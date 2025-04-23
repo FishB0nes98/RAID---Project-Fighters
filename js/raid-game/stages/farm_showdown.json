@@ -1,0 +1,45 @@
+{
+  "id": "farm_showdown",
+  "name": "Farm Showdown",
+  "description": "The farmers have challenged you to a battle! Defeat all three farmers to prove your worth.",
+  "difficulty": 5,
+  "objectives": {
+    "winConditions": [
+      { "type": "allEnemiesDefeated" }
+    ]
+  },
+  "stageEffects": [
+    {
+      "id": "farm_field",
+      "name": "Farm Field",
+      "description": "The battle takes place in an open field. The farmers have the home advantage!",
+      "icon": "Icons/effects/farm_field.png"
+    }
+  ],
+  "enemies": [
+    {
+      "characterId": "farmer_nina"
+    },
+    {
+      "characterId": "farmer_alice"
+    },
+    {
+      "characterId": "farmer_shoma"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 300
+    },
+    {
+      "type": "xp",
+      "value": 150
+    }
+  ],
+  "playerCharacterRestrictions": {
+    "excluded": ["farmer_nina", "farmer_alice", "farmer_shoma"]
+  },
+  "backgroundImage": "images/stages/farm_field.webp",
+  "backgroundMusic": "sounds/farm_bgm.mp3"
+} 

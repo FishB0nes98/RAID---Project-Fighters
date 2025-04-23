@@ -1,0 +1,74 @@
+{
+    "id": "schoolboy_siegfried",
+    "name": "Schoolboy Siegfried",
+    "image": "Loading Screen/Schoolboy Siegfried.png",
+    "rarity": "epic",
+    "type": "fighter",
+    "description": "A determined schoolboy warrior who grows stronger with every boon.",
+    "stats": {
+        "physicalDamage": 250,
+        "magicalDamage": 10,
+        "armor": 8,
+        "magicalShield": 8,
+        "hp": 8790,
+        "hpPerTurn": 0,
+        "mana": 1000,
+        "manaPerTurn": 20,
+        "lifesteal": 0.00,
+        "dodgeChance": 0.05,
+        "critChance": 0.0,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "schoolboy_siegfried_q",
+            "name": "Sword Slash",
+            "type": "damage",
+            "damageType": "physical",
+            "amount": 1,
+            "manaCost": 20,
+            "cooldown": 0,
+            "targetType": "enemy",
+            "description": "Deals 100% Physical Damage.",
+            "icon": "Icons/abilities/sword_slash.jfif"
+        },
+        {
+            "id": "schoolboy_siegfried_w",
+            "name": "Lion Protection",
+            "type": "buff",
+            "manaCost": 120,
+            "cooldown": 15,
+            "targetType": "self",
+            "description": "Heals for 10% of missing health. Gains 50% bonus Armor and Magical Shield for 5 turns.",
+            "icon": "Icons/abilities/lion_protection.jfif"
+        },
+        {
+            "id": "schoolboy_siegfried_e",
+            "name": "Sword Blessing",
+            "type": "buff",
+            "manaCost": 125,
+            "cooldown": 12,
+            "targetType": "self",
+            "description": "Siegfried blesses his sword, gaining 15% Lifesteal and 200 Physical Damage for 6 turns.",
+            "icon": "Icons/abilities/sword_blessing.jfif"
+        },
+        {
+            "id": "schoolboy_siegfried_r",
+            "name": "Judgement",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 200,
+            "cooldown": 25,
+            "targetType": "enemy",
+            "description": "Deals 350% AD physical damage, ignoring armor. If damage is dealt, Siegfried and a random ally are healed for the damage amount.",
+            "icon": "Icons/abilities/judgement.png"
+        }
+    ],
+    "passive": {
+        "id": "schoolboy_siegfried_passive",
+        "name": "Buff Connoisseur",
+        "description": "Gain 200 Physical Damage for each active buff.",
+        "icon": "Icons/passives/schoolboy_siegfried_passive.jfif"
+    }
+} 

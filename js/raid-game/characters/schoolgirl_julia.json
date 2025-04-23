@@ -1,0 +1,70 @@
+{
+    "id": "schoolgirl_julia",
+    "name": "Schoolgirl Julia",
+    "image": "Loading Screen/Schoolgirl Julia.png",
+    "stats": {
+        "physicalDamage": 180,
+        "magicalDamage": 20,
+        "armor": 10,
+        "magicalShield": 14,
+        "hp": 7952,
+        "hpPerTurn": 0,
+        "mana": 2900,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.00,
+        "critDamage": 1.5,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "schoolgirl_julia_q",
+            "name": "Healing Kick",
+            "type": "aoe_damage",
+            "damageType": "physical",
+            "manaCost": 60,
+            "cooldown": 1,
+            "targetType": "all_enemies",
+            "description": "Deals 200% Physical Damage to ALL enemies.",
+            "icon": "Icons/abilities/healing_kick.png"
+        },
+        {
+            "id": "schoolgirl_julia_w",
+            "name": "Sprout Planting",
+            "type": "buff",
+            "manaCost": 75,
+            "cooldown": 6,
+            "targetType": "ally",
+            "description": "Plants a healing sprout on an ally for 2 turns. When the sprout expires, it heals the target for 1250 (+100% Healing Power) HP.",
+            "icon": "Icons/abilities/sprout_planting.png"
+        },
+        {
+            "id": "schoolgirl_julia_e",
+            "name": "Pushback Attack",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 50,
+            "cooldown": 5,
+            "targetType": "enemy",
+            "description": "Deals 150% physical damage to the target and has an 40% chance to stun it for 1 turn.",
+            "icon": "Icons/abilities/pushback_attack.jfif"
+        },
+        {
+            "id": "schoolgirl_julia_r",
+            "name": "Spirits Strength",
+            "type": "aoe_heal",
+            "manaCost": 200,
+            "cooldown": 16,
+            "targetType": "all_allies",
+            "description": "Heals ALL allies for 1200 (+200% Magical Damage) HP. Cooldown reduced by 1 whenever Julia is healed.",
+            "icon": "Icons/abilities/spirits_strength.jfif"
+        }
+    ],
+    "passive": {
+        "id": "schoolgirl_julia_passive",
+        "name": "Healing Empowerment",
+        "description": "Whenever Julia heals herself (including lifesteal) or heals an ally, she permanently gains +50 Physical Damage.",
+        "icon": "Icons/passives/healing_empowerment.png"
+    }
+} 

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roguelike Raid Battle</title>
+    <link rel="stylesheet" href="css/raid-game.css">
+    <link rel="stylesheet" href="css/schoolboy_shoma-ball-vfx.css">
+    <link rel="stylesheet" href="css/ayane-abilities.css">
+    <link rel="stylesheet" href="styles/farmer_nina.css">
+    <link rel="stylesheet" href="css/atlantean_kagome_abilities.css">
+    <link rel="stylesheet" href="css/farmer_alice_abilities.css">
+    <link rel="stylesheet" href="css/farmer_shoma_abilities.css">
+    <link rel="stylesheet" href="css/schoolgirl_kokoro_abilities.css">
+    <link rel="stylesheet" href="css/schoolboy_siegfried_abilities.css">
+    <link rel="stylesheet" href="css/schoolgirl_julia_abilities.css">
+    <link rel="stylesheet" href="css/schoolgirl_ayane_abilities.css">
+    <link rel="stylesheet" href="css/schoolgirl_elphelt_abilities.css">
+    <link rel="stylesheet" href="css/infernal_astaroth_abilities.css">
+    <link rel="stylesheet" href="css/infernal_scorpion.css">
+    <link rel="stylesheet" href="css/infernal_birdie_abilities.css">
+    <link rel="stylesheet" href="css/infernal_ibuki_abilities.css">
+    <link rel="stylesheet" href="css/infernal_raiden_abilities.css">
+    <link rel="stylesheet" href="css/angry_carrot_abilities.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader"></div>
+        <div id="loading-text" class="loading-text">Loading Game...</div>
+    </div>
+
+    <div class="battle-container">
+        <!-- Stage Background -->
+        <div id="stage-background" class="stage-background"></div>
+        
+        <!-- Volume Control -->
+        <div class="volume-control">
+            <span class="volume-icon" id="volume-icon">🔊</span>
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70">
+        </div>
+        
+        <!-- AI Section (Top) -->
+        <div class="top-section">
+            <div id="ai-characters-container" class="characters-container">
+                <!-- AI characters will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Middle Section with Turn Counter -->
+        <div class="middle-section">
+            <div class="turn-counter">Turn: <span id="turn-count">1</span></div>
+            <div id="battle-phase">Player's Turn</div>
+            <button id="end-turn-button" class="end-turn-button">End Turn</button>
+        </div>
+
+        <!-- Player Section (Bottom) -->
+        <div class="bottom-section">
+            <div id="player-characters-container" class="characters-container">
+                <!-- Player characters will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Battle Log -->
+        <div class="battle-log-container">
+            <div class="battle-log-header">
+                <span>Battle Log</span>
+                <div class="battle-log-controls">
+                    <button id="clear-log-button" class="log-button" title="Clear log">🗑️</button>
+                    <button id="toggle-log-button" class="log-button" title="Toggle log size">⬍</button>
+                </div>
+            </div>
+            <div class="battle-log-content">
+                <div id="battle-log" class="battle-log">
+                    <!-- Battle log entries will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen (Hidden by default) -->
+        <div id="game-over-container" class="game-over-container">
+            <div class="game-over-content">
+                <h2 id="game-over-title" class="game-over-title">Victory!</h2>
+                <p id="game-over-message" class="game-over-message">You have defeated all enemies!</p>
+                <div class="game-over-buttons">
+                    <button id="character-select-button" class="game-over-button">Character Select</button>
+                    <button id="restart-button" class="game-over-button">Restart Battle</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tooltip (Hidden by default) -->
+        <div id="tooltip" class="tooltip">
+            <div id="tooltip-title" class="tooltip-title"></div>
+            <div id="tooltip-description" class="tooltip-description"></div>
+        </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/stage-manager.js"></script>
+    <script src="js/raid-game/game-manager.js"></script>
+    <script src="js/raid-game/character-factory.js"></script>
+    
+    <!-- Passive Ability Scripts (Load after character.js) -->
+    <script src="js/raid-game/passives/schoolboy_siegfried_passive.js"></script>
+    <script src="js/raid-game/passives/schoolgirl_julia_passive.js"></script>
+    <script src="js/raid-game/passives/schoolgirl_ayane_passive.js"></script>
+    <script src="js/raid-game/passives/schoolgirl_elphelt_passive.js"></script>
+    <script src="js/raid-game/passives/infernal_astaroth_passive.js"></script>
+    <script src="js/raid-game/passives/infernal_scorpion_passive.js"></script>
+    <script src="js/raid-game/passives/infernal_birdie_passive.js"></script>
+    <!-- Add other passive scripts here -->
+
+    <!-- Character/Ability Specific Scripts -->
+    <script src="js/raid-game/characters/schoolboy_shoma-ball-selection.js"></script>
+    <script src="js/raid-game/abilities/schoolboy_shoma-homerun.js"></script>
+    <script src="js/raid-game/abilities/cham_cham_abilities.js"></script>
+    <script src="js/raid-game/abilities/ayane_abilities.js"></script>
+    <script src="js/raid-game/abilities/farmer_nina_abilities.js"></script>
+    <script src="js/raid-game/abilities/atlantean_kagome_abilities.js"></script>
+    <script src="js/raid-game/abilities/farmer_alice_abilities.js"></script>
+    <script src="js/raid-game/abilities/farmer_shoma_abilities.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_kokoro_abilities.js"></script>
+    <script src="js/raid-game/abilities/schoolboy_siegfried_abilities.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_julia_abilities.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_ayane_abilities.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_elphelt_abilities.js"></script>
+    <script src="js/raid-game/abilities/infernal_astaroth_abilities.js"></script>
+    <script src="js/raid-game/abilities/infernal_scorpion_abilities.js"></script>
+    <script src="js/raid-game/abilities/blazing_elemental_abilities.js"></script>
+    <script src="js/raid-game/abilities/infernal_birdie_abilities.js"></script>
+    <script src="js/raid-game/abilities/infernal_ibuki_abilities.js"></script>
+    <script src="js/raid-game/abilities/infernal_raiden_abilities.js"></script>
+    <script src="js/raid-game/abilities/angry_carrot_abilities.js"></script>
+
+    <!-- Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        // Function to hide loading screen
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transition = 'opacity 0.5s';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }
+
+        // Global function for updating character UI (needed by character.js)
+        function updateCharacterUI(character) {
+            if (window.gameManager && window.gameManager.uiManager) {
+                window.gameManager.uiManager.updateCharacterUI(character);
+            }
+        }
+
+        // Global function for adding log entries (needed by character.js)
+        function addLogEntry(message, className = '') {
+            if (window.gameManager) {
+                window.gameManager.addLogEntry(message, className);
+            } else {
+                console.log(message);
+            }
+        }
+
+        // Setup tooltip functionality
+        function setupTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            const tooltipTitle = document.getElementById('tooltip-title');
+            const tooltipDescription = document.getElementById('tooltip-description');
+            
+            // Show tooltip
+            function showTooltip(title, description, x, y) {
+                tooltipTitle.textContent = title;
+                tooltipDescription.textContent = description;
+                
+                // Set initial position but temporarily make invisible to calculate dimensions
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.left = `${x}px`;
+                tooltip.style.top = `${y}px`;
+                tooltip.classList.add('visible');
+                
+                // Calculate dimensions and adjust position if needed
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const tooltipWidth = tooltipRect.width;
+                const tooltipHeight = tooltipRect.height;
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                
+                // Check if tooltip would go outside window and adjust position
+                let finalX = x;
+                let finalY = y;
+                
+                // Check right edge
+                if (x + tooltipWidth > windowWidth) {
+                    finalX = x - tooltipWidth - 10; // 10px spacing from the source element
+                }
+                
+                // Check bottom edge
+                if (y + tooltipHeight > windowHeight) {
+                    finalY = y - tooltipHeight + 20; // Adjust position to appear above cursor
+                    if (finalY < 0) {
+                        // If it would go outside top edge, put it at the top with margin
+                        finalY = 10;
+                    }
+                }
+                
+                // Apply final position
+                tooltip.style.left = `${finalX}px`;
+                tooltip.style.top = `${finalY}px`;
+                tooltip.style.visibility = 'visible';
+            }
+            
+            // Hide tooltip
+            function hideTooltip() {
+                tooltip.classList.remove('visible');
+            }
+            
+            // Add mouseover event to ability elements
+            document.addEventListener('mouseover', (e) => {
+                const abilityElement = e.target.closest('.ability');
+                if (abilityElement) {
+                    // Find character and ability info
+                    const characterElement = abilityElement.closest('.character-slot');
+                    if (characterElement) {
+                        // Use instanceId from dataset for unique identification
+                        const instanceId = characterElement.dataset.instanceId; 
+                        const abilityIndex = abilityElement.dataset.index;
+                        
+                        // Get character from game state using instanceId if it exists
+                        let character = null;
+                        if (window.gameManager && instanceId) { 
+                            character = window.gameManager.gameState.playerCharacters.find(c => (c.instanceId || c.id) === instanceId);
+                            if (!character) {
+                                // Check AI characters using instanceId
+                                character = window.gameManager.gameState.aiCharacters.find(c => c.instanceId === instanceId);
+                            }
+                        }
+                        
+                        if (character && abilityIndex !== undefined) {
+                            const ability = character.abilities[abilityIndex];
+                            if (ability) {
+                                const rect = abilityElement.getBoundingClientRect();
+                                showTooltip(
+                                    ability.name,
+                                    ability.description,
+                                    rect.right + 10,
+                                    rect.top
+                                );
+                            }
+                        }
+                    }
+                }
+                
+                // Add tooltip for Alice's Magic Shield counter
+                const shieldCounter = e.target.closest('.magic-shield-counter');
+                if (shieldCounter) {
+                    const characterElement = shieldCounter.closest('.character-slot');
+                    if (characterElement) {
+                        const characterId = characterElement.id.replace('character-', '');
+                        
+                        // Get character from game state
+                        let character = null;
+                        if (window.gameManager) {
+                            character = window.gameManager.gameState.playerCharacters.find(c => c.id === characterId);
+                            if (!character) {
+                                character = window.gameManager.gameState.aiCharacters.find(c => c.id === characterId);
+                            }
+                        }
+                        
+                        if (character && character.passive) {
+                            const rect = shieldCounter.getBoundingClientRect();
+                            const passiveDesc = character.passive.description + 
+                                   `\n\nTotal Magic Shield gained from passive: ${character.magicShieldFromPassive}`;
+                            showTooltip(
+                                character.passive.name,
+                                passiveDesc,
+                                rect.right + 10,
+                                rect.top
+                            );
+                        }
+                    }
+                }
+            });
+            
+            // Add mouseout event to hide tooltip
+            document.addEventListener('mouseout', (e) => {
+                if (e.target.closest('.ability') || e.target.closest('.magic-shield-counter')) {
+                    hideTooltip();
+                }
+            });
+        }
+
+        // Setup game over screen functionality
+        function setupGameOverScreen() {
+            const gameOverContainer = document.getElementById('game-over-container');
+            const gameOverTitle = document.getElementById('game-over-title');
+            const gameOverMessage = document.getElementById('game-over-message');
+            const restartButton = document.getElementById('restart-button');
+            const characterSelectButton = document.getElementById('character-select-button');
+            
+            // Show game over screen
+            window.showGameOverScreen = function(isVictory) {
+                console.log(`[raid-game.html] showGameOverScreen called with isVictory: ${isVictory}`); // Log function call
+                const urlParams = new URLSearchParams(window.location.search);
+                const returnUrl = urlParams.get('returnUrl');
+                const isInStoryMode = !!returnUrl; // Check if we are in story mode context
+
+                if (isVictory) {
+                    gameOverTitle.textContent = 'Victory!';
+                    gameOverTitle.className = 'game-over-title victory';
+                    gameOverMessage.textContent = 'You have defeated all enemies!';
+
+                    // Show restart button (optional for victory, maybe hide in story mode?)
+                    restartButton.style.display = 'inline-block'; // Or 'none' if you want to hide it on story victory too
+
+                    // Handle the other button based on story mode
+                    if (isInStoryMode) {
+                        characterSelectButton.textContent = "Continue Story";
+                        characterSelectButton.onclick = () => {
+                            window.location.href = returnUrl; // Use the provided return URL
+                        };
+                    } else {
+                        characterSelectButton.textContent = "Character Select";
+                        characterSelectButton.onclick = () => {
+                            window.location.href = 'character-selector.html';
+                        };
+                    }
+                    characterSelectButton.style.display = 'inline-block'; // Ensure it's visible
+
+                } else { // Defeat
+                    gameOverTitle.textContent = 'Defeat!';
+                    gameOverTitle.className = 'game-over-title defeat';
+                    gameOverMessage.textContent = 'Your team has been defeated!';
+
+                    // Hide the restart button on defeat
+                    restartButton.style.display = 'none';
+
+                    // Always show the "Character Select" button on defeat and make it go back
+                    characterSelectButton.textContent = "Character Select";
+                    characterSelectButton.onclick = () => {
+                        window.location.href = 'character-selector.html';
+                    };
+                    characterSelectButton.style.display = 'inline-block'; // Ensure it's visible
+                }
+
+                gameOverContainer.classList.add('active');
+            };
+
+            // Hide game over screen
+            window.hideGameOverScreen = function() {
+                gameOverContainer.classList.remove('active');
+            };
+
+            // Restart game button (only shown on victory now, or non-story defeat)
+            restartButton.addEventListener('click', () => {
+                hideGameOverScreen();
+                if (window.gameManager) {
+                    const selectedStage = localStorage.getItem('selectedStage');
+                    if (selectedStage) {
+                        try {
+                            const stageData = JSON.parse(selectedStage);
+                            window.gameManager.startGame(stageData.id);
+                        } catch (e) {
+                             console.error("Error parsing selected stage from localStorage:", e);
+                             window.gameManager.startGame('test_stage'); // Fallback
+                        }
+                    } else {
+                        window.gameManager.startGame('test_stage'); // Fallback
+                    }
+                }
+            });
+
+            // Character select button (behavior is set dynamically in showGameOverScreen)
+            // No default listener needed here anymore, as onclick is set above.
+            // characterSelectButton.addEventListener('click', () => {
+            //     window.location.href = 'character-selector.html';
+            // });
+        }
+
+        // Initialize and start the game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the loading element immediately after DOM is ready
+            const loadingTextElement = document.getElementById('loading-text');
+            if (!loadingTextElement) {
+                console.error("Fatal Error: loading-text element not found immediately after DOMContentLoaded!");
+                alert("Fatal Error: UI component missing. Cannot initialize game.");
+                return;
+            }
+
+            // --- Wait for Firebase Auth State --- 
+            firebaseAuth.onAuthStateChanged(async (user) => {
+                // Use the loadingTextElement variable captured from the outer scope
+                // No need to getElementById again here
+
+                if (user) {
+                    console.log("User is authenticated, proceeding with game initialization.");
+                    try {
+                        // Setup UI components that don't depend on game state yet
+                        setupTooltip();
+                        setupGameOverScreen();
+
+                        // Access the global gameManager (or create if needed)
+                        // Ensure GameManager is defined or imported appropriately
+                        if (typeof GameManager === 'undefined') {
+                             throw new Error("GameManager class not found. Check script includes.");
+                        }
+                        window.gameManager = new GameManager(); // Create instance
+                        await window.gameManager.initialize(); // Initialize managers
+
+                        // Get stageId (might be from URL for story mode, or default)
+                        const urlParams = new URLSearchParams(window.location.search);
+                        let stageId = urlParams.get('stage') || 'test_stage'; // Use URL stage or default
+                        const storyId = urlParams.get('storyId');
+                        const stageIndex = urlParams.get('stageIndex');
+                        
+                        // If in story mode context, startGame will handle fetching correct stageId and state
+                        // If not, it uses the stageId determined here.
+                        console.log(`Attempting to start game. Story context: ${storyId ? storyId + '['+stageIndex+']' : 'None'}, Fallback Stage ID: ${stageId}`);
+                        await window.gameManager.startGame(stageId); // Call the async startGame
+
+                        // Hide loading screen AFTER game state is loaded and ready
+                        hideLoadingScreen();
+
+                    } catch (error) {
+                        console.error('Failed to initialize or start game:', error);
+                        loadingTextElement.textContent = `Error initializing game: ${error.message}. Please try refreshing.`;
+                        // Optionally hide loading screen even on error, or keep it showing the error
+                        // hideLoadingScreen(); 
+                    }
+                } else {
+                    // User is not logged in
+                    console.log("User not authenticated. Redirecting to login...");
+                    loadingTextElement.textContent = 'Redirecting to login...'; // Use the variable
+                    // Add a small delay before redirecting to allow message visibility
+                    setTimeout(() => {
+                         window.location.href = 'index.html';
+                    }, 1500);
+                }
+            });
+            // --- End Firebase Auth Wait ---
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,31 @@
+{
+  "id": "forest_entrance",
+  "name": "Forest Entrance",
+  "description": "The gateway to the mystical forest is guarded by twisted vegetation and corrupt wildlife.",
+  "difficulty": 2,
+  "enemies": [
+    {
+      "characterId": "corrupted_guardian",
+      "modifications": null
+    },
+    {
+      "characterId": "tainted_wolf",
+      "modifications": null
+    },
+    {
+      "characterId": "vine_crawler",
+      "modifications": null
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "amount": 100
+    },
+    {
+      "type": "experience",
+      "amount": 50
+    }
+  ],
+  "backgroundImage": ""
+} 

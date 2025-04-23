@@ -1,0 +1,65 @@
+{
+  "id": "infernal_astaroth",
+  "name": "Infernal Astaroth",
+  "image": "Loading Screen/Infernal Astaroth.png",
+  "rarity": "legendary",
+  "type": "boss",
+  "description": "A demonic entity engulfed in perpetual flames, commanding the power of the inferno.",
+  "stats": {
+    "physicalDamage": 250,
+    "magicalDamage": 720,
+    "armor": 20,
+    "magicalShield": 40,
+    "lifesteal": 0,
+    "dodgeChance": 0.0,
+    "critChance": 0.12,
+    "critDamage": 2,
+    "healingPower": 0,
+    "hp": 15000,
+    "hpPerTurn": 0,
+    "mana": 5000,
+    "manaPerTurn": 50
+  },
+  "passive": {
+    "id": "infernal_astaroth_passive",
+    "name": "Molten Aura",
+    "description": "When Astaroth is hit, the attacker takes 20% of Astaroth's Magical Damage as magical damage.",
+    "icon": "Icons/passives/molten_aura.png"
+  },
+  "abilities": [
+    {
+      "id": "infernal_astaroth_q_blazing_ball",
+      "name": "Blazing Ball",
+      "icon": "Icons/abilities/blazing_ball.webp",
+      "manaCost": 50,
+      "cooldown": 5,
+      "type": "damage",
+      "damageType": "magical",
+      "fixedDamage": 1200,
+      "targetType": "enemy",
+      "description": "Hurls a massive ball of fire at a single target, dealing 1200 magical damage."
+    },
+    {
+      "id": "infernal_astaroth_w_explosion",
+      "name": "Explosion",
+      "icon": "Icons/abilities/explosion.webp",
+      "manaCost": 75,
+      "cooldown": 3,
+      "type": "damage",
+      "damageType": "magical",
+      "targetType": "aoe_enemy",
+      "description": "Deals 600 (+100% MD) magical damage to all enemies."
+    },
+    {
+      "id": "infernal_astaroth_e_molten_armor",
+      "name": "Molten Armor",
+      "icon": "Icons/abilities/molten_armor.webp",
+      "manaCost": 60,
+      "cooldown": 8,
+      "type": "buff",
+      "targetType": "self",
+      "description": "Grants 50% bonus Armor and Magic Shield for 5 turns. When the effect expires or is removed, deals 50% MD magical damage to all enemies."
+    }
+  ],
+  "isAI": true
+} 

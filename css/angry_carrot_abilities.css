@@ -1,0 +1,142 @@
+/* Angry Carrot Ability VFX */
+
+/* --- Go Dormant (Stun) --- */
+
+/* Zzz particles for the stun */
+.character-slot[data-character-id="angry_carrot"] .status-effect-container .status-icon[data-effect-id="go_dormant_stun_debuff"]::after {
+    content: 'Zzz';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #b0bec5; /* Light blue-grey */
+    animation: floatUp 1.5s ease-in-out infinite alternate;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes floatUp {
+    from {
+        transform: translate(-50%, 0);
+        opacity: 0.8;
+    }
+    to {
+        transform: translate(-50%, -10px);
+        opacity: 1;
+    }
+}
+
+/* Add a slight grey overlay when stunned */
+.character-slot[data-character-id="angry_carrot"].stunned-by-go-dormant .character-image {
+    filter: grayscale(70%) brightness(0.8);
+    transition: filter 0.5s ease;
+}
+
+/* --- Anger (Buff) --- */
+
+/* Cast VFX - Red Pulse/Glow */
+@keyframes angerPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 50, 50, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 15px 20px rgba(255, 50, 50, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 50, 50, 0);
+    }
+}
+
+.character-slot .anger-cast-vfx {
+    position: absolute;
+    inset: -10px; /* Slightly larger than the character */
+    border-radius: 50%;
+    animation: angerPulse 1s ease-out forwards;
+    pointer-events: none; /* Don't interfere with clicks */
+    z-index: 10; /* Appear above character */
+}
+
+/* Active Buff Indicator - Persistent Red Aura */
+.character-slot .anger-active-vfx {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 0, 0, 0.6);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5), inset 0 0 8px rgba(255, 50, 50, 0.3);
+    animation: slowPulse 2s infinite alternate ease-in-out;
+    pointer-events: none;
+    z-index: 5; /* Below cast VFX but above base image */
+}
+
+@keyframes slowPulse {
+    from {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+/* Ensure the buff indicator is removed when the buff expires */
+/* The remove logic should be handled in JS when the buff is removed, */
+/* by selecting the element via `[data-buff-id="anger_damage_buff"]` and removing it. */ 
+
+/* --- Carrot Cannon --- */
+
+/* Projectile styling */
+.carrot-cannon-projectile {
+    position: fixed;
+    width: 30px;
+    height: 60px;
+    background-image: url('../Icons/abilities/carrot_cannon.jpeg');
+    background-size: cover;
+    border-radius: 10px;
+    transform: translate(-50%, -50%) rotate(45deg);
+    filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.8));
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Impact explosion animation */
+.carrot-cannon-impact {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,140,0,0.8) 0%, rgba(255,69,0,0.5) 50%, rgba(255,69,0,0) 100%);
+    border-radius: 50%;
+    z-index: 999;
+    pointer-events: none;
+    animation: carrotImpact 0.6s ease-out forwards;
+}
+
+@keyframes carrotImpact {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Target hit effect */
+.character-slot.carrot-cannon-hit {
+    animation: hitShake 0.3s ease-in-out;
+}
+
+@keyframes hitShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+} 

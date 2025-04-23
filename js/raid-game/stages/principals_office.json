@@ -1,0 +1,49 @@
+{
+  "id": "principals_office",
+  "name": "Principal's Office",
+  "description": "The heart of the inferno lies within. Defeat the mastermind behind the school's fiery fate!",
+  "difficulty": 7,
+  "enemies": [
+    {
+      "characterId": "headmaster_infernus",
+      "modifications": {
+        "hp_multiplier": 2.0,
+        "attack_multiplier": 1.5,
+        "special_abilities": ["Hellfire Roar", "Summon Flames", "Infernal Command"]
+      }
+    },
+    {
+      "characterId": "fire_guardian",
+      "modifications": {
+        "hp_multiplier": 1.2
+      }
+    },
+    {
+      "characterId": "ember_minion",
+      "modifications": {
+        "count": 3
+      }
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "amount": 500
+    },
+    {
+      "type": "experience",
+      "amount": 250
+    },
+    {
+      "type": "item",
+      "name": "Infernus Crown",
+      "rarity": "epic"
+    },
+    {
+      "type": "story_completion",
+      "value": "Blazing School Day"
+    }
+  ],
+  "backgroundImage": "",
+  "isBossStage": true
+} 

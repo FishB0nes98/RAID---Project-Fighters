@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Selector</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --bg-dark: #0e1015;
+            --bg-medium: #171b24;
+            --bg-light: #1e2430;
+            --primary: #7e57c2;
+            --primary-dark: #5e35b1;
+            --primary-light: #9575cd;
+            --accent: #ff9800;
+            --accent-dark: #f57c00;
+            --danger: #e53935;
+            --success: #43a047;
+            --text-light: #f5f5f5;
+            --text-medium: #b0bec5;
+            --text-dark: #78909c;
+            --legendary: #ffb636;
+            --epic: #b35eff;
+            --rare: #5e9fff;
+            --shadow-soft: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.3);
+            --shadow-hard: 0 8px 16px rgba(0, 0, 0, 0.4);
+            --border-radius: 8px;
+            --glow: 0 0 10px var(--primary-light);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            background-image: radial-gradient(circle at top right, rgba(126, 87, 194, 0.1), transparent 70%),
+                              radial-gradient(circle at bottom left, rgba(255, 152, 0, 0.05), transparent 70%);
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin: 0;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+            padding: 0 20px;
+        }
+        
+        .game-header h1::before,
+        .game-header h1::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary));
+        }
+        
+        .game-header h1::before {
+            right: 100%;
+        }
+        
+        .game-header h1::after {
+            left: 100%;
+            background: linear-gradient(to left, transparent, var(--primary));
+        }
+        
+        .content-wrapper {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex: 1;
+        }
+        
+        /* Stage Selection Section */
+        .stage-selection {
+            flex: 1;
+            background-color: var(--bg-medium);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(126, 87, 194, 0.2);
+        }
+        
+        .section-header {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .section-header p {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            font-style: italic;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(126, 87, 194, 0.3);
+        }
+        
+        .tab-button {
+            background-color: transparent;
+            border: none;
+            color: var(--text-medium);
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-family: 'Exo 2', sans-serif;
+        }
+        
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .tab-button:hover {
+            color: var(--text-light);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-light);
+        }
+        
+        .tab-button.active::after {
+            width: 100%;
+        }
+        
+        .tab-content {
+            display: none;
+            max-height: 550px;
+            overflow-y: auto;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Story Container Styles */
+        .story-container {
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .story-title {
+            font-size: 1.2rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(126, 87, 194, 0.3);
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .story-title::before {
+            content: "⚔️";
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        
+        .story-stages {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-left: 15px;
+        }
+        
+        .story-path {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary-light), rgba(126, 87, 194, 0.1));
+            z-index: 1;
+        }
+        
+        .stage-node {
+            position: absolute;
+            left: -5px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            box-shadow: 0 0 5px var(--primary-light);
+            z-index: 2;
+        }
+        
+        .story-description {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 2px solid var(--primary-dark);
+            font-style: italic;
+        }
+        
+        .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            justify-items: center;
+        }
+        
+        .stage-card {
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(126, 87, 194, 0.1);
+        }
+        
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hard);
+            border-color: rgba(126, 87, 194, 0.3);
+        }
+        
+        .stage-card.selected {
+            border: 1px solid rgba(126, 87, 194, 0.1);
+            box-shadow: none;
+        }
+        
+        .stage-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .stage-card.locked::before {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            z-index: 2;
+        }
+        
+        .stage-image {
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%; /* Can keep 4:3 for stages */
+            background-color: var(--bg-medium);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .stage-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .stage-number {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 24px;
+            height: 24px;
+            background-color: rgba(126, 87, 194, 0.8);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 5;
+        }
+        
+        .story-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 152, 0, 0.8);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 5;
+        }
+        
+        .stage-info {
+            padding: 12px;
+        }
+        
+        .stage-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .stage-desc {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            min-height: 2.4em;
+        }
+        
+        .difficulty-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+        
+        .difficulty-easy {
+            background-color: rgba(67, 160, 71, 0.7);
+        }
+        
+        .difficulty-medium {
+            background-color: rgba(255, 152, 0, 0.7);
+        }
+        
+        .difficulty-hard {
+            background-color: rgba(229, 57, 53, 0.7);
+        }
+        
+        /* Character Selection Section */
+        .character-selection {
+            flex: 1;
+            background-color: var(--bg-medium);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(126, 87, 194, 0.2);
+        }
+        
+        .filter-container {
+            margin-bottom: 15px;
+        }
+        
+        .tag-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tag-filter-button {
+            background-color: var(--bg-light);
+            border: 1px solid rgba(126, 87, 194, 0.2);
+            border-radius: 15px;
+            color: var(--text-medium);
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Exo 2', sans-serif;
+        }
+        
+        .tag-filter-button:hover {
+            background-color: rgba(126, 87, 194, 0.1);
+            color: var(--text-light);
+        }
+        
+        .tag-filter-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+        
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            max-height: 550px;
+            overflow-y: auto;
+            padding-right: 5px;
+            justify-items: center;
+        }
+        
+        .character-card {
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 1px solid rgba(126, 87, 194, 0.1);
+            position: relative;
+            max-width: 140px; /* Make cards a bit smaller */
+        }
+        
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hard);
+            border-color: rgba(126, 87, 194, 0.3);
+        }
+        
+        .character-card.selected {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        
+        .character-card.selected:not(.locked):hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hard), 0 0 10px var(--accent);
+        }
+        
+        .character-card.hidden {
+            display: none;
+        }
+        
+        .character-card.locked {
+            filter: grayscale(80%);
+            cursor: not-allowed;
+            position: relative;
+        }
+        
+        .character-card.locked:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: rgba(126, 87, 194, 0.1);
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .character-card.locked .lock-overlay {
+            opacity: 1;
+        }
+        
+        .character-card.restricted:not(.locked) .lock-overlay {
+            display: none;
+        }
+        
+        .character-card.selected.locked {
+            filter: grayscale(50%);
+        }
+        
+        .character-image {
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%; /* Creates a 1:1 aspect ratio */
+            background-color: var(--bg-medium);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .character-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        .character-image .no-image, 
+        .stage-image .no-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            background-color: var(--bg-medium);
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .character-info {
+            padding: 10px;
+        }
+        
+        .character-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .character-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        
+        .character-tag {
+            background-color: rgba(126, 87, 194, 0.2);
+            border-radius: 8px;
+            padding: 1px 4px;
+            font-size: 0.65rem;
+            color: var(--text-medium);
+        }
+        
+        .rarity-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            z-index: 5;
+        }
+        
+        .rarity-legendary {
+            color: var(--legendary);
+            border: 1px solid var(--legendary);
+        }
+        
+        .rarity-epic {
+            color: var(--epic);
+            border: 1px solid var(--epic);
+        }
+        
+        .rarity-rare {
+            color: var(--rare);
+            border: 1px solid var(--rare);
+        }
+        
+        /* Team Preview Section */
+        .team-preview {
+            background-color: var(--bg-medium);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-medium);
+            margin-top: auto;
+            border: 1px solid rgba(126, 87, 194, 0.2);
+        }
+        
+        .team-preview h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .team-slots {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .team-slot {
+            width: 60px;
+            height: 60px;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            border: 1px dashed rgba(126, 87, 194, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .team-slot.hidden {
+            display: none;
+        }
+        
+        .team-slot.filled {
+            background-color: var(--bg-light);
+            background-size: cover;
+            background-position: center;
+            border: 1px solid var(--primary);
+            color: var(--text-light);
+            box-shadow: 0 0 5px rgba(126, 87, 194, 0.5);
+        }
+        
+        .team-slot.filled::after {
+            content: "✕";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .team-slot.filled:hover::after {
+            opacity: 1;
+        }
+        
+        .team-slot.filled img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .action-button {
+            min-width: 150px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .start-button {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 0 var(--primary-dark);
+        }
+        
+        .start-button:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        
+        .start-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 var(--primary-dark);
+        }
+        
+        .back-button {
+            background-color: var(--bg-light);
+            color: var(--text-medium);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button:hover {
+            background-color: var(--bg-medium);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+        
+        .back-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-medium);
+            border-radius: var(--border-radius);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            box-shadow: var(--shadow-hard);
+            border: 1px solid var(--primary);
+            animation: modalFadeIn 0.3s forwards;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-medium);
+            transition: color 0.3s;
+            z-index: 10;
+        }
+        
+        .close-modal:hover {
+            color: var(--danger);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-medium);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-dark);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        
+        /* Responsive styling */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .team-slots {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .game-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .character-grid, .stage-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+            
+            .action-button {
+                min-width: 120px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        .modal-stage-image {
+            width: 100%;
+            height: 180px;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modal-stage-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        
+        .modal-story-title {
+            display: flex;
+            align-items: center;
+            color: var(--primary-light);
+            font-size: 1.2rem;
+            margin: 15px 0;
+            border-bottom: 1px solid rgba(126, 87, 194, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        .story-icon {
+            margin-right: 8px;
+        }
+        
+        .modal-story-description {
+            font-style: italic;
+            color: var(--text-medium);
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 2px solid var(--primary-dark);
+        }
+        
+        .modal-progress {
+            margin: 15px 0;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: var(--bg-light);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-dark), var(--primary-light));
+            border-radius: 5px;
+        }
+        
+        .modal-difficulty {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .modal-difficulty.difficulty-easy {
+            background-color: rgba(67, 160, 71, 0.2);
+            color: #66bb6a;
+        }
+        
+        .modal-difficulty.difficulty-medium {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: #ffa726;
+        }
+        
+        .modal-difficulty.difficulty-hard {
+            background-color: rgba(229, 57, 53, 0.2);
+            color: #ef5350;
+        }
+        
+        .modal-description {
+            color: var(--text-light);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .modal-restrictions {
+            background-color: rgba(229, 57, 53, 0.1);
+            border-left: 3px solid var(--danger);
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .modal-restrictions h4 {
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+        
+        .modal-restrictions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .modal-restrictions li {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        /* Tooltip message */
+        .tooltip-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background-color: rgba(229, 57, 53, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            text-align: center;
+        }
+        
+        .tooltip-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .story-container.selected {
+            border: 2px solid var(--primary);
+            box-shadow: var(--glow);
+            background-color: rgba(126, 87, 194, 0.05); /* Subtle highlight */
+        }
+        
+        .team-slot.invalid {
+             border: 2px dashed var(--danger);
+             background-color: rgba(229, 57, 53, 0.1);
+        }
+
+        .active-runs-container {
+            background-color: rgba(126, 87, 194, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(126, 87, 194, 0.3);
+        }
+        .active-runs-title {
+            color: var(--primary-light);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .active-runs-info {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        .active-runs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .active-run-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-light);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(126, 87, 194, 0.2);
+        }
+        .run-info {
+            flex: 1;
+            margin-right: 10px; /* Add space between info and buttons */
+        }
+        .run-story-title {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text-light);
+        }
+        .run-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .run-stage {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+        .progress-bar {
+            height: 6px;
+            background-color: var(--bg-medium);
+            border-radius: 3px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            border-radius: 3px;
+        }
+        .run-actions { /* Container for buttons */
+            display: flex;
+            gap: 10px;
+        }
+        .run-action-button { /* Common styles for run buttons */
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .run-action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .continue-run-button {
+            background-color: var(--primary);
+            color: white;
+        }
+        .continue-run-button:hover {
+            background-color: var(--primary-light);
+        }
+        .finish-run-button { /* Style for the new button */
+            background-color: var(--danger);
+            color: white;
+        }
+        .finish-run-button:hover {
+            background-color: #ff6f60; /* Lighter red */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>Choose Your Story</h1>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Story Selection Section -->
+            <div class="stage-selection">
+                <div class="section-header">
+                    <h2>Select a Story or Stage</h2>
+                    <p>Choose your adventure, hero</p>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="story-tab">Story Mode</button>
+                    <button class="tab-button" data-tab="stage-tab">Single Stages</button>
+                </div>
+                
+                <div class="tab-content active" id="story-tab">
+                    <div id="story-stage-grid" class="stage-grid"></div>
+                </div>
+                
+                <div class="tab-content" id="stage-tab">
+                    <div id="single-stage-grid" class="stage-grid"></div>
+                </div>
+            </div>
+            
+            <!-- Character Selection Section -->
+            <div class="character-selection">
+                <div class="section-header">
+                    <h2>Select Your Team</h2>
+                    <p id="team-restriction-text">Choose your heroes carefully</p>
+                </div>
+                
+                <div class="filter-container">
+                    <div class="tag-filters" id="tag-filters">
+                        <!-- Tag filter buttons will be populated here -->
+                    </div>
+                </div>
+                
+                <div id="character-grid" class="character-grid">
+                    <!-- Character cards will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Team Preview Section -->
+        <div class="team-preview">
+            <h2 id="selected-team-title">Your Squad</h2>
+            <div class="team-slots" id="team-slots">
+                <!-- Slots will be dynamically generated -->
+            </div>
+            
+            <div class="action-buttons">
+                <button id="back-button" class="action-button back-button">Back</button>
+                <button id="start-button" class="action-button start-button">Start Battle</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stage Detail Modal -->
+    <div class="modal" id="stage-detail-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="stage-detail-content" id="stage-detail-content">
+                <!-- Stage details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase JS SDK (Add before your main script) -->
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+
+    <!-- Firebase Config (Add after SDKs, before your main script) -->
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            let selectedCharacters = [];
+            let selectedStory = null;
+            let selectedStage = null;
+            let allCharacters = [];
+            let maxTeamSize = 4;
+            let minTeamSize = 1;
+            let stageRegistry = {};
+            let allTags = new Set();
+            let activeTagFilter = null;
+            let allStories = [];
+            let allStages = [];
+            let ownedCharacters = [];
+            let isLoadingUserData = true;
+            let activeRuns = []; // To store user's active story runs
+            let currentSelectionMode = 'story'; // 'story' or 'stage'
+
+            // --- UI Element Variables ---
+            let characterGrid, storyContainer, stageContainer, teamSlotsContainer,
+                selectedTeamTitle, startButton, backButton, tagFiltersContainer,
+                teamRestrictionText;
+            
+            // --- Tab Switching Logic ---
+            function setupTabSwitching() {
+                const tabButtons = document.querySelectorAll('.tab-button');
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Remove active class from all buttons and contents
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                        
+                        // Add active class to clicked button and corresponding content
+                        button.classList.add('active');
+                        const tabId = button.getAttribute('data-tab');
+                        document.getElementById(tabId).classList.add('active');
+                        
+                        // Set current selection mode
+                        currentSelectionMode = tabId === 'story-tab' ? 'story' : 'stage';
+                        
+                        // Reset selections when switching tabs
+                        if (currentSelectionMode === 'story') {
+                            selectedStage = null;
+                            // Update UI based on story requirements
+                            if (selectedStory) {
+                                const reqs = selectedStory.requirements || {};
+                                const newMaxSize = reqs.teamSize?.max ?? 4;
+                                const newMinSize = reqs.teamSize?.min ?? 1;
+                                updateTeamSizeUI(newMaxSize, newMinSize);
+                            } else {
+                                updateTeamSizeUI(4, 1); // Default
+                            }
+                        } else { // 'stage' mode
+                            selectedStory = null;
+                            // Update UI based on stage requirements
+                            if (selectedStage && selectedStage.id === '5v5_blazing_school_day') {
+                                updateTeamSizeUI(5, 1); // Special case for 5v5 stage
+                            } else {
+                                updateTeamSizeUI(4, 1); // Default
+                            }
+                        }
+                        
+                        clearSelections();
+                        applyStoryRestrictions();
+                        updateTeamRestrictionText();
+                        updateStartButtonState();
+                    });
+                });
+            }
+            
+            function clearSelections() {
+                // Clear selected cards and update UI
+                document.querySelectorAll('.stage-card.selected, .story-container.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                selectedCharacters = [];
+                updateTeamSlotsUI();
+            }
+
+            // Function to convert image path
+            function getCharacterIconPath(character) {
+                // The paths in character-registry.json are already correct
+                return character.image || null;
+            }
+
+            try {
+                // --- Firebase Auth Check ---
+                firebaseAuth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        console.log("User logged in:", user.uid);
+                        const userId = user.uid;
+                        // Fetch user data (including owned characters)
+                        try {
+                            const snapshot = await firebaseDatabase.ref(`users/${userId}/ownedCharacters`).once('value');
+                            if (snapshot.exists()) {
+                                // Firebase stores objects, convert keys to array if needed, or assume it's an array
+                                const ownedData = snapshot.val();
+                                if (Array.isArray(ownedData)) {
+                                    ownedCharacters = ownedData;
+                                } else if (typeof ownedData === 'object') {
+                                    // Handle cases where Firebase might store it as { 0: "id1", 1: "id2" }
+                                    ownedCharacters = Object.values(ownedData);
+                                } else {
+                                    console.warn("Owned characters data is not an array or object:", ownedData);
+                                    ownedCharacters = []; // Fallback to empty
+                                }
+                                console.log("Fetched owned characters:", ownedCharacters);
+                            } else {
+                                console.log("No owned characters found for user, using default or assuming all unlocked for now.");
+                                // Decide default behavior: unlock all or unlock none?
+                                // Let's assume all are available if no data exists for now.
+                                ownedCharacters = allCharacters.map(c => c.id);
+                            }
+                            
+                            // Check for active story runs
+                            const storyProgressSnapshot = await firebaseDatabase.ref(`users/${userId}/storyProgress`).once('value');
+                            if (storyProgressSnapshot.exists()) {
+                                const allProgress = storyProgressSnapshot.val();
+                                console.log("Found story progress data:", allProgress);
+                                
+                                // Convert to array of { storyId, progress } objects
+                                activeRuns = Object.entries(allProgress).map(([storyId, progress]) => ({
+                                    storyId,
+                                    progress
+                                }));
+                                
+                                if (activeRuns.length > 0) {
+                                    console.log(`Found ${activeRuns.length} active story runs`);
+                                    displayActiveRuns(activeRuns);
+                                }
+                            } else {
+                                console.log("No active story runs found");
+                            }
+                            
+                        } catch (error) {
+                            console.error("Error fetching owned characters:", error);
+                            showTooltip("Error loading your character data.");
+                            // Fallback: Allow all characters if fetch fails?
+                            ownedCharacters = allCharacters.map(c => c.id);
+                        }
+                        isLoadingUserData = false;
+                        // Re-populate/update grid now that user data is loaded
+                        populateCharacterGrid(allCharacters);
+                    } else {
+                        console.log("User not logged in. Redirecting to index.html");
+                        window.location.href = 'index.html';
+                    }
+                });
+                // --- End Firebase Auth Check ---
+
+                const [characterData, storiesData, stageRegistryData] = await Promise.all([
+                    fetch('characters.json').then(response => response.ok ? response.json() : Promise.reject('Failed to load characters')),
+                    fetch('stories.json').then(response => response.ok ? response.json() : Promise.reject('Failed to load stories')),
+                    fetch('js/raid-game/stage-registry.json').then(response => response.ok ? response.json() : Promise.reject('Failed to load stage registry'))
+                ]);
+
+                allStories = storiesData;
+                stageRegistry = stageRegistryData;
+                
+                // Extract standalone stages (non-story stages)
+                allStages = stageRegistry.stages.filter(stage => 
+                    stage.type === 'single' || stage.type === 'challenge'
+                );
+                
+                allCharacters = characterData.map(char => ({
+                    ...char,
+                    id: char.name.replace(/\s+/g, '_').toLowerCase()
+                }));
+
+                // Extract all tags from characters
+                allCharacters.forEach(char => {
+                    if (char.tags && Array.isArray(char.tags)) {
+                        char.tags.forEach(tag => allTags.add(tag));
+                    }
+                });
+
+                // --- Assign UI Elements ---
+                characterGrid = document.getElementById('character-grid');
+                storyContainer = document.getElementById('story-stage-grid');
+                stageContainer = document.getElementById('single-stage-grid');
+                teamSlotsContainer = document.getElementById('team-slots');
+                selectedTeamTitle = document.getElementById('selected-team-title');
+                startButton = document.getElementById('start-button');
+                backButton = document.getElementById('back-button');
+                tagFiltersContainer = document.getElementById('tag-filters');
+                teamRestrictionText = document.getElementById('team-restriction-text');
+
+                // --- Initial Population ---
+                setupTabSwitching();
+                updateTeamSizeUI(maxTeamSize, minTeamSize);
+                populateTagFilters(Array.from(allTags));
+                populateCharacterGrid(allCharacters);
+                populateStoryGrid(allStories);
+                populateStageGrid(allStages);
+
+            } catch (error) {
+                console.error("Error loading initial data:", error);
+                document.querySelector('.game-container').innerHTML = `
+                    <div class="error-screen">
+                        <h1>Error</h1>
+                        <p>Could not load game data. Please try again later.</p>
+                        <p class="error-details">Details: ${error}</p>
+                        <button onclick="location.reload()" class="action-button">Retry</button>
+                    </div>`;
+                return;
+            }
+           
+            function populateCharacterGrid(charactersToDisplay) {
+                characterGrid.innerHTML = '';
+                charactersToDisplay.forEach(character => {
+                    const card = createCharacterCard(character);
+                    characterGrid.appendChild(card);
+                });
+                applyStoryRestrictions();
+            }
+
+            function displayActiveRuns(runs) {
+                // Create a container for active runs at the top of the story selection
+                const activeRunsContainer = document.createElement('div');
+                activeRunsContainer.className = 'active-runs-container';
+                activeRunsContainer.innerHTML = `
+                    <h3 class="active-runs-title">Your Active Adventures</h3>
+                    <p class="active-runs-info">Continue your journey or start a new one!</p>
+                    <div class="active-runs-list"></div>
+                `;
+                
+                const runsList = activeRunsContainer.querySelector('.active-runs-list');
+                
+                // Add each active run to the list
+                runs.forEach(run => {
+                    // Find story title from ID
+                    const matchedStory = allStories.find(story => run.storyId === normalizeStoryId(story.title));
+                    if (!matchedStory) return; // Skip if story not found
+                    
+                    const storyName = matchedStory.title;
+                    const currentStage = run.progress.currentStageIndex + 1;
+                    const totalStages = matchedStory.stages.length;
+                    const progress = Math.round((run.progress.completedStages / totalStages) * 100);
+                    
+                    const runElement = document.createElement('div');
+                    runElement.className = 'active-run-item';
+                    runElement.dataset.storyId = run.storyId; // Add data attribute for easier removal
+                    runElement.innerHTML = `
+                        <div class="run-info">
+                            <h4 class="run-story-title">${storyName}</h4>
+                            <div class="run-progress">
+                                <div class="run-stage">Stage ${currentStage}/${totalStages}</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="run-actions">
+                            <button class="run-action-button continue-run-button">Continue</button>
+                            <button class="run-action-button finish-run-button">Finish</button>
+                        </div>
+                    `;
+                    
+                    // Add click handler to continue button
+                    const continueButton = runElement.querySelector('.continue-run-button');
+                    continueButton.addEventListener('click', () => {
+                        console.log(`Continuing story run: ${run.storyId}`);
+                        window.location.href = `story.html?story=${run.storyId}`;
+                    });
+
+                    // Add click handler to finish button
+                    const finishButton = runElement.querySelector('.finish-run-button');
+                    finishButton.addEventListener('click', () => {
+                        finishStoryRun(run.storyId, storyName, runElement); // Pass necessary info
+                    });
+
+                    runsList.appendChild(runElement);
+                });
+                
+                // Add the active runs container before the story grid
+                const storySectionHeader = document.querySelector('.stage-selection .section-header');
+                storySectionHeader.parentNode.insertBefore(activeRunsContainer, storySectionHeader.nextSibling);
+                
+                // Add CSS for active runs
+                const style = document.createElement('style');
+                style.textContent = `
+                    .active-runs-container {
+                        background-color: rgba(126, 87, 194, 0.1);
+                        border-radius: 8px;
+                        padding: 15px;
+                        margin-bottom: 20px;
+                        border: 1px solid rgba(126, 87, 194, 0.3);
+                    }
+                    .active-runs-title {
+                        color: var(--primary-light);
+                        font-size: 1.2rem;
+                        margin-bottom: 5px;
+                    }
+                    .active-runs-info {
+                        color: var(--text-medium);
+                        font-size: 0.9rem;
+                        margin-bottom: 15px;
+                    }
+                    .active-runs-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    .active-run-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        background-color: var(--bg-light);
+                        padding: 10px 15px;
+                        border-radius: 6px;
+                        border: 1px solid rgba(126, 87, 194, 0.2);
+                    }
+                    .run-info {
+                        flex: 1;
+                        margin-right: 10px; /* Add space between info and buttons */
+                    }
+                    .run-story-title {
+                        font-size: 1.1rem;
+                        margin-bottom: 5px;
+                        color: var(--text-light);
+                    }
+                    .run-progress {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 3px;
+                    }
+                    .run-stage {
+                        font-size: 0.8rem;
+                        color: var(--text-medium);
+                    }
+                    .progress-bar {
+                        height: 6px;
+                        background-color: var(--bg-medium);
+                        border-radius: 3px;
+                        overflow: hidden;
+                        width: 100%;
+                    }
+                    .progress-fill {
+                        height: 100%;
+                        background: linear-gradient(to right, var(--primary), var(--primary-light));
+                        border-radius: 3px;
+                    }
+                    .run-actions { /* Container for buttons */
+                        display: flex;
+                        gap: 10px;
+                    }
+                    .run-action-button { /* Common styles for run buttons */
+                        border: none;
+                        border-radius: 4px;
+                        padding: 8px 15px;
+                        font-size: 0.9rem;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        font-family: 'Exo 2', sans-serif;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    .run-action-button:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    }
+                    .continue-run-button {
+                        background-color: var(--primary);
+                        color: white;
+                    }
+                    .continue-run-button:hover {
+                        background-color: var(--primary-light);
+                    }
+                    .finish-run-button { /* Style for the new button */
+                        background-color: var(--danger);
+                        color: white;
+                    }
+                    .finish-run-button:hover {
+                        background-color: #ff6f60; /* Lighter red */
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Helper function to normalize story IDs
+            function normalizeStoryId(title) {
+                return title.toLowerCase().replace(/\s+/g, '_');
+            }
+
+            // --- Function to Finish a Story Run ---
+            async function finishStoryRun(storyId, storyTitle, runElement) {
+                if (!confirm(`Are you sure you want to finish the story "${storyTitle}"? This will delete your current progress permanently.`)) {
+                    return; // User cancelled
+                }
+
+                const userId = getCurrentUserId();
+                if (!userId) {
+                    showTooltip('Authentication error. Please log in again.');
+                    return;
+                }
+
+                try {
+                    await firebaseDatabase.ref(`users/${userId}/storyProgress/${storyId}`).remove();
+                    console.log(`Successfully finished and deleted run for ${storyId}.`);
+                    showTooltip(`Progress for "${storyTitle}" cleared.`);
+
+                    // Remove the run element from the UI
+                    runElement.remove();
+
+                    // Remove from local activeRuns array
+                    const runIndex = activeRuns.findIndex(run => run.storyId === storyId);
+                    if (runIndex > -1) {
+                        activeRuns.splice(runIndex, 1);
+                    }
+
+                    // If no more active runs, remove the container (optional)
+                    const runsListContainer = document.querySelector('.active-runs-list');
+                    if (runsListContainer && runsListContainer.children.length === 0) {
+                        const activeRunsContainer = document.querySelector('.active-runs-container');
+                        if(activeRunsContainer) activeRunsContainer.remove();
+                    }
+
+                } catch (error) {
+                    console.error(`Error finishing run for ${storyId}:`, error);
+                    showTooltip('Failed to finish the story run. Please try again.');
+                }
+            }
+             // --- Helper function to get current user ID ---
+            function getCurrentUserId() {
+                const user = firebaseAuth.currentUser;
+                return user ? user.uid : null;
+            }
+
+            function createCharacterCard(character) {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                card.dataset.id = character.id;
+
+                // NEW: Check if character is owned
+                const isOwned = ownedCharacters.includes(character.id);
+                if (!isOwned) {
+                    card.classList.add('locked');
+                }
+
+                if (selectedCharacters.some(c => c.id === character.id)) {
+                    card.classList.add('selected');
+                }
+
+                // Apply story/filter restrictions immediately
+                applySingleCharacterRestrictions(card, character);
+                
+                // Determine the rarity class
+                let rarityClass = '';
+                let rarityText = '';
+                if (character.rarity) {
+                    if (character.rarity.toLowerCase() === 'legendary') {
+                        rarityClass = 'rarity-legendary';
+                        rarityText = 'Legendary';
+                    } else if (character.rarity.toLowerCase() === 'epic') {
+                        rarityClass = 'rarity-epic';
+                        rarityText = 'Epic';
+                    } else if (character.rarity.toLowerCase() === 'rare') {
+                        rarityClass = 'rarity-rare';
+                        rarityText = 'Rare';
+                    }
+                }
+                
+                const tagElements = character.tags && character.tags.length > 0 
+                    ? character.tags.map(tag => `<span class="character-tag">${tag}</span>`).join('')
+                    : '<span class="character-tag">No tags</span>';
+                
+                // Get the correct icon path
+                const iconPath = getCharacterIconPath(character);
+                
+                card.innerHTML = `
+                    <div class="character-image">
+                        ${iconPath ? `<img src="${iconPath}" alt="${character.name}">` : `<div class="no-image">No Img</div>`}
+                        ${!isOwned ? '<div class="lock-overlay">🔒</div>' : ''}
+                    </div>
+                    ${rarityText ? `<div class="rarity-badge ${rarityClass}">${rarityText}</div>` : ''}
+                    <div class="character-info">
+                        <div class="character-name">${character.name}</div>
+                        <div class="character-tags">${tagElements}</div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    // NEW: Prevent selecting locked characters
+                    if (card.classList.contains('locked')) {
+                        showTooltip('You do not own this character.');
+                        return;
+                    }
+                    if (!card.classList.contains('hidden') && !card.classList.contains('restricted')) {
+                        selectCharacter(character);
+                    }
+                });
+                
+                return card;
+            }
+
+            function applySingleCharacterRestrictions(cardElement, character) {
+                cardElement.classList.remove('hidden', 'restricted');
+                let isRestricted = false;
+                let isHiddenByTagFilter = false;
+                const isOwned = ownedCharacters.includes(character.id);
+
+                // Apply locked status first
+                if (!isOwned) {
+                    cardElement.classList.add('locked');
+                } else {
+                    cardElement.classList.remove('locked'); // Ensure not locked if owned
+                }
+
+                // 1. Apply Story Requirements (if a story is selected)
+                if (currentSelectionMode === 'story' && selectedStory && selectedStory.requirements) {
+                    const reqs = selectedStory.requirements;
+                    // Check required tags
+                    if (reqs.tags && reqs.tags.length > 0) {
+                        const hasRequiredTag = reqs.tags.every(tag => character.tags && character.tags.includes(tag));
+                        if (!hasRequiredTag) {
+                            isRestricted = true;
+                        }
+                    }
+                    // Add other requirement checks here if needed (e.g., specific character bans)
+                } 
+                // 2. Apply Stage Requirements (if a stage is selected)
+                else if (currentSelectionMode === 'stage' && selectedStage) {
+                    // For 5v5_blazing_school_day, recommend (but don't restrict to) School tag
+                    if (selectedStage.id === '5v5_blazing_school_day' && (!character.tags || !character.tags.includes('School'))) {
+                        // Just make slightly transparent but don't restrict
+                        cardElement.style.opacity = '0.8';
+                    }
+                    
+                    // NEW: Check for excluded characters in playerCharacterRestrictions
+                    if (selectedStage.playerCharacterRestrictions && 
+                        selectedStage.playerCharacterRestrictions.excluded &&
+                        selectedStage.playerCharacterRestrictions.excluded.includes(character.id)) {
+                        isRestricted = true;
+                        cardElement.title = "This character cannot be used in this stage";
+                    }
+                }
+                
+                // 3. Apply Active Tag Filter
+                if (activeTagFilter && (!character.tags || !character.tags.includes(activeTagFilter))) {
+                    isHiddenByTagFilter = true;
+                }
+
+                // Ensure locked cards are visually distinct even if restricted by tags/story
+                if (cardElement.classList.contains('locked')) {
+                    cardElement.style.cursor = 'not-allowed';
+                    // Opacity is handled by the .locked CSS class
+                } else if (isRestricted) {
+                    // If restricted by story/tags but owned
+                    cardElement.classList.add('restricted');
+                    cardElement.style.opacity = '0.5';
+                    cardElement.style.cursor = 'not-allowed';
+                }
+                
+                if(isHiddenByTagFilter) {
+                    cardElement.classList.add('hidden');
+                }
+            }
+            
+            function applyStoryRestrictions() {
+                // Don't run restrictions if user data is still loading
+                if (isLoadingUserData) {
+                    console.log("Skipping restrictions check, waiting for user data...");
+                    return;
+                }
+                document.querySelectorAll('.character-card').forEach(card => {
+                    const characterId = card.dataset.id;
+                    const character = allCharacters.find(c => c.id === characterId);
+                    if (character) {
+                        applySingleCharacterRestrictions(card, character);
+                    }
+                });
+                clearTeamIfNeeded();
+                updateTeamRestrictionText();
+                updateTeamSlotsUI();
+            }
+
+            function updateTeamSizeUI(newMaxSize, newMinSize) {
+                maxTeamSize = newMaxSize;
+                minTeamSize = newMinSize;
+                teamSlotsContainer.innerHTML = '';
+                for (let i = 0; i < maxTeamSize; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'team-slot';
+                    slot.dataset.slot = i;
+                    slot.textContent = 'Empty';
+                    teamSlotsContainer.appendChild(slot);
+                }
+                updateTeamSlotsUI();
+                selectedTeamTitle.textContent = `Your Squad (${selectedCharacters.length}/${maxTeamSize})`;
+            }
+            
+            function populateStoryGrid(stories) {
+                storyContainer.innerHTML = '';
+                
+                stories.forEach(story => {
+                    if (story.stages && story.stages.length > 0) {
+                        const storyWrapper = document.createElement('div');
+                        storyWrapper.className = 'story-container';
+                        storyWrapper.dataset.storyTitle = story.title;
+
+                        const storyTitleEl = document.createElement('h3');
+                        storyTitleEl.className = 'story-title';
+                        storyTitleEl.textContent = story.title;
+                        storyWrapper.appendChild(storyTitleEl);
+
+                        if (story.description) {
+                            const storyDesc = document.createElement('div');
+                            storyDesc.className = 'story-description';
+                            storyDesc.textContent = story.description;
+                            storyWrapper.appendChild(storyDesc);
+                        }
+
+                        const stagesGrid = document.createElement('div');
+                        stagesGrid.className = 'stage-grid';
+
+                        storyWrapper.addEventListener('click', () => selectStory(story.title));
+
+                        storyContainer.appendChild(storyWrapper);
+                    }
+                });
+
+                if (storyContainer.children.length === 0) {
+                    storyContainer.innerHTML = '<div class="empty-message">No stories available yet</div>';
+                }
+            }
+            
+            function populateTagFilters(tags) {
+                tagFiltersContainer.innerHTML = '';
+                
+                // Add "All" filter
+                const allFilterBtn = document.createElement('button');
+                allFilterBtn.className = 'tag-filter-button active';
+                allFilterBtn.textContent = 'All';
+                allFilterBtn.dataset.tag = '';
+                allFilterBtn.addEventListener('click', () => filterCharactersByTag(''));
+                tagFiltersContainer.appendChild(allFilterBtn);
+                
+                // Add a button for each tag
+                tags.sort().forEach(tag => {
+                    const button = document.createElement('button');
+                    button.className = 'tag-filter-button';
+                    button.textContent = tag;
+                    button.dataset.tag = tag;
+                    button.addEventListener('click', () => filterCharactersByTag(tag));
+                    tagFiltersContainer.appendChild(button);
+                });
+            }
+            
+            function filterCharactersByTag(tag) {
+                activeTagFilter = tag === '' ? null : tag;
+                
+                document.querySelectorAll('.tag-filter-button').forEach(btn => {
+                    const isActive = (btn.dataset.tag === tag) || (btn.dataset.tag === '' && !tag);
+                    btn.classList.toggle('active', isActive);
+                });
+                
+                applyStoryRestrictions();
+            }
+            
+            function selectCharacter(character) {
+                const existingIndex = selectedCharacters.findIndex(c => c.id === character.id);
+                
+                if (existingIndex !== -1) {
+                    removeCharacter(existingIndex);
+                    return;
+                }
+
+                if (selectedCharacters.length >= maxTeamSize) {
+                    showTooltip(`Team full! Max size for this story is ${maxTeamSize}.`);
+                    return;
+                }
+                
+                // Check stage restrictions for excluded characters
+                if (currentSelectionMode === 'stage' && selectedStage && 
+                    selectedStage.playerCharacterRestrictions && 
+                    selectedStage.playerCharacterRestrictions.excluded && 
+                    selectedStage.playerCharacterRestrictions.excluded.includes(character.id)) {
+                    showTooltip(`Character ${character.name} cannot be used in this stage.`);
+                    return;
+                }
+                
+                // Check story requirements
+                if (selectedStory && selectedStory.requirements && selectedStory.requirements.tags) {
+                    const hasRequiredTag = selectedStory.requirements.tags.every(tag => character.tags && character.tags.includes(tag));
+                    if (!hasRequiredTag) {
+                        showTooltip(`Character does not meet story tag requirements: ${selectedStory.requirements.tags.join(', ')}`);
+                        return;
+                    }
+                }
+                
+                selectedCharacters.push(character);
+                highlightSelectedCards();
+                updateTeamSlotsUI();
+                updateStartButtonState();
+            }
+            
+            function selectStory(storyTitle) {
+                const newlySelectedStory = allStories.find(s => s.title === storyTitle);
+                if (!newlySelectedStory) return;
+
+                const storyContainerElement = document.querySelector(`.story-container[data-story-title="${storyTitle}"]`);
+
+                if (selectedStory && selectedStory.title === storyTitle) {
+                    selectedStory = null;
+                    if(storyContainerElement) storyContainerElement.classList.remove('selected');
+                    updateTeamSizeUI(4, 1);
+                    applyStoryRestrictions();
+                    updateTeamRestrictionText();
+                    clearTeamIfNeeded();
+                    updateStartButtonState();
+                    return;
+                }
+
+                const previouslySelected = document.querySelector('.story-container.selected');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected');
+                }
+
+                selectedStory = newlySelectedStory;
+                if (storyContainerElement) storyContainerElement.classList.add('selected');
+
+                const reqs = selectedStory.requirements || {};
+                const newMaxSize = reqs.teamSize?.max ?? 4;
+                const newMinSize = reqs.teamSize?.min ?? 1;
+
+                updateTeamSizeUI(newMaxSize, newMinSize);
+                applyStoryRestrictions();
+                updateStartButtonState();
+            }
+            
+            function populateStageGrid(stages) {
+                stageContainer.innerHTML = '';
+                
+                stages.forEach(stage => {
+                    const card = document.createElement('div');
+                    card.className = 'stage-card';
+                    card.dataset.stageId = stage.id;
+                    
+                    let difficultyClass = 'difficulty-easy';
+                    if (stage.difficulty >= 7) {
+                        difficultyClass = 'difficulty-hard';
+                    } else if (stage.difficulty >= 4) {
+                        difficultyClass = 'difficulty-medium';
+                    }
+                    
+                    let backgroundStyle = '';
+                    if (stage.backgroundImage) {
+                        backgroundStyle = `background-image: url(${stage.backgroundImage});`;
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="stage-image" style="${backgroundStyle}">
+                            ${!backgroundStyle ? '<div class="no-image">No Image</div>' : ''}
+                            <div class="difficulty-badge ${difficultyClass}">Difficulty: ${stage.difficulty}</div>
+                        </div>
+                        <div class="stage-info">
+                            <div class="stage-name">${stage.name}</div>
+                            <div class="stage-desc">${stage.description || 'No description available'}</div>
+                        </div>
+                    `;
+                    
+                    card.addEventListener('click', () => selectStage(stage.id));
+                    stageContainer.appendChild(card);
+                });
+                
+                if (stageContainer.children.length === 0) {
+                    stageContainer.innerHTML = '<div class="empty-message">No stages available yet</div>';
+                }
+            }
+            
+            function selectStage(stageId) {
+                const newlySelectedStage = allStages.find(s => s.id === stageId);
+                if (!newlySelectedStage) return;
+                
+                const stageCard = document.querySelector(`.stage-card[data-stage-id="${stageId}"]`);
+                
+                if (selectedStage && selectedStage.id === stageId) {
+                    selectedStage = null;
+                    if (stageCard) stageCard.classList.remove('selected');
+                    updateTeamSizeUI(4, 1); // Default
+                    applyStoryRestrictions();
+                    updateTeamRestrictionText();
+                    clearTeamIfNeeded();
+                    updateStartButtonState();
+                    return;
+                }
+                
+                const previouslySelected = document.querySelector('.stage-card.selected');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected');
+                }
+                
+                selectedStage = newlySelectedStage;
+                if (stageCard) stageCard.classList.add('selected');
+                
+                // Special cases for different stages
+                if (stageId === '5v5_blazing_school_day') {
+                    updateTeamSizeUI(5, 1);
+                    // Optional: Tag filter for School characters
+                    filterCharactersByTag('School');
+                } else if (stageId === 'farm_showdown') {
+                    updateTeamSizeUI(3, 1); // 3v3 battle
+                } else {
+                    updateTeamSizeUI(4, 1); // Default for other stages
+                }
+                
+                applyStoryRestrictions();
+                updateTeamRestrictionText();
+                updateStartButtonState();
+            }
+
+            function updateTeamRestrictionText() {
+                let text = "Select a story or stage to see requirements.";
+                
+                if (currentSelectionMode === 'story' && selectedStory) {
+                    const reqs = selectedStory.requirements;
+                    if (reqs) {
+                        text = "Requirements: ";
+                        let parts = [];
+                        if (reqs.tags && reqs.tags.length > 0) {
+                             parts.push(`Tags: [${reqs.tags.join(', ')}]`);
+                        }
+                        if (reqs.teamSize) {
+                            if (reqs.teamSize.min && reqs.teamSize.max && reqs.teamSize.min === reqs.teamSize.max) {
+                                parts.push(`Team Size: Exactly ${reqs.teamSize.max}`);
+                            } else {
+                                let sizeParts = [];
+                                if(reqs.teamSize.min) sizeParts.push(`Min ${reqs.teamSize.min}`);
+                                if(reqs.teamSize.max) sizeParts.push(`Max ${reqs.teamSize.max}`);
+                                parts.push(`Team Size: ${sizeParts.join(', ')}`);
+                            }
+                        }
+                         if (parts.length === 0) text += "None";
+                         else text += parts.join(' | ');
+                    } else {
+                        text = "No specific requirements for this story. Max team size: " + maxTeamSize;
+                    }
+                } else if (currentSelectionMode === 'stage' && selectedStage) {
+                    if (selectedStage.id === '5v5_blazing_school_day') {
+                        text = "Recommended: 5 School characters. Max team size: 5";
+                    } else if (selectedStage.id === 'farm_showdown') {
+                        text = "Beat the farmers! Farmers are not allowed on your team. Max team size: 3";
+                    } else {
+                        text = "No specific requirements for this stage. Max team size: " + maxTeamSize;
+                    }
+                }
+                
+                teamRestrictionText.textContent = text;
+            }
+
+            function clearTeamIfNeeded() {
+                let teamChanged = false;
+                const currentTeamSize = selectedCharacters.length;
+
+                if (currentTeamSize > maxTeamSize) {
+                    selectedCharacters.splice(maxTeamSize);
+                    teamChanged = true;
+                }
+
+                let requiredTags = null;
+                if (selectedStory && selectedStory.requirements && selectedStory.requirements.tags) {
+                    requiredTags = selectedStory.requirements.tags;
+                }
+
+                if (requiredTags && requiredTags.length > 0) {
+                    const originalLength = selectedCharacters.length;
+                    selectedCharacters = selectedCharacters.filter(c => {
+                         return requiredTags.every(tag => c.tags && c.tags.includes(tag));
+                    });
+                    if (selectedCharacters.length !== originalLength) {
+                        teamChanged = true;
+                    }
+                }
+
+                if (teamChanged) {
+                    selectedTeamTitle.textContent = `Your Squad (${selectedCharacters.length}/${maxTeamSize})`;
+                    updateTeamSlotsUI();
+                    highlightSelectedCards();
+                    updateStartButtonState();
+                }
+            }
+            
+            function updateTeamSlotsUI() {
+                const slots = teamSlotsContainer.querySelectorAll('.team-slot');
+                const isTeamSizeValid = selectedCharacters.length >= minTeamSize;
+
+                slots.forEach((slot, index) => {
+                    const character = selectedCharacters[index];
+                    let newSlot = slot.cloneNode(true); // Clone upfront to modify before replacing
+                    
+                    // Determine slot state first
+                    let isInvalid = !isTeamSizeValid && !character; // Invalid if team too small and slot is empty
+                    let isFilled = !!character;
+                    
+                    // Apply classes to the clone
+                    newSlot.className = 'team-slot'; // Start fresh
+                    if (isFilled) newSlot.classList.add('filled');
+                    if (isInvalid) newSlot.classList.add('invalid');
+
+                    // Set content for the clone
+                    if (character) {
+                        const iconPath = getCharacterIconPath(character);
+                        if (iconPath) {
+                            newSlot.innerHTML = `<img src="${iconPath}" alt="${character.name}" title="${character.name}">`;
+                        } else {
+                            newSlot.textContent = character.name.substring(0, 10); // Fallback text
+                            newSlot.innerHTML = ''; // Ensure no conflicting img tag if iconPath was temporarily truthy then null
+                        }
+                        newSlot.title = character.name;
+                        
+                        // Add remove listener only to filled slots
+                        newSlot.addEventListener('click', (e) => {
+                            // Check if the click target is the slot itself or the image inside
+                            if (e.target === newSlot || e.target.tagName === 'IMG') {
+                                removeCharacter(index);
+                            }
+                        });
+                    } else {
+                        newSlot.textContent = 'Empty';
+                        newSlot.title = '';
+                        newSlot.innerHTML = ''; // Clear any previous image/content
+                        // No click listener needed for empty slots
+                    }
+                    
+                    // Replace the original slot with the fully prepared new one
+                    slot.replaceWith(newSlot);
+                });
+                
+                // Update the team title with current count/max
+                selectedTeamTitle.textContent = `Your Squad (${selectedCharacters.length}/${maxTeamSize})`;
+                updateStartButtonState(); // Check validity after UI update
+            }
+
+            function highlightSelectedCards() {
+                document.querySelectorAll('.character-card').forEach(card => {
+                    const cardId = card.dataset.id;
+                    if (selectedCharacters.some(c => c.id === cardId)) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                });
+            }
+            
+            function removeCharacter(index) {
+                if (index < 0 || index >= selectedCharacters.length) return;
+                const removedChar = selectedCharacters.splice(index, 1)[0];
+                updateTeamSlotsUI();
+                highlightSelectedCards();
+                updateStartButtonState();
+            }
+             
+            async function startBattle() {
+                const userId = getCurrentUserId();
+                if (!userId) {
+                    showTooltip('Authentication error. Please log in again.');
+                    return;
+                }
+                
+                // Validate based on current selection mode
+                if (currentSelectionMode === 'story') {
+                    if (!selectedStory) {
+                        showTooltip('Please select a story first!');
+                        return;
+                    }
+                    
+                    if (selectedCharacters.length < minTeamSize) {
+                        showTooltip(`Team too small! Minimum size for this story is ${minTeamSize}.`);
+                        return;
+                    }
+                    
+                    let requiredTags = selectedStory.requirements?.tags;
+                    if (requiredTags && requiredTags.length > 0) {
+                        const teamIsValid = selectedCharacters.every(c =>
+                            requiredTags.every(tag => c.tags && c.tags.includes(tag))
+                        );
+                        if (!teamIsValid) {
+                            showTooltip(`One or more characters don't meet the required tags: [${requiredTags.join(', ')}]`);
+                            return;
+                        }
+                    }
+                    
+                    const characterIdsToSend = selectedCharacters.map(c => c.id);
+                    const storyIdForUrl = selectedStory.title.toLowerCase().replace(/\s+/g, '_');
+                    
+                    // Check if there's an existing run for this story and delete it first
+                    const existingRun = activeRuns.find(run => run.storyId === storyIdForUrl);
+                    if (existingRun) {
+                        // Ask for confirmation before deleting the existing run
+                        if (!confirm(`You already have an active run of "${selectedStory.title}". Starting a new run will delete your current progress. Continue?`)) {
+                            return; // User cancelled
+                        }
+                        
+                        try {
+                            await firebaseDatabase.ref(`users/${userId}/storyProgress/${storyIdForUrl}`).remove();
+                            console.log(`Deleted existing run for ${storyIdForUrl} to start a new one.`);
+                        } catch (error) {
+                            console.error("Error deleting existing run:", error);
+                            showTooltip('Failed to delete existing run. Please try again.');
+                            return;
+                        }
+                    }
+
+                    // --- Save selection to Firebase --- 
+                    try {
+                        const updates = {};
+                        updates[`users/${userId}/currentTeamSelection`] = characterIdsToSend;
+                        updates[`users/${userId}/currentStorySelection`] = storyIdForUrl;
+                        
+                        await firebaseDatabase.ref().update(updates);
+                        console.log('Saved current team and story selection to Firebase.');
+                    } catch (error) {
+                         console.error("Error saving selection to Firebase:", error);
+                         showTooltip('Failed to save team selection. Please try again.');
+                         return; // Prevent navigation if save fails
+                    }
+                    // --- End Firebase Save ---
+
+                    console.log('Starting story:', storyIdForUrl, 'with team IDs:', characterIdsToSend);
+                    
+                    // Navigate to story page (still using URL param for initial load)
+                    window.location.href = `story.html?story=${storyIdForUrl}`;
+                    
+                } else { // 'stage' mode
+                    if (!selectedStage) {
+                        showTooltip('Please select a stage first!');
+                        return;
+                    }
+                    
+                    if (selectedCharacters.length < minTeamSize) {
+                        showTooltip(`Team too small! Minimum size is ${minTeamSize}.`);
+                        return;
+                    }
+                    
+                    const characterIdsToSend = selectedCharacters.map(c => c.id);
+                    
+                    try {
+                        // Save character selection to Firebase
+                        await firebaseDatabase.ref(`users/${userId}/currentTeamSelection`).set(characterIdsToSend);
+                        // Save selected stage
+                        await firebaseDatabase.ref(`users/${userId}/currentStageSelection`).set({
+                            id: selectedStage.id,
+                            name: selectedStage.name
+                        });
+                        
+                        console.log('Starting stage:', selectedStage.id, 'with team IDs:', characterIdsToSend);
+                        
+                        // Store stage data in localStorage for the battle to access
+                        localStorage.setItem('selectedStage', JSON.stringify(selectedStage));
+                        
+                        // Navigate to battle page
+                        window.location.href = `raid-game.html?stage=${selectedStage.id}`;
+                        
+                    } catch (error) {
+                        console.error("Error saving selection to Firebase:", error);
+                        showTooltip('Failed to save team selection. Please try again.');
+                    }
+                }
+            }
+             
+            function showTooltip(message) {
+                let tooltip = document.querySelector('.tooltip-message');
+                if (!tooltip) {
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip-message';
+                    document.body.appendChild(tooltip);
+                }
+                tooltip.textContent = message;
+                
+                tooltip.classList.remove('show');
+                void tooltip.offsetWidth;
+
+                tooltip.classList.add('show');
+                setTimeout(() => {
+                    tooltip.classList.remove('show');
+                }, 2500);
+            }
+
+            function updateStartButtonState() {
+                let enabled = true;
+                let reason = "";
+                if (!selectedStory && !selectedStage) {
+                    enabled = false;
+                    reason = "Select a story or stage";
+                } else if (selectedCharacters.length < minTeamSize) {
+                     enabled = false;
+                     reason = `Need at least ${minTeamSize} character(s)`;
+                } else if (selectedCharacters.length > maxTeamSize) {
+                    enabled = false;
+                    reason = `Team too large (max ${maxTeamSize})`;
+                }
+                
+                startButton.disabled = !enabled;
+                startButton.style.opacity = enabled ? '1' : '0.6';
+                startButton.style.cursor = enabled ? 'pointer' : 'not-allowed';
+                startButton.title = enabled ? "Start the story!" : reason;
+            }
+
+            startButton.addEventListener('click', startBattle);
+            
+            backButton.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+
+            updateStartButtonState();
+        });
+    </script>
+</body>
+</html> 

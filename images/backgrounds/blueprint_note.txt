@@ -1,0 +1,6 @@
+Please place a school blueprint background image named "school_blueprint.jpg" in this directory.
+
+The image should be a light blueprint-style layout of a school building.
+If no image is provided, the system will use a fallback gradient.
+
+Recommended dimensions: 1200x800 pixels 

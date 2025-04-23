@@ -1,0 +1,33 @@
+{
+    "id": "blazing_elemental",
+    "name": "Blazing Elemental",
+    "image": "Loading Screen/Blazing Elemental.png",
+    "stats": {
+        "physicalDamage": 150,
+        "magicalDamage": 250,
+        "armor": 5,
+        "magicalShield": 2,
+        "hp": 3250,
+        "hpPerTurn": 0,
+        "mana": 10000,
+        "manaPerTurn": 100,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.08,
+        "critDamage": 1.4,
+        "healingPower": 0 
+    },
+    "abilities": [
+        {
+            "id": "blazing_elemental_blaze_bomb",
+            "name": "Blaze Bomb",
+            "type": "custom_blaze_bomb", 
+            "manaCost": 100, 
+            "cooldown": 0,
+            "targetType": "all", 
+            "description": "Deals 300 magical damage to all enemies and heals all allies for 355 HP.",
+            "icon": "Icons/abilities/blaze_bomb.png" 
+        }
+    ],
+    "passive": null 
+} 

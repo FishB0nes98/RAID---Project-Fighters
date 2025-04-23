@@ -1,0 +1,276 @@
+/* CSS for Schoolgirl Ayane Abilities and Passive */
+
+/* --- Butterfly Dagger (Q) VFX --- */
+.schoolgirl-ayane-dagger-vfx {
+    position: absolute;
+    width: 30px; /* Dagger width */
+    height: 8px; /* Dagger height */
+    background-color: silver; /* Simple dagger color */
+    border: 1px solid #555;
+    border-radius: 2px;
+    transform-origin: left center; 
+    z-index: 1000; /* Ensure it's above characters */
+    pointer-events: none;
+    transform: rotate(var(--dagger-angle, 0deg)); /* Apply rotation based on JS calculation */
+    /* Add a slight offset so it doesn't originate exactly from center */
+    margin-left: 15px;
+    margin-top: -4px; /* Center vertically */
+}
+
+@keyframes dagger-throw {
+    0% {
+        opacity: 0;
+        transform: rotate(var(--dagger-angle, 0deg)) translateX(0);
+    }
+    20% {
+        opacity: 1; /* Appear quickly */
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(var(--dagger-angle, 0deg)) translateX(calc(var(--dagger-distance, 100px))); /* This variable would need to be set via JS if you want distance control in CSS */
+        /* Since width controls distance in the JS, this translateX is less critical now but kept for potential future use */
+    }
+}
+
+.schoolgirl-ayane-dagger-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192, 192, 192, 0.8) 0%, rgba(192, 192, 192, 0) 70%);
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    animation: dagger-impact-anim 0.5s ease-out forwards;
+}
+
+@keyframes dagger-impact-anim {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* --- Combat Reflexes (Passive) Proc VFX --- */
+.schoolgirl-ayane-passive-proc-vfx {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px; /* Match character slot border */
+    box-shadow: 0 0 15px 5px rgba(255, 255, 100, 0.8); /* Yellowish glow */
+    background-color: rgba(255, 255, 100, 0.2); /* Faint overlay */
+    z-index: 10; /* Below health bars etc. */
+    pointer-events: none;
+    opacity: 0;
+}
+
+@keyframes ayane-passive-flash {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.passive-vfx-text {
+    position: absolute;
+    top: -20px; /* Position above the character */
+    left: 50%;
+    transform: translateX(-50%);
+    color: yellow;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-shadow: 1px 1px 2px black;
+    z-index: 100;
+    animation: floatUpFade 0.6s ease-out forwards;
+}
+
+/* Re-use existing floatUpFade animation if defined in raid-game.css */
+@keyframes floatUpFade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -25px);
+    }
+}
+
+/* CSS for Schoolgirl Ayane Abilities */
+
+/* Q: Butterfly Dagger VFX */
+.ayane-dagger-vfx {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-image: url('../img/vfx/dagger_slash.png'); /* Placeholder image */
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    animation: ayaneDaggerThrow 0.8s ease-out forwards;
+    transform: translate(-50%, -50%); /* Center on coordinates */
+}
+
+@keyframes ayaneDaggerThrow {
+    0% {
+        left: var(--start-x);
+        top: var(--start-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    }
+    100% {
+        left: var(--end-x);
+        top: var(--end-y);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1) rotate(360deg);
+    }
+}
+
+/* W: Butterfly Trail VFX */
+.butterfly-trail-vfx {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden; /* Prevent particles from going outside the character slot */
+}
+
+.butterfly-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #ff80ff; /* Pink/purple butterfly color */
+    border-radius: 50%;
+    opacity: 0;
+    animation: butterflyFly 1.5s ease-out forwards;
+    box-shadow: 0 0 5px #ff80ff, 0 0 10px #ff80ff;
+}
+
+/* Stagger the particle animations */
+.butterfly-particle:nth-child(1) { animation-delay: 0s; }
+.butterfly-particle:nth-child(2) { animation-delay: 0.1s; }
+.butterfly-particle:nth-child(3) { animation-delay: 0.2s; }
+.butterfly-particle:nth-child(4) { animation-delay: 0.3s; }
+.butterfly-particle:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes butterflyFly {
+    0% {
+        opacity: 1;
+        transform: translate(50%, 80%) scale(0.5);
+        left: 50%; /* Start near center */
+        top: 80%;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx, 0), var(--ty, -100px)) scale(1.2);
+        /* Randomize end position slightly */
+        left: calc(50% + (random() * 60px - 30px)); 
+        top: calc(0% + (random() * 40px - 20px)); 
+    }
+}
+
+/* Style for the W ability icon itself if needed */
+.ability[data-ability-id="schoolgirl_ayane_w"] .ability-icon {
+    /* Add specific styles if different from default */
+    border-color: #ff80ff; /* Example: Pink border */
+}
+
+/* Style for the buff icon */
+.status-icon[data-buff-id="schoolgirl_ayane_w_buff"] {
+    background-image: url('../Icons/abilities/schoolgirl_ayane_w.png'); 
+    background-color: #ffc0cb; /* Light pink background */
+    border: 1px solid #ff80ff;
+}
+
+/* --- Quick Reflexes (E) VFX --- */
+.quick-reflexes-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; /* Allow interaction with character */
+    overflow: hidden; /* Contain particles */
+    border-radius: inherit; /* Match character slot border-radius */
+}
+
+.quick-reflexes-particle {
+    position: absolute;
+    width: 6px;
+    height: 12px;
+    background-color: rgba(100, 200, 255, 0.8); /* Light blue color */
+    border-radius: 50%;
+    opacity: 0;
+    animation: quickReflexesParticleAnim 1.5s ease-out forwards;
+}
+
+@keyframes quickReflexesParticleAnim {
+    0% {
+        opacity: 1;
+        transform: translate(var(--start-x), var(--start-y)) scale(0.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--end-x), var(--end-y)) scale(1.5);
+    }
+}
+
+/* Stagger particle animations using animation-delay in JS */
+/* Example positioning in JS: */
+/* particle.style.setProperty('--start-x', `${Math.random() * 100}%`); */
+/* particle.style.setProperty('--start-y', `${Math.random() * 100}%`); */
+/* particle.style.setProperty('--end-x', `${Math.random() * 100}%`); */
+/* particle.style.setProperty('--end-y', `${Math.random() * 100}%`); */
+/* particle.style.animationDelay = `${Math.random() * 0.5}s`; */
+
+/* --- R: Execute Attack --- */
+.schoolgirl-ayane-execute-vfx {
+    /* Optional container styling if needed for positioning */
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none; 
+    z-index: 100; 
+}
+
+.schoolgirl-ayane-execute-impact {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%; 
+    background: radial-gradient(circle, rgba(200, 0, 0, 0.8) 0%, rgba(100, 0, 0, 0) 70%);
+    transform: scale(0.5);
+    opacity: 0;
+    animation: execute-impact-anim 0.8s ease-out forwards;
+    z-index: 99; /* Below character image but above bars */
+}
+
+@keyframes execute-impact-anim {
+    0% { transform: scale(0.5); opacity: 0; }
+    30% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Optional: Add a slash effect */
+.schoolgirl-ayane-execute-impact::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #ffdddd, transparent);
+    transform: translateY(-50%) rotate(-30deg) scaleX(0);
+    animation: execute-slash-anim 0.5s 0.1s ease-out forwards;
+}
+
+@keyframes execute-slash-anim {
+    0% { transform: translateY(-50%) rotate(-30deg) scaleX(0); }
+    70% { transform: translateY(-50%) rotate(-30deg) scaleX(1); }
+    100% { transform: translateY(-50%) rotate(-30deg) scaleX(1); opacity: 0; }
+} 

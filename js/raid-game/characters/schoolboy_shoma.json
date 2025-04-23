@@ -1,0 +1,99 @@
+{
+    "id": "schoolboy_shoma",
+    "name": "Schoolboy Shoma",
+    "image": "Loading Screen/Schoolboy Shoma.png",
+    "stats": {
+        "physicalDamage": 210,
+        "magicalDamage": 0,
+        "armor": 11,
+        "magicalShield": 10,
+        "hp": 8965,
+        "hpPerTurn": 0,
+        "mana": 1980,
+        "manaPerTurn": 22,
+        "lifesteal": 0,
+        "dodgeChance": 0.09,
+        "critChance": 0.0,
+        "critDamage": 2.0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "boink",
+            "name": "Boink",
+            "type": "damage",
+            "damageType": "physical",
+            "amount": 1.25,
+            "manaCost": 40,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 125% physical damage to the target. Has a 35% chance to stun the target for 1 turn. Has a 50% chance to permanently increase Shoma's critical hit chance by 5%.",
+            "icon": "Icons/abilities/boink.jfif",
+            "debuffEffect": {
+                "debuffId": "stun",
+                "name": "Stunned",
+                "duration": 1,
+                "chance": 0.35,
+                "effects": {
+                    "cantAct": true
+                }
+            }
+        },
+        {
+            "id": "ball_throw",
+            "name": "Ball Throw",
+            "type": "damage",
+            "damageType": "physical",
+            "fixedDamage": 0,
+            "manaCost": 80,
+            "cooldown": 3,
+            "targetType": "enemy",
+            "description": "Throws a ball at target. Select a ball type at the start of battle.",
+            "icon": "Icons/abilities/ball_throw.jfif",
+            "placeholderAbility": true
+        },
+        {
+            "id": "catch",
+            "name": "Catch!",
+            "type": "buff",
+            "manaCost": 65,
+            "cooldown": 11,
+            "targetType": "ally_or_self",
+            "description": "Gives himself or an ally 85% dodge chance for 3 turns.",
+            "icon": "Icons/abilities/catch.jfif",
+            "buffEffect": {
+                "buffId": "dodge_boost",
+                "name": "Dodge Boost",
+                "duration": 3,
+                "effects": {
+                    "dodgeChance": 0.85
+                }
+            }
+        },
+        {
+            "id": "homerun",
+            "name": "Homerun",
+            "type": "buff",
+            "manaCost": 120,
+            "cooldown": 14,
+            "targetType": "self",
+            "description": "Gives himself 100% dodge chance for 3 turns, resets all his cooldowns to 0, and allows him to choose a different ball type.",
+            "icon": "Icons/abilities/homerun.jfif",
+            "buffEffect": {
+                "buffId": "homerun_buff",
+                "name": "Homerun",
+                "duration": 3,
+                "effects": {
+                    "dodgeChance": 1.0,
+                    "resetCooldowns": true,
+                    "selectNewBall": true
+                }
+            }
+        }
+    ],
+    "passive": {
+        "id": "ball_selection",
+        "name": "Ball Master",
+        "description": "At the start of the game, Schoolboy Shoma can choose from 4 types of balls (Grass, Fire, Heavy, or Water). The chosen ball will be used for the Ball Throw ability for the entire game."
+    }
+} 

@@ -1,0 +1,70 @@
+{
+    "id": "farmer_nina",
+    "name": "Farmer Nina",
+    "image": "Loading Screen/Farmer Nina.png",
+    "stats": {
+        "physicalDamage": 220,
+        "magicalDamage": 0,
+        "armor": 10,
+        "magicalShield": 6,
+        "hp": 6980,
+        "hpPerTurn": 0,
+        "mana": 1800,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.03,
+        "critChance": 0.10,
+        "critDamage": 1.7,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "farmer_nina_q",
+            "name": "Sniper Shot",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 40,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 400 (+50% AD) damage. After use, gain 20% crit chance for 3 turns.",
+            "icon": "Icons/abilities/sniper_shot.jpeg"
+        },
+        {
+            "id": "farmer_nina_w",
+            "name": "Hiding",
+            "type": "buff",
+            "manaCost": 30,
+            "cooldown": 5,
+            "targetType": "self",
+            "description": "Become untargetable for 2 turns and regenerate 350 HP each turn. Farmer farmer_nina can still be damaged by AOE and DOT effects. Stealth breaks if damaged or when using other abilities.",
+            "icon": "Icons/abilities/hiding.jpeg"
+        },
+        {
+            "id": "farmer_nina_e",
+            "name": "Target Lock",
+            "type": "debuff",
+            "manaCost": 0,
+            "cooldown": 20,
+            "targetType": "enemy",
+            "description": "Marks a target, causing them to take 15% more physical damage for 10 turns.",
+            "icon": "Icons/abilities/target_lock.jpeg"
+        },
+        {
+            "id": "farmer_nina_r",
+            "name": "Piercing Shot",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 100,
+            "cooldown": 15,
+            "targetType": "enemy",
+            "description": "Fires a specialized round that deals 750 (+250% AD) physical damage and completely ignores the target's armor.",
+            "icon": "Icons/abilities/piercing_shot.jpeg"
+        }
+    ],
+    "passive": {
+        "id": "farmer_nina_passive",
+        "name": "Amplified Buffs",
+        "description": "All buffs applied to Farmer farmer_nina are twice as powerful.",
+        "icon": "Icons/passive_farmer_farmer_nina.png"
+    }
+} 

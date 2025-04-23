@@ -1,0 +1,29 @@
+{
+  "id": "corruption_at_the_farmland_an_angry_carrot",
+  "name": "An Angry Carrot",
+  "description": "A strangely aggressive carrot blocks the path into the farmland.",
+  "difficulty": 1,
+  "objectives": {
+    "winConditions": [
+      { "type": "enemyDefeated", "targetId": "angry_carrot" }
+    ]
+  },
+  "stageEffects": [],
+  "enemies": [
+    {
+      "characterId": "angry_carrot"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 50
+    },
+    {
+      "type": "xp",
+      "value": 20
+    }
+  ],
+  "backgroundImage": "images/stages/Stage_1_BG.jpeg",
+  "backgroundMusic": "sounds/Stage_1_Audio.mp3"
+} 

@@ -1,0 +1,49 @@
+{
+    "id": "test_stage",
+    "name": "Test Stage",
+    "description": "A test stage to try out new characters and bosses.",
+    "difficulty": 3,
+    "backgroundImage": "",
+    "enemies": [
+        {
+            "characterId": "test_boss",
+            "modifications": {
+                "stats": {
+                    "hp": 12000,
+                    "physicalDamage": 180,
+                    "magicalDamage": 150,
+                    "armor": 20,
+                    "magicalShield": 20
+                }
+            }
+        },
+        {
+            "characterId": "infernal_birdie"
+        }
+    ],
+    "rewards": [
+        {
+            "type": "gold",
+            "value": 500,
+            "chance": 1.0
+        },
+        {
+            "type": "experience",
+            "value": 250,
+            "chance": 1.0
+        },
+        {
+            "type": "item",
+            "value": "rare_item",
+            "chance": 0.7
+        }
+    ],
+    "maxTurns": 20,
+    "victoryConditions": [
+        "defeat_all_enemies"
+    ],
+    "defeatConditions": [
+        "all_player_characters_defeated",
+        "max_turns_reached"
+    ]
+} 

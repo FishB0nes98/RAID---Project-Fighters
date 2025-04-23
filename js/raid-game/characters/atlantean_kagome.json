@@ -1,0 +1,72 @@
+{
+    "id": "atlantean_kagome",
+    "name": "Atlantean Kagome",
+    "image": "Loading Screen/Atlantean Kagome.png",
+    "stats": {
+        "physicalDamage": 150,
+        "magicalDamage": 220,
+        "armor": 40,
+        "magicalShield": 50,
+        "hp": 8500,
+        "hpPerTurn": 45,
+        "mana": 2440,
+        "manaPerTurn": 40,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.08,
+        "critDamage": 1.5,
+        "healingPower": 0.10
+    },
+    "abilities": [
+        {
+            "id": "atlantean_kagome_q",
+            "name": "Golden Arrow",
+            "type": "damage",
+            "damageType": "magical",
+            "manaCost": 70,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "description": "Deals 400 (100% AP) magical damage to an enemy.",
+            "icon": "Icons/abilities/golden_arrow.png"
+        },
+        {
+            "id": "atlantean_kagome_w",
+            "name": "Scatter Golden Arrows",
+            "type": "damage",
+            "damageType": "magical",
+            "manaCost": 100,
+            "cooldown": 4,
+            "targetType": "all_enemies",
+            "description": "Deals 200 + 50% AP to ALL enemies. When used, Kagome gains 25% AP for 6 turns based on the number of enemies hit (25% for 1 enemy, 50% for 2 enemies, 75% for 3 enemies, etc). If the buff is already active, using this ability resets the buff duration but does not increase the AP bonus.",
+            "icon": "Icons/abilities/golden_arrow_storm.png"
+        },
+        {
+            "id": "atlantean_kagome_e",
+            "name": "Spiritwalk",
+            "type": "buff",
+            "damageType": "magical",
+            "manaCost": 60,
+            "cooldown": 5,
+            "targetType": "self",
+            "description": "Kagome stuns herself for 4 turns, gains 200% magic shield and armor (for the duration as buff) and heals herself when ability is used by 1000HP.",
+            "icon": "Icons/abilities/spiritwalk.png"
+        },
+        {
+            "id": "atlantean_kagome_r",
+            "name": "Spirit Scream",
+            "type": "damage",
+            "damageType": "magical",
+            "manaCost": 150,
+            "cooldown": 8,
+            "targetType": "all_enemies",
+            "description": "Deals 200% of Kagome's magical damage to ALL enemies and removes all their active buffs.",
+            "icon": "Icons/abilities/spirit_scream.png"
+        }
+    ],
+    "passive": {
+        "id": "atlantean_kagome_passive",
+        "name": "Atlantean Blessing",
+        "description": "Heals HP equal to 100% of your missing mana at the start of each turn.",
+        "icon": "Icons/passive_atlantean.webp"
+    }
+} 

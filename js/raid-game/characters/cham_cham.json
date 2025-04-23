@@ -1,0 +1,31 @@
+{
+    "id": "cham_cham",
+    "name": "Cham Cham",
+    "image": "Loading Screen/Cham Cham.png",
+    "stats": {
+        "hp": 8751,
+        "mana": 1990,
+        "physicalDamage": 245,
+        "magicalDamage": 15,
+        "armor": 85,
+        "magicalShield": 30,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.15,
+        "critDamage": 1.6,
+        "hpPerTurn": 50,
+        "manaPerTurn": 25
+    },
+    "abilities": [
+        {"id": "cham_cham_q", "manaCost": 10, "cooldown": 2},
+        {"id": "cham_cham_w", "manaCost": 15, "cooldown": 8},
+        {"id": "cham_cham_e", "manaCost": 12, "cooldown": 4},
+        {"id": "cham_cham_r", "manaCost": 50, "cooldown": 12}
+    ],
+    "passive": {
+        "id": "cham_cham_passive",
+        "name": "Growing Power",
+        "description": "Gains 2% damage for each stack, obtained by using Q or E.",
+        "icon": "Icons/passive_cham_cham.webp"
+    }
+} 

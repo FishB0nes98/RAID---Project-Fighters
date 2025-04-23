@@ -1,0 +1,539 @@
+/* Infernal Scorpion VFX */
+
+/* GET OVER HERE Chain Animation */
+.scorpion-chain-vfx {
+    position: absolute;
+    height: 5px;
+    background: linear-gradient(to right, #ff8c00, #ffeb3b); /* Orange to yellow gradient */
+    box-shadow: 0 0 5px #ffeb3b;
+    transform-origin: left center;
+    z-index: 10;
+    pointer-events: none; /* Prevent interaction */
+    border-radius: 2px;
+}
+
+@keyframes chain-pulse {
+    from { opacity: 0.8; filter: brightness(1); }
+    to { opacity: 1; filter: brightness(1.5); }
+}
+
+/* --- NEW: Burn Debuff Character Overlay VFX --- */
+.character-burn-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20; /* Above regular character but below UI elements */
+    pointer-events: none; /* Allow clicks to pass through */
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Fire base effect - gradient overlay */
+.character-burn-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(0deg, 
+        rgba(255, 100, 0, 0.4) 0%, 
+        rgba(255, 50, 0, 0.2) 40%, 
+        rgba(255, 200, 0, 0.3) 60%,
+        rgba(255, 150, 0, 0.1) 100%);
+    animation: burn-pulse 2s infinite alternate;
+    z-index: -1;
+}
+
+/* Flame particles overlay */
+.character-burn-vfx::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255, 50, 0, 0.8) 0%, rgba(255, 50, 0, 0) 20%),
+        radial-gradient(circle at 50% 90%, rgba(255, 100, 0, 0.8) 0%, rgba(255, 100, 0, 0) 30%),
+        radial-gradient(circle at 80% 85%, rgba(255, 150, 0, 0.8) 0%, rgba(255, 150, 0, 0) 25%);
+    background-size: 200% 200%;
+    animation: flame-dance 3s infinite alternate;
+    mix-blend-mode: overlay;
+}
+
+@keyframes burn-pulse {
+    0% { opacity: 0.7; }
+    100% { opacity: 0.9; }
+}
+
+@keyframes flame-dance {
+    0% {
+        background-position: 0% 100%;
+        filter: brightness(0.9) blur(1px);
+    }
+    100% {
+        background-position: 100% 0%;
+        filter: brightness(1.1) blur(2px);
+    }
+}
+
+/* Emblematic flames that rise from bottom */
+.burn-ember {
+    position: absolute;
+    bottom: 0;
+    width: 5px;
+    height: 15px;
+    background-color: rgba(255, 100, 0, 0.7);
+    border-radius: 2px;
+    filter: blur(1px);
+    animation: ember-rise var(--duration, 2s) infinite ease-out;
+    opacity: 0.7;
+}
+
+@keyframes ember-rise {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0.7;
+        background-color: rgba(255, 50, 0, 0.7);
+    }
+    100% {
+        transform: translateY(-100px) scale(0) rotate(45deg);
+        opacity: 0;
+        background-color: rgba(255, 200, 0, 0.3);
+    }
+}
+/* --- END NEW --- */
+
+/* Hook Impact Animation */
+.hook-impact-vfx {
+    position: absolute;
+    top: 40%; 
+    left: 40%;
+    width: 40px; /* Adjust size as needed */
+    height: 40px;
+    background-image: url('../Icons/effects/impact_spark.png'); /* Use an appropriate spark image */
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+    animation: impactFade 0.4s ease-out forwards;
+    z-index: 15;
+    pointer-events: none;
+    transform: translate(-50%, -50%); /* Center the impact */
+}
+
+@keyframes impactFade {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+/* Target Pull/Shake Animation */
+.hook-shake-animation {
+    animation: hookShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+}
+
+@keyframes hookShake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Hooked Debuff Visualization */
+/* --- REMOVE THIS BLOCK --- 
+.hooked-debuff-indicator {
+    position: absolute;
+    bottom: -15px; // Position below the character
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25px;
+    height: 25px;
+    background-image: url('../Icons/abilities/get_over_here.png'); // Use the ability icon
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 5; // Make sure it's visible but below some VFX
+    opacity: 0.9;
+}
+--- END REMOVE --- */
+
+@keyframes hooked-pulse {
+    0% { opacity: 0.2; }
+    50% { opacity: 0.5; }
+    100% { opacity: 0.2; }
+}
+
+/* Chain Spikes (for chain animation) */
+.chain-spike {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #d4af37; /* Gold color */
+    border: 1px solid #a08430;
+    transform: rotate(45deg); /* Diamond shape */
+    z-index: 11;
+    pointer-events: none;
+}
+
+/* CHAIN REACTION PASSIVE VFX - Fiery Theme */
+
+/* Chain Fire Effect */
+.chain-reaction-bolt {
+    position: absolute;
+    height: 5px;
+    /* Changed gradient to fiery colors */
+    background: linear-gradient(to right, #ffcc00, #ff6600, #ff3300);
+    /* Changed shadow to fiery colors */
+    box-shadow: 0 0 8px #ff6600, 0 0 15px #ff3300;
+    transform-origin: left center;
+    z-index: 100;
+    pointer-events: none;
+    filter: blur(1px);
+    opacity: 0.9;
+    border-radius: 2px; /* Add slight rounding */
+}
+
+/* Start point pulse for chain */
+.chain-start-point {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    /* Changed gradient to fiery colors */
+    background: radial-gradient(circle, rgba(255,204,0,0.9) 0%, rgba(255,102,0,0.7) 40%, rgba(255,51,0,0) 70%);
+    transform: translate(-50%, -50%);
+    animation: start-pulse 0.5s ease-out;
+    z-index: 101;
+    pointer-events: none;
+}
+
+/* End point impact for chain */
+.chain-end-point {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    /* Changed gradient to fiery colors */
+    background: radial-gradient(circle, rgba(255,204,0,0.9) 0%, rgba(255,102,0,0.7) 40%, rgba(255,51,0,0) 70%);
+    transform: translate(-50%, -50%);
+    animation: end-impact 0.8s ease-out;
+    z-index: 101;
+    pointer-events: none;
+}
+
+/* Fire particle effects */
+.chain-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 102;
+}
+
+.chain-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    /* Changed background to orange/yellow */
+    background-color: #ffcc00;
+    border-radius: 50%;
+    /* Changed shadow to fiery color */
+    box-shadow: 0 0 8px #ff6600;
+    animation: particle-fade 0.6s linear forwards;
+    opacity: 0.8;
+}
+
+/* Damage number for chain reaction */
+.chain-damage-number {
+    position: absolute;
+    /* Changed color to fiery orange */
+    color: #ff9900;
+    font-size: 24px;
+    font-weight: bold;
+    /* Changed shadow to fiery colors */
+    text-shadow: 0 0 10px #ffffff, 0 0 15px #ff6600, 0 0 20px #ff3300;
+    animation: damage-float 1s ease-out forwards;
+    z-index: 103;
+    pointer-events: none;
+}
+
+@keyframes damage-float {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+}
+
+/* CSS for Infernal Scorpion Abilities */
+
+/* --- Fire Breath VFX --- */
+.fire-breath-vfx {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 30%, rgba(255, 100, 0, 0.7) 0%, rgba(255, 165, 0, 0.5) 40%, rgba(255, 215, 0, 0.2) 70%, transparent 100%);
+    border-radius: 50%;
+    animation: firePulse 1s ease-out forwards;
+    opacity: 0;
+    z-index: 15;
+    pointer-events: none;
+    transform-origin: center center;
+}
+
+@keyframes firePulse {
+    0% { transform: scale(0.1); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+/* --- Burn Tick VFX --- */
+.burn-tick-vfx {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    width: 20px;
+    height: 30px;
+    background-image: url('../Icons/effects/burn_tick_flame.png'); /* Small flame icon */
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: burnTickFadeUp 0.5s ease-out forwards;
+    z-index: 16;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+@keyframes burnTickFadeUp {
+    0% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -20px); } 
+}
+
+/* --- Burn Debuff Icon (general style for debuffs might be in raid-game.css) --- */
+/* If you need specific styling for the burn icon itself */
+.debuff-icon[title*="Burn"] { 
+    /* Add specific styles if needed, e.g., border */
+    /* border: 1px solid red; */
+}
+
+/* --- Dual Blade Strike (E Ability) VFX --- */
+
+.infernal-scorpion-dual-strike-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.fiery-slash {
+    position: absolute;
+    top: 20%;
+    left: 10%;
+    width: 80%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(255, 80, 0, 0) 40%, rgba(255, 100, 0, 0.8) 60%, rgba(255, 150, 50, 0.5) 70%, rgba(255, 0, 0, 0) 80%);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+    animation: fiery-slash-anim 0.5s ease-out forwards;
+}
+
+.fiery-slash.slash-1 {
+    clip-path: polygon(0% 40%, 100% 60%, 100% 70%, 0% 50%); /* Diagonal slash shape */
+}
+
+.fiery-slash.slash-2 {
+    clip-path: polygon(0% 60%, 100% 40%, 100% 50%, 0% 70%); /* Opposite diagonal slash */
+    transform: scale(0.5) rotate(10deg); /* Slightly different angle */
+}
+
+@keyframes fiery-slash-anim {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-20deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1) rotate(5deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3) rotate(15deg);
+    }
+}
+
+.impact-sparks {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+    z-index: 101;
+}
+
+.impact-sparks::before {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    left: -70px;
+    top: -70px;
+    background: radial-gradient(circle, rgba(255,200,0,0.6) 10%, rgba(255,100,0,0.4) 30%, rgba(255,0,0,0) 70%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: spark-burst 0.6s ease-out 0.1s forwards; /* Delay slightly after first hit */
+}
+
+@keyframes spark-burst {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Caster animation for strike */
+.caster-strike-animation {
+    animation: caster-strike-anim 0.6s ease-in-out;
+}
+
+@keyframes caster-strike-anim {
+    0% {
+        transform: scale(1.0) translateY(0);
+    }
+    30% {
+        transform: scale(1.1) translateY(-10px) rotate(-3deg);
+    }
+    60% {
+         transform: scale(1.05) translateY(5px) rotate(2deg);
+    }
+    100% {
+        transform: scale(1.0) translateY(0);
+    }
+}
+
+/* --- NEW: Open Portal (R Ability) VFX --- */
+
+/* Caster animation for portal opening */
+.infernal-portal-cast-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 105;
+    animation: portal-cast-pulse 1.5s ease-in-out forwards;
+}
+
+.infernal-portal-cast-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.5) 0%, rgba(150, 0, 0, 0.3) 50%, rgba(50, 0, 0, 0) 80%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: portal-cast-aura 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes portal-cast-pulse {
+    0% { opacity: 0; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes portal-cast-aura {
+    from { filter: brightness(1) blur(2px); }
+    to { filter: brightness(1.5) blur(4px); }
+}
+
+/* Portal effect over targets */
+.infernal-portal-target-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 100px;
+    background: radial-gradient(ellipse at center, rgba(50, 0, 50, 0.8) 0%, rgba(150, 0, 150, 0.6) 50%, rgba(255, 0, 255, 0.3) 70%, transparent 90%);
+    border: 2px solid #ff00ff;
+    border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%; /* Irregular oval shape */
+    box-shadow: 0 0 15px #ff00ff, 0 0 25px #8a2be2, inset 0 0 10px #ff00ff;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    animation: portal-appear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    z-index: 100;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+@keyframes portal-appear {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+    70% { transform: translate(-50%, -50%) scale(1.1) rotate(-5deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Particles swirling inside the portal */
+.portal-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #ff80ff;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #ff00ff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: portal-swirl 1.5s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes portal-swirl {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(0deg) translateX(0px) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(720deg) translateX(35px) scale(1);
+        /* Adjust translateX for portal size */
+    }
+}
+
+/* Visual indicator for disabled ability */
+.portal-disable-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: red;
+    text-shadow: 0 0 3px black;
+    z-index: 101; /* Above portal */
+    animation: disable-pulse 1s infinite alternate;
+}
+
+@keyframes disable-pulse {
+    from { opacity: 0.7; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.1); }
+}

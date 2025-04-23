@@ -1,0 +1,564 @@
+/* Farmer Shoma Ability Styles */
+
+/* Passive Indicator Styles */
+.shoma-passive-indicator {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #8e4506, #d78b0d);
+    border-radius: 8px;
+    width: auto;
+    height: 30px;
+    padding: 0 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), inset 0 0 8px rgba(255, 215, 0, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    z-index: 5;
+}
+
+.shoma-passive-indicator::before {
+    content: "⚔️";
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+.shoma-passive-indicator.updated {
+    transform: translateX(-50%) scale(1.2);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 12px rgba(255, 215, 0, 0.5);
+    animation: pulsate 1s ease-in-out;
+}
+
+@keyframes pulsate {
+    0% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.3); }
+    100% { transform: translateX(-50%) scale(1.2); }
+}
+
+/* Passive Boost VFX */
+.shoma-passive-boost-vfx {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f5a623, #ff7e00);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    animation: passiveBoost 2s forwards;
+    z-index: 10;
+    box-shadow: 0 0 15px #ffcc00, inset 0 0 8px rgba(255, 255, 255, 0.5);
+    border: 2px solid #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.shoma-passive-boost-vfx::before,
+.shoma-passive-boost-vfx::after {
+    content: "⚔️";
+    margin: 0 5px;
+}
+
+@keyframes passiveBoost {
+    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* Enhanced Passive Highlight */
+.shoma-passive-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 4;
+    animation: passiveHighlight 2s forwards;
+    background: radial-gradient(circle, rgba(255, 204, 0, 0.3) 0%, rgba(255, 204, 0, 0) 70%);
+    box-shadow: 0 0 20px 10px rgba(255, 204, 0, 0.6);
+}
+
+@keyframes passiveHighlight {
+    0% { opacity: 0; transform: scale(0.8); }
+    20% { opacity: 1; transform: scale(1.1); }
+    40% { opacity: 0.8; transform: scale(1); }
+    60% { opacity: 1; transform: scale(1.1); }
+    80% { opacity: 0.8; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* Home Run Animations */
+.home-run-animation {
+    animation: shomaSwing 0.5s forwards;
+}
+
+@keyframes shomaSwing {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(30deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.bat-swing-vfx {
+    position: absolute;
+    width: 150%;
+    height: 50px;
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.5), transparent);
+    transform: rotate(-30deg);
+    animation: batSwing 0.5s forwards;
+    z-index: 2;
+    left: -25%;
+}
+
+@keyframes batSwing {
+    0% { opacity: 0; transform: rotate(-30deg) translateY(0); }
+    50% { opacity: 1; transform: rotate(0deg) translateY(-10px); }
+    100% { opacity: 0; transform: rotate(30deg) translateY(0); }
+}
+
+.home-run-impact {
+    animation: homeRunImpact 0.5s forwards;
+}
+
+@keyframes homeRunImpact {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px) translateY(-5px); }
+    50% { transform: translateX(8px) translateY(5px); }
+    75% { transform: translateX(-5px) translateY(-3px); }
+    100% { transform: translateX(0); }
+}
+
+.home-run-impact-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 200, 0, 0.5) 0%, transparent 70%);
+    animation: impactFade 0.6s forwards;
+    z-index: 2;
+}
+
+@keyframes impactFade {
+    0% { opacity: 0; transform: scale(0.5); }
+    40% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Apple Throw Animations - Enhanced */
+.apple-throw-animation {
+    animation: appleThrow 0.7s forwards;
+    position: relative;
+}
+
+@keyframes appleThrow {
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(-10deg) translateY(-5px); }
+    30% { transform: rotate(-15deg) translateY(-8px); }
+    50% { transform: rotate(5deg) translateY(0); }
+    75% { transform: rotate(-5deg) translateY(-3px); }
+    100% { transform: rotate(0deg); }
+}
+
+.apple-throw-vfx {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    animation: appleThrowPath 0.8s forwards;
+    z-index: 5;
+    background: radial-gradient(circle, rgba(255, 50, 50, 0.9) 0%, rgba(204, 0, 0, 0.7) 60%, rgba(204, 0, 0, 0.3) 80%);
+    box-shadow: 0 0 15px #ff6a00, inset 0 0 8px rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.apple-throw-vfx::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    width: 6px;
+    height: 10px;
+    background: linear-gradient(to bottom, #5a3700, #3a2400);
+    transform: translateX(-50%) rotate(5deg);
+    border-radius: 40% 40% 0 0;
+}
+
+.apple-throw-vfx::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    right: 25%;
+    width: 7px;
+    height: 7px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    filter: blur(1px);
+}
+
+.apple-throw-trail {
+    position: absolute;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0.6;
+    animation: trailFade 0.7s forwards;
+}
+
+@keyframes trailFade {
+    0% { opacity: 0.6; }
+    100% { opacity: 0; }
+}
+
+@keyframes appleThrowPath {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; filter: blur(2px); }
+    10% { transform: translate(-35%, -60%) scale(0.8); opacity: 1; filter: blur(0px); }
+    30% { transform: translate(0%, -80%) scale(1.1); opacity: 1; filter: blur(0px); }
+    50% { transform: translate(50%, -60%) scale(1.2); opacity: 1; filter: blur(0px); }
+    70% { transform: translate(100%, -30%) scale(1.1); opacity: 1; filter: blur(0px); }
+    90% { transform: translate(150%, 0%) scale(1); opacity: 0.8; filter: blur(0px); }
+    100% { transform: translate(200%, 30%) scale(0.8); opacity: 0; filter: blur(3px); }
+}
+
+/* Apple Heal Effect - Enhanced */
+.apple-heal-effect {
+    animation: appleHeal 1s forwards;
+    position: relative;
+}
+
+@keyframes appleHeal {
+    0% { filter: brightness(1); }
+    20% { filter: brightness(1.1) hue-rotate(120deg); }
+    50% { filter: brightness(1.4) hue-rotate(120deg); }
+    80% { filter: brightness(1.2) hue-rotate(60deg); }
+    100% { filter: brightness(1); }
+}
+
+.apple-heal-vfx {
+    position: absolute;
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.5) 0%, rgba(0, 255, 0, 0) 70%);
+    animation: healGlow 1s forwards;
+    z-index: 2;
+    border-radius: 50%;
+}
+
+.apple-heal-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    animation: healParticlesRise 1.2s forwards;
+    pointer-events: none;
+}
+
+.apple-heal-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #7cff7c;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #4cff4c;
+    opacity: 0.8;
+    filter: blur(1px);
+}
+
+@keyframes healGlow {
+    0% { opacity: 0; transform: scale(0.6); }
+    30% { opacity: 0.8; transform: scale(1.1); }
+    70% { opacity: 0.7; transform: scale(1.3); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes healParticlesRise {
+    0% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 1; transform: translateY(-5px); }
+    80% { opacity: 0.8; transform: translateY(-30px); }
+    100% { opacity: 0; transform: translateY(-50px); }
+}
+
+.healing-apple-splash {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(175, 255, 138, 0.8) 0%, rgba(50, 205, 50, 0.3) 50%, transparent 70%);
+    animation: healingSplash 0.8s forwards;
+    z-index: 3;
+}
+
+@keyframes healingSplash {
+    0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+    30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+/* Apple Impact Effect - Enhanced */
+.apple-impact {
+    animation: appleImpact 0.7s forwards;
+    position: relative;
+}
+
+@keyframes appleImpact {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.07) rotate(2deg); }
+    30% { transform: scale(0.95) rotate(-2deg); }
+    45% { transform: scale(1.05) rotate(1deg); }
+    60% { transform: scale(0.97) rotate(-1deg); }
+    75% { transform: scale(1.02) rotate(0.5deg); }
+    100% { transform: scale(1); }
+}
+
+.apple-impact-vfx {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(255, 90, 90, 0.7) 0%, rgba(255, 50, 0, 0.4) 50%, transparent 70%);
+    animation: appleSplash 0.8s forwards;
+    z-index: 2;
+    border-radius: 50%;
+}
+
+.apple-splash-fragments {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.apple-fragment {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #ff4500, #8b0000);
+    border-radius: 50% 50% 0 50%;
+    box-shadow: 0 0 3px rgba(255, 0, 0, 0.5);
+    opacity: 0.9;
+}
+
+@keyframes appleSplash {
+    0% { opacity: 0; transform: scale(0.5); }
+    30% { opacity: 0.9; transform: scale(1.2); }
+    70% { opacity: 0.7; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.6); }
+}
+
+.apple-splash-indicator {
+    position: absolute;
+    top: -20px;
+    right: 5px;
+    font-size: 20px;
+    animation: bobbing 2s infinite ease-in-out, rotatePulse 3s infinite linear;
+    filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.7));
+    z-index: 5;
+}
+
+@keyframes bobbing {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-7px) rotate(5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes rotatePulse {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.7)) brightness(1); }
+    33% { filter: drop-shadow(0 0 7px rgba(255, 50, 0, 0.8)) brightness(1.2); }
+    66% { filter: drop-shadow(0 0 6px rgba(255, 100, 0, 0.7)) brightness(1.1); }
+    100% { filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.7)) brightness(1); }
+}
+
+.apple-damage-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border: 3px solid rgba(255, 0, 0, 0.6);
+    box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.4);
+    animation: damagePulse 0.8s forwards;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+@keyframes damagePulse {
+    0% { opacity: 0; transform: scale(0.9); }
+    40% { opacity: 0.8; transform: scale(1.05); }
+    100% { opacity: 0; transform: scale(1.1); }
+}
+
+/* Farmer's Catch Ability Styles */
+.farmers-catch-animation {
+    animation: farmersCatch 0.8s forwards;
+}
+
+@keyframes farmersCatch {
+    0% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-8px) rotate(-5deg); }
+    50% { transform: translateY(5px) rotate(3deg); }
+    75% { transform: translateY(-3px) rotate(-2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+.farmers-catch-vfx {
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    top: -5%;
+    left: -5%;
+    border-radius: 50%;
+    border: 3px dashed rgba(255, 255, 255, 0.7);
+    animation: catchRotate 2s linear infinite, catchPulse 0.8s forwards;
+    z-index: 3;
+}
+
+@keyframes catchRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes catchPulse {
+    0% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+    40% { opacity: 0.8; transform: scale(1.2) rotate(144deg); }
+    100% { opacity: 0; transform: scale(1.5) rotate(360deg); }
+}
+
+/* Dodge Buff Effect Styles */
+.dodge-buff-effect {
+    animation: dodgeBuffPulse 1s forwards;
+}
+
+@keyframes dodgeBuffPulse {
+    0% { filter: brightness(1) blur(0); }
+    30% { filter: brightness(1.3) blur(2px); }
+    60% { filter: brightness(1.2) blur(1px); }
+    100% { filter: brightness(1) blur(0); }
+}
+
+.dodge-buff-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.7) 0%, rgba(135, 206, 250, 0.4) 40%, transparent 70%);
+    box-shadow: 0 0 20px rgba(135, 206, 250, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.5);
+    animation: dodgeGlow 1.2s forwards;
+    z-index: 2;
+}
+
+@keyframes dodgeGlow {
+    0% { opacity: 0; transform: scale(0.8); }
+    40% { opacity: 0.8; transform: scale(1.15); }
+    80% { opacity: 0.6; transform: scale(1.3); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+.dodge-buff-indicator {
+    position: absolute;
+    top: -15px;
+    right: 25px;
+    font-size: 20px;
+    animation: dodgeFloat 3s infinite ease-in-out;
+    filter: drop-shadow(0 0 5px rgba(135, 206, 250, 0.8));
+    z-index: 5;
+}
+
+@keyframes dodgeFloat {
+    0% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-7px) rotate(10deg); }
+    66% { transform: translateY(-3px) rotate(-5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Wind Effect Particles */
+.wind-effect-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.wind-streak {
+    position: absolute;
+    height: 3px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9), transparent);
+    left: -100%;
+    border-radius: 3px;
+    animation: windStreak 0.8s linear forwards;
+    filter: blur(1px);
+}
+
+@keyframes windStreak {
+    0% { transform: translateX(0) rotate(0deg); opacity: 0; left: -100%; }
+    10% { opacity: 1; }
+    100% { transform: translateX(300%) rotate(0deg); opacity: 0; left: 0; }
+}
+
+/* Additional animations for dodge effect */
+@keyframes fadeOut {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Animation when character dodges attacks */
+.dodge-animation {
+    animation: characterDodge 0.5s ease-out;
+    position: relative;
+}
+
+@keyframes characterDodge {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-15px); }
+    75% { transform: translateX(15px); }
+    100% { transform: translateX(0); }
+}
+
+/* Afterimage effect when dodging */
+.dodge-afterimage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: inherit;
+    border-radius: inherit;
+    opacity: 0.3;
+    filter: blur(2px) brightness(1.2);
+    animation: afterimageFade 0.4s forwards;
+    z-index: 1;
+}
+
+@keyframes afterimageFade {
+    0% { opacity: 0.4; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(20px); }
+} 

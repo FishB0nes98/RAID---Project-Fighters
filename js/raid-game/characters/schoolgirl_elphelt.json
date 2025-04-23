@@ -1,0 +1,82 @@
+{
+    "id": "schoolgirl_elphelt",
+    "name": "Schoolgirl Elphelt",
+    "image": "Loading Screen/Schoolgirl Elphelt.png",
+    "stats": {
+        "physicalDamage": 225,
+        "magicalDamage": 300,
+        "armor": 12,
+        "magicalShield": 13,
+        "hp": 8752,
+        "hpPerTurn": 0,
+        "mana": 1900,
+        "manaPerTurn": 39,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.02,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "schoolgirl_elphelt_q",
+            "name": "Love Bullet",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 300 + (50% AD + 50% MD) physical damage.",
+            "icon": "Icons/abilities/love_bullet.jfif" 
+        },
+        {
+            "id": "schoolgirl_elphelt_w",
+            "name": "Flower Bomb",
+            "type": "debuff",
+            "manaCost": 75,
+            "cooldown": 8,
+            "targetType": "enemy",
+            "description": "Throws a flower bomb, disabling one of the target's abilities for 2 turns.",
+            "icon": "Icons/abilities/flower_bomb.jfif"
+        },
+        {
+            "id": "schoolgirl_elphelt_e",
+            "name": "Affection",
+            "type": "buff",
+            "manaCost": 100,
+            "cooldown": 12,
+            "targetType": "enemy",
+            "description": "Places a heart onto the target enemy, causing them to deal 50% less damage to Elphelt for 4 turns.",
+            "icon": "Icons/abilities/affection.jfif",
+            "buffEffect": {
+                "buffId": "affection_buff",
+                "name": "Affection",
+                "duration": 4,
+                "description": "Receives 50% less damage from the targeted enemy."
+            },
+            "debuffEffect": {
+                "debuffId": "affection_debuff",
+                "name": "Affected by Affection",
+                "duration": 4,
+                "description": "Infatuated with Elphelt."
+            }
+        },
+        {
+            "id": "schoolgirl_elphelt_r",
+            "name": "Piercing Bullet",
+            "type": "custom",
+            "damageType": "physical",
+            "manaCost": 100,
+            "cooldown": 22,
+            "targetType": "enemy",
+            "description": "Deals 350% Physical Damage to the target. Has a 50% chance to pierce to another random enemy for 50% of the original damage, potentially chaining multiple times.",
+            "icon": "Icons/abilities/piercing_bullet.jfif"
+        }
+    ],
+    "passive": {
+        "id": "schoolgirl_elphelt_passive",
+        "name": "Defensive Maneuvers",
+        "description": "Gains 10 Armor and 10 Magic Shield for 2 turns after using any ability.",
+        "icon": "Icons/passives/schoolgirl_elphelt_passive.png"
+    }
+} 

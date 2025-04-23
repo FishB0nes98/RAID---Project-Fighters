@@ -1,0 +1,42 @@
+{
+    "id": "shao_kahn_boss",
+    "name": "Shao Kahn",
+    "image": "Loading Screen/Shao Kahn.png",
+    "stats": {
+        "physicalDamage": 199,
+        "magicalDamage": 250,
+        "armor": 45,
+        "magicalShield": 30,
+        "hp": 9819,
+        "hpPerTurn": 150,
+        "mana": 1890,
+        "manaPerTurn": 50,
+        "lifesteal": 0.1,
+        "dodgeChance": 0.02,
+        "critChance": 1,
+        "critDamage": 2.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "smash",
+            "name": "Smash",
+            "type": "damage",
+            "damageType": "magical",
+            "fixedDamage": 500,
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Crushes a single enemy with overwhelming magical force, dealing 500 magical damage.",
+            "icon": "Icons/abilities/smash.png"
+        }
+    ],
+    "passive": {
+        "id": "emperor_might",
+        "name": "Emperor's Might",
+        "description": "Starts with triple health, making him an imposing opponent.",
+        "effects": {
+            "tripleHealth": true
+        }
+    }
+} 

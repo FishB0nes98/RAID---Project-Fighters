@@ -1,0 +1,93 @@
+{
+    "id": "schoolgirl_kokoro",
+    "name": "Schoolgirl Kokoro",
+    "image": "Loading Screen/Schoolgirl Kokoro.png",
+    "stats": {
+        "physicalDamage": 30,
+        "magicalDamage": 150,
+        "armor": 6,
+        "magicalShield": 7,
+        "hp": 6500,
+        "hpPerTurn": 0,
+        "mana": 3000,
+        "manaPerTurn": 50,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.0,
+        "critDamage": 1.5,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "lesser_heal",
+            "name": "Lesser Heal",
+            "type": "healing",
+            "manaCost": 55,
+            "cooldown": 1,
+            "targetType": "ally_or_self",
+            "description": "Heals the selected ally or herself for 410HP.",
+            "icon": "Icons/abilities/lesser_heal.jpeg",
+            "effects": {
+                "healing": {
+                    "fixedAmount": 410
+                }
+            }
+        },
+        {
+            "id": "silencing_ring",
+            "name": "Silencing Ring",
+            "type": "debuff",
+            "manaCost": 90,
+            "cooldown": 15,
+            "targetType": "enemy",
+            "description": "Places a debuff on the target for 6 turns, reducing their damage output by 30%.",
+            "icon": "Icons/abilities/silencing_ring.jfif",
+            "effects": {
+                "debuff": {
+                    "type": "damage_multiplier",
+                    "value": 0.7,
+                    "duration": 6
+                }
+            }
+        },
+        {
+            "id": "circle_heal",
+            "name": "Circle Heal",
+            "type": "healing",
+            "manaCost": 125,
+            "cooldown": 9,
+            "targetType": "self",
+            "description": "Heals all allies for 250HP + 150% of Magic Damage.",
+            "icon": "Icons/abilities/circle_heal.jfif",
+            "effects": {
+                "healing": {
+                    "fixedAmount": 250,
+                    "magicalDamagePercent": 1.5
+                }
+            }
+        },
+        {
+            "id": "protective_aura",
+            "name": "Protective Aura",
+            "type": "buff",
+            "manaCost": 155,
+            "cooldown": 20,
+            "targetType": "self",
+            "description": "Gives 15% Increased armor to all allies and increase their healing power by 35% for 7 turns.",
+            "icon": "Icons/abilities/protective_aura.jfif",
+            "effects": {
+                "buff": {
+                    "armor_percent": 0.15,
+                    "healing_power": 0.35,
+                    "duration": 7
+                }
+            }
+        }
+    ],
+    "passive": {
+        "id": "healing_feedback",
+        "name": "Healing Feedback",
+        "description": "Using an ability restores 410HP back to yourself.",
+        "icon": "Icons/passive_kokoro.png"
+    }
+} 

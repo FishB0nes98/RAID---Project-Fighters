@@ -1,0 +1,46 @@
+{
+    "id": "boss_stage",
+    "name": "Emperor's Arena",
+    "description": "Face the mighty Shao Kahn in his own arena. His power is unrivaled.",
+    "difficulty": 5,
+    "backgroundImage": "",
+    "enemies": [
+        {
+            "characterId": "shao_kahn_boss",
+            "modifications": {
+                "stats": {
+                    "hp": 29457,
+                    "physicalDamage": 0,
+                    "magicalDamage": 0,
+                    "armor": 0,
+                    "magicalShield": 0
+                }
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "gold",
+            "value": 1000,
+            "chance": 1.0
+        },
+        {
+            "type": "experience",
+            "value": 500,
+            "chance": 1.0
+        },
+        {
+            "type": "item",
+            "value": "legendary_item",
+            "chance": 0.5
+        }
+    ],
+    "maxTurns": 30,
+    "victoryConditions": [
+        "defeat_all_enemies"
+    ],
+    "defeatConditions": [
+        "all_player_characters_defeated",
+        "max_turns_reached"
+    ]
+} 

@@ -1,0 +1,35 @@
+{
+  "id": "5v5_blazing_school_day",
+  "name": "5v5 - Blazing School Day",
+  "description": "A full-scale infernal assault on the school! Gather your best team of 5 School characters to face the combined might of the Blazing School Day bosses.",
+  "difficulty": 9,
+  "objectives": {
+    "winConditions": [
+      { "type": "allEnemiesDefeated" }
+    ]
+  },
+  "modifiers": [
+    { 
+      "id": "weaklings",
+      "name": "Weaklings",
+      "description": "AI characters deal 25% less damage",
+      "effect": {
+        "type": "ai_damage_reduction",
+        "value": 0.25
+      }
+    }
+  ],
+  "enemies": [
+    { "characterId": "infernal_astaroth" },
+    { "characterId": "infernal_raiden" },
+    { "characterId": "infernal_ibuki" },
+    { "characterId": "infernal_scorpion" },
+    { "characterId": "infernal_birdie" }
+  ],
+  "rewards": [
+    { "type": "gold", "value": 500 },
+    { "type": "xp", "value": 300 }
+  ],
+  "backgroundImage": "images/stages/burning_school_gym.png",
+  "backgroundMusic": "sounds/burning_school_gym_bgm.mp3"
+} 

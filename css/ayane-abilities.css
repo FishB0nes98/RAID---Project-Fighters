@@ -1,0 +1,365 @@
+/* Ayane Abilities and VFX CSS */
+
+/* Custom log message styling */
+.battle-log .combo {
+    color: #ff00aa !important;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 0, 170, 0.5);
+    font-size: 1.2em;
+    padding: 2px 5px;
+    background-color: rgba(255, 0, 170, 0.1);
+    border-radius: 3px;
+    border-left: 3px solid #ff00aa;
+    animation: comboHighlight 1s ease-in-out;
+}
+
+@keyframes comboHighlight {
+    0% { background-color: rgba(255, 0, 170, 0.3); }
+    100% { background-color: rgba(255, 0, 170, 0.1); }
+}
+
+/* Teleport Blade VFX */
+.teleport-out {
+    animation: teleportFadeOut 0.4s forwards;
+}
+
+@keyframes teleportFadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.2;
+        transform: scale(0.8);
+    }
+}
+
+.teleport-afterimage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    filter: hue-rotate(180deg) contrast(1.2) brightness(1.5);
+    z-index: 1;
+    animation: afterimageEffect 1s forwards;
+}
+
+@keyframes afterimageEffect {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+.teleport-in-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(128, 0, 255, 0.8) 0%, rgba(128, 0, 255, 0) 70%);
+    z-index: 2;
+    animation: teleportIn 0.5s forwards;
+}
+
+@keyframes teleportIn {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.teleport-blade-slash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%);
+    z-index: 3;
+    animation: bladeSlash 0.3s forwards;
+}
+
+@keyframes bladeSlash {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-45deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5) rotate(45deg);
+    }
+}
+
+/* Combo Effect */
+.combo-trigger-vfx {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 0, 128, 0.8);
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 100;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+    animation: comboAnimation 1.2s forwards;
+}
+
+@keyframes comboAnimation {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0);
+    }
+    10% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    20% {
+        transform: translateX(-50%) scale(1);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+/* Passive Effect VFX */
+.ayane-passive-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    animation: passiveGlow 1s forwards;
+}
+
+.ayane-passive-symbol {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: #ffcc00;
+    text-shadow: 0 0 10px #ffcc00;
+    animation: symbolFloat 1s ease-out;
+}
+
+@keyframes passiveGlow {
+    0% {
+        box-shadow: inset 0 0 0 rgba(255, 204, 0, 0);
+    }
+    50% {
+        box-shadow: inset 0 0 20px rgba(255, 204, 0, 0.5);
+    }
+    100% {
+        box-shadow: inset 0 0 0 rgba(255, 204, 0, 0);
+    }
+}
+
+@keyframes symbolFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+/* Stealth Effect */
+.stealth-animation {
+    animation: stealthPulse 2s forwards;
+}
+
+@keyframes stealthPulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0.4;
+    }
+}
+
+.stealth-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.1),
+        rgba(0, 0, 0, 0.1) 10px,
+        rgba(50, 50, 50, 0.2) 10px,
+        rgba(50, 50, 50, 0.2) 20px
+    );
+    z-index: 5;
+    animation: stealthAppear 1.2s forwards;
+    pointer-events: none;
+}
+
+@keyframes stealthAppear {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* Apply this class to characters that have the stealth buff active */
+.character-stealthed {
+    opacity: 0.4;
+    filter: grayscale(50%) blur(1px);
+    pointer-events: none; /* Prevents clicking on stealthed character */
+}
+
+/* But make sure our UI elements are still clickable */
+.character-stealthed .ability,
+.character-stealthed .hp-bar,
+.character-stealthed .mana-bar {
+    pointer-events: auto;
+}
+
+/* Butterfly Trail Effect */
+.butterfly-trail-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    animation: butterflyGlow 2s forwards;
+}
+
+@keyframes butterflyGlow {
+    0% {
+        box-shadow: inset 0 0 0 rgba(255, 105, 180, 0);
+    }
+    30% {
+        box-shadow: inset 0 0 25px rgba(255, 105, 180, 0.5);
+    }
+    100% {
+        box-shadow: inset 0 0 0 rgba(255, 105, 180, 0);
+    }
+}
+
+.butterfly-particle {
+    position: absolute;
+    width: 15px;
+    height: 12px;
+    background: radial-gradient(circle at 30% 30%, hotpink 0%, hotpink 30%, transparent 70%);
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L4,11l8,9l8-9L12,2z M12,17.2L6.8,11L12,4.8L17.2,11L12,17.2z"/></svg>');
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L4,11l8,9l8-9L12,2z M12,17.2L6.8,11L12,4.8L17.2,11L12,17.2z"/></svg>');
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    animation: butterflyFloat 2s ease-in-out;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 3px rgba(255, 105, 180, 0.7));
+}
+
+.butterfly-particle:nth-child(1) {
+    top: 20%;
+    left: 50%;
+    animation-duration: 1.8s;
+}
+
+.butterfly-particle:nth-child(2) {
+    top: 30%;
+    left: 20%;
+    animation-duration: 2.2s;
+}
+
+.butterfly-particle:nth-child(3) {
+    top: 50%;
+    left: 70%;
+    animation-duration: 1.6s;
+}
+
+.butterfly-particle:nth-child(4) {
+    top: 70%;
+    left: 40%;
+    animation-duration: 2.4s;
+}
+
+.butterfly-particle:nth-child(5) {
+    top: 40%;
+    left: 80%;
+    animation-duration: 2s;
+}
+
+@keyframes butterflyFloat {
+    0% {
+        opacity: 0;
+        transform: translate(0, 10px) rotate(0deg) scale(0.8);
+    }
+    10% {
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-15px, -20px) rotate(15deg) scale(1.2);
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-30px, -40px) rotate(30deg) scale(0.6);
+    }
+}
+
+/* Cooldown reduction visual indicator */
+.cooldown-reduced {
+    animation: cooldownPulse 1s ease-in-out;
+}
+
+@keyframes cooldownPulse {
+    0% {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    50% {
+        background-color: rgba(255, 105, 180, 0.7);
+    }
+    100% {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+} 

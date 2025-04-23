@@ -1,0 +1,31 @@
+{
+  "id": "scorched_cafeteria",
+  "name": "Scorched Cafeteria",
+  "description": "The cafeteria has been transformed into a hellish kitchen. Be careful of explosive ovens and flame jets!",
+  "difficulty": 4,
+  "enemies": [
+    {
+      "characterId": "chef_pyronis",
+      "modifications": null
+    },
+    {
+      "characterId": "fire_elemental",
+      "modifications": null
+    },
+    {
+      "characterId": "living_flame",
+      "modifications": null
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "amount": 150
+    },
+    {
+      "type": "experience",
+      "amount": 75
+    }
+  ],
+  "backgroundImage": ""
+} 

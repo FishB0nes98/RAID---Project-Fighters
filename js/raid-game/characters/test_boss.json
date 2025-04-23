@@ -1,0 +1,73 @@
+{
+    "id": "test_boss",
+    "name": "Test Boss",
+    "image": "Loading Screen/Test Boss.png",
+    "stats": {
+        "physicalDamage": 180,
+        "magicalDamage": 150,
+        "armor": 20,
+        "magicalShield": 20,
+        "hp": 12000,
+        "hpPerTurn": 150,
+        "mana": 5000,
+        "manaPerTurn": 50,
+        "lifesteal": 0.05,
+        "dodgeChance": 0.05,
+        "critChance": 0.15,
+        "critDamage": 2.0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "heavy_slam",
+            "name": "Heavy Slam",
+            "type": "damage",
+            "damageType": "physical",
+            "amount": 220,
+            "manaCost": 35,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "A powerful slam that deals 220 physical damage to a single target."
+        },
+        {
+            "id": "energy_wave",
+            "name": "Energy Wave",
+            "type": "damage",
+            "damageType": "magical",
+            "amount": 150,
+            "manaCost": 60,
+            "cooldown": 2,
+            "targetType": "all_enemies",
+            "description": "Releases a wave of energy dealing 150 magical damage to all enemies."
+        },
+        {
+            "id": "power_up",
+            "name": "Power Up",
+            "type": "buff",
+            "buffId": "power_up_buff",
+            "manaCost": 80,
+            "cooldown": 3,
+            "targetType": "self",
+            "duration": 3,
+            "description": "Increases physical and magical damage by 20% for 3 turns.",
+            "buffEffect": {
+                "statModifiers": {
+                    "physicalDamage": 0.2,
+                    "magicalDamage": 0.2
+                }
+            }
+        },
+        {
+            "id": "vampiric_strike",
+            "name": "Vampiric Strike",
+            "type": "lifesteal",
+            "damageType": "physical",
+            "amount": 180,
+            "lifestealPercent": 0.4,
+            "manaCost": 50,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "description": "A vampiric attack that deals 180 physical damage and heals for 40% of the damage dealt."
+        }
+    ]
+} 

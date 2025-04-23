@@ -1,0 +1,47 @@
+{
+  "id": "rooftop",
+  "name": "Rooftop",
+  "description": "The school rooftop offers a vantage point, but a fearsome Infernal Scorpion guards it.",
+  "difficulty": 6,
+  "objectives": {
+    "winConditions": [
+      { "type": "enemyDefeated", "targetId": "infernal_scorpion" }
+    ]
+  },
+  "stageEffects": [
+    {
+      "id": "scorching_sun",
+      "name": "Scorching Sun",
+      "description": "The intense heat slightly reduces the armor of all characters.",
+      "icon": "Icons/effects/scorching_sun.png",
+      "effect": {
+        "type": "stat_modifier_temporary",
+        "stat": "armor",
+        "value": -50,
+        "target": "all"
+      }
+    }
+  ],
+  "enemies": [
+    {
+      "characterId": "infernal_scorpion"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 350
+    },
+    {
+      "type": "xp",
+      "value": 250
+    },
+    {
+      "type": "item",
+      "itemId": "scorpion_stinger",
+      "chance": 0.25
+    }
+  ],
+  "backgroundImage": "images/stages/school_rooftop.png",
+  "backgroundMusic": "sounds/bgaudio3.mp3"
+} 

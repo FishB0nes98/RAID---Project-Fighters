@@ -1,0 +1,588 @@
+/* Enhanced styles for Infernal Ibuki abilities */
+
+/* Kunai Mastery Passive Indicator */
+.kunai-mastery-indicator {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    width: 22px;
+    height: 22px;
+    background: radial-gradient(circle, #ff6b2d 0%, #ff4500 70%);
+    border: 2px solid #ffe0c0;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 69, 0, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 3;
+    transition: transform 0.2s ease-out, background-color 0.2s;
+}
+
+.kunai-mastery-indicator .indicator-text {
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+.kunai-mastery-indicator.stack-added {
+    transform: scale(1.5);
+    background: radial-gradient(circle, #ffae76 0%, #ff6b2d 70%);
+    animation: kunai-stack-pulse 0.6s ease-out;
+}
+
+@keyframes kunai-stack-pulse {
+    0% { transform: scale(1.5); box-shadow: 0 0 6px rgba(255, 69, 0, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.6); }
+    50% { transform: scale(1.7); box-shadow: 0 0 15px rgba(255, 69, 0, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.7); }
+    100% { transform: scale(1.5); box-shadow: 0 0 6px rgba(255, 69, 0, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.6); }
+}
+
+/* Kunai Toss VFX - Enhanced */
+.kunai-toss-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.kunai-projectile {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-image: url('../images/icons/kunai_toss_placeholder.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    left: var(--start-x);
+    top: var(--start-y);
+    transform: translate(-50%, -50%);
+    animation: kunai-fly 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    filter: drop-shadow(0 0 5px rgba(255, 120, 50, 0.8));
+}
+
+/* Add trail particles to the kunai */
+.kunai-projectile::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 150, 50, 0.4), transparent);
+    transform: translate(-50%, -50%) rotate(45deg);
+    animation: kunai-trail 0.5s linear infinite;
+    z-index: -1;
+}
+
+@keyframes kunai-trail {
+    0% { opacity: 0.8; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(1.5); }
+}
+
+@keyframes kunai-fly {
+    0% {
+        left: var(--start-x);
+        top: var(--start-y);
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        left: var(--end-x);
+        top: var(--end-y);
+        transform: translate(-50%, -50%) rotate(720deg);
+    }
+}
+
+/* Kunai Impact VFX - Enhanced */
+.kunai-impact-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Main impact circle */
+.kunai-impact-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 160, 100, 0.7) 0%, rgba(255, 69, 0, 0.5) 50%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: impact-pulse 0.5s ease-out forwards;
+}
+
+/* Impact slashes */
+.kunai-impact-vfx::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 70%;
+    background: linear-gradient(45deg, transparent 40%, #ff6347 45%, white 50%, #ff6347 55%, transparent 60%);
+    transform: translate(-50%, -50%);
+    animation: impact-slash 0.4s ease-out forwards;
+}
+
+@keyframes impact-pulse {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.8);
+    }
+}
+
+@keyframes impact-slash {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.3) rotate(45deg);
+    }
+}
+
+/* Shadow Step Styles - Enhanced */
+.character-slot.shadow-step-active .character-image,
+.character-slot.shadow-step-active .image-container {
+    opacity: 0.4;
+    filter: grayscale(0.5) blur(1px);
+    transition: opacity 0.4s, filter 0.4s;
+}
+
+/* Container for smoke particles */
+.shadow-step-smoke-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* Individual smoke particle */
+.shadow-step-smoke {
+    position: absolute;
+    bottom: 5%;
+    left: calc(var(--i) * 20%);
+    width: 35px;
+    height: 45px;
+    background: linear-gradient(to top, rgba(20, 20, 20, 0.8), rgba(60, 60, 60, 0.5), rgba(100, 100, 100, 0.2));
+    border-radius: 40% 60% 60% 40% / 40% 60% 60% 40%;
+    filter: blur(8px);
+    opacity: 0;
+    animation: smoke-rise 4s infinite ease-in-out;
+    animation-delay: calc(var(--i) * 0.4s);
+    transform-origin: 50% 100%;
+}
+
+/* Add some variation to smoke particles */
+.shadow-step-smoke:nth-child(even) {
+    width: 40px;
+    height: 50px;
+    border-radius: 60% 40% 40% 60% / 60% 40% 40% 60%;
+    animation-duration: 4.5s;
+}
+
+@keyframes smoke-rise {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.8) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(-70px) translateX(calc(var(--i) * 5px - 10px)) scale(1.3) rotate(calc(var(--i) * 10deg - 20deg));
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(-120px) translateX(calc(var(--i) * 10px - 20px)) scale(0.6) rotate(calc(var(--i) * 20deg - 40deg));
+        opacity: 0;
+    }
+}
+
+/* Shadow Step buff icon */
+.status-indicator[data-effect-id="shadow_step_buff"] {
+    background-color: #2a2a2a;
+    background-image: radial-gradient(circle, #444444 10%, #222222 90%);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    animation: shadow-step-pulse 2s infinite alternate;
+}
+
+@keyframes shadow-step-pulse {
+    from { box-shadow: 0 0 5px rgba(30, 30, 30, 0.7); }
+    to { box-shadow: 0 0 10px rgba(100, 100, 100, 0.8); }
+}
+
+/* Dashing Strike Styles - Enhanced */
+.ibuki-dashing {
+    transition: transform var(--ibuki-dash-duration, 400ms) cubic-bezier(0.05, 0.7, 0.1, 1);
+    transform: translate(var(--ibuki-dash-x, 0), var(--ibuki-dash-y, 0));
+    filter: contrast(1.2);
+}
+
+/* Speed lines during dash */
+.ibuki-dashing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        rgba(255, 255, 255, 0.1) 5px,
+        rgba(255, 255, 255, 0.1) 10px
+    );
+    opacity: 0.7;
+    z-index: 1;
+}
+
+/* Motion blur effect */
+.ibuki-dashing .character-image {
+    filter: blur(2px) brightness(1.1);
+}
+
+/* Dashing Strike Impact VFX - Enhanced */
+.dashing-strike-impact-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: visible;
+}
+
+/* Main impact circle */
+.dashing-strike-impact-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(220, 20, 60, 0.6) 40%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: dash-impact-pulse 0.5s ease-out forwards;
+}
+
+/* Cross-slash effect */
+.dashing-strike-impact-vfx::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(45deg, transparent 40%, #ff3030 45%, white 50%, #ff3030 55%, transparent 60%),
+        linear-gradient(135deg, transparent 40%, #ff3030 45%, white 50%, #ff3030 55%, transparent 60%);
+    border-radius: 10%;
+    opacity: 0;
+    animation: dash-cross-slash 0.5s ease-out forwards;
+}
+
+@keyframes dash-impact-pulse {
+    0% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(0.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+@keyframes dash-cross-slash {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5) rotate(15deg);
+    }
+}
+
+/* Add new styles for shadow kunai and damage numbers */
+.kunai-shadow {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/icons/kunai_toss_placeholder.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    left: var(--start-x);
+    top: var(--start-y);
+    transform: translate(-50%, -50%);
+    filter: brightness(0.5) blur(2px) opacity(0.6);
+    animation: kunai-shadow-fly 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    animation-delay: var(--shadow-delay);
+}
+
+@keyframes kunai-shadow-fly {
+    0% {
+        left: var(--start-x);
+        top: var(--start-y);
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.9);
+    }
+    100% {
+        left: var(--end-x);
+        top: var(--end-y);
+        transform: translate(-50%, -50%) rotate(720deg) scale(0.9);
+    }
+}
+
+/* Kunai impact particles */
+.kunai-impact-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: #ff6347;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: impact-particle-fly 0.6s ease-out forwards;
+    transform-origin: center center;
+}
+
+@keyframes impact-particle-fly {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateX(5px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateX(35px);
+        opacity: 0;
+    }
+}
+
+/* Damage number animation */
+.damage-number {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(calc(-50% + var(--offset-x, 0)), 0);
+    color: white;
+    font-weight: bold;
+    font-size: 22px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    z-index: 100;
+    pointer-events: none;
+    animation: damage-float 1.5s ease-out forwards;
+    opacity: 0;
+}
+
+.damage-number.physical {
+    color: #ff6347; /* Orange-red for physical damage */
+}
+
+.damage-number.critical {
+    color: #ff0000; /* Red for critical hits */
+    font-size: 26px;
+    text-shadow: 1px 1px 4px rgba(255, 0, 0, 0.5);
+    animation-name: damage-float-critical;
+}
+
+@keyframes damage-float {
+    0% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), 0) scale(0.7);
+        opacity: 0;
+    }
+    10% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), 0) scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), -20px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), -60px) scale(0.7);
+        opacity: 0;
+    }
+}
+
+@keyframes damage-float-critical {
+    0% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), 0) scale(0.7);
+        opacity: 0;
+    }
+    10% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), 0) scale(1.5);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), -30px) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(calc(-50% + var(--offset-x, 0)), -80px) scale(0.7);
+        opacity: 0;
+    }
+}
+
+/* Pre-dash effect */
+.pre-dash-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 2px rgba(220, 20, 60, 0.1);
+    pointer-events: none;
+    z-index: 4;
+    animation: pre-dash-pulse 0.3s ease-in forwards;
+}
+
+@keyframes pre-dash-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+        box-shadow: 0 0 0 2px rgba(220, 20, 60, 0.1);
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+        box-shadow: 0 0 0 2px rgba(220, 20, 60, 0.8), 0 0 20px rgba(220, 20, 60, 0.5);
+    }
+}
+
+/* Dash trail effects */
+.ibuki-dash-trail-container {
+    position: absolute;
+    pointer-events: none;
+    z-index: 40;
+}
+
+.ibuki-dash-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: inherit;
+    opacity: var(--opacity-start, 0.4);
+    filter: blur(2px) brightness(1.1) contrast(0.8);
+    animation: dash-trail-fade 0.4s ease-out forwards;
+    animation-delay: var(--trail-delay, 0s);
+}
+
+@keyframes dash-trail-fade {
+    0% {
+        opacity: var(--opacity-start, 0.4);
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+/* Dash impact particles */
+.dash-impact-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: #ff3030;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: dash-particle-fly 0.8s ease-out forwards;
+    transform-origin: center center;
+}
+
+@keyframes dash-particle-fly {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateX(5px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateX(50px);
+        opacity: 0;
+    }
+}
+
+/* Chain indicator for dashing strike chaining */
+.dash-chain-indicator {
+    position: fixed;
+    height: 3px;
+    background: linear-gradient(to right, transparent, rgba(220, 20, 60, 0.8) 20%, rgba(255, 255, 255, 0.9) 50%, rgba(220, 20, 60, 0.8) 80%, transparent);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: scaleX(0.7);
+    transform-origin: left center;
+}
+
+.dash-chain-indicator.active {
+    animation: chain-indicator-pulse 0.4s ease-in-out;
+}
+
+@keyframes chain-indicator-pulse {
+    0% {
+        opacity: 0;
+        transform: scaleX(0.7);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
+}
+
+/* Light screen shake animation */
+.light-screen-shake {
+    animation: light-screen-shake-effect 0.3s ease-in-out;
+}
+
+@keyframes light-screen-shake-effect {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
+} 

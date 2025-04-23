@@ -1,0 +1,97 @@
+{
+    "id": "infernal_raiden",
+    "name": "Infernal Raiden",
+    "image": "Loading Screen/Infernal Raiden.png",
+    "stats": {
+        "physicalDamage": 40,
+        "magicalDamage": 500,
+        "armor": 9,
+        "magicalShield": 20,
+        "hp": 11500,
+        "hpPerTurn": 0,
+        "mana": 6000,
+        "manaPerTurn": 120,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.04,
+        "critDamage": 2,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "blazing_lightning_ball",
+            "name": "Blazing Lightning Ball",
+            "type": "debuff",
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Places a stackable Blazing Lightning Ball mark on the target for 10 turns. Raiden's damaging abilities deal doubled damage per stack.",
+            "icon": "Icons/abilities/blazing_lightning_ball.png",
+            "doesNotEndTurn": true
+        },
+        {
+            "id": "thunder_from_the_sky",
+            "name": "Thunder From The Sky",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 100% Magic Damage, multiplied by 2x for each Blazing Lightning Ball stack on the target. Stuns the target for 2 turns.",
+            "icon": "Icons/abilities/thunder_from_the_sky.webp",
+            "effect": {
+                "functionName": "thunderFromTheSkyEffect",
+                "script": "js/raid-game/abilities/infernal_raiden_abilities.js"
+            },
+            "stunEffect": {
+                "debuffId": "stun",
+                "name": "Stunned",
+                "duration": 2,
+                "chance": 1.0,
+                "icon": "Icons/effects/stun.png",
+                "effects": {
+                    "cantAct": true
+                }
+            }
+        },
+        {
+            "id": "thunderstruck_infernal",
+            "name": "Thunderstruck (Infernal Version)",
+            "type": "custom",
+            "manaCost": 100,
+            "cooldown": 1,
+            "targetType": "all_enemies",
+            "description": "Deals 150% magical damage to all targets.",
+            "icon": "Icons/abilities/thunderstruck_infernal.webp",
+            "effect": {
+                "functionName": "thunderstruckInfernalEffect",
+                "script": "js/raid-game/abilities/infernal_raiden_abilities.js"
+            }
+        },
+        {
+            "id": "teleportation",
+            "name": "Teleportation",
+            "type": "buff",
+            "manaCost": 100,
+            "cooldown": 10,
+            "targetType": "self",
+            "description": "Increases Raiden's dodge chance by 75% and crit chance by 50% for 3 turns.",
+            "icon": "Icons/abilities/teleportation.png",
+            "buffEffect": {
+                "buffId": "teleportation_buff",
+                "name": "Teleportation Phase",
+                "duration": 3,
+                "statModifiers": {
+                    "dodgeChance": 0.75,
+                    "critChance": 0.50
+                },
+                "description": "Increased dodge and critical hit chance."
+            }
+        }
+    ],
+    "passive": {
+        "id": "storm_conduit",
+        "name": "Storm Conduit",
+        "description": "Gains 45 Magic Damage permanently whenever an ability is used.",
+        "icon": "images/icons/passive_storm_conduit_placeholder.png"
+    }
+} 

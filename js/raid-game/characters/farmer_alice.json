@@ -1,0 +1,112 @@
+{
+    "id": "farmer_alice",
+    "name": "Farmer Alice",
+    "image": "Loading Screen/Farmer Alice.png",
+    "stats": {
+        "physicalDamage": 120,
+        "magicalDamage": 0,
+        "armor": 12,
+        "magicalShield": 20,
+        "hp": 9340,
+        "hpPerTurn": 0,
+        "mana": 1455,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.00,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "pounce",
+            "name": "Pounce",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 50,
+            "cooldown": 4,
+            "targetType": "enemy",
+            "description": "Deals 50% AD damage and has a 65% chance to stun the target for 4 turns.",
+            "amount": 0.5,
+            "icon": "Icons/abilities/pounce.jpeg",
+            "debuffEffect": {
+                "debuffId": "stun",
+                "name": "Stunned",
+                "duration": 4,
+                "chance": 0.65,
+                "effects": {
+                    "cantAct": true
+                }
+            }
+        },
+        {
+            "id": "thick_fur",
+            "name": "Thick Fur",
+            "type": "buff",
+            "manaCost": 100,
+            "cooldown": 18,
+            "targetType": "self",
+            "description": "Increases Armor and Magic Shield by 20% for 10 turns.",
+            "icon": "Icons/abilities/thick_fur.jpeg",
+            "buffEffect": {
+                "buffId": "thick_fur_buff",
+                "name": "Thick Fur",
+                "duration": 10,
+                "effects": {
+                    "armorBoost": "20%",
+                    "magicShieldBoost": "20%"
+                }
+            }
+        },
+        {
+            "id": "bunny_bounce",
+            "name": "Bunny Bounce",
+            "type": "utility",
+            "manaCost": 100,
+            "cooldown": 8,
+            "targetType": "any",
+            "description": "If used on an ally: Gives 50% of Magic Shield to that target. If used on an enemy: Deals 600% of Magic Shield as physical damage.",
+            "icon": "Icons/abilities/bunny_bounce.webp",
+            "effects": {
+                "allyEffect": {
+                    "buffId": "bunny_bounce_shield_buff",
+                    "name": "Bunny Shield",
+                    "duration": 5,
+                    "magicShieldPercent": 0.5
+                },
+                "enemyEffect": {
+                    "damage": {
+                        "type": "physical",
+                        "magicShieldMultiplier": 6
+                    }
+                }
+            }
+        },
+        {
+            "id": "carrot_power_up",
+            "name": "Carrot Power Up",
+            "type": "healing",
+            "manaCost": 155,
+            "cooldown": 15,
+            "targetType": "ally",
+            "description": "Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target's active cooldowns by 2 turns. Cooldown reduces by 1 turn when Alice takes damage.",
+            "icon": "Icons/abilities/carrot_power_up.webp",
+            "effects": {
+                "healing": {
+                    "missingHealthPercent": 0.21,
+                    "minimumPercent": 0.02
+                },
+                "cooldownReduction": 2,
+                "specialCooldown": {
+                    "reduceOnDamage": 1
+                }
+            }
+        }
+    ],
+    "passive": {
+        "id": "magical_resistance",
+        "name": "Magical Resistance",
+        "description": "When hit by magical damage, permanently gains 1 Magic Shield.",
+        "icon": "Icons/passive_farmer_alice.png"
+    }
+} 

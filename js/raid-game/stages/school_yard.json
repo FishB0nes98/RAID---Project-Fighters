@@ -1,0 +1,15 @@
+{
+    "id": "school_yard",
+    "name": "School Yard",
+    "description": "The school yard crackles with heat. Five Blazing Elementals block the path!",
+    "difficulty": 4,
+    "enemies": [
+        { "characterId": "blazing_elemental" },
+        { "characterId": "blazing_elemental" },
+        { "characterId": "blazing_elemental" },
+        { "characterId": "blazing_elemental" },
+        { "characterId": "blazing_elemental" }
+    ],
+    "backgroundImage": "images/stages/school_yard.png",
+    "backgroundMusic": "sounds/bgaudiofire.mp3"
+} 

@@ -1,0 +1,68 @@
+{
+    "id": "schoolgirl_ayane",
+    "name": "Schoolgirl Ayane",
+    "image": "Loading Screen/Schoolgirl Ayane.png",
+    "stats": {
+        "physicalDamage": 250,
+        "magicalDamage": 40,
+        "armor": 10,
+        "magicalShield": 5,
+        "hp": 7800,
+        "hpPerTurn": 0,
+        "mana": 1900,
+        "manaPerTurn": 20,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.00,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "schoolgirl_ayane_q",
+            "name": "Butterfly Dagger",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 425 (+55% Physical Damage). 40% chance to gain 50% dodge chance for 1 turn.",
+            "icon": "Icons/abilities/butterfly_dagger.webp"
+        },
+        {
+            "id": "schoolgirl_ayane_w",
+            "name": "Butterfly Trail (Schoolgirl Version)",
+            "type": "buff",
+            "manaCost": 85,
+            "cooldown": 10,
+            "targetType": "all_allies",
+            "description": "Gives ALL allies a buff increasing Physical Damage and Magical Damage by 20% for 4 turns.",
+            "icon": "Icons/abilities/butterfly_trail_schoolgirl.webp"
+        },
+        {
+            "id": "schoolgirl_ayane_e",
+            "name": "Quick Reflexes",
+            "type": "buff",
+            "manaCost": 100,
+            "cooldown": 12,
+            "targetType": "self",
+            "description": "Gains 100% dodge chance and increases Physical Damage by 250% of total Physical Damage for 2 turns.",
+            "icon": "Icons/abilities/quick_reflexes.webp"
+        },
+        {
+            "id": "schoolgirl_ayane_r",
+            "name": "Execute Attack",
+            "manaCost": 200,
+            "cooldown": 20,
+            "targetType": "enemy",
+            "description": "Deals 250% Physical Damage. If the target is below 25% HP, deals 600% Physical Damage instead. Cooldown resets if this ability defeats the target.",
+            "icon": "Icons/abilities/execute_attack_schoolgirl.webp"
+        }
+    ],
+    "passive": {
+        "id": "schoolgirl_ayane_passive",
+        "name": "Combat Reflexes",
+        "description": "Whenever Ayane dodges an attack, she gains +200 Physical Damage for 5 turns.",
+        "icon": "Icons/abilities/passive_schoolgirl_ayane.webp"
+    }
+} 

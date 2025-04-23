@@ -1,0 +1,36 @@
+{
+  "id": "molten_library",
+  "name": "Molten Library",
+  "description": "Ancient knowledge burns in magical flames. The books have come alive and seek vengeance!",
+  "difficulty": 5,
+  "enemies": [
+    {
+      "characterId": "ignited_grimoire",
+      "modifications": null
+    },
+    {
+      "characterId": "burning_page",
+      "modifications": null
+    },
+    {
+      "characterId": "flame_archivist",
+      "modifications": null
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "amount": 200
+    },
+    {
+      "type": "experience",
+      "amount": 100
+    },
+    {
+      "type": "item",
+      "name": "Tome of Fire",
+      "rarity": "rare"
+    }
+  ],
+  "backgroundImage": ""
+} 

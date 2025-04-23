@@ -1,0 +1,1988 @@
+// Game Manager for Roguelike Raid Game
+class GameManager {
+    constructor() {
+        this.isGameRunning = false;
+        this.gameState = {
+            currentTurn: 1,
+            phase: 'player', // 'player' or 'ai'
+            playerCharacters: [],
+            aiCharacters: [],
+            selectedCharacter: null,
+            selectedAbility: null
+        };
+        this.actedCharacters = [];
+        this.uiManager = new UIManager(this);
+        this.aiManager = new AIManager(this);
+        
+        // Initialize preventTurnEnd flag
+        this.preventTurnEndFlag = false;
+        
+        // Add a special window function to force ability reuse for debugging
+        window.forceAyaneAbilityReuse = () => {
+            if (this.gameState.selectedCharacter && 
+                this.gameState.selectedCharacter.id === 'ayane' &&
+                this.gameState.selectedAbility && 
+                this.gameState.selectedAbility.id === 'ayane_q') {
+                
+                console.log("[DEBUG] Forcing Ayane ability reuse via debug function");
+                
+                // Force ability cooldown reset
+                this.gameState.selectedAbility.currentCooldown = 0;
+                
+                // Ensure turn doesn't end
+                this.preventTurnEndFlag = true;
+                
+                // Remove character from actedCharacters if present
+                const index = this.actedCharacters.indexOf(this.gameState.selectedCharacter.id);
+                if (index > -1) {
+                    this.actedCharacters.splice(index, 1);
+                }
+                
+                // Unmark character as acted in UI
+                this.uiManager.markCharacterAsActive(this.gameState.selectedCharacter);
+                
+                // Add message to log
+                if (this.uiManager) {
+                    this.uiManager.addLogEntry(`Debug: ${this.gameState.selectedCharacter.name} can act again!`, 'combo');
+                }
+                
+                return true;
+            }
+            return false;
+        };
+        
+        // Debug info
+        console.log("[DEBUG] GameManager initialized with preventTurnEndFlag:", this.preventTurnEndFlag);
+    }
+
+    // Method to prevent turn from ending (for abilities like Ayane's Teleport Blade)
+    preventTurnEnd() {
+        console.log("[DEBUG PREVENTTURNEND] Called preventTurnEnd() method");
+        console.log("[DEBUG PREVENTTURNEND] Selected character:", this.selectedCharacter ? this.selectedCharacter.name : "none");
+        
+        // Set the flag directly
+        this.preventTurnEndFlag = true;
+        
+        // Remove from acted characters if they were just added
+        if (this.selectedCharacter) {
+            const index = this.actedCharacters.indexOf(this.selectedCharacter.id);
+            if (index > -1) {
+                console.log("[DEBUG PREVENTTURNEND] Removing character from actedCharacters");
+                this.actedCharacters.splice(index, 1);
+            }
+            
+            // Update the end turn button
+            this.uiManager.updateEndTurnButton();
+            
+            // If this is Ayane's Teleport Blade, reset its cooldown directly here
+            if (this.selectedCharacter.id === 'ayane' && this.selectedAbility && this.selectedAbility.id === 'ayane_q') {
+                console.log("[DEBUG PREVENTTURNEND] Resetting cooldown for Ayane's Q ability");
+                this.selectedAbility.currentCooldown = 0;
+                
+                // Update UI
+                this.uiManager.updateCharacterUI(this.selectedCharacter);
+                
+                // Add message to battle log
+                this.addLogEntry(`${this.selectedCharacter.name}'s Teleport Blade is reset!`, 'combo');
+            }
+        }
+    }
+    
+    // Also add a method to reset the flag at the end of the ability
+    setPreventTurnEnd(value) {
+        this.preventTurnEndFlag = value;
+    }
+
+    // Initialize the game manager
+    async initialize() {
+        try {
+            // Create and initialize stage manager
+            this.stageManager = stageManager;
+            await this.stageManager.initialize();
+            
+            // Create AI manager
+            this.aiManager = new AIManager(this);
+            
+            // Create UI manager
+            this.uiManager = new UIManager(this);
+            this.uiManager.initialize(false); // Only initialize basic UI components
+            
+            // Set callback for stage loading
+            this.stageManager.onStageLoaded = (stage, gameState) => {
+                this.onStageLoaded(stage, gameState);
+            };
+            
+            return true;
+        } catch (error) {
+            console.error('Failed to initialize game manager:', error);
+            return false;
+        }
+    }
+
+    // Called when a stage is loaded
+    onStageLoaded(stage, gameState) {
+        console.log('Stage loaded:', stage.name);
+        this.gameState = gameState;
+        
+        // Initialize actedCharacters array
+        this.actedCharacters = [];
+        
+        // Update UI
+        this.uiManager.renderCharacters(gameState.playerCharacters, gameState.aiCharacters);
+        this.uiManager.updateTurnCounter(gameState.turn);
+        this.uiManager.updatePhase(gameState.phase);
+        this.uiManager.clearBattleLog();
+        this.uiManager.addLogEntry(`Battle started in ${stage.name}!`, 'system');
+        this.uiManager.addLogEntry(`Player's turn`, 'player-turn');
+        
+        // Now that game state is loaded, set up event handlers
+        this.uiManager.setupEventHandlers();
+        
+        // Start the game
+        this.isGameRunning = true;
+    }
+
+    // Start a new game with a specific stage
+    async startGame(stageId) {
+        try {
+            // Make sure the stage manager is fully initialized
+            if (!this.stageManager.availableStages || this.stageManager.availableStages.length === 0) {
+                console.log("Stage manager not fully initialized, reinitializing...");
+                await this.stageManager.loadStageRegistry();
+            }
+            
+            // Load the stage
+            await this.stageManager.loadStage(stageId);
+            return true;
+        } catch (error) {
+            console.error('Failed to start game:', error);
+            return false;
+        }
+    }
+
+    // Handle player selecting a character
+    selectCharacter(character) {
+        // Can only select player characters during player phase
+        if (this.gameState.phase !== 'player' || character.isAI || !this.isGameRunning) {
+            return false;
+        }
+        
+        // Check if character has already acted this turn
+        if (this.actedCharacters.includes(character.id)) {
+            this.uiManager.addLogEntry(`${character.name} has already acted this turn.`);
+            return false;
+        }
+        
+        // Check if character is stunned
+        if (character.isStunned()) {
+            this.uiManager.addLogEntry(`${character.name} is stunned and cannot act this turn.`);
+            return false;
+        }
+        
+        // Deselect previously selected characters
+        this.gameState.selectedCharacter = character;
+        this.gameState.selectedAbility = null;
+        
+        // Update UI
+        this.uiManager.highlightSelectedCharacter(character);
+        this.uiManager.showCharacterAbilities(character);
+        
+        this.uiManager.addLogEntry(`Selected ${character.name}`);
+        
+        return true;
+    }
+
+    // Handle player selecting an ability
+    selectAbility(character, abilityIndex) {
+        // Make sure the character is selected
+        if (this.gameState.selectedCharacter !== character || !this.isGameRunning) {
+            return false;
+        }
+        
+        const ability = character.abilities[abilityIndex];
+        if (!ability) {
+            return false;
+        }
+        
+        // Check if ability is on cooldown
+        if (ability.currentCooldown > 0) {
+            this.uiManager.addLogEntry(`${ability.name} is on cooldown for ${ability.currentCooldown} more turns.`);
+            return false;
+        }
+        
+        this.gameState.selectedAbility = ability;
+        
+        // Update UI
+        this.uiManager.highlightSelectedAbility(abilityIndex);
+        
+        // Show valid targets based on ability type
+        this.uiManager.showValidTargets(ability.targetType);
+        
+        this.uiManager.addLogEntry(`Selected ability: ${ability.name}`);
+        
+        // No auto-selection of targets - this has been removed
+        
+        return true;
+    }
+
+    // Auto-select the best ability for the currently selected character
+    autoSelectAbility() {
+        // This method is disabled as we only want auto character selection, not auto ability selection
+        return false;
+    }
+
+    // Auto-select the best target for the currently selected ability
+    autoSelectTarget() {
+        // This method is disabled as we only want auto character selection, not auto target selection
+        return false;
+    }
+
+    // Handle player targeting a character with an ability
+    targetCharacter(target) {
+        // Make sure we have a character and ability selected
+        if (!this.gameState.selectedCharacter || !this.gameState.selectedAbility || !this.isGameRunning) {
+            this.uiManager.addLogEntry("Select a character and ability first.");
+            return false;
+        }
+        
+        const caster = this.gameState.selectedCharacter;
+        const ability = this.gameState.selectedAbility;
+        
+        // Validate targeting based on ability type
+        if (!this.validateTarget(ability.targetType, target)) {
+            this.uiManager.addLogEntry("Invalid target for this ability.");
+            return false;
+        }
+        
+        // Check if caster has enough mana
+        if (caster.stats.currentMana < ability.manaCost) {
+            this.uiManager.addLogEntry(`Not enough mana! Need ${ability.manaCost} mana.`);
+            return false;
+        }
+        
+        // Check if ability is on cooldown
+        if (ability.currentCooldown > 0) {
+            this.uiManager.addLogEntry(`Ability is on cooldown for ${ability.currentCooldown} more turns.`);
+            return false;
+        }
+        
+        let success = false;
+        
+        // Reset the preventTurnEndFlag before using the ability
+        this.preventTurnEndFlag = false;
+        
+        // Handle AOE abilities specially
+        if (ability.targetType.startsWith('all_')) {
+            // For 'all_enemies', 'all_allies', and 'all'
+            let targets = [];
+            
+            if (ability.targetType === 'all_enemies') {
+                targets = caster.isAI ? this.gameState.playerCharacters : this.gameState.aiCharacters;
+            } else if (ability.targetType === 'all_allies') {
+                targets = caster.isAI ? this.gameState.aiCharacters : this.gameState.playerCharacters;
+                // Remove caster from targets for allies (unless we want self-targeting)
+                targets = targets.filter(c => c.id !== caster.id);
+            } else if (ability.targetType === 'all') {
+                targets = [...this.gameState.playerCharacters, ...this.gameState.aiCharacters];
+                // Remove caster from targets (unless we want self-targeting)
+                targets = targets.filter(c => c.id !== caster.id);
+            }
+            
+            // Use ability on all targets
+            this.uiManager.addLogEntry(`${caster.name} uses ${ability.name}!`);
+            
+            // Apply mana cost and cooldown first
+            caster.stats.currentMana -= ability.manaCost;
+            ability.currentCooldown = ability.cooldown;
+            console.log(`Set ${ability.name} cooldown to ${ability.currentCooldown}`);
+            
+            targets.forEach(function(target) {
+                // Use the ability's effect function directly instead of calling use() again
+                // since we've already applied mana cost and cooldown
+                ability.effect(caster, target);
+                
+                // Check if target died
+                if (target.isDead()) {
+                    this.uiManager.addLogEntry(`${target.name} has been defeated!`, 'system');
+                    
+                    if (target.isAI) {
+                        // Remove from AI characters
+                        this.gameState.aiCharacters = this.gameState.aiCharacters.filter(c => c.id !== target.id);
+                        this.uiManager.removeCharacter(target);
+                    } else {
+                        // Remove from player characters
+                        this.gameState.playerCharacters = this.gameState.playerCharacters.filter(c => c.id !== target.id);
+                        this.uiManager.removeCharacter(target);
+                    }
+                }
+            }, this);
+            
+            success = true;
+        } else {
+            // Single target ability
+            success = ability.use(caster, target);
+            
+            if (success) {
+                // Check if target died
+                if (target.isDead()) {
+                    this.uiManager.addLogEntry(`${target.name} has been defeated!`, 'system');
+                    
+                    if (target.isAI) {
+                        // Remove from AI characters
+                        this.gameState.aiCharacters = this.gameState.aiCharacters.filter(c => c.id !== target.id);
+                        this.uiManager.removeCharacter(target);
+                    } else {
+                        // Remove from player characters
+                        this.gameState.playerCharacters = this.gameState.playerCharacters.filter(c => c.id !== target.id);
+                        this.uiManager.removeCharacter(target);
+                    }
+                }
+            }
+        }
+        
+        if (success) {
+            // Update UI for caster
+            this.uiManager.updateCharacterUI(caster);
+            
+            // Check if the game is over
+            if (this.checkGameOver()) {
+                return true;
+            }
+            
+            // IMPORTANT DEBUG: Log whether we should prevent turn end
+            console.log("[DEBUG MANAGER] After ability use, preventTurnEndFlag =", this.preventTurnEndFlag);
+            console.log("[DEBUG MANAGER] Ability ID:", this.gameState.selectedAbility.id);
+            
+            // Force Ayane's Q ability to prevent turn end - IMPORTANT FIX
+            if (this.gameState.selectedAbility.id === 'ayane_q') {
+                console.log("[DEBUG MANAGER] Ayane's Q ability used - special handling");
+                this.preventTurnEndFlag = true; // CRITICAL: Force the flag to true
+            }
+            
+            // Only mark character as acted if turn shouldn't be prevented
+            if (!this.preventTurnEndFlag) {
+                // Mark character as having acted this turn
+                this.actedCharacters.push(this.gameState.selectedCharacter.id);
+                this.uiManager.markCharacterAsActed(this.gameState.selectedCharacter);
+            } else {
+                // Remove character from acted list if they were just added
+                const index = this.actedCharacters.indexOf(this.gameState.selectedCharacter.id);
+                if (index > -1) {
+                    this.actedCharacters.splice(index, 1);
+                }
+                
+                // Mark character as active again
+                this.uiManager.markCharacterAsActive(this.gameState.selectedCharacter);
+                
+                // Add message to battle log
+                this.addLogEntry(`${this.gameState.selectedCharacter.name} can act again!`, 'combo');
+                
+                // Update button text
+                this.uiManager.updateEndTurnButton();
+            }
+            
+            // Reset preventTurnEndFlag after use
+            if (this.preventTurnEndFlag && this.gameState.selectedAbility.id !== 'ayane_q') {
+                this.preventTurnEndFlag = false;
+            }
+            
+            // Deselect character
+            this.gameState.selectedCharacter = null;
+            this.gameState.selectedAbility = null;
+            this.uiManager.clearSelection();
+            
+            // Check if all player characters have acted
+            if (this.allPlayerCharactersActed()) {
+                // End player turn
+                this.endPlayerTurn();
+            } else {
+                // Auto-select the next character if auto-select is enabled
+                if (this.autoSelectEnabled) {
+                    // Small delay before auto-selecting to make it more user-friendly
+                    setTimeout(() => {
+                        this.autoSelectCharacter();
+                    }, 300);
+                } else {
+                    // Prompt to select the next character
+                    this.uiManager.addLogEntry("Select your next character.", 'player-turn');
+                }
+            }
+        }
+        
+        return success;
+    }
+
+    // Validate if a target is valid for the given ability type
+    validateTarget(targetType, target) {
+        const selectedChar = this.gameState.selectedCharacter;
+        
+        switch (targetType) {
+            case 'enemy':
+                return target.isAI !== selectedChar.isAI;
+            case 'ally':
+                return target.isAI === selectedChar.isAI && target !== selectedChar;
+            case 'self':
+                return target === selectedChar;
+            case 'ally_or_self':
+                return target.isAI === selectedChar.isAI; // Both allies and self
+            case 'any':
+                return true;
+            case 'all_enemies':
+                // For AOE abilities that target all enemies
+                return target.isAI !== selectedChar.isAI;
+            case 'all_allies':
+                // For AOE abilities that target all allies
+                return target.isAI === selectedChar.isAI;
+            case 'all':
+                // For AOE abilities that target everyone
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Check if all player characters have acted
+    allPlayerCharactersActed() {
+        const playerCharacterIds = this.gameState.playerCharacters.map(c => c.id);
+        return playerCharacterIds.every(id => this.actedCharacters.includes(id));
+    }
+
+    // End player turn and start AI turn
+    endPlayerTurn() {
+        this.gameState.phase = 'ai';
+        
+        // Deselect character and ability
+        this.gameState.selectedCharacter = null;
+        this.gameState.selectedAbility = null;
+        
+        // Update UI
+        this.uiManager.clearSelection();
+        this.uiManager.updatePhase('ai');
+        this.uiManager.addLogEntry("AI's turn", 'enemy-turn');
+        
+        // Process effects and reduce cooldowns for all characters
+        this.gameState.playerCharacters.concat(this.gameState.aiCharacters).forEach(char => {
+            if (!char.isDead()) {
+                // Process buffs/debuffs
+                char.processEffects();
+                
+                // Regenerate resources
+                char.regenerateResources();
+                
+                // Reduce ability cooldowns
+                const abilitiesOnCooldown = char.abilities.filter(ability => ability.currentCooldown > 0);
+                if (abilitiesOnCooldown.length > 0) {
+                    abilitiesOnCooldown.forEach(ability => ability.reduceCooldown());
+                    this.uiManager.addLogEntry(`${char.name}'s ability cooldowns are reduced.`, 'system');
+                }
+                
+                // Update UI for each character
+                this.uiManager.updateCharacterUI(char);
+            }
+        });
+        
+        // Start AI turn with a delay
+        setTimeout(() => this.executeAITurn(), this.turnDelay);
+    }
+
+    // Execute AI turn
+    async executeAITurn() {
+        try {
+            this.gameState.phase = 'ai';
+            this.uiManager.updatePhase('ai');
+            this.addLogEntry("AI's turn", 'enemy-turn');
+            
+            // Show planning phase overlay
+            this.uiManager.showPlanningPhase(true);
+            
+            // Get list of AI characters that can act (not stunned)
+            const activeAICharacters = this.gameState.aiCharacters.filter(char => {
+                if (char.isStunned()) {
+                    this.addLogEntry(`${char.name} is stunned and cannot act this turn.`, 'enemy-turn');
+                    return false;
+                }
+                return true;
+            });
+            
+            // Plan actions for each AI character
+            const actions = [];
+            for (const aiChar of activeAICharacters) {
+                // Show planning animation for this character
+                this.uiManager.showCharacterPlanning(aiChar, true);
+                
+                // Plan the action with delay for visualization
+                await this.delay(800);
+                const action = await this.planAIAction(aiChar);
+                
+                if (action) {
+                    actions.push(action);
+                }
+                
+                // Hide planning animation when done
+                this.uiManager.showCharacterPlanning(aiChar, false);
+                
+                // Add small delay between planning for each character
+                await this.delay(300);
+            }
+            
+            // Hide planning phase overlay
+            this.uiManager.showPlanningPhase(false);
+            
+            // Execute each planned action with delay between them
+            for (const action of actions) {
+                await this.executeAction(action);
+                await this.delay(1000); // Delay between AI actions
+            }
+            
+            // End AI turn
+            this.endAITurn();
+            
+            return true;
+        } catch (error) {
+            console.error('Error in AI turn:', error);
+            this.uiManager.showPlanningPhase(false);
+            this.endAITurn();
+            return false;
+        }
+    }
+
+    // Plan an action for an AI character (but don't execute it yet)
+    async planAIAction(aiChar) {
+        // Check if character is stunned
+        if (aiChar.isStunned()) {
+            this.addLogEntry(`${aiChar.name} is stunned and cannot act this turn.`, 'enemy-turn');
+            return null; // Skip this character
+        }
+        
+        // Simple AI: pick a random ability or do a basic attack
+        
+        // First, check if the AI has any usable abilities
+        const usableAbilities = aiChar.abilities.filter(ability => {
+            return ability.currentCooldown === 0 && aiChar.stats.currentMana >= ability.manaCost;
+        });
+        
+        let action = {
+            character: aiChar,
+            type: 'attack', // Default to basic attack
+            target: null,
+            ability: null
+        };
+        
+        if (usableAbilities.length > 0 && Math.random() > 0.3) {
+            // 70% chance to use an ability if available
+            const randomAbility = usableAbilities[Math.floor(Math.random() * usableAbilities.length)];
+            
+            // Handle different ability types
+            if (randomAbility.targetType.startsWith('all_')) {
+                // AOE abilities
+                action.type = 'aoe_ability';
+                action.ability = randomAbility;
+                
+                // For AOE abilities, just need one sample target to trigger
+                if (randomAbility.targetType === 'all_enemies') {
+                    const sampleTarget = this.gameManager.stageManager.getRandomEnemy();
+                    action.target = sampleTarget;
+                } else if (randomAbility.targetType === 'all_allies') {
+                    const sampleTarget = this.gameManager.stageManager.getRandomAlly([aiChar.id]);
+                    action.target = sampleTarget;
+                } else {
+                    const sampleTarget = this.gameManager.stageManager.getRandomEnemy();
+                    action.target = sampleTarget;
+                }
+            } else {
+                // Single target abilities
+                action.type = 'ability';
+                action.ability = randomAbility;
+                
+                // Pick a target based on ability type
+                switch (randomAbility.targetType) {
+                    case 'enemy':
+                        action.target = this.gameManager.stageManager.getRandomEnemy();
+                        break;
+                    case 'ally':
+                        action.target = this.gameManager.stageManager.getRandomAlly([aiChar.id]);
+                        break;
+                    case 'ally_or_self':
+                        // Randomly choose between self and ally
+                        if (Math.random() < 0.5) {
+                            action.target = aiChar; // Self
+                        } else {
+                            const ally = this.gameManager.stageManager.getRandomAlly([aiChar.id]);
+                            action.target = ally || aiChar; // Fallback to self if no other allies
+                        }
+                        break;
+                    case 'self':
+                        action.target = aiChar;
+                        break;
+                    default:
+                        action.target = this.gameManager.stageManager.getRandomEnemy();
+                }
+            }
+        } else {
+            // Do a basic attack
+            action.target = this.gameManager.stageManager.getRandomEnemy();
+        }
+        
+        // Add a planning message (if we wanted to simulate AI "thinking")
+        // this.gameManager.addLogEntry(`${aiChar.name} is planning its action...`, 'enemy-turn');
+        
+        return action;
+    }
+    
+    // Execute a previously planned action
+    async executeAction(action) {
+        const { character, type, target, ability } = action;
+        
+        // Skip if target is no longer valid
+        if (!target || target.isDead()) {
+            this.gameManager.addLogEntry(`${character.name}'s target is no longer valid.`, 'enemy-turn');
+            return;
+        }
+        
+        if (type === 'ability' || type === 'aoe_ability') {
+            // Use ability
+            if (type === 'aoe_ability') {
+                // AOE ability
+                this.gameManager.addLogEntry(`${character.name} uses ${ability.name}!`, 'enemy-turn');
+                
+                // Apply mana cost and cooldown first
+                character.stats.currentMana -= ability.manaCost;
+                ability.currentCooldown = ability.cooldown;
+                console.log(`AI: Set ${ability.name} cooldown to ${ability.currentCooldown}`);
+                
+                // Get the targets based on ability type
+                let targets = [];
+                
+                if (ability.targetType === 'all_enemies') {
+                    targets = this.gameManager.gameState.playerCharacters;
+                } else if (ability.targetType === 'all_allies') {
+                    targets = this.gameManager.gameState.aiCharacters.filter(c => c.id !== character.id);
+                } else if (ability.targetType === 'all') {
+                    targets = [
+                        ...this.gameManager.gameState.playerCharacters,
+                        ...this.gameManager.gameState.aiCharacters.filter(c => c.id !== character.id)
+                    ];
+                }
+                
+                // Apply effect to all targets
+                for (const target of targets) {
+                    ability.effect(character, target);
+                    
+                    // Check if target died
+                    if (target.isDead()) {
+                        if (!target.isAI) {
+                            // Remove from player characters
+                            this.gameManager.gameState.playerCharacters = this.gameManager.gameState.playerCharacters.filter(c => c.id !== target.id);
+                            this.gameManager.uiManager.removeCharacter(target);
+                        }
+                    }
+                }
+                
+                // Update AI character UI
+                this.gameManager.uiManager.updateCharacterUI(character);
+            } else {
+                // Single target ability
+                ability.use(character, target);
+                
+                // Check if target died
+                if (target.isDead()) {
+                    if (!target.isAI) {
+                        // Remove from player characters
+                        this.gameManager.gameState.playerCharacters = this.gameManager.gameState.playerCharacters.filter(c => c.id !== target.id);
+                        this.gameManager.uiManager.removeCharacter(target);
+                    }
+                }
+            }
+        } else {
+            // Basic attack
+            const damage = character.stats.physicalDamage;
+            
+            // Track damage source for lifesteal VFX
+            target.isDamageSource = character;
+            
+            const result = target.applyDamage(damage, 'physical');
+            
+            // Reset damage source
+            target.isDamageSource = null;
+            
+            let message = `${character.name} attacks ${target.name} for ${result.damage} physical damage`;
+            if (result.isCritical) {
+                message += " (Critical Hit!)";
+            }
+            
+            this.gameManager.addLogEntry(message, 'enemy-turn');
+            
+            // Apply lifesteal if character has it
+            if (character.stats.lifesteal > 0) {
+                const lifestealAmount = character.applyLifesteal(result.damage);
+                if (lifestealAmount > 0) {
+                    this.gameManager.addLogEntry(`${character.name} healed for ${lifestealAmount} from lifesteal.`, 'enemy-turn');
+                }
+            }
+            
+            // Check if target died
+            if (target.isDead()) {
+                this.gameManager.addLogEntry(`${target.name} has been defeated!`, 'enemy-turn');
+                
+                // Remove from player characters
+                this.gameManager.gameState.playerCharacters = this.gameManager.gameState.playerCharacters.filter(c => c.id !== target.id);
+                this.gameManager.uiManager.removeCharacter(target);
+            }
+        }
+    }
+
+    // Helper to create a delay
+    async delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+}
+
+// UI Manager for handling game UI
+class UIManager {
+    constructor(gameManager) {
+        this.gameManager = gameManager;
+    }
+
+    // Initialize UI manager
+    initialize(setupEventHandlers = true) {
+        // Get UI elements
+        this.playerCharactersContainer = document.getElementById('player-characters-container');
+        this.aiCharactersContainer = document.getElementById('ai-characters-container');
+        this.turnCounter = document.getElementById('turn-count');
+        this.battlePhaseElement = document.getElementById('battle-phase');
+        this.endTurnButton = document.getElementById('end-turn-button');
+        this.battleLog = document.getElementById('battle-log');
+        
+        // Create auto-select button
+        this.createAutoSelectButton();
+        
+        // Set up event handlers
+        if (setupEventHandlers) {
+            this.setupEventHandlers();
+        }
+        
+        // Create planning phase overlay
+        this.createPlanningPhaseOverlay();
+    }
+
+    // Set up event handlers for UI elements
+    setupEventHandlers() {
+        // Event delegation for player characters
+        document.getElementById('player-characters-container').addEventListener('click', (e) => {
+            const charElement = this.findCharacterElement(e.target);
+            if (charElement) {
+                const characterId = charElement.id.replace('character-', '');
+                const character = this.gameManager.gameState.playerCharacters.find(c => c.id === characterId);
+                if (character) {
+                    // Check if we're in targeting mode
+                    if (this.gameManager.gameState.selectedCharacter && this.gameManager.gameState.selectedAbility) {
+                        // If a character and ability are already selected, this is a targeting action
+                        this.gameManager.targetCharacter(character);
+                    } else {
+                        // Otherwise it's a character selection
+                        this.gameManager.selectCharacter(character);
+                    }
+                }
+            }
+            
+            // Check if an ability was clicked
+            const abilityElement = e.target.closest('.ability');
+            if (abilityElement) {
+                const abilityIndex = parseInt(abilityElement.dataset.index);
+                const characterElement = e.target.closest('.character-slot');
+                if (characterElement && !isNaN(abilityIndex)) {
+                    const characterId = characterElement.id.replace('character-', '');
+                    const character = this.gameManager.gameState.playerCharacters.find(c => c.id === characterId);
+                    if (character) {
+                        this.gameManager.selectAbility(character, abilityIndex);
+                    }
+                }
+            }
+        });
+        
+        // Event delegation for AI characters (for targeting)
+        document.getElementById('ai-characters-container').addEventListener('click', (e) => {
+            const charElement = this.findCharacterElement(e.target);
+            if (charElement) {
+                const characterId = charElement.id.replace('character-', '');
+                const character = this.gameManager.gameState.aiCharacters.find(c => c.id === characterId);
+                if (character) {
+                    this.gameManager.targetCharacter(character);
+                }
+            }
+        });
+        
+        // End Turn button
+        const endTurnButton = document.getElementById('end-turn-button');
+        if (endTurnButton) {
+            endTurnButton.addEventListener('click', () => {
+                // Only enable during player's turn and when game state exists
+                if (this.gameManager.gameState && this.gameManager.gameState.phase === 'player') {
+                    this.gameManager.endPlayerTurn();
+                }
+            });
+        }
+        
+        // Keyboard controls for abilities using Q, W, E, R keys
+        document.addEventListener('keydown', (e) => {
+            // Only process keyboard shortcuts during player phase
+            if (!this.gameManager.gameState || this.gameManager.gameState.phase !== 'player') {
+                return;
+            }
+            
+            // Debug mode - special key handlers
+            if (e.key === 'Numpad4' || e.key === '4') {
+                // NUM4: Reduces ALL enemies HP to 20% MAXHP
+                console.log("[DEBUG] NUM4 pressed - reducing all enemies HP to 20% of maximum");
+                this.gameManager.gameState.aiCharacters.forEach(enemy => {
+                    const newHp = Math.floor(enemy.stats.maxHp * 0.2);
+                    enemy.stats.currentHp = newHp;
+                    this.gameManager.uiManager.updateCharacterUI(enemy);
+                    this.gameManager.addLogEntry(`[DEBUG] ${enemy.name}'s HP reduced to ${newHp}`, 'system');
+                });
+                return;
+            }
+            
+            const selectedChar = this.gameManager.gameState.selectedCharacter;
+            if (!selectedChar || selectedChar.isAI) {
+                return;
+            }
+            
+            let abilityIndex = -1;
+            
+            // Map keys to ability indices (0-3)
+            switch (e.key.toLowerCase()) {
+                case 'q': abilityIndex = 0; break;
+                case 'w': abilityIndex = 1; break;
+                case 'e': abilityIndex = 2; break;
+                case 'r': abilityIndex = 3; break;
+                default: return; // Not a mapped key
+            }
+            
+            // Check if the character has this ability
+            if (abilityIndex >= 0 && abilityIndex < selectedChar.abilities.length) {
+                this.gameManager.selectAbility(selectedChar, abilityIndex);
+            }
+        });
+        
+        // Now safe to update the button state
+        this.updateEndTurnButton();
+        
+        // Set up battle log controls
+        const clearLogButton = document.getElementById('clear-log-button');
+        const toggleLogButton = document.getElementById('toggle-log-button');
+        const battleLogContainer = document.querySelector('.battle-log-container');
+        
+        if (clearLogButton) {
+            clearLogButton.addEventListener('click', () => {
+                this.clearBattleLog();
+                this.addLogEntry('Battle log cleared', 'system');
+            });
+        }
+        
+        if (toggleLogButton && battleLogContainer) {
+            toggleLogButton.addEventListener('click', () => {
+                battleLogContainer.classList.toggle('expanded');
+                toggleLogButton.textContent = battleLogContainer.classList.contains('expanded') ? '⬆' : '⬍';
+            });
+        }
+    }
+
+    // Find character element from event target
+    findCharacterElement(element) {
+        while (element && !element.id.startsWith('character-')) {
+            element = element.parentElement;
+        }
+        return element;
+    }
+
+    // Render characters to UI
+    renderCharacters(playerCharacters, aiCharacters) {
+        const playerContainer = document.getElementById('player-characters-container');
+        const aiContainer = document.getElementById('ai-characters-container');
+        
+        // Clear containers
+        playerContainer.innerHTML = '';
+        aiContainer.innerHTML = '';
+        
+        // Render player characters
+        playerCharacters.forEach(function(character) {
+            const charElement = this.createCharacterElement(character);
+            playerContainer.appendChild(charElement);
+        }, this);
+        
+        // Render AI characters
+        aiCharacters.forEach(function(character) {
+            const charElement = this.createCharacterElement(character, true);
+            aiContainer.appendChild(charElement);
+        }, this);
+    }
+
+    // Create ability UI elements
+    createAbilityElements(character, abilitiesDiv, isAI = false) {
+        if (character.abilities.length > 0) {
+            character.abilities.forEach(function(ability, index) {
+                // Debug log for cooldowns
+                console.log(`Ability ${ability.name} has cooldown: ${ability.currentCooldown}/${ability.cooldown}`);
+                
+                const abilityDiv = document.createElement('div');
+                abilityDiv.className = 'ability';
+                abilityDiv.dataset.index = index;
+                
+                // Add ability icon
+                if (ability.icon) {
+                    const abilityIcon = document.createElement('img');
+                    abilityIcon.src = ability.icon;
+                    abilityIcon.className = 'ability-icon';
+                    abilityDiv.appendChild(abilityIcon);
+                }
+                
+                // Add mana cost indicator
+                if (ability.manaCost > 0) {
+                    const manaCostDiv = document.createElement('div');
+                    manaCostDiv.className = 'ability-cost';
+                    manaCostDiv.textContent = ability.manaCost;
+                    abilityDiv.appendChild(manaCostDiv);
+                }
+                
+                // Add cooldown overlay if on cooldown
+                if (ability.currentCooldown > 0) {
+                    const cooldownDiv = document.createElement('div');
+                    cooldownDiv.className = 'ability-cooldown';
+                    cooldownDiv.textContent = ability.currentCooldown;
+                    abilityDiv.appendChild(cooldownDiv);
+                }
+                
+                // Add keyboard shortcut indicator for player characters
+                if (!isAI) {
+                    const keybindDiv = document.createElement('div');
+                    keybindDiv.className = 'ability-keybind';
+                    
+                    let keyLabel = '';
+                    switch (index) {
+                        case 0: keyLabel = 'Q'; break;
+                        case 1: keyLabel = 'W'; break;
+                        case 2: keyLabel = 'E'; break;
+                        case 3: keyLabel = 'R'; break;
+                    }
+                    
+                    keybindDiv.textContent = keyLabel;
+                    abilityDiv.appendChild(keybindDiv);
+                }
+                
+                // No longer need individual click events as they're handled by delegation
+                
+                abilitiesDiv.appendChild(abilityDiv);
+            });
+        } else {
+            // Create placeholder ability slots
+            for (let i = 0; i < 4; i++) {
+                const abilityDiv = document.createElement('div');
+                abilityDiv.className = 'ability';
+                
+                // Add keyboard shortcut indicators to placeholders for player characters
+                if (!isAI) {
+                    const keybindDiv = document.createElement('div');
+                    keybindDiv.className = 'ability-keybind';
+                    
+                    let keyLabel = '';
+                    switch (i) {
+                        case 0: keyLabel = 'Q'; break;
+                        case 1: keyLabel = 'W'; break;
+                        case 2: keyLabel = 'E'; break;
+                        case 3: keyLabel = 'R'; break;
+                    }
+                    
+                    keybindDiv.textContent = keyLabel;
+                    abilityDiv.appendChild(keybindDiv);
+                }
+                
+                abilitiesDiv.appendChild(abilityDiv);
+            }
+        }
+    }
+
+    // Create character UI element
+    createCharacterElement(character, isAI = false) {
+        const charDiv = document.createElement('div');
+        charDiv.id = `character-${character.id}`;
+        charDiv.className = 'character-slot';
+        if (isAI) {
+            charDiv.classList.add('ai-character');
+        }
+        
+        // Character image with buff/debuff containers
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-container';
+        
+        const image = document.createElement('img');
+        image.src = character.image;
+        image.className = 'character-image';
+        image.alt = character.name;
+        
+        // Add right-click context menu for character stats
+        image.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this.showCharacterStatsMenu(character, e.clientX, e.clientY);
+        });
+        
+        // Buff container
+        const buffsDiv = document.createElement('div');
+        buffsDiv.className = 'status-effects buffs';
+        
+        // Debuff container
+        const debuffsDiv = document.createElement('div');
+        debuffsDiv.className = 'status-effects debuffs';
+        
+        // Cham Cham Passive Stack Indicator Container (Ensure this is only added for Cham Cham)
+        let passiveStackDiv = null;
+        if (character.id === 'cham_cham') {
+            passiveStackDiv = document.createElement('div');
+            // Add specific class AND a general class for potential reuse/styling
+            passiveStackDiv.className = 'passive-stack-indicator cham-cham-passive';
+            passiveStackDiv.style.display = 'none'; // Hide initially
+        }
+
+        imageContainer.appendChild(image);
+        imageContainer.appendChild(buffsDiv);
+        imageContainer.appendChild(debuffsDiv);
+        // Only append if created (i.e., if it's Cham Cham)
+        if (passiveStackDiv) {
+            imageContainer.appendChild(passiveStackDiv);
+        }
+
+        // Character info
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'character-info';
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'character-name';
+        nameDiv.textContent = character.name;
+        
+        // HP bar
+        const hpContainer = document.createElement('div');
+        hpContainer.className = 'bar-container';
+        const hpBar = document.createElement('div');
+        hpBar.className = 'hp-bar';
+        hpBar.style.width = `${(character.stats.currentHp / character.stats.maxHp) * 100}%`;
+        hpBar.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}`;
+        hpContainer.appendChild(hpBar);
+        
+        // Mana bar
+        const manaContainer = document.createElement('div');
+        manaContainer.className = 'bar-container';
+        const manaBar = document.createElement('div');
+        manaBar.className = 'mana-bar';
+        manaBar.style.width = `${(character.stats.currentMana / character.stats.maxMana) * 100}%`;
+        manaBar.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+        manaContainer.appendChild(manaBar);
+        
+        // Ability slots
+        const abilitiesDiv = document.createElement('div');
+        abilitiesDiv.className = 'abilities';
+        
+        // Create ability elements
+        this.createAbilityElements(character, abilitiesDiv, isAI);
+        
+        infoDiv.appendChild(nameDiv);
+        infoDiv.appendChild(hpContainer);
+        infoDiv.appendChild(manaContainer);
+        infoDiv.appendChild(abilitiesDiv);
+        
+        charDiv.appendChild(imageContainer);
+        charDiv.appendChild(infoDiv);
+        
+        return charDiv;
+    }
+
+    // Update character UI
+    updateCharacterUI(character) {
+        const charElement = document.getElementById(`character-${character.id}`);
+        if (!charElement) return;
+        
+        // Update HP bar
+        const hpBar = charElement.querySelector('.hp-bar');
+        hpBar.style.width = `${(character.stats.currentHp / character.stats.maxHp) * 100}%`;
+        hpBar.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}`;
+        
+        // Update Mana bar
+        const manaBar = charElement.querySelector('.mana-bar');
+        manaBar.style.width = `${(character.stats.currentMana / character.stats.maxMana) * 100}%`;
+        manaBar.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+        
+        // Update abilities (cooldowns and mana costs)
+        const abilitiesDiv = charElement.querySelector('.abilities');
+        abilitiesDiv.innerHTML = '';
+        this.createAbilityElements(character, abilitiesDiv, character.isAI);
+        
+        // Update buffs
+        const buffsDiv = charElement.querySelector('.buffs');
+        buffsDiv.innerHTML = '';
+        character.buffs.forEach((buff) => {
+            const buffIcon = document.createElement('div');
+            buffIcon.className = 'status-icon buff-icon';
+            
+            // Add buff icon if available
+            if (buff.icon) {
+                const img = document.createElement('img');
+                img.src = buff.icon;
+                img.alt = buff.name;
+                img.className = 'effect-icon';
+                buffIcon.appendChild(img);
+            }
+            
+            // Add turn counter
+            const durationElement = document.createElement('div');
+            durationElement.className = 'status-duration';
+            durationElement.textContent = buff.duration;
+            buffIcon.appendChild(durationElement);
+            
+            // Add enhanced tooltip functionality
+            buffIcon.addEventListener('mouseenter', (e) => {
+                this.showStatusTooltip(e, buff, 'buff');
+            });
+            
+            buffIcon.addEventListener('mouseleave', () => {
+                this.hideStatusTooltip();
+            });
+            
+            buffsDiv.appendChild(buffIcon);
+        });
+        
+        // Update debuffs
+        const debuffsDiv = charElement.querySelector('.debuffs');
+        debuffsDiv.innerHTML = '';
+        
+        character.debuffs.forEach((debuff) => {
+            const debuffIcon = document.createElement('div');
+            debuffIcon.className = 'status-icon debuff-icon';
+            
+            // Add debuff icon if available
+            if (debuff.icon) {
+                const img = document.createElement('img');
+                img.src = debuff.icon;
+                img.alt = debuff.name;
+                img.className = 'effect-icon';
+                debuffIcon.appendChild(img);
+            }
+            
+            // Add turn counter
+            const durationElement = document.createElement('div');
+            durationElement.className = 'status-duration';
+            durationElement.textContent = debuff.duration;
+            debuffIcon.appendChild(durationElement);
+            
+            // Add enhanced tooltip functionality
+            debuffIcon.addEventListener('mouseenter', (e) => {
+                this.showStatusTooltip(e, debuff, 'debuff');
+            });
+            
+            debuffIcon.addEventListener('mouseleave', () => {
+                this.hideStatusTooltip();
+            });
+            
+            debuffsDiv.appendChild(debuffIcon);
+        });
+
+        // Update Cham Cham Passive Stack Indicator
+        const passiveStackElement = charElement.querySelector('.cham-cham-passive');
+        // Check if the element exists (it should only exist for Cham Cham)
+        if (passiveStackElement) {
+            // Check if the character has the passive stacks property defined
+            if (typeof character.chamChamPassiveStacks !== 'undefined' && character.chamChamPassiveStacks > 0) {
+                // Display the stacks
+                passiveStackElement.textContent = character.chamChamPassiveStacks;
+                // Add a tooltip showing the percentage bonus
+                const bonusPercent = character.chamChamPassiveStacks * 2; // 2% per stack
+                passiveStackElement.title = `Growing Power: +${bonusPercent}% Damage (${character.chamChamPassiveStacks} stacks)`;
+                passiveStackElement.style.display = 'flex'; // Use flex for centering text inside
+            } else {
+                // Hide if no stacks or property undefined
+                passiveStackElement.style.display = 'none';
+            }
+        }
+
+        // --- Primal Fury (W Buff) VFX --- 
+        const imageContainerW = charElement.querySelector('.image-container');
+        if (imageContainerW) {
+            // Check if the character has the buff (assuming a hasBuff method exists)
+            if (character.hasBuff && character.hasBuff('cham_cham_w_buff')) {
+                imageContainerW.classList.add('primal-fury-active');
+            } else {
+                imageContainerW.classList.remove('primal-fury-active');
+            }
+        }
+        // --- End Primal Fury VFX ---
+        
+        // Apply or remove stunned visual effect based on whether the character is stunned
+        if (character.isStunned()) {
+            if (!charElement.classList.contains('stunned')) {
+                charElement.classList.add('stunned');
+                
+                // Get the image container to add the stun effect
+                const imageContainer = charElement.querySelector('.image-container');
+                
+                // Remove any existing stun effects first
+                const existingStunEffect = imageContainer.querySelector('.stun-effect');
+                if (existingStunEffect) {
+                    existingStunEffect.remove();
+                }
+                
+                // Create stun effect
+                const stunEffect = document.createElement('div');
+                stunEffect.className = 'stun-effect';
+                
+                // Add stars
+                const stunStars = document.createElement('div');
+                stunStars.className = 'stun-stars';
+                stunEffect.appendChild(stunStars);
+                
+                // Add circle
+                const stunCircle = document.createElement('div');
+                stunCircle.className = 'stun-circle';
+                stunEffect.appendChild(stunCircle);
+                
+                // Add to the image container
+                imageContainer.appendChild(stunEffect);
+                
+                // Add a log entry to indicate character is stunned (only if gameManager exists)
+                if (this.gameManager && !character.justStunned) {
+                    this.gameManager.addLogEntry(`${character.name} is stunned!`, 'system');
+                    character.justStunned = true;
+                }
+            }
+        } else {
+            charElement.classList.remove('stunned');
+            
+            // Remove stun effects if they exist
+            const imageContainer = charElement.querySelector('.image-container');
+            const stunEffect = imageContainer.querySelector('.stun-effect');
+            if (stunEffect) {
+                stunEffect.remove();
+            }
+            
+            // Reset the justStunned flag when no longer stunned
+            character.justStunned = false;
+        }
+    }
+
+    // Highlight selected character
+    highlightSelectedCharacter(character) {
+        // Clear previous selection
+        document.querySelectorAll('.character-slot').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        
+        // Highlight new selection
+        const charElement = document.getElementById(`character-${character.id}`);
+        if (charElement) {
+            charElement.classList.add('selected');
+        }
+    }
+
+    // Highlight selected ability
+    highlightSelectedAbility(index) {
+        // Clear previous selection
+        document.querySelectorAll('.ability').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        
+        // Find selected character element
+        const charElement = document.querySelector('.character-slot.selected');
+        if (charElement) {
+            // Find ability at index
+            const abilityElement = charElement.querySelector(`.ability[data-index="${index}"]`);
+            if (abilityElement) {
+                abilityElement.classList.add('selected');
+            }
+        }
+    }
+
+    // Show character abilities
+    showCharacterAbilities(character) {
+        // Will be implemented with ability tooltips/details
+        console.log('Character abilities:', character.abilities);
+    }
+
+    // Show character stats context menu
+    showCharacterStatsMenu(character, x, y) {
+        // Remove any existing stats menu
+        const existingMenu = document.getElementById('character-stats-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+        
+        // Create stats menu
+        const statsMenu = document.createElement('div');
+        statsMenu.id = 'character-stats-menu';
+        statsMenu.className = 'character-stats-menu';
+        
+        // Temporarily add to DOM with visibility:hidden to calculate dimensions
+        statsMenu.style.visibility = 'hidden';
+        document.body.appendChild(statsMenu);
+        
+        // Create header
+        const header = document.createElement('div');
+        header.className = 'stats-menu-header';
+        header.textContent = character.name;
+        statsMenu.appendChild(header);
+        
+        // Create stats section
+        const statsSection = document.createElement('div');
+        statsSection.className = 'stats-menu-section';
+        
+        // Add stats
+        const statsList = document.createElement('ul');
+        statsList.className = 'stats-list';
+        
+        // Define stats to display
+        const statsToDisplay = [
+            { name: 'Physical DMG', value: character.stats.physicalDamage },
+            { name: 'Magical DMG', value: character.stats.magicalDamage },
+            { name: 'Armor', value: character.stats.armor },
+            { name: 'Magic Shield', value: character.stats.magicalShield },
+            { name: 'HP', value: `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}` },
+            { name: 'HP Regen', value: character.stats.hpPerTurn },
+            { name: 'Mana', value: `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}` },
+            { name: 'Mana Regen', value: character.stats.manaPerTurn },
+            { name: 'Lifesteal', value: `${character.stats.lifesteal * 100}%` },
+            { name: 'Dodge', value: `${character.stats.dodgeChance * 100}%` },
+            { name: 'Crit Chance', value: `${character.stats.critChance * 100}%` },
+            { name: 'Healing Power', value: character.stats.healingPower }
+        ];
+        
+        statsToDisplay.forEach(stat => {
+            if (stat.value && stat.value !== 0 && stat.value !== '0%') {
+                const statItem = document.createElement('li');
+                statItem.innerHTML = `<span class="stat-name">${stat.name}:</span> <span class="stat-value">${stat.value}</span>`;
+                statsList.appendChild(statItem);
+            }
+        });
+        
+        statsSection.appendChild(statsList);
+        statsMenu.appendChild(statsSection);
+        
+        // Add stat changes section if character has active buffs that modify stats
+        if (character.buffs && character.buffs.length > 0) {
+            // Find buffs that have stored original stat values
+            let hasStatChanges = false;
+            const statChanges = {};
+            
+            // Check for stat changes in buffs (like Ayane's Ready to Slice)
+            character.buffs.forEach(buff => {
+                // Check for common stored original values pattern
+                for (const key in character) {
+                    if (key.startsWith(buff.id + 'Original') || 
+                        key.includes('Original') && key.includes(buff.id.replace(/_/g, ''))) {
+                        hasStatChanges = true;
+                        const statName = key.replace(buff.id + 'Original', '')
+                                            .replace(buff.id.replace(/_/g, '') + 'Original', '')
+                                            .replace('Original', '');
+                        
+                        // Format the stat name nicely
+                        let formattedName = statName;
+                        if (statName === 'PhysicalDamage') formattedName = 'Physical DMG';
+                        else if (statName === 'MagicalDamage') formattedName = 'Magical DMG';
+                        else if (statName === 'DodgeChance') formattedName = 'Dodge';
+                        
+                        // Calculate difference
+                        if (statName === 'DodgeChance' || statName === 'CritChance' || statName === 'Lifesteal') {
+                            // Format percentage stats
+                            const originalValue = character[key] * 100;
+                            const currentValue = character.stats[statName.charAt(0).toLowerCase() + statName.slice(1)] * 100;
+                            const diff = (currentValue - originalValue).toFixed(1);
+                            
+                            if (diff !== 0) {
+                                statChanges[formattedName] = {
+                                    original: `${originalValue.toFixed(1)}%`,
+                                    current: `${currentValue.toFixed(1)}%`,
+                                    diff: `${diff > 0 ? '+' : ''}${diff}%`,
+                                    positive: diff > 0
+                                };
+                            }
+                        } else {
+                            // Regular number stats
+                            const originalValue = character[key];
+                            const currentValue = character.stats[statName.charAt(0).toLowerCase() + statName.slice(1)];
+                            const diff = Math.round(currentValue - originalValue);
+                            
+                            if (diff !== 0) {
+                                statChanges[formattedName] = {
+                                    original: Math.round(originalValue),
+                                    current: Math.round(currentValue),
+                                    diff: `${diff > 0 ? '+' : ''}${diff}`,
+                                    positive: diff > 0
+                                };
+                            }
+                        }
+                    }
+                }
+                
+                // Check specific effects like Ready to Slice
+                if (buff.id === 'ready_to_slice') {
+                    hasStatChanges = true;
+                    if (!statChanges['Physical DMG']) {
+                        statChanges['Physical DMG'] = {
+                            diff: '+50%',
+                            positive: true,
+                            fromBuff: true
+                        };
+                    }
+                    if (!statChanges['Dodge']) {
+                        statChanges['Dodge'] = {
+                            diff: '+20%',
+                            positive: true,
+                            fromBuff: true
+                        };
+                    }
+                }
+            });
+            
+            // If we have stat changes, create a section for them
+            if (hasStatChanges && Object.keys(statChanges).length > 0) {
+                const statChangesHeader = document.createElement('div');
+                statChangesHeader.className = 'stats-menu-subheader';
+                statChangesHeader.textContent = 'Stat Changes';
+                statsMenu.appendChild(statChangesHeader);
+                
+                const statChangesSection = document.createElement('div');
+                statChangesSection.className = 'stats-menu-section';
+                
+                const statChangesList = document.createElement('ul');
+                statChangesList.className = 'stats-list stat-changes-list';
+                
+                for (const [statName, change] of Object.entries(statChanges)) {
+                    const statChangeItem = document.createElement('li');
+                    
+                    if (change.fromBuff) {
+                        // For buffs where we don't have original values
+                        statChangeItem.innerHTML = `
+                            <span class="stat-name">${statName}:</span> 
+                            <span class="stat-change ${change.positive ? 'positive' : 'negative'}">
+                                ${change.diff}
+                            </span>
+                        `;
+                    } else {
+                        // For stats where we have original and current values
+                        statChangeItem.innerHTML = `
+                            <span class="stat-name">${statName}:</span> 
+                            <span class="stat-change-details">
+                                <span class="stat-original">${change.original}</span>
+                                <span class="stat-arrow">→</span>
+                                <span class="stat-current">${change.current}</span>
+                                <span class="stat-change ${change.positive ? 'positive' : 'negative'}">
+                                    (${change.diff})
+                                </span>
+                            </span>
+                        `;
+                    }
+                    
+                    statChangesList.appendChild(statChangeItem);
+                }
+                
+                statChangesSection.appendChild(statChangesList);
+                statsMenu.appendChild(statChangesSection);
+            }
+        }
+        
+        // Add abilities section
+        if (character.abilities && character.abilities.length > 0) {
+            const abilitiesHeader = document.createElement('div');
+            abilitiesHeader.className = 'stats-menu-subheader';
+            abilitiesHeader.textContent = 'Abilities';
+            statsMenu.appendChild(abilitiesHeader);
+            
+            const abilitiesSection = document.createElement('div');
+            abilitiesSection.className = 'stats-menu-section abilities-section';
+            
+            character.abilities.forEach(ability => {
+                const abilityItem = document.createElement('div');
+                abilityItem.className = 'ability-item';
+                
+                const abilityHeader = document.createElement('div');
+                abilityHeader.className = 'ability-header';
+                
+                if (ability.icon) {
+                    const abilityIcon = document.createElement('img');
+                    abilityIcon.src = ability.icon;
+                    abilityIcon.className = 'ability-icon-small';
+                    abilityHeader.appendChild(abilityIcon);
+                }
+                
+                const abilityName = document.createElement('span');
+                abilityName.className = 'ability-name';
+                abilityName.textContent = ability.name;
+                abilityHeader.appendChild(abilityName);
+                
+                const abilityDescription = document.createElement('div');
+                abilityDescription.className = 'ability-description';
+                abilityDescription.textContent = ability.description;
+                
+                const abilityDetails = document.createElement('div');
+                abilityDetails.className = 'ability-details';
+                abilityDetails.innerHTML = `Mana: ${ability.manaCost} | Cooldown: ${ability.cooldown}`;
+                
+                abilityItem.appendChild(abilityHeader);
+                abilityItem.appendChild(abilityDescription);
+                abilityItem.appendChild(abilityDetails);
+                abilitiesSection.appendChild(abilityItem);
+            });
+            
+            statsMenu.appendChild(abilitiesSection);
+        }
+        
+        // Add passive ability if exists
+        if (character.passive) {
+            const passiveHeader = document.createElement('div');
+            passiveHeader.className = 'stats-menu-subheader';
+            passiveHeader.textContent = 'Passive';
+            statsMenu.appendChild(passiveHeader);
+            
+            const passiveSection = document.createElement('div');
+            passiveSection.className = 'stats-menu-section';
+            
+            const passiveItem = document.createElement('div');
+            passiveItem.className = 'passive-item';
+            
+            const passiveName = document.createElement('div');
+            passiveName.className = 'passive-name';
+            passiveName.textContent = character.passive.name;
+            
+            const passiveDescription = document.createElement('div');
+            passiveDescription.className = 'passive-description';
+            passiveDescription.textContent = character.passive.description;
+            
+            passiveItem.appendChild(passiveName);
+            passiveItem.appendChild(passiveDescription);
+            passiveSection.appendChild(passiveItem);
+            
+            statsMenu.appendChild(passiveSection);
+        }
+        
+        // Add close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'stats-menu-close';
+        closeButton.textContent = 'Close';
+        closeButton.addEventListener('click', () => {
+            statsMenu.remove();
+        });
+        statsMenu.appendChild(closeButton);
+        
+        // Calculate dimensions and adjust position
+        const menuRect = statsMenu.getBoundingClientRect();
+        const menuWidth = menuRect.width;
+        const menuHeight = menuRect.height;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // Check if menu would go outside window and adjust position
+        let finalX = x;
+        let finalY = y;
+        
+        // Check right edge - leave at least 10px margin
+        if (x + menuWidth > windowWidth - 10) {
+            finalX = Math.max(10, windowWidth - menuWidth - 10);
+        }
+        
+        // Check bottom edge - leave at least 10px margin
+        if (y + menuHeight > windowHeight - 10) {
+            finalY = Math.max(10, windowHeight - menuHeight - 10);
+        }
+        
+        // Make sure we don't go off the left or top edges
+        finalX = Math.max(10, finalX);
+        finalY = Math.max(10, finalY);
+        
+        // Set final position and make visible
+        statsMenu.style.left = `${finalX}px`;
+        statsMenu.style.top = `${finalY}px`;
+        statsMenu.style.visibility = 'visible';
+        
+        // Add click outside to close
+        document.addEventListener('click', function closeMenu(e) {
+            if (!statsMenu.contains(e.target) && e.target.id !== 'character-stats-menu') {
+                statsMenu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }
+
+    // Clear selection UI
+    clearSelection() {
+        document.querySelectorAll('.character-slot').forEach(function(el) {
+            el.classList.remove('selected');
+            el.classList.remove('valid-target');
+            el.classList.remove('invalid-target');
+            el.style.cursor = ''; // Reset cursor style
+        });
+        
+        document.querySelectorAll('.ability').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+    }
+
+    // Remove a character from the UI
+    removeCharacter(character) {
+        const charElement = document.getElementById(`character-${character.id}`);
+        if (charElement) {
+            charElement.remove();
+        }
+    }
+
+    // Update turn counter
+    updateTurnCounter(turn) {
+        document.getElementById('turn-count').textContent = turn;
+    }
+
+    // Update phase indicator
+    updatePhase(phase) {
+        // Only update if phase is provided
+        if (phase) {
+            const phaseText = phase === 'player' ? "Player's Turn" : "AI's Turn";
+            document.getElementById('battle-phase').textContent = phaseText;
+        }
+        
+        // Update End Turn button state
+        this.updateEndTurnButton();
+    }
+
+    // Mark character as acted in UI
+    markCharacterAsActed(character) {
+        const charElement = document.getElementById(`character-${character.id}`);
+        if (charElement) {
+            charElement.classList.add('acted');
+        }
+    }
+    
+    // Reverse the 'acted' state of a character (for Ayane's ability)
+    markCharacterAsActive(character) {
+        const charElement = document.getElementById(`character-${character.id}`);
+        if (charElement) {
+            charElement.classList.remove('acted');
+        }
+    }
+
+    resetActedCharacters() {
+        document.querySelectorAll('.character-slot').forEach(function(el) {
+            el.classList.remove('acted');
+        });
+    }
+
+    // Add log entry
+    addLogEntry(message, className = '') {
+        const logElement = document.getElementById('battle-log');
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${className}`;
+        
+        // Create message text element
+        const messageText = document.createElement('span');
+        messageText.className = 'log-message';
+        messageText.textContent = message;
+        entry.appendChild(messageText);
+        
+        // Add timestamp (in format HH:MM:SS)
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timestamp = `${hours}:${minutes}:${seconds}`;
+        
+        const timestampElement = document.createElement('span');
+        timestampElement.className = 'battle-log-timestamp';
+        timestampElement.textContent = timestamp;
+        entry.appendChild(timestampElement);
+        
+        logElement.appendChild(entry);
+        
+        // Auto-scroll to bottom
+        const contentElement = document.querySelector('.battle-log-content');
+        if (contentElement) {
+            contentElement.scrollTop = contentElement.scrollHeight;
+        }
+        
+        // Flash the header for important messages
+        if (className === 'critical' || className === 'system') {
+            const headerElement = document.querySelector('.battle-log-header');
+            if (headerElement) {
+                headerElement.classList.add('flash');
+                setTimeout(() => {
+                    headerElement.classList.remove('flash');
+                }, 500);
+            }
+        }
+    }
+
+    // Clear battle log
+    clearBattleLog() {
+        const logElement = document.getElementById('battle-log');
+        logElement.innerHTML = '';
+    }
+
+    // Show game over screen
+    showGameOverScreen(isVictory) {
+        // Use the global showGameOverScreen function if available
+        if (window.showGameOverScreen) {
+            window.showGameOverScreen(isVictory);
+        } else {
+            // Fallback to simple alert
+            const message = isVictory ? 
+                "Victory! You've defeated all enemies." : 
+                "Defeat! Your team has been defeated.";
+                
+            alert(message);
+        }
+    }
+
+    // Create planning phase overlay
+    createPlanningPhaseOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'planning-phase-overlay';
+        
+        const content = document.createElement('div');
+        content.className = 'planning-phase-content';
+        
+        const title = document.createElement('div');
+        title.className = 'planning-phase-title';
+        title.textContent = 'AI is planning its turn...';
+        
+        content.appendChild(title);
+        overlay.appendChild(content);
+        
+        document.body.appendChild(overlay);
+    }
+    
+    // Show or hide planning phase overlay
+    showPlanningPhase(show) {
+        const overlay = document.querySelector('.planning-phase-overlay');
+        if (overlay) {
+            if (show) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
+    }
+    
+    // Show or hide planning indicator for a character
+    showCharacterPlanning(character, show) {
+        const charElement = document.getElementById(`character-${character.id}`);
+        if (charElement) {
+            if (show) {
+                charElement.classList.add('planning');
+            } else {
+                charElement.classList.remove('planning');
+            }
+        }
+    }
+
+    // Update End Turn button state
+    updateEndTurnButton() {
+        const endTurnButton = document.getElementById('end-turn-button');
+        if (endTurnButton) {
+            // Check if gameState exists first
+            if (this.gameManager.gameState) {
+                if (this.gameManager.gameState.phase === 'player') {
+                    endTurnButton.disabled = false;
+                    endTurnButton.textContent = 'End Turn';
+                } else {
+                    endTurnButton.disabled = true;
+                    endTurnButton.textContent = 'AI Turn...';
+                }
+            } else {
+                // If gameState doesn't exist yet, disable the button
+                endTurnButton.disabled = true;
+                endTurnButton.textContent = 'Waiting...';
+            }
+        }
+    }
+
+    // Create auto-select button
+    createAutoSelectButton() {
+        const middleSection = document.querySelector('.middle-section');
+        if (middleSection) {
+            // Create the button element
+            const autoSelectButton = document.createElement('button');
+            autoSelectButton.id = 'auto-select-button';
+            autoSelectButton.className = 'auto-select-button';
+            autoSelectButton.textContent = 'Enable Auto Character';
+            autoSelectButton.title = 'Automatically selects the best character for each turn and after abilities are used';
+            
+            // Add it before the end turn button
+            if (this.endTurnButton) {
+                middleSection.insertBefore(autoSelectButton, this.endTurnButton);
+            } else {
+                middleSection.appendChild(autoSelectButton);
+            }
+            
+            // Add event listener
+            autoSelectButton.addEventListener('click', () => {
+                if (this.gameManager.isGameRunning) {
+                    this.gameManager.toggleAutoSelect();
+                }
+            });
+            
+            // Store reference to the button
+            this.autoSelectButton = autoSelectButton;
+        }
+    }
+    
+    // Update the auto-select button state
+    updateAutoSelectButton(isEnabled) {
+        if (this.autoSelectButton) {
+            if (isEnabled) {
+                this.autoSelectButton.textContent = 'Disable Auto Character';
+                this.autoSelectButton.classList.add('active');
+            } else {
+                this.autoSelectButton.textContent = 'Enable Auto Character';
+                this.autoSelectButton.classList.remove('active');
+            }
+        }
+    }
+
+    // Show tooltip for status effects (buffs/debuffs)
+    showStatusTooltip(event, statusEffect, type) {
+        // Hide any existing tooltips
+        this.hideStatusTooltip();
+        
+        // Create tooltip element
+        const tooltip = document.createElement('div');
+        tooltip.className = `status-tooltip ${type}-tooltip`;
+        
+        // Create tooltip header with icon and name
+        const header = document.createElement('div');
+        header.className = 'status-tooltip-header';
+        
+        // Add icon if available
+        if (statusEffect.icon) {
+            const iconImg = document.createElement('img');
+            iconImg.src = statusEffect.icon;
+            iconImg.className = 'status-tooltip-icon';
+            header.appendChild(iconImg);
+        }
+        
+        // Add name
+        const name = document.createElement('div');
+        name.className = 'status-tooltip-name';
+        name.textContent = statusEffect.name || (type === 'buff' ? 'Buff' : 'Debuff');
+        header.appendChild(name);
+        
+        // Add turns remaining
+        const turns = document.createElement('div');
+        turns.className = 'status-tooltip-turns';
+        turns.textContent = `${statusEffect.duration} turn${statusEffect.duration !== 1 ? 's' : ''}`;
+        header.appendChild(turns);
+        
+        tooltip.appendChild(header);
+        
+        // Add description
+        const description = document.createElement('div');
+        description.className = 'status-tooltip-description';
+        description.textContent = statusEffect.description || 
+            (type === 'buff' 
+                ? 'A positive effect enhancing this character.' 
+                : 'A negative effect hindering this character.');
+        tooltip.appendChild(description);
+        
+        // Position the tooltip
+        document.body.appendChild(tooltip);
+        
+        const rect = event.target.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        
+        // Position above the status icon if there's room, otherwise below
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        
+        if (spaceAbove > tooltipRect.height + 10) {
+            tooltip.style.top = `${rect.top - tooltipRect.height - 10}px`;
+        } else if (spaceBelow > tooltipRect.height + 10) {
+            tooltip.style.top = `${rect.bottom + 10}px`;
+        } else {
+            // If neither above nor below has enough space, position it to the side
+            tooltip.style.top = `${Math.max(10, rect.top)}px`;
+        }
+        
+        // Horizontal positioning
+        if (rect.left + tooltipRect.width + 10 > window.innerWidth) {
+            // Position to the left of the cursor if it would overflow on the right
+            tooltip.style.left = `${Math.max(10, rect.left - tooltipRect.width - 10)}px`;
+        } else {
+            // Position to the right of the cursor
+            tooltip.style.left = `${rect.right + 10}px`;
+        }
+        
+        // Make tooltip visible with a slight delay for better UX
+        setTimeout(() => {
+            tooltip.classList.add('visible');
+        }, 50);
+    }
+    
+    // Hide status tooltip
+    hideStatusTooltip() {
+        const existingTooltips = document.querySelectorAll('.status-tooltip');
+        existingTooltips.forEach(tooltip => {
+            tooltip.classList.remove('visible');
+            setTimeout(() => {
+                tooltip.remove();
+            }, 200);
+        });
+    }
+
+    // Create a debug button for Ayane's Teleport Blade ability
+    createAyaneDebugButton() {
+        const middleSection = document.querySelector('.middle-section');
+        if (middleSection) {
+            // Create the button element
+            const debugButton = document.createElement('button');
+            debugButton.id = 'ayane-debug-button';
+            debugButton.className = 'ayane-debug-button';
+            debugButton.textContent = 'Debug Ayane';
+            debugButton.title = 'Force Ayane\'s Teleport Blade to reset';
+            debugButton.style.backgroundColor = '#ff00aa';
+            debugButton.style.color = 'white';
+            debugButton.style.margin = '0 10px';
+            debugButton.style.padding = '5px 10px';
+            debugButton.style.border = 'none';
+            debugButton.style.borderRadius = '4px';
+            debugButton.style.cursor = 'pointer';
+            
+            // Add it before the end turn button
+            if (this.endTurnButton) {
+                middleSection.insertBefore(debugButton, this.endTurnButton);
+            } else {
+                middleSection.appendChild(debugButton);
+            }
+            
+            // Add event listener
+            debugButton.addEventListener('click', () => {
+                if (window.forceAyaneAbilityReuse) {
+                    const result = window.forceAyaneAbilityReuse();
+                    if (result) {
+                        console.log("[DEBUG UI] Ayane ability reset via debug button");
+                    } else {
+                        console.log("[DEBUG UI] Ayane ability reset failed - make sure Ayane is selected with Teleport Blade");
+                        this.addLogEntry("Debug: Select Ayane and Teleport Blade first", "system");
+                    }
+                } else {
+                    console.error("[DEBUG UI] forceAyaneAbilityReuse function not available");
+                }
+            });
+            
+            // Store reference to the button
+            this.ayaneDebugButton = debugButton;
+        }
+    }
+}
+
+// Global Game Manager instance creation
+const gameManager = new GameManager();
+
+// Make gameManager available globally immediately
+window.gameManager = gameManager;
+
+// Initialize when document is ready, but don't start game automatically
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize the game manager
+    await gameManager.initialize();
+    console.log("Game manager initialized and ready");
+}); 

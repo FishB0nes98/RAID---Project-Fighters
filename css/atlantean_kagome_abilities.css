@@ -1,0 +1,468 @@
+/* Kagome Abilities and VFX CSS */
+
+/* Kagome Bow Animation */
+.kagome-bow-animation {
+    animation: bowPullback 0.8s ease-out;
+}
+
+@keyframes bowPullback {
+    0% {
+        transform: translateX(0);
+    }
+    30% {
+        transform: translateX(-10px);
+    }
+    40% {
+        transform: translateX(-15px);
+    }
+    50% {
+        transform: translateX(-10px);
+    }
+    60% {
+        transform: translateX(15px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* Arrow Rain VFX for Scatter Golden Arrows */
+.kagome-arrow-rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%; /* Reduced to top half of the screen */
+    z-index: 10;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 215, 0, 0.1) 0px,
+        rgba(255, 215, 0, 0.1) 2px,
+        transparent 2px,
+        transparent 8px
+    );
+    animation: arrowRain 1.5s forwards;
+    overflow: hidden;
+}
+
+.kagome-arrow-rain::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 300%;
+    background: repeating-linear-gradient(
+        125deg,
+        transparent 0px,
+        transparent 8px,
+        rgba(255, 215, 0, 0.7) 8px,
+        rgba(255, 215, 0, 0.7) 9px
+    );
+    animation: arrowFall 1.5s linear;
+}
+
+@keyframes arrowRain {
+    0% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes arrowFall {
+    0% {
+        transform: translateY(-30%);
+    }
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+/* Golden Arrow Projectile for Q ability */
+.golden-arrow-projectile {
+    position: absolute;
+    width: 40px;
+    height: 8px;
+    background-color: rgba(255, 215, 0, 0.9);
+    border-radius: 2px;
+    z-index: 15;
+    transform-origin: center;
+    transition: left 0.35s ease-in, top 0.35s ease-in;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7));
+    pointer-events: none;
+}
+
+.golden-arrow-projectile::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: -6px;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 215, 0, 0.9);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    transform: rotate(-90deg);
+}
+
+.golden-arrow-hit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 215, 0, 0.8);
+    border-radius: 50%;
+    z-index: 15;
+    animation: goldenArrowHit 0.8s forwards;
+}
+
+@keyframes goldenArrowHit {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+}
+
+/* Individual Arrow Hit VFX */
+.kagome-arrow-hit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 215, 0, 0.7);
+    border-radius: 50%;
+    z-index: 15;
+    animation: arrowHit 0.8s forwards;
+}
+
+.kagome-arrow-hit::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.7) 0%, transparent 70%);
+    animation: arrowHitExpand 0.8s forwards;
+}
+
+@keyframes arrowHit {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+}
+
+@keyframes arrowHitExpand {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    20% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+/* AP Buff VFX */
+.ap-buff-vfx {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: rgba(255, 215, 0, 0.8);
+    color: #000;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 20;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    animation: apBuffFloat 1.5s forwards;
+}
+
+@keyframes apBuffFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    40% {
+        transform: translateX(-50%) scale(1);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+/* Add custom log styling for Kagome's ability messages */
+.battle-log .kagome-buff {
+    color: #ffd700 !important;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    border-left: 3px solid #ffd700;
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+/* Spiritwalk Animation and VFX */
+.kagome-spiritwalk-animation {
+    animation: spiritwalkPulse 4s infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes spiritwalkPulse {
+    0% {
+        filter: brightness(1) drop-shadow(0 0 5px rgba(173, 216, 230, 0.5));
+    }
+    50% {
+        filter: brightness(1.5) drop-shadow(0 0 20px rgba(173, 216, 230, 0.8));
+    }
+    100% {
+        filter: brightness(1) drop-shadow(0 0 5px rgba(173, 216, 230, 0.5));
+    }
+}
+
+.kagome-spiritwalk-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.6) 0%, rgba(173, 216, 230, 0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: spiritwalkAura 4s infinite, spiritwalkExpand 1.5s forwards;
+    pointer-events: none;
+}
+
+.kagome-spiritwalk-vfx::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    background: repeating-conic-gradient(
+        rgba(173, 216, 230, 0.3) 0deg 10deg,
+        rgba(173, 216, 230, 0.1) 10deg 20deg
+    );
+    border-radius: 50%;
+    z-index: -2;
+    animation: spiritwalkRotate 8s linear infinite;
+    pointer-events: none;
+}
+
+.kagome-spiritwalk-vfx::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    z-index: -3;
+    border: 2px solid rgba(173, 216, 230, 0.6);
+    border-radius: 50%;
+    animation: spiritwalkRings 4s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes spiritwalkAura {
+    0% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0.4;
+    }
+}
+
+@keyframes spiritwalkExpand {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes spiritwalkRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spiritwalkRings {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.1;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0.1;
+    }
+}
+
+/* Spirit Scream Animation and VFX */
+.kagome-spirit-glow {
+    animation: spiritGlowPulse 2s ease-in-out;
+    position: relative;
+    z-index: 5;
+}
+
+@keyframes spiritGlowPulse {
+    0% {
+        filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    }
+    50% {
+        filter: brightness(2) drop-shadow(0 0 25px rgba(255, 255, 255, 0.9));
+    }
+    100% {
+        filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    }
+}
+
+.kagome-spirit-scream {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(173, 216, 230, 0.4) 40%, transparent 70%);
+    border-radius: 50%;
+    z-index: 20;
+    pointer-events: none;
+    animation: spiritScreamExpand 2s forwards;
+}
+
+@keyframes spiritScreamExpand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    20% {
+        width: 200px;
+        height: 200px;
+        opacity: 1;
+    }
+    100% {
+        width: 1000px;
+        height: 1000px;
+        opacity: 0;
+    }
+}
+
+/* Buff Dispel Effect */
+.kagome-buff-dispel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    z-index: 15;
+    pointer-events: none;
+    animation: buffDispelPulse 1.5s forwards;
+}
+
+@keyframes buffDispelPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+        border-color: rgba(255, 0, 0, 0.8);
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+        border-color: rgba(0, 0, 0, 0);
+    }
+}
+
+/* Scream Impact Effect */
+.kagome-scream-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.8);
+    mix-blend-mode: overlay;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    z-index: 15;
+    pointer-events: none;
+    animation: screamImpact 1.5s forwards;
+}
+
+@keyframes screamImpact {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(3);
+    }
+} 

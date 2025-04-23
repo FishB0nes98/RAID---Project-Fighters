@@ -1,0 +1,65 @@
+{
+    "id": "angry_carrot",
+    "name": "Angry Carrot",
+    "image": "Loading Screen/Angry Carrot.jpeg",
+    "stats": {
+        "physicalDamage": 255,
+        "magicalDamage": 0,
+        "armor": 2,
+        "magicalShield": 1,
+        "hp": 8000,
+        "hpPerTurn": 0,
+        "mana": 3000,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0,
+        "critChance": 0.05,
+        "critDamage": 2,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "self_heal_stun",
+            "name": "Go Dormant",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 12,
+            "targetType": "self",
+            "description": "The carrot goes dormant, healing for 2500 HP but becoming stunned for the next 2 turns.",
+            "icon": "Icons/abilities/rooted_rage.jpeg",
+            "effect": {
+                "script": "js/raid-game/abilities/angry_carrot_abilities.js",
+                "functionName": "goDormantEffect"
+            }
+        },
+        {
+            "id": "anger",
+            "name": "Anger",
+            "type": "custom",
+            "manaCost": 20,
+            "cooldown": 5,
+            "targetType": "self",
+            "description": "Increases the carrot's damage output by 10% for the next 5 turns.",
+            "icon": "Icons/abilities/anger.jpeg",
+            "effect": {
+                "script": "js/raid-game/abilities/angry_carrot_abilities.js",
+                "functionName": "angerEffect"
+            }
+        },
+        {
+            "id": "carrot_cannon",
+            "name": "Carrot Cannon",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 110% Physical Damage as physical damage to the target.",
+            "icon": "Icons/abilities/carrot_cannon.jpeg",
+            "effect": {
+                "script": "js/raid-game/abilities/angry_carrot_abilities.js",
+                "functionName": "carrotCannonEffect"
+            }
+        }
+    ],
+    "passive": null
+} 

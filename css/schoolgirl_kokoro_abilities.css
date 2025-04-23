@@ -1,0 +1,805 @@
+/* Schoolgirl Kokoro ability styles */
+
+/* Passive indicator */
+.kokoro-passive {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: #ff84e8;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+/* Healing VFX for passive */
+.kokoro-heal-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.kokoro-heal-vfx span {
+    background-color: rgba(255, 132, 232, 0.8);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    animation: kokoro-float-up 1.5s forwards;
+    box-shadow: 0 0 5px #ff84e8;
+}
+
+@keyframes kokoro-float-up {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-40px); opacity: 0; }
+}
+
+/* Lesser Heal ability VFX - Dark Green Theme */
+.lesser-heal-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99; /* Higher z-index to ensure it's on top */
+    overflow: hidden;
+}
+
+/* Healing number display */
+.lesser-heal-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 70, 35, 0.85);
+    color: #9effc1;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #00734a, inset 0 0 8px #00ff85;
+    border: 2px solid #00ff85;
+    text-shadow: 0 0 5px #00ff85;
+    z-index: 101; /* Make sure it's above other effects */
+    animation: kokoro-heal-number-fade 2s forwards;
+}
+
+@keyframes kokoro-heal-number-fade {
+    0% { 
+        opacity: 0;
+    }
+    15% { 
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% { 
+        opacity: 0;
+    }
+}
+
+/* Emerald aura effect */
+.lesser-heal-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(0, 255, 133, 0.4) 0%,
+        rgba(0, 100, 50, 0.2) 50%,
+        rgba(0, 70, 35, 0) 70%
+    );
+    z-index: 100;
+    animation: kokoro-emerald-fade 2s ease-out;
+}
+
+@keyframes kokoro-emerald-fade {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Leaf particles container */
+.lesser-heal-leaf-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+/* Emerald leaf particle */
+.emerald-leaf {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--size, 15px);
+    height: var(--size, 15px);
+    background-color: #00a651;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    transform-origin: center;
+    z-index: 100;
+    animation: kokoro-leaf-float 1.5s ease-out forwards;
+    animation-delay: var(--delay, 0s);
+}
+
+.emerald-leaf::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    width: 60%;
+    height: 60%;
+    background-color: #00ff85;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    opacity: 0.7;
+}
+
+@keyframes kokoro-leaf-float {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: 
+            translate(
+                calc(-50% + (cos(var(--angle, 0deg)) * 80px)), 
+                calc(-50% + (sin(var(--angle, 0deg)) * 80px))
+            )
+            rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Emerald rune circles */
+.emerald-rune-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    border: 2px solid #00ff85;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: kokoro-rune-circle-fade 1.5s ease-out forwards;
+}
+
+.emerald-rune-circle:nth-child(1) {
+    width: 60px;
+    height: 60px;
+}
+
+.emerald-rune-circle:nth-child(2) {
+    width: 90px;
+    height: 90px;
+}
+
+.emerald-rune-circle:nth-child(3) {
+    width: 120px;
+    height: 120px;
+}
+
+@keyframes kokoro-rune-circle-fade {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Silencing Ring ability VFX - Purple Theme */
+.silencing-ring-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99;
+    overflow: hidden;
+}
+
+/* Debuff text display */
+.silencing-ring-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(60, 0, 90, 0.85);
+    color: #d8a5ff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #5c0099, inset 0 0 8px #ad00ff;
+    border: 2px solid #ad00ff;
+    text-shadow: 0 0 5px #ad00ff;
+    z-index: 101;
+    animation: silencing-ring-text-fade 2s forwards;
+}
+
+@keyframes silencing-ring-text-fade {
+    0% { 
+        opacity: 0;
+    }
+    15% { 
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% { 
+        opacity: 0;
+    }
+}
+
+/* Purple arcane aura effect */
+.silencing-ring-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(173, 0, 255, 0.4) 0%,
+        rgba(90, 0, 140, 0.2) 50%,
+        rgba(60, 0, 90, 0) 70%
+    );
+    z-index: 100;
+    animation: silencing-ring-aura-fade 2s ease-out;
+}
+
+@keyframes silencing-ring-aura-fade {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Ring container */
+.silencing-ring-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+/* Purple ring particles */
+.silencing-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--size, 150px);
+    height: var(--size, 150px);
+    border: 3px solid #ad00ff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    box-shadow: 0 0 10px #ad00ff;
+    animation: silencing-ring-expand 1.5s ease-out forwards;
+}
+
+@keyframes silencing-ring-expand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    40% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Status effect icon indicator for silenced targets */
+.silencing-ring-status {
+    position: absolute;
+    bottom: 30px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: #ad00ff;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 5px rgba(173, 0, 255, 0.7);
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.silencing-ring-status::before {
+    content: "🔇";
+    font-size: 10px;
+    color: white;
+}
+
+/* Circle Heal ability VFX - Dark Green Theme (Completely Different) */
+.circle-heal-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99;
+    overflow: hidden;
+}
+
+/* Custom healing display for Circle Heal */
+.circle-heal-number {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 50, 20, 0.9);
+    color: #7aff9b;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px #00451a, inset 0 0 5px #00ff4c;
+    border: 1px solid #00ff4c;
+    text-shadow: 0 0 4px #00ff4c;
+    z-index: 101;
+    animation: circle-heal-number-pulse 2s forwards;
+}
+
+@keyframes circle-heal-number-pulse {
+    0% { 
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    15% { 
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% { 
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(-20px);
+    }
+}
+
+/* Hexagonal pattern for the circle heal */
+.circle-heal-pattern {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    overflow: hidden;
+}
+
+/* Hexagon cells */
+.hexagon-cell {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background-color: rgba(0, 80, 30, 0.6);
+    border: 1px solid #00ff4c;
+    box-shadow: 0 0 5px rgba(0, 255, 76, 0.5);
+    transform-origin: center;
+    animation: hexagon-appear 1.5s forwards;
+}
+
+@keyframes hexagon-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    40% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    60% {
+        transform: scale(1);
+    }
+    80% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Vine tendrils */
+.vine-tendril {
+    position: absolute;
+    width: 2px;
+    height: 0;
+    background-color: #00ff4c;
+    transform-origin: bottom center;
+    box-shadow: 0 0 3px #00ff4c;
+    z-index: 100;
+    animation: vine-grow 1.2s ease-out forwards;
+}
+
+@keyframes vine-grow {
+    0% {
+        height: 0;
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    100% {
+        height: var(--height, 50px);
+        opacity: 0;
+    }
+}
+
+/* Leaf at the end of each tendril */
+.vine-leaf {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 15px;
+    background-color: #00a028;
+    clip-path: polygon(50% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%);
+    transform: translateX(-4px) rotate(var(--angle, 0deg));
+    transform-origin: center bottom;
+    z-index: 100;
+    animation: leaf-pulse 1s ease-in-out forwards;
+    animation-delay: 0.8s;
+}
+
+@keyframes leaf-pulse {
+    0% {
+        transform: translateX(-4px) rotate(var(--angle, 0deg)) scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-4px) rotate(var(--angle, 0deg)) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-4px) rotate(var(--angle, 0deg)) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Energy glyphs that float up */
+.healing-glyph {
+    position: absolute;
+    font-size: 16px;
+    color: #00ff4c;
+    text-shadow: 0 0 5px #004f1b;
+    opacity: 0;
+    z-index: 101;
+    animation: glyph-float 2s ease-out forwards;
+}
+
+@keyframes glyph-float {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8) rotate(var(--rotation, 0deg));
+    }
+}
+
+/* Pulsing ground effect */
+.circle-heal-ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    background: linear-gradient(to top, rgba(0, 80, 30, 0.7), transparent);
+    z-index: 99;
+    animation: ground-pulse 1.5s ease-in-out;
+}
+
+@keyframes ground-pulse {
+    0% {
+        opacity: 0;
+        height: 0;
+    }
+    50% {
+        opacity: 0.7;
+        height: 25%;
+    }
+    100% {
+        opacity: 0;
+        height: 20%;
+    }
+}
+
+/* Protective Aura ability VFX - Blue/Gold Theme */
+.protective-aura-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99;
+    overflow: hidden;
+}
+
+/* Buff text display */
+.protective-aura-text {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 42, 102, 0.85);
+    color: #82baff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #0057b3, inset 0 0 8px #34a0ff;
+    border: 2px solid #34a0ff;
+    text-shadow: 0 0 5px #34a0ff;
+    z-index: 101;
+    animation: protective-aura-text-fade 2s forwards;
+}
+
+@keyframes protective-aura-text-fade {
+    0% { 
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    15% { 
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% { 
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(-20px);
+    }
+}
+
+/* Blue/gold aura effect */
+.protective-aura-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(52, 160, 255, 0.3) 0%,
+        rgba(0, 87, 179, 0.2) 40%,
+        rgba(212, 175, 55, 0.15) 70%,
+        rgba(0, 42, 102, 0) 90%
+    );
+    z-index: 100;
+    animation: protective-aura-fade 2.5s ease-out;
+}
+
+@keyframes protective-aura-fade {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Shield container */
+.protective-aura-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+/* Shield elements */
+.protective-shield {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    background-color: transparent;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    animation: shield-pulse 2s ease-out forwards;
+}
+
+.protective-shield::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 6px solid rgba(52, 160, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px rgba(52, 160, 255, 0.4), inset 0 0 10px rgba(52, 160, 255, 0.2);
+}
+
+.protective-shield::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 95%;
+    height: 95%;
+    border: 3px solid rgba(212, 175, 55, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), inset 0 0 8px rgba(212, 175, 55, 0.2);
+}
+
+@keyframes shield-pulse {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Energy particles */
+.aura-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--size, 5px);
+    height: var(--size, 5px);
+    background-color: #34a0ff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #0057b3;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    opacity: 0;
+    animation: particle-pulse var(--duration, 1s) ease-out forwards;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes particle-pulse {
+    0% {
+        opacity: 0;
+        transform: 
+            translate(-50%, -50%) 
+            rotate(0deg)
+            translateX(0);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: 
+            translate(-50%, -50%) 
+            rotate(var(--angle, 0rad))
+            translateX(var(--distance, 50px));
+    }
+}
+
+/* Every 3rd particle is gold */
+.aura-particle:nth-child(3n) {
+    background-color: #d4af37;
+    box-shadow: 0 0 8px #aa8c2c;
+}
+
+/* Magic runes */
+.aura-rune {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 20px;
+    color: #d4af37;
+    text-shadow: 0 0 5px #34a0ff;
+    transform: translate(-50%, -50%);
+    z-index: 101;
+    opacity: 0;
+    animation: rune-float 2s ease-out forwards;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes rune-float {
+    0% {
+        opacity: 0;
+        transform: 
+            translate(-50%, -50%) 
+            rotate(0deg)
+            translateX(0);
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: 
+            translate(-50%, -50%) 
+            rotate(var(--angle, 0rad))
+            translateX(var(--distance, 50px));
+    }
+} 

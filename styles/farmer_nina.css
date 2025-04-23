@@ -1,0 +1,436 @@
+/* Farmer Nina-specific CSS */
+
+/* Passive VFX */
+.nina-passive-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 100;
+    animation: nina-passive-pulse 1s ease-out;
+}
+
+.nina-passive-symbol {
+    font-size: 3em;
+    color: gold;
+    text-shadow: 0 0 10px gold, 0 0 20px gold;
+    animation: nina-passive-float 1s ease-out;
+}
+
+@keyframes nina-passive-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes nina-passive-float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    100% {
+        transform: translateY(-40px);
+        opacity: 0;
+    }
+}
+
+/* Special styling for Farmer Nina's buff icons - to show they're amplified */
+.character[id^="character-nina"] .buff-icon {
+    position: relative;
+    overflow: visible;
+}
+
+.character[id^="character-nina"] .buff-icon::after {
+    content: "×2";
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background-color: gold;
+    color: black;
+    font-size: 0.7em;
+    font-weight: bold;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 5px gold;
+    animation: nina-buff-pulse 2s infinite;
+}
+
+@keyframes nina-buff-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 5px gold;
+    }
+    50% {
+        transform: scale(1.2);
+        box-shadow: 0 0 8px gold, 0 0 12px yellow;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 5px gold;
+    }
+}
+
+/* Sniper Shot VFX */
+.sniper-shot-tracer {
+    position: fixed;
+    height: 2px;
+    background: linear-gradient(to right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1));
+    transform-origin: left center;
+    z-index: 100;
+    animation: tracer-fade 0.3s linear;
+}
+
+@keyframes tracer-fade {
+    0% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.sniper-shot-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(255, 0, 0, 0) 70%);
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    animation: impact-expand 0.6s ease-out;
+}
+
+@keyframes impact-expand {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Hiding VFX */
+.hiding-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 90;
+    animation: hiding-fade 1s ease-out;
+}
+
+.hiding-cloak {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 100, 255, 0.3) 0%, rgba(0, 50, 150, 0) 70%);
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 100, 255, 0.5);
+    animation: hiding-cloak-pulse 1s ease-out;
+}
+
+/* Special styling for characters that are hiding */
+.character[data-is-hiding="true"] {
+    pointer-events: auto !important; /* Keep clickable for player */
+    position: relative;
+}
+
+/* No-targeting indicator */
+.character[data-is-hiding="true"]::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background-image: url('Icons/untargetable.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 120;
+    filter: drop-shadow(0 0 3px rgba(0, 100, 255, 0.7));
+    animation: hiding-untargetable-float 2s infinite ease-in-out;
+}
+
+@keyframes hiding-untargetable-float {
+    0% {
+        transform: translateX(-50%) translateY(0);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.character[data-is-hiding="true"]:hover::after {
+    content: "Hiding";
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 100, 255, 0.8);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    z-index: 120;
+}
+
+@keyframes hiding-fade {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes hiding-cloak-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* Special styling for the hiding buff icon */
+.character[id^="character-nina"] .buff-icon[data-buff-id="nina_w_hiding_buff"] {
+    background-image: url('../Icons/hiding.png');
+    background-size: contain;
+    position: relative;
+    filter: drop-shadow(0 0 3px rgba(0, 100, 255, 0.7));
+}
+
+.character[id^="character-nina"] .buff-icon[data-buff-id="nina_w_hiding_buff"]::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 100, 255, 0.5) 0%, rgba(0, 50, 150, 0) 70%);
+    border-radius: 50%;
+    animation: hiding-icon-pulse 2s infinite;
+}
+
+@keyframes hiding-icon-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+}
+
+/* Target Lock VFX */
+.target-lock-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 90;
+}
+
+.target-lock-reticle {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255, 0, 0, 0.8);
+    border-radius: 50%;
+    animation: reticle-lock 0.5s ease-out;
+}
+
+.target-lock-reticle::before,
+.target-lock-reticle::after {
+    content: "";
+    position: absolute;
+    background-color: rgba(255, 0, 0, 0.8);
+}
+
+.target-lock-reticle::before {
+    top: 50%;
+    left: -10px;
+    right: -10px;
+    height: 2px;
+    transform: translateY(-50%);
+}
+
+.target-lock-reticle::after {
+    left: 50%;
+    top: -10px;
+    bottom: -10px;
+    width: 2px;
+    transform: translateX(-50%);
+}
+
+@keyframes reticle-lock {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+        border-color: rgba(255, 0, 0, 0.3);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        border-color: rgba(255, 0, 0, 0.8);
+    }
+}
+
+.target-lock-icon {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background-image: url('../Icons/target-lock.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.7));
+    animation: target-lock-pulse 2s infinite ease-in-out;
+    z-index: 110;
+}
+
+.target-lock-icon::before {
+    content: "LOCKED";
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: red;
+    font-size: 0.7em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+@keyframes target-lock-pulse {
+    0% {
+        transform: translateX(-50%) scale(1);
+        filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.7));
+    }
+    50% {
+        transform: translateX(-50%) scale(1.2);
+        filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.9));
+    }
+    100% {
+        transform: translateX(-50%) scale(1);
+        filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.7));
+    }
+}
+
+/* Piercing Shot VFX */
+.piercing-shot-tracer {
+    position: fixed;
+    height: 3px;
+    background: linear-gradient(to right, rgba(255, 100, 0, 0), rgba(255, 100, 0, 1));
+    transform-origin: left center;
+    z-index: 100;
+    animation: piercing-shot-tracer 0.4s linear;
+}
+
+@keyframes piercing-shot-tracer {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.piercing-shot-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 100, 0, 0.8) 0%, rgba(255, 100, 0, 0) 70%);
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    animation: piercing-shot-impact 0.6s ease-out;
+}
+
+@keyframes piercing-shot-impact {
+    0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+/* Armor Break Text Effect */
+.armor-break-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff5500;
+    font-weight: bold;
+    font-size: 1.5em;
+    text-shadow: 0 0 5px #ff5500, 0 0 10px #ff5500;
+    white-space: nowrap;
+    z-index: 110;
+    animation: armor-break-text 1s ease-out;
+}
+
+@keyframes armor-break-text {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+} 

@@ -1,0 +1,152 @@
+[
+  {
+    "title": "Blazing School Day",
+    "description": "Survive the chaos of a school day gone wrong!",
+    "requirements": {
+      "tags": ["School"],
+      "teamSize": { "min": 2, "max": 2 }
+    },
+    "stages": [
+      {
+        "name": "Burning School Gym",
+        "description": "The school gym is ablaze with unnatural fire! Defeat the fiery enemies and find a way forward.",
+        "difficulty": 3,
+        "boss": "Infernal Astaroth"
+      },
+      {
+        "name": "School Corridor",
+        "description": "You reach a seemingly calm corridor. There are some useful items left behind.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "First Aid Kit",
+            "description": "Heal a chosen character to full HP.",
+            "effect": { "type": "heal", "target": "selected", "amount": "full" }
+          },
+          {
+            "name": "Red Adrenaline",
+            "description": "Inject a chosen character with adrenaline, boosting their physical damage by 20%.",
+            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": "physicalDamage", "amount": 20 }
+          },
+          {
+            "name": "Student's Book",
+            "description": "Apply learned knowledge to a chosen character, increasing all stats.",
+            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": "all", "amount": 5 }
+          }
+        ]
+      },
+      {
+        "name": "School Yard",
+        "description": "The school yard crackles with heat. Five Blazing Elementals block the path!",
+        "difficulty": 4,
+        "enemies": [
+          { "characterId": "blazing_elemental" },
+          { "characterId": "blazing_elemental" },
+          { "characterId": "blazing_elemental" },
+          { "characterId": "blazing_elemental" },
+          { "characterId": "blazing_elemental" }
+        ]
+      },
+      {
+        "name": "Classroom 5B Door",
+        "description": "You find a locked classroom door. Perhaps someone inside can help?",
+        "type": "recruit",
+        "recruitTag": "School",
+        "recruitCount": 3
+      },
+      {
+        "name": "Rooftop",
+        "description": "The school rooftop offers a vantage point, but a fearsome Infernal Scorpion guards it.",
+        "difficulty": 6,
+        "boss": "Infernal Scorpion"
+      },
+      {
+        "name": "Final Choice",
+        "description": "After the rooftop battle, you find a strange altar with three options.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Mysterious Font",
+            "description": "Revive a fallen ally, restoring them to 50% HP.",
+            "target": "selected_dead",
+            "effect": { "type": "revive", "target": "selected", "amount_percent": 50 }
+          },
+          {
+            "name": "First Aid Kit",
+            "description": "Heal a chosen character to full HP.",
+            "target": "selected_living",
+            "effect": { "type": "heal", "target": "selected", "amount": "full" }
+          },
+          {
+            "name": "Risky Medicine",
+            "description": "A potent concoction. 50% chance to double the character's Max HP (and fully heal), 50% chance to defeat them instantly.",
+            "target": "selected_living",
+            "effect": { "type": "risky_medicine", "target": "selected" }
+          }
+        ]
+      },
+      {
+        "name": "Bathroom Entrance",
+        "description": "You hear sounds of struggle near the bathroom. Someone is bravely fighting Mr. Birdie, the corrupted cleaning man! Maybe they could join you?",
+        "type": "recruit",
+        "recruitTag": "School",
+        "recruitCount": 3
+      },
+      {
+        "name": "Bathroom Fight",
+        "description": "Infernal Birdie, the corrupted cleaning man, attacks with deadly chains!",
+        "difficulty": 8,
+        "type": "battle",
+        "boss": "Infernal Birdie",
+        "backgroundImage": "images/stages/background4.png",
+        "backgroundMusic": "sounds/bgaudio5.mp3"
+      },
+      {
+        "name": "Principal's Office",
+        "description": "You've reached the Principal's office. Choose one final ally to face whatever awaits.",
+        "type": "recruit",
+        "recruitTag": "School",
+        "recruitCount": 3
+      },
+      {
+        "name": "Returning to the Burning School Gym",
+        "description": "The flames rage anew! The mastermind behind this chaos, Headmaster Infernus, awaits in the restored inferno.",
+        "difficulty": 9,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "infernal_ibuki" },
+          { "characterId": "infernal_raiden" }
+        ],
+        "backgroundImage": "images/stages/background1.png",
+        "backgroundMusic": "sounds/bgaudio1.mp3"
+      }
+    ]
+  },
+  {
+    "title": "Corruption at the Farmland",
+    "description": "Something is wrong in the peaceful farmland...",
+    "requirements": {
+      "tags": ["Farmer"],
+      "teamSize": { "min": 1, "max": 1 }
+    },
+    "stages": [
+      {
+        "name": "An Angry Carrot",
+        "description": "A strangely aggressive carrot blocks the path into the farmland.",
+        "difficulty": 1,
+        "enemies": [
+            { "characterId": "angry_carrot" }
+        ],
+        "backgroundImage": "images/stages/farmland_entrance.png",
+        "backgroundMusic": "sounds/music/farmland_ambient.mp3"
+      },
+      {
+        "name": "Cottage",
+        "description": "You find a small cottage. Inside, a few farmhands are taking shelter. Perhaps one could join you?",
+        "type": "recruit",
+        "recruitTag": "Farmer",
+        "recruitCount": 3
+      }
+    ]
+  }
+] 

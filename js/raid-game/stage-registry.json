@@ -1,0 +1,230 @@
+{
+    "stages": [
+        {
+            "id": "burning_school_gym",
+            "name": "Burning School Gym",
+            "description": "The school gym is ablaze! Defeat the source of the inferno.",
+            "difficulty": 3,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "images/stages/burning_school_gym.png",
+            "backgroundMusic": "sounds/burning_school_gym_bgm.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "school_yard",
+            "name": "School Yard",
+            "description": "The school yard crackles with heat. Five Blazing Elementals block the path!",
+            "difficulty": 4,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "images/stages/school_yard_background.png",
+            "backgroundMusic": "sounds/music/fiery_encounter.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "scorched_cafeteria",
+            "name": "Scorched Cafeteria",
+            "description": "The cafeteria has been transformed into a hellish kitchen. Be careful of explosive ovens and flame jets!",
+            "difficulty": 4,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "molten_library",
+            "name": "Molten Library",
+            "description": "Ancient knowledge burns in magical flames. The books have come alive and seek vengeance!",
+            "difficulty": 5,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "rooftop",
+            "name": "Rooftop",
+            "description": "The school rooftop offers a vantage point, but a fearsome Infernal Scorpion guards it.",
+            "difficulty": 6,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "images/stages/school_rooftop.png",
+            "backgroundMusic": "sounds/rooftop_battle.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "bathroom_fight",
+            "name": "Bathroom Fight",
+            "description": "Infernal Birdie, the corrupted cleaning man, attacks with deadly chains!",
+            "difficulty": 8,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "images/stages/background4.png",
+            "backgroundMusic": "sounds/bgaudio5.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "principals_office",
+            "name": "Principal's Office",
+            "description": "The heart of the inferno lies within. Defeat the mastermind behind the school's fiery fate!",
+            "difficulty": 7,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "forest_entrance",
+            "name": "Forest Entrance",
+            "description": "The gateway to the mystical forest is guarded by twisted vegetation and corrupt wildlife.",
+            "difficulty": 2,
+            "type": "story",
+            "storyTitle": "Mystical Forest Journey",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "ancient_grove",
+            "name": "Ancient Grove",
+            "description": "The heart of the forest holds ancient magic. The trees themselves will try to stop your progress!",
+            "difficulty": 3,
+            "type": "story",
+            "storyTitle": "Mystical Forest Journey",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "mushroom_caverns",
+            "name": "Mushroom Caverns",
+            "description": "Below the forest lies a network of caves filled with toxic fungi and luminescent spores.",
+            "difficulty": 4,
+            "type": "story",
+            "storyTitle": "Mystical Forest Journey",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "crystal_springs",
+            "name": "Crystal Springs",
+            "description": "The magical wellspring of the forest has been tainted. Purify it by defeating its corrupted protector!",
+            "difficulty": 5,
+            "type": "story",
+            "storyTitle": "Mystical Forest Journey",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "heart_of_corruption",
+            "name": "Heart of Corruption",
+            "description": "Face the source of the corruption and cleanse the forest once and for all!",
+            "difficulty": 6,
+            "type": "story",
+            "storyTitle": "Mystical Forest Journey",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "submerged_gateway",
+            "name": "Submerged Gateway",
+            "description": "The entrance to Atlantis lies partially underwater. Defeat the guardians to gain access to the city.",
+            "difficulty": 4,
+            "type": "story",
+            "storyTitle": "Atlantean Ruins",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "coral_district",
+            "name": "Coral District",
+            "description": "Once a residential area, now overrun with aquatic creatures and animated coral formations.",
+            "difficulty": 5,
+            "type": "story",
+            "storyTitle": "Atlantean Ruins",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "temple_of_poseidon",
+            "name": "Temple of Poseidon",
+            "description": "The grand temple still contains powerful magic and is guarded by devoted servants of the sea god.",
+            "difficulty": 6,
+            "type": "story",
+            "storyTitle": "Atlantean Ruins",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "royal_palace",
+            "name": "Royal Palace",
+            "description": "The seat of Atlantean power, where the last king still rules over his drowned subjects.",
+            "difficulty": 7,
+            "type": "story",
+            "storyTitle": "Atlantean Ruins",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "power_core",
+            "name": "Power Core",
+            "description": "The ancient technology that raised the city is unstable. Defeat its controller before Atlantis rises fully!",
+            "difficulty": 8,
+            "type": "story",
+            "storyTitle": "Atlantean Ruins",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "abyssal_throne",
+            "name": "Abyssal Throne",
+            "description": "The true ruler of Atlantis awaits in the darkest depths. An ancient evil that must be defeated!",
+            "difficulty": 10,
+            "type": "story",
+            "storyTitle": "Atlantean Ruins",
+            "backgroundImage": "",
+            "unlockRequirements": []
+        },
+        {
+            "id": "returning_to_the_burning_school_gym",
+            "name": "Returning to the Burning School Gym",
+            "description": "The flames rage anew! The masterminds behind this chaos, Infernal Ibuki and Infernal Raiden, await in the restored inferno.",
+            "difficulty": 9,
+            "type": "story",
+            "storyTitle": "Blazing School Day",
+            "backgroundImage": "images/stages/background1.png",
+            "backgroundMusic": "sounds/bgaudio1.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "5v5_blazing_school_day",
+            "name": "5v5 - Blazing School Day",
+            "description": "A full-scale infernal assault on the school! Gather your best team of 5 School characters to face the combined might of the Blazing School Day bosses.",
+            "difficulty": 9,
+            "type": "challenge",
+            "backgroundImage": "images/stages/burning_school_gym.png",
+            "backgroundMusic": "sounds/burning_school_gym_bgm.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "farm_showdown",
+            "name": "Farm Showdown",
+            "description": "The farmers have challenged you to a battle! Defeat all three farmers to prove your worth.",
+            "difficulty": 5,
+            "type": "challenge",
+            "backgroundImage": "images/stages/farm_field.webp",
+            "backgroundMusic": "sounds/farm_bgm.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "an_angry_carrot",
+            "name": "An Angry Carrot",
+            "description": "A strangely aggressive carrot blocks the path into the farmland.",
+            "difficulty": 1,
+            "type": "story",
+            "storyTitle": "Corruption at the Farmland",
+            "backgroundImage": "images/stages/farmland_entrance.png",
+            "backgroundMusic": "sounds/music/farmland_ambient.mp3",
+            "unlockRequirements": []
+        }
+    ]
+} 

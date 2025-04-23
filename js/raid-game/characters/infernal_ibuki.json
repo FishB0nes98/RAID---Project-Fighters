@@ -1,0 +1,85 @@
+{
+    "id": "infernal_ibuki",
+    "name": "Infernal Ibuki",
+    "image": "Loading Screen/Infernal Ibuki.png",
+    "stats": {
+        "physicalDamage": 590,
+        "magicalDamage": 50,
+        "armor": 11,
+        "magicalShield": 11,
+        "hp": 10500,
+        "hpPerTurn": 0,
+        "mana": 5000,
+        "manaPerTurn": 100,
+        "lifesteal": 0.0,
+        "dodgeChance": 0.05,
+        "critChance": 0.08,
+        "critDamage": 2,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "kunai_toss",
+            "name": "Kunai Toss",
+            "type": "physical",
+            "manaCost": 50,
+            "cooldown": 0,
+            "targetType": "enemy",
+            "description": "Deals 500 + 200% Physical Damage to the target. Damage increases permanently each time this is used.",
+            "icon": "Icons/abilities/kunai_toss.png",
+            "sound": "sounds/kunai_toss.mp3",
+            "effects": {
+                "damage": {
+                    "fixedAmount": 500,
+                    "physicalDamagePercent": 2.0
+                }
+            }
+        },
+        {
+            "id": "shadow_step",
+            "name": "Shadow Step",
+            "type": "buff",
+            "manaCost": 80,
+            "cooldown": 13,
+            "targetType": "self",
+            "description": "Turns invisible and untargetable by abilities for 4 turns.",
+            "icon": "Icons/abilities/shadow_step_placeholder.png",
+            "sound": "sounds/smoke.mp3",
+            "effects": {
+                "buff": {
+                    "id": "shadow_step_buff",
+                    "name": "Shadow Step",
+                    "duration": 4,
+                    "isUntargetable": true,
+                    "description": "Untargetable by abilities."
+                }
+            }
+        },
+        {
+            "id": "dashing_strike",
+            "name": "Dashing Strike",
+            "type": "physical",
+            "manaCost": 70,
+            "cooldown": 0,
+            "targetType": "enemy",
+            "description": "Deals 200% Physical Damage to the target. 60% chance to dash to another enemy and repeat.",
+            "icon": "Icons/abilities/dashing_strike.png",
+            "sound": "sounds/dash.mp3",
+            "effects": {
+                "damage": {
+                    "physicalDamagePercent": 3.5
+                },
+                "chaining": {
+                    "chance": 0.60,
+                    "maxChains": -1
+                }
+            }
+        }
+    ],
+    "passive": {
+        "id": "kunai_mastery",
+        "name": "Kunai Mastery",
+        "description": "Kunai Toss deals 5% more damage permanently each time it's used.",
+        "icon": "images/icons/passive_kunai_mastery_placeholder.png"
+    }
+} 

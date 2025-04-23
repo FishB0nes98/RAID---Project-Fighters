@@ -1,0 +1,72 @@
+{
+    "id": "farmer_shoma",
+    "name": "Farmer Shoma",
+    "image": "Loading Screen/Farmer Shoma.png",
+    "stats": {
+        "physicalDamage": 200,
+        "magicalDamage": 55,
+        "armor": 18,
+        "magicalShield": 11,
+        "hp": 9000,
+        "hpPerTurn": 0,
+        "mana": 2800,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.5,
+        "critDamage": 2.0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "farmer_shoma_q",
+            "name": "Home Run Smash",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 35,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "description": "Deals 235 damage and has 35% chance to stun the target for 3 turns.",
+            "icon": "Icons/abilities/homerun_smash.jpeg"
+        },
+        {
+            "id": "farmer_shoma_w",
+            "name": "Apple Throw",
+            "type": "heal_or_damage",
+            "damageType": "physical",
+            "manaCost": 45,
+            "cooldown": 3,
+            "targetType": "any",
+            "description": "If targets ally: Heals 750 health. If targets enemy: Deals 400 damage and reduces their damage by 20% for 4 turns. Both effects can crit.",
+            "icon": "Icons/abilities/apple_throw.jpeg"
+        },
+        {
+            "id": "farmer_shoma_e",
+            "name": "Farmer's Catch",
+            "type": "buff",
+            "damageType": "physical",
+            "manaCost": 95,
+            "cooldown": 10,
+            "targetType": "ally",
+            "description": "Increase target's dodge chance by 50% for 5 turns.",
+            "icon": "Icons/abilities/farmers_catch.jpeg"
+        },
+        {
+            "id": "farmer_shoma_r",
+            "name": "Cottage Run",
+            "type": "heal_and_buff",
+            "damageType": "physical",
+            "manaCost": 150,
+            "cooldown": 22,
+            "targetType": "self",
+            "description": "Heals 50% of missing health to himself and gains 100% dodge chance for 4 turns.",
+            "icon": "Icons/abilities/cottage_run.jpeg"
+        }
+    ],
+    "passive": {
+        "id": "farmer_shoma_passive",
+        "name": "Farming Experience",
+        "description": "You start with 50% crit chance, increased to 70% after turn 20.",
+        "icon": "Icons/passive_farmer_shoma.png"
+    }
+} 

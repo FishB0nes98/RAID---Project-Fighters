@@ -1,0 +1,132 @@
+{
+    "characters": [
+        {
+            "id": "schoolboy_shoma",
+            "name": "Schoolboy Shoma",
+            "image": "Icons/characters/Schoolboy Shoma.png",
+            "rarity": "rare",
+            "type": "fighter",
+            "description": "A talented high school baseball player who uses his bat and physical prowess in combat."
+        },
+        {
+            "id": "test_boss",
+            "name": "Test Boss",
+            "image": "Icons/characters/Test Boss.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "description": "A powerful boss created for testing new characters and abilities."
+        },
+        {
+            "id": "shao_kahn_boss",
+            "name": "Shao Kahn",
+            "image": "Icons/characters/Shao Kahn.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "description": "The Emperor of Outworld, a powerful warrior with unrivaled strength. His hammer strikes fear into the hearts of his enemies."
+        },
+        {
+            "id": "cham_cham",
+            "name": "Cham Cham",
+            "image": "Icons/characters/Cham Cham.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang."
+        },
+        {
+            "id": "ayane",
+            "name": "Ayane",
+            "image": "Icons/characters/Ayane.png",
+            "rarity": "epic",
+            "type": "assassin",
+            "description": "A swift assassin who uses teleportation and shadow techniques. Her Combat Reflexes passive lets her reduce ability cooldowns."
+        },
+        {
+            "id": "farmer_nina",
+            "name": "Farmer Nina",
+            "image": "Icons/characters/Farmer Nina.png",
+            "rarity": "epic",
+            "type": "assassin",
+            "description": "A precision sniper with enhanced buff capabilities. Her Amplified Buffs passive doubles the power of all buffs applied to her."
+        },
+        {
+            "id": "atlantean_kagome",
+            "name": "Atlantean Kagome",
+            "image": "Icons/characters/Atlantean Kagome.png",
+            "rarity": "epic",
+            "type": "mage",
+            "description": "A mystical archer from Atlantis whose arrows are imbued with ancient magic. Her Atlantean Blessing passive converts missing mana into healing."
+        },
+        {
+            "id": "farmer_alice",
+            "name": "Farmer Alice",
+            "image": "Icons/characters/Farmer Alice.png",
+            "rarity": "epic",
+            "type": "tank",
+            "description": "A bulky tank with magical resistance. Her Magical Resistance passive allows her to gain permanent Magic Shield when taking magical damage."
+        },
+        {
+            "id": "farmer_shoma",
+            "name": "Farmer Shoma",
+            "image": "Icons/characters/Farmer Shoma.png",
+            "rarity": "legendary",
+            "type": "fighter",
+            "description": "A farm-raised baseball prodigy with extraordinary critical hit chance. His Farming Experience passive increases his already high crit chance after turn 20."
+        },
+        {
+            "id": "schoolgirl_kokoro",
+            "name": "Schoolgirl Kokoro",
+            "image": "Icons/characters/Schoolgirl Kokoro.png",
+            "rarity": "epic",
+            "type": "support",
+            "description": "A healer who specializes in restorative abilities. Her Healing Feedback passive lets her recover health whenever she uses any ability."
+        },
+        {
+            "id": "schoolboy_siegfried",
+            "name": "Schoolboy Siegfried",
+            "image": "Icons/characters/Schoolboy Siegfried.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "description": "A determined schoolboy warrior who grows stronger with every boon. His passive grants bonus Physical Damage per active buff."
+        },
+        {
+            "id": "schoolgirl_julia",
+            "name": "Schoolgirl Julia",
+            "image": "Icons/characters/Schoolgirl Julia.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "description": "A energetic fighter who grows stronger whenever she heals or is healed. Her passive grants permanent Physical Damage on healing."
+        },
+        {
+            "id": "schoolgirl_ayane",
+            "name": "Schoolgirl Ayane",
+            "image": "Icons/characters/Schoolgirl Ayane.png",
+            "rarity": "epic",
+            "type": "assassin",
+            "description": "A swift assassin who uses agility and daggers. Her Combat Reflexes passive boosts her damage after dodging."
+        },
+        {
+            "id": "schoolgirl_elphelt",
+            "name": "Schoolgirl Elphelt",
+            "image": "Icons/characters/Schoolgirl Elphelt.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "description": "A cheerful shooter who bolsters her defenses when using abilities."
+        },
+        {
+            "id": "blazing_elemental",
+            "name": "Blazing Elemental",
+            "image": "Icons/characters/Blazing Elemental.png",
+            "rarity": "rare",
+            "type": "mage",
+            "description": "A fiery being that unleashes explosive power, harming foes and healing allies."
+        },
+        {
+            "id": "infernal_birdie",
+            "name": "Infernal Birdie",
+            "image": "Icons/characters/Infernal Birdie.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "description": "A relentless warrior wielding enchanted chains, capable of striking multiple foes and stunning them."
+        }
+    ]
+} 

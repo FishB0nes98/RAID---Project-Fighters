@@ -1,0 +1,68 @@
+{
+    "id": "infernal_birdie",
+    "name": "Infernal Birdie",
+    "image": "Loading Screen/Infernal Birdie.png",
+    "stats": {
+        "physicalDamage": 185,
+        "magicalDamage": 100,
+        "armor": 14,
+        "magicalShield": 12,
+        "hp": 9700,
+        "hpPerTurn": 0,
+        "mana": 2500,
+        "manaPerTurn": 40,
+        "lifesteal": 0.0,
+        "dodgeChance": 0.08,
+        "critChance": 0.0,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "infernal_birdie_chain_slash",
+            "name": "Chain Slash",
+            "type": "custom_chain_slash",
+            "manaCost": 50,
+            "cooldown": 3,
+            "targetType": "all_enemies",
+            "description": "Deals 400 + 100% Physical Damage and 100% Magical Damage to all enemies. Has a 20% chance to stun each target for 2 turns.",
+            "icon": "Icons/abilities/chain_slash.webp"
+        },
+        {
+            "id": "infernal_birdie_drink_up",
+            "name": "Drink Up!",
+            "type": "custom",
+            "manaCost": 100,
+            "cooldown": 14,
+            "targetType": "self",
+            "description": "Heals self for 800 HP and increases Healing Power by 20% for 4 turns. Cooldown reduced by 1 when healed.",
+            "icon": "Icons/abilities/drink_up.webp"
+        },
+        {
+            "id": "infernal_birdie_headbutt",
+            "name": "Headbutt",
+            "type": "custom",
+            "manaCost": 20,
+            "cooldown": 5,
+            "targetType": "enemy",
+            "description": "Deals 65% Physical Damage and stuns the target for 2 turns.",
+            "icon": "Icons/abilities/headbutt.webp"
+        },
+        {
+            "id": "infernal_birdie_fire_shield",
+            "name": "Fire Shield",
+            "type": "custom",
+            "manaCost": 150,
+            "cooldown": 10,
+            "targetType": "self",
+            "description": "Grants 25% damage reduction for 5 turns. Attackers take 50% of the damage they deal (before reduction) back as magic damage.",
+            "icon": "Icons/abilities/fire_shield.webp"
+        }
+    ],
+    "passive": {
+        "id": "lifesteal_on_stun",
+        "name": "Lifesteal on Stun",
+        "description": "Whenever Infernal Birdie successfully stuns a target, he permanently gains 1% Lifesteal.",
+        "icon": "Icons/passives/lifesteal_on_stun.png"
+    }
+} 

@@ -1,0 +1,29 @@
+{
+  "id": "blazing_school_day_bathroom_fight",
+  "name": "Bathroom Fight",
+  "description": "Infernal Birdie, the corrupted cleaning man, attacks with deadly chains!",
+  "difficulty": 8,
+  "objectives": {
+    "winConditions": [
+      { "type": "enemyDefeated", "targetId": "infernal_birdie" }
+    ]
+  },
+  "stageEffects": [],
+  "enemies": [
+    {
+      "characterId": "infernal_birdie"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 400
+    },
+    {
+      "type": "xp",
+      "value": 250
+    }
+  ],
+  "backgroundImage": "images/stages/background4.png",
+  "backgroundMusic": "sounds/bgaudio5.mp3"
+} 

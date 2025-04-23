@@ -1,0 +1,70 @@
+{
+    "id": "ayane",
+    "name": "Ayane",
+    "image": "Loading Screen/Ayane.png",
+    "stats": {
+        "physicalDamage": 225,
+        "magicalDamage": 20,
+        "armor": 35,
+        "magicalShield": 20,
+        "hp": 8200,
+        "hpPerTurn": 40,
+        "mana": 2500,
+        "manaPerTurn": 35,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.10,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "ayane_q",
+            "name": "Teleport Blade",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 20,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 100% AD damage. 45% chance to allow another action without ending turn.",
+            "icon": "Icons/abilities/teleport_blade.jfif"
+        },
+        {
+            "id": "ayane_w",
+            "name": "Butterfly Trail",
+            "type": "utility",
+            "manaCost": 25,
+            "cooldown": 4,
+            "targetType": "self",
+            "description": "Reduces all teammates' and Ayane's active cooldowns by 1 turn. Has 20% chance to reduce by 2 turns instead.",
+            "icon": "Icons/abilities/butterfly_trail.jfif"
+        },
+        {
+            "id": "ayane_e",
+            "name": "Ready to Slice",
+            "type": "buff",
+            "manaCost": 30,
+            "cooldown": 5,
+            "targetType": "self",
+            "description": "Increases Ayane's critical chance by 15% for 3 turns and her physical damage by 10%.",
+            "icon": "Icons/abilities/ready_to_slice.jfif"
+        },
+        {
+            "id": "ayane_r",
+            "name": "Execute Attack",
+            "type": "damage",
+            "damageType": "physical",
+            "manaCost": 60,
+            "cooldown": 8,
+            "targetType": "enemy",
+            "description": "Deals 250% AD damage. If target is below 30% health, deals 350% AD damage instead.",
+            "icon": "Icons/abilities/execute_attack.jfif"
+        }
+    ],
+    "passive": {
+        "id": "ayane_passive",
+        "name": "Combat Reflexes",
+        "description": "After using an ability, Ayane has a 25% chance to reduce all her abilities on cooldown by 1 turn.",
+        "icon": "Icons/passive_ayane.webp"
+    }
+} 

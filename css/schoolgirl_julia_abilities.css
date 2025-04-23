@@ -1,0 +1,292 @@
+/* CSS for Schoolgirl Julia abilities */
+
+/* Placeholder for potential Healing Kick VFX */
+.healing-kick-vfx {
+    /* Add styles when VFX are designed */
+}
+
+/* Healing Kick Wind VFX */
+.healing-kick-wind-vfx {
+    position: absolute;
+    width: 10px; /* Small size for particle effect */
+    height: 10px;
+    background-color: rgba(200, 255, 255, 0.7); /* Light cyan, semi-transparent */
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(150, 230, 230, 0.8);
+    pointer-events: none;
+    z-index: 14; /* Below passive VFX but above character */
+    animation: windyEffect 0.6s ease-out forwards;
+    /* Random starting position and delay will be handled by JS */
+}
+
+@keyframes windyEffect {
+    0% {
+        opacity: 0.8;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        /* Move outwards and upwards, with a slight curve */
+        transform: translate(var(--wind-x, 50px), var(--wind-y, -30px)) scale(0.5);
+    }
+}
+
+/* Passive gain VFX */
+.julia-passive-gain-vfx {
+     position: absolute;
+     top: -20px;
+     left: 50%;
+     transform: translateX(-50%);
+     color: #ffeb99; /* Light gold color */
+     font-weight: bold;
+     font-size: 1.1em;
+     text-shadow: 0 0 3px black;
+     animation: floatUpFade 1s ease-out forwards;
+     pointer-events: none;
+     white-space: nowrap; /* Prevent wrapping */
+     z-index: 15;
+}
+
+/* Re-use existing float up animation */
+@keyframes floatUpFade {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+/* Passive Damage Counter Display */
+.julia-passive-counter {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #ffc966;
+    border-radius: 4px;
+    padding: 3px 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Icon for passive */
+.julia-passive-icon {
+    width: 16px;
+    height: 16px;
+    background-color: #ff9933;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Plus sign inside the icon */
+.julia-passive-icon::before {
+    content: '+';
+    color: #fff;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* Value display */
+.julia-passive-value {
+    color: #ffc966;
+    font-weight: bold;
+    font-size: 13px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    transition: transform 0.2s ease;
+}
+
+/* Pulse animation for damage gain */
+.julia-passive-value.pulse {
+    animation: counterPulse 0.6s ease;
+}
+
+@keyframes counterPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); color: #ffffff; }
+    100% { transform: scale(1); }
+}
+
+/* Tier styling for passive counter */
+.julia-passive-counter.tier1 {
+    border-color: #66ccff;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.julia-passive-counter.tier1 .julia-passive-icon {
+    background-color: #3399ff;
+    box-shadow: 0 0 4px #3399ff;
+}
+
+.julia-passive-counter.tier1 .julia-passive-value {
+    color: #99ddff;
+}
+
+.julia-passive-counter.tier2 {
+    border-color: #cc99ff;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.julia-passive-counter.tier2 .julia-passive-icon {
+    background-color: #9966ff;
+    box-shadow: 0 0 5px #9966ff;
+}
+
+.julia-passive-counter.tier2 .julia-passive-value {
+    color: #d9b3ff;
+}
+
+.julia-passive-counter.tier3 {
+    border-color: #ff99cc;
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 8px rgba(255, 153, 204, 0.4);
+}
+
+.julia-passive-counter.tier3 .julia-passive-icon {
+    background-color: #ff3399;
+    box-shadow: 0 0 6px #ff3399;
+    animation: tier3Glow 1.5s infinite alternate;
+}
+
+.julia-passive-counter.tier3 .julia-passive-value {
+    color: #ffcce6;
+    font-size: 14px;
+}
+
+@keyframes tier3Glow {
+    0% { box-shadow: 0 0 4px #ff3399; }
+    100% { box-shadow: 0 0 10px #ff3399; }
+}
+
+/* Sprout Planting (W) VFX */
+.sprout-planting-vfx {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 30px;
+    background-color: #4CAF50; /* Green */
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    animation: growSprout 1s ease-out forwards;
+    z-index: 10;
+}
+
+@keyframes growSprout {
+    0% { height: 0; opacity: 0; }
+    100% { height: 30px; opacity: 1; }
+}
+
+.sprout-bloom-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(144, 238, 144, 0.8) 0%, rgba(144, 238, 144, 0) 70%); /* Light green bloom */
+    border-radius: 50%;
+    animation: bloomEffect 1.5s ease-out forwards;
+    z-index: 10;
+    pointer-events: none; /* Ensure it doesn't block clicks */
+}
+
+@keyframes bloomEffect {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Placeholder for Healing Sprout buff icon in UI */
+.status-icon[style*="sprout_planting.png"] {
+    background-color: #90EE90; /* Light Green background for placeholder */
+    border: 1px solid #3CB371; /* Medium Sea Green border */
+}
+
+/* Add styles for Pushback Attack VFX */
+.julia-push-caster-animation {
+    /* Optional: Add a slight forward lunge or glow */
+    animation: juliaPushCaster 0.5s ease-out;
+}
+
+@keyframes juliaPushCaster {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); filter: brightness(1.2); }
+    100% { transform: translateX(0); }
+}
+
+.pushback-animation {
+    animation: pushbackTarget 0.8s ease-out;
+}
+
+@keyframes pushbackTarget {
+    0% { transform: translateX(0); }
+    40% { transform: translateX(-30px); /* Adjust push distance */ }
+    100% { transform: translateX(0); }
+}
+
+.julia-push-impact-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(255, 255, 100, 0.8) 0%, rgba(255, 255, 100, 0) 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: pushImpact 0.6s ease-out 0.1s; /* Delay slightly */
+    z-index: 10;
+}
+
+@keyframes pushImpact {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+/* Add styles for Spirits Strength VFX */
+.spirits-strength-heal-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em; /* Larger text for ultimate */
+    font-weight: bold;
+    color: #aaffaa; /* Light green healing color */
+    text-shadow: 0 0 5px #00ff00, 0 0 10px #ffffff;
+    z-index: 11;
+    animation: floatUpFadeStrong 1.5s ease-out forwards;
+}
+
+.spirits-strength-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(170, 255, 170, 0.6) 0%, rgba(170, 255, 170, 0) 75%);
+    border-radius: 50%;
+    animation: spiritsStrengthPulse 1.5s ease-out forwards;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes floatUpFadeStrong {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -100%) scale(1.2); } /* Float up further */
+}
+
+@keyframes spiritsStrengthPulse {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.3); opacity: 0.8; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* Placeholder for buff icon */
+.status-icon[style*="spirits_strength.jfif"] {
+    background-color: #98FB98; /* Pale Green */
+    border: 1px solid #3CB371; /* Medium Sea Green border */
+} 

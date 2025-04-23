@@ -1,0 +1,281 @@
+/* CSS for Schoolgirl Elphelt Abilities and Passive */
+
+/* Love Bullet VFX */
+.love-bullet-vfx {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-color: #ff3385;
+    clip-path: path('M20,10 C17,0 0,0 0,10 C0,20 10,30 20,35 C30,30 40,20 40,10 C40,0 23,0 20,10 Z');
+    z-index: 100;
+    pointer-events: none; /* Prevent interaction */
+    transform-origin: center center;
+    filter: drop-shadow(0 0 8px rgba(255, 51, 133, 0.8));
+    animation: heartbeat 0.8s infinite alternate;
+}
+
+.love-bullet-vfx::before,
+.love-bullet-vfx::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 51, 133, 0.3);
+    clip-path: path('M20,10 C17,0 0,0 0,10 C0,20 10,30 20,35 C30,30 40,20 40,10 C40,0 23,0 20,10 Z');
+    animation: pulse-ring 1.5s linear infinite;
+    z-index: -1;
+}
+
+.love-bullet-vfx::after {
+    animation-delay: 0.5s;
+}
+
+@keyframes heartbeat {
+    0% {
+        transform: scale(0.8);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+.love-bullet-trail {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 105, 180, 0.7);
+    border-radius: 50%;
+    z-index: 90;
+    pointer-events: none;
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 0.7; }
+    100% { opacity: 0; }
+}
+
+.love-bullet-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    z-index: 99;
+    pointer-events: none;
+}
+
+.love-bullet-impact::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #ff3385;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.1);
+    animation: impactRing 0.6s ease-out forwards;
+}
+
+/* Multiple heart particles for the impact */
+.love-bullet-impact::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    animation: heartParticles 0.6s ease-out forwards;
+}
+
+@keyframes impactRing {
+    0% { 
+        transform: scale(0.1); 
+        opacity: 0.8; 
+    }
+    100% { 
+        transform: scale(1.5); 
+        opacity: 0; 
+    }
+}
+
+@keyframes heartParticles {
+    0% {
+        box-shadow: 
+            0 0 0 0 #ff3385,
+            0 0 0 0 #ff3385,
+            0 0 0 0 #ff3385,
+            0 0 0 0 #ff3385,
+            0 0 0 0 #ff3385,
+            0 0 0 0 #ff3385;
+    }
+    50% {
+        box-shadow: 
+            15px -15px 0 -2px #ff3385,
+            15px 15px 0 -2px #ff3385,
+            -15px -15px 0 -2px #ff3385,
+            -15px 15px 0 -2px #ff3385,
+            0px -25px 0 -2px #ff3385,
+            0px 25px 0 -2px #ff3385;
+    }
+    100% {
+        box-shadow: 
+            30px -30px 0 -4px transparent,
+            30px 30px 0 -4px transparent,
+            -30px -30px 0 -4px transparent,
+            -30px 30px 0 -4px transparent,
+            0px -50px 0 -4px transparent,
+            0px 50px 0 -4px transparent;
+    }
+}
+
+/* Heart particles that explode outward on impact */
+.heart-particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #ff3385;
+    clip-path: path('M6,3 C5.1,0 0,0 0,3 C0,6 3,9 6,10.5 C9,9 12,6 12,3 C12,0 6.9,0 6,3 Z');
+    transform-origin: center center;
+    animation: flyingHearts 0.8s ease-out forwards;
+    opacity: 0.9;
+}
+
+@keyframes flyingHearts {
+    0% {
+        transform: translate(0, 0) scale(0.5) rotate(0deg);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(var(--x, 50px), var(--y, 50px)) scale(1) rotate(var(--r, 180deg));
+        opacity: 0;
+    }
+}
+
+/* Defensive Stance Passive VFX */
+.elphelt-passive-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px; /* Match character slot radius */
+    border: 3px solid #ff80ab; /* Pinkish color */
+    box-shadow: 0 0 15px #ff80ab, inset 0 0 10px #ff80ab;
+    opacity: 0;
+    animation: elpheltPassivePulse 1s ease-out forwards;
+    pointer-events: none;
+    z-index: 10; /* Below image container but above background */
+}
+
+@keyframes elpheltPassivePulse {
+    0% { opacity: 0; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0; transform: scale(1); }
+}
+
+/* --- Affection Ability VFX --- */
+.affection-vfx {
+    position: absolute;
+    font-size: 24px;
+    color: #ff4757; /* Pinkish-red heart color */
+    opacity: 0;
+    animation: floatAndFade 1.5s ease-out forwards;
+    z-index: 95;
+    pointer-events: none;
+    text-shadow: 0 0 5px white, 0 0 10px #ff4757;
+}
+
+.affection-vfx.target-heart {
+    top: 10%; /* Position above the target */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.affection-vfx.caster-heart {
+    top: 15%; /* Slightly lower than target heart */
+    left: 40%; /* Slightly offset */
+    transform: translateX(-50%);
+    animation-delay: 0.1s; /* Stagger the animation slightly */
+}
+
+@keyframes floatAndFade {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 10px);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -15px);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -25px);
+    }
+}
+
+/* Piercing Bullet VFX */
+.elphelt-piercing-bullet-tracer {
+    position: absolute; /* Positioned relative to body */
+    height: 3px;
+    background: linear-gradient(90deg, rgba(255, 105, 180, 0.2), rgba(255, 20, 147, 1)); /* Pink gradient */
+    box-shadow: 0 0 5px rgba(255, 20, 147, 0.8);
+    border-radius: 2px;
+    transform-origin: left center;
+    z-index: 100; /* Ensure it's above characters */
+    pointer-events: none; /* Allow clicks through */
+    opacity: 0;
+}
+
+.elphelt-piercing-bullet-tracer.initial-hit {
+    animation: elphelt-pierce-initial 0.5s ease-out forwards;
+}
+
+.elphelt-piercing-bullet-tracer.chain-hit {
+     animation: elphelt-pierce-chain 0.4s ease-out forwards;
+}
+
+@keyframes elphelt-pierce-initial {
+    0% { 
+        opacity: 0; 
+        width: 0; 
+    }
+    20% { 
+        opacity: 1; 
+    }
+    100% { 
+        opacity: 0; 
+        /* Width is set dynamically by JS */
+    }
+}
+
+@keyframes elphelt-pierce-chain {
+     0% { 
+        opacity: 0; 
+        width: 0; 
+    }
+    20% { 
+        opacity: 1; 
+    }
+    100% { 
+        opacity: 0; 
+        /* Width is set dynamically by JS */
+    }
+}
+
+/* Add more styles for other Elphelt abilities or effects as needed */ 

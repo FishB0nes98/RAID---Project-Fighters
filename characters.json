@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Schoolboy Shoma",
+    "image": "Icons/characters/Schoolboy Shoma.png",
+    "tags": ["School", "Physical"]
+  },
+  {
+    "name": "Cham Cham",
+    "image": "Icons/characters/Cham Cham.png",
+    "tags": ["Solo", "Carry", "Physical"]
+  },
+  {
+    "name": "Ayane",
+    "image": "Icons/characters/Ayane.png",
+    "tags": ["Carry", "Solo", "Physical"]
+  },
+  {
+    "name": "Farmer Nina",
+    "image": "Icons/characters/Farmer Nina.png",
+    "tags": ["Carry", "Physical", "Farmer"]
+  },
+  {
+    "name": "Atlantean Kagome",
+    "image": "Icons/characters/Atlantean Kagome.png",
+    "tags": ["Magical", "Atlantean"]
+  },
+  {
+    "name": "Farmer Alice",
+    "image": "Icons/characters/Farmer Alice.png",
+    "tags": ["Tank", "Support", "Farmer", "Physical"]
+  },
+  {
+    "name": "Farmer Shoma",
+    "image": "Icons/characters/Farmer Shoma.png",
+    "tags": ["Support", "Farmer", "Physical"]
+  },
+  {
+    "name": "Schoolgirl Kokoro",
+    "image": "Icons/characters/Schoolgirl Kokoro.png",
+    "tags": ["Support", "School"]
+  },
+  {
+    "name": "Schoolboy Siegfried",
+    "image": "Icons/characters/Schoolboy Siegfried.png",
+    "tags": ["Carry", "Physical", "School", "Solo"]
+  },
+  {
+    "name": "Schoolgirl Julia",
+    "image": "Icons/characters/Schoolgirl Julia.png",
+    "tags": ["Support", "School", "Physical"]
+  },
+  {
+    "name": "Schoolgirl Ayane",
+    "image": "Icons/characters/Schoolgirl Ayane.png",
+    "tags": ["Solo", "School", "Physical", "Carry"]
+  },
+  {
+    "name": "Schoolgirl Elphelt",
+    "image": "Icons/characters/Schoolgirl Elphelt.png",
+    "tags": ["School", "Physical", "Tank"]
+  }
+] 

@@ -1,0 +1,97 @@
+{
+  "id": "infernal_scorpion",
+  "name": "Infernal Scorpion",
+  "image": "Loading Screen/Infernal Scorpion.png",
+  "tags": ["Demon", "Scorpion", "Melee"],
+  "description": "A terrifying demonic scorpion forged in the depths of the underworld. Its chain hook spells doom for its victims.",
+  "rarity": "Epic",
+  "stats": {
+    "hp": 8070,
+    "mana": 1800,
+    "physicalDamage": 300,
+    "magicalDamage": 50,
+    "armor": 20,
+    "magicalShield": 25,
+    "critChance": 0.15,
+    "critDamage": 1.6,
+    "hpRegen": 0,
+    "manaRegen": 50,
+    "lifesteal": 0.00,
+    "dodgeChance": 0.30
+  },
+  "passive": {
+    "id": "infernal_chain_reaction",
+    "name": "Chain Reaction",
+    "icon": "Icons/passives/chain_reaction.png",
+    "description": "Damaging abilities have a 50% chance to chain to another random enemy, dealing 50% of the original damage.",
+    "script": "js/raid-game/passives/infernal_scorpion_passive.js"
+  },
+  "abilities": [
+    {
+      "id": "infernal_scorpion_q",
+      "name": "GET OVER HERE",
+      "icon": "Icons/abilities/get_over_here.png",
+      "type": "custom",
+      "manaCost": 90,
+      "cooldown": 8,
+      "targetType": "enemy",
+      "description": "Deals 250% Physical Damage to the target and applies Hooked for 6 turns.",
+      "effect": {
+        "type": "custom",
+        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
+        "functionName": "infernalScorpionGetOverHereEffect"
+      }
+    },
+    {
+      "id": "infernal_scorpion_w",
+      "name": "Fire Breath",
+      "icon": "Icons/abilities/fire_breath.png",
+      "type": "custom",
+      "manaCost": 90,
+      "cooldown": 3,
+      "targetType": "enemy",
+      "description": "Deals 980 (+100% Magical Damage) magical damage to the target and has a 75% chance to apply Burn for 10 turns.",
+      "effect": {
+        "type": "custom",
+        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
+        "functionName": "infernalScorpionFireBreathEffect"
+      }
+    },
+    {
+      "id": "infernal_scorpion_dual_strike",
+      "name": "Dual Blade Strike",
+      "icon": "Icons/abilities/dual_blade_strike.png",
+      "type": "custom",
+      "manaCost": 30,
+      "cooldown": 3,
+      "targetType": "enemy",
+      "description": "Deals (250% Physical Damage + 100% Magical Damage) as physical damage to the target twice. Each hit can trigger passives.",
+      "effect": {
+        "type": "custom",
+        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
+        "functionName": "dualBladeStrikeEffect"
+      }
+    },
+    {
+      "id": "infernal_scorpion_open_portal",
+      "name": "Open Portal",
+      "icon": "Icons/abilities/open_portal.png",
+      "type": "custom",
+      "manaCost": 100,
+      "cooldown": 6,
+      "targetType": "self",
+      "description": "Opens a chaotic portal, disabling one random non-passive ability on each enemy for 5 turns. Reduces own ability cooldowns by 2 turns.",
+      "effect": {
+        "type": "custom",
+        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
+        "functionName": "infernalScorpionOpenPortalEffect"
+      }
+    }
+  ],
+  "quotes": {
+    "attack": ["Feel the sting!", "Nowhere to run!", "Gotcha!"],
+    "hit": ["Urgh!", "Insolent pest!", "Just a scratch!"],
+    "defeat": ["Impossible... the flames... consume...", "Master... forgive me..."],
+    "victory": ["All will burn!", "Inferior beings!", "Victory is inevitable."]
+  }
+} 
