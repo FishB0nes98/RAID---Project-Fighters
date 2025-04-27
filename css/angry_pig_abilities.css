@@ -1,0 +1,71 @@
+/* Angry Pig Abilities CSS */
+
+/* Pitchfork Pierce */
+.pitchfork-cast-animation {
+    animation: lunge-forward 0.5s ease-out;
+}
+
+@keyframes lunge-forward {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(15px) scale(1.05); }
+    100% { transform: translateX(0); }
+}
+
+.pitchfork-impact-vfx {
+    position: absolute;
+    top: 30%; left: 40%;
+    width: 20px;
+    height: 40px;
+    background-color: silver; /* Placeholder for stab */
+    border: 1px solid gray;
+    transform-origin: bottom center;
+    animation: stab-effect 0.6s ease-out forwards;
+    opacity: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes stab-effect {
+    0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+    30% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+    70% { transform: scale(0.9) rotate(-2deg); opacity: 0.9; }
+    100% { transform: scale(0.8) rotate(0deg); opacity: 0; }
+}
+
+/* Passive Heal */
+.passive-heal-glow-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(144, 238, 144, 0.7) 0%, rgba(0, 100, 0, 0) 70%);
+    border-radius: 50%;
+    animation: heal-pulse 1.2s ease-out forwards;
+    z-index: 8;
+    pointer-events: none;
+}
+
+@keyframes heal-pulse {
+    0% { transform: scale(0.9); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1.0); opacity: 0; }
+}
+
+.passive-heal-text-vfx {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #32CD32; /* LimeGreen */
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 3px black, 0 0 5px darkgreen;
+    white-space: nowrap;
+    animation: float-up-heal 1.2s ease-out forwards;
+    z-index: 9;
+    pointer-events: none;
+}
+
+@keyframes float-up-heal {
+    0% { transform: translate(-50%, 0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-50%, -30px); opacity: 0; }
+} 

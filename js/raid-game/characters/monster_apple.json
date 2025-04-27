@@ -1,0 +1,38 @@
+{
+    "id": "monster_apple",
+    "name": "Monster Apple",
+    "image": "Loading Screen/Monster Apple.webp",
+    "stats": {
+        "physicalDamage": 300,
+        "magicalDamage": 50,
+        "armor": 15,
+        "magicalShield": 15,
+        "hp": 4000,
+        "hpPerTurn": 0,
+        "mana": 1000,
+        "manaPerTurn": 100,
+        "lifesteal": 0,
+        "dodgeChance": 0.0,
+        "critChance": 0.0,
+        "critDamage": 0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "monster_apple_scythe_slash",
+            "name": "Scythe Slash",
+            "type": "custom",
+            "manaCost": 60,
+            "cooldown": 1,
+            "targetType": "all_enemies",
+            "description": "Deals 150% Physical Damage to all enemies.",
+            "icon": "Icons/abilities/scythe_slash.png"
+        }
+    ],
+    "passive": {
+        "id": "monster_apple_curse",
+        "name": "Monstrous Curse",
+        "description": "Upon death, permanently reduces all enemies' Physical and Magical Damage by 35%.",
+        "icon": "Icons/passives/monster_apple_curse.png"
+    }
+} 

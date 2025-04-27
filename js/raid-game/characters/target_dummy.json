@@ -1,0 +1,36 @@
+{
+    "id": "target_dummy",
+    "name": "Target Dummy",
+    "image": "images/characters/target_dummy.png", 
+    "stats": {
+        "physicalDamage": 0,
+        "magicalDamage": 0,
+        "armor": 0,
+        "magicalShield": 0,
+        "hp": 10000, 
+        "hpPerTurn": 0,
+        "mana": 0,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.0,
+        "critChance": 0.0,
+        "critDamage": 1.5,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "do_nothing",
+            "name": "Do Nothing",
+            "type": "utility",
+            "manaCost": 0,
+            "cooldown": 1,
+            "targetType": "self",
+            "description": "The dummy sits there menacingly.",
+            "icon": "images/icons/ability_placeholder.png", 
+            "effects": {
+                "customEffect": "doNothingEffect" 
+            }
+        }
+    ],
+    "passive": null 
+} 

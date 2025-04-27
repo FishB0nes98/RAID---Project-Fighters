@@ -1,0 +1,38 @@
+{
+    "id": "rotten_apple",
+    "name": "Rotten Apple",
+    "image": "Loading Screen/Rotten Apple.webp",
+    "stats": {
+        "physicalDamage": 55,
+        "magicalDamage": 190,
+        "armor": 8,
+        "magicalShield": 20,
+        "hp": 3950,
+        "hpPerTurn": 0,
+        "mana": 1200,
+        "manaPerTurn": 10,
+        "lifesteal": 0,
+        "dodgeChance": 0.0,
+        "critChance": 0.0,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "rotten_apple_rot_spit",
+            "name": "Rot Spit",
+            "type": "custom",
+            "manaCost": 35,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 65% Magical damage to the target and reduces their armor by 5% for 3 turns (can stack).",
+            "icon": "Icons/abilities/rot_spit.png"
+        }
+    ],
+    "passive": {
+        "id": "rotten_apple_explosion",
+        "name": "Rotten Explosion",
+        "description": "Upon death, deals 3500 magical damage to all enemies, ignoring armor and magical shield.",
+        "icon": "Icons/passives/rotten_apple_explosion.png"
+    }
+} 

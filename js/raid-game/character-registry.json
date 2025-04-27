@@ -46,7 +46,17 @@
             "image": "Icons/characters/Farmer Nina.png",
             "rarity": "epic",
             "type": "assassin",
+            "tags": ["Farmer"],
             "description": "A precision sniper with enhanced buff capabilities. Her Amplified Buffs passive doubles the power of all buffs applied to her."
+        },
+        {
+            "id": "farmer_raiden",
+            "name": "Farmer Raiden",
+            "image": "Icons/characters/Farmer Raiden.png",
+            "rarity": "epic",
+            "type": "mage",
+            "tags": ["Farmer"],
+            "description": "A powerful farmer who harnesses the power of lightning. His Thunder Mastery passive allows him to deal bonus magical damage and gain magical shield when using lightning abilities."
         },
         {
             "id": "atlantean_kagome",
@@ -62,6 +72,7 @@
             "image": "Icons/characters/Farmer Alice.png",
             "rarity": "epic",
             "type": "tank",
+            "tags": ["Farmer"],
             "description": "A bulky tank with magical resistance. Her Magical Resistance passive allows her to gain permanent Magic Shield when taking magical damage."
         },
         {
@@ -70,6 +81,7 @@
             "image": "Icons/characters/Farmer Shoma.png",
             "rarity": "legendary",
             "type": "fighter",
+            "tags": ["Farmer"],
             "description": "A farm-raised baseball prodigy with extraordinary critical hit chance. His Farming Experience passive increases his already high crit chance after turn 20."
         },
         {
@@ -127,6 +139,65 @@
             "rarity": "epic",
             "type": "fighter",
             "description": "A relentless warrior wielding enchanted chains, capable of striking multiple foes and stunning them."
+        },
+        {
+            "id": "farmer_cham_cham",
+            "name": "Farmer Cham Cham",
+            "image": "Icons/characters/Farmer Cham Cham.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "tags": ["Farmer"],
+            "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang."
+        },
+        {
+            "id": "angry_bull",
+            "name": "Angry Bull",
+            "image": "images/characters/angry_bull_avatar.png",
+            "tags": ["Enemy", "Beast"],
+            "description": "A furious bull, mutated by dark influences."
+        },
+        {
+            "id": "monster_apple",
+            "name": "Monster Apple",
+            "image": "images/characters/apples/monster_apple_avatar.png",
+            "tags": ["Enemy", "Plant", "Mutated"],
+            "description": "A grotesque, oversized apple with a hunger for flesh."
+        },
+        {
+            "id": "healthy_apple",
+            "name": "Healthy Apple",
+            "image": "images/characters/apples/healthy_apple_avatar.png",
+            "tags": ["Enemy", "Plant", "Support"],
+            "description": "A vibrant apple that seems to radiate restorative energy."
+        },
+        {
+            "id": "angry_apple",
+            "name": "Angry Apple",
+            "image": "images/characters/apples/angry_apple_avatar.png",
+            "tags": ["Enemy", "Plant", "Aggressive"],
+            "description": "This apple looks furious and ready to attack."
+        },
+        {
+            "id": "leafy_apple",
+            "name": "Leafy Apple",
+            "image": "images/characters/apples/leafy_apple_avatar.png",
+            "tags": ["Enemy", "Plant", "Magic"],
+            "description": "An apple covered in leaves, pulsing with natural magic."
+        },
+        {
+            "id": "rotten_apple",
+            "name": "Rotten Apple",
+            "image": "images/characters/apples/rotten_apple_avatar.png",
+            "tags": ["Enemy", "Plant", "Debuff"],
+            "description": "A decaying apple spreading blight."
+        },
+        {
+            "id": "farmer_fang",
+            "name": "Farmer FANG",
+            "image": "images/characters/farmer_fang_avatar.png",
+            "tags": ["Boss"],
+            "rarity": "Epic",
+            "path": "js/raid-game/characters/farmer_fang.json"
         }
     ]
 } 

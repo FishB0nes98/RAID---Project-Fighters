@@ -1,0 +1,171 @@
+/* Styles for Monster Apple Passive */
+
+.monster-curse-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle, rgba(66, 30, 75, 0.5) 0%, rgba(25, 12, 32, 0) 70%);
+    animation: monster-curse-pulse 3s ease-out forwards;
+}
+
+.monster-curse-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 230%;
+    height: 230%;
+    background-image: url('../img/vfx/dark-aura.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.75;
+    animation: monster-curse-expand 3s ease-out forwards;
+    filter: hue-rotate(280deg) brightness(0.85);
+}
+
+.monster-curse-vfx::after {
+    content: '👹';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    font-size: 80px;
+    animation: monster-curse-icon 3s ease-out forwards;
+    text-shadow: 0 0 12px rgba(136, 14, 79, 0.9);
+}
+
+.monster-curse-symbols {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(128, 0, 128, 0.4) 0%, rgba(76, 0, 153, 0.2) 50%, rgba(76, 0, 153, 0) 70%);
+    box-shadow: 0 0 15px rgba(128, 0, 128, 0.6);
+    border-radius: 50%;
+    animation: monster-symbols 3s ease-out forwards;
+}
+
+.monster-curse-symbol {
+    position: absolute;
+    font-size: 20px;
+    color: #9c27b0;
+    text-shadow: 0 0 8px #7b1fa2;
+    opacity: 0;
+    animation: monster-symbol-float 4s ease-out forwards;
+}
+
+.monster-dark-mist {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(76, 0, 153, 0.3);
+    border-radius: 50%;
+    filter: blur(8px);
+    opacity: 0;
+    animation: monster-mist 3.5s ease-out forwards;
+}
+
+@keyframes monster-curse-pulse {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.95;
+    }
+    75% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes monster-curse-expand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    25% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.9);
+        opacity: 0;
+    }
+}
+
+@keyframes monster-curse-icon {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(-20deg);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1.7) rotate(20deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.3) rotate(-10deg);
+        opacity: 0;
+    }
+}
+
+@keyframes monster-symbols {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.7;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes monster-symbol-float {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) rotate(var(--rotation));
+        opacity: 0;
+    }
+}
+
+@keyframes monster-mist {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) scale(1.5);
+        opacity: 0;
+    }
+} 

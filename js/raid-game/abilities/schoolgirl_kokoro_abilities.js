@@ -629,66 +629,50 @@ const protectiveAuraEffect = (caster, target) => {
             existingBuff.duration = 7;
             log(`${ally.name}'s Protective Aura refreshed.`, 'buff');
         } else {
-            // Create a new buff
-            const buff = {
-                id: buffId,
-                name: 'Protective Aura',
-                description: '+15% Armor, +35% Healing Power',
-                icon: 'Icons/abilities/protective_aura.jfif',
-                duration: 7,
-                
-                // Store original values
-                originalArmor: null,
-                originalHealingPower: null,
-                
-                // Called when the buff is first applied
-                onApply: function(character) {
-                    // Store original values
-                    this.originalArmor = character.stats.armor;
-                    this.originalHealingPower = character.stats.healingPower;
-                    
-                    // Apply armor buff (15% increase)
-                    character.stats.armor = Math.floor(this.originalArmor * 1.15);
-                    
-                    // Apply healing power buff (35% increase)
-                    character.stats.healingPower = this.originalHealingPower + 0.35;
-                    
-                    // Log buff application
-                    log(`${character.name} gained +${character.stats.armor - this.originalArmor} Armor and +35% Healing Power.`, 'buff');
-                },
-                
-                // Called when the buff expires
-                remove: function(character) {
-                    // Restore original values
-                    if (this.originalArmor !== null) {
-                        character.stats.armor = this.originalArmor;
-                    }
-                    
-                    if (this.originalHealingPower !== null) {
-                        character.stats.healingPower = this.originalHealingPower;
-                    }
-                    
-                    // Log buff removal
-                    log(`Protective Aura effect removed from ${character.name}.`, 'status');
-                }
+            // Create a new buff using the Effect class constructor
+            const buff = new Effect(
+                buffId,
+                'Protective Aura',
+                'Icons/abilities/protective_aura.jfif',
+                7, // Duration
+                null, // No per-turn effect needed here
+                false // isDebuff
+            );
+
+            // Define stat modifiers for the buff
+            buff.statModifiers = {
+                armor_percent: 15, // 15% increase
+                healingPower_percent: 35 // 35% increase (Assuming healingPower is treated like a percentage internally)
+                                          // If healingPower is a flat value that needs 0.35 added, use:
+                                          // healingPower: 0.35 
+            };
+
+            buff.setDescription('+15% Armor, +35% Healing Power'); // Update description if needed
+
+            // Custom logic for VFX on apply/remove
+            buff.onApply = function(character) {
+                log(`${character.name} gained Protective Aura! (+15% Armor, +35% Healing Power)`, 'buff');
+                showProtectiveAuraVFX(character); // Keep the VFX call
+            };
+
+            buff.remove = function(character) {
+                log(`Protective Aura effect removed from ${character.name}.`, 'status');
+                 // If using flat healingPower modifier, no action needed here for removal
+                 // If recalculateStats doesn't fully reset, manual restoration might be needed,
+                 // but ideally recalculateStats handles it by reapplying from baseStats.
             };
             
-            // Add the buff to the character
+            // Add the buff to the character (this will trigger recalculateStats)
             ally.addBuff(buff);
             
-            // Call onApply since it might not be called automatically
-            if (typeof buff.onApply === 'function') {
-                buff.onApply(ally);
-            }
+            // onApply is called by addBuff if it exists, no need to call manually
         }
         
-        // Show VFX for the buff
+        // Show VFX for the buff (ensure this runs even if buff is just refreshed)
         showProtectiveAuraVFX(ally);
         
-        // Update UI
-        if (typeof updateCharacterUI === 'function') {
-            updateCharacterUI(ally);
-        }
+        // Update UI (addBuff calls recalculateStats which calls updateCharacterUI)
+        // No need for explicit call here if addBuff handles it
     });
     
     // Play sound

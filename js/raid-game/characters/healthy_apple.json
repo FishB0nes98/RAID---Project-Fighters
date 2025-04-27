@@ -1,0 +1,38 @@
+{
+    "id": "healthy_apple",
+    "name": "Healthy Apple",
+    "image": "Loading Screen/Healthy Apple.webp",
+    "stats": {
+        "physicalDamage": 105,
+        "magicalDamage": 0,
+        "armor": 10,
+        "magicalShield": 20,
+        "hp": 2810,
+        "hpPerTurn": 0,
+        "mana": 2000,
+        "manaPerTurn": 50,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.0,
+        "critDamage": 1.5,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "healthy_apple_knock",
+            "name": "Knock",
+            "type": "custom",
+            "manaCost": 30,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 100 + (100% Physical Damage) as physical damage to the target.",
+            "icon": "Icons/abilities/knock.png"
+        }
+    ],
+    "passive": {
+        "id": "healthy_apple_final_gift",
+        "name": "Final Gift",
+        "description": "Upon death, heals all enemies for 50% of their maximum HP.",
+        "icon": "Icons/passives/healthy_apple_final_gift.png"
+    }
+} 

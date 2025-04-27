@@ -1,0 +1,279 @@
+{
+  "characterId": "farmer_shoma",
+  "talentTree": {
+    "talent_shoma_1": {
+      "id": "talent_shoma_1",
+      "name": "Mighty Swing",
+      "description": "Home Run Smash now deals 455 damage.",
+      "icon": "Icons/abilities/homerun_smash.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_q",
+        "property": "baseDamage",
+        "value": 455
+      },
+      "parents": [],
+      "children": ["talent_shoma_2", "talent_shoma_3"]
+    },
+    "talent_shoma_2": {
+      "id": "talent_shoma_2",
+      "name": "Quick Apple Toss",
+      "description": "Apple Throw cooldown reduced to 2 turns.",
+      "icon": "Icons/abilities/apple_throw.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_w",
+        "property": "cooldown",
+        "value": 2
+      },
+      "parents": ["talent_shoma_1"],
+      "children": ["talent_shoma_4"]
+    },
+    "talent_shoma_3": {
+      "id": "talent_shoma_3",
+      "name": "Hearty Farmer",
+      "description": "Increases base HP by 500.",
+      "icon": "Icons/stats/Heart.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "maxHp",
+        "operation": "add",
+        "value": 500
+      },
+      "parents": ["talent_shoma_1"],
+      "children": []
+    },
+    "talent_shoma_4": {
+      "id": "talent_shoma_4",
+      "name": "Charged Smash",
+      "description": "Home Run Smash now also scales with 50% of Physical Damage.",
+      "icon": "Icons/abilities/homerun_smash.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_q",
+        "property": "scalingPercent",
+        "value": 0.5
+      },
+      "parents": ["talent_shoma_2"],
+      "children": ["talent_shoma_5", "talent_shoma_6", "talent_shoma_7"]
+    },
+    "talent_shoma_5": {
+      "id": "talent_shoma_5",
+      "name": "Shared Strength",
+      "description": "Using Farmer's Catch on an ally also applies the buff to Shoma.",
+      "icon": "Icons/abilities/farmers_catch.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_e",
+        "property": "buffCaster",
+        "value": true
+      },
+      "parents": ["talent_shoma_4"],
+      "children": ["talent_shoma_12"]
+    },
+    "talent_shoma_6": {
+      "id": "talent_shoma_6",
+      "name": "Fortified Strength",
+      "description": "Increases Physical Damage by 100.",
+      "icon": "Icons/stats/Strength.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "physicalDamage",
+        "operation": "add",
+        "value": 100
+      },
+      "parents": ["talent_shoma_4"],
+      "children": ["talent_shoma_8", "talent_shoma_9"]
+    },
+    "talent_shoma_7": {
+      "id": "talent_shoma_7",
+      "name": "Energized Farmer",
+      "description": "Adds 55 mana regeneration per turn.",
+      "icon": "Icons/stats/ManaPerTurn.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "manaPerTurn",
+        "operation": "add",
+        "value": 55
+      },
+      "parents": ["talent_shoma_4"],
+      "children": ["talent_shoma_14", "talent_shoma_15"]
+    },
+    "talent_shoma_8": {
+      "id": "talent_shoma_8",
+      "name": "Veteran Farmer",
+      "description": "Farming Experience passive crit chance bonus increased to 85%.",
+      "icon": "Icons/stats/passive_farmer_shoma.png",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "passiveCritBoostValue",
+        "value": 0.85
+      },
+      "parents": ["talent_shoma_6"],
+      "children": ["talent_shoma_10"],
+        "position": { "x": 20, "y": 0}
+    },
+    "talent_shoma_9": {
+      "id": "talent_shoma_9",
+      "name": "Nimble Farmer",
+      "description": "Increases base Dodge Chance by 10%.",
+      "icon": "Icons/stats/Dodge.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "dodgeChance",
+        "operation": "add",
+        "value": 0.1
+      },
+      "parents": ["talent_shoma_6"],
+      "children": ["talent_shoma_11"]
+    },
+    "talent_shoma_10": {
+      "id": "talent_shoma_10",
+      "name": "Early Harvest",
+      "description": "Farming Experience passive now triggers its crit boost at turn 10 instead of turn 20.",
+      "icon": "Icons/stats/Turn.png",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "passiveTriggerTurn",
+        "value": 10
+      },
+      "parents": ["talent_shoma_8"],
+      "children": ["talent_shoma_19"]
+    },
+    "talent_shoma_11": {
+      "id": "talent_shoma_11",
+      "name": "Farm Endurance",
+      "description": "Increases base HP by 1000.",
+      "icon": "Icons/stats/Heart.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "maxHp",
+        "operation": "add",
+        "value": 1000
+      },
+      "parents": ["talent_shoma_9"],
+      "children": ["talent_shoma_19"]
+    },
+    "talent_shoma_12": {
+      "id": "talent_shoma_12",
+      "name": "Refreshing Toss",
+      "description": "Using Apple Throw on an ally also heals Shoma for 30% of the heal amount.",
+      "icon": "Icons/abilities/apple_throw.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_w",
+        "property": "casterHealPercent",
+        "value": 0.3
+      },
+      "parents": ["talent_shoma_5"],
+      "children": ["talent_shoma_13"],
+      "position": { "y": -180 }
+    },
+    "talent_shoma_13": {
+      "id": "talent_shoma_13",
+      "name": "Restorative Touch",
+      "description": "Increases Healing Power by 12%.",
+      "icon": "Icons/stats/HealingPower.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "healingPower",
+        "operation": "add",
+        "value": 0.12
+      },
+      "parents": ["talent_shoma_12"],
+      "children": ["talent_shoma_18"],
+      "position": { "y": -150 }
+    },
+    "talent_shoma_14": {
+      "id": "talent_shoma_14",
+      "name": "Nurturing Toss",
+      "description": "Using Apple Throw grants Shoma 5% Healing Power for 5 turns. Stacks up to 5 times.",
+      "icon": "Icons/abilities/apple_throw_heal_boost.png",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_w",
+        "property": "appliesHealingPowerBuff",
+        "value": true
+      },
+      "parents": ["talent_shoma_7"],
+      "children": ["talent_shoma_16"],
+      "position": { "x": -50, "y": 50 }
+    },
+    "talent_shoma_15": {
+      "id": "talent_shoma_15",
+      "name": "Sustaining Harvest",
+      "description": "Shoma gains +10% Lifesteal.",
+      "icon": "Icons/stats/Lifesteal.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "lifesteal",
+        "operation": "add",
+        "value": 0.10
+      },
+      "parents": ["talent_shoma_7"],
+      "children": ["talent_shoma_17"],
+      "position": { "x": -150, "y": 15}
+    },
+    "talent_shoma_16": {
+      "id": "talent_shoma_16",
+      "name": "Refreshing Cottage",
+      "description": "Cottage Run also restores 20% of maximum mana.",
+      "icon": "Icons/stats/refreshing_cottage.png",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_r",
+        "property": "restoresManaPercent",
+        "value": 0.2
+      },
+      "parents": ["talent_shoma_14"],
+      "children": [],
+      "position": { "x": -100, "y": 80}
+    },
+    "talent_shoma_17": {
+      "id": "talent_shoma_17",
+      "name": "Robust Harvest",
+      "description": "Increases Physical Damage by 100.",
+      "icon": "Icons/stats/Strength.png",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "physicalDamage",
+        "operation": "add",
+        "value": 100
+      },
+      "parents": ["talent_shoma_15"],
+      "children": [],
+      "position": { "x": -200, "y": 60}
+    },
+    "talent_shoma_18": {
+      "id": "talent_shoma_18",
+      "name": "Bountiful Harvest",
+      "description": "Apple Throw has a 50% chance to affect all allies when used on an ally.",
+      "icon": "Icons/abilities/apple_throw_aoe.png",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_w",
+        "property": "allyAoeChance",
+        "value": 0.5
+      },
+      "parents": ["talent_shoma_13"],
+      "children": [],
+      "position": { "x": 50, "y": -200},
+      "powerful": true
+    },
+    "talent_shoma_19": {
+      "id": "talent_shoma_19",
+      "name": "Critical Nourishment",
+      "description": "When Farmer Shoma lands a critical hit, he automatically heals himself and a random ally for 800 HP.",
+      "icon": "Icons/stats/Heart_Crit.png",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "criticalHealProc",
+        "value": 800
+      },
+      "parents": ["talent_shoma_10", "talent_shoma_11"],
+      "children": [],
+      "position": { "x": 100, "y": 150},
+      "powerful": true
+    }
+  }
+} 

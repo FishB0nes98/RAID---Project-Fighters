@@ -1,0 +1,61 @@
+{
+    "id": "crazy_farmer",
+    "name": "Crazy Farmer",
+    "image": "Loading Screen/Crazy Farmer.jpeg",
+    "stats": {
+        "physicalDamage": 200,
+        "magicalDamage": 100,
+        "armor": 8,
+        "magicalShield": 10,
+        "hp": 6955,
+        "hpPerTurn": 0,
+        "mana": 2000,
+        "manaPerTurn": 100,
+        "lifesteal": 0.4,
+        "dodgeChance": 0.05,
+        "critChance": 0.0,
+        "critDamage": 0.0,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "farmer_reap",
+            "name": "Farmer Reap",
+            "type": "custom",
+            "manaCost": 40,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "description": "Deals 500 + 50% Physical Damage to the target and reduces armor by 5% for 3 turns.",
+            "icon": "Icons/abilities/farmer_reap.webp",
+            "functionName": "farmerReapEffect"
+        },
+        {
+            "id": "drink_alcohol",
+            "name": "Drink Alcohol",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 16,
+            "targetType": "self",
+            "description": "Heals 3000HP but sets armor and magic shield to 0 for 5 turns.",
+            "icon": "Icons/abilities/drink_alcohol.webp",
+            "functionName": "drinkAlcoholEffect"
+        },
+        {
+            "id": "med_pet",
+            "name": "Med Pet",
+            "type": "custom",
+            "manaCost": 80,
+            "cooldown": 10,
+            "targetType": "ally",
+            "description": "Heals Hound (or an ally if Hound is not present) for 1350HP.",
+            "icon": "Icons/abilities/med_pet.webp",
+            "functionName": "medPetEffect"
+        }
+    ],
+    "passive": {
+        "id": "healing_pact",
+        "name": "Healing Pact",
+        "description": "Whenever the Crazy Farmer deals damage, he heals his allies for 70% of the damage dealt.",
+        "icon": "Icons/passives/healing_pact.png"
+    }
+} 

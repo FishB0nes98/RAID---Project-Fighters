@@ -1,0 +1,830 @@
+/* Farmer Cham Cham VFX - Anime Cat Farmer Theme */
+
+/* ======= SCRATCH ABILITY VFX ======= */
+.farmer-scratch-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+/* Cat paw print scratch marks */
+.farmer-scratch-vfx::before,
+.farmer-scratch-vfx::after {
+    content: '';
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFFFFF" d="M25,15c-3.5,0-6.3,2.8-6.3,6.3c0,3.5,6.3,13.8,6.3,13.8s6.3-10.3,6.3-13.8C31.3,17.8,28.5,15,25,15z M50,5c-3.5,0-6.3,2.8-6.3,6.3 c0,3.5,6.3,13.8,6.3,13.8s6.3-10.3,6.3-13.8C56.3,7.8,53.5,5,50,5z M75,15c-3.5,0-6.3,2.8-6.3,6.3c0,3.5,6.3,13.8,6.3,13.8 s6.3-10.3,6.3-13.8C81.3,17.8,78.5,15,75,15z M50,55c-8,0-25-3-25-12.5S35,30,50,30s25,3,25,12.5S58,55,50,55z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.8)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+    opacity: 0;
+    transform: scale(0) rotate(25deg);
+    transform-origin: center;
+}
+
+.farmer-scratch-vfx::before {
+    top: 10%;
+    left: 15%;
+    animation: cat-paw-scratch1 0.6s ease-out forwards;
+}
+
+.farmer-scratch-vfx::after {
+    top: 30%;
+    left: 30%;
+    animation: cat-paw-scratch2 0.7s ease-out 0.1s forwards;
+}
+
+/* Flying soil particles */
+.farmer-scratch-vfx .soil-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #8B4513; /* Brown soil */
+    border-radius: 50%;
+    opacity: 0;
+}
+
+@keyframes cat-paw-scratch1 {
+    0% { 
+        transform: scale(0) rotate(25deg); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: scale(1.2) rotate(15deg); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 0; 
+    }
+}
+
+@keyframes cat-paw-scratch2 {
+    0% { 
+        transform: scale(0) rotate(-15deg); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: scale(1.2) rotate(-5deg); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1) rotate(10deg); 
+        opacity: 0; 
+    }
+}
+
+@keyframes soil-particle-fly {
+    0% { 
+        transform: translate(0, 0) scale(0.5); 
+        opacity: 0; 
+    }
+    20% { 
+        opacity: 0.9; 
+    }
+    100% { 
+        transform: translate(var(--x), var(--y)) scale(1); 
+        opacity: 0; 
+    }
+}
+
+/* Anime impact stars */
+.farmer-scratch-impact {
+    position: absolute;
+    top: 30%;
+    left: 40%;
+    width: 40%;
+    height: 40%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon fill="%23FFFF00" points="50,0 61,35 97,35 68,57 79,91 50,70 21,91 32,57 3,35 39,35"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 5px yellow);
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+    animation: impact-star 0.4s ease-out 0.3s forwards;
+}
+
+@keyframes impact-star {
+    0% { 
+        transform: scale(0) rotate(0deg); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.5) rotate(180deg); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(0.8) rotate(360deg); 
+        opacity: 0; 
+    }
+}
+
+/* ======= LEAP ABILITY VFX ======= */
+/* Add cat ears during leap */
+.farmer-leap-animation .cat-ears {
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    pointer-events: none;
+    z-index: 16;
+    opacity: 0;
+    animation: cat-ears-appear 0.8s ease-out forwards;
+}
+
+.farmer-leap-animation .cat-ears::before,
+.farmer-leap-animation .cat-ears::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 20px;
+    height: 30px;
+    background-color: #FF9900; /* Orange cat ears */
+    border-radius: 50% 50% 0 0;
+    transform-origin: bottom center;
+}
+
+.farmer-leap-animation .cat-ears::before {
+    left: 25%;
+    transform: rotate(-15deg);
+}
+
+.farmer-leap-animation .cat-ears::after {
+    right: 25%;
+    transform: rotate(15deg);
+}
+
+@keyframes cat-ears-appear {
+    0% { opacity: 0; transform: translateY(5px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(5px); }
+}
+
+/* Cat tail during leap */
+.farmer-leap-animation .cat-tail {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 8px;
+    height: 40px;
+    background-color: #FF9900; /* Orange cat tail */
+    border-radius: 4px;
+    transform-origin: top center;
+    transform: translateX(-50%) rotate(30deg);
+    z-index: -1;
+    opacity: 0;
+    animation: cat-tail-wag 0.8s ease-out forwards;
+}
+
+@keyframes cat-tail-wag {
+    0% { opacity: 0; transform: translateX(-50%) rotate(30deg); }
+    10% { opacity: 1; transform: translateX(-50%) rotate(10deg); }
+    30% { transform: translateX(-50%) rotate(-20deg); }
+    50% { transform: translateX(-50%) rotate(15deg); }
+    70% { transform: translateX(-50%) rotate(-10deg); }
+    90% { opacity: 1; transform: translateX(-50%) rotate(5deg); }
+    100% { opacity: 0; transform: translateX(-50%) rotate(0deg); }
+}
+
+/* Anime-style jump & landing effects */
+.farmer-leap-animation .image-container {
+    position: relative;
+    animation: anime-leap-jump 0.8s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+@keyframes anime-leap-jump {
+    0% { transform: translateY(0) scale(1); filter: brightness(1); }
+    10% { transform: translateY(-5px) scale(0.95); filter: brightness(1); }
+    40% { transform: translateY(-60px) scale(1.1); filter: brightness(1.3); }
+    60% { transform: translateY(-60px) scale(1.1); filter: brightness(1.3); }
+    90% { transform: translateY(-5px) scale(0.95); filter: brightness(1); }
+    100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+/* Sparkly anime dust clouds */
+.farmer-leap-dust {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    z-index: -2;
+}
+
+.farmer-leap-dust::before,
+.farmer-leap-dust::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 60%;
+    height: 100%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.8) 0%, rgba(255, 215, 0, 0.4) 50%, transparent 100%);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.farmer-leap-dust::before {
+    left: 0;
+    animation: dust-poof-left 0.6s ease-out forwards;
+}
+
+.farmer-leap-dust::after {
+    right: 0;
+    animation: dust-poof-right 0.6s ease-out 0.1s forwards;
+}
+
+@keyframes dust-poof-left {
+    0% { opacity: 0; transform: scale(0.2) translateX(-5px); }
+    50% { opacity: 0.8; transform: scale(1) translateX(-15px); }
+    100% { opacity: 0; transform: scale(1.5) translateX(-20px); }
+}
+
+@keyframes dust-poof-right {
+    0% { opacity: 0; transform: scale(0.2) translateX(5px); }
+    50% { opacity: 0.8; transform: scale(1) translateX(15px); }
+    100% { opacity: 0; transform: scale(1.5) translateX(20px); }
+}
+
+/* Vegetable particles during leap */
+.farmer-leap-veggies {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.veggie-particle {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.veggie-particle.carrot {
+    background-color: #FF7F00;
+    border-radius: 40% 40% 20% 20%;
+}
+
+.veggie-particle.tomato {
+    background-color: #FF6347;
+}
+
+.veggie-particle.lettuce {
+    background-color: #90EE90;
+    border-radius: 30%;
+}
+
+@keyframes veggie-bounce {
+    0% { 
+        opacity: 0; 
+        transform: translate(0, 0) rotate(0deg); 
+    }
+    10% { 
+        opacity: 1; 
+    }
+    60% { 
+        opacity: 1; 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(var(--x), var(--y)) rotate(var(--r)); 
+    }
+}
+
+/* Buff glow with farming theme */
+.farmer-leap-buff-glow-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit; 
+    background: radial-gradient(circle, rgba(255, 193, 7, 0.6) 0%, rgba(255, 87, 34, 0.3) 50%, transparent 70%);
+    box-shadow: 0 0 15px 8px rgba(255, 152, 0, 0.4);
+    opacity: 0;
+    animation: anime-buff-pulse 1s ease-out forwards;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes anime-buff-pulse {
+    0% { opacity: 0; transform: scale(0.8); }
+    30% { opacity: 0.8; transform: scale(1.1); }
+    70% { opacity: 0.6; transform: scale(1.05); }
+    100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* ======= BOOMERANG ABILITY VFX ======= */
+/* Cat-themed farming tool boomerang */
+.farmer-boomerang-vfx {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    z-index: 100;
+    transform-origin: center;
+    pointer-events: none;
+    background: none;
+    /* Override background-image with a cat-themed tool */
+}
+
+/* Create cat-shaped boomerang using pseudo-elements */
+.farmer-boomerang-vfx::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 40px;
+    height: 40px;
+    background-color: #FFA500; /* Orange */
+    border-radius: 50% 50% 50% 10%;
+    transform: rotate(-45deg);
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Cat ears on boomerang */
+.farmer-boomerang-vfx::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle 8px at 15px 15px, #000 0%, #000 40%, transparent 50%),
+        radial-gradient(circle 8px at 35px 15px, #000 0%, #000 40%, transparent 50%),
+        radial-gradient(circle 6px at 25px 30px, #FF6347 0%, #FF6347 40%, transparent 50%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* Throw animation with paw print trail */
+.farmer-boomerang-vfx.throw {
+    transition: transform 0.8s cubic-bezier(0.2, 0.85, 0.4, 1);
+    animation: cat-boomerang-throw 0.8s linear forwards;
+}
+
+/* Return animation */
+.farmer-boomerang-vfx.return {
+    transition: transform 0.8s cubic-bezier(0.6, 0.15, 0.8, 0.4);
+    animation: cat-boomerang-return 0.8s linear forwards;
+}
+
+/* Paw print trail elements */
+.paw-print {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFA500" d="M30,20c-5,0-9,4-9,9s9,20,9,20s9-15,9-20S35,20,30,20z M70,20c-5,0-9,4-9,9s9,20,9,20s9-15,9-20S75,20,70,20z M50,0c-5,0-9,4-9,9s9,20,9,20s9-15,9-20S55,0,50,0z M50,60c-20,0-40-8-40-20s20-20,40-20s40,8,40,20S70,60,50,60z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    z-index: 99;
+}
+
+/* Anime sparkle effects */
+.boomerang-sparkle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon fill="%23FFFFFF" points="50,0 61,35 97,35 68,57 79,91 50,70 21,91 32,57 3,35 39,35"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 3px white);
+    opacity: 0;
+    z-index: 99;
+    animation: sparkle-twinkle 0.5s linear forwards;
+}
+
+@keyframes sparkle-twinkle {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+@keyframes cat-boomerang-throw {
+    0% {
+        transform: rotate(0deg) scale(0.8);
+        filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.8));
+    }
+    50% {
+        transform: rotate(540deg) scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.9));
+    }
+    100% {
+        transform: rotate(1080deg) scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 165, 0, 1));
+    }
+}
+
+@keyframes cat-boomerang-return {
+    0% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 165, 0, 1));
+    }
+    50% {
+        transform: rotate(540deg) scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.9));
+    }
+    100% {
+        transform: rotate(1080deg) scale(0.8);
+        filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.8));
+    }
+}
+
+/* Impact effect */
+.boomerang-impact {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle, rgba(255, 165, 0, 0.7) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: scale(0);
+    opacity: 0;
+    z-index: 5;
+    animation: impact-burst 0.5s ease-out forwards;
+}
+
+@keyframes impact-burst {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* No cooldown effect - kitty paw prints dancing */
+.boomerang-no-cooldown-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    opacity: 1;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.paw-dance {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFA500" d="M30,20c-5,0-9,4-9,9s9,20,9,20s9-15,9-20S35,20,30,20z M70,20c-5,0-9,4-9,9s9,20,9,20s9-15,9-20S75,20,70,20z M50,0c-5,0-9,4-9,9s9,20,9,20s9-15,9-20S55,0,50,0z M50,60c-20,0-40-8-40-20s20-20,40-20s40,8,40,20S70,60,50,60z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(0);
+    filter: drop-shadow(0 0 3px white);
+}
+
+@keyframes paw-no-cooldown {
+    0% { 
+        transform: scale(0) translate(0, 0); 
+        opacity: 0; 
+    }
+    30% { 
+        transform: scale(1) translate(var(--tx), var(--ty)); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(0.5) translate(var(--tx2), var(--ty2)); 
+        opacity: 0; 
+    }
+}
+
+/* Passive lifesteal VFX - keeping original with slight modifications */
+.passive-lifesteal-gain-glow-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(144, 238, 144, 0.7) 0%, rgba(0, 100, 0, 0) 70%);
+    box-shadow: 0 0 15px 8px rgba(144, 238, 144, 0.5);
+    animation: lifesteal-gain-pulse 1.5s ease-out forwards;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.passive-lifesteal-gain-text-vfx {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #90ee90;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 0 4px black, 0 0 8px darkgreen;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(144, 238, 144, 0.6);
+    white-space: nowrap;
+    animation: lifesteal-gain-float 1.5s ease-out forwards;
+    z-index: 9;
+    pointer-events: none;
+}
+
+@keyframes lifesteal-gain-pulse {
+    0% { opacity: 0; transform: scale(0.8); }
+    40% { opacity: 0.8; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+@keyframes lifesteal-gain-float {
+    0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); }
+}
+
+/* ======= FERAL STRIKE ABILITY VFX ======= */
+.farmer-feral-strike-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    overflow: hidden;
+}
+
+/* Cat silhouette that moves across target */
+.cat-silhouette {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFA500" d="M50,15c-11,0-20,9-20,20v10c0,11,9,20,20,20s20-9,20-20V35C70,24,61,15,50,15z M30,35c0-2.2,1.8-4,4-4s4,1.8,4,4s-1.8,4-4,4S30,37.2,30,35z M62,35c0-2.2,1.8-4,4-4s4,1.8,4,4s-1.8,4-4,4S62,37.2,62,35z M70,45v-5c5.5,0,10-4.5,10-10h5C85,40.3,78.3,45,70,45z M20,30h5c0,5.5,4.5,10,10,10v5C26.7,45,20,38.3,20,30z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    left: 15%;
+    top: 15%;
+    filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.8));
+    opacity: 0.9;
+    transform: scale(0.8);
+    animation: feral-silhouette-dash 1.5s ease-in-out forwards;
+}
+
+@keyframes feral-silhouette-dash {
+    0% { 
+        transform: translateX(-100%) scale(0.8) rotate(-20deg); 
+        filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.8));
+    }
+    15% { 
+        transform: translateX(0%) scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 10px rgba(255, 165, 0, 1));
+    }
+    30% { 
+        transform: translateX(50%) scale(0.9) rotate(10deg);
+        filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.9));
+        opacity: 0.8;
+    }
+    45% { 
+        transform: translateX(0%) scale(1.1) rotate(-5deg);
+        filter: drop-shadow(0 0 12px rgba(255, 165, 0, 1));
+        opacity: 0.9;
+    }
+    60% { 
+        transform: translateX(30%) scale(0.9) rotate(5deg);
+        filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.8));
+        opacity: 0.8;
+    }
+    75% { 
+        transform: translateX(-20%) scale(1) rotate(-10deg);
+        filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.9));
+        opacity: 0.9;
+    }
+    90% { 
+        transform: translateX(10%) scale(0.9) rotate(0deg);
+        filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.7));
+        opacity: 0.7;
+    }
+    100% { 
+        transform: translateX(100%) scale(0.8) rotate(15deg); 
+        filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.5));
+        opacity: 0;
+    }
+}
+
+/* Afterimages for speed effect */
+.cat-afterimage {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFA500" d="M50,15c-11,0-20,9-20,20v10c0,11,9,20,20,20s20-9,20-20V35C70,24,61,15,50,15z M30,35c0-2.2,1.8-4,4-4s4,1.8,4,4s-1.8,4-4,4S30,37.2,30,35z M62,35c0-2.2,1.8-4,4-4s4,1.8,4,4s-1.8,4-4,4S62,37.2,62,35z M70,45v-5c5.5,0,10-4.5,10-10h5C85,40.3,78.3,45,70,45z M20,30h5c0,5.5,4.5,10,10,10v5C26.7,45,20,38.3,20,30z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    left: 15%;
+    top: 15%;
+    opacity: 0.5;
+    filter: blur(2px) brightness(1.5);
+    animation: feral-afterimage 1.5s ease-in-out forwards;
+}
+
+@keyframes feral-afterimage {
+    0% { 
+        transform: translateX(-100%) scale(0.8) rotate(-20deg); 
+        opacity: 0;
+    }
+    10% { 
+        transform: translateX(-50%) scale(0.85) rotate(-10deg);
+        opacity: 0.3;
+    }
+    40% { 
+        transform: translateX(0%) scale(0.9) rotate(0deg);
+        opacity: 0.4;
+    }
+    70% { 
+        transform: translateX(50%) scale(0.85) rotate(10deg);
+        opacity: 0.3;
+    }
+    100% { 
+        transform: translateX(100%) scale(0.8) rotate(20deg); 
+        opacity: 0;
+    }
+}
+
+/* Slash marks for each strike */
+.feral-slash-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.feral-slash {
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    top: 10%;
+    left: 10%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path stroke="%23FFFFFF" stroke-width="6" fill="none" d="M10,10 L90,90" stroke-linecap="round"><animate attributeName="stroke-dasharray" from="0,150" to="150,0" dur="0.4s" fill="freeze" /></path></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    filter: drop-shadow(0 0 10px #FFF) drop-shadow(0 0 5px #FF8C00);
+    animation: feral-slash-appear 0.6s ease-out forwards;
+}
+
+@keyframes feral-slash-appear {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.5); 
+    }
+    30% { 
+        opacity: 1; 
+        transform: scale(1.2); 
+    }
+    70% { 
+        opacity: 0.8; 
+        transform: scale(1.1); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(1); 
+    }
+}
+
+/* Flying particles */
+.feral-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #FFA500;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #FFF;
+    opacity: 0;
+    transform: translate(0, 0);
+    animation: feral-particle-fly 0.8s ease-out forwards;
+}
+
+@keyframes feral-particle-fly {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.5) translate(0, 0); 
+    }
+    20% { 
+        opacity: 1; 
+        transform: scale(1) translate(calc(var(--x) * 0.3), calc(var(--y) * 0.3)); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(0.5) translate(var(--x), var(--y)); 
+    }
+}
+
+/* Critical hit effect */
+.feral-crit-impact {
+    position: absolute;
+    font-family: 'Arial', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: #FF4500;
+    text-shadow: 
+        -1px -1px 0 #FFF,
+        1px -1px 0 #FFF,
+        -1px 1px 0 #FFF,
+        1px 1px 0 #FFF,
+        0 0 10px #FF8C00;
+    transform: scale(0) rotate(0deg);
+    animation: feral-crit-popup 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2) forwards;
+}
+
+@keyframes feral-crit-popup {
+    0% { 
+        transform: scale(0) rotate(-20deg); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.5) rotate(10deg); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 0; 
+    }
+}
+
+/* Anime-style speed lines for the background */
+.farmer-feral-strike-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        transparent 20%, 
+        rgba(255, 255, 255, 0.1) 20.5%, 
+        transparent 21%, 
+        transparent 25%, 
+        rgba(255, 255, 255, 0.1) 25.5%, 
+        transparent 26%, 
+        transparent 30%, 
+        rgba(255, 255, 255, 0.15) 30.5%, 
+        transparent 31%, 
+        transparent 35%, 
+        rgba(255, 255, 255, 0.1) 35.5%, 
+        transparent 36%, 
+        transparent 40%, 
+        rgba(255, 255, 255, 0.15) 40.5%, 
+        transparent 41%, 
+        transparent 45%, 
+        rgba(255, 255, 255, 0.1) 45.5%, 
+        transparent 46%, 
+        transparent 50%, 
+        rgba(255, 255, 255, 0.15) 50.5%, 
+        transparent 51%, 
+        transparent 55%, 
+        rgba(255, 255, 255, 0.1) 55.5%, 
+        transparent 56%, 
+        transparent 60%, 
+        rgba(255, 255, 255, 0.15) 60.5%, 
+        transparent 61%,
+        transparent 65%, 
+        rgba(255, 255, 255, 0.1) 65.5%, 
+        transparent 66%, 
+        transparent 70%, 
+        rgba(255, 255, 255, 0.15) 70.5%, 
+        transparent 71%, 
+        transparent 100%
+    );
+    opacity: 0;
+    animation: speed-lines 1.5s ease-in-out forwards;
+}
+
+@keyframes speed-lines {
+    0% { 
+        opacity: 0; 
+        transform: translateX(50px); 
+    }
+    10% { 
+        opacity: 0.7; 
+        transform: translateX(0); 
+    }
+    80% { 
+        opacity: 0.7; 
+        transform: translateX(0); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateX(-50px); 
+    }
+} 

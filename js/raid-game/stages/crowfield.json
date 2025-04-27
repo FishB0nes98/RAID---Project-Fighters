@@ -1,0 +1,48 @@
+{
+  "id": "crowfield",
+  "name": "Crowfield",
+  "description": "A desolate field with an ominous scarecrow that seems to command a murder of crows.",
+  "difficulty": 5,
+  "objectives": {
+    "winConditions": [
+      { "type": "allEnemiesDefeated" }
+    ]
+  },
+  "stageEffects": [
+    {
+      "id": "crow_watch",
+      "name": "Crow Watch",
+      "description": "Crows are watching from above, making it harder to dodge. Player dodge chance reduced by 5%.",
+      "icon": "Icons/effects/crow_watch.png"
+    }
+  ],
+  "enemies": [
+    {
+      "characterId": "crow"
+    },
+    {
+      "characterId": "crow"
+    },
+    {
+      "characterId": "scarecrow"
+    },
+    {
+      "characterId": "crow"
+    },
+    {
+      "characterId": "crow"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 250
+    },
+    {
+      "type": "xp",
+      "value": 150
+    }
+  ],
+  "backgroundImage": "images/stages/crowfield.webp",
+  "backgroundMusic": "sounds/music/crowfield.mp3"
+} 

@@ -111,7 +111,7 @@ class FarmerAliceCharacter extends Character {
 
         // --- Passive Magic Shield Gain ---
         if (type === 'magical' && result.damage > 0 && this.passive && this.passive.id === 'magical_resistance') {
-            const magicShieldGain = 1;
+            const magicShieldGain = 2;
             if (magicShieldGain > 0) {
                 this.stats.magicalShield += magicShieldGain;
                 this.magicShieldFromPassive += magicShieldGain;
@@ -316,9 +316,9 @@ const thickFurAbilityEffect = (caster) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
-    // Calculate the 20% increase for armor and magic shield
-    const armorBoost = Math.ceil(caster.stats.armor * 0.2);
-    const magicShieldBoost = Math.ceil(caster.stats.magicalShield * 0.2);
+    // Set the flat boost amount
+    const armorBoost = 20;
+    const magicShieldBoost = 20;
     
     // --- Caster Buff VFX ---
     const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
@@ -576,7 +576,7 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
 
     log(`${caster.name} used Carrot Power Up on ${target.name}, healing for ${healAmount} HP.`);
     
-    // Reduce active cooldowns by 2 turns
+    // Reduce active cooldowns by 5 turns
     let reducedAbilities = 0;
     
     // Iterate through all abilities and reduce their current cooldown if active
@@ -584,7 +584,7 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
         target.abilities.forEach(ability => {
             if (ability.currentCooldown > 0) {
                 // Calculate how much to reduce (minimum to 0)
-                const reduction = Math.min(ability.currentCooldown, 2);
+                const reduction = Math.min(ability.currentCooldown, 5);
                 ability.currentCooldown -= reduction;
                 reducedAbilities++;
                 
@@ -597,7 +597,7 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
     }
     
     if (reducedAbilities > 0) {
-        log(`${target.name}'s ability cooldowns were reduced by 2 turns.`);
+        log(`${target.name}'s ability cooldowns were reduced by 5 turns.`);
         
         // --- Target Cooldown Reduction VFX ---
         if (targetElement) {
@@ -607,7 +607,7 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
 
             const cdVfx = document.createElement('div');
             cdVfx.className = 'cooldown-reduction-vfx'; // Use generic style
-            cdVfx.innerHTML = `<span>-2 CD</span>`;
+            cdVfx.innerHTML = `<span>-5 CD</span>`;
             cdVfxContainer.appendChild(cdVfx);
 
             playSound('sounds/cooldown_reduced.mp3', 0.5); // Example sound
@@ -628,9 +628,9 @@ const pounceAbility = new Ability(
     'Pounce',
     'Icons/abilities/pounce.webp',
     50, // Mana cost
-    4,  // Cooldown in turns
+    2,  // Cooldown in turns
     pounceAbilityEffect
-).setDescription('Deals 50% AD damage and has a 25% chance to stun the target for 4 turns.')
+).setDescription('Deals 50% AD damage and has a 65% chance to stun the target for 4 turns.')
  .setTargetType('enemy');
 
 // Create the Thick Fur ability
@@ -641,7 +641,7 @@ const thickFurAbility = new Ability(
     100, // Mana cost
     18,  // Cooldown in turns
     thickFurAbilityEffect
-).setDescription('Increases Armor and Magic Shield by 20% for 10 turns.')
+).setDescription('Increases Armor and Magic Shield by 20 for 10 turns.')
  .setTargetType('self');
 
 // Create the Bunny Bounce ability
@@ -663,7 +663,7 @@ const carrotPowerUpAbility = new Ability(
     155, // Mana cost
     15,  // Cooldown in turns
     carrotPowerUpAbilityEffect
-).setDescription('Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 2 turns. Cooldown reduces by 1 turn when Alice takes damage.')
+).setDescription('Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.')
  .setTargetType('ally'); // Can target self or allies
 
 // Register abilities with AbilityFactory

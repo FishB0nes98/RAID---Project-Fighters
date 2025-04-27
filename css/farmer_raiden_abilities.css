@@ -1,0 +1,1158 @@
+/* CSS for Farmer Raiden abilities and passive effects */
+
+/* Lightning Orb ability casting animation */
+.lightning-orb-cast-animation {
+    animation: lightning-cast 0.8s ease-out;
+}
+
+@keyframes lightning-cast {
+    0% {
+        transform: translateY(0);
+        filter: brightness(1);
+    }
+    20% {
+        transform: translateY(-5px);
+    }
+    40% {
+        transform: translateY(0);
+        filter: brightness(1.4);
+    }
+    60% {
+        transform: translateY(-3px);
+        filter: brightness(1.8);
+    }
+    100% {
+        transform: translateY(0);
+        filter: brightness(1);
+    }
+}
+
+/* Lightning Orb projectile */
+.lightning-orb-projectile {
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(135,206,250,0.9) 30%, rgba(0,119,255,0.8) 70%, rgba(0,47,167,0.6) 100%);
+    box-shadow: 
+        0 0 10px #00b3ff,
+        0 0 20px #00b3ff,
+        0 0 30px #00b3ff;
+    z-index: 1000;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: pulse-lightning 0.4s infinite alternate;
+}
+
+@keyframes pulse-lightning {
+    0% {
+        box-shadow: 
+            0 0 10px #00b3ff,
+            0 0 20px #00b3ff,
+            0 0 30px #00b3ff;
+        opacity: 0.8;
+    }
+    100% {
+        box-shadow: 
+            0 0 15px #00b3ff,
+            0 0 25px #00b3ff,
+            0 0 35px #00b3ff;
+        opacity: 1;
+    }
+}
+
+/* Lightning impact effect */
+.lightning-impact-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: lightning-impact 0.8s ease-out forwards;
+}
+
+.lightning-impact-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 
+        0 0 20px #00b3ff,
+        0 0 40px #00b3ff;
+    animation: lightning-explosion 0.8s ease-out forwards;
+}
+
+@keyframes lightning-impact {
+    0% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+    10% {
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+    30% {
+        background-color: rgba(0, 179, 255, 0.5);
+    }
+    100% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+}
+
+@keyframes lightning-explosion {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    50% {
+        width: 150px;
+        height: 150px;
+        opacity: 0.8;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+/* Zap Passive Effects */
+
+/* Raiden passive indicator */
+.raiden-passive-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 5;
+    animation: passive-pulse 2s infinite;
+}
+
+.raiden-passive-indicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 15px;
+    height: 15px;
+    background-image: url('../Icons/passives/lightning_zap.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: passive-icon-pulse 2s infinite alternate;
+}
+
+@keyframes passive-pulse {
+    0% {
+        box-shadow: 0 0 5px #00b3ff;
+    }
+    50% {
+        box-shadow: 0 0 10px #00b3ff, 0 0 15px #00b3ff;
+    }
+    100% {
+        box-shadow: 0 0 5px #00b3ff;
+    }
+}
+
+@keyframes passive-icon-pulse {
+    0% {
+        filter: brightness(1);
+    }
+    100% {
+        filter: brightness(1.5);
+    }
+}
+
+/* Zap lightning effect */
+.raiden-zap-effect {
+    position: fixed;
+    height: 8px;
+    background: linear-gradient(90deg, transparent 0%, #ffffff 15%, #00b3ff 50%, #ffffff 85%, transparent 100%);
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.05s ease-in;
+}
+
+.raiden-zap-effect.active {
+    opacity: 1;
+}
+
+.raiden-zap-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 10%,
+        rgba(255, 255, 255, 0.8) 10%,
+        rgba(255, 255, 255, 0.8) 20%
+    );
+    opacity: 0.3;
+    animation: lightning-flicker 0.15s steps(3) infinite;
+}
+
+@keyframes lightning-flicker {
+    0% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0.3;
+    }
+}
+
+/* Zap impact effect */
+.zap-impact-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: zap-impact 0.6s ease-out forwards;
+}
+
+.zap-impact-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(0,179,255,0.6) 40%, transparent 70%);
+    animation: zap-fade 0.6s ease-out forwards;
+}
+
+/* Create lightning bolt arcs around the impact */
+.zap-impact-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background-image: 
+        radial-gradient(circle, transparent 50%, rgba(255,255,255,0.7) 51%, transparent 52%),
+        radial-gradient(circle, transparent 60%, rgba(255,255,255,0.5) 61%, transparent 62%),
+        radial-gradient(circle, transparent 70%, rgba(255,255,255,0.3) 71%, transparent 72%);
+    animation: zap-impact-circles 0.6s ease-out forwards;
+}
+
+@keyframes zap-impact {
+    0% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+    20% {
+        background-color: rgba(255, 255, 255, 0.7);
+    }
+    40% {
+        background-color: rgba(0, 179, 255, 0.4);
+    }
+    100% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+}
+
+@keyframes zap-fade {
+    0% {
+        opacity: 1;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes zap-impact-circles {
+    0% {
+        opacity: 1;
+        width: 0;
+        height: 0;
+    }
+    100% {
+        opacity: 0;
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* Thunder Shield Effects */
+
+/* Shield cast animation */
+.thunder-shield-cast {
+    animation: thunder-shield-cast-anim 0.8s ease-out;
+}
+
+@keyframes thunder-shield-cast-anim {
+    0% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.7);
+    }
+    75% {
+        filter: brightness(1.4);
+    }
+    100% {
+        filter: brightness(1);
+    }
+}
+
+/* Thunder Shield burst effect when activated */
+.thunder-shield-burst {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 20;
+    animation: shield-burst-anim 1s ease-out forwards;
+}
+
+.thunder-shield-burst::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(0,179,255,0.5) 30%, transparent 70%);
+    box-shadow: 
+        0 0 20px #00b3ff,
+        0 0 40px #00b3ff;
+    animation: shield-burst-rings 0.8s ease-out;
+}
+
+.thunder-shield-burst::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle, transparent 60%, rgba(255,255,255,0.7) 62%, transparent 65%),
+        radial-gradient(circle, transparent 70%, rgba(255,255,255,0.5) 72%, transparent 75%),
+        radial-gradient(circle, transparent 80%, rgba(255,255,255,0.3) 82%, transparent 85%);
+    animation: shield-burst-outer-rings 1s ease-out;
+}
+
+@keyframes shield-burst-anim {
+    0% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes shield-burst-rings {
+    0% {
+        width: 100%;
+        height: 100%;
+        opacity: 0.9;
+    }
+    100% {
+        width: 180%;
+        height: 180%;
+        opacity: 0;
+    }
+}
+
+@keyframes shield-burst-outer-rings {
+    0% {
+        width: 100%;
+        height: 100%;
+        opacity: 0.9;
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        width: 220%;
+        height: 220%;
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+}
+
+/* Thunder Shield main effect */
+.thunder-shield-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    perspective: 800px;
+    transform-style: preserve-3d;
+}
+
+/* Lightning barrier effect */
+.thunder-shield-effect::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 50%, rgba(0,179,255,0.1) 70%, rgba(0,179,255,0.2) 80%, rgba(0,179,255,0.3) 90%, transparent 100%);
+    box-shadow: 
+        inset 0 0 20px rgba(0, 179, 255, 0.5),
+        0 0 15px rgba(0, 179, 255, 0.7);
+    animation: thunder-shield-pulse 3s infinite alternate;
+    z-index: 1;
+}
+
+/* Rotating shield barrier */
+.thunder-shield-effect::after {
+    content: '';
+    position: absolute;
+    top: -15%;
+    left: -15%;
+    width: 130%;
+    height: 130%;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 179, 255, 0.5);
+    box-shadow: 
+        0 0 10px #00b3ff,
+        inset 0 0 15px #00b3ff;
+    animation: thunder-shield-rotate 10s linear infinite;
+    z-index: 2;
+}
+
+/* Lightning arcs */
+.thunder-shield-arc {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.thunder-shield-arc:nth-child(1) {
+    transform: translate(-50%, -50%) rotate(0deg);
+    animation: thunder-arc-anim 5s linear infinite, thunder-arc-opacity 3s infinite;
+}
+
+.thunder-shield-arc:nth-child(2) {
+    transform: translate(-50%, -50%) rotate(72deg);
+    animation: thunder-arc-anim 5s linear infinite 0.6s, thunder-arc-opacity 3s infinite 0.4s;
+}
+
+.thunder-shield-arc:nth-child(3) {
+    transform: translate(-50%, -50%) rotate(144deg);
+    animation: thunder-arc-anim 5s linear infinite 1.2s, thunder-arc-opacity 3s infinite 0.8s;
+}
+
+.thunder-shield-arc:nth-child(4) {
+    transform: translate(-50%, -50%) rotate(216deg);
+    animation: thunder-arc-anim 5s linear infinite 1.8s, thunder-arc-opacity 3s infinite 1.2s;
+}
+
+.thunder-shield-arc:nth-child(5) {
+    transform: translate(-50%, -50%) rotate(288deg);
+    animation: thunder-arc-anim 5s linear infinite 2.4s, thunder-arc-opacity 3s infinite 1.6s;
+}
+
+.thunder-shield-arc::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(0, 179, 255, 0.8) 50%, transparent);
+    transform-origin: bottom center;
+    transform: translateX(-50%) scaleY(0);
+    animation: thunder-arc-grow 3s ease-in-out infinite;
+}
+
+.thunder-shield-arc::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 5px #ffffff,
+        0 0 10px #00b3ff,
+        0 0 15px #00b3ff;
+    transform: translate(-50%, 0);
+    animation: thunder-arc-spark 3s ease-in-out infinite;
+}
+
+/* Fading animation */
+.thunder-shield-effect.fading {
+    animation: thunder-shield-fade 0.5s forwards;
+}
+
+.thunder-shield-effect.fading .thunder-shield-arc {
+    animation: thunder-arc-fade 0.5s forwards !important;
+}
+
+/* Shield animations */
+@keyframes thunder-shield-pulse {
+    0%, 100% {
+        opacity: 0.7;
+        box-shadow: 
+            inset 0 0 20px rgba(0, 179, 255, 0.5),
+            0 0 15px rgba(0, 179, 255, 0.7);
+    }
+    50% {
+        opacity: 0.9;
+        box-shadow: 
+            inset 0 0 30px rgba(0, 179, 255, 0.7),
+            0 0 25px rgba(0, 179, 255, 0.9);
+    }
+}
+
+@keyframes thunder-shield-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes thunder-arc-anim {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes thunder-arc-opacity {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes thunder-arc-grow {
+    0%, 100% {
+        transform: translateX(-50%) scaleY(0);
+    }
+    50% {
+        transform: translateX(-50%) scaleY(1);
+    }
+}
+
+@keyframes thunder-arc-spark {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes thunder-shield-fade {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes thunder-arc-fade {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* 3D lightning effects */
+.thunder-shield-3d {
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+    transform-style: preserve-3d;
+    animation: thunder-shield-3d-rotate 15s linear infinite;
+}
+
+.thunder-shield-3d::before,
+.thunder-shield-3d::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle, transparent 60%, rgba(0,179,255,0.1) 70%, rgba(0,179,255,0.2) 80%, rgba(0,179,255,0.1) 90%, transparent 100%);
+    box-shadow: 
+        0 0 10px rgba(0, 179, 255, 0.5),
+        inset 0 0 15px rgba(0, 179, 255, 0.5);
+}
+
+.thunder-shield-3d::before {
+    transform: translateZ(20px);
+    animation: thunder-shield-3d-pulse 3s infinite alternate;
+}
+
+.thunder-shield-3d::after {
+    transform: translateZ(-20px);
+    animation: thunder-shield-3d-pulse 3s infinite alternate-reverse;
+}
+
+@keyframes thunder-shield-3d-rotate {
+    0% {
+        transform: rotateX(65deg) rotateY(0deg);
+    }
+    100% {
+        transform: rotateX(65deg) rotateY(360deg);
+    }
+}
+
+@keyframes thunder-shield-3d-pulse {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* Electric Shock Ability Styles */
+.electric-shock-cast {
+    animation: electric-shock-cast 1s ease-out;
+}
+
+@keyframes electric-shock-cast {
+    0% {
+        transform: translateY(0);
+        filter: brightness(1);
+    }
+    20% {
+        transform: translateY(-8px);
+        filter: brightness(1.5);
+    }
+    40% {
+        transform: translateY(0);
+        filter: brightness(2);
+    }
+    60% {
+        transform: translateY(-5px);
+        filter: brightness(1.8);
+    }
+    80% {
+        transform: translateY(0);
+        filter: brightness(1.5);
+    }
+    100% {
+        transform: translateY(0);
+        filter: brightness(1);
+    }
+}
+
+/* Electric Shock Wave Effect */
+.electric-shock-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 20px #00b3ff, 0 0 40px #00b3ff;
+    z-index: 100;
+    animation: electric-shock-wave 1s ease-out forwards;
+}
+
+@keyframes electric-shock-wave {
+    0% {
+        width: 10px;
+        height: 10px;
+        opacity: 1;
+        border-radius: 50%;
+    }
+    50% {
+        width: 200px;
+        height: 200px;
+        opacity: 0.8;
+        border-radius: 50%;
+    }
+    100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+        border-radius: 50%;
+    }
+}
+
+/* Electric Shock Impact Effect */
+.electric-shock-impact {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: electric-shock-impact 0.8s ease-out forwards;
+}
+
+.electric-shock-impact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(0, 179, 255, 0.8) 0%, rgba(0, 179, 255, 0) 70%),
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 60%);
+    filter: blur(2px);
+    opacity: 0;
+    animation: electric-shock-flash 0.8s ease-out forwards;
+}
+
+.electric-shock-impact::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: 
+        linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(0, 179, 255, 0.8));
+    border-radius: 50%;
+    box-shadow: 
+        0 0 30px #00b3ff,
+        0 0 60px #00b3ff;
+    animation: electric-shock-expand 0.8s ease-out forwards;
+}
+
+@keyframes electric-shock-impact {
+    0% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+    15% {
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+    30% {
+        background-color: rgba(0, 179, 255, 0.5);
+    }
+    100% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+}
+
+@keyframes electric-shock-flash {
+    0% {
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes electric-shock-expand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    50% {
+        width: 120px;
+        height: 120px;
+        opacity: 0.8;
+    }
+    100% {
+        width: 180px;
+        height: 180px;
+        opacity: 0;
+    }
+}
+
+/* Lightning bolts that appear around impacted targets */
+.electric-shock-impact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(135deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%),
+        linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%),
+        linear-gradient(225deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%),
+        linear-gradient(315deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%);
+    background-size: 200% 200%;
+    background-position: center;
+    opacity: 0;
+    animation: electric-shock-lightning 0.5s ease-out forwards;
+}
+
+@keyframes electric-shock-lightning {
+    0% {
+        opacity: 0;
+        background-size: 100% 100%;
+    }
+    30% {
+        opacity: 1;
+        background-size: 150% 150%;
+    }
+    70% {
+        opacity: 0.7;
+        background-size: 180% 180%;
+    }
+    100% {
+        opacity: 0;
+        background-size: 200% 200%;
+    }
+}
+
+/* Shocked Debuff VFX */
+.shocked-debuff-apply {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    animation: shocked-apply 1s ease-out forwards;
+}
+
+.shocked-debuff-apply::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 179, 255, 0.5) 10%, rgba(0, 179, 255, 0) 70%);
+    animation: shocked-pulse 1s ease-out forwards;
+}
+
+.shocked-debuff-apply::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background-image: url('../Icons/debuffs/shocked.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 5px #00b3ff);
+    opacity: 0;
+    animation: shocked-icon 1s ease-out forwards;
+}
+
+@keyframes shocked-apply {
+    0% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+    20% {
+        background-color: rgba(0, 179, 255, 0.3);
+    }
+    80% {
+        background-color: rgba(0, 179, 255, 0.1);
+    }
+    100% {
+        background-color: rgba(0, 179, 255, 0);
+    }
+}
+
+@keyframes shocked-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    70% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes shocked-icon {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+/* Shocked Debuff active state (when applied to character) */
+.debuff-icon[title*="Shocked"] {
+    position: relative;
+    overflow: visible;
+}
+
+.debuff-icon[title*="Shocked"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #00b3ff, 0 0 10px #00b3ff;
+    animation: shocked-active-pulse 2s infinite;
+    z-index: -1;
+}
+
+@keyframes shocked-active-pulse {
+    0% {
+        opacity: 0.5;
+        box-shadow: 0 0 5px #00b3ff, 0 0 10px #00b3ff;
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 8px #00b3ff, 0 0 15px #00b3ff;
+    }
+    100% {
+        opacity: 0.5;
+        box-shadow: 0 0 5px #00b3ff, 0 0 10px #00b3ff;
+    }
+}
+
+/* Storm Circle Cast Animation */
+.storm-circle-cast {
+    position: relative;
+    overflow: visible;
+    animation: thunder-shield-cast-anim 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Storm Circle Wave Animation */
+.storm-circle-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(142, 236, 255, 0.2) 0%, rgba(0, 132, 255, 0.4) 50%, rgba(31, 97, 255, 0.1) 70%, transparent 100%);
+    box-shadow: 0 0 20px rgba(0, 162, 255, 0.8), 0 0 40px rgba(0, 140, 255, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.6);
+    z-index: 100;
+    animation: storm-circle-expand 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+    pointer-events: none;
+}
+
+/* Storm Circle Lightning Arcs */
+.storm-circle-lightning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 101;
+    animation: storm-circle-lightning 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+.storm-circle-lightning::before,
+.storm-circle-lightning::after {
+    content: '';
+    position: absolute;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px #00a2ff, 0 0 20px #00a2ff;
+    opacity: 0;
+    transform-origin: center center;
+    animation: lightning-flicker 0.8s ease-out forwards;
+}
+
+.storm-circle-lightning::before {
+    width: 2px;
+    height: 80%;
+    top: 10%;
+    left: 50%;
+    transform: rotate(45deg);
+    animation-delay: 0.2s;
+}
+
+.storm-circle-lightning::after {
+    width: 2px;
+    height: 80%;
+    top: 10%;
+    left: 50%;
+    transform: rotate(-45deg);
+    animation-delay: 0.5s;
+}
+
+/* Storm Circle Impact Effect */
+.storm-circle-impact {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+    animation: shake-animation 0.5s ease;
+}
+
+.storm-circle-impact::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(30, 144, 255, 0.6) 40%, rgba(0, 127, 255, 0.2) 70%, transparent 100%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: storm-impact 0.8s ease-out forwards;
+}
+
+/* Animations */
+@keyframes storm-circle-expand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.3;
+    }
+    50% {
+        width: 300vw;
+        height: 300vw;
+        opacity: 0.8;
+    }
+    100% {
+        width: 500vw;
+        height: 500vw;
+        opacity: 0;
+    }
+}
+
+@keyframes storm-circle-lightning {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(3);
+    }
+}
+
+@keyframes storm-impact {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.2);
+    }
+    20% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    70% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes shake-animation {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-5px, 0); }
+    20% { transform: translate(5px, 0); }
+    30% { transform: translate(-7px, 0); }
+    40% { transform: translate(7px, 0); }
+    50% { transform: translate(-5px, 0); }
+    60% { transform: translate(5px, 0); }
+    70% { transform: translate(-3px, 0); }
+    80% { transform: translate(3px, 0); }
+    90% { transform: translate(-1px, 0); }
+} 

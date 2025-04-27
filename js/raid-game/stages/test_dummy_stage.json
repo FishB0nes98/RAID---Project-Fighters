@@ -1,0 +1,25 @@
+{
+  "id": "test_dummy_stage",
+  "name": "Target Dummy Test",
+  "description": "A simple stage with a target dummy for testing purposes.",
+  "difficulty": 1,
+  "objectives": {
+    "winConditions": [
+      { "type": "enemyDefeated", "targetId": "target_dummy" } 
+    ]
+  },
+  "stageEffects": [], 
+  "enemies": [
+    {
+      "characterId": "target_dummy"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "xp",
+      "value": 1
+    }
+  ],
+  "backgroundImage": "images/stages/test_background.png", 
+  "backgroundMusic": null 
+} 

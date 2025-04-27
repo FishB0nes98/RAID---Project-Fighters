@@ -146,6 +146,179 @@
         "type": "recruit",
         "recruitTag": "Farmer",
         "recruitCount": 3
+      },
+      {
+        "name": "Mutated Animals Ranch",
+        "description": "The ranch animals have been horribly mutated! Survive the onslaught.",
+        "difficulty": 2,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "angry_pig" },
+          { "characterId": "angry_chicken" },
+          { "characterId": "angry_bull" }
+        ],
+        "backgroundImage": "images/stages/mutated_ranch.png",
+        "backgroundMusic": "sounds/music/ranch_battle.mp3"
+      },
+      {
+        "name": "Farmhouse Pantry",
+        "description": "You discover the farmhouse pantry, surprisingly well-stocked despite the chaos.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Fresh Apple",
+            "description": "Restores 50% Max HP to the entire team.",
+            "effect": { "type": "heal_percent", "target": "all", "amount_percent": 50 }
+          },
+          {
+            "name": "Juicy Pear",
+            "description": "Increase a selected character's Magic Damage by 30%.",
+            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": "magicalDamage", "amount": 30 }
+          },
+          {
+            "name": "Ripe Watermelon",
+            "description": "Increase a selected character's Armor and Magical Resistance by 7%.",
+            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": ["armor", "magicalShield"], "amount": 7 }
+          }
+        ]
+      },
+      {
+        "name": "Farm Well",
+        "description": "You find a well filled with clear, refreshing water. It seems to possess restorative properties.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Drink from the Well",
+            "description": "Restores the entire team's Mana to full.",
+            "effect": { "type": "mana_restore", "target": "all", "amount": "full" }
+          }
+        ]
+      },
+      {
+        "name": "Under the apple tree",
+        "description": "A large, ancient apple tree stands here. But the apples... they don't look right.",
+        "difficulty": 3,
+        "type": "battle",
+        "enemies": [
+            { "characterId": "monster_apple" },
+            { "characterId": "healthy_apple" },
+            { "characterId": "angry_apple" },
+            { "characterId": "leafy_apple" },
+            { "characterId": "rotten_apple" }
+        ],
+        "backgroundImage": "images/stages/apple_tree_grove.png",
+        "backgroundMusic": "sounds/music/apple_battle.mp3"
+      },
+      {
+        "name": "Digged up treasure",
+        "description": "You unearth a hidden chest while digging near the tree.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "First Aid Kit",
+            "description": "Heal a chosen character to full HP.",
+            "effect": { "type": "heal", "target": "selected", "amount": "full" }
+          },
+          {
+            "name": "A Rare Bone",
+            "description": "Increases a selected character's dodge chance by 15%.",
+            "effect": { "type": "stat_boost", "target": "selected", "stat": "dodgeChance", "amount": 0.15 }
+          },
+          {
+            "name": "Pocket of Weed",
+            "description": "Double your Magical and Physical Damage of a selected character but set armor and magic shield to 0.",
+            "effect": { "type": "pocket_of_weed_effect", "target": "selected" }
+          }
+        ]
+      },
+      {
+        "name": "The Barn",
+        "description": "You approach the sinister looking barn. Inside, a Crazy Farmer and his Hound are waiting.",
+        "difficulty": 4,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "crazy_farmer" },
+          { "characterId": "hound" }
+        ],
+        "backgroundImage": "images/stages/farm_barn.png",
+        "backgroundMusic": "sounds/music/barn_battle.mp3"
+      },
+      {
+        "name": "Freed from the Barn",
+        "description": "Having cleared the barn, you find some grateful farmhands who were trapped inside. Choose one to join your cause.",
+        "type": "recruit",
+        "recruitTag": "Farmer",
+        "recruitCount": 3
+      },
+      {
+        "name": "Hidden on the cornfield",
+        "description": "Lost in the endless rows of corn, you stumble upon some items hidden amongst the stalks.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Water Bottle",
+            "description": "Restores 2000 HP and 2000 Mana to a character.",
+            "effect": { "type": "heal_and_mana_restore", "target": "selected", "amount": { "hp": 2000, "mana": 2000 } }
+          },
+          {
+            "name": "Corn",
+            "description": "+80 HP regeneration to a character.",
+            "effect": { "type": "stat_boost", "target": "selected", "stat": "hpRegen", "amount": 80 }
+          },
+          {
+            "name": "Magical Ring",
+            "description": "Restores mana to full and grants the selected character +100 Magical Damage.",
+            "effect": { "type": "mana_restore_and_stat_boost", "target": "selected", "amount": { "mana": "full", "stat": "magicalDamage", "value": 100 } }
+          }
+        ]
+      },
+      {
+        "name": "Crowfield",
+        "description": "You venture into an eerie field dominated by a sinister scarecrow. Dark crows circle overhead, watching your every move.",
+        "difficulty": 5,
+        "type": "battle",
+        "boss": "scarecrow",
+        "backgroundImage": "images/stages/crowfield.png",
+        "backgroundMusic": "sounds/music/crowfield.mp3"
+      },
+      {
+        "name": "Farm Well Again",
+        "description": "You find another well. The water still looks refreshing.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Drink from the Well",
+            "description": "Restores the entire team's Mana to full.",
+            "effect": { "type": "mana_restore", "target": "all", "amount": "full" }
+          }
+        ]
+      },
+      {
+        "name": "A friend among the corns",
+        "description": "You hear rustling nearby. Could it be another survivor?",
+        "type": "recruit",
+        "recruitTag": "Farmer",
+        "recruitCount": 3
+      },
+      {
+        "name": "Farm clearing",
+        "description": "The source of the corruption reveals itself! Farmer FANG stands with his twisted minions.",
+        "difficulty": 7,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "angry_bull" },
+          { "characterId": "crow" },
+          { "characterId": "farmer_fang" },
+          { "characterId": "angry_carrot" },
+          { "characterId": "hound" }
+        ],
+        "objectives": {
+          "winConditions": [
+            { "type": "enemyDefeated", "targetId": "farmer_fang" }
+          ]
+        },
+        "backgroundImage": "images/stages/farm_clearing_final.png",
+        "backgroundMusic": "sounds/music/final_farm_battle.mp3"
       }
     ]
   }

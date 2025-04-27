@@ -15,7 +15,7 @@
         "dodgeChance": 0.00,
         "critChance": 0.5,
         "critDamage": 2.0,
-        "healingPower": 0
+        "healingPower": 0.0
     },
     "abilities": [
         {
@@ -26,7 +26,7 @@
             "manaCost": 35,
             "cooldown": 2,
             "targetType": "enemy",
-            "description": "Deals 235 damage and has 35% chance to stun the target for 3 turns.",
+            "description": "Deals 235 damage and has 35% chance to stun the target for 2 turns.",
             "icon": "Icons/abilities/homerun_smash.jpeg"
         },
         {

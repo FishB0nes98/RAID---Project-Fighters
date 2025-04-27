@@ -100,7 +100,7 @@ body {
 }
 
 .character-slot.invalid-target {
-    opacity: 0.5;
+    border-color: red;
     cursor: not-allowed;
 }
 
@@ -596,26 +596,26 @@ body {
     position: absolute;
     right: 20px;
     bottom: 20px;
-    width: 320px;
-    height: 200px;
-    background-color: rgba(15, 15, 20, 0.85);
+    width: 350px; /* Increased width */
+    height: 300px; /* Start with fully open height */
+    background-color: rgba(15, 15, 20, 0.92); /* Slightly more opaque */
     border-radius: 10px;
-    border: 1px solid #555;
+    border: 1px solid #444;
     overflow: hidden;
     z-index: 3;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); /* Enhanced shadow */
     display: flex;
     flex-direction: column;
 }
 
 .battle-log-header {
-    padding: 8px 12px;
-    background-color: rgba(40, 40, 50, 0.8);
-    border-bottom: 1px solid #666;
+    padding: 10px 14px;
+    background-color: rgba(30, 35, 50, 0.9); /* Darker, more contrasty header */
+    border-bottom: 1px solid #555;
     font-weight: bold;
     font-size: 14px;
-    color: #eee;
+    color: #fff; /* Brighter text */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     display: flex;
     align-items: center;
@@ -625,8 +625,32 @@ body {
 
 .battle-log-header::before {
     content: "⚔️";
-    margin-right: 8px;
+    margin-right: 10px;
     font-size: 16px;
+}
+
+.battle-log-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.log-button {
+    background: rgba(60, 70, 90, 0.6);
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.log-button:hover {
+    background: rgba(80, 90, 120, 0.8);
 }
 
 .battle-log-header.flash {
@@ -634,14 +658,15 @@ body {
 }
 
 @keyframes header-flash {
-    0%, 100% { background-color: rgba(40, 40, 50, 0.8); }
-    50% { background-color: rgba(100, 100, 150, 0.9); }
+    0%, 100% { background-color: rgba(30, 35, 50, 0.9); }
+    50% { background-color: rgba(60, 70, 120, 0.95); }
 }
 
 .battle-log-content {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    padding: 10px 0;
     scrollbar-width: thin;
     scrollbar-color: #555 rgba(0, 0, 0, 0.2);
 }
@@ -659,30 +684,37 @@ body {
     border-radius: 3px;
 }
 
+/* Remove hover expand since we're starting expanded */
 .battle-log-container:hover {
-    height: 300px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+/* For toggling battle log size */
+.battle-log-container.collapsed {
+    height: 180px;
 }
 
 .battle-log {
     font-size: 13px;
-    color: #ddd;
-    padding: 0 12px;
+    color: #eee; /* Brighter text */
+    padding: 0 14px;
 }
 
 .log-entry {
-    margin-bottom: 8px;
-    padding: 5px 8px;
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.25);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    margin-bottom: 9px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: rgba(30, 30, 40, 0.5); /* More visible entry background */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     animation: fadeIn 0.3s ease-in-out;
     position: relative;
     transition: all 0.2s ease;
+    border-left-width: 4px; /* Thicker indicator border */
 }
 
 .log-entry:hover {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(40, 40, 60, 0.7);
+    transform: translateX(3px);
 }
 
 .log-entry:last-child {
@@ -908,6 +940,65 @@ body {
 .tooltip-description {
     font-size: 12px;
     line-height: 1.4;
+}
+
+/* Context Menu Styles */
+.context-menu {
+    position: absolute;
+    background-color: rgba(30, 30, 40, 0.95); /* Dark semi-transparent background */
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555; /* Subtle border */
+    z-index: 1001; /* Ensure it's above most elements */
+    width: 200px; /* Adjusted width */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Soft shadow */
+    opacity: 0; /* Start hidden */
+    transform: scale(0.95); /* Start slightly smaller */
+    transform-origin: top left; /* Scale from top-left */
+    transition: opacity 0.15s ease, transform 0.15s ease; /* Smooth transition */
+    pointer-events: none; /* Initially not interactable */
+}
+
+.context-menu.visible {
+    opacity: 1; /* Fully visible */
+    transform: scale(1); /* Normal size */
+    pointer-events: auto; /* Allow interaction when visible */
+}
+
+.context-menu-item {
+    padding: 8px 12px; /* Increased padding */
+    cursor: pointer;
+    border-radius: 3px;
+    margin-bottom: 3px; /* Slightly more spacing */
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    font-size: 14px; /* Ensure readability */
+}
+
+.context-menu-item:hover {
+    background-color: rgba(80, 90, 120, 0.8); /* Highlight on hover */
+}
+
+.context-menu-item:active {
+    background-color: rgba(60, 70, 100, 0.8); /* Slightly darker on click */
+}
+
+.context-menu-item-icon {
+    margin-right: 10px; /* More space for icon */
+    width: 16px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8; /* Slightly faded icon */
+}
+
+.context-menu-divider {
+    height: 1px;
+    background-color: #555;
+    margin: 6px 0; /* Adjusted margins */
 }
 
 /* Responsive design */
@@ -1239,1387 +1330,143 @@ body {
 /* Heal VFX */
 .heal-vfx {
     position: absolute;
+    color: #4CAF50; /* Standard green */
+    font-size: 20px;
+    font-weight: bold;
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #2ecc71;
-    font-size: 28px;
-    font-weight: bold;
-    text-shadow: 0 0 10px #2ecc71, 2px 2px 3px rgba(0, 0, 0, 0.8);
-    z-index: 100;
-    animation: floatUpFade 1s ease-out forwards;
-    pointer-events: none;
+    text-shadow: 0 0 5px rgba(105, 240, 174, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.6);
+    animation: heal-float 1.5s ease-out;
+    white-space: nowrap;
+    z-index: 105; /* Ensure it's above other elements */
 }
 
-/* Healing particles */
+.heal-vfx.critical {
+    color: #FFD700; /* Gold color for critical heal */
+    font-size: 24px; /* Slightly larger */
+    text-shadow: 0 0 8px #FFFACD, 0 0 12px #FFEC8B, 1px 1px 3px rgba(0, 0, 0, 0.7);
+    animation: crit-heal-float 1.8s ease-out; /* Different animation maybe? */
+}
+
 .heal-particles {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 90;
-    pointer-events: none;
-    background-image: 
-        radial-gradient(circle at 30% 30%, rgba(46, 204, 113, 0.8) 0%, rgba(46, 204, 113, 0) 10%),
-        radial-gradient(circle at 70% 40%, rgba(46, 204, 113, 0.8) 0%, rgba(46, 204, 113, 0) 10%),
-        radial-gradient(circle at 40% 60%, rgba(46, 204, 113, 0.8) 0%, rgba(46, 204, 113, 0) 10%),
-        radial-gradient(circle at 60% 80%, rgba(46, 204, 113, 0.8) 0%, rgba(46, 204, 113, 0) 10%),
-        radial-gradient(circle at 50% 50%, rgba(46, 204, 113, 0.4) 0%, rgba(46, 204, 113, 0) 40%);
-    animation: particleFade 1s ease-out forwards;
-}
-
-@keyframes particleFade {
-    0% { 
-        opacity: 1; 
-        background-position: 
-            30% 30%, 
-            70% 40%, 
-            40% 60%, 
-            60% 80%,
-            50% 50%;
-    }
-    100% { 
-        opacity: 0; 
-        background-position: 
-            20% 20%, 
-            80% 30%, 
-            30% 70%, 
-            70% 90%,
-            50% 40%;
-    }
-}
-
-@keyframes fadeOut {
-    0% { opacity: 0.8; }
-    100% { opacity: 0; }
-}
-
-/* Stun effect */
-.character-slot.stunned .image-container {
-    position: relative;
-    overflow: visible;
-}
-
-.character-slot.stunned .image-container::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.3);
-    z-index: 15;
-    pointer-events: none;
-}
-
-.stun-effect {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    pointer-events: none;
-    animation: stunAnimation 2s linear infinite;
-}
-
-.stun-stars {
-    position: absolute;
     width: 100%;
     height: 100%;
-    background-image: 
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f1c40f"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>'),
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f1c40f"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>'),
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f1c40f"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
-    background-repeat: no-repeat;
-    background-size: 30px 30px;
-    background-position: 30% 30%, 70% 50%, 50% 70%;
-    opacity: 0.8;
-}
-
-@keyframes stunAnimation {
-    0% {
-        transform: rotate(0deg) scale(1);
-    }
-    25% {
-        transform: rotate(10deg) scale(1.05);
-    }
-    50% {
-        transform: rotate(0deg) scale(1);
-    }
-    75% {
-        transform: rotate(-10deg) scale(1.05);
-    }
-    100% {
-        transform: rotate(0deg) scale(1);
-    }
-}
-
-/* Circular stun animation */
-.stun-circle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 4px dotted #f1c40f;
-    transform: translate(-50%, -50%);
-    animation: stunCircle 2s linear infinite;
-}
-
-@keyframes stunCircle {
-    0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-        opacity: 0.8;
-    }
-    100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-        opacity: 0.8;
-    }
-}
-
-/* Dodge animation */
-@keyframes dodgeMove {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-15px) rotate(-5deg); }
-    75% { transform: translateX(15px) rotate(5deg); }
-    100% { transform: translateX(0); }
-}
-
-.dodge-animation {
-    animation: dodgeMove 0.6s cubic-bezier(.36,.07,.19,.97) both;
-    border-color: #3498db !important;
-    box-shadow: 0 0 15px rgba(52, 152, 219, 0.7) !important;
-}
-
-/* Dodge VFX */
-.dodge-vfx {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #3498db;
-    font-size: 32px;
-    font-weight: bold;
-    text-shadow: 0 0 10px #3498db, 2px 2px 3px rgba(0, 0, 0, 0.8);
+    top: 0;
+    left: 0;
+    pointer-events: none;
     z-index: 100;
-    animation: dodgeVfxAnim 1s ease-out forwards;
-    pointer-events: none;
 }
 
-@keyframes dodgeVfxAnim {
-    0% { 
-        opacity: 0; 
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    30% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    100% { 
-        opacity: 0; 
-        transform: translate(-50%, -80%) scale(1);
-    }
-}
-
-/* Character Stats Context Menu */
-.character-stats-menu {
-    position: fixed;
-    background-color: rgba(0, 0, 0, 0.9);
-    border: 2px solid #3498db;
-    border-radius: 8px;
-    padding: 15px;
-    min-width: 320px;
-    max-width: 650px;
-    max-height: 80vh;
-    overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
-    color: white;
-    font-size: 14px;
-    transform-origin: top left;
-    animation: menuAppear 0.2s ease-out;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: #3498db rgba(0, 0, 0, 0.3);
-}
-
-/* Custom scrollbar for Webkit browsers */
-.character-stats-menu::-webkit-scrollbar {
+.heal-particles::before,
+.heal-particles::after {
+    content: '';
+    position: absolute;
     width: 8px;
-}
-
-.character-stats-menu::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-}
-
-.character-stats-menu::-webkit-scrollbar-thumb {
-    background-color: #3498db;
-    border-radius: 4px;
-}
-
-@keyframes menuAppear {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.stats-menu-header {
-    font-size: 22px;
-    font-weight: bold;
-    color: #3498db;
-    text-align: center;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #555;
-    text-shadow: 0 0 8px rgba(52, 152, 219, 0.7);
-}
-
-.stats-menu-subheader {
-    font-size: 18px;
-    font-weight: bold;
-    color: #e74c3c;
-    margin: 15px 0 8px 0;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #555;
-}
-
-.stats-menu-section {
-    margin-bottom: 15px;
-}
-
-.stats-list {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-}
-
-.stats-list li {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    padding: 4px 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.stat-name {
-    color: #bbb;
-}
-
-.stat-value {
-    font-weight: bold;
-    color: #fff;
-}
-
-.stat-change {
-    font-size: 0.85em;
-    opacity: 0.9;
-    margin-left: 4px;
-}
-
-.ability-item {
-    margin-bottom: 12px;
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border-left: 3px solid #3498db;
-}
-
-.buff-item {
-    margin-bottom: 12px;
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border-left: 3px solid #4cd137;
-}
-
-.buff-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    justify-content: space-between;
-}
-
-.buff-icon-small {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
-    border-radius: 4px;
-    border: 1px solid #555;
-}
-
-.buff-name {
-    font-weight: bold;
-    color: #4cd137;
-    margin-right: auto;
-}
-
-.buff-duration {
-    font-size: 0.9em;
-    color: #f39c12;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2px 6px;
-    border-radius: 10px;
-}
-
-.buff-description {
-    margin-bottom: 5px;
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-.ability-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.ability-icon-small {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
-    border-radius: 4px;
-    border: 1px solid #555;
-}
-
-.ability-name {
-    font-weight: bold;
-    color: #3498db;
-}
-
-.ability-description {
-    margin-bottom: 5px;
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-.ability-details {
-    font-size: 12px;
-    color: #aaa;
-}
-
-.passive-item {
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border-left: 3px solid #e67e22;
-}
-
-.passive-name {
-    font-weight: bold;
-    color: #e67e22;
-    margin-bottom: 5px;
-}
-
-.passive-description {
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-.stats-menu-close {
-    display: block;
-    width: 100%;
-    padding: 8px;
-    margin-top: 10px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.stats-menu-close:hover {
-    background-color: #2980b9;
-}
-
-/* Disable context menu on right-click for character images */
-.character-image {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* Mobile adjustments for stats menu */
-@media (max-width: 768px) {
-    .character-stats-menu {
-        max-width: 95vw;
-        max-height: 70vh;
-        padding: 10px;
-        font-size: 13px;
-    }
-    
-    .stats-list {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .stats-menu-header {
-        font-size: 18px;
-        margin-bottom: 8px;
-        padding-bottom: 8px;
-    }
-    
-    .stats-menu-subheader {
-        font-size: 16px;
-        margin: 10px 0 5px 0;
-    }
-    
-    .ability-item, .passive-item {
-        padding: 5px;
-        margin-bottom: 8px;
-    }
-    
-    .ability-description, .passive-description {
-        font-size: 12px;
-    }
-    
-    .ability-details {
-        font-size: 11px;
-    }
-}
-
-@media (max-width: 480px) {
-    .top-section, .bottom-section {
-        padding: 10px;
-    }
-    
-    .battle-log-container {
-        width: 220px;
-        height: 150px;
-        right: 5px;
-        bottom: 5px;
-    }
-    
-    .battle-log-container:hover {
-        height: 220px;
-    }
-    
-    .battle-log-header {
-        padding: 5px 8px;
-        font-size: 12px;
-    }
-    
-    .battle-log {
-        font-size: 11px;
-        padding: 0 8px;
-    }
-    
-    .log-entry {
-        padding: 3px 5px;
-        margin-bottom: 5px;
-    }
-    
-    .character-slot {
-        width: 120px;
-    }
-    
-    .character-image, .image-container, .character-info {
-        width: 105px;
-    }
-    
-    .character-image, .image-container {
-        height: 105px;
-    }
-    
-    .ability {
-        width: 24px;
-        height: 24px;
-    }
-    
-    .character-name {
-        font-size: 12px;
-    }
-    
-    .middle-section {
-        height: 50px;
-    }
-    
-    .turn-counter, #battle-phase {
-        font-size: 14px;
-    }
-    
-    .stats-list {
-        grid-template-columns: 1fr;
-    }
-    
-    .character-stats-menu {
-        max-width: 95vw;
-    }
-}
-
-/* Add a new rule to handle menu positioning for bottom row characters */
-.character-stats-menu.bottom-character {
-    bottom: 10px;
-    top: auto !important;
-    max-height: 70vh;
-}
-
-/* Auto-select button */
-.auto-select-button {
-    padding: 10px 15px;
-    font-size: 14px;
-    margin-right: 10px;
-    background-color: #4a5568;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.auto-select-button:hover {
-    background-color: #2d3748;
-}
-
-.auto-select-button.active {
-    background-color: #48bb78;
-}
-
-.auto-select-button.active:hover {
-    background-color: #38a169;
-}
-
-/* Passive Stack Indicator */
-.passive-stack-indicator {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    border-radius: 50%; /* Make it circular */
-    width: 25px;
-    height: 25px;
-    display: flex; /* Use flexbox for centering */
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    z-index: 5; /* Ensure it's above the image but below tooltips */
-    pointer-events: auto; /* Make sure tooltip works */
-}
-
-/* Modern Cham Cham passive */
-.cham-cham-passive {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
+    height: 8px;
+    background-color: #4CAF50;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6c22bd, #9b59b6);
-    box-shadow: 
-        0 0 8px #e0aaff, 
-        0 0 15px rgba(138, 43, 226, 0.6),
-        inset 0 0 10px rgba(255, 255, 255, 0.3);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-    z-index: 6;
-    transition: all 0.3s ease;
-    transform-origin: center;
-}
-
-/* Cham Cham passive stacks glow effect */
-.cham-cham-passive::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0%,
-        rgba(226, 43, 226, 0.8) 25%,
-        rgba(138, 43, 226, 0.8) 50%,
-        rgba(43, 107, 226, 0.8) 75%,
-        transparent 100%
-    );
-    border-radius: 50%;
-    z-index: -1;
-    opacity: 0.7;
-    animation: rotateChamChamPassive 4s linear infinite;
-}
-
-/* Cham Cham passive stacks outer ring */
-.cham-cham-passive::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 50%;
-    background: transparent;
-    border: 2px solid rgba(226, 43, 226, 0.3);
-    z-index: -2;
+    box-shadow: 0 0 6px #69F0AE;
+    animation: healing-particle-flow 1.5s infinite linear;
     opacity: 0;
-    transform: scale(1.1);
-    transition: all 0.3s ease;
 }
 
-/* Stack-based styling - adding classes dynamically in JS */
-.cham-cham-passive[data-stacks="0"] {
-    background: linear-gradient(135deg, #514f50, #6c6c6c);
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+.heal-particles.critical::before,
+.heal-particles.critical::after {
+    background-color: #FFD700; /* Gold particles for crit */
+    box-shadow: 0 0 8px #FFFACD, 0 0 12px #FFEC8B;
+    width: 10px; /* Slightly larger particles */
+    height: 10px;
+    animation-duration: 1.8s; /* Match animation duration */
 }
 
-.cham-cham-passive[data-stacks="1"] {
-    background: linear-gradient(135deg, #6c22bd, #9b59b6);
-}
-
-.cham-cham-passive[data-stacks="2"] {
-    background: linear-gradient(135deg, #8022bd, #a55cfa);
-}
-
-.cham-cham-passive[data-stacks="3"] {
-    background: linear-gradient(135deg, #9421bd, #b864ff);
-}
-
-.cham-cham-passive[data-stacks="4"] {
-    background: linear-gradient(135deg, #aa21bd, #cc69ff);
-}
-
-.cham-cham-passive[data-stacks="5"] {
-    background: linear-gradient(135deg, #bd1eb6, #e26eff);
-}
-
-/* Higher stacks get more intense effects */
-.cham-cham-passive[data-stacks="5"]::after,
-.cham-cham-passive[data-stacks="6"]::after,
-.cham-cham-passive[data-stacks="7"]::after,
-.cham-cham-passive[data-stacks="8"]::after,
-.cham-cham-passive[data-stacks="9"]::after,
-.cham-cham-passive[data-stacks="10"]::after {
-    opacity: 0.8;
-    animation: pulsePassiveRing 1.5s infinite alternate;
-}
-
-.cham-cham-passive[data-stacks="6"] {
-    background: linear-gradient(135deg, #c71daf, #ff72f4);
-    font-size: 15px;
-}
-
-.cham-cham-passive[data-stacks="7"] {
-    background: linear-gradient(135deg, #d01ba6, #ff77e9);
-    font-size: 15px;
-}
-
-.cham-cham-passive[data-stacks="8"] {
-    background: linear-gradient(135deg, #e0199b, #ff7bde);
-    font-size: 16px;
-}
-
-.cham-cham-passive[data-stacks="9"] {
-    background: linear-gradient(135deg, #f01790, #ff80d3);
-    font-size: 16px;
-}
-
-.cham-cham-passive[data-stacks="10"] {
-    background: linear-gradient(135deg, #ff1584, #ff85c8);
-    font-size: 17px;
-    animation: passivePulse 1s infinite alternate;
-}
-
-/* Stack addition effect */
-.cham-cham-passive.stack-added {
-    animation: stackAddedPulse 0.5s ease-out;
-}
-
-/* Animations */
-@keyframes rotateChamChamPassive {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes stackAddedPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-}
-
-@keyframes pulsePassiveRing {
-    0% { opacity: 0.4; transform: scale(1.1); }
-    100% { opacity: 0.8; transform: scale(1.2); }
-}
-
-@keyframes passivePulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.15); }
-}
-
-/* Scratch VFX */
-.scratch-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* Allow clicks to pass through */
-    overflow: hidden; /* Keep slashes within bounds */
-    z-index: 95; /* Above image, below stun/heal text */
-}
-
-.scratch-vfx::before,
-.scratch-vfx::after,
-.scratch-vfx span { /* Use a real span for the third slash */
-    content: '';
-    position: absolute;
-    width: 3px; /* Thickness of the slash */
-    height: 120%; /* Length of the slash */
-    background: linear-gradient(0deg, transparent, rgba(255, 0, 0, 0.8) 50%, transparent);
-    box-shadow: 0 0 4px rgba(255, 0, 0, 0.7);
-    opacity: 0;
-    animation: scratchAnim 0.3s ease-out forwards;
-}
-
-/* First slash */
-.scratch-vfx::before {
-    top: -10%;
-    left: 30%;
-    transform: rotate(20deg);
+.heal-particles::before {
+    top: 20%;
+    left: 10%;
     animation-delay: 0s;
 }
 
-/* Second slash */
-.scratch-vfx::after {
-    top: -10%;
-    left: 50%;
-    transform: rotate(25deg);
-    animation-delay: 0.05s;
+.heal-particles::after {
+    top: 70%;
+    left: 80%;
+    animation-delay: 0.5s;
 }
 
-/* Third slash (using a span) */
-.scratch-vfx span {
-    display: block; /* Important for positioning */
-    top: -10%;
-    left: 70%;
-    transform: rotate(30deg);
-    animation-delay: 0.1s;
-}
-
-@keyframes scratchAnim {
-    0% {
-        opacity: 0.8;
-        height: 0%; /* Start invisible and short */
+@keyframes heal-float {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.8); 
+        opacity: 0;
     }
-    50% {
+    10% { 
+        transform: translate(-50%, -50%) scale(1.2); 
         opacity: 1;
-        height: 120%; /* Grow to full length */
+    }
+    90% { 
+        transform: translate(-50%, -80%) scale(1); 
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -90%) scale(0.8); 
+        opacity: 0;
+    }
+}
+
+@keyframes crit-heal-float {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.9); 
+        opacity: 0;
+    }
+    10% { 
+        transform: translate(-50%, -50%) scale(1.4) rotate(-5deg); 
+        opacity: 1;
+    }
+    90% { 
+        transform: translate(-50%, -90%) scale(1.1) rotate(5deg); 
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -100%) scale(0.9); 
+        opacity: 0;
+    }
+}
+
+@keyframes healing-particle-flow {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(-10px) scale(1);
+        opacity: 0.8;
+    }
+    80% {
+        transform: translateY(-40px) scale(0.8);
+        opacity: 0.8;
     }
     100% {
+        transform: translateY(-50px) scale(0.5);
         opacity: 0;
-        height: 120%; /* Fade out at full length */
     }
+}
+
+/* Add new log entry style */
+.log-entry.critical-heal {
+    color: #FFEC8B; /* Lighter gold for text */
+    font-weight: bold;
+    background-color: rgba(255, 215, 0, 0.1); /* Faint gold background */
+    border-left: 3px solid #FFD700;
+}
+
+.log-entry.critical-heal::before {
+    content: '✨';
+    margin-right: 5px;
+    color: #FFD700;
 }
 
 /* Primal Fury (W Buff) Active VFX */
 .image-container.primal-fury-active {
     animation: primalFuryPulse 1.5s infinite alternate;
-}
-
-@keyframes primalFuryPulse {
-    0% {
-        box-shadow: 0 0 10px rgba(200, 0, 0, 0.4), inset 0 0 5px rgba(200, 0, 0, 0.2);
-        border-color: rgba(200, 0, 0, 0.5);
-    }
-    100% {
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.4);
-        border-color: rgba(255, 0, 0, 0.8);
-    }
-}
-
-/* ----- SIMPLIFIED LIFESTEAL VFX ----- */
-.lifesteal-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(40, 220, 40, 0.5) 0%, rgba(40, 220, 40, 0) 70%);
-    border-radius: 50%;
-    opacity: 0;
-    animation: lifesteal-pulse 1s ease-out;
-    z-index: 15;
-}
-
-/* Simple pulsing animation for lifesteal */
-@keyframes lifesteal-pulse {
-    0% { opacity: 0; transform: scale(0.7); }
-    40% { opacity: 0.8; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.1); }
-}
-
-/* Lifesteal heal number that appears */
-.lifesteal-heal-number {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #3cff3c; /* Bright green */
-    font-weight: bold;
-    text-shadow: 
-        0 0 4px rgba(0, 0, 0, 1),
-        0 0 8px rgba(0, 0, 0, 0.8);
-    font-size: 1.3em;
-    opacity: 0;
-    animation: lifesteal-heal-text 1.2s ease-out;
-    z-index: 20;
-    pointer-events: none;
-}
-
-@keyframes lifesteal-heal-text {
-    0% { opacity: 0; transform: translate(-50%, -100%); }
-    20% { opacity: 1; transform: translate(-50%, -130%); }
-    80% { opacity: 1; transform: translate(-50%, -180%); }
-    100% { opacity: 0; transform: translate(-50%, -200%); }
-}
-
-/* Particles animation for blood orbs from target */
-@keyframes lifesteal-particle-emit {
-    0% { 
-        box-shadow: 
-            0 0 0 0 rgba(255, 0, 0, 0),
-            0 0 0 0 rgba(255, 0, 0, 0),
-            0 0 0 0 rgba(255, 0, 0, 0);
-        transform: translate(-50%, -50%) scale(0.5); 
-    }
-    50% { 
-        box-shadow: 
-            10px -10px 0 -2px rgba(255, 0, 0, 0.8),
-            -15px -5px 0 -2px rgba(255, 0, 0, 0.8),
-            5px 15px 0 -2px rgba(255, 0, 0, 0.8);
-        transform: translate(-50%, -50%) scale(1); 
-    }
-    100% { 
-        box-shadow: 
-            40px -40px 0 -5px rgba(255, 0, 0, 0),
-            -50px -20px 0 -5px rgba(255, 0, 0, 0),
-            20px 60px 0 -5px rgba(255, 0, 0, 0);
-        transform: translate(-50%, -50%) scale(1.5); 
-    }
-}
-
-/* Flow animation for blood orbs */
-@keyframes lifesteal-orbs-flow {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-        filter: blur(0px);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-        filter: blur(0px);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-400%, -400%) scale(0.2);
-        filter: blur(3px);
-    }
-}
-
-/* Healing particles that flow into caster */
-.healing-particles {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    pointer-events: none;
-    z-index: 17;
-}
-
-.healing-particles::before,
-.healing-particles::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: rgba(60, 240, 60, 0.8);
-    border-radius: 50%;
-    box-shadow: 
-        0 0 6px 2px rgba(30, 210, 30, 0.5),
-        0 0 10px 4px rgba(0, 180, 0, 0.3);
-    opacity: 0;
-    animation: healing-particle-flow 1.2s ease-out;
-}
-
-.healing-particles::before {
-    animation-delay: 0.1s;
-    transform: translate(-40px, -40px);
-}
-
-.healing-particles::after {
-    animation-delay: 0.3s;
-    transform: translate(-30px, -60px);
-}
-
-@keyframes healing-particle-flow {
-    0% {
-        opacity: 0;
-        transform: translate(-100px, -100px) scale(0.2);
-        filter: blur(2px);
-    }
-    50% {
-        opacity: 1;
-        transform: translate(-50px, -50px) scale(1);
-        filter: blur(0px);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(0, 0) scale(0.5);
-        filter: blur(1px);
-    }
-}
-
-/* Jump Animation for Cham Cham's Leap */
-.jump-animation {
-    animation: jumpEffect 0.7s ease-out forwards;
-}
-
-@keyframes jumpEffect {
-    0% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-40px) scale(1.05);
-    }
-    70% {
-        transform: translateY(-20px) scale(1.05);
-    }
-    100% {
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Jump VFX Shadow */
-.jump-vfx {
-    position: absolute;
-    bottom: 5%;
-    left: 10%;
-    width: 80%;
-    height: 20px;
-    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
-    border-radius: 50%;
-    z-index: 5;
-    pointer-events: none;
-    animation: jumpShadow 0.7s ease-out forwards;
-}
-
-@keyframes jumpShadow {
-    0% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-    40% {
-        opacity: 0.3;
-        transform: scale(0.7);
-    }
-    70% {
-        opacity: 0.5;
-        transform: scale(0.8);
-    }
-    100% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-}
-
-/* Boomerang VFX */
-.boomerang-vfx {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background-image: url('Icons/abilities/boomerang.webp');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    z-index: 96;
-    pointer-events: none;
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
-}
-
-@keyframes boomerangThrow {
-    0% {
-        opacity: 0.9;
-        transform: translate(0, 0) rotate(0deg) scale(0.6);
-    }
-    50% {
-        opacity: 1;
-        transform: translate(200px, -30px) rotate(360deg) scale(1);
-    }
-    100% {
-        opacity: 1;
-        transform: translate(400px, 0) rotate(720deg) scale(0.6);
-    }
-}
-
-@keyframes boomerangReturn {
-    0% {
-        opacity: 1;
-        transform: translate(400px, 0) rotate(720deg) scale(0.6);
-    }
-    50% {
-        opacity: 1;
-        transform: translate(200px, 30px) rotate(1080deg) scale(1);
-    }
-    100% {
-        opacity: 0.9;
-        transform: translate(0, 0) rotate(1440deg) scale(0.6);
-    }
-}
-
-@keyframes boomerangMiss {
-    0% {
-        opacity: 1;
-        transform: translate(400px, 0) rotate(720deg) scale(0.6);
-    }
-    50% {
-        opacity: 0.7;
-        transform: translate(350px, 100px) rotate(900deg) scale(0.8);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(300px, 200px) rotate(1080deg) scale(0.5);
-    }
-}
-
-.battle-log-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.log-button {
-    background: none;
-    border: none;
-    color: #ddd;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 3px;
-    transition: all 0.2s ease;
-}
-
-.log-button:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: #fff;
-}
-
-.log-button:active {
-    transform: scale(0.95);
-}
-
-.battle-log-container.expanded {
-    height: 350px;
-}
-
-@media (max-width: 480px) {
-    .battle-log-container.expanded {
-        height: 270px;
-    }
-}
-
-/* Atlantean Kagome Mana restoration effects */
-.mana-restore-vfx {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #42a5f5;
-    font-weight: bold;
-    font-size: 1.2rem;
-    text-shadow: 0 0 4px #1976d2;
-    animation: mana-restore-text 1.5s ease-out forwards;
-    z-index: 15;
-    pointer-events: none;
-}
-
-.mana-restore-animation {
-    animation: mana-restore-glow 1.5s ease-out;
-}
-
-@keyframes mana-restore-text {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, 0);
-    }
-    20% {
-        opacity: 1;
-    }
-    80% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -30px);
-    }
-}
-
-@keyframes mana-restore-glow {
-    0% {
-        box-shadow: 0 0 0 0 rgba(66, 165, 245, 0);
-    }
-    20% {
-        box-shadow: 0 0 15px 5px rgba(66, 165, 245, 0.7);
-    }
-    80% {
-        box-shadow: 0 0 25px 10px rgba(66, 165, 245, 0.9);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(66, 165, 245, 0);
-    }
-}
-
-.shield-gain-vfx {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #27ae60;
-    font-weight: bold;
-    font-size: 20px;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
-    animation: shieldGainAnim 1.5s ease-out forwards;
-    z-index: 100;
-    padding: 10px;
-    background: rgba(39, 174, 96, 0.2);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.shield-gain-vfx span {
-    position: relative;
-    z-index: 10;
-}
-
-.shield-gain-vfx::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(39, 174, 96, 0.6) 0%, rgba(39, 174, 96, 0) 70%);
-    border-radius: 50%;
-    animation: shieldPulse 1.5s ease-out forwards;
-    z-index: 1;
-}
-
-@keyframes shieldGainAnim {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
-    }
-}
-
-@keyframes shieldPulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.8;
-    }
-    50% {
-        transform: scale(1.5);
-        opacity: 0.6;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-/* Tooltip styles for stats */
-.has-tooltip {
-    position: relative;
-    cursor: help;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
-}
-
-.has-tooltip:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 0;
-    bottom: 100%;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.9);
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    white-space: nowrap;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    pointer-events: none;
-    margin-bottom: 5px;
-}
-
-.has-tooltip:hover::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    bottom: 100%;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid rgba(0, 0, 0, 0.9);
-    transform: translateY(5px);
-    pointer-events: none;
-}
-
-/* Add this at the end of the file */
-.character-slot.dead {
-    filter: grayscale(100%);
-    opacity: 0.6;
-    pointer-events: none; /* Prevent clicks */
-    box-shadow: none; /* Remove hover effects */
-    transform: none; /* Remove hover effects */
-}
-
-.character-slot.dead .hp-bar,
-.character-slot.dead .mana-bar {
-    background-color: #555; /* Darken bars */
-}
-
-.character-slot.dead .abilities .ability {
-    cursor: default;
-    opacity: 0.5;
-}
-
-.character-slot.dead .status-icon {
-    opacity: 0.7;
-}
-
-/* Volume Slider Styles */
-.volume-control {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 8px 12px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    z-index: 100;
-}
-
-.volume-icon {
-    color: white;
-    margin-right: 8px;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-.volume-slider {
-    width: 100px;
-    height: 4px;
-    -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.3);
-    outline: none;
-    border-radius: 2px;
-}
-
-.volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-}
-
-.volume-slider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-}
-
-/* Styles for Dead Characters */
-.character-slot.character-dead {
-  filter: grayscale(100%);
-  opacity: 0.6;
-  pointer-events: none; /* Prevent interactions */
-  box-shadow: none !important; /* Remove hover/selection effects */
-  border-color: #333 !important; /* Reset border color */
-}
-
-/* Optional: Make abilities of dead characters less prominent */
-.character-slot.character-dead .abilities .ability {
-  opacity: 0.5;
-  cursor: default; /* Indicate non-interactivity */
-}
-
-/* Optional: Stop animations on dead characters if needed */
-.character-slot.character-dead .character-image {
-  animation: none !important; /* Stop existing animations */
-}
-
-/* Optional: Darken resource bars */
-.character-slot.character-dead .hp-bar {
-  background: linear-gradient(to right, #5a5a5a, #777777);
-}
-
-.character-slot.character-dead .mana-bar {
-  background: linear-gradient(to right, #5a5a5a, #777777);
-}
-
-/* Optional: Dim status icons */
-.character-slot.character-dead .status-icon {
-    opacity: 0.7;
-}
-
-/* Style for characters that have acted their turn */
-.character-slot.acted {
-    opacity: 0.8; /* Slightly reduce opacity */
-    border-color: #555; /* Change border to a dimmer color */
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4); /* Reduce shadow */
-    transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Dim the abilities of acted characters */
-.character-slot.acted .abilities .ability {
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none; /* Prevent clicks on abilities */
-}
-
-/* Burning Ground VFX */
-.stage-damage {
-    color: #ff6600 !important;
-    font-weight: bold;
     text-shadow: 0 0 5px #ff0000, 0 0 10px #ff3300;
 }
 
@@ -2670,7 +1517,7 @@ body {
 .stage-modifiers-container {
     position: absolute;
     top: 10px;
-    left: 10px;
+    right: 10px;
     background-color: rgba(0, 0, 0, 0.7);
     border: 2px solid #8a4600;
     border-radius: 8px;
@@ -2792,5 +1639,654 @@ body {
         transform: translateY(-35px) scale(0.8);
         opacity: 0;
     }
+}
+
+/* Styling for dead characters */
+.character-slot.character-dead {
+    filter: grayscale(100%);
+    opacity: 0.5;
+    pointer-events: none; /* Disable interactions */
+}
+
+.character-slot.character-dead .abilities .ability {
+    /* Ensure abilities are visually disabled too */
+    opacity: 0.3;
+    cursor: not-allowed;
+    background-color: #555;
+}
+
+.character-slot.character-dead .character-image {
+    /* Optional: Add specific image styling like slight desaturation */
+    /* filter: saturate(0.5); */
+}
+
+.character-slot.character-dead .hp-bar {
+    background-color: #333; /* Dark background for dead HP bar */
+}
+.character-slot.character-dead .hp-bar::before {
+    width: 0 !important; /* Ensure fill is 0 */
+}
+
+.character-slot.character-dead .mana-bar {
+     background-color: #333;
+}
+.character-slot.character-dead .mana-bar::before {
+    width: 0 !important;
+}
+
+.character-slot.character-dead .status-icon {
+    opacity: 0.4;
+}
+
+.stage-damage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 5;
+    background: linear-gradient(to top, rgba(255,50,0,0.4) 0%, rgba(255,80,0,0.1) 70%, rgba(255,0,0,0) 100%);
+}
+
+/* Character stats right-click menu */
+.character-stats-menu {
+    position: fixed;
+    z-index: 1000;
+    background-color: rgba(20, 20, 20, 0.95);
+    border: 2px solid #444;
+    border-radius: 10px;
+    width: 450px; /* Increased from 350px */
+    max-height: 65vh; /* Reduced from 75vh to prevent excessive height */
+    overflow-y: auto; /* Ensure content is scrollable */
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    color: #f0f0f0;
+    font-size: 14px;
+}
+
+.character-stats-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.character-stats-menu::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.character-stats-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.character-stats-menu.bottom-character {
+    transform: translateY(-30%);
+}
+
+.stats-menu-header {
+    font-size: 18px;
+    font-weight: bold;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #3498db;
+    text-align: center;
+}
+
+.stats-menu-section {
+    margin-bottom: 15px;
+}
+
+.stats-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+.stat-name {
+    font-weight: bold;
+}
+
+.stat-value {
+    font-family: 'Courier New', monospace;
+}
+
+.stat-value.buffed {
+    color: #2ecc71;
+}
+
+.stat-value.debuffed {
+    color: #e74c3c;
+}
+
+.stats-menu-subheader {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 0;
+    margin: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e67e22;
+}
+
+.buffs-section, .abilities-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.buff-item, .ability-item, .passive-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 10px;
+    border-left: 3px solid #3498db;
+}
+
+.buff-header, .ability-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.buff-icon-small, .ability-icon-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.buff-name, .ability-name, .passive-name {
+    font-weight: bold;
+    color: #f39c12;
+    flex-grow: 1;
+}
+
+.buff-duration {
+    font-size: 12px;
+    color: #bdc3c7;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.buff-description, .ability-description, .passive-description {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #ecf0f1;
+}
+
+.ability-details {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #95a5a6;
+    padding-top: 5px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.stats-menu-close {
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(to bottom, #2c3e50, #1a252f);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.stats-menu-close:hover {
+    background: linear-gradient(to bottom, #34495e, #2c3e50);
+}
+
+.character-stats-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 12px;
+    color: white;
+    z-index: 1001;
+    max-width: 250px;
+    pointer-events: none;
+}
+
+/* Dodge VFX */
+.dodge-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: dodgeFlash 0.6s ease-out forwards;
+}
+
+.dodge-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.8), 2px 2px 3px rgba(0, 0, 0, 0.8);
+    transform: rotate(-5deg);
+    animation: dodgeTextEffect 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.dodge-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    animation: dodgeImageEffect 0.6s ease-out forwards;
+}
+
+@keyframes dodgeFlash {
+    0% {
+        background: radial-gradient(circle, rgba(52, 152, 219, 0.4) 0%, rgba(52, 152, 219, 0) 50%);
+        opacity: 0;
+    }
+    20% {
+        background: radial-gradient(circle, rgba(52, 152, 219, 0.6) 0%, rgba(52, 152, 219, 0) 80%);
+        opacity: 1;
+    }
+    100% {
+        background: radial-gradient(circle, rgba(52, 152, 219, 0) 0%, rgba(52, 152, 219, 0) 100%);
+        opacity: 0;
+    }
+}
+
+@keyframes dodgeTextEffect {
+    0% {
+        transform: scale(0.8) rotate(-5deg);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.3) rotate(-5deg);
+        opacity: 1;
+    }
+    80% {
+        transform: scale(1.1) rotate(-5deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(-5deg);
+        opacity: 0;
+    }
+}
+
+@keyframes dodgeImageEffect {
+    0% {
+        transform: translateX(0);
+        opacity: 0.7;
+    }
+    15% {
+        transform: translateX(-10px);
+        opacity: 0.9;
+    }
+    30% {
+        transform: translateX(8px);
+        opacity: 0.8;
+    }
+    45% {
+        transform: translateX(-6px);
+        opacity: 0.7;
+    }
+    60% {
+        transform: translateX(4px);
+        opacity: 0.6;
+    }
+    75% {
+        transform: translateX(-2px);
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 0.3;
+    }
+}
+
+/* Remove auto-select button CSS */
+.auto-select-button {
+    display: none !important;
+}
+
+/* Stun Visual Effects */
+.stun-vfx {
+    position: absolute;
+    top: -30px;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 5;
+    animation: bounce 0.5s ease infinite alternate;
+}
+
+.stun-star {
+    position: absolute;
+    color: gold;
+    font-size: 24px;
+    opacity: 0;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+    animation: spin-star 2s ease-in-out infinite;
+}
+
+.stun-text {
+    color: #ffdd00;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 0 3px #000, 0 0 5px #000;
+    letter-spacing: 1px;
+    animation: pulse 0.5s ease infinite alternate;
+}
+
+@keyframes spin-star {
+    0% {
+        transform: rotate(0deg) translate(0, 0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) translate(30px, -20px);
+        opacity: 0;
+    }
+}
+
+@keyframes bounce {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+/* Rain VFX for "It finally rains!" stage modifier */
+.rain-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.raindrop {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.8));
+    top: -20px;
+    opacity: 0.8;
+    animation: rainfall linear infinite;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes rainfall {
+    0% {
+        transform: translateY(-20px) rotate(20deg);
+        opacity: 0.8;
+    }
+    85% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(120vh) rotate(20deg);
+        opacity: 0;
+    }
+}
+
+/* Rain modifier icon in the stage modifiers list */
+.stage-modifier[data-modifier-id="it_finally_rains"] {
+    background-color: rgba(0, 120, 255, 0.2);
+    border-color: rgba(0, 120, 255, 0.7);
+}
+
+/* Rain healing VFX */
+.rain-heal-vfx {
+    color: #3cf;
+    text-shadow: 0 0 8px rgba(0, 190, 255, 0.8), 0 0 15px rgba(0, 120, 255, 0.6);
+    animation: rain-heal-float 2s ease-out forwards;
+    font-weight: bold;
+}
+
+.rain-heal-particles {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.rain-heal-particles::before,
+.rain-heal-particles::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(128, 212, 255, 0.8);
+    box-shadow: 0 0 10px #3cf;
+    animation: rain-heal-particle-flow 1.5s ease-out infinite;
+}
+
+.rain-heal-particles::before {
+    animation-delay: 0.2s;
+}
+
+.rain-heal-particles::after {
+    animation-delay: 0.6s;
+}
+
+@keyframes rain-heal-float {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes rain-heal-particle-flow {
+    0% {
+        transform: translate(0, 0) scale(0.7);
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(
+            calc(20px - 40px * var(--random-x, 0.5)),
+            calc(-30px * var(--random-y, 0.5))
+        ) scale(0.1);
+        opacity: 0;
+    }
+}
+
+/* Add a slight blue tint to the stage when rain modifier is active */
+.stage-background.rain-active {
+    position: relative;
+}
+
+.stage-background.rain-active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(0, 80, 170, 0.05) 0%,
+        rgba(0, 40, 100, 0.2) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Adjust log entry styling for rain healing */
+.log-entry.stage-effect.heal {
+    color: #3cf;
+    background-color: rgba(0, 120, 255, 0.15);
+}
+
+.log-entry.stage-effect.positive {
+    color: #3cf;
+    background-color: rgba(0, 120, 255, 0.15);
+}
+
+.log-entry.stage-effect.positive::before {
+    content: '🌧️'; /* Rain emoji */
+    margin-right: 5px;
+}
+/* --- NEW: Floating Text Styling --- */
+.floating-text {
+    position: absolute; /* Already set by JS, but good for clarity */
+    font-size: 20px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    /* Animation handled by JS */
+}
+
+.floating-text.damage {
+    color: #e74c3c; /* Red for damage */
+}
+
+.floating-text.heal {
+    color: #2ecc71; /* Green for heal */
+}
+
+.floating-text.buff {
+    color: #3498db; /* Blue for buff */
+}
+
+.floating-text.debuff {
+    color: #e67e22; /* Orange for debuff */
+}
+
+.floating-text.miss, .floating-text.dodge {
+    color: #bdc3c7; /* Grey for miss/dodge */
+    font-style: italic;
+}
+
+.floating-text.critical {
+    color: #f1c40f; /* Gold for critical */
+    font-size: 24px; /* Slightly larger */
+    text-shadow: 0 0 5px #f1c40f, 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.floating-text.passive {
+    color: #e0c4ff; /* Light purple for passive */
+}
+
+/* NEW: Style for talent bonus text in descriptions */
+.talent-bonus {
+    color: #4caf50; /* Green color for positive talent effects */
+    font-weight: bold;
+}
+
+/* --- END Floating Text Styling --- */
+
+/* Talent-related description styling */
+.tooltip-description .talent-effect {
+    color: #4caf50;
+    font-weight: bold;
+    border-left: 2px solid #4caf50;
+    padding-left: 5px;
+    margin-top: 3px;
+}
+
+.status-tooltip-description .talent-effect {
+    color: #4caf50;
+    font-weight: bold;
+    border-left: 2px solid #4caf50;
+    padding-left: 5px;
+    margin-top: 3px;
+    display: block;
+}
+
+/* For right-click context menu descriptions */
+.ability-description .talent-effect {
+    color: #4caf50;
+    font-weight: bold;
+    border-left: 2px solid #4caf50;
+    padding-left: 5px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Variation for buff-related talents */
+.talent-effect.healing {
+    color: #2ecc71;
+    border-left-color: #2ecc71;
+}
+
+/* Variation for damage-related talents */
+.talent-effect.damage {
+    color: #e74c3c;
+    border-left-color: #e74c3c;
+}
+
+/* Variation for utility-related talents */
+.talent-effect.utility {
+    color: #3498db;
+    border-left-color: #3498db;
+}
+
+/* Variation for AoE-related talents */
+.talent-effect.aoe {
+    color: #9b59b6;
+    border-left-color: #9b59b6;
+}
+
+/* Variation for resource-related talents */
+.talent-effect.resource {
+    color: #f39c12;
+    border-left-color: #f39c12;
 }
   

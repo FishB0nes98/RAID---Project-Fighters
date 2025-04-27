@@ -9,7 +9,8 @@
             "storyTitle": "Blazing School Day",
             "backgroundImage": "images/stages/burning_school_gym.png",
             "backgroundMusic": "sounds/burning_school_gym_bgm.mp3",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/burning_school_gym.json"
         },
         {
             "id": "school_yard",
@@ -20,7 +21,8 @@
             "storyTitle": "Blazing School Day",
             "backgroundImage": "images/stages/school_yard_background.png",
             "backgroundMusic": "sounds/music/fiery_encounter.mp3",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/school_yard.json"
         },
         {
             "id": "scorched_cafeteria",
@@ -30,7 +32,8 @@
             "type": "story",
             "storyTitle": "Blazing School Day",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/scorched_cafeteria.json"
         },
         {
             "id": "molten_library",
@@ -40,7 +43,8 @@
             "type": "story",
             "storyTitle": "Blazing School Day",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/molten_library.json"
         },
         {
             "id": "rooftop",
@@ -51,7 +55,8 @@
             "storyTitle": "Blazing School Day",
             "backgroundImage": "images/stages/school_rooftop.png",
             "backgroundMusic": "sounds/rooftop_battle.mp3",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/rooftop.json"
         },
         {
             "id": "bathroom_fight",
@@ -62,7 +67,8 @@
             "storyTitle": "Blazing School Day",
             "backgroundImage": "images/stages/background4.png",
             "backgroundMusic": "sounds/bgaudio5.mp3",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/bathroom_fight.json"
         },
         {
             "id": "principals_office",
@@ -72,7 +78,8 @@
             "type": "story",
             "storyTitle": "Blazing School Day",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/principals_office.json"
         },
         {
             "id": "forest_entrance",
@@ -82,7 +89,8 @@
             "type": "story",
             "storyTitle": "Mystical Forest Journey",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/forest_entrance.json"
         },
         {
             "id": "ancient_grove",
@@ -92,7 +100,8 @@
             "type": "story",
             "storyTitle": "Mystical Forest Journey",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/ancient_grove.json"
         },
         {
             "id": "mushroom_caverns",
@@ -102,7 +111,8 @@
             "type": "story",
             "storyTitle": "Mystical Forest Journey",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/mushroom_caverns.json"
         },
         {
             "id": "crystal_springs",
@@ -112,7 +122,8 @@
             "type": "story",
             "storyTitle": "Mystical Forest Journey",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/crystal_springs.json"
         },
         {
             "id": "heart_of_corruption",
@@ -122,7 +133,8 @@
             "type": "story",
             "storyTitle": "Mystical Forest Journey",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/heart_of_corruption.json"
         },
         {
             "id": "submerged_gateway",
@@ -132,7 +144,8 @@
             "type": "story",
             "storyTitle": "Atlantean Ruins",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/submerged_gateway.json"
         },
         {
             "id": "coral_district",
@@ -142,7 +155,8 @@
             "type": "story",
             "storyTitle": "Atlantean Ruins",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/coral_district.json"
         },
         {
             "id": "temple_of_poseidon",
@@ -152,7 +166,8 @@
             "type": "story",
             "storyTitle": "Atlantean Ruins",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/temple_of_poseidon.json"
         },
         {
             "id": "royal_palace",
@@ -162,7 +177,8 @@
             "type": "story",
             "storyTitle": "Atlantean Ruins",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/royal_palace.json"
         },
         {
             "id": "power_core",
@@ -172,7 +188,8 @@
             "type": "story",
             "storyTitle": "Atlantean Ruins",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/power_core.json"
         },
         {
             "id": "abyssal_throne",
@@ -182,7 +199,8 @@
             "type": "story",
             "storyTitle": "Atlantean Ruins",
             "backgroundImage": "",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/abyssal_throne.json"
         },
         {
             "id": "returning_to_the_burning_school_gym",
@@ -193,7 +211,8 @@
             "storyTitle": "Blazing School Day",
             "backgroundImage": "images/stages/background1.png",
             "backgroundMusic": "sounds/bgaudio1.mp3",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/returning_to_the_burning_school_gym.json"
         },
         {
             "id": "5v5_blazing_school_day",
@@ -203,10 +222,12 @@
             "type": "challenge",
             "backgroundImage": "images/stages/burning_school_gym.png",
             "backgroundMusic": "sounds/burning_school_gym_bgm.mp3",
-            "unlockRequirements": []
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/5v5_blazing_school_day.json"
         },
         {
             "id": "farm_showdown",
+            "path": "js/raid-game/stages/farm_showdown.json",
             "name": "Farm Showdown",
             "description": "The farmers have challenged you to a battle! Defeat all three farmers to prove your worth.",
             "difficulty": 5,
@@ -224,6 +245,92 @@
             "storyTitle": "Corruption at the Farmland",
             "backgroundImage": "images/stages/farmland_entrance.png",
             "backgroundMusic": "sounds/music/farmland_ambient.mp3",
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/an_angry_carrot.json"
+        },
+        {
+            "id": "mutated_animals_ranch",
+            "name": "Mutated Animals Ranch",
+            "description": "The ranch animals have been horribly mutated! Survive the onslaught.",
+            "difficulty": 2,
+            "type": "story",
+            "storyTitle": "Corruption at the Farmland",
+            "backgroundImage": "images/stages/mutated_ranch.png",
+            "backgroundMusic": "sounds/music/ranch_battle.mp3",
+            "unlockRequirements": [],
+            "path": "js/raid-game/stages/mutated_animals_ranch.json"
+        },
+        {
+            "id": "corruption_at_the_farmland_farm_well",
+            "path": "js/raid-game/stages/corruption_at_the_farmland_farm_well.json"
+        },
+        {
+            "id": "under_the_apple_tree",
+            "path": "js/raid-game/stages/corruption_at_the_farmland_under_the_apple_tree.json",
+            "name": "Under the Apple Tree",
+            "description": "A tree that is full of apples. The apples are not normal apples. They are corrupted and will attack you.",
+            "difficulty": 1,
+            "type": "story",
+            "storyTitle": "Corruption at the Farmland",
+            "backgroundImage": "images/stages/under_the_apple_tree.png",
+            "backgroundMusic": "sounds/music/under_the_apple_tree.mp3"
+        },
+        {
+            "id": "the_barn",
+            "path": "js/raid-game/stages/the_barn.json",
+            "name": "The Barn",
+            "description": "You approach the sinister looking barn. Inside, a Crazy Farmer and his Hound are waiting.",
+            "difficulty": 4,
+            "type": "story",
+            "storyTitle": "Corruption at the Farmland",
+            "backgroundImage": "images/stages/farm_barn.png",
+            "backgroundMusic": "sounds/music/barn_battle.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "crowfield",
+            "path": "js/raid-game/stages/crowfield.json",
+            "name": "Crowfield",
+            "description": "A desolate field with an ominous scarecrow that seems to command a murder of crows.",
+            "difficulty": 5,
+            "type": "story",
+            "storyTitle": "Corruption at the Farmland",
+            "backgroundImage": "images/stages/crowfield.png",
+            "backgroundMusic": "sounds/music/crowfield.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "farm_clearing",
+            "path": "js/raid-game/stages/corruption_at_the_farmland_farm_clearing.json",
+            "name": "Farm clearing",
+            "description": "The source of the corruption reveals itself! Farmer FANG stands with his twisted minions.",
+            "difficulty": 7,
+            "type": "story",
+            "storyTitle": "Corruption at the Farmland",
+            "backgroundImage": "images/stages/farm_clearing.png",
+            "backgroundMusic": "sounds/music/final_farm_battle.mp3",
+            "unlockRequirements": []
+        },
+        {
+            "id": "test_stage",
+            "path": "js/raid-game/stages/test_stage.json",
+            "name": "Test Stage",
+            "description": "A basic test stage.",
+            "difficulty": 1,
+            "type": "challenge",
+            "backgroundImage": "images/stages/test_background.png",
+            "backgroundMusic": null,
+            "unlockRequirements": []
+        },
+        {
+            "id": "test_dummy_stage",
+            "path": "js/raid-game/stages/test_dummy_stage.json",
+            "name": "Target Dummy Test",
+            "description": "A simple stage with a target dummy for testing purposes.",
+            "difficulty": 1,
+            "type": "challenge",
+            "backgroundImage": "images/stages/test_background.png",
+            "backgroundMusic": null,
             "unlockRequirements": []
         }
     ]

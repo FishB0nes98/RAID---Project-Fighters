@@ -1,0 +1,61 @@
+{
+    "id": "hound",
+    "name": "Hound",
+    "image": "Loading Screen/Hound.jpeg",
+    "stats": {
+        "physicalDamage": 300,
+        "magicalDamage": 0,
+        "armor": 0,
+        "magicalShield": 10,
+        "hp": 8000,
+        "hpPerTurn": 0,
+        "mana": 2000,
+        "manaPerTurn": 50,
+        "lifesteal": 0.0,
+        "dodgeChance": 0.0,
+        "critChance": 0.5,
+        "critDamage": 1.7,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "bite",
+            "name": "Bite",
+            "type": "custom",
+            "manaCost": 30,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 350 damage to the target. Has a 50% chance to critically strike.",
+            "icon": "Icons/abilities/bite.webp",
+            "functionName": "biteEffect"
+        },
+        {
+            "id": "rush_run",
+            "name": "Rush Run",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 9,
+            "targetType": "self",
+            "description": "Gains 50% dodge chance for 3 turns.",
+            "icon": "Icons/abilities/rush_run.webp",
+            "functionName": "rushRunEffect"
+        },
+        {
+            "id": "bloodthirst",
+            "name": "Bloodthirst",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 10,
+            "targetType": "self",
+            "description": "Gain 100% lifesteal for 5 turns.",
+            "icon": "Icons/abilities/bloodthirst.webp",
+            "functionName": "bloodthirstEffect"
+        }
+    ],
+    "passive": {
+        "id": "bleeding_wounds",
+        "name": "Bleeding Wounds",
+        "description": "All abilities apply a stacking Bleeding debuff that deals 5 damage per stack at the end of each turn. The debuff is permanent.",
+        "icon": "Icons/passives/bleeding_wounds.png"
+    }
+} 

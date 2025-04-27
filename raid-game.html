@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roguelike Raid Battle</title>
     <link rel="stylesheet" href="css/raid-game.css">
+    <link rel="stylesheet" href="css/farmer_cham_cham.css">
     <link rel="stylesheet" href="css/schoolboy_shoma-ball-vfx.css">
     <link rel="stylesheet" href="css/ayane-abilities.css">
     <link rel="stylesheet" href="styles/farmer_nina.css">
@@ -22,6 +23,20 @@
     <link rel="stylesheet" href="css/infernal_ibuki_abilities.css">
     <link rel="stylesheet" href="css/infernal_raiden_abilities.css">
     <link rel="stylesheet" href="css/angry_carrot_abilities.css">
+    <link rel="stylesheet" href="css/farmer_raiden_abilities.css">
+    <link rel="stylesheet" href="css/angry_pig_abilities.css">
+    <link rel="stylesheet" href="css/angry_chicken_abilities.css">
+    <link rel="stylesheet" href="css/angry_bull_abilities.css">
+    <link rel="stylesheet" href="css/monster_apple_passive.css">
+    <link rel="stylesheet" href="css/healthy_apple_passive.css">
+    <link rel="stylesheet" href="css/angry_apple_passive.css">
+    <link rel="stylesheet" href="css/leafy_apple_passive.css">
+    <link rel="stylesheet" href="css/rotten_apple_passive.css">
+    <link rel="stylesheet" href="css/apple_abilities.css">
+    <link rel="stylesheet" href="css/crazy_farmer_abilities.css">
+    <link rel="stylesheet" href="css/hound_abilities.css">
+    <link rel="stylesheet" href="css/scarecrow_abilities.css">
+    <link rel="stylesheet" href="css/farmer_fang_abilities.css">
 </head>
 <body>
     <!-- Loading Screen -->
@@ -94,15 +109,21 @@
             <div id="tooltip-title" class="tooltip-title"></div>
             <div id="tooltip-description" class="tooltip-description"></div>
         </div>
+
+        <!-- Context Menu (Hidden by default) -->
+        <div id="context-menu" class="context-menu">
+            <!-- Context menu items will be dynamically populated -->
+        </div>
     </div>
 
     <!-- Game Scripts -->
+    <!-- Core Classes -->
     <script src="js/raid-game/character.js"></script>
-    <script src="js/raid-game/stage-manager.js"></script>
-    <script src="js/raid-game/game-manager.js"></script>
-    <script src="js/raid-game/character-factory.js"></script>
-    
-    <!-- Passive Ability Scripts (Load after character.js) -->
+    <script src="js/raid-game/ability-modifier.js"></script>
+    <script src="js/raid-game/talent-manager.js"></script>
+    <script src="js/raid-game/passive-factory.js"></script>
+
+    <!-- ALL Passive Ability Scripts (Load AFTER PassiveFactory, BEFORE Managers) -->
     <script src="js/raid-game/passives/schoolboy_siegfried_passive.js"></script>
     <script src="js/raid-game/passives/schoolgirl_julia_passive.js"></script>
     <script src="js/raid-game/passives/schoolgirl_ayane_passive.js"></script>
@@ -110,12 +131,34 @@
     <script src="js/raid-game/passives/infernal_astaroth_passive.js"></script>
     <script src="js/raid-game/passives/infernal_scorpion_passive.js"></script>
     <script src="js/raid-game/passives/infernal_birdie_passive.js"></script>
+    <script src="js/raid-game/passives/farmer_cham_cham_passive.js"></script>
+    <script src="js/raid-game/passives/farmer_raiden_passive.js"></script>
+    <script src="js/raid-game/passives/angry_pig_passive.js"></script>
+    <script src="js/raid-game/passives/angry_chicken_passive.js"></script>
+    <script src="js/raid-game/passives/angry_bull_passive.js"></script>
+    <script src="js/raid-game/passives/monster_apple_passive.js"></script>
+    <script src="js/raid-game/passives/healthy_apple_passive.js"></script>
+    <script src="js/raid-game/passives/angry_apple_passive.js"></script>
+    <script src="js/raid-game/passives/leafy_apple_passive.js"></script>
+    <script src="js/raid-game/passives/rotten_apple_passive.js"></script>
+    <script src="js/raid-game/passives/crazy_farmer_passive.js"></script>
+    <script src="js/raid-game/passives/hound_passive.js"></script>
+    <script src="js/raid-game/passives/farmer_fang_passive.js"></script>
     <!-- Add other passive scripts here -->
 
-    <!-- Character/Ability Specific Scripts -->
+    <!-- Factories -->
+    <!-- <script src="js/raid-game/character-factory.js"></script> -->
+    <!-- NOTE: CharacterFactory logic seems integrated into character.js now -->
+
+    <!-- Managers (Depend on Factories and Passives being registered) -->
+    <script src="js/raid-game/stage-manager.js"></script>
+    <script src="js/raid-game/game-manager.js"></script>
+
+    <!-- Character/Ability Specific Scripts (Load AFTER core classes/managers) -->
     <script src="js/raid-game/characters/schoolboy_shoma-ball-selection.js"></script>
     <script src="js/raid-game/abilities/schoolboy_shoma-homerun.js"></script>
     <script src="js/raid-game/abilities/cham_cham_abilities.js"></script>
+    <script src="js/raid-game/abilities/farmer_cham_cham_abilities.js"></script>
     <script src="js/raid-game/abilities/ayane_abilities.js"></script>
     <script src="js/raid-game/abilities/farmer_nina_abilities.js"></script>
     <script src="js/raid-game/abilities/atlantean_kagome_abilities.js"></script>
@@ -133,6 +176,17 @@
     <script src="js/raid-game/abilities/infernal_ibuki_abilities.js"></script>
     <script src="js/raid-game/abilities/infernal_raiden_abilities.js"></script>
     <script src="js/raid-game/abilities/angry_carrot_abilities.js"></script>
+    <script src="js/raid-game/abilities/farmer_raiden_abilities.js"></script>
+    <script src="js/raid-game/abilities/angry_pig_pitchfork_pierce.js"></script>
+    <script src="js/raid-game/abilities/angry_chicken_double_stab.js"></script>
+    <script src="js/raid-game/abilities/angry_bull_horn_drill.js"></script>
+    <script src="js/raid-game/abilities/apple_abilities.js"></script>
+    <script src="js/raid-game/abilities/crazy_farmer_abilities.js"></script>
+    <script src="js/raid-game/abilities/hound_abilities.js"></script>
+    <script src="js/raid-game/abilities/scarecrow_abilities.js"></script>
+    <script src="js/raid-game/abilities/crow_abilities.js"></script>
+    <script src="js/raid-game/abilities/farmer_fang_abilities.js"></script>
+    <script src="js/raid-game/abilities/target_dummy_abilities.js"></script>
 
     <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
@@ -178,7 +232,7 @@
             // Show tooltip
             function showTooltip(title, description, x, y) {
                 tooltipTitle.textContent = title;
-                tooltipDescription.textContent = description;
+                tooltipDescription.innerHTML = description;
                 
                 // Set initial position but temporarily make invisible to calculate dimensions
                 tooltip.style.visibility = 'hidden';
@@ -384,6 +438,33 @@
             // });
         }
 
+        // Setup battle log controls
+        function setupBattleLog() {
+            const battleLogContainer = document.querySelector('.battle-log-container');
+            const toggleLogButton = document.getElementById('toggle-log-button');
+            const clearLogButton = document.getElementById('clear-log-button');
+            
+            // Toggle battle log size
+            toggleLogButton.addEventListener('click', () => {
+                battleLogContainer.classList.toggle('collapsed');
+                // Update button text based on state
+                toggleLogButton.textContent = battleLogContainer.classList.contains('collapsed') ? '⬆' : '⬍';
+            });
+            
+            // Clear battle log
+            clearLogButton.addEventListener('click', () => {
+                const battleLog = document.getElementById('battle-log');
+                if (battleLog) {
+                    battleLog.innerHTML = '';
+                    // Add system message
+                    const clearMsg = document.createElement('div');
+                    clearMsg.className = 'log-entry system';
+                    clearMsg.textContent = 'Battle log cleared';
+                    battleLog.appendChild(clearMsg);
+                }
+            });
+        }
+
         // Initialize and start the game when page loads
         document.addEventListener('DOMContentLoaded', () => {
             // Get the loading element immediately after DOM is ready
@@ -405,6 +486,12 @@
                         // Setup UI components that don't depend on game state yet
                         setupTooltip();
                         setupGameOverScreen();
+                        setupBattleLog();
+
+                        // Initialize the talent manager if available
+                        if (window.talentManager) {
+                            await window.talentManager.initialize();
+                        }
 
                         // Access the global gameManager (or create if needed)
                         // Ensure GameManager is defined or imported appropriately

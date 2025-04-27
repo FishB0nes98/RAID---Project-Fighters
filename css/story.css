@@ -355,6 +355,7 @@ body {
     width: 100%;
     height: 100%;
     min-height: 400px;
+    overflow: hidden;
 }
 
 .map-path {
@@ -364,6 +365,7 @@ body {
     width: 100%;
     height: 100%;
     z-index: 1;
+    transform-origin: 0 0; /* Ensure scaling happens from top-left */
 }
 
 .path-segment {
@@ -388,8 +390,13 @@ body {
 }
 
 .map-stages {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    height: max-content;
     z-index: 2;
+    transform-origin: 0 0; /* Ensure scaling happens from top-left */
 }
 
 .stage-node {
@@ -403,11 +410,14 @@ body {
     transition: all 0.3s ease;
     cursor: pointer;
     z-index: 2;
+    /* Improve visibility when scaled down */
+    min-height: 100px;
 }
 
 .stage-node:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(126, 87, 194, 0.3);
+    z-index: 3; /* Bring hovered nodes to front */
 }
 
 .stage-node.completed {
@@ -1087,9 +1097,19 @@ body {
 .choice-item.effect-heal:hover { box-shadow: 0 12px 20px rgba(67, 160, 71, 0.2); }
 .choice-item.effect-heal::before { background: linear-gradient(90deg, #43a047, var(--primary)); }
 
+/* Style for heal_percent (can reuse heal styling) */
+.choice-item.effect-heal_percent { border-left: 3px solid #43a047; } 
+.choice-item.effect-heal_percent:hover { box-shadow: 0 12px 20px rgba(67, 160, 71, 0.2); }
+.choice-item.effect-heal_percent::before { background: linear-gradient(90deg, #43a047, var(--primary)); }
+
 .choice-item.effect-stat_boost { border-left: 3px solid #e53935; }
 .choice-item.effect-stat_boost:hover { box-shadow: 0 12px 20px rgba(229, 57, 53, 0.2); }
 .choice-item.effect-stat_boost::before { background: linear-gradient(90deg, #e53935, var(--primary)); }
+
+/* Style for mana_restore */
+.choice-item.effect-mana_restore { border-left: 3px solid #3498db; } /* Blue color */
+.choice-item.effect-mana_restore:hover { box-shadow: 0 12px 20px rgba(52, 152, 219, 0.2); }
+.choice-item.effect-mana_restore::before { background: linear-gradient(90deg, #3498db, var(--primary)); }
 
 .choice-item.effect-stat_boost_percent { border-left: 3px solid #ffb300; }
 .choice-item.effect-stat_boost_percent:hover { box-shadow: 0 12px 20px rgba(255, 179, 0, 0.2); }
@@ -1103,6 +1123,16 @@ body {
 .choice-item.effect-risky_medicine { border-left: 3px solid #ff5722; } /* Deep orange/red for risk */
 .choice-item.effect-risky_medicine:hover { box-shadow: 0 12px 20px rgba(255, 87, 34, 0.2); }
 .choice-item.effect-risky_medicine::before { background: linear-gradient(90deg, #ff5722, var(--primary)); }
+/* --- END NEW --- */
+
+/* --- NEW: Styles for Rare Bone (Dodge Boost) and Pocket of Weed --- */
+.choice-item.effect-stat_boost_percent.stat-dodgeChance { border-left: 3px solid #00bcd4; } /* Cyan color for dodge */
+.choice-item.effect-stat_boost_percent.stat-dodgeChance:hover { box-shadow: 0 12px 20px rgba(0, 188, 212, 0.2); }
+.choice-item.effect-stat_boost_percent.stat-dodgeChance::before { background: linear-gradient(90deg, #00bcd4, var(--primary)); }
+
+.choice-item.effect-pocket_of_weed_effect { border-left: 3px solid #7b1fa2; } /* Deep purple for mixed effect */
+.choice-item.effect-pocket_of_weed_effect:hover { box-shadow: 0 12px 20px rgba(123, 31, 162, 0.2); }
+.choice-item.effect-pocket_of_weed_effect::before { background: linear-gradient(90deg, #7b1fa2, var(--primary)); }
 /* --- END NEW --- */
 
 /* Styles for Character Selection Modal Cards */
@@ -1215,4 +1245,37 @@ body {
         opacity: 0;
         transform: translate(-50%, -40px); /* Move further up as it fades */
     }
+}
+
+/* Zoom indicator in corner */
+.map-zoom-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(30, 36, 48, 0.8);
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+}
+
+.zoom-text {
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+/* Zoom hint for users */
+.zoom-hint {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(30, 36, 48, 0.8);
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: var(--text-light);
+    font-size: 0.8rem;
+    pointer-events: none;
+    opacity: 0.8;
+    z-index: 10;
 }

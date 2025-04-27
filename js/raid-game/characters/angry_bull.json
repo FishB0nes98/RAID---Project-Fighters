@@ -1,0 +1,38 @@
+{
+    "id": "angry_bull",
+    "name": "Angry Bull",
+    "image": "Loading Screen/Angry Bull.jpeg",
+    "stats": {
+        "physicalDamage": 180,
+        "magicalDamage": 0,
+        "armor": 25,
+        "magicalShield": 15,
+        "hp": 9500,
+        "hpPerTurn": 0,
+        "mana": 100,
+        "manaPerTurn": 20,
+        "lifesteal": 0.0,
+        "dodgeChance": 0.0,
+        "critChance": 0.05,
+        "critDamage": 1.7,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "angry_bull_horn_drill",
+            "name": "Horn Drill",
+            "type": "custom",
+            "manaCost": 20,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 400 physical damage and disables a random ability of the target for 1 turn.",
+            "icon": "Icons/abilities/horn_drill.webp"
+        }
+    ],
+    "passive": {
+        "id": "angry_bull_armor_gain",
+        "name": "Armor Gain",
+        "description": "If he takes damage, he permanently gains 1% Armor.",
+        "icon": "Icons/passives/armor_gain.webp"
+    }
+} 

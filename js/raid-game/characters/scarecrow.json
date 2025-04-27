@@ -1,0 +1,39 @@
+{
+    "id": "scarecrow",
+    "name": "Scarecrow",
+    "image": "Loading Screen/Scarecrow.webp",
+    "stats": {
+        "physicalDamage": 80,
+        "magicalDamage": 200,
+        "armor": 20,
+        "magicalShield": 25,
+        "hp": 10000,
+        "hpPerTurn": 0,
+        "mana": 10000,
+        "manaPerTurn": 100,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.00,
+        "critDamage": 1.5,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "scarecrow_fear",
+            "name": "Fear",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 3,
+            "targetType": "all_enemies",
+            "description": "Disables two abilities for each enemy for 2 turns.",
+            "icon": "Icons/abilities/scarecrow_fear.webp",
+            "effectFunctionName": "scarecrowFearEffect"
+        }
+    ],
+    "passive": {
+        "id": "scarecrow_healing",
+        "name": "Crow Caretaker",
+        "description": "If alive, heals all allies for 700 HP at the start of each turn.",
+        "icon": "Icons/passives/scarecrow_healing.png"
+    }
+} 

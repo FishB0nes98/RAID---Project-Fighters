@@ -58,5 +58,18 @@
     "name": "Schoolgirl Elphelt",
     "image": "Icons/characters/Schoolgirl Elphelt.png",
     "tags": ["School", "Physical", "Tank"]
+  },
+  {
+    "name": "Farmer Cham Cham",
+    "image": "Icons/characters/Farmer Cham Cham.png",
+    "tags": ["Physical", "Farmer"]
+  },
+  {
+    "name": "Farmer Raiden",
+    "image": "Icons/characters/Farmer Raiden.png",
+    "tags": ["Farmer", "Magical", "Carry"]
   }
+  
+
+  
 ] 

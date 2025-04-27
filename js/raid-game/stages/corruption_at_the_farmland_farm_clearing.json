@@ -1,0 +1,49 @@
+{
+    "id": "corruption_at_the_farmland_farm_clearing",
+    "name": "Farm clearing",
+    "description": "The source of the corruption reveals itself! Farmer FANG stands with his twisted minions.",
+    "difficulty": 7,
+    "type": "battle",
+    "enemies": [
+        { "characterId": "angry_bull" },
+        { "characterId": "crow" },
+        { "characterId": "farmer_fang" },
+        { "characterId": "angry_carrot" },
+        { "characterId": "hound" }
+    ],
+    "objectives": {
+        "winConditions": [
+            { "type": "enemyDefeated", "targetId": "farmer_fang" }
+        ]
+    },
+    "modifiers": [
+        {
+            "id": "it_finally_rains",
+            "name": "It finally rains!",
+            "description": "Player characters regenerate 3% max HP each turn. Player abilities cost 0 Mana.",
+            "icon": "🌧️" 
+        },
+        {
+            "id": "pack_power",
+            "name": "Pack Power",
+            "description": "All AI characters deal 20% more damage.",
+            "icon": "🐺", 
+            "effect": {
+                "type": "ai_damage_increase",
+                "value": 0.20 
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "gold",
+            "value": 500
+        },
+        {
+            "type": "xp",
+            "value": 250
+        }
+    ],
+    "backgroundImage": "images/stages/farm_clearing.png",
+    "backgroundMusic": "sounds/music/final_farm_battle.mp3"
+} 

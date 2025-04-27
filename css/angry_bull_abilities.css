@@ -1,0 +1,98 @@
+/* Angry Bull Abilities CSS */
+
+/* Horn Drill */
+.horn-drill-cast-animation {
+    animation: bull-charge 0.7s ease-in-out;
+}
+
+@keyframes bull-charge {
+    0% { transform: translateX(0) rotate(0deg); }
+    40% { transform: translateX(-10px) rotate(-5deg) scale(0.95); }
+    70% { transform: translateX(25px) rotate(2deg) scale(1.1); }
+    100% { transform: translateX(0) rotate(0deg); }
+}
+
+.horn-drill-impact-vfx {
+    position: absolute;
+    top: 35%; left: 50%;
+    width: 30px;
+    height: 50px;
+    /* Placeholder: Could use a rotated rectangle or an SVG for a horn shape */
+    background: linear-gradient(to top, #a0522d, #f4a460);
+    border: 1px solid #8b4513;
+    border-radius: 10px 10px 0 0;
+    transform-origin: bottom center;
+    animation: drill-impact 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    opacity: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes drill-impact {
+    0% { transform: translate(-50%, 20px) scale(0.5) rotate(0deg); opacity: 0; }
+    50% { transform: translate(-50%, -10px) scale(1.2) rotate(15deg); opacity: 1; }
+    100% { transform: translate(-50%, 0px) scale(1) rotate(0deg); opacity: 0; }
+}
+
+/* Ability Disable Debuff */
+.ability-disable-vfx {
+    position: absolute;
+    top: 15%; left: 50%;
+    transform: translateX(-50%);
+    width: 35px;
+    height: 35px;
+    background-image: url('../icons/effects/ability_disabled.png'); /* Use the icon */
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: debuff-pulse-fade 0.8s ease-out forwards;
+    opacity: 0;
+    z-index: 9;
+    pointer-events: none;
+}
+
+@keyframes debuff-pulse-fade {
+    0% { transform: translate(-50%, -5px) scale(0.8); opacity: 0; }
+    40% { transform: translate(-50%, 0) scale(1.1); opacity: 1; }
+    70% { transform: translate(-50%, 0) scale(1); opacity: 0.9; }
+    100% { transform: translate(-50%, 5px) scale(0.9); opacity: 0; }
+}
+
+/* Passive Armor Gain */
+.armor-gain-stone-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(169, 169, 169, 0.6) 0%, rgba(105, 105, 105, 0) 75%); /* Gray gradient */
+    border: 2px solid rgba(112, 128, 144, 0.8); /* SlateGray border */
+    border-radius: 10%;
+    animation: harden-effect 1.3s ease-out forwards;
+    opacity: 0;
+    z-index: 8;
+    pointer-events: none;
+}
+
+@keyframes harden-effect {
+    0% { transform: scale(1); opacity: 0; border-width: 0px; }
+    50% { transform: scale(1.05); opacity: 0.7; border-width: 3px; }
+    100% { transform: scale(1); opacity: 0; border-width: 0px; }
+}
+
+.armor-gain-text-vfx {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #a9a9a9; /* DarkGray */
+    font-size: 17px;
+    font-weight: bold;
+    text-shadow: 0 0 3px black, 0 0 5px dimgray;
+    white-space: nowrap;
+    animation: float-up-armor 1.3s ease-out forwards;
+    z-index: 9;
+    pointer-events: none;
+}
+
+@keyframes float-up-armor {
+    0% { transform: translate(-50%, 0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-50%, -28px); opacity: 0; }
+} 

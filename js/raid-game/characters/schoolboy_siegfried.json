@@ -68,7 +68,7 @@
     "passive": {
         "id": "schoolboy_siegfried_passive",
         "name": "Buff Connoisseur",
-        "description": "Gain 200 Physical Damage for each active buff.",
+        "description": "Gain 125 Physical Damage for each active buff.",
         "icon": "Icons/passives/schoolboy_siegfried_passive.jfif"
     }
 } 

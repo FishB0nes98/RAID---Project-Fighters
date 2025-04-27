@@ -1,0 +1,241 @@
+/* Farmer FANG Abilities CSS */
+
+/* Carrot Power-up VFX */
+.carrot-powerup-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.carrot-powerup-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,140,0,0.4) 0%, rgba(255,69,0,0) 70%);
+    animation: carrot-glow 2s ease-in-out;
+}
+
+.carrot-particle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: url('../Icons/abilities/carrot_particle.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: carrot-float 3s ease-out forwards;
+}
+
+@keyframes carrot-glow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes carrot-float {
+    0% {
+        transform: translateY(20px) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Carrot Power-up Buff Icon Style */
+.buff-icon[data-buff-id="fang_carrot_powerup"] {
+    background-color: rgba(255, 140, 0, 0.3);
+    border: 2px solid #ff8c00;
+    box-shadow: 0 0 8px 2px rgba(255, 140, 0, 0.5);
+}
+
+/* Character with Carrot Power-up buff active */
+.character-slot.carrot-powered .character-image {
+    box-shadow: 0 0 15px 5px rgba(255, 140, 0, 0.6);
+}
+
+/* Damage text color for buffed characters */
+.floating-text.carrot-powered {
+    color: #ff8c00;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 69, 0, 0.8);
+}
+
+/* Corn Power Up VFX */
+.corn-cleanse-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.corn-cleanse-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,0,0.5) 0%, rgba(255,255,0,0) 70%);
+    animation: corn-cleanse-glow 2s ease-in-out;
+}
+
+.corn-particle {
+    position: absolute;
+    width: 18px;
+    height: 30px;
+    background-image: url('../Icons/abilities/corn_particle.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: corn-float 2.5s ease-out forwards;
+}
+
+@keyframes corn-cleanse-glow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes corn-float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-80px) rotate(30deg);
+        opacity: 0;
+    }
+}
+
+/* Corn Power Up Cleanse Text */
+.floating-text.corn-cleansed {
+    color: #ffff00;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+}
+
+/* Plant Trick VFX */
+.plant-trick-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.plant-growth {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,128,0,0.3) 0%, rgba(0,128,0,0) 70%);
+    animation: plant-grow 2.5s ease-out;
+    z-index: -1;
+}
+
+.leaf-particle {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-image: url('../Icons/abilities/leaf_particle.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    bottom: -5px;
+    animation: leaf-float 2s ease-out forwards;
+}
+
+@keyframes plant-grow {
+    0% {
+        height: 0%;
+        opacity: 0;
+    }
+    30% {
+        opacity: 0.7;
+    }
+    100% {
+        height: 100%;
+        opacity: 0;
+    }
+}
+
+@keyframes leaf-float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-60px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Plant Trick Debuff Icon Style */
+.debuff-icon[data-debuff-id="fang_plant_trick_disable"] {
+    background-color: rgba(0, 128, 0, 0.3);
+    border: 2px solid #006400;
+    box-shadow: 0 0 8px 2px rgba(0, 128, 0, 0.5);
+}
+
+/* Character with Plant Trick debuff active */
+.character-slot .character-image.plant-disabled {
+    filter: sepia(0.5) hue-rotate(70deg);
+}
+
+/* Disable text color */
+.floating-text.plant-disable {
+    color: #006400;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 128, 0, 0.8);
+} 

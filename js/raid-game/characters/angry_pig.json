@@ -1,0 +1,38 @@
+{
+    "id": "angry_pig",
+    "name": "Angry Pig",
+    "image": "Loading Screen/Angry Pig.jpeg",
+    "stats": {
+        "physicalDamage": 120,
+        "magicalDamage": 0,
+        "armor": 18,
+        "magicalShield": 10,
+        "hp": 8000,
+        "hpPerTurn": 0,
+        "mana": 100,
+        "manaPerTurn": 20,
+        "lifesteal": 0.0,
+        "dodgeChance": 0.05,
+        "critChance": 0.05,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "angry_pig_pitchfork_pierce",
+            "name": "Pitchfork Pierce",
+            "type": "custom",
+            "manaCost": 20,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 600 physical damage to the target.",
+            "icon": "Icons/abilities/pitchfork_pierce.webp"
+        }
+    ],
+    "passive": {
+        "id": "angry_pig_damage_heal",
+        "name": "Damage Heal",
+        "description": "Heals 50% of the damage received back to himself.",
+        "icon": "Icons/passives/damage_heal.webp"
+    }
+} 

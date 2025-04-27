@@ -778,167 +778,278 @@ class StoryManager {
         if (this.isStoryComplete()) return false; 
 
         const currentStageData = this.getCurrentStage();
-        if (!currentStageData || currentStageData.type !== 'choice') {
-            console.error('Attempted to apply choice effect on a non-choice stage.');
-            return false;
+        if (!currentStageData || (currentStageData.type !== 'choice' && currentStageData.type !== 'recruit')) { // Allow recruit type for UI flow
+            console.error('Attempted to apply choice/recruit effect on an invalid stage type:', currentStageData?.type);
+            // Don't throw error here, let UI handle closing etc.
+             return false; 
         }
 
-        const targetCharacterIndex = this.playerTeam.findIndex(c => c.id === targetCharacterId);
-        if (targetCharacterIndex === -1) {
-            console.error(`Target character ID ${targetCharacterId} not found in player team.`);
-            return false;
-        }
-
-        let character = this.playerTeam[targetCharacterIndex];
         const effect = choice.effect;
+        console.log(`Applying choice '${choice.name}' effect:`, effect);
 
-        console.log(`Applying choice '${choice.name}' effect to character ${character.name || character.id}:`, effect);
-
-        // Apply the effect
         try {
-            switch (effect.type) {
-                case 'heal':
-                    if (effect.amount === 'full') {
-                        character.currentHP = character.stats.hp; // Heal to max HP based on current stats.hp
-                        console.log(`Healed ${character.id} to full HP: ${character.currentHP}`);
-                    } else {
-                        // Ensure stats.hp exists before trying to use it as the cap
-                        const maxHP = character.stats && character.stats.hp ? character.stats.hp : character.currentHP;
-                        character.currentHP = Math.min(maxHP, (character.currentHP || 0) + effect.amount);
-                        console.log(`Healed ${character.id} by ${effect.amount}, new HP: ${character.currentHP}`);
-                    }
-                    break;
-                case 'stat_boost':
-                    if (character.stats && character.stats[effect.stat] !== undefined) {
-                        const boostAmount = effect.amount;
-                        // Directly modify the character's current stats object.
-                        // This change will be persisted when lastTeamState is rebuilt and saved.
-                        character.stats[effect.stat] = (character.stats[effect.stat] || 0) + boostAmount;
-                        console.log(`Boosted ${character.id}'s ${effect.stat} by ${boostAmount} to ${character.stats[effect.stat]}`);
-
-                        // --- Optional: Check if HP/Mana was boosted and adjust current if needed ---
-                        if (effect.stat === 'hp' || effect.stat === 'mana') {
-                             // If max HP was boosted, also increase current HP by the same amount
-                             if (effect.stat === 'hp') {
-                                character.currentHP = Math.min(character.stats.hp, (character.currentHP || 0) + boostAmount);
-                                console.log(`Adjusted ${character.id}'s current HP after Max HP boost: ${character.currentHP}`);
-                             }
-                             // If max Mana was boosted, also increase current Mana by the same amount
-                             if (effect.stat === 'mana') {
-                                character.currentMana = Math.min(character.stats.mana, (character.currentMana || 0) + boostAmount);
-                                console.log(`Adjusted ${character.id}'s current Mana after Max Mana boost: ${character.currentMana}`);
-                             }
+            // --- Handle effects targeting the whole team (no character selection needed) ---
+            if (effect.target === 'all') {
+                console.log(`Applying effect to all team members.`);
+                let changesMade = false;
+                switch (effect.type) {
+                    case 'heal_percent':
+                        this.playerTeam.forEach(member => {
+                            if (member.currentHP > 0) { // Only heal living characters
+                                const maxHP = member.stats?.hp ?? 1;
+                                const healAmount = Math.floor(maxHP * (effect.amount_percent / 100));
+                                member.currentHP = Math.min(maxHP, (member.currentHP || 0) + healAmount);
+                                console.log(`Healed ${member.id} by ${effect.amount_percent}%, new HP: ${member.currentHP}`);
+                                changesMade = true;
+                            }
+                        });
+                        break;
+                    case 'mana_restore':
+                        if (effect.amount === 'full') {
+                            this.playerTeam.forEach(member => {
+                                if (member.currentHP > 0) { // Only affect living characters
+                                    const maxMana = member.stats?.mana ?? 0;
+                                    member.currentMana = maxMana;
+                                    console.log(`Restored ${member.id}'s Mana to full: ${member.currentMana}`);
+                                    changesMade = true;
+                                }
+                            });
+                        } else {
+                            // Handle specific amount mana restore if needed later
+                            console.warn(`Mana restore amount '${effect.amount}' not implemented for target 'all'.`);
                         }
-                        // NOTE: Base stats are not modified here, only the current operational stats for the run.
-                    } else {
-                        console.warn(`Stat ${effect.stat} not found or undefined on character ${character.id}. Stats:`, character.stats);
-                    }
-                    break;
-                case 'stat_boost_percent':
-                     console.log(`[DEBUG] Applying stat_boost_percent for ${effect.stat} to ${character.id}`);
-                     const baseStats = await this.getBaseStats(character.id); // Helper needed
-                     if (!baseStats) {
-                         console.error(`[DEBUG] Could not retrieve base stats for ${character.id}. Cannot apply boost.`);
-                         throw new Error(`Could not retrieve base stats for ${character.id}`);
-                     }
-                     console.log(`[DEBUG] Base stats for ${character.id}:`, JSON.parse(JSON.stringify(baseStats))); // Log a copy
+                        break;
+                    // Add other 'all' target effects here if needed
+                    default:
+                        console.warn(`Unknown effect type for target 'all': ${effect.type}`);
+                        break;
+                }
+                if (!changesMade) {
+                     console.log("Effect targeted 'all' but no applicable changes were made.");
+                     // Optionally skip advancement if nothing happened?
+                     // For now, we still advance the stage.
+                }
+            } 
+            // --- Handle effects targeting a selected character ---
+            else if (effect.target === 'selected' || effect.target === 'selected_living' || effect.target === 'selected_dead') {
+                if (!targetCharacterId) {
+                    console.error("Target character ID is required for 'selected' effects but was not provided.");
+                    return false; // Stop if target is needed but missing
+                }
+                
+                const targetCharacterIndex = this.playerTeam.findIndex(c => c.id === targetCharacterId);
+                if (targetCharacterIndex === -1) {
+                    console.error(`Target character ID ${targetCharacterId} not found in player team.`);
+                    return false;
+                }
+                let character = this.playerTeam[targetCharacterIndex];
+                console.log(`Applying effect to selected character ${character.name || character.id}.`);
+                
+                // Check if target type matches character state (living/dead)
+                if (effect.target === 'selected_living' && character.currentHP <= 0) {
+                    console.warn(`Choice target is 'selected_living' but character ${character.id} is dead. Skipping effect.`);
+                    // Don't apply effect, but still advance stage?
+                    // For now, we advance.
+                } else if (effect.target === 'selected_dead' && character.currentHP > 0) {
+                    console.warn(`Choice target is 'selected_dead' but character ${character.id} is alive. Skipping effect.`);
+                    // Don't apply effect, but still advance stage?
+                    // For now, we advance.
+                } else {
+                    // Apply the effect
+                    switch (effect.type) {
+                        case 'heal':
+                            if (effect.amount === 'full') {
+                                character.currentHP = character.stats.hp; // Heal to max HP based on current stats.hp
+                                console.log(`Healed ${character.id} to full HP: ${character.currentHP}`);
+                            } else {
+                                const maxHP = character.stats?.hp ?? character.currentHP ?? 0;
+                                character.currentHP = Math.min(maxHP, (character.currentHP || 0) + effect.amount);
+                                console.log(`Healed ${character.id} by ${effect.amount}, new HP: ${character.currentHP}`);
+                            }
+                            break;
+                        case 'stat_boost':
+                            let statName = effect.stat;
+                            // Remap 'hpRegen' from the choice effect to 'hpPerTurn' on the character stats
+                            if (statName === 'hpRegen') {
+                                statName = 'hpPerTurn';
+                            }
+                            
+                            // Initialize hpPerTurn if it doesn't exist
+                            if (statName === 'hpPerTurn' && character.stats[statName] === undefined) {
+                                character.stats[statName] = 0; 
+                            }
+                            
+                            if (character.stats && character.stats[statName] !== undefined) {
+                                const boostAmount = effect.amount;
+                                character.stats[statName] = (character.stats[statName] || 0) + boostAmount;
+                                console.log(`Boosted ${character.id}'s ${statName} (from effect stat: ${effect.stat}) by ${boostAmount} to ${character.stats[statName]}`);
+                                
+                                // Adjust current HP/Mana if max was boosted
+                                if (statName === 'hp') { // Use the potentially remapped statName here
+                                    character.currentHP = Math.min(character.stats.hp, (character.currentHP || 0) + boostAmount);
+                                } else if (statName === 'mana') { // And here
+                                    character.currentMana = Math.min(character.stats.mana, (character.currentMana || 0) + boostAmount);
+                                }
+                            } else {
+                                console.warn(`Stat ${statName} (from effect stat: ${effect.stat}) not found or undefined on character ${character.id}. Stats:`, character.stats);
+                            }
+                            break;
+                        case 'stat_boost_percent':
+                            console.log(`[DEBUG] Applying stat_boost_percent to ${character.id}`);
+                            const baseStats = await this.getBaseStats(character.id);
+                            if (!baseStats) {
+                                console.error(`[DEBUG] Could not retrieve base stats for ${character.id}. Cannot apply boost.`);
+                                throw new Error(`Could not retrieve base stats for ${character.id}`);
+                            }
+                            console.log(`[DEBUG] Base stats for ${character.id}:`, JSON.parse(JSON.stringify(baseStats))); 
 
-                    const boostMultiplier = 1 + (effect.amount / 100);
-                    console.log(`[DEBUG] Boost multiplier: ${boostMultiplier}`);
-                    
-                    // Log stats BEFORE boost for comparison
-                    console.log(`[DEBUG] Stats BEFORE boost for ${character.id}:`, JSON.parse(JSON.stringify(character.stats))); 
+                            const boostMultiplier = 1 + (effect.amount / 100);
+                            console.log(`[DEBUG] Boost multiplier: ${boostMultiplier}`);
+                            console.log(`[DEBUG] Stats BEFORE boost for ${character.id}:`, JSON.parse(JSON.stringify(character.stats)));
 
-                    const oldMaxHp = character.stats.hp; // Store old max HP
-                    const oldMaxMana = character.stats.mana; // Store old max Mana
-
-                    if (effect.stat === 'all') {
-                         console.log(`[DEBUG] Boosting ALL stats.`);
-                         for (const stat in character.stats) {
-                            // Avoid boosting non-numeric stats like name/id or currentHP/Mana
-                             if (typeof character.stats[stat] === 'number' && stat !== 'currentHP' && stat !== 'currentMana' && baseStats[stat] !== undefined) { // Check if base stat exists
-                                // Apply boost to current stats based on base stat
+                            const oldMaxHp = character.stats.hp;
+                            const oldMaxMana = character.stats.mana;
+                            
+                            // --- Handle single stat, 'all', or array of stats --- 
+                            let statsToBoost = [];
+                            if (effect.stat === 'all') {
+                                console.log(`[DEBUG] Boosting ALL stats.`);
+                                statsToBoost = Object.keys(character.stats).filter(stat => 
+                                    typeof character.stats[stat] === 'number' && 
+                                    stat !== 'currentHP' && 
+                                    stat !== 'currentMana' && 
+                                    baseStats[stat] !== undefined
+                                );
+                            } else if (Array.isArray(effect.stat)) {
+                                console.log(`[DEBUG] Boosting multiple specific stats:`, effect.stat);
+                                statsToBoost = effect.stat.filter(stat => 
+                                    character.stats[stat] !== undefined && 
+                                    baseStats[stat] !== undefined
+                                );
+                            } else if (typeof effect.stat === 'string' && character.stats[effect.stat] !== undefined && baseStats[effect.stat] !== undefined) {
+                                console.log(`[DEBUG] Boosting single specific stat: ${effect.stat}`);
+                                statsToBoost = [effect.stat];
+                            } else {
+                                console.warn(`[DEBUG] Invalid or missing stat(s) specified for boost:`, effect.stat);
+                            }
+                            // --- End Stat Handling --- 
+                            
+                            // --- Apply boost to determined stats --- 
+                            statsToBoost.forEach(stat => {
                                 const baseValue = baseStats[stat];
                                 const newStatValue = Math.round(baseValue * boostMultiplier);
                                 console.log(`[DEBUG] Boosting ${stat}: Base=${baseValue}, New=${newStatValue}`);
                                 character.stats[stat] = newStatValue; // Update live stat
-                            } else {
-                                console.log(`[DEBUG] Skipping boost for non-numeric or non-base stat: ${stat}`);
+                            });
+                            // --- End Apply Boost --- 
+
+                            console.log(`[DEBUG] Stats AFTER boost for ${character.id}:`, JSON.parse(JSON.stringify(character.stats)));
+                            console.log(`Recalculated stats for ${character.id} after % base stat boost. New Max HP: ${character.stats.hp}, New Max Mana: ${character.stats.mana}`);
+                            
+                            // Adjust current HP/Mana based on Max increase
+                            const hpIncrease = character.stats.hp - oldMaxHp;
+                            const manaIncrease = character.stats.mana - oldMaxMana;
+                            if (hpIncrease > 0) {
+                                character.currentHP = Math.min(character.stats.hp, (character.currentHP || 0) + hpIncrease);
                             }
-                        }
-                     } else if (effect.stat && character.stats[effect.stat] !== undefined && baseStats[effect.stat] !== undefined) { // Check specific stat exists in character.stats and baseStats
-                         console.log(`[DEBUG] Boosting specific stat: ${effect.stat}`);
-                         const baseValue = baseStats[effect.stat];
-                         const newStatValue = Math.round(baseValue * boostMultiplier);
-                         console.log(`[DEBUG] Boosting ${effect.stat}: Base=${baseValue}, New=${newStatValue}`);
-                         character.stats[effect.stat] = newStatValue; // Update live stat
-                     } else {
-                         console.warn(`[DEBUG] Stat ${effect.stat} not found on character ${character.id} or base stats. Cannot apply boost.`);
-                     }
-                     
-                     // Log stats AFTER boost
-                     console.log(`[DEBUG] Stats AFTER boost for ${character.id}:`, JSON.parse(JSON.stringify(character.stats)));
-                     console.log(`Recalculated stats for ${character.id} after % base stat boost. New Max HP: ${character.stats.hp}, New Max Mana: ${character.stats.mana}`);
+                            if (manaIncrease > 0) {
+                                character.currentMana = Math.min(character.stats.mana, (character.currentMana || 0) + manaIncrease);
+                            }
+                            break;
+                        case 'revive':
+                            if (character.currentHP <= 0) { 
+                                const revivePercent = effect.amount_percent || 50; 
+                                const maxHP = character.stats?.hp ?? 1;
+                                character.currentHP = Math.max(1, Math.floor(maxHP * (revivePercent / 100)));
+                                console.log(`Revived ${character.id} to ${revivePercent}% HP: ${character.currentHP}`);
+                            } else {
+                                console.warn(`Attempted to revive living character ${character.id}`);
+                            }
+                            break;
+                        case 'risky_medicine':
+                            const chance = Math.random();
+                            if (chance < 0.5) { 
+                                character.currentHP = 0;
+                                console.log(`Risky Medicine backfired! ${character.id} was defeated.`);
+                            } else { 
+                                const oldMaxHp = character.stats.hp;
+                                const newMaxHp = oldMaxHp * 2;
+                                character.stats.hp = newMaxHp;
+                                character.currentHP = newMaxHp; 
+                                console.log(`Risky Medicine worked! ${character.id}'s Max HP doubled to ${newMaxHp} and fully healed.`);
+                            }
+                            break;
+                        // --- NEW: Handle Pocket of Weed --- 
+                        case 'pocket_of_weed_effect':
+                            if (character.stats) {
+                                // Double damages
+                                character.stats.physicalDamage = (character.stats.physicalDamage || 0) * 2;
+                                character.stats.magicalDamage = (character.stats.magicalDamage || 0) * 2;
+                                // Set defenses to 0
+                                character.stats.armor = 0;
+                                character.stats.magicalShield = 0;
+                                console.log(`Applied Pocket of Weed to ${character.id}. New Phys Dmg: ${character.stats.physicalDamage}, New Mag Dmg: ${character.stats.magicalDamage}, Armor/MR: 0`);
+                            } else {
+                                console.warn(`Cannot apply Pocket of Weed: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        // --- END NEW --- 
 
-                     // --- NEW: Adjust current HP/Mana based on Max increase ---
-                     const hpIncrease = character.stats.hp - oldMaxHp; // Use recalculated maxHp
-                     const manaIncrease = character.stats.mana - oldMaxMana; // Use recalculated maxMana
+                        // --- NEW: Handle combined effects --- 
+                        case 'heal_and_mana_restore':
+                            if (character.stats) {
+                                const maxHP = character.stats.hp ?? character.currentHP ?? 0;
+                                const maxMana = character.stats.mana ?? character.currentMana ?? 0;
+                                const hpAmount = effect.amount?.hp || 0;
+                                const manaAmount = effect.amount?.mana || 0;
+                                
+                                character.currentHP = Math.min(maxHP, (character.currentHP || 0) + hpAmount);
+                                character.currentMana = Math.min(maxMana, (character.currentMana || 0) + manaAmount);
+                                console.log(`Applied Water Bottle to ${character.id}. Restored ${hpAmount} HP (now ${character.currentHP}) and ${manaAmount} Mana (now ${character.currentMana}).`);
+                            } else {
+                                console.warn(`Cannot apply Water Bottle: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'mana_restore_and_stat_boost':
+                            if (character.stats) {
+                                // Restore mana to full
+                                character.currentMana = character.stats.mana ?? 0;
+                                
+                                // Boost stat
+                                const statToBoost = effect.amount?.stat;
+                                const boostValue = effect.amount?.value || 0;
+                                if (statToBoost && character.stats[statToBoost] !== undefined) {
+                                    character.stats[statToBoost] = (character.stats[statToBoost] || 0) + boostValue;
+                                    console.log(`Applied Magical Ring to ${character.id}. Mana restored to full (${character.currentMana}). Boosted ${statToBoost} by ${boostValue} (now ${character.stats[statToBoost]}).`);
+                                } else {
+                                    console.warn(`Cannot apply Magical Ring stat boost: Stat ${statToBoost} invalid or boost value missing.`);
+                                    console.log(`Applied Magical Ring to ${character.id}. Mana restored to full (${character.currentMana}). Stat boost skipped.`);
+                                }
+                            } else {
+                                console.warn(`Cannot apply Magical Ring: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        // --- END NEW --- 
 
-                     if (hpIncrease > 0) {
-                         character.currentHP = Math.min(character.stats.hp, (character.currentHP || 0) + hpIncrease);
-                         console.log(`Increased ${character.id}'s current HP by ${hpIncrease} due to Max HP boost.`);
-                     }
-                     if (manaIncrease > 0) {
-                         character.currentMana = Math.min(character.stats.mana, (character.currentMana || 0) + manaIncrease);
-                         console.log(`Increased ${character.id}'s current Mana by ${manaIncrease} due to Max Mana boost.`);
-                     }
-                     // --- END NEW ---
-                    break;
-                // --- NEW: Revive Effect --- 
-                case 'revive':
-                    if (character.currentHP <= 0) { // Double-check target is actually dead
-                        const revivePercent = effect.amount_percent || 50; // Default to 50% if not specified
-                        const maxHP = character.stats && character.stats.hp ? character.stats.hp : 1; // Get max HP, fallback to 1
-                        character.currentHP = Math.max(1, Math.floor(maxHP * (revivePercent / 100))); // Restore HP, ensure at least 1
-                        console.log(`Revived ${character.id} to ${revivePercent}% HP: ${character.currentHP}`);
-                    } else {
-                        console.warn(`Attempted to revive living character ${character.id}`);
-                        // Optionally, still heal them slightly or provide some other benefit?
-                        // For now, just log the warning.
+                        default:
+                            console.warn(`Unknown choice effect type: ${effect.type}`);
+                            break;
                     }
-                    break;
-                // --- END: Revive Effect --- 
-
-                // --- NEW: Risky Medicine Effect --- 
-                case 'risky_medicine':
-                    const chance = Math.random();
-                    if (chance < 0.5) { // 50% chance to kill
-                        character.currentHP = 0;
-                        console.log(`Risky Medicine backfired! ${character.id} was defeated.`);
-                    } else { // 50% chance to double HP
-                        const oldMaxHp = character.stats.hp;
-                        const newMaxHp = oldMaxHp * 2;
-                        character.stats.hp = newMaxHp;
-                        character.currentHP = newMaxHp; // Fully heal to new max HP
-                        console.log(`Risky Medicine worked! ${character.id}'s Max HP doubled to ${newMaxHp} and fully healed.`);
-                    }
-                    break;
-                // --- END: Risky Medicine Effect --- 
-                default:
-                    console.warn(`Unknown choice effect type: ${effect.type}`);
-                    break;
+                    
+                    // Update the character in the playerTeam array
+                    this.playerTeam[targetCharacterIndex] = character;
+                }
+            } else {
+                 console.warn(`Unknown or unsupported effect target type: ${effect.target}`);
             }
-            
-            // Update the character in the playerTeam array
-            this.playerTeam[targetCharacterIndex] = character;
 
-            // Update lastTeamState for saving (HP/Mana are most critical, but stats changes should persist too)
-            // This correctly includes the potentially modified stats object
+            // --- Common Logic after applying effect (or skipping) ---
+            
+            // Update lastTeamState for saving (reflects changes from effects)
             this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
                  acc[member.id] = { 
                      currentHP: member.currentHP, 
                      currentMana: member.currentMana,
-                     // Include the full stats object to persist modifications
                      stats: { ...member.stats } 
                  };
                  return acc;
@@ -950,14 +1061,13 @@ class StoryManager {
 
             // Save progress (which now includes the updated stats in lastTeamState)
             await this.saveStoryProgress();
-            console.log(`[StoryManager] Applied choice, advanced to stage ${this.storyProgress.currentStageIndex}, and saved progress.`);
+            console.log(`[StoryManager] Processed choice/recruit, advanced to stage ${this.storyProgress.currentStageIndex}, and saved progress.`);
 
             const hasMoreStages = this.storyProgress.currentStageIndex < this.getTotalStages();
 
             // Call event handler if defined
             if (this.onStageCompleted) {
                 const completedStageId = this.getStageId(this.storyProgress.currentStageIndex - 1);
-                // Pass empty rewards for choice stages for now
                 this.onStageCompleted(completedStageId, [], hasMoreStages); 
             }
 
@@ -965,7 +1075,6 @@ class StoryManager {
 
         } catch (error) {
             console.error(`Error applying choice effect: ${error}`);
-            // Should we revert changes? Or just log? For now, just log.
             return false;
         }
     }
@@ -1033,21 +1142,24 @@ class StoryManager {
                 // Check if not already in the team
                 if (currentTeamIds.has(id)) return false;
 
-                // Check for the required tag (case-insensitive inference from ID)
-                const tag = stageData.recruitTag.toLowerCase();
-                const charIdLower = id.toLowerCase();
-                // Simple inference: check if ID contains the tag
-                if (tag === 'school' && (charIdLower.includes('schoolboy') || charIdLower.includes('schoolgirl'))) {
-                    return true;
-                }
-                // NEW: Check for Farmer tag
-                if (tag === 'farmer' && (charIdLower.includes('farmer') || charIdLower.includes('farmhand'))) {
-                    return true;
-                }
-                // Add more tag checks here if needed
-                // else if (tag === 'another_tag' && ...) { return true; }
+                // Get the registry entry for this character
+                const registryEntry = this.characterRegistry[id];
+                if (!registryEntry) return false; // Skip if no registry entry (shouldn't happen)
 
-                return false; // Default: no match
+                // Check if the character has tags defined
+                if (!registryEntry.tags || !Array.isArray(registryEntry.tags)) {
+                    // If no tags defined, maybe infer? For now, exclude.
+                    // console.warn(`Character ${id} has no tags in registry.`);
+                    return false; 
+                }
+
+                // Check if the character's tags array includes the required recruitTag
+                const requiredTag = stageData.recruitTag; // Use the exact tag from stage data
+                if (registryEntry.tags.includes(requiredTag)) {
+                    return true; // Found the required tag
+                }
+
+                return false; // Default: tag not found
             });
 
             console.log(`[StoryManager] Potential recruits found (${potentialRecruits.length}):`, potentialRecruits);

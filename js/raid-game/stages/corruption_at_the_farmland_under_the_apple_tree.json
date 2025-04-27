@@ -1,0 +1,31 @@
+{
+  "id": "corruption_at_the_farmland_under_the_apple_tree",
+  "name": "Under the Apple Tree",
+  "description": "A large, ancient apple tree stands here. But the apples... they don't look right.",
+  "difficulty": 3,
+  "objectives": {
+    "winConditions": [
+      { "type": "allEnemiesDefeated" }
+    ]
+  },
+  "stageEffects": [],
+  "enemies": [
+    { "characterId": "monster_apple" },
+    { "characterId": "healthy_apple" },
+    { "characterId": "angry_apple" },
+    { "characterId": "leafy_apple" },
+    { "characterId": "rotten_apple" }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 150
+    },
+    {
+      "type": "xp",
+      "value": 80
+    }
+  ],
+  "backgroundImage": "images/stages/under_the_apple_tree.webp",
+  "backgroundMusic": "sounds/music/under_the_apple_tree.mp3"
+} 

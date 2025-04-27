@@ -85,11 +85,11 @@ class StageManager {
                 throw new Error(`Stage ${stageId} not found in registry`);
             }
             
-            // Load the stage data
-            const response = await fetch(`js/raid-game/stages/${stageId}.json`);
+            // Load the stage data using the path from the registry
+            const response = await fetch(stageInfo.path); // Use stageInfo.path
             if (!response.ok) {
-                console.error(`Failed to fetch stage file for ${stageId}. Status: ${response.status}`);
-                throw new Error(`Failed to load stage data for ${stageId}`);
+                console.error(`Failed to fetch stage file from path ${stageInfo.path} for ${stageId}. Status: ${response.status}`);
+                throw new Error(`Failed to load stage data for ${stageId} from path ${stageInfo.path}`);
             }
             
             const stageData = await response.json();
@@ -110,6 +110,30 @@ class StageManager {
             
             // Apply stage modifiers
             this.applyStageModifiers();
+
+            // --- NEW: Initialize Passives After Loading --- 
+            console.log("[StageManager] Initializing passives after stage load...");
+            const allCharacters = [...this.gameState.playerCharacters, ...this.gameState.aiCharacters];
+            allCharacters.forEach(character => {
+                if (character.passiveHandler && typeof character.passiveHandler.initialize === 'function') {
+                     console.log(`[StageManager] Calling initialize() for ${character.name}'s passive: ${character.passiveHandler.name || character.passive.id}`);
+                     try {
+                         character.passiveHandler.initialize(character); 
+                     } catch (err) {
+                          console.error(`[StageManager] Error initializing passive for ${character.name}:`, err);
+                     }
+                } else if (character.passive && character.passive.id === 'scarecrow_evasive_stance' && typeof character.passiveHandler?.updateDodgeBuff === 'function') {
+                    // Special check for Scarecrow passive if initialize wasn't found but handler exists
+                    console.log(`[StageManager] Directly calling updateDodgeBuff() for ${character.name}`);
+                    try {
+                         character.passiveHandler.updateDodgeBuff();
+                    } catch (err) {
+                         console.error(`[StageManager] Error calling updateDodgeBuff for ${character.name}:`, err);
+                    }
+                }
+            });
+            console.log("[StageManager] Passive initialization complete.");
+            // --- END NEW ---
 
             // Add to stage history
             this.stageHistory.push(stageId);
@@ -160,36 +184,102 @@ class StageManager {
         }
 
         this.stageModifiers.forEach(modifier => {
+            // --- Handle AI Damage Reduction --- 
             if (modifier.effect && modifier.effect.type === 'ai_damage_reduction') {
                 const reductionValue = modifier.effect.value || 0;
                 
-                // Apply damage reduction modifier to all AI characters
                 this.gameState.aiCharacters.forEach(character => {
-                    // Add a stage modifier property to each AI character
                     character.stageModifiers = character.stageModifiers || {};
-                    character.stageModifiers.damageReduction = reductionValue;
-                    
-                    // Also patch the calculateDamage method to apply the reduction
-                    const originalCalculateDamage = character.calculateDamage;
-                    character.calculateDamage = function(baseDamage, type) {
-                        // First apply the original method's logic
-                        let damage = originalCalculateDamage.call(this, baseDamage, type);
-                        
-                        // Then apply stage modifier reduction
-                        if (this.stageModifiers && typeof this.stageModifiers.damageReduction === 'number') {
-                            const reduction = this.stageModifiers.damageReduction;
-                            return Math.max(1, Math.floor(damage * (1 - reduction)));
-                        }
-                        
-                        return damage;
-                    };
-                    
-                    console.log(`Applied ${modifier.name} modifier to ${character.name} (Damage reduced by ${reductionValue * 100}%)`);
+                    // Store the reduction value
+                    character.stageModifiers.damageReduction = (character.stageModifiers.damageReduction || 0) + reductionValue;
+                    console.log(`Applying ${modifier.name} modifier to ${character.name} (Added ${reductionValue * 100}% Damage Reduction)`);
+                });
+            }
+
+            // --- Handle AI Damage Increase (Pack Power) --- 
+            if (modifier.effect && modifier.effect.type === 'ai_damage_increase') {
+                const increaseValue = modifier.effect.value || 0;
+
+                this.gameState.aiCharacters.forEach(character => {
+                    character.stageModifiers = character.stageModifiers || {};
+                    // Store the multiplier increase
+                    character.stageModifiers.damageMultiplier = (character.stageModifiers.damageMultiplier || 0) + increaseValue;
+                     console.log(`Applying ${modifier.name} modifier to ${character.name} (Added ${increaseValue * 100}% Damage Increase)`);
                 });
             }
             
-            // Add other modifier types here as needed
+            // --- Handle 'it_finally_rains' modifier --- 
+            if (modifier.id === 'it_finally_rains') {
+                // Apply to all player characters
+                this.gameState.playerCharacters.forEach(character => {
+                    // Initialize stage modifiers property
+                    character.stageModifiers = character.stageModifiers || {};
+                    character.stageModifiers.itFinallyRains = true;
+                    
+                    // Patch the ability cost calculation
+                    const originalUseAbility = character.useAbility;
+                    character.useAbility = function(abilityIndex, targetOrTargets) {
+                        // Store original mana cost
+                        const originalManaCost = this.abilities[abilityIndex].manaCost;
+                        
+                        // Set mana cost to 0 temporarily
+                        this.abilities[abilityIndex].manaCost = 0;
+                        
+                        // Call the original method
+                        const result = originalUseAbility.call(this, abilityIndex, targetOrTargets);
+                        
+                        // Restore original mana cost
+                        this.abilities[abilityIndex].manaCost = originalManaCost;
+                        
+                        return result;
+                    };
+                });
+                
+                // Create and add rain VFX to the stage
+                this.createRainVFX();
+                
+                console.log(`Applied ${modifier.name} modifier: Rain healing and zero mana cost for player characters`);
+            }
         });
+    }
+    
+    // Create rain VFX for the stage
+    createRainVFX() {
+        // Check if the rain container already exists
+        if (document.getElementById('rain-container')) {
+            return; // Rain VFX already created
+        }
+        
+        // Create the rain container
+        const rainContainer = document.createElement('div');
+        rainContainer.id = 'rain-container';
+        rainContainer.className = 'rain-container';
+        
+        // Create raindrops
+        const dropCount = 150; // Number of raindrops
+        for (let i = 0; i < dropCount; i++) {
+            const raindrop = document.createElement('div');
+            raindrop.className = 'raindrop';
+            
+            // Randomize positions and animation delays
+            const left = Math.random() * 100; // Random horizontal position
+            const animationDelay = Math.random() * 2; // Random delay up to 2s
+            const duration = 0.7 + Math.random() * 0.5; // Duration between 0.7-1.2s
+            
+            raindrop.style.left = `${left}%`;
+            raindrop.style.animationDelay = `${animationDelay}s`;
+            raindrop.style.animationDuration = `${duration}s`;
+            
+            rainContainer.appendChild(raindrop);
+        }
+        
+        // Add to the stage background
+        const stageBackground = document.getElementById('stage-background');
+        if (stageBackground) {
+            stageBackground.appendChild(rainContainer);
+        } else {
+            document.querySelector('.battle-container').appendChild(rainContainer);
+        }
     }
     
     // Reset the game state
@@ -208,44 +298,59 @@ class StageManager {
     // Load AI characters for the stage
     async loadAICharacters(enemyList) {
         if (!enemyList || !Array.isArray(enemyList)) {
-            console.error('Invalid enemy list for stage');
+            console.error('[StageManager] Invalid enemy list for stage');
             return;
         }
         
         this.gameState.aiCharacters = [];
         let instanceCounter = 0; // Counter for unique IDs
         
+        console.log(`[StageManager] Starting AI character loading. Count: ${enemyList.length}`); // <<< Log start
         for (const enemyInfo of enemyList) {
+            console.log(`[StageManager] Processing enemy: ${enemyInfo.characterId}`); // <<< Log each enemy
             try {
                 // Load character data
                 const charData = await CharacterFactory.loadCharacterData(enemyInfo.characterId);
                 
+                // <<< Log loaded charData >>>
+                console.log(`[StageManager] Loaded charData for ${enemyInfo.characterId}:`, charData ? 'Data OK' : 'Load FAILED', charData);
+
                 if (!charData) {
-                    console.error(`Failed to load AI character: ${enemyInfo.characterId}`);
-                    continue;
+                    console.error(`[StageManager] Failed to load AI character data: ${enemyInfo.characterId}`);
+                    continue; // Skip this character if data failed to load
                 }
                 
                 // Apply any stage-specific modifications
                 if (enemyInfo.modifications) {
+                    console.log(`[StageManager] Applying modifications to ${enemyInfo.characterId}`);
                     this.applyCharacterModifications(charData, enemyInfo.modifications);
                 }
                 
-                // Create the character
-                const character = CharacterFactory.createCharacter(charData);
-                character.isAI = true;
-                // Assign a unique instance ID
-                character.instanceId = `${character.id}-${instanceCounter++}`;
-                console.log(`Assigned instance ID: ${character.instanceId} to ${character.name}`);
+                // <<< Log before calling createCharacter >>>
+                console.log(`[StageManager] Calling CharacterFactory.createCharacter for ${enemyInfo.characterId}`);
+                const character = await CharacterFactory.createCharacter(charData);
                 
-                // Add to AI characters
+                // <<< Log after calling createCharacter >>>
+                if (!character) {
+                    console.error(`[StageManager] CharacterFactory.createCharacter returned null/falsy for ${enemyInfo.characterId}`);
+                    continue; // Skip if creation failed
+                }
+                console.log(`[StageManager] CharacterFactory.createCharacter call completed for ${enemyInfo.characterId}. Resulting passiveHandler: ${character.passiveHandler ? character.passiveHandler.constructor.name : 'NULL'}`);
+
+
+                character.isAI = true;
+                character.instanceId = `${character.id}-${instanceCounter++}`;
+                console.log(`[StageManager] Assigned instance ID: ${character.instanceId} to ${character.name}`);
+                
                 this.gameState.aiCharacters.push(character);
                 
             } catch (error) {
-                console.error(`Error loading AI character ${enemyInfo.characterId}:`, error);
+                // <<< Log errors during the loop >>>
+                console.error(`[StageManager] Error loading AI character ${enemyInfo.characterId} inside loop:`, error);
             }
         }
         
-        console.log(`Loaded ${this.gameState.aiCharacters.length} AI characters for stage`);
+        console.log(`[StageManager] Loaded ${this.gameState.aiCharacters.length} AI characters for stage`);
     }
     
     // Load player characters
@@ -284,6 +389,21 @@ class StageManager {
         this.gameState.playerCharacters = [];
         let playerInstanceCounter = 0; // Counter for unique player instance IDs
 
+        // --- NEW: Fetch all selected talents for the team first ---
+        let allSelectedTalents = {};
+        const userId = getCurrentUserId();
+        if (userId) {
+            try {
+                const talentsRef = firebaseDatabase.ref(`users/${userId}/characterTalents`);
+                const snapshot = await talentsRef.once('value');
+                allSelectedTalents = snapshot.val() || {};
+                console.log("[StageManager] Fetched selected talents for user:", JSON.stringify(allSelectedTalents)); // Log fetched data
+            } catch (error) {
+                console.error("[StageManager] Error fetching selected talents from Firebase:", error);
+            }
+        }
+        // --- END NEW ---
+
         for (const charId of characterIds) {
             try {
                 // Get saved state only if we are NOT using default state
@@ -296,8 +416,18 @@ class StageManager {
                     continue;
                 }
 
-                // Create the character
-                const character = CharacterFactory.createCharacter(charData);
+                // --- MODIFIED: Pass selected talents to createCharacter ---
+                const characterTalentData = allSelectedTalents[charId] || {}; // Get data for this specific character
+                const selectedTalentIds = Object.keys(characterTalentData);
+                console.log(`[StageManager] Raw talent data for ${charId}:`, characterTalentData);
+                console.log(`[StageManager] Passing ${selectedTalentIds.length} selected talents for ${charId} to CharacterFactory:`, selectedTalentIds);
+                const character = await CharacterFactory.createCharacter(charData, selectedTalentIds);
+                // --- END MODIFICATION ---
+
+                if (!character) {
+                     console.error(`[StageManager] CharacterFactory returned null/falsy for player ${charId}. Skipping.`);
+                     continue;
+                }
 
                 // --- NEW: Assign unique instanceId to player character --- 
                 character.instanceId = `${character.id}-player-${playerInstanceCounter++}`;
@@ -379,6 +509,19 @@ class StageManager {
                     character.stats.currentHp = character.stats.maxHp;
                     character.stats.currentMana = character.stats.maxMana;
                      console.log(`Initialized ${character.name} with full HP/Mana as no valid state was provided.`);
+                }
+
+                // Apply character talents if TalentManager is available
+                if (window.talentManager && character) {
+                    try {
+                        // Load and apply talents for this character
+                        await character.loadTalents();
+                        
+                        // Log talent application
+                        console.log(`Applied talents for ${character.name}`);
+                    } catch (error) {
+                        console.error(`Error applying talents for ${character.id}:`, error);
+                    }
                 }
 
                 // Add to player characters

@@ -1,0 +1,73 @@
+{
+    "id": "farmer_fang",
+    "name": "Farmer FANG",
+    "image": "Loading Screen/Farmer FANG.png",
+    "stats": {
+        "physicalDamage": 50,
+        "magicalDamage": 505,
+        "armor": 10,
+        "magicalShield": 12,
+        "hp": 22900,
+        "hpPerTurn": 0,
+        "mana": 10000,
+        "manaPerTurn": 100,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.0,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "fang_use_potion",
+            "name": "Use Potion",
+            "type": "heal",
+            "manaCost": 0,
+            "cooldown": 4,
+            "targetType": "self",
+            "healAmount": 1550,
+            "description": "Farmer FANG drinks a potent potion, healing himself for 1550 HP.",
+            "icon": "Icons/abilities/use_potion.jpeg"
+        },
+        {
+            "id": "fang_carrot_powerup",
+            "name": "Carrot Power-up",
+            "type": "buff",
+            "manaCost": 0,
+            "cooldown": 5,
+            "targetType": "all_allies_except_self",
+            "buffDuration": 3,
+            "description": "Farmer FANG empowers all allies with magical carrots, increasing their overall damage by 50% for 3 turns.",
+            "icon": "Icons/abilities/carrot_power_up_fang.webp",
+            "buffEffects": {
+                "damageMultiplier": 0.5
+            }
+        },
+        {
+            "id": "fang_corn_powerup",
+            "name": "Corn Power Up",
+            "type": "buff",
+            "manaCost": 0,
+            "cooldown": 4,
+            "targetType": "all_allies",
+            "description": "Removes all debuffs from all allies.",
+            "icon": "Icons/abilities/corn_power_up.webp"
+        },
+        {
+            "id": "fang_plant_trick",
+            "name": "Plant Trick",
+            "type": "debuff",
+            "manaCost": 0,
+            "cooldown": 4,
+            "targetType": "enemy",
+            "description": "Disables all abilities of a random enemy for 3 turns.",
+            "icon": "Icons/abilities/plant_trick.webp"
+        }
+    ],
+    "passive": {
+        "id": "fang_full_heal_ally",
+        "name": "Full Heal Ally",
+        "description": "At the start of the turn, Farmer FANG fully heals a random ally (excluding himself).",
+        "icon": "Icons/passives/fang_full_heal_ally.png"
+    }
+} 

@@ -1,0 +1,38 @@
+{
+    "id": "angry_apple",
+    "name": "Angry Apple",
+    "image": "Loading Screen/Angry Apple.webp",
+    "stats": {
+        "physicalDamage": 280,
+        "magicalDamage": 0,
+        "armor": 10,
+        "magicalShield": 22,
+        "hp": 4000,
+        "hpPerTurn": 0,
+        "mana": 1000,
+        "manaPerTurn": 50,
+        "lifesteal": 0,
+        "dodgeChance": 0.0,
+        "critChance": 0.0,
+        "critDamage": 0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "angry_apple_vine_whip",
+            "name": "Vine Whip",
+            "type": "custom",
+            "manaCost": 40,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 300 + (125% Physical damage) to the target and disables one of their abilities for two turns.",
+            "icon": "Icons/abilities/vine_whip.png"
+        }
+    ],
+    "passive": {
+        "id": "angry_apple_final_fury",
+        "name": "Final Fury",
+        "description": "Upon death, permanently increases all allies' Physical and Magical Damage by 200%.",
+        "icon": "Icons/passives/angry_apple_final_fury.png"
+    }
+} 

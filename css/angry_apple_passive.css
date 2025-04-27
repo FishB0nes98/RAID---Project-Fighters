@@ -1,0 +1,83 @@
+/* Styles for Angry Apple Passive */
+
+.final-fury-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle, rgba(255,50,0,0.3) 0%, rgba(255,0,0,0) 70%);
+    animation: final-fury-pulse 2s ease-out forwards;
+}
+
+.final-fury-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    background-image: url('../img/vfx/flame-burst.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+    animation: final-fury-grow 1.5s ease-out forwards;
+}
+
+.final-fury-vfx::after {
+    content: '⚔️';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 40px;
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    animation: final-fury-icon 1.5s ease-out forwards;
+}
+
+@keyframes final-fury-pulse {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes final-fury-grow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    40% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes final-fury-icon {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+} 

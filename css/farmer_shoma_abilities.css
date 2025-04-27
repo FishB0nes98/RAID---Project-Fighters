@@ -561,4 +561,297 @@
 @keyframes afterimageFade {
     0% { opacity: 0.4; transform: translateX(0); }
     100% { opacity: 0; transform: translateX(20px); }
+}
+
+/* Mana Restoration VFX for Cottage Run */
+.cottage-run-mana-vfx {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 100, 255, 0.6) 0%, rgba(50, 80, 255, 0.3) 50%, transparent 80%);
+    box-shadow: 0 0 20px rgba(50, 100, 255, 0.7), inset 0 0 15px rgba(100, 150, 255, 0.6);
+    animation: manaRestoreGlow 1.5s forwards;
+    z-index: 3;
+    pointer-events: none;
+}
+
+@keyframes manaRestoreGlow {
+    0% { opacity: 0; transform: scale(0.8); }
+    40% { opacity: 0.9; transform: scale(1.15); }
+    80% { opacity: 0.6; transform: scale(1.3); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+.mana-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 4;
+    transform: scale(1.2);
+}
+
+.mana-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgba(80, 130, 255, 0.8);
+    border-radius: 50%;
+    filter: blur(2px);
+    animation: manaParticleFloat 1.8s ease-out forwards;
+    box-shadow: 0 0 8px rgba(100, 150, 255, 0.8);
+}
+
+.mana-particle::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(150, 200, 255, 0.7);
+    filter: blur(1px);
+    transform: scale(0.6);
+}
+
+.mana-particle:nth-child(odd) {
+    background: rgba(50, 100, 240, 0.8);
+}
+
+@keyframes manaParticleFloat {
+    0% { 
+        transform: translate(calc(50% + 20px * var(--rx, 0)), calc(50% + 20px * var(--ry, 0))) scale(0.5);
+        opacity: 0;
+    }
+    20% { 
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(calc(50% + 80px * var(--rx, 0)), calc(50% + -100px * var(--ry, 0))) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Added blue flash for the mana restore */
+.cottage-run-mana-effect {
+    animation: manaFlash 0.8s forwards;
+}
+
+@keyframes manaFlash {
+    0% { filter: brightness(1); }
+    30% { filter: brightness(1.3) hue-rotate(-60deg); }
+    70% { filter: brightness(1.2) hue-rotate(-30deg); }
+    100% { filter: brightness(1); }
+}
+
+/* Bountiful Harvest AOE Effect */
+.bountiful-harvest-vfx {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 220, 120, 0.5) 0%, rgba(255, 180, 0, 0.3) 30%, transparent 70%);
+    box-shadow: 0 0 30px rgba(255, 220, 0, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.5);
+    animation: bountyPulse 1.5s forwards;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes bountyPulse {
+    0% { opacity: 0; transform: scale(0.2); }
+    30% { opacity: 0.8; transform: scale(1.2); }
+    70% { opacity: 0.5; transform: scale(1.5); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+.bountiful-harvest-trail {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 6;
+}
+
+.bounty-particle {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: rgba(255, 220, 0, 0.7);
+    border-radius: 50%;
+    filter: blur(2px);
+    box-shadow: 0 0 8px rgba(255, 180, 0, 0.7);
+    animation: bountyParticle 1.2s ease-out forwards;
+}
+
+@keyframes bountyParticle {
+    0% {
+        transform: translate(50%, 50%) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(var(--tx, 0), var(--ty, 0)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Special effect message styling */
+.log-entry.special-effect {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+    color: #ffd700;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    border-left: 3px solid #ffd700;
+    animation: specialPulse 2s infinite;
+}
+
+.log-entry.special-effect::before {
+    content: "✨";
+    margin-right: 5px;
+}
+
+@keyframes specialPulse {
+    0% { background-color: rgba(255, 215, 0, 0.1); }
+    50% { background-color: rgba(255, 215, 0, 0.2); }
+    100% { background-color: rgba(255, 215, 0, 0.1); }
+}
+
+/* Critical Nourishment Talent Effect */
+.critical-nourishment-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    animation: criticalNourishmentPulse 0.8s ease-out;
+}
+
+@keyframes criticalNourishmentPulse {
+    0% {
+        box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 30px 15px rgba(255, 215, 0, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0);
+    }
+}
+
+.critical-nourishment-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 16;
+    overflow: hidden;
+}
+
+.critical-nourishment-particles::before,
+.critical-nourishment-particles::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, rgba(255, 215, 0, 0) 70%),
+        radial-gradient(circle, rgba(120, 255, 120, 0.6) 10%, rgba(120, 255, 120, 0) 70%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transform: scale(0.2);
+    animation: criticalNourishmentGlow 1.5s ease-out;
+}
+
+.critical-nourishment-particles::before {
+    background-size: 50% 50%, 70% 70%;
+    background-position: center center, center center;
+    animation-delay: 0.1s;
+}
+
+.critical-nourishment-particles::after {
+    background-size: 40% 40%, 60% 60%;
+    background-position: center center, center center;
+    animation-delay: 0.3s;
+}
+
+@keyframes criticalNourishmentGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+/* Add sparkle particles for critical nourishment */
+.critical-nourishment-vfx::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 15%),
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 15%),
+        radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 15%),
+        radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 15%);
+    background-size: 30% 30%;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: criticalSparkles 1.5s ease-out;
+}
+
+@keyframes criticalSparkles {
+    0% {
+        opacity: 0;
+        transform: scale(0.2) rotate(0deg);
+    }
+    30% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5) rotate(15deg);
+    }
+}
+
+/* Special effect for battle log entries */
+.log-entry.special-effect {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(120, 255, 120, 0.1), rgba(255, 215, 0, 0.1));
+    border-left: 3px solid gold;
+    animation: specialPulse 2s infinite;
+}
+
+.log-entry.special-effect::before {
+    content: '✨';
+    margin-right: 5px;
+}
+
+@keyframes specialPulse {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 } 

@@ -1,0 +1,18 @@
+{
+    "id": "mutated_animals_ranch",
+    "name": "Mutated Animals Ranch",
+    "description": "The ranch animals have been horribly mutated! Survive the onslaught.",
+    "difficulty": 2,
+    "backgroundImage": "images/stages/farmstage2.jpeg",
+    "backgroundMusic": "sounds/farmstage2.mp3",
+    "enemies": [
+        { "characterId": "angry_pig" },
+        { "characterId": "angry_chicken" },
+        { "characterId": "angry_bull" }
+    ],
+    "rewards": [
+        { "type": "xp", "value": 150, "chance": 1.0 },
+        { "type": "gold", "value": 75, "chance": 0.8 }
+    ],
+    "modifiers": []
+} 

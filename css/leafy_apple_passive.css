@@ -1,0 +1,173 @@
+/* Styles for Leafy Apple Passive */
+
+.leafy-inheritance-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.35) 0%, rgba(46, 125, 50, 0) 70%);
+    animation: leafy-inheritance-pulse 3s ease-out forwards;
+}
+
+.leafy-inheritance-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 200%;
+    height: 200%;
+    background-image: url('../img/vfx/leaves-spiral.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+    animation: leafy-inheritance-expand 3s ease-out forwards;
+    filter: saturate(1.4) brightness(1.1);
+}
+
+.leafy-inheritance-vfx::after {
+    content: '🍃';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    font-size: 70px;
+    animation: leafy-inheritance-icon 3s ease-out forwards;
+    text-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+.leafy-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(76, 153, 0, 0.6);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(76, 153, 0, 0.4);
+    opacity: 0;
+    animation: leafy-circle 3s ease-out forwards;
+}
+
+.leafy-leaf {
+    position: absolute;
+    width: 20px;
+    height: 30px;
+    background-color: rgba(76, 153, 0, 0.7);
+    border-radius: 50% 0 50% 0;
+    opacity: 0;
+    transform-origin: bottom center;
+    animation: leafy-float 4s ease-out forwards;
+}
+
+.leafy-sparkle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: rgba(150, 230, 100, 0.8);
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(1px);
+    box-shadow: 0 0 2px rgba(150, 230, 100, 1);
+    animation: leafy-sparkle 3s ease-out forwards;
+}
+
+@keyframes leafy-inheritance-pulse {
+    0% {
+        opacity: 0;
+    }
+    25% {
+        opacity: 0.8;
+    }
+    75% {
+        opacity: 0.4;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes leafy-inheritance-expand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    25% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0;
+    }
+}
+
+@keyframes leafy-inheritance-icon {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(-15deg);
+        opacity: 1;
+    }
+    75% {
+        transform: translate(-50%, -50%) scale(1.6) rotate(15deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2) rotate(0deg);
+        opacity: 0;
+    }
+}
+
+@keyframes leafy-circle {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    30% {
+        opacity: 0.8;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes leafy-float {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) rotate(var(--rotation)) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes leafy-sparkle {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) scale(1.5);
+        opacity: 0;
+    }
+} 

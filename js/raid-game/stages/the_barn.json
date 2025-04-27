@@ -1,0 +1,39 @@
+{
+  "id": "the_barn",
+  "name": "The Barn",
+  "description": "You approach the sinister looking barn. Inside, a Crazy Farmer and his Hound are waiting.",
+  "difficulty": 4,
+  "objectives": {
+    "winConditions": [
+      { "type": "allEnemiesDefeated" }
+    ]
+  },
+  "stageEffects": [
+    {
+      "id": "unsanitary_floor",
+      "name": "Unsanitary Floor",
+      "description": "The barn floor is filthy, increasing bleeding damage by 20%.",
+      "icon": "Icons/effects/bleeding_floor.png"
+    }
+  ],
+  "enemies": [
+    {
+      "characterId": "crazy_farmer"
+    },
+    {
+      "characterId": "hound"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 250
+    },
+    {
+      "type": "xp",
+      "value": 120
+    }
+  ],
+  "backgroundImage": "images/stages/the_barn.webp",
+  "backgroundMusic": "sounds/music/barn_battle.mp3"
+} 

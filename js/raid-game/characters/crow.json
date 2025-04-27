@@ -1,0 +1,35 @@
+{
+    "id": "crow",
+    "name": "Crow",
+    "image": "Loading Screen/Crow.webp",
+    "stats": {
+        "physicalDamage": 1000,
+        "magicalDamage": 0,
+        "armor": 0,
+        "magicalShield": 0,
+        "hp": 4950,
+        "hpPerTurn": 0,
+        "mana": 0,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.0,
+        "critChance": 0.00,
+        "critDamage": 1.3,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "crow_peck",
+            "name": "Crow Peck",
+            "type": "damage",
+            "manaCost": 0,
+            "cooldown": 0,
+            "targetType": "enemy",
+            "description": "Deals 555 damage to the target, ignoring armor.",
+            "icon": "Icons/abilities/crow_peck.webp",
+            "damageType": "physical",
+            "fixedDamage": 555,
+            "ignoresArmor": true
+        }
+    ]
+} 

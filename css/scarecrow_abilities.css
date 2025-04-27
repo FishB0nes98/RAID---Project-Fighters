@@ -1,0 +1,310 @@
+/* Scarecrow and Crow Abilities CSS */
+
+/* Crow Spawn VFX */
+.crow-spawn-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.crow-feather {
+    position: absolute;
+    width: 15px;
+    height: 30px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 0%, rgba(40,40,40,0.5) 100%);
+    clip-path: polygon(50% 0%, 90% 40%, 100% 90%, 50% 100%, 0% 90%, 10% 40%);
+    transform-origin: center;
+    opacity: 0;
+    animation: feather-fall 2s var(--delay) ease-out forwards;
+    transform: rotate(var(--angle));
+}
+
+@keyframes feather-fall {
+    0% {
+        opacity: 0;
+        transform: translate(0, -50px) rotate(var(--angle)) scale(0.5);
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(var(--angle) - 180deg), 100px) rotate(calc(var(--angle) + 720deg)) scale(1);
+    }
+}
+
+/* Fear Ability VFX */
+.fear-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.fear-skull {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: fear-pulse 1.5s ease-out forwards;
+}
+
+.fear-skull::before {
+    content: '💀';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    opacity: 0;
+    animation: skull-appear 1.5s ease-out forwards;
+}
+
+.fear-shadow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 70%);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    animation: fear-shadow var(--delay) 1.5s ease-out forwards;
+}
+
+/* Fear effect on the character */
+.character-slot:has(.fear-vfx) .character-image {
+    animation: fear-character-shake 0.5s ease-in-out;
+    filter: grayscale(0.7) brightness(0.7);
+}
+
+/* Apply a special style to the disabled abilities */
+.ability.disabled[data-ability-id^="scarecrow_fear"] {
+    position: relative;
+    background: linear-gradient(rgba(20, 20, 20, 0.7), rgba(0, 0, 0, 0.9));
+    border: 2px solid #641010;
+}
+
+.ability.disabled[data-ability-id^="scarecrow_fear"]::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #ff0000;
+    text-shadow: 0 0 5px black;
+}
+
+@keyframes fear-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.9;
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+@keyframes skull-appear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(30deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2) rotate(0deg);
+    }
+    70% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5) rotate(-30deg);
+    }
+}
+
+@keyframes fear-shadow {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes fear-character-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+
+/* ADD Evasive Stance VFX */
+.evasive-stance-vfx {
+    position: absolute;
+    bottom: 5px; /* Position near the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 30px; /* Adjust height as needed */
+    border-radius: 15px;
+    pointer-events: none;
+    z-index: 4; /* Below status icons maybe */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.5s ease-in-out;
+}
+
+.evasive-stance-vfx.active {
+    opacity: 1;
+    background: linear-gradient(to right, rgba(50, 50, 50, 0.4), rgba(100, 100, 100, 0.6), rgba(50, 50, 50, 0.4));
+    animation: evasiveShimmer 2s linear infinite;
+}
+
+.evasive-stance-vfx span {
+    font-size: 20px;
+    animation: windGust 1.5s infinite ease-in-out;
+}
+
+@keyframes evasiveShimmer {
+    0% { background-position: -100px 0; }
+    100% { background-position: 100px 0; }
+}
+
+@keyframes windGust {
+    0%, 100% { transform: translateX(0) scale(1); opacity: 0.8; }
+    50% { transform: translateX(5px) scale(1.1); opacity: 1; }
+}
+/* --- End Evasive Stance VFX --- */
+
+/* Crow Peck VFX */
+.crow-peck-container {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.crow-peck-vfx {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+}
+
+.crow-peck-slash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 4px;
+    background: #000;
+    transform: translate(-50%, -50%) rotate(var(--rotation));
+    transform-origin: center;
+    opacity: 0;
+    animation: slash-appear 0.5s var(--delay) ease-out forwards;
+}
+
+.crow-peck-slash::before,
+.crow-peck-slash::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 3px;
+    background: inherit;
+}
+
+.crow-peck-slash::before {
+    right: 0;
+    transform: rotate(30deg);
+    transform-origin: right;
+}
+
+.crow-peck-slash::after {
+    right: 0;
+    transform: rotate(-30deg);
+    transform-origin: right;
+}
+
+@keyframes slash-appear {
+    0% {
+        opacity: 0;
+        width: 0;
+    }
+    10% {
+        opacity: 1;
+        width: 0;
+    }
+    50% {
+        width: 70px;
+    }
+    100% {
+        opacity: 0;
+        width: 70px;
+    }
+}
+
+.crow-peck-damage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #f00;
+    text-shadow: 1px 1px 2px #000;
+    transform: translate(-50%, -50%);
+    animation: damage-float 1.2s ease-out forwards;
+}
+
+@keyframes damage-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -70%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -120%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -150%) scale(0.8);
+    }
+} 

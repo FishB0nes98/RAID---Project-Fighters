@@ -1,44 +1,40 @@
 {
     "id": "farmer_cham_cham",
     "name": "Farmer Cham Cham",
-    "image": "images/characters/farmer_cham_cham.png",
+    "image": "Loading Screen/Farmer Cham Cham.png",
     "stats": {
-        "physicalDamage": 80,
-        "magicalDamage": 10,
-        "armor": 5,
-        "magicalShield": 2,
-        "hp": 4500,
-        "hpPerTurn": 10,
-        "mana": 500,
-        "manaPerTurn": 20,
+        "physicalDamage": 205,
+        "magicalDamage": 0,
+        "armor": 12,
+        "magicalShield": 8,
+        "hp": 8400,
+        "hpPerTurn": 0,
+        "mana": 1200,
+        "manaPerTurn": 0,
         "lifesteal": 0,
         "dodgeChance": 0.1,
-        "critChance": 0.15,
+        "critChance": 0.1,
         "critDamage": 1.6,
         "healingPower": 0.0
     },
     "abilities": [
         {
-            "id": "farmer_scratch",
-            "name": "Scratch (Farmer)",
-            "type": "damage",
-            "manaCost": 10,
-            "cooldown": 0,
-            "targetType": "enemy",
-            "description": "Scratches the target with farming tools, dealing 120% Physical Damage.",
-            "icon": "Icons/abilities/farmer_scratch.png",
-            "effects": {
-                "damage": {
-                    "physicalDamagePercent": 1.20
-                }
-            }
+            "id": "farmer_scratch"
+        },
+        {
+            "id": "farmer_leap"
+        },
+        {
+            "id": "farmer_boomerang"
+        },
+        {
+            "id": "farmer_feral_strike"
         }
-        // Add more abilities later
     ],
     "passive": {
         "id": "farmer_lifesteal",
         "name": "Farmer's Resilience",
-        "description": "Every 5th turn, gains a temporary 5% Lifesteal buff for that turn.",
+        "description": "Every 5th turn, permanently gains 5% Lifesteal.",
         "icon": "Icons/passives/farmer_lifesteal.png"
     }
 } 

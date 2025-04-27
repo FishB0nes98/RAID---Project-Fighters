@@ -1105,6 +1105,30 @@
         .finish-run-button:hover {
             background-color: #ff6f60; /* Lighter red */
         }
+
+        /* NEW: Talents Button Styling */
+        .talents-button {
+            display: block; /* Make it block to take full width */
+            width: calc(100% - 10px); /* Adjust width as needed */
+            margin: 8px auto 0; /* Add some top margin, center horizontally */
+            padding: 5px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            background-color: rgba(255, 152, 0, 0.1);
+            border: 1px solid var(--accent-dark);
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .talents-button:hover {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--accent-dark);
+            box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+        }
+        /* END NEW */
     </style>
 </head>
 <body>
@@ -1665,11 +1689,17 @@
                     <div class="character-info">
                         <div class="character-name">${character.name}</div>
                         <div class="character-tags">${tagElements}</div>
+                         <button class="talents-button" data-char-id="${character.id}">Talents</button> 
                     </div>
                 `;
                 
-                card.addEventListener('click', () => {
-                    // NEW: Prevent selecting locked characters
+                // Add click listener for character selection
+                card.addEventListener('click', (e) => {
+                    // Prevent selection if the talents button was clicked
+                     if (e.target.classList.contains('talents-button')) {
+                         return;
+                     }
+                    
                     if (card.classList.contains('locked')) {
                         showTooltip('You do not own this character.');
                         return;
@@ -1678,6 +1708,17 @@
                         selectCharacter(character);
                     }
                 });
+                
+                // Add click listener for the Talents button
+                 const talentsButton = card.querySelector('.talents-button');
+                 if (talentsButton) {
+                     talentsButton.addEventListener('click', (e) => {
+                         e.stopPropagation(); // Prevent card selection click
+                         
+                         // Redirect to talents page with character ID
+                         window.location.href = `talents.html?character=${character.id}`;
+                     });
+                 }
                 
                 return card;
             }

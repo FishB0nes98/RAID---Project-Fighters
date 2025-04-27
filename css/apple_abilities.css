@@ -1,0 +1,237 @@
+/* Apple Abilities CSS
+ * Contains visual effects for all apple character abilities
+ */
+
+/* --- Angry Apple: Vine Whip --- */
+.vine-whip-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    background: linear-gradient(45deg, transparent 45%, rgba(0, 128, 0, 0.6) 50%, transparent 55%);
+    animation: vine-whip-slash 0.6s ease-out forwards;
+}
+
+.vine-whip-vfx::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(-45deg, transparent 45%, rgba(0, 128, 0, 0.6) 50%, transparent 55%);
+    animation: vine-whip-slash-reverse 0.6s ease-out forwards;
+}
+
+@keyframes vine-whip-slash {
+    0% { clip-path: polygon(0 0, 0 0, 0 0); }
+    100% { clip-path: polygon(0 0, 100% 0, 100% 100%); }
+}
+
+@keyframes vine-whip-slash-reverse {
+    0% { clip-path: polygon(100% 100%, 100% 100%, 100% 100%); }
+    100% { clip-path: polygon(0 100%, 100% 0, 0 0); }
+}
+
+/* --- Healthy Apple: Knock --- */
+.knock-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 5%, transparent 70%);
+    animation: knock-pulse 0.6s ease-out forwards;
+}
+
+.knock-vfx::before {
+    content: '💥';
+    position: absolute;
+    font-size: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: knock-impact 0.6s ease-out forwards;
+}
+
+@keyframes knock-pulse {
+    0% { opacity: 0; transform: scale(0.1); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.2); }
+}
+
+@keyframes knock-impact {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+.shake-animation {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* --- Monster Apple: Scythe Slash --- */
+.scythe-slash-cast-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(139, 0, 0, 0.2) 0%, transparent 70%);
+    animation: scythe-cast-pulse 0.8s ease-out forwards;
+}
+
+.scythe-slash-impact-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.scythe-slash-impact-vfx::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 2px;
+    background-color: rgba(139, 0, 0, 0.8);
+    top: 50%;
+    left: -50%;
+    transform: rotate(30deg);
+    box-shadow: 0 0 10px 3px rgba(139, 0, 0, 0.6);
+    animation: scythe-slash 0.3s ease-out forwards;
+}
+
+.scythe-slash-impact-vfx::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 2px;
+    background-color: rgba(139, 0, 0, 0.8);
+    top: 50%;
+    left: -50%;
+    transform: rotate(-30deg);
+    box-shadow: 0 0 10px 3px rgba(139, 0, 0, 0.6);
+    animation: scythe-slash 0.3s ease-out 0.1s forwards;
+}
+
+@keyframes scythe-cast-pulse {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes scythe-slash {
+    0% { opacity: 0; width: 0; left: 50%; }
+    100% { opacity: 1; width: 200%; left: -50%; }
+}
+
+/* --- Leafy Apple: Heal Up --- */
+.heal-up-cast-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.3) 0%, transparent 70%);
+    animation: heal-cast-pulse 1s ease-out forwards;
+}
+
+.heal-up-target-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.heal-up-target-vfx::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: 0;
+    left: -50%;
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.5) 0%, transparent 70%);
+    animation: heal-target-pulse 1.2s ease-out forwards;
+}
+
+/* Reuse existing heal-vfx class from main CSS */
+
+@keyframes heal-cast-pulse {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes heal-target-pulse {
+    0% { opacity: 0; transform: scale(0.5); }
+    40% { opacity: 0.8; transform: scale(0.9); }
+    100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* --- Rotten Apple: Rot Spit --- */
+.rot-spit-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.rot-spit-vfx::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle, rgba(128, 96, 0, 0.7) 0%, rgba(139, 69, 19, 0.4) 40%, transparent 70%);
+    animation: rot-spit-splash 0.8s ease-out forwards;
+}
+
+.rot-spit-vfx::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: 
+        radial-gradient(circle at 30% 30%, rgba(128, 96, 0, 0.7) 0%, transparent 15%),
+        radial-gradient(circle at 70% 40%, rgba(128, 96, 0, 0.7) 0%, transparent 15%),
+        radial-gradient(circle at 40% 70%, rgba(128, 96, 0, 0.7) 0%, transparent 15%),
+        radial-gradient(circle at 60% 60%, rgba(128, 96, 0, 0.7) 0%, transparent 15%);
+    animation: rot-spit-drips 1s ease-out forwards;
+}
+
+@keyframes rot-spit-splash {
+    0% { opacity: 0; transform: scale(0.3); }
+    60% { opacity: 0.8; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes rot-spit-drips {
+    0% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+    40% { opacity: 1; transform: scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: scale(1.2) rotate(10deg); }
+} 

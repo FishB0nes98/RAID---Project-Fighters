@@ -1,0 +1,38 @@
+{
+    "id": "angry_chicken",
+    "name": "Angry Chicken",
+    "image": "Loading Screen/Angry Chicken.jpeg",
+    "stats": {
+        "physicalDamage": 150,
+        "magicalDamage": 0,
+        "armor": 10,
+        "magicalShield": 5,
+        "hp": 6000,
+        "hpPerTurn": 0,
+        "mana": 100,
+        "manaPerTurn": 20,
+        "lifesteal": 0.0,
+        "dodgeChance": 0.15,
+        "critChance": 0.10,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "angry_chicken_double_stab",
+            "name": "Double Stab",
+            "type": "custom",
+            "manaCost": 20,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 500 physical damage twice, reducing the target's armor by 15% for 2 turns.",
+            "icon": "Icons/abilities/double_stab.webp"
+        }
+    ],
+    "passive": {
+        "id": "angry_chicken_dodge_gain",
+        "name": "Dodge Gain",
+        "description": "Gains 1% dodge chance each turn.",
+        "icon": "Icons/passives/dodge_gain.webp"
+    }
+} 

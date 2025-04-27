@@ -5,9 +5,38 @@ class FarmerShomaCharacter extends Character {
     constructor(id, name, image, stats) {
         super(id, name, image, stats);
         
+        // Default values that can be overridden by talents
+        this.stunChance = 0.35; // Default stun chance for Home Run Smash
+        this.dodgeBoost = 0.5;  // Default dodge boost for Farmer's Catch
+        this.critBoost = 0.7;   // Default crit boost from passive after turn 20
+        this.passiveCritBoostValue = 0.7; // Default passive boost value
+        this.passiveTriggerTurn = 20; // Default turn for passive trigger
+        
         // Initialize passive tracking
         this.isPassiveCritBoosted = false;
         this.createPassiveIndicator();
+        
+        this.passiveCritBoostTriggered = false;
+        
+        // Track when critical hits occur
+        this.critHitListener = this.onCriticalHit.bind(this);
+        document.addEventListener('criticalHit', this.critHitListener);
+        
+        // Initialize listeners for passive
+        const turnEndListener = (event) => {
+            const currentTurn = event.detail.turn;
+            this.checkPassiveCritBoost(currentTurn);
+        };
+        
+        // Add listener for turn end
+        document.addEventListener('turnEnd', turnEndListener);
+        
+        // Clean up listener when character is destroyed
+        this.cleanupFunctions = this.cleanupFunctions || [];
+        this.cleanupFunctions.push(() => {
+            document.removeEventListener('turnEnd', turnEndListener);
+            document.removeEventListener('criticalHit', this.critHitListener);
+        });
     }
     
     // Method to create the passive indicator
@@ -32,7 +61,7 @@ class FarmerShomaCharacter extends Character {
                     const indicator = document.createElement('div');
                     indicator.className = 'shoma-passive-indicator';
                     indicator.innerHTML = `
-                        <span>${this.isPassiveCritBoosted ? '70%' : '50%'} Crit</span>
+                        <span>${this.passiveCritBoostValue * 100}% Crit</span>
                     `;
                     charElement.appendChild(indicator);
                 }
@@ -55,7 +84,7 @@ class FarmerShomaCharacter extends Character {
             // Update indicator value
             const valueSpan = indicator.querySelector('span');
             if (valueSpan) {
-                valueSpan.textContent = `${this.isPassiveCritBoosted ? '70%' : '50%'} Crit`;
+                valueSpan.textContent = `${this.passiveCritBoostValue * 100}% Crit`;
                 
                 // Add animation class
                 indicator.classList.add('updated');
@@ -80,27 +109,34 @@ class FarmerShomaCharacter extends Character {
         
         // Only log once every 5 turns to avoid spam
         if (actualTurn % 5 === 0 || actualTurn === 20) {
-            logFunction(`${this.name}'s Farming Experience: Turn ${actualTurn}/20`, 'passive-check');
+            logFunction(`${this.name}'s Farming Experience: Turn ${actualTurn}/${this.passiveTriggerTurn}`, 'passive-check');
         }
         
-        if (actualTurn >= 20 && !this.isPassiveCritBoosted) {
+        if (actualTurn >= this.passiveTriggerTurn && !this.isPassiveCritBoosted) {
             // Apply crit chance boost at turn 20
             this.isPassiveCritBoosted = true;
-            this.stats.critChance = 0.7; // 70% crit chance
+            this.stats.critChance = this.passiveCritBoostValue;
             
             // Update UI
             this.updatePassiveIndicator();
             
             // Log the passive activation with prominent styling
-            logFunction(`★★★ ${this.name}'s Farming Experience reaches full potential! Crit chance increased to 70%! ★★★`, 'passive-effect critical');
+            logFunction(`★★★ ${this.name}'s Farming Experience reaches full potential! Crit chance increased to ${this.passiveCritBoostValue * 100}%! ★★★`, 'passive-effect critical');
             
+            // --- Update passive description --- 
+            if (this.passive) { 
+                 this.passive.description = `You start with 50% crit chance, increased to ${this.passiveCritBoostValue * 100}% after turn 20.`;
+                 console.log(`Updated ${this.name}'s passive description upon activation.`);
+            }
+            // ------------------------------------
+
             // Create passive activation VFX
             const charElement = document.getElementById(`character-${this.id}`);
             if (charElement) {
                 // Create a more prominent passive activation effect
                 const passiveVfx = document.createElement('div');
                 passiveVfx.className = 'shoma-passive-boost-vfx';
-                passiveVfx.innerHTML = `<span>Crit Boost 70%!</span>`;
+                passiveVfx.innerHTML = `<span>Crit Boost ${this.passiveCritBoostValue * 100}%!</span>`;
                 charElement.appendChild(passiveVfx);
                 
                 // Add a full-character highlight effect
@@ -116,15 +152,122 @@ class FarmerShomaCharacter extends Character {
             }
         }
     }
+    
+    // New method to handle critical hits
+    onCriticalHit(event) {
+        // Only process if the character who scored the crit is Farmer Shoma
+        if (event.detail && event.detail.source && event.detail.source.id === this.id) {
+            console.log(`[Farmer Shoma] Critical hit detected from ${this.name}`);
+            
+            // Check if we have the Critical Nourishment talent
+            if (this.criticalHealProc && this.criticalHealProc > 0) {
+                console.log(`[Farmer Shoma] Critical Nourishment talent active, healing for ${this.criticalHealProc}`);
+                
+                // Get gameManager for proper functions and game state
+                const gameManager = window.gameManager;
+                if (!gameManager) {
+                    console.warn('[Farmer Shoma] Could not access gameManager for critical heal proc');
+                    return;
+                }
+                
+                // Heal self
+                this.heal(this.criticalHealProc, this);
+                gameManager.addLogEntry(`${this.name}'s Critical Nourishment heals himself for ${this.criticalHealProc} HP!`, 'heal special-effect');
+                
+                // Find a random ally to heal (excluding self)
+                const allies = gameManager.getAllies(this).filter(ally => ally.id !== this.id && !ally.isDead());
+                
+                if (allies.length > 0) {
+                    // Pick a random ally
+                    const randomAlly = allies[Math.floor(Math.random() * allies.length)];
+                    
+                    // Heal the random ally
+                    randomAlly.heal(this.criticalHealProc, this);
+                    gameManager.addLogEntry(`${this.name}'s Critical Nourishment heals ${randomAlly.name} for ${this.criticalHealProc} HP!`, 'heal special-effect');
+                    
+                    // Show healing VFX for both characters
+                    this.showCriticalNourishmentVFX(this);
+                    this.showCriticalNourishmentVFX(randomAlly);
+                } else {
+                    // If no other allies, just show VFX for self
+                    this.showCriticalNourishmentVFX(this);
+                    console.log('[Farmer Shoma] No other allies to heal with Critical Nourishment');
+                }
+                
+                // Update character UI
+                if (typeof updateCharacterUI === 'function') {
+                    updateCharacterUI(this);
+                    allies.forEach(ally => updateCharacterUI(ally));
+                }
+            }
+        }
+    }
+    
+    // Method to show the Critical Nourishment VFX
+    showCriticalNourishmentVFX(character) {
+        const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!charElement) return;
+        
+        // Create VFX container
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'critical-nourishment-vfx';
+        charElement.appendChild(vfxContainer);
+        
+        // Create healing particles
+        const healParticles = document.createElement('div');
+        healParticles.className = 'critical-nourishment-particles';
+        vfxContainer.appendChild(healParticles);
+        
+        // Play healing sound
+        const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+        playSound('sounds/heal.mp3', 0.6);
+        
+        // Remove VFX after animation completes
+        setTimeout(() => {
+            vfxContainer.remove();
+        }, 2000);
+    }
 }
 
 // Register Farmer Shoma's character class with the character factory
 CharacterFactory.registerCharacterClass('farmer_shoma', FarmerShomaCharacter);
 
+// Add a debug function to print the current abilities state
+function debugAbilities(character) {
+    if (!character || !character.abilities) return;
+    
+    console.log(`=== Debug ${character.name}'s Abilities ===`);
+    character.abilities.forEach(ability => {
+        console.log(`Ability: ${ability.id} (${ability.name})`);
+        console.log(`  Cooldown: ${ability.cooldown}`);
+        console.log(`  Mana Cost: ${ability.manaCost}`);
+        if (ability.baseDamage) console.log(`  Base Damage: ${ability.baseDamage}`);
+        if (ability.healAmount) console.log(`  Heal Amount: ${ability.healAmount}`);
+    });
+    console.log('=== End Debug ===');
+}
+
 // Create the Home Run Smash ability effect function
-const homeRunSmashEffect = (caster, target) => {
+const homeRunSmashEffect = (caster, target, ability, actualManaCost, options = {}) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+
+    // --- Determine Base Damage CHECKING TALENT MODIFIERS --- 
+    let baseDamage = 235; // Default base damage
+    if (ability.talentModifiers && ability.talentModifiers.baseDamage !== undefined) {
+        baseDamage = ability.talentModifiers.baseDamage;
+        console.log(`[HomeRunSmash] Using talent-modified base damage: ${baseDamage}`);
+    } else {
+        console.log(`[HomeRunSmash] Using default base damage: ${baseDamage}`);
+    }
+    // --- End Base Damage ---
+    // --- Scaling Bonus Damage ---
+    const scalingPercent = ability.scalingPercent || 0;
+    const scalingBonus = caster.stats.physicalDamage * scalingPercent;
+    if (scalingBonus) {
+        console.log(`[HomeRunSmash] Applying scaling bonus: ${scalingBonus}`);
+    }
+    const totalDamage = baseDamage + scalingBonus;
 
     // --- Caster VFX ---
     const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
@@ -155,8 +298,8 @@ const homeRunSmashEffect = (caster, target) => {
     // Set damage source property correctly on target for critical hit calculation
     target.isDamageSource = caster;
     
-    // Apply fixed damage - 235 damage as specified
-    const result = target.applyDamage(235, 'physical');
+    // Apply damage using the determined baseDamage
+    const result = target.applyDamage(totalDamage, 'physical', caster, options); // Use baseDamage variable, pass caster and options
     
     // Reset damage source
     target.isDamageSource = null;
@@ -165,6 +308,7 @@ const homeRunSmashEffect = (caster, target) => {
     if (result.isCritical) {
         message += " (Critical Hit!)";
     }
+    log(message); // Log the message
     
     // --- Target Impact VFX ---
     const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
@@ -198,7 +342,7 @@ const homeRunSmashEffect = (caster, target) => {
             'farmer_shoma_stun_debuff',
             'Stunned',
             'Icons/debuffs/stun.png',
-            3, // Duration of 3 turns
+            2, // Duration of 2 turns
             null,
             true // Is a debuff
         );
@@ -222,7 +366,7 @@ const homeRunSmashEffect = (caster, target) => {
         
         // Add debuff to target
         target.addDebuff(stunDebuff.clone()); // Clone before adding
-        log(`${target.name} is stunned for 3 turns!`);
+        log(`${target.name} is stunned for 2 turns!`);
 
         // Add stun VFX
         if (targetElement) {
@@ -245,6 +389,7 @@ const homeRunSmashEffect = (caster, target) => {
     // Update UI
     updateCharacterUI(caster);
     updateCharacterUI(target);
+    console.log(`[HomeRunSmash Effect Debug] HP of target (${target.name}) immediately after UI update: ${target.stats.currentHp}`); // <<< ADDED LOG
 };
 
 // Create the Home Run Smash ability object
@@ -255,18 +400,65 @@ const homeRunSmashAbility = new Ability(
     35, // Mana cost
     2,  // Cooldown in turns
     homeRunSmashEffect
-).setDescription('Deals 235 damage and has 35% chance to stun the target for 3 turns.')
- .setTargetType('enemy');
+)
+.setTargetType('enemy');
+
+// Assign relevant properties for description generation
+homeRunSmashAbility.baseDamage = 235; // Set the base damage value
+homeRunSmashAbility.stunChance = 0.35; // Set the stun chance value
+homeRunSmashAbility.scalingPercent = 0; // Default no scaling until talent
+
+// Custom description generation to support talent modifications
+homeRunSmashAbility.generateDescription = function() {
+    let description = `Deals ${this.baseDamage} damage`;
+    
+    // Add scaling info if talent is active
+    if (this.scalingPercent > 0) {
+        description += ` <span class="talent-effect damage">plus ${this.scalingPercent * 100}% of Physical Damage</span>`;
+    }
+    
+    description += ` and has ${this.stunChance * 100}% chance to stun the target for 2 turns.`;
+    
+    this.description = description;
+    return description;
+};
+
+// Generate initial description
+homeRunSmashAbility.generateDescription();
+
+// Add listener for ability modifications to update description
+document.addEventListener('abilityModified', function(event) {
+    if (event.detail && event.detail.abilityId === 'farmer_shoma_q') {
+        console.log('Home Run Smash ability modified, updating description');
+        homeRunSmashAbility.generateDescription();
+    }
+});
 
 // Create the Apple Throw ability effect function
-const appleThrowEffect = (caster, target) => {
+const appleThrowEffect = (caster, target, ability) => {
+    // Debug ability state at the start
+    debugAbilities(caster);
+
+    // Get direct reference to the ability from caster's abilities
+    const abilityReference = caster.abilities.find(a => a.id === 'farmer_shoma_w');
+    if (abilityReference) {
+        console.log(`[AppleThrow Effect] Apple Throw ability found. Cooldown: ${abilityReference.cooldown}`);
+        
+        // If talent system applied a modifier, it should be stored in talentModifiers
+        if (abilityReference.talentModifiers && abilityReference.talentModifiers.cooldown) {
+            console.log(`[AppleThrow Effect] Talent modified cooldown: ${abilityReference.talentModifiers.cooldown} (actual: ${abilityReference.cooldown})`);
+        }
+    }
+    
     const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+    
+    // VFX container for all apple throw effects
+    const vfxContainer = document.createElement('div');
 
     // --- Caster Animation VFX ---
     const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
     if (casterElement) {
-        const vfxContainer = document.createElement('div');
         vfxContainer.className = 'vfx-container apple-throw-caster-vfx';
         casterElement.appendChild(vfxContainer);
 
@@ -283,6 +475,7 @@ const appleThrowEffect = (caster, target) => {
 
         // Play throwing sound
         playSound('sounds/apple_throw.mp3', 0.6); // Example sound
+        playSound('sounds/shoma_apple.mp3', 0.7); // Farmer Shoma W sound
 
         // Remove container and caster animation class
         setTimeout(() => {
@@ -295,69 +488,248 @@ const appleThrowEffect = (caster, target) => {
     // Check if target is an ally or enemy
     const isAlly = caster.isAI === target.isAI;
     
+    // --- TALENT: Apply Nurturing Toss Stacking Buff --- 
+    if (ability && ability.appliesHealingPowerBuff) {
+        // Check if the buff already exists to determine stacks
+        let currentStacks = 1;
+        const existingBuff = caster.buffs.find(buff => buff.id === 'nurturing_toss_buff');
+        if (existingBuff && existingBuff.currentStacks) {
+            currentStacks = Math.min(existingBuff.currentStacks + 1, 5); // Increment but cap at 5
+        }
+        
+        const nurturingBuff = new Effect(
+            'nurturing_toss_buff', // Unique ID for the buff
+            'Nurturing Toss', // Buff name
+            'Icons/buffs/nurturing_toss.png', // Placeholder icon
+            5, // Duration
+            null, // No immediate effect function
+            false // Is a buff
+        );
+
+        // --- Set properties directly on the Effect instance --- 
+        nurturingBuff.stackable = true;
+        nurturingBuff.maxStacks = 5;
+        nurturingBuff.statModifiers = { healingPower: 0.05 * currentStacks }; // 5% per stack
+        nurturingBuff.currentStacks = currentStacks; // Set current stacks
+
+        // Dynamically generate description based on stacks
+        nurturingBuff.updateDescription = function() { // Method to update description
+            const stacks = this.currentStacks || 1;
+            const totalBonus = stacks * 5;
+            this.description = `Increases Healing Power by ${totalBonus}% (${stacks}/${this.maxStacks} stacks).`;
+            return this; // Allow chaining
+        };
+        nurturingBuff.updateDescription();
+
+        // --- Buff Apply/Remove for Stack Indicator ---
+        nurturingBuff.onApply = function(character) {
+            const stackCount = this.currentStacks || 1;
+            
+            // Find and remove any existing indicator
+            const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+            if (charElement) {
+                const existingIndicators = charElement.querySelectorAll('.nurturing-toss-stack-indicator');
+                existingIndicators.forEach(el => el.remove());
+                
+                // Find status container
+                let statusContainer = charElement.querySelector(`.status-container[data-effect-id="nurturing_toss_buff"], 
+                                                                .status-effect-container[data-effect-id="nurturing_toss_buff"]`);
+                
+                if (!statusContainer) {
+                    // Create container if it doesn't exist
+                    statusContainer = document.createElement('div');
+                    statusContainer.className = 'status-container';
+                    statusContainer.dataset.effectId = 'nurturing_toss_buff';
+                    const buffIcon = document.createElement('img');
+                    buffIcon.src = this.icon;
+                    buffIcon.className = 'buff-icon';
+                    buffIcon.alt = this.name;
+                    statusContainer.appendChild(buffIcon);
+                    charElement.querySelector('.buffs').appendChild(statusContainer);
+                }
+                
+                // Add stack indicator
+                const stackIndicator = document.createElement('div');
+                stackIndicator.className = 'nurturing-toss-stack-indicator';
+                stackIndicator.textContent = stackCount;
+                stackIndicator.classList.add('stack-updated'); // Animation class
+                statusContainer.appendChild(stackIndicator);
+                
+                // Add glow effect
+                const glowEffect = document.createElement('div');
+                glowEffect.className = 'nurturing-toss-glow';
+                statusContainer.appendChild(glowEffect);
+                
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    if (stackIndicator.parentNode) { // Check if still exists
+                        stackIndicator.classList.remove('stack-updated');
+                    }
+                }, 600);
+            }
+            
+            const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            logFunction(`${character.name} gains Nurturing Toss buff (${stackCount}/${this.maxStacks} stacks)`, 'buff-effect');
+        };
+        
+        nurturingBuff.remove = function(character) {
+            const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+            if (charElement) {
+                const indicators = charElement.querySelectorAll('.nurturing-toss-stack-indicator, .nurturing-toss-glow');
+                indicators.forEach(indicator => {
+                    indicator.classList.add('effect-fading');
+                    setTimeout(() => {
+                        if (indicator.parentNode) { // Check if still exists
+                            indicator.remove();
+                        }
+                    }, 500);
+                });
+                
+                // Also fade out the container
+                const container = charElement.querySelector(`.status-container[data-effect-id="nurturing_toss_buff"], 
+                                                          .status-effect-container[data-effect-id="nurturing_toss_buff"]`);
+                if (container) {
+                    container.classList.add('effect-fading');
+                    setTimeout(() => {
+                        if (container.parentNode) { // Check if still exists
+                            container.remove();
+                        }
+                    }, 500);
+                }
+            }
+            
+            const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            logFunction(`${character.name}'s Nurturing Toss buff has expired.`, 'effect-expired');
+        };
+        // --- End Buff Apply/Remove ---
+
+        // Add buff to caster
+        caster.addBuff(nurturingBuff);
+        
+        console.log(`[Nurturing Toss] Applied buff with ${currentStacks} stacks`);
+    }
+    // --- END TALENT --- 
+    
     if (isAlly) {
-        // HEAL ALLY
-        // Calculate heal amount
-        const healAmount = 750;
+        // Helper function to apply heal effect to a single ally target
+        const applyHealToAlly = (healTarget) => {
+            // HEAL ALLY
+            // Calculate base heal amount (crit is now handled by target.heal)
+            const healAmount = 750;
+            
+            // Apply healing (pass base amount and caster)
+            const healResult = healTarget.heal(healAmount, caster); // Pass caster for crit check
+            const actualHeal = healResult.healAmount;
+            const isCriticalHeal = healResult.isCritical;
+            
+            // Log the healing (Critical heal log is handled inside target.heal)
+            if (!isCriticalHeal) { // Only log non-critical heals here
+                logFunction(`${caster.name} used Apple Throw to heal ${healTarget.name} for ${Math.round(actualHeal)} health`);
+            }
+            
+            // --- Ally Heal VFX ---
+            const targetElement = document.getElementById(`character-${healTarget.instanceId || healTarget.id}`);
+            if (targetElement) {
+                const healVfxContainer = document.createElement('div');
+                healVfxContainer.className = 'vfx-container apple-heal-vfx-container';
+                targetElement.appendChild(healVfxContainer);
+
+                // Add heal animation class to target element
+                targetElement.classList.add('apple-heal-effect');
+
+                // Create heal VFX elements inside the container
+                const healVfx = document.createElement('div');
+                healVfx.className = 'apple-heal-vfx';
+                healVfxContainer.appendChild(healVfx);
+
+                const healSplash = document.createElement('div');
+                healSplash.className = 'healing-apple-splash';
+                healVfxContainer.appendChild(healSplash);
+
+                // Create healing particles inside the container
+                createHealingParticles(healVfxContainer); // Pass container as parent
+
+                // Play heal sound
+                playSound('sounds/heal_effect.mp3', 0.7); // Example sound
+
+                // Remove container and target animation class
+                setTimeout(() => {
+                    targetElement.classList.remove('apple-heal-effect');
+                    healVfxContainer.remove();
+                }, 1200); // Match animation duration
+            }
+            
+            return actualHeal;
+        };
         
-        // Check for critical heal
-        let finalHealAmount = healAmount;
-        let isCritical = false;
+        // Apply heal to the primary target first
+        const primaryHeal = applyHealToAlly(target);
         
-        if (Math.random() < caster.stats.critChance) {
-            finalHealAmount = Math.floor(healAmount * caster.stats.critDamage);
-            isCritical = true;
+        // --- NEW: Check for AOE ally heal from talent ---
+        let shouldApplyAoe = false;
+        if (ability && ability.allyAoeChance) {
+            // Roll for AOE chance
+            const aoeRoll = Math.random();
+            shouldApplyAoe = aoeRoll <= ability.allyAoeChance;
+            
+            if (shouldApplyAoe) {
+                // Get game manager if available
+                const gameManager = window.gameManager;
+                
+                if (gameManager) {
+                    // Get all allies except the primary target
+                    const allAllies = caster.isAI ? 
+                                    gameManager.gameState.aiCharacters : 
+                                    gameManager.gameState.playerCharacters;
+                    
+                    const otherAllies = allAllies.filter(ally => 
+                        ally !== target && !ally.isDead());
+                    
+                    if (otherAllies.length > 0) {
+                        // Log the AOE effect proc
+                        logFunction(`${caster.name}'s Bountiful Harvest activates, healing all other allies!`, 'special-effect');
+                        
+                        // Apply VFX for the AOE proc
+                        if (casterElement) {
+                            const aoeVfx = document.createElement('div');
+                            aoeVfx.className = 'bountiful-harvest-vfx';
+                            casterElement.appendChild(aoeVfx);
+                            
+                            setTimeout(() => aoeVfx.remove(), 1500);
+                        }
+                        
+                        // Apply healing to all other allies with a slight delay between each
+                        otherAllies.forEach((ally, index) => {
+                            setTimeout(() => {
+                                applyHealToAlly(ally);
+                            }, 200 * (index + 1)); // Stagger the heal effects
+                        });
+                    }
+                }
+            }
         }
+        // --- END NEW AOE code ---
         
-        // Apply healing
-        const actualHeal = target.heal(finalHealAmount);
-        
-        // Log the healing
-        let message = `${caster.name} used Apple Throw to heal ${target.name} for ${Math.round(actualHeal)} health`;
-        if (isCritical) {
-            message += " (Critical Heal!)";
+        // --- NEW: Handle Caster Heal from Talent --- 
+        if (ability && ability.casterHealPercent) {
+            const casterHealAmount = Math.round(primaryHeal * ability.casterHealPercent);
+            if (casterHealAmount > 0) {
+                const casterHealResult = caster.heal(casterHealAmount, caster); // Caster heals self
+                if (!casterHealResult.isCritical) { // Don't double log criticals
+                     logFunction(`${caster.name} healed themself for ${Math.round(casterHealResult.healAmount)} due to Refreshing Toss talent!`, 'heal talent-effect');
+                }
+                 // Optional: Add caster heal VFX
+                 // showCasterHealVFX(caster, casterHealAmount);
+            }
         }
-        logFunction(message);
-        
-        // --- Ally Heal VFX ---
-        const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
-        if (targetElement) {
-            const vfxContainer = document.createElement('div');
-            vfxContainer.className = 'vfx-container apple-heal-vfx-container';
-            targetElement.appendChild(vfxContainer);
-
-            // Add heal animation class to target element
-            targetElement.classList.add('apple-heal-effect');
-
-            // Create heal VFX elements inside the container
-            const healVfx = document.createElement('div');
-            healVfx.className = 'apple-heal-vfx';
-            vfxContainer.appendChild(healVfx);
-
-            const healSplash = document.createElement('div');
-            healSplash.className = 'healing-apple-splash';
-            vfxContainer.appendChild(healSplash);
-
-            // Create healing particles inside the container
-            createHealingParticles(vfxContainer); // Pass container as parent
-
-            // Play heal sound
-            playSound('sounds/heal_effect.mp3', 0.7); // Example sound
-
-            // Remove container and target animation class
-            setTimeout(() => {
-                targetElement.classList.remove('apple-heal-effect');
-                vfxContainer.remove();
-            }, 1200); // Match animation duration
-        }
-        // --- End Ally Heal VFX ---
+        // --- END NEW ---
     } else {
         // DAMAGE ENEMY
         // Set damage source for crit calculation
         target.isDamageSource = caster;
         
         // Apply damage
-        const result = target.applyDamage(400, 'physical');
+        const result = target.applyDamage(400, 'physical', caster); // Pass caster as the third parameter
         
         // Reset damage source
         target.isDamageSource = null;
@@ -400,75 +772,115 @@ const appleThrowEffect = (caster, target) => {
             }, 900); // Match animation duration
         }
         // --- End Enemy Impact VFX ---
-
+        
         // Apply damage reduction debuff
-        const damageDebuff = new Effect(
-            'apple_splash_debuff',
-            'Apple Splash',
-            'Icons/debuffs/apple_splash.jpeg',
-            4, // Duration of 4 turns
+        const damageReductionDebuff = new Effect(
+            'apple_throw_debuff',
+            'Apple Splatter',
+            'Icons/debuffs/apple_splatter.jpeg',
+            4, // Duration in turns
             null,
             true // Is a debuff
         );
-        
-        // Set damage reduction effect properties
-        damageDebuff.effects = {
-            outgoingDamageModifier: 0.8 // Target deals 80% damage (20% reduction)
+
+        // Set stat modifiers - reduce all damage by 20%
+        damageReductionDebuff.statModifiers = {
+            physicalDamage: -0.2, // -20% physical damage
+            magicalDamage: -0.2,  // -20% magical damage
+            critDamage: -0.2,     // -20% critical damage
         };
         
-        damageDebuff.setDescription('Deals 20% less damage for 4 turns.');
+        damageReductionDebuff.setDescription('Reduces all damage dealt by 20%.');
 
-        // --- Refactored Debuff Apply/Remove for Indicator ---
-        damageDebuff.onApply = function(character) {
+        // Add visual indicator logic
+        damageReductionDebuff.onApply = function(character) {
             const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
             if (charElement) {
-                // Create container for the indicator
-                const indicatorContainer = document.createElement('div');
-                indicatorContainer.className = 'status-indicator-container apple-splash-indicator-container'; // Add specific class
-                indicatorContainer.dataset.debuffId = 'apple_splash_debuff'; // Link to debuff
-                charElement.appendChild(indicatorContainer);
-
-                const debuffIndicator = document.createElement('div');
-                debuffIndicator.className = 'apple-splash-indicator'; // CSS for styling and animation
-                debuffIndicator.innerHTML = '🍎';
-                indicatorContainer.appendChild(debuffIndicator);
-
-                // Add initial splash effect (optional, reuse impact vfx?)
-                // const initialSplash = document.createElement('div');
-                // initialSplash.className = 'apple-impact-vfx';
-                // initialSplash.style.opacity = '0.5';
-                // indicatorContainer.appendChild(initialSplash);
-                // setTimeout(() => initialSplash.remove(), 800);
+                const indicator = document.createElement('div');
+                indicator.className = 'apple-splash-indicator';
+                indicator.innerHTML = '🍎';
+                indicator.dataset.debuffId = 'apple_throw_debuff';
+                charElement.appendChild(indicator);
             }
+            
+            const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            logFunction(`${character.name} is covered in apple juice! (Damage -20% for 4 turns)`, 'debuff-effect');
         };
 
-        damageDebuff.remove = function(character) {
+        damageReductionDebuff.remove = function(character) {
             const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
             if (charElement) {
-                const indicators = charElement.querySelectorAll('.apple-splash-indicator-container[data-debuff-id="apple_splash_debuff"]');
-                indicators.forEach(container => {
-                    const indicator = container.querySelector('.apple-splash-indicator');
-                    if (indicator) {
-                        indicator.style.animation = 'none'; // Stop animation
-                        void indicator.offsetWidth; // Trigger reflow
-                        indicator.style.animation = 'fadeOut 0.5s forwards'; // Apply fade out
-                    }
-                    // Remove the container after fade out
-                    setTimeout(() => container.remove(), 500);
+                const indicators = charElement.querySelectorAll('.apple-splash-indicator[data-debuff-id="apple_throw_debuff"]');
+                indicators.forEach(indicator => {
+                    indicator.style.animation = 'fadeOut 0.5s forwards';
+                    setTimeout(() => indicator.remove(), 500);
                 });
             }
+            
+            const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            logFunction(`${character.name} is no longer affected by Apple Splatter.`, 'effect-expired');
         };
-        // --- End Refactored Debuff Apply/Remove ---
 
-        // Add debuff to target
-        target.addDebuff(damageDebuff.clone()); // Clone before adding
-        logFunction(`${target.name} is affected by Apple Splash and deals 20% less damage for 4 turns!`);
+        // Apply debuff to target
+        target.addDebuff(damageReductionDebuff);
     }
-
-    // Update UI
-    updateCharacterUI(caster);
-    updateCharacterUI(target);
+    
+    // --- Update UI after ability is used ---
+    if (typeof updateCharacterUI === 'function') {
+        updateCharacterUI(caster);
+        updateCharacterUI(target);
+    }
 };
+
+// Create Apple Throw ability object
+const appleThrowAbility = new Ability(
+    'farmer_shoma_w',
+    'Apple Throw',
+    'Icons/abilities/apple_throw.jpeg',
+    45, // Mana cost
+    3,  // Cooldown in turns - THIS IS OVERRIDDEN BY TALENT LATER
+    appleThrowEffect
+)
+.setDescription('If targets ally: Heals {healAmount} health. If targets enemy: Deals {baseDamage} damage and reduces their damage by 20% for 4 turns. Both effects can crit.')
+.setTargetType('any');
+
+// Assign relevant properties for description generation
+appleThrowAbility.baseDamage = 400;
+appleThrowAbility.healAmount = 750;
+appleThrowAbility.baseCooldown = 3; // Store original for reference
+
+// Custom method to generate description based on available talents
+appleThrowAbility.generateDescription = function() {
+    let desc = 'If targets ally: Heals {healAmount} health. If targets enemy: Deals {baseDamage} damage and reduces their damage by 20% for 4 turns. Both effects can crit.';
+    
+    // Check if Nurturing Toss talent is active
+    if (this.appliesHealingPowerBuff) {
+        desc += ' <span class="talent-effect healing">Also grants 5% Healing Power for 5 turns (stacks up to 5 times).</span>';
+    }
+    
+    // Check if Refreshing Toss talent is active
+    if (this.casterHealPercent > 0) {
+        desc += ` <span class="talent-effect healing">Additionally heals yourself for ${this.casterHealPercent * 100}% of the healing done.</span>`;
+    }
+    
+    // Check if Bountiful Harvest talent is active
+    if (this.allyAoeChance > 0) {
+        desc += ` <span class="talent-effect aoe">Has a ${this.allyAoeChance * 100}% chance to affect all allies when used on an ally.</span>`;
+    }
+    
+    this.description = desc
+        .replace('{healAmount}', this.healAmount || 750)
+        .replace('{baseDamage}', this.baseDamage || 400);
+    
+    // Log description change
+    console.log(`[Ability Description] Apple Throw description updated: ${this.description}`);
+        
+    return this;
+};
+
+appleThrowAbility.generateDescription(); // Generate initial description
+
+console.log(`[Abilities] Initialized Apple Throw with base cooldown of ${appleThrowAbility.cooldown}`);
 
 // Helper function to create trail effect for apple throw
 function createAppleTrail(vfxContainer) { // Accept VFX container
@@ -506,13 +918,6 @@ function createAppleTrail(vfxContainer) { // Accept VFX container
             }, 600);
         }, i * 60);
     }
-    
-    // No need to remove trailContainer separately, it gets removed with vfxContainer
-    // setTimeout(() => {
-    //     if (trailContainer.parentNode) {
-    //         trailContainer.remove();
-    //     }
-    // }, 1000);
 }
 
 // Helper function to create healing particles
@@ -546,13 +951,6 @@ function createHealingParticles(vfxContainer) { // Accept VFX container
         
         particlesContainer.appendChild(particle);
     }
-    
-    // No need to remove particlesContainer separately
-    // setTimeout(() => {
-    //     if (particlesContainer.parentNode) {
-    //         particlesContainer.remove();
-    //     }
-    // }, 1500);
 }
 
 // Helper function to create apple splash fragments
@@ -602,28 +1000,10 @@ function createAppleSplashFragments(vfxContainer) { // Accept VFX container
         
         fragmentsContainer.appendChild(fragment);
     }
-    
-    // No need to remove fragmentsContainer separately
-    // setTimeout(() => {
-    //     if (fragmentsContainer.parentNode) {
-    //         fragmentsContainer.remove();
-    //     }
-    // }, 1000);
 }
 
-// Create Apple Throw ability object
-const appleThrowAbility = new Ability(
-    'farmer_shoma_w',
-    'Apple Throw',
-    'Icons/abilities/apple_throw.jpeg',
-    45, // Mana cost
-    3,  // Cooldown in turns
-    appleThrowEffect
-).setDescription('If targets ally: Heals 750 health. If targets enemy: Deals 400 damage and reduces their damage by 20% for 4 turns. Both effects can crit.')
- .setTargetType('any');
-
 // Create the Farmer's Catch ability effect function
-const farmersCatchEffect = (caster, target) => {
+const farmersCatchEffect = (caster, target, ability) => {
     const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
@@ -644,6 +1024,7 @@ const farmersCatchEffect = (caster, target) => {
 
         // Play catch sound
         playSound('sounds/catch.mp3', 0.6); // Example sound
+        playSound('sounds/fshoma_e.mp3', 0.7); // Farmer Shoma E sound
 
         // Remove container and caster animation class
         setTimeout(() => {
@@ -723,26 +1104,14 @@ const farmersCatchEffect = (caster, target) => {
 
     // Add buff to target
     target.addBuff(dodgeBuff.clone()); // Clone before adding
-
     // Log the buff application
     logFunction(`${caster.name} used Farmer's Catch on ${target.name}, increasing their dodge chance by 50% for 5 turns!`);
-
-    // --- Target Buff VFX (Now handled in onApply) ---
-    // const targetElement = document.getElementById(`character-${target.id}`);
-    // if (targetElement) {
-    //     targetElement.classList.add('dodge-buff-effect');
-    //     const dodgeBoostVfx = document.createElement('div');
-    //     dodgeBoostVfx.className = 'dodge-boost-vfx'; // Likely redundant now
-    //     targetElement.appendChild(dodgeBoostVfx);
-    //     createWindEffectParticles(targetElement);
-    //     setTimeout(() => {
-    //         targetElement.classList.remove('dodge-buff-effect');
-    //         // dodgeBoostVfx might not exist or be needed
-    //         const boostVfx = targetElement.querySelector('.dodge-boost-vfx');
-    //         if (boostVfx) boostVfx.remove();
-    //     }, 1200);
-    // }
-    // --- End Target Buff VFX ---
+    // If Shared Strength talent is active, also buff the caster
+    if (ability.buffCaster) {
+        caster.addBuff(dodgeBuff.clone());
+        logFunction(`${caster.name} also gains the dodge buff from Shared Strength talent!`, 'buff-effect');
+        updateCharacterUI(caster);
+    }
 
     // Update UI
     updateCharacterUI(caster);
@@ -797,8 +1166,36 @@ const farmersCatchAbility = new Ability(
     95, // Mana cost
     10, // Cooldown in turns
     farmersCatchEffect
-).setDescription('Increase target\'s dodge chance by 50% for 5 turns.')
- .setTargetType('ally');
+)
+.setTargetType('ally');
+
+// Assign relevant properties for description generation
+farmersCatchAbility.dodgeBoost = 0.5; // Use a property name matching the placeholder
+farmersCatchAbility.buffCaster = false; // Default no self-buff until talent
+
+// Custom description generation to support talent modifications
+farmersCatchAbility.generateDescription = function() {
+    let description = `Increase target's dodge chance by ${this.dodgeBoost * 100}% for 5 turns.`;
+    
+    // Add self-buff info if talent is active
+    if (this.buffCaster) {
+        description += ` <span class="talent-effect utility">Also applies the buff to Shoma.</span>`;
+    }
+    
+    this.description = description;
+    return description;
+};
+
+// Generate initial description
+farmersCatchAbility.generateDescription();
+
+// Add listener for ability modifications to update description
+document.addEventListener('abilityModified', function(event) {
+    if (event.detail && event.detail.abilityId === 'farmer_shoma_e') {
+        console.log('Farmer\'s Catch ability modified, updating description');
+        farmersCatchAbility.generateDescription();
+    }
+});
 
 // Create the Cottage Run ability effect function
 const cottageRunEffect = (caster, target) => {
@@ -824,6 +1221,7 @@ const cottageRunEffect = (caster, target) => {
 
         // Play dash sound
         playSound('sounds/dash.mp3', 0.6); // Example sound
+        playSound('sounds/fshoma_r.mp3', 0.7); // Farmer Shoma R sound
 
         // Remove container and caster animation class
         setTimeout(() => {
@@ -838,10 +1236,58 @@ const cottageRunEffect = (caster, target) => {
     const healAmount = Math.round(missingHealth * 0.5);
     
     // Apply healing
-    const actualHeal = target.heal(healAmount);
+    const healResult = target.heal(healAmount, caster); // Pass caster for crit check
+    const actualHeal = healResult.healAmount;
+    const isCriticalHeal = healResult.isCritical;
     
-    // Log the healing
-    logFunction(`${caster.name} used Cottage Run to heal ${Math.round(actualHeal)} health (50% of missing health).`);
+    // Log the healing (Critical heal log is handled inside target.heal)
+    if (!isCriticalHeal) { // Only log non-critical heals here
+        logFunction(`${caster.name} used Cottage Run to heal ${Math.round(actualHeal)} health (50% of missing health).`);
+    }
+    
+    // --- NEW: Check for and apply mana restoration from talent ---
+    if (cottageRunAbility.restoresManaPercent) {
+        const manaRestorePercent = cottageRunAbility.restoresManaPercent;
+        const manaRestoreAmount = Math.floor(target.stats.maxMana * manaRestorePercent);
+        
+        if (manaRestoreAmount > 0) {
+            // Apply mana restoration
+            const oldMana = target.stats.currentMana;
+            target.stats.currentMana = Math.min(target.stats.maxMana, target.stats.currentMana + manaRestoreAmount);
+            const actualManaRestored = target.stats.currentMana - oldMana;
+            
+            // Log the mana restoration
+            logFunction(`${caster.name}'s Cottage Run also restored ${actualManaRestored} mana (${manaRestorePercent * 100}% of maximum mana).`, 'buff-effect');
+            
+            // Add mana restore VFX if target element exists
+            if (casterElement) {
+                const manaVfxContainer = document.createElement('div');
+                manaVfxContainer.className = 'vfx-container cottage-run-mana-vfx-container';
+                casterElement.appendChild(manaVfxContainer);
+                
+                // Add mana effect class to character element
+                casterElement.classList.add('cottage-run-mana-effect');
+                
+                // Create mana VFX
+                const manaVfx = document.createElement('div');
+                manaVfx.className = 'cottage-run-mana-vfx';
+                manaVfxContainer.appendChild(manaVfx);
+                
+                // Create mana particles
+                createManaParticles(manaVfxContainer);
+                
+                // Play mana sound
+                playSound('sounds/mana_restore.mp3', 0.6);
+                
+                // Remove container and effect class after animation
+                setTimeout(() => {
+                    casterElement.classList.remove('cottage-run-mana-effect');
+                    manaVfxContainer.remove();
+                }, 2000);
+            }
+        }
+    }
+    // --- END NEW mana restoration code ---
     
     // --- Caster Heal VFX (target is caster) ---
     const targetElement = document.getElementById(`character-${target.instanceId || target.id}`); // target is caster
@@ -998,8 +1444,32 @@ const cottageRunAbility = new Ability(
     150, // Mana cost
     22,  // Cooldown in turns
     cottageRunEffect
-).setDescription('Heals 50% of missing health to himself and gains 100% dodge chance for 4 turns.')
- .setTargetType('self'); // Self-targeting ability
+)
+.setTargetType('self'); // Self-targeting ability
+
+// Update description generation to include mana restoration if talent is active
+cottageRunAbility.generateDescription = function() {
+    let description = 'Heals 50% of missing health to himself and gains 100% dodge chance for 4 turns.';
+    
+    // Add mana restoration to description if talent is active
+    if (this.restoresManaPercent) {
+        description += ` <span class="talent-effect resource">Also restores ${this.restoresManaPercent * 100}% of maximum mana.</span>`;
+    }
+    
+    this.description = description;
+    return description;
+};
+
+// Generate initial description
+cottageRunAbility.generateDescription();
+
+// Ensure the description is updated after the talent is applied
+document.addEventListener('abilityModified', function(event) {
+    if (event.detail && event.detail.abilityId === 'farmer_shoma_r') {
+        console.log('Cottage Run ability modified, updating description');
+        cottageRunAbility.generateDescription();
+    }
+});
 
 // Register abilities with AbilityFactory
 document.addEventListener('DOMContentLoaded', () => {
@@ -1319,6 +1789,51 @@ document.addEventListener('DOMContentLoaded', () => {
             100% { transform: translateY(0); }
         }
         
+        /* Nurturing Toss Stack Indicator */
+        .status-container[data-effect-id="nurturing_toss_buff"],
+        .status-effect-container[data-effect-id="nurturing_toss_buff"] {
+            position: relative;
+        }
+        
+        .nurturing-toss-stack-indicator {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #2d882d, #55aa55);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            box-shadow: 0 0 5px rgba(0, 128, 0, 0.7);
+            font-weight: bold;
+            z-index: 6;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .nurturing-toss-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 0, 0.4) 0%, rgba(0, 255, 0, 0) 70%);
+            animation: nurturingGlow 2s infinite;
+            z-index: 2;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        @keyframes nurturingGlow {
+            0% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+            100% { opacity: 0.4; transform: scale(0.9); }
+        }
+        
         /* Passive Boost VFX */
         .shoma-passive-boost-vfx {
             position: absolute;
@@ -1496,6 +2011,48 @@ document.addEventListener('DOMContentLoaded', () => {
             66% { transform: translateY(-3px) rotate(-3deg); }
             100% { transform: translateY(0) rotate(0deg); }
         }
+        
+        /* Nurturing Toss Stack Indicator Animation */
+        .stack-updated {
+            animation: stackPulse 0.6s ease-in-out;
+        }
+        
+        @keyframes stackPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.8); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Effect fading animation */
+        .effect-fading {
+            animation: effectFade 0.5s forwards;
+        }
+        
+        @keyframes effectFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        
+        /* Override Nurturing Toss stack indicator for better visibility */
+        .nurturing-toss-stack-indicator {
+            position: absolute !important;
+            top: -10px !important;
+            right: -10px !important;
+            width: 25px !important;
+            height: 25px !important;
+            font-size: 14px !important;
+            background: linear-gradient(135deg, #1e6b1e, #3aaa3a) !important;
+            box-shadow: 0 0 8px #3aaa3a, 0 0 12px rgba(0, 255, 0, 0.5) !important;
+            border: 2px solid white !important;
+            z-index: 9999 !important;
+            font-weight: bold !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 50% !important;
+            text-shadow: 0 1px 2px black !important;
+        }
     `;
     document.head.appendChild(style);
 });
@@ -1590,3 +2147,81 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Added dodge animation to Character.prototype.checkDodge");
     }
 }); 
+
+// Override the property setter for appliesHealingPowerBuff to update description
+// This ensures the description updates when the talent is applied
+Object.defineProperty(appleThrowAbility, 'appliesHealingPowerBuff', {
+    get: function() {
+        return this._appliesHealingPowerBuff || false;
+    },
+    set: function(value) {
+        this._appliesHealingPowerBuff = value;
+        // Regenerate description when this property changes
+        if (value) {
+            console.log('[Talent Applied] Nurturing Toss talent activated');
+            this.generateDescription();
+        }
+    }
+});
+
+// Create mana particles for Cottage Run
+function createManaParticles(container) {
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'mana-particles';
+    container.appendChild(particlesContainer);
+    
+    // Create multiple particles with random positions
+    for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'mana-particle';
+        
+        // Random size
+        const size = 4 + Math.random() * 8;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        const rx = Math.random() * 2 - 1;
+        const ry = Math.random() * 2 - 1;
+        particle.style.setProperty('--rx', rx);
+        particle.style.setProperty('--ry', ry);
+        
+        // Random start position
+        particle.style.left = `${30 + Math.random() * 40}%`;
+        particle.style.top = `${30 + Math.random() * 40}%`;
+        
+        // Random delay
+        particle.style.animationDelay = `${Math.random() * 0.5}s`;
+        
+        particlesContainer.appendChild(particle);
+    }
+    
+    // Remove particles after animation
+    setTimeout(() => {
+        particlesContainer.remove();
+    }, 2000);
+}
+
+// Patch Character's applyDamage to dispatch critical hit events
+const originalCharacterApplyDamage = Character.prototype.applyDamage;
+Character.prototype.applyDamage = function(amount, type, caster = null, options = {}) {
+    // Call the original method and store its result
+    const result = originalCharacterApplyDamage.call(this, amount, type, caster, options);
+    
+    // If it was a critical hit and we have a caster, dispatch event
+    if (result.isCritical && caster) {
+        const critEvent = new CustomEvent('criticalHit', {
+            detail: {
+                source: caster,
+                target: this,
+                damage: result.damage,
+                type: type
+            },
+            bubbles: true
+        });
+        document.dispatchEvent(critEvent);
+    }
+    
+    // Return the original result
+    return result;
+};

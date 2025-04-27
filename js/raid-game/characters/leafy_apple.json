@@ -1,0 +1,38 @@
+{
+    "id": "leafy_apple",
+    "name": "Leafy Apple",
+    "image": "Loading Screen/Leafy Apple.webp",
+    "stats": {
+        "physicalDamage": 1,
+        "magicalDamage": 1,
+        "armor": 20,
+        "magicalShield": 20,
+        "hp": 2580,
+        "hpPerTurn": 0,
+        "mana": 3000,
+        "manaPerTurn": 100,
+        "lifesteal": 0,
+        "dodgeChance": 0.0,
+        "critChance": 0.00,
+        "critDamage": 0,
+        "healingPower": 0.0
+    },
+    "abilities": [
+        {
+            "id": "leafy_apple_heal_up",
+            "name": "Heal Up",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 1,
+            "targetType": "all_allies",
+            "description": "Heals all allies by 310HP.",
+            "icon": "Icons/abilities/heal_up.png"
+        }
+    ],
+    "passive": {
+        "id": "leafy_apple_inheritance",
+        "name": "Leafy Inheritance",
+        "description": "Upon death, permanently increases all enemies' Healing Power by 25%.",
+        "icon": "Icons/passives/leafy_apple_inheritance.png"
+    }
+} 

@@ -16,6 +16,7 @@ class StoryUI {
         this.mapStagesElement = null;
         this.mapPathElement = null;
         this.storyMapElement = null; // Added for the main map container
+        this.mapContainerElement = null; // Added this line
         this.stageDetailsElement = null;
         
         // Stage details elements
@@ -76,6 +77,19 @@ class StoryUI {
         this.mapStagesElement = document.getElementById('map-stages');
         this.mapPathElement = document.getElementById('map-path');
         this.storyMapElement = document.querySelector('.story-map'); // Select by class
+        this.mapContainerElement = document.querySelector('.map-container'); // Added this line
+        
+        // Create zoom controls if they don't exist
+        if (!document.querySelector('.map-zoom-controls')) {
+            const zoomControls = document.createElement('div');
+            zoomControls.className = 'map-zoom-controls';
+            zoomControls.innerHTML = '<div class="zoom-text">Zoom: 100%</div>';
+            this.mapContainerElement.appendChild(zoomControls);
+            this.zoomTextElement = zoomControls.querySelector('.zoom-text');
+        } else {
+            this.zoomTextElement = document.querySelector('.map-zoom-controls .zoom-text');
+        }
+        
         this.stageDetailsElement = document.getElementById('stage-details');
         this.stageNameElement = document.getElementById('stage-name');
         this.stageDifficultyElement = document.getElementById('stage-difficulty');
@@ -97,8 +111,8 @@ class StoryUI {
         // --- End Select DOM Elements ---
 
         // --- Check if essential elements were found --- 
-        if (!this.storyMapElement || !this.mapStagesElement) {
-            console.error("[StoryUI] FATAL: Essential map elements (.story-map or #map-stages) not found in the DOM during initialization.");
+        if (!this.storyMapElement || !this.mapStagesElement || !this.mapContainerElement) { // Added mapContainerElement check
+            console.error("[StoryUI] FATAL: Essential map elements (.story-map, .map-container or #map-stages) not found in the DOM during initialization.");
             alert("UI Error: Could not find map elements. Story cannot be displayed.");
             // Potentially redirect or stop further execution
             return; 
@@ -403,8 +417,8 @@ class StoryUI {
         const stageHeight = 100;
         const minPadding = 50; // Increase padding slightly more
 
-        const genericXSpacing = 250;
-        const genericYSpacing = 180;
+        const genericXSpacing = 350; // Increased from 250 for more spacing
+        const genericYSpacing = 250; // Increased from 180 for more spacing
 
         const storyTitle = this.storyManager.currentStory?.title;
 
@@ -448,7 +462,73 @@ class StoryUI {
 
                 positions.push({ x, y });
             });
-
+        } else if (storyTitle === "Corruption at the Farmland" && mapContainerWidth > 0 && mapContainerHeight > 0) {
+            console.log("[StoryUI] Applying SPECIFIC narrative layout for 'Corruption at the Farmland'");
+            
+            // Create a winding path layout that follows a more narrative progression
+            // This will create a zigzag path with descending stages
+            
+            // Map dimensions - ensure plenty of space (Increased significantly)
+            const width = Math.max(mapContainerWidth, 2500); // Increased from 1500
+            const height = Math.max(mapContainerHeight, 2000); // Increased from 1200
+            
+            // Create a winding narrative path
+            const pathPoints = [
+                { x: 0.15, y: 0.15 },  // Start top-left
+                { x: 0.50, y: 0.22 },  // Move right
+                { x: 0.80, y: 0.30 },  // Continue right
+                { x: 0.65, y: 0.45 },  // Move back left and down
+                { x: 0.35, y: 0.55 },  // Continue left
+                { x: 0.60, y: 0.70 },  // Move right and down
+                { x: 0.80, y: 0.80 },  // Continue right
+                { x: 0.45, y: 0.88 }   // Final position - middle bottom
+            ];
+            
+            // Handle case where we have more or fewer stages than path points
+            const totalPoints = pathPoints.length;
+            const totalStages = stages.length;
+            
+            stages.forEach((stage, index) => {
+                // If we have more stages than pathPoints, interpolate new positions
+                let position;
+                
+                if (totalStages <= totalPoints) {
+                    // We have enough pre-defined points
+                    position = pathPoints[index];
+                } else {
+                    // We need to interpolate points based on index
+                    const normalizedPosition = index / (totalStages - 1);
+                    const pointIndex = Math.floor(normalizedPosition * (totalPoints - 1));
+                    const nextPointIndex = Math.min(pointIndex + 1, totalPoints - 1);
+                    const pointProgress = (normalizedPosition * (totalPoints - 1)) - pointIndex;
+                    
+                    const point1 = pathPoints[pointIndex];
+                    const point2 = pathPoints[nextPointIndex];
+                    
+                    position = {
+                        x: point1.x + (point2.x - point1.x) * pointProgress,
+                        y: point1.y + (point2.y - point1.y) * pointProgress
+                    };
+                }
+                
+                // Calculate actual pixel coordinates from percentages
+                const x = position.x * width;
+                const y = position.y * height;
+                
+                // Add slight random variation to prevent perfect alignment
+                const jitterAmount = 40;
+                const jitterX = (Math.random() - 0.5) * jitterAmount;
+                const jitterY = (Math.random() - 0.5) * jitterAmount;
+                
+                positions.push({ 
+                    x: x + jitterX, 
+                    y: y + jitterY 
+                });
+            });
+            
+            // Ensure the map container is large enough
+            this.mapStagesElement.style.width = `${width}px`;
+            this.mapStagesElement.style.height = `${height}px`;
         } else {
             // --- Generic layout (remains the same) ---
             console.log("[StoryUI] Applying generic layout.");
@@ -652,45 +732,47 @@ class StoryUI {
         this.stageDescriptionElement.textContent = stage.description;
         
         // Set stage image - use a placeholder if none available or for non-battle stages
+        let imagePath = 'images/stages/default.jpg'; // Default image
         if (stage.type === 'battle' || stage.type === 'boss') {
-            this.stageImageElement.src = `images/stages/${stage.id}.jpg`;
-            this.stageImageElement.onerror = () => {
-                this.stageImageElement.src = 'images/stages/default.jpg';
-            };
-        } else {
-            // Use default for choice/recruit stages
-            this.stageImageElement.src = 'images/stages/default.jpg';
-            this.stageImageElement.onerror = null; // Remove error handler for default
+            // Try to load specific image for battle/boss stages
+            // Assuming stage.id is something like 'storyid_stagename'
+            // We might need a better way to determine the image filename
+            const potentialImageName = stage.id ? `${stage.id}.jpg` : 'default.jpg';
+            imagePath = `images/stages/${potentialImageName}`;
         }
-
-        // Reset state visibility
-        this.enemyListElement.parentElement.classList.remove('hidden'); // Show enemy list container
-        this.rewardListElement.parentElement.classList.remove('hidden'); // Show reward list container
-        this.startStageButton.classList.remove('hidden'); // Show start button
-        this.stageChoicesContainer.classList.add('hidden'); // Hide choices
-        this.stageRecruitContainer.classList.add('hidden'); // Hide recruits
-
-        // Set basic stage info
-        this.stageNameElement.textContent = stage.name || 'Unknown Stage';
-        this.stageDifficultyElement.textContent = stage.difficulty ? `Difficulty: ${stage.difficulty}` : 'Non-Combat';
-        this.stageDescriptionElement.textContent = stage.description;
-
+        this.stageImageElement.src = imagePath;
+        this.stageImageElement.onerror = () => {
+            this.stageImageElement.src = 'images/stages/default.jpg'; // Fallback on error
+        };
+        
+        // Reset visibility states
+        this.enemyListElement.parentElement.classList.remove('hidden');
+        this.rewardListElement.parentElement.classList.remove('hidden');
+        this.stageChoicesContainer.classList.add('hidden');
+        this.stageRecruitContainer.classList.add('hidden');
+        this.startStageButton.classList.remove('hidden'); // Default to visible
+        this.startStageButton.disabled = false; // Default to enabled
+        this.startStageButton.textContent = 'Begin Battle'; // Default text
+        
         // Handle stage type specifics
         if (stage.type === 'choice') {
-            this.enemyListElement.parentElement.classList.add('hidden'); // Hide enemies
-            this.rewardListElement.parentElement.classList.add('hidden'); // Hide rewards
+            this.enemyListElement.parentElement.classList.add('hidden');
+            this.rewardListElement.parentElement.classList.add('hidden');
             this.startStageButton.classList.add('hidden'); // Hide start button
-            this.stageChoicesContainer.classList.remove('hidden'); // Show choices
+            this.stageChoicesContainer.classList.remove('hidden');
+            this.renderStageChoices(stage.choices); // Render choices
         } else if (stage.type === 'recruit') {
-            this.enemyListElement.parentElement.classList.add('hidden'); // Hide enemies
-            this.rewardListElement.parentElement.classList.add('hidden'); // Hide rewards
+            this.enemyListElement.parentElement.classList.add('hidden');
+            this.rewardListElement.parentElement.classList.add('hidden');
             this.startStageButton.classList.add('hidden'); // Hide start button
-            this.stageRecruitContainer.classList.remove('hidden'); // Show recruits
-        } else {
-            this.startStageButton.disabled = false;
-            this.startStageButton.textContent = 'Begin Battle';
+            this.stageRecruitContainer.classList.remove('hidden');
+            this.renderRecruitmentOffers(stage); // Render recruitment offers
+        } else { // Default case (battle/boss)
+            // Populate enemies and rewards for battle stages
+            this.renderEnemyList(this.getMockEnemiesForStage(stage));
+            this.renderRewardList(this.getMockRewardsForStage(stage));
         }
-
+        
         // Show details panel
         this.stageDetailsElement.classList.add('visible');
     }
@@ -753,15 +835,45 @@ class StoryUI {
     }
 
     /**
-     * Handle the selection of a choice on a 'choice' stage
+     * Called when a choice button is clicked in the stage details panel
      * @param {Object} choice - The selected choice object
      */
-    handleChoiceSelection(choice) {
-        console.log('Choice selected:', choice.name);
-        // Store the selected choice
-        this.selectedChoice = choice;
-        // Show the character selection modal
-        this.showCharacterSelectionModal(choice);
+    async handleChoiceSelection(choice) {
+        console.log('Choice selected:', choice);
+        // Check if the choice requires character selection
+        if (choice.effect && (choice.effect.target === 'selected' || choice.effect.target === 'selected_living' || choice.effect.target === 'selected_dead')) {
+            this.selectedChoice = choice; // Store the selected choice
+            this.showCharacterSelectionModal(choice); // Show modal to pick character
+        } else if (choice.effect && choice.effect.target === 'all') {
+            // If target is 'all', apply effect directly without modal
+            try {
+                showLoadingOverlay(`Applying effect: ${choice.name}...`); // Use placeholder
+                const hasMore = await this.storyManager.applyChoiceEffectAndAdvance(choice, null); // Pass null for targetCharacterId
+                hideLoadingOverlay(); // Use placeholder
+                if (hasMore) {
+                    this.closeStageDetails();
+                    this.renderPlayerTeam(); // Update team display
+                    this.updateStageNodes(); // Update map node statuses
+                } else {
+                    // Story complete or error occurred
+                    this.closeStageDetails();
+                    if (!this.storyManager.isStoryComplete()) {
+                        showPopupMessage("Failed to apply effect.", 'error');
+                    } else {
+                        this.showStoryCompleteScreen();
+                    }
+                }
+            } catch (error) {
+                hideLoadingOverlay(); // Use placeholder
+                console.error("Error applying 'all' target effect:", error);
+                showPopupMessage(`Error applying effect: ${error.message}`, 'error');
+            }
+        } else {
+            // Handle other cases or choices without effects if needed
+            console.warn('Selected choice does not require character selection or target \'all\', or effect/target is missing:', choice);
+            // Maybe just close the details panel?
+            // this.closeStageDetails();
+        }
     }
 
     /**
@@ -1524,8 +1636,9 @@ class StoryUI {
      * Initializes the map dragging functionality.
      */
     initializeMapDragging() {
-        const mapElement = this.storyMapElement; // Assuming this exists from constructor
-        const stagesContainer = this.mapStagesElement; // Assuming this exists
+        const mapElement = this.storyMapElement;
+        const stagesContainer = this.mapStagesElement;
+        const pathElement = this.mapPathElement;
 
         if (!mapElement || !stagesContainer) {
             console.error("Map elements not found for dragging initialization.");
@@ -1534,22 +1647,77 @@ class StoryUI {
 
         let isDragging = false;
         let startX, startY;
-        let scrollLeft, scrollTop;
+        let initialTranslateX = 0, initialTranslateY = 0;
+        let currentTranslateX = 0, currentTranslateY = 0;
+        let currentScale = 1.0; // Initial zoom level
+
+        // --- Get initial transform values if already set ---
+        const initialTransform = stagesContainer.style.transform;
+        if (initialTransform && initialTransform.includes('translate')) {
+            const match = initialTransform.match(/translate\(([-0-9.]+)px,\s*([-0-9.]+)px\)/);
+            if (match) {
+                initialTranslateX = parseFloat(match[1]);
+                initialTranslateY = parseFloat(match[2]);
+                currentTranslateX = initialTranslateX;
+                currentTranslateY = initialTranslateY;
+            }
+        }
+        
+        // Set initial transform 
+        this.applyMapTransform(stagesContainer, pathElement, currentTranslateX, currentTranslateY, currentScale);
+        
+        // --- Mouse wheel for zooming ---
+        mapElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            // Determine zoom direction
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1; // Zoom out (0.9) or in (1.1)
+            
+            // Calculate new scale with limits
+            const newScale = Math.max(0.5, Math.min(2.5, currentScale * zoomFactor));
+            
+            // Only proceed if scale changed
+            if (newScale !== currentScale) {
+                // Calculate mouse position relative to the map
+                const mapRect = mapElement.getBoundingClientRect();
+                const mouseX = e.clientX - mapRect.left;
+                const mouseY = e.clientY - mapRect.top;
+                
+                // Calculate zoom around mouse position
+                const scaleRatio = newScale / currentScale;
+                const newTranslateX = mouseX - (mouseX - currentTranslateX) * scaleRatio;
+                const newTranslateY = mouseY - (mouseY - currentTranslateY) * scaleRatio;
+                
+                // Update current values
+                currentScale = newScale;
+                currentTranslateX = newTranslateX;
+                currentTranslateY = newTranslateY;
+                
+                // Apply transform
+                this.applyMapTransform(stagesContainer, pathElement, currentTranslateX, currentTranslateY, currentScale);
+            }
+        });
 
         mapElement.addEventListener('mousedown', (e) => {
-            // Only start drag if clicking directly on the map, not a stage node
-            if (e.target !== mapElement && e.target !== stagesContainer) {
-                 // Allow clicks on stages/paths to propagate
-                 return;
-            }
+            // --- Updated Drag Start Condition ---
+            // Allow drag if clicking on map background OR the map container
+            // Disallow drag if clicking on a stage node or its children
+            const clickedOnNode = e.target.closest('.stage-node');
+            
+            if (clickedOnNode) {
+                return; // Don't start drag if click is on a node
+            } 
+            
+            // If the click wasn't on a node, proceed with dragging
             isDragging = true;
             mapElement.classList.add('dragging');
-            startX = e.pageX - mapElement.offsetLeft;
-            startY = e.pageY - mapElement.offsetTop;
-            // Store the initial position of the stages container
-            scrollLeft = stagesContainer.offsetLeft;
-            scrollTop = stagesContainer.offsetTop;
-            e.preventDefault(); // Prevent default drag behavior
+            // Record starting mouse position relative to the viewport
+            startX = e.pageX;
+            startY = e.pageY;
+            // Record the transform value when dragging starts
+            initialTranslateX = currentTranslateX;
+            initialTranslateY = currentTranslateY;
+            e.preventDefault();
         });
 
         mapElement.addEventListener('mouseleave', () => {
@@ -1567,56 +1735,49 @@ class StoryUI {
         });
 
         mapElement.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
+            if (!isDragging) {
+                return;
+            }
             e.preventDefault();
-            const x = e.pageX - mapElement.offsetLeft;
-            const y = e.pageY - mapElement.offsetTop;
-            const walkX = (x - startX);
-            const walkY = (y - startY);
 
-            // Calculate new position
-            let newLeft = scrollLeft + walkX;
-            let newTop = scrollTop + walkY;
+            // Calculate mouse movement delta
+            const dx = e.pageX - startX;
+            const dy = e.pageY - startY;
 
-            // --- Boundary checks (optional but recommended) ---
-            const mapRect = mapElement.getBoundingClientRect();
-            const stagesRect = stagesContainer.getBoundingClientRect();
+            // Calculate new transform values
+            let newTranslateX = initialTranslateX + dx;
+            let newTranslateY = initialTranslateY + dy;
 
-            // Prevent dragging too far left (leaving whitespace on the right)
-            if (newLeft > 0) {
-                newLeft = 0;
-            }
-            // Prevent dragging too far right (leaving whitespace on the left)
-            const minLeft = mapRect.width - stagesRect.width;
-             // Only enforce minLeft if the stages container is wider than the map
-            if (stagesRect.width > mapRect.width && newLeft < minLeft) {
-                 newLeft = minLeft;
-            }
-             // If stages container is narrower, don't let it go past left edge (newLeft=0 handled above)
-             else if (stagesRect.width <= mapRect.width) {
-                 newLeft = 0;
-             }
+            // Update current translate values
+            currentTranslateX = newTranslateX;
+            currentTranslateY = newTranslateY;
 
-            // Prevent dragging too far up (leaving whitespace on the bottom)
-            if (newTop > 0) {
-                newTop = 0;
-            }
-            // Prevent dragging too far down (leaving whitespace on the top)
-            const minTop = mapRect.height - stagesRect.height;
-             // Only enforce minTop if the stages container is taller than the map
-             if (stagesRect.height > mapRect.height && newTop < minTop) {
-                newTop = minTop;
-            }
-            // If stages container is shorter, don't let it go past top edge (newTop=0 handled above)
-            else if (stagesRect.height <= mapRect.height) {
-                newTop = 0;
-            }
-            // --- End Boundary Checks ---
-
-            stagesContainer.style.left = `${newLeft}px`;
-            stagesContainer.style.top = `${newTop}px`;
+            // Apply the transform
+            this.applyMapTransform(stagesContainer, pathElement, currentTranslateX, currentTranslateY, currentScale);
         });
 
-        console.log("[StoryUI] Map dragging initialized.");
+        console.log("[StoryUI] Map dragging and zooming initialized.");
+    }
+
+    /**
+     * Helper method to apply transform to both map elements
+     * @param {HTMLElement} stagesContainer - The stages container element
+     * @param {HTMLElement} pathElement - The path element
+     * @param {number} translateX - Translation X value
+     * @param {number} translateY - Translation Y value
+     * @param {number} scale - Scale value
+     */
+    applyMapTransform(stagesContainer, pathElement, translateX, translateY, scale) {
+        const transformValue = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        stagesContainer.style.transform = transformValue;
+        if (pathElement) {
+            pathElement.style.transform = transformValue;
+        }
+        
+        // Update zoom percentage display if element exists
+        if (this.zoomTextElement) {
+            const zoomPercentage = Math.round(scale * 100);
+            this.zoomTextElement.textContent = `Zoom: ${zoomPercentage}%`;
+        }
     }
 } 

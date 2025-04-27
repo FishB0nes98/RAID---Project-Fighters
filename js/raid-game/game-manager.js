@@ -4,8 +4,10 @@ class GameManager {
         this.stageManager = new StageManager();
         this.uiManager = new UIManager(this);
         this.aiManager = new AIManager(this); // Initialize AI Manager
-        this.characters = []; // Combined list of all characters
-        this.gameState = null;
+        this.characterFactory = CharacterFactory; // Use the global instance
+        this.gameState = {}; // Initial empty game state
+        this.actedCharacters = []; // Track characters who have acted this turn
+        this.deadCharactersLogged = []; // Initialize array to track logged deaths
         this.selectedCharacter = null;
         this.selectedAbilityIndex = null;
         this.targetingMode = false;
@@ -652,6 +654,9 @@ class GameManager {
         
         // Common logic after ability use attempt
         if (success) {
+            // Explicitly update the caster's UI to ensure cooldowns/mana are reflected
+            this.uiManager.updateCharacterUI(caster);
+
             // Check if the clicked target died (for single-target)
             // AoE death checks should happen within the ability effect itself for clarity
             if (target && target.isDead() && !ability.targetType.startsWith('all_')) {
@@ -799,6 +804,26 @@ class GameManager {
 
     // End player turn and start AI turn
     endPlayerTurn() {
+        console.log("Player turn ended.");
+
+        // Process player character effects WITH duration reduction
+        this.gameState.playerCharacters.forEach(char => {
+            if (char && !char.isDead()) {
+                // Trigger onTurnStart for passives
+                if (char.passiveHandler && typeof char.passiveHandler.onTurnStart === 'function') {
+                    try {
+                        // Pass the character and current turn number
+                        char.passiveHandler.onTurnStart(char, this.gameState.turn);
+                    } catch (e) {
+                        console.error(`Error in onTurnStart for ${char.name}'s passive:`, e);
+                    }
+                }
+                char.processEffects(true, true); // Reduce duration and regenerate resources
+            }
+        });
+
+        // Do NOT reduce durations for AI characters here, it will be done in AI turn
+        
         this.gameState.phase = 'ai';
         
         // Deselect character and ability
@@ -810,20 +835,6 @@ class GameManager {
         this.uiManager.updatePhase('ai');
         this.uiManager.addLogEntry("AI's turn", 'enemy-turn');
         
-        // Process effects for all characters (but don't reduce cooldowns or buff/debuff durations here)
-        this.gameState.playerCharacters.concat(this.gameState.aiCharacters).forEach(char => {
-            if (!char.isDead()) {
-                // Process buffs/debuffs (without reducing durations)
-                char.processEffects(false);
-                
-                // Regenerate resources
-                char.regenerateResources();
-                
-                // Update UI for each character
-                this.uiManager.updateCharacterUI(char);
-            }
-        });
-        
         // Start AI turn with a delay - use aiManager instead of calling our own method
         setTimeout(() => this.aiManager.executeAITurn(), this.turnDelay);
     }
@@ -833,21 +844,18 @@ class GameManager {
         try {
             this.gameManager.gameState.phase = 'ai';
             this.gameManager.uiManager.updatePhase('ai');
-            // No need to add log entry here, it's added in endPlayerTurn
-            // this.gameManager.addLogEntry("AI's turn", 'enemy-turn');
 
-            // --- NEW: Process AI effects at start of their turn --- 
+            // Process AI effects at start of their turn WITH duration reduction
             this.gameManager.gameState.aiCharacters.forEach(aiChar => {
                 if (!aiChar.isDead()) {
-                    // Process buffs/debuffs, reduce duration=true
-                    aiChar.processEffects(true); 
+                    // Process buffs/debuffs, reduce duration=true, regenerate resources
+                    aiChar.processEffects(true, true);
                     // Reduce ability cooldowns
                     aiChar.abilities.forEach(ability => ability.reduceCooldown());
                     // Update UI after processing
-                    this.gameManager.uiManager.updateCharacterUI(aiChar); 
+                    this.gameManager.uiManager.updateCharacterUI(aiChar);
                 }
             });
-            // --- END Process AI effects --- 
 
             // Show planning phase overlay
             this.gameManager.uiManager.showPlanningPhase(true);
@@ -967,13 +975,14 @@ class GameManager {
                 ];
                 break;
             case 'all_enemies':
-                possibleTargets = allPlayerChars; // Target the group of enemies
-                break;
             case 'all': // Add 'all' case to target enemies
                 possibleTargets = allPlayerChars; // Target the group of enemies
                 break;
             case 'all_allies':
                 possibleTargets = allAIChars; // Target the group
+                break;
+            case 'all_allies_except_self': // Added this case for Carrot Power-up
+                possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Target the group, excluding self
                 break;
             default:
                 console.error(` [AI Planner] Unknown target type '${selectedAbility.targetType}'`);
@@ -992,9 +1001,9 @@ class GameManager {
             return { ability: selectedAbility, target: null, error: 'No valid targets found' }; // Indicate no valid target
         }
 
-        // Select a random target from the valid list
-        const targetIndex = Math.floor(Math.random() * possibleTargets.length);
-        let selectedTarget = possibleTargets[targetIndex]; // Changed const to let
+        // Select a random target from the valid list for single-target abilities
+        // For group abilities, we'll use the entire group later
+        let selectedTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
 
         console.log(`[AI Planner Debug] Initial target selected for ${selectedAbility.name}: ${selectedTarget.name} (isAI: ${selectedTarget.isAI})`);
 
@@ -1005,9 +1014,12 @@ class GameManager {
             selectedTarget = allAIChars; // Pass the array
         } else if (selectedAbility.targetType === 'all') { // Handle the new 'all' case
             selectedTarget = allPlayerChars; // Pass the array of player characters
+        } else if (selectedAbility.targetType === 'all_allies_except_self') { // Handle Carrot Power-up case
+            selectedTarget = allAIChars.filter(c => c.id !== aiChar.id); // Pass the filtered array
         }
+        // For single target types (enemy, ally, self, any, any_except_self), selectedTarget remains the randomly chosen single character.
 
-        if (selectedTarget) {
+        if (selectedTarget && (!Array.isArray(selectedTarget) || selectedTarget.length > 0)) {
              const targetName = Array.isArray(selectedTarget) ? `${selectedTarget.length} targets` : selectedTarget.name;
              console.log(`[AI Planner] Planned action: ${selectedAbility.name} on ${targetName}`);
             return { ability: selectedAbility, target: selectedTarget };
@@ -1092,6 +1104,10 @@ class GameManager {
                 const livingAllies = this.gameState.aiCharacters.filter(a => !a.isDead());
                 finalTargetInfo = [...livingEnemies, ...livingAllies];
                 console.log(`[AI Execute] Validating ${finalTargetInfo.length} living characters for 'all'.`);
+            } else if (targetType === 'all_allies_except_self') { // Added this case
+                // Re-fetch living allies excluding self just before execution
+                finalTargetInfo = this.gameState.aiCharacters.filter(a => !a.isDead() && a.instanceId !== caster.instanceId);
+                console.log(`[AI Execute] Validating ${finalTargetInfo.length} living allies (excluding self) for AoE buff.`);
             } else {
                  console.warn(`[AI Execute] Unhandled target type ${targetType} during re-validation.`);
                  finalTargetInfo = targetInfo; // Pass original planned target if type is unknown
@@ -1148,6 +1164,34 @@ class GameManager {
 
        // End AI turn and start a new turn
        endAITurn() {
+           console.log("AI turn ended.");
+
+           // --- DISPATCH TurnStart EVENT --- 
+           // Dispatch event *before* processing player turn effects
+           const turnStartEvent = new CustomEvent('TurnStart', {
+               detail: { turn: this.gameState.turn + 1 } // Dispatch for the upcoming player turn
+           });
+           document.dispatchEvent(turnStartEvent);
+           console.log(`[GameManager] Dispatched TurnStart event for turn ${this.gameState.turn + 1}`);
+           // --- END DISPATCH ---
+
+           // At the end of AI turn, do NOT process effects for all characters again
+           // Just trigger passive onTurnStart without reducing durations
+           [...this.gameState.playerCharacters, ...this.gameState.aiCharacters].forEach(char => {
+               if (char && !char.isDead()) {
+                   // Trigger onTurnStart for passives without reducing effect durations
+                   if (char.passiveHandler && typeof char.passiveHandler.onTurnStart === 'function') {
+                       try {
+                           // Pass the character and current turn number
+                           char.passiveHandler.onTurnStart(char, this.gameState.turn);
+                       } catch (e) {
+                           console.error(`Error in onTurnStart for ${char.name}'s passive:`, e);
+                       }
+                   }
+                   // We don't call processEffects(true) here anymore
+               }
+           });
+
            this.addLogEntry("AI turn ended.");
            this.gameState.phase = 'player';
            this.gameState.turn++; // Increment turn counter
@@ -1159,56 +1203,23 @@ class GameManager {
            this.actedCharacters = []; // Reset the list of characters who have acted this turn
 
            // Apply stage effects at the start of the player turn sequence
-           this.applyStageEffects(); // NEW CALL
-
-           // --- NEW: Stage Passive Check - Burning Ground --- MOVED TO applyStageEffects() ---
-           // if (this.stageManager.currentStage && this.stageManager.currentStage.id === 'burning_school_gym') {
-           //     this.addLogEntry("The ground burns beneath the players!", "stage-effect");
-           //     const burningDamage = 50;
-           //     const playerChars = [...this.gameState.playerCharacters]; // Create copy to avoid issues if a character dies
-
-           //     playerChars.forEach(playerChar => {
-           //         if (!playerChar.isDead()) {
-           //             // Apply damage directly, bypassing dodge/mitigation for stage effect
-           //             const originalHp = playerChar.stats.currentHp;
-           //             playerChar.stats.currentHp = Math.max(0, playerChar.stats.currentHp - burningDamage);
-           //             const actualDamage = originalHp - playerChar.stats.currentHp;
-           //             updateCharacterUI(playerChar); // Update UI immediately
-           //             
-           //             // Play damage VFX
-           //             const charElement = document.getElementById(`character-${playerChar.id}`);
-           //             if (charElement) {
-           //                 const damageVfx = document.createElement('div');
-           //                 damageVfx.className = 'damage-vfx stage-damage'; // Add specific class if needed
-           //                 damageVfx.textContent = `-${actualDamage}`;
-           //                 charElement.appendChild(damageVfx);
-           //                 setTimeout(() => damageVfx.remove(), 1000);
-           //             }
-
-           //             this.addLogEntry(`${playerChar.name} takes ${actualDamage} damage from Burning Ground.`, "stage-effect");
-
-           //             if (playerChar.isDead()) {
-           //                 this.addLogEntry(`${playerChar.name} succumbed to the flames!`, "stage-effect");
-           //                 // Handle character removal from UI/game state if necessary, might need a dedicated function
-           //                 this.uiManager.removeCharacter(playerChar);
-           //                 // Check game over immediately after a character dies from stage effect
-           //                 if(this.checkGameOver()) return; // Stop processing if game over
-           //             }
-           //         }
-           //     });
-           //     // Update player characters array in case someone died
-           //     this.gameState.playerCharacters = this.gameState.playerCharacters.filter(p => !p.isDead());
-           // }
-           // --- END Stage Passive Check ---
+           this.applyStageEffects();
            
-           // Process effects and reduce cooldowns for player characters at the start of their turn
+           // Process player characters at the start of their turn - but don't reduce durations
            this.gameState.playerCharacters.forEach(char => {
                if (!char.isDead()) {
-                   // Process buffs/debuffs, reduce duration=true
-                   char.processEffects(true);
+                   // Call processEffects with false to apply effects but not reduce durations
+                   // And false for regenerateResources since we'll do it manually
+                   char.processEffects(false, false);
+                   
+                   // Manually regenerate resources
+                   char.regenerateResources();
+                   
                    // Reduce ability cooldowns
                    char.abilities.forEach(ability => ability.reduceCooldown());
-                   updateCharacterUI(char); // Update UI after processing
+                   
+                   // Update UI after processing
+                   updateCharacterUI(char);
                }
            });
 
@@ -1285,6 +1296,24 @@ class GameManager {
            }
            // --- END MODIFICATION ---
 
+           // --- NEW: Handle 'It finally rains!' modifier ---
+           const rainModifier = this.stageManager?.getStageModifier('it_finally_rains');
+           if (rainModifier) {
+               this.addLogEntry("The rain provides soothing relief.", "stage-effect positive");
+               this.gameState.playerCharacters.forEach(playerChar => {
+                   if (!playerChar.isDead()) {
+                       const healAmount = Math.floor(playerChar.stats.maxHp * 0.03);
+                       if (healAmount > 0) {
+                           playerChar.heal(healAmount, null, { passiveSource: rainModifier.id, isStageEffect: true, hideLog: true }); // Pass hideLog
+                           this.addLogEntry(`${playerChar.name} heals ${healAmount} HP from the rain.`, "stage-effect heal");
+                           // Show custom rain healing VFX
+                           this.showRainHealVFX(playerChar, healAmount);
+                       }
+                   }
+               });
+           }
+           // --- END NEW ---
+
            // Add checks for other stage effects here in the future
        }
        // --- END applyStageEffects ---
@@ -1293,6 +1322,9 @@ class GameManager {
        checkGameOver() {
            let gameOver = false;
            let isVictory = false;
+           const urlParams = new URLSearchParams(window.location.search); // Get URL params here
+           const storyId = urlParams.get('storyId');
+           const returnUrl = urlParams.get('returnUrl');
            
            // --- DEBUG LOGGING START ---
            console.log('[GameManager] checkGameOver called.');
@@ -1327,10 +1359,11 @@ class GameManager {
                 const winConditions = this.stageManager?.currentStage?.objectives?.winConditions || [{ type: "allEnemiesDefeated" }]; // Default if none defined
                 
                 for (const condition of winConditions) {
-                    if (condition.type === "allEnemiesDefeated") {
+                    // --- Corrected type check --- 
+                    if (condition.type === "allEnemiesDefeated") { // <-- Changed this line
                          const allAIDead = this.gameState.aiCharacters.length > 0 && this.gameState.aiCharacters.every(char => char.isDead());
                          if (allAIDead) {
-                             console.log('[GameManager] checkGameOver: Win condition met - allEnemiesDefeated.');
+                             console.log('[GameManager] checkGameOver: Win condition met - allEnemiesDefeated.'); // <-- Updated log message
                              gameOver = true;
                              isVictory = true;
                              break; // Found a win condition
@@ -1352,29 +1385,20 @@ class GameManager {
                 }
            }
            
-           // --- Old Victory Check (Replaced by condition loop above) ---
-           /*
-           const allAIDead = this.gameState.aiCharacters.length > 0 && this.gameState.aiCharacters.every(char => char.isDead());
-           if (!gameOver && allAIDead) {
-                // --- DEBUG LOGGING ---\n                console.log('[GameManager] checkGameOver: All AI detected as dead.');
-                // --- DEBUG LOGGING END ---\n               gameOver = true;
-               isVictory = true;
-           }
-           */
-
            if (gameOver) {
-                // --- DEBUG LOGGING ---\n                console.log(`[GameManager] checkGameOver: Game Over detected. Victory: ${isVictory}`);
+                // --- DEBUG LOGGING ---
+                console.log(`[GameManager] checkGameOver: Game Over detected. Victory: ${isVictory}`);
                 console.log('[GameManager] Attempting to save battle result...');
                 // --- DEBUG LOGGING END ---
                
                // Save result (especially important for story mode)
                this.saveBattleResultToFirebase(isVictory)
-                   .then(() => {
+                   .then(async (saveSuccess) => { // Check if save was successful (optional, assuming it returns true/false or throws)
                        // --- DEBUG LOGGING ---
-                       console.log('[GameManager] Battle result saved (or save skipped). Showing Game Over screen...');
+                       console.log(`[GameManager] Battle result saved (Success: ${saveSuccess}). Showing Game Over screen...`);
                        // --- DEBUG LOGGING END ---
-                       // Show game over screen using UIManager
-                       this.uiManager.showGameOverScreen(isVictory);
+                       // Pass context to the UIManager's showGameOverScreen
+                       this.uiManager.showGameOverScreen(isVictory, { storyId, returnUrl }); 
                        
                        // Maybe clear log AFTER showing screen so user can see final messages? Or maybe not clear at all?
                        // this.clearBattleLog(); // Consider removing or moving this clear
@@ -1383,8 +1407,8 @@ class GameManager {
                        // --- DEBUG LOGGING ---
                        console.error('[GameManager] Error saving battle result, but still showing Game Over screen.', error);
                        // --- DEBUG LOGGING END ---
-                       // Still show the game over screen even if saving failed
-                       this.uiManager.showGameOverScreen(isVictory);
+                       // Still show the game over screen even if saving failed, pass context
+                       this.uiManager.showGameOverScreen(isVictory, { storyId, returnUrl }); 
                        // this.clearBattleLog(); 
                    });
                
@@ -1694,100 +1718,108 @@ class GameManager {
            const stageId = this.stageManager?.currentStage?.id || urlParams.get('stage');
 
            // If in story mode context
-           if (storyId && stageIndexStr !== null && returnUrl) {
-               // --- DEBUG LOGGING ---
-               console.log(`[GameManager] Saving result for Story: ${storyId}, Stage Index: ${stageIndexStr}`);
-               // --- DEBUG LOGGING END ---
-
-               const stageIndex = parseInt(stageIndexStr, 10); // Parse index to integer
-               if (isNaN(stageIndex)) {
-                    console.error("[GameManager] Invalid stageIndex passed in URL params:", stageIndexStr);
-                    return; // Don't save if index is invalid
-               }
-
-               const resultPath = `users/${userId}/lastBattleResult`;
-               
-               // Get final team state ONLY if it's a victory
-               let finalTeamState = null;
-               if (isVictory) {
-                    finalTeamState = this.gameState.playerCharacters
-                       .filter(char => !char.isDead()) // Only include survivors
-                       .map(char => ({
-                           id: char.id,
-                           currentHP: char.stats.currentHp,
-                           currentMana: char.stats.currentMana,
-                           // --- IMPORTANT: Include stats to persist modifications ---
-                           stats: { ...char.stats } 
-                           // --- END IMPORTANT ---
-                       }));
-                     // --- DEBUG LOGGING ---
-                     console.log('[GameManager] Final Team State (Victory):', JSON.stringify(finalTeamState));
-                     // --- DEBUG LOGGING END ---
-               } else {
-                   // --- DEBUG LOGGING ---
-                   console.log('[GameManager] Defeat detected, finalTeamState will be null.');
-                   // --- DEBUG LOGGING END ---
-               }
-
-               const battleResult = {
-                   storyId: storyId,
-                   stageIndex: stageIndex, // Save the numeric index
-                   victory: isVictory,
-                   timestamp: firebase.database.ServerValue.TIMESTAMP,
-                   // Only include finalTeamState if it's a victory
-                   ...(isVictory && { finalTeamState: finalTeamState }) 
-               };
-
-               // --- DEBUG LOGGING ---
-               console.log('[GameManager] Battle Result object prepared:', JSON.stringify(battleResult));
-               // --- DEBUG LOGGING END ---
-               
-               try {
+           try { // Added try block around the main logic
+                if (storyId && stageIndexStr !== null && returnUrl) {
                     // --- DEBUG LOGGING ---
-                    console.log(`[GameManager] Attempting to set data at path: ${resultPath}`);
+                    console.log(`[GameManager] Saving result for Story: ${storyId}, Stage Index: ${stageIndexStr}`);
                     // --- DEBUG LOGGING END ---
-                   await firebaseDatabase.ref(resultPath).set(battleResult);
-                   console.log(`[GameManager] Battle result for story ${storyId}, stage ${stageIndex} saved to Firebase.`);
-               } catch (error) {
-                    console.error(`[GameManager] Firebase Error: Failed to save battle result for story ${storyId}:`, error);
-                    // Re-throw the error so the caller (.then/.catch in checkGameOver) knows it failed
-                    throw error; 
-               }
-           }
-           // For standalone battles (not in story mode)
-           else if (stageId) {
-               console.log(`[GameManager] Saving standalone battle result for stage: ${stageId}`);
-               
-               try {
-                   // Path for standalone battle results
-                   const resultsPath = `users/${userId}/battleResults/${stageId}`;
-                   
-                   // Calculate survivors count
-                   const survivors = isVictory ? 
-                       this.gameState.playerCharacters.filter(char => !char.isDead()).length : 0;
-                   
-                   // Get team composition
-                   const teamComposition = this.gameState.playerCharacters.map(char => char.id);
-                   
-                   const battleData = {
-                       victory: isVictory,
-                       timestamp: firebase.database.ServerValue.TIMESTAMP,
-                       turns: this.gameState.turn,
-                       survivors: survivors,
-                       teamComposition: teamComposition
-                   };
-                   
-                   // Save the battle result
-                   await firebaseDatabase.ref(resultsPath).push(battleData);
-                   console.log(`[GameManager] Standalone battle result for stage ${stageId} saved to Firebase.`);
-               } catch (error) {
-                   console.error(`[GameManager] Firebase Error: Failed to save standalone battle result for stage ${stageId}:`, error);
-                   // Re-throw the error so the caller knows it failed
-                   throw error;
-               }
-           }
-           else {
-               console.log('[GameManager] No stage ID identified. Skipping Firebase save.');
+
+                    const stageIndex = parseInt(stageIndexStr, 10); // Parse index to integer
+                    if (isNaN(stageIndex)) {
+                         console.error("[GameManager] Invalid stageIndex passed in URL params:", stageIndexStr);
+                         return; // Don't save if index is invalid
+                    }
+
+                    const resultPath = `users/${userId}/lastBattleResult`;
+                    
+                    // Get final team state ONLY if it's a victory
+                    let finalTeamState = null;
+                    if (isVictory) {
+                         finalTeamState = this.gameState.playerCharacters
+                            .filter(char => !char.isDead()) // Only include survivors
+                            .map(char => ({
+                                id: char.id,
+                                currentHP: char.stats.currentHp,
+                                currentMana: char.stats.currentMana,
+                                // --- IMPORTANT: Include stats to persist modifications ---
+                                stats: { ...char.stats } 
+                                // --- END IMPORTANT ---
+                            }));
+                          // --- DEBUG LOGGING ---
+                          console.log('[GameManager] Final Team State (Victory):', JSON.stringify(finalTeamState));
+                          // --- DEBUG LOGGING END ---
+                    } else {
+                        // --- DEBUG LOGGING ---
+                        console.log('[GameManager] Defeat detected, finalTeamState will be null.');
+                        // --- DEBUG LOGGING END ---
+                    }
+
+                    const battleResult = {
+                        storyId: storyId,
+                        stageIndex: stageIndex, // Save the numeric index
+                        victory: isVictory,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        // Only include finalTeamState if it's a victory
+                        ...(isVictory && { finalTeamState: finalTeamState }) 
+                    };
+
+                    // --- DEBUG LOGGING ---
+                    console.log('[GameManager] Battle Result object prepared:', JSON.stringify(battleResult));
+                    // --- DEBUG LOGGING END ---
+                    
+                    try {
+                         // --- DEBUG LOGGING ---
+                         console.log(`[GameManager] Attempting to set data at path: ${resultPath}`);
+                         // --- DEBUG LOGGING END ---
+                        await firebaseDatabase.ref(resultPath).set(battleResult);
+                        console.log(`[GameManager] Battle result for story ${storyId}, stage ${stageIndex} saved to Firebase.`);
+                        return true; // Indicate success
+                    } catch (error) {
+                         console.error(`[GameManager] Firebase Error: Failed to save battle result for story ${storyId}:`, error);
+                         // Re-throw the error so the caller (.then/.catch in checkGameOver) knows it failed
+                         throw error; 
+                    }
+                }
+                // For standalone battles (not in story mode)
+                else if (stageId) {
+                    console.log(`[GameManager] Saving standalone battle result for stage: ${stageId}`);
+                    
+                    try {
+                        // Path for standalone battle results
+                        const resultsPath = `users/${userId}/battleResults/${stageId}`;
+                        
+                        // Calculate survivors count
+                        const survivors = isVictory ? 
+                            this.gameState.playerCharacters.filter(char => !char.isDead()).length : 0;
+                        
+                        // Get team composition
+                        const teamComposition = this.gameState.playerCharacters.map(char => char.id);
+                        
+                        const battleData = {
+                            victory: isVictory,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP,
+                            turns: this.gameState.turn,
+                            survivors: survivors,
+                            teamComposition: teamComposition
+                        };
+                        
+                        // Save the battle result
+                        await firebaseDatabase.ref(resultsPath).push(battleData);
+                        console.log(`[GameManager] Standalone battle result for stage ${stageId} saved to Firebase.`);
+                        return true; // Indicate success
+                    } catch (error) {
+                        console.error(`[GameManager] Firebase Error: Failed to save standalone battle result for stage ${stageId}:`, error);
+                        // Re-throw the error so the caller knows it failed
+                        throw error;
+                    }
+                }
+                else {
+                    console.log('[GameManager] No stage ID identified. Skipping Firebase save.');
+                    return false; // Indicate save was skipped
+                }
+           } catch (error) { // Catch errors from the outer logic (e.g., parsing stageIndex)
+                console.error(`[GameManager] Error during saveBattleResultToFirebase setup:`, error);
+                throw error; // Re-throw to be caught by checkGameOver
            }
        }
        // --- END NEW --- 
@@ -1796,6 +1828,11 @@ class GameManager {
         * Resets the game state to its initial values.
         */
        resetGame() {
+           console.log("[GameManager] Resetting game...");
+           this.isGameOver = false;
+           this.isGameRunning = false;
+           this.actedCharacters = [];
+           this.deadCharactersLogged = []; // Reset logged deaths
            this.gameState = {
                turn: 1,
                phase: 'player',
@@ -1806,7 +1843,6 @@ class GameManager {
                battleLog: []
            };
            this.currentTurnActions = [];
-           this.isGameOver = false;
            this.selectedCharacter = null;
            this.selectedAbilityIndex = -1;
            this.autoSelectEnabled = false; 
@@ -1853,11 +1889,50 @@ class GameManager {
        // --- END NEW DEBUG FUNCTION ---
 
        handleCharacterDeath(character) {
-           console.log(`[handleCharacterDeath] Processing death for: ${character.name} (ID: ${character.id}, InstanceID: ${character.instanceId})`);
-           // Mark character as dead internally if not already (belt-and-suspenders)
-           // Character.applyDamage should set currentHp to 0 or less.
+           const log = this.addLogEntry.bind(this);
+           log(`${character.name} has been defeated!`, 'death');
 
-           // Remove from the correct game state array
+           // --- Trigger Death Passive FIRST --- 
+           // We need to trigger this *before* modifying game state arrays 
+           // in case the passive needs access to the character's original team/opponents.
+           let passiveTriggered = false;
+           console.log(`[Passive Check - ${character.name}] Checking passive:`, character.passive); // Log 1
+           if (character.passive && character.passive.id && window.PassiveFactory) {
+               console.log(`[Passive Check - ${character.name}] Found passive ID: ${character.passive.id}. PassiveFactory exists.`); // Log 2
+               const PassiveHandlerClass = window.PassiveFactory.getPassiveHandlerClass(character.passive.id);
+               // --- MODIFIED LOG --- 
+               console.log(`[Passive Check - ${character.name}] Retrieved handler class:`, PassiveHandlerClass, ` | Registered IDs:`, Array.from(window.PassiveFactory.registeredPassives.keys())); // Log 3
+               // --- END MODIFIED LOG --- 
+               if (PassiveHandlerClass) {
+                   try {
+                       const handler = new PassiveHandlerClass(character);
+                       console.log(`[Passive Check - ${character.name}] Instantiated handler:`, handler); // Log 4
+                       if (typeof handler.onDeath === 'function') {
+                           console.log(`[Passive Trigger] Found onDeath for ${character.passive.id}. Triggering...`); // Log 5
+                           handler.onDeath(character, this); 
+                           passiveTriggered = true;
+                       } else {
+                           console.warn(`[Passive Check - ${character.name}] Handler exists but onDeath is not a function. Type: ${typeof handler.onDeath}`); // Log 6a
+                           console.warn(`Passive handler for ${character.passive.id} does not have an onDeath method.`);
+                       }
+                   } catch (error) {
+                       console.error(`[Passive Check - ${character.name}] Error during handler instantiation or onDeath call:`, error); // Log 6b
+                       console.error(`Error executing onDeath passive for ${character.passive.id}:`, error);
+                   }
+               } else {
+                    console.log(`[Passive Check - ${character.name}] No specific passive handler CLASS found registered for ID: ${character.passive.id}`); // Log 6c
+                    // console.log(`No specific passive handler found for ${character.passive.id} on death.`);
+               }
+           } else if (character.passive && character.passive.id) {
+                console.warn(`[Passive Check - ${character.name}] PassiveFactory missing?`, window.PassiveFactory); // Log 7a
+                console.warn("PassiveFactory not found, cannot trigger death passive.");
+           } else {
+                console.log(`[Passive Check - ${character.name}] Passive check failed: passive=${!!character.passive}, id=${character.passive?.id}`); // Log 7b
+           }
+           // --- End Trigger Death Passive --- 
+
+           // Remove character from game state *after* triggering passive
+           // Find which team the character belonged to
            let found = false;
            if (character.isAI) {
                const index = this.gameState.aiCharacters.findIndex(c => (c.instanceId || c.id) === (character.instanceId || character.id));
@@ -1888,6 +1963,16 @@ class GameManager {
                // this.uiManager.removeCharacter(character); // REMOVED
                this.uiManager.updateCharacterUI(character); // Ensure UI reflects HP 0 and dead state
                console.log(`Updated UI for deceased character: ${character.name}`);
+
+               // --- ADDED: Special handling for crow despawn ---
+               if (character.id === 'crow') {
+                   // Use a slight delay to allow death animations/effects to play
+                   setTimeout(() => {
+                       this.uiManager.removeCharacter(character);
+                       log(`${character.name} (a crow) has despawned.`);
+                   }, 500); // Delay in milliseconds (adjust as needed)
+               }
+               // --- END ADDED ---
            } else {
                 console.warn(`[handleCharacterDeath] Could not find character ${character.name} (ID: ${character.id}, InstanceID: ${character.instanceId}) in game state arrays.`);
            }
@@ -1897,6 +1982,111 @@ class GameManager {
 
            // Update the End Turn button state, as a death might change who can act
            this.uiManager.updateEndTurnButton();
+
+           console.log(`${character.name} (instanceId: ${character.instanceId}) has been removed from the game state.`);
+           // Check for game over after removing the character
+           this.checkGameOver();
+
+           // <<< Dispatch CharacterDied event >>>
+           const deathEvent = new CustomEvent('CharacterDied', {
+               detail: { character: character }
+           });
+           document.dispatchEvent(deathEvent);
+           // <<< End Dispatch >>>
+       }
+
+       /**
+        * Gets the opposing team relative to the given character.
+        * @param {Character} character - The character to find opponents for.
+        * @returns {Character[]} - Array of opponent characters.
+        */
+       getOpponents(character) {
+           return character.isAI ? this.gameState.playerCharacters : this.gameState.aiCharacters;
+       }
+
+       /**
+        * Gets the allied team relative to the given character (including the character itself if alive).
+        * @param {Character} character - The character to find allies for.
+        * @returns {Character[]} - Array of allied characters.
+        */
+       getAllies(character) {
+           return character.isAI ? this.gameState.aiCharacters : this.gameState.playerCharacters;
+       }
+
+       applyDamage(amount, type, caster = null, options = {}) { // Added options object
+           if (this.isDead()) {
+               return 0;
+           }
+
+           // Check if character can dodge
+           const dodgeChance = this.stats.dodgeChance || 0;
+           const dodgeRoll = Math.random();
+           
+           // Process dodge - if character has dodge chance and roll is successful
+           if (dodgeChance > 0 && dodgeRoll < dodgeChance) {
+               console.log(`${this.name} dodged the attack!`);
+               
+               // Show dodge VFX
+               this.showDodgeVFX();
+               
+               // Add log entry
+               addLogEntry(`${this.name} dodged the attack!`, 'system');
+               
+               return 0; // No damage taken
+           }
+
+           // Rest of the damage application logic remains the same...
+       }
+       
+       // Add new method to show dodge VFX
+       showDodgeVFX() {
+           // Get character element
+           const charElement = document.getElementById(`character-${this.instanceId || this.id}`);
+           if (!charElement) return;
+           
+           // Create VFX container
+           const dodgeVfx = document.createElement('div');
+           dodgeVfx.className = 'dodge-vfx';
+           
+           // Create the DODGE! text
+           const dodgeText = document.createElement('div');
+           dodgeText.className = 'dodge-text';
+           dodgeText.textContent = 'DODGE!';
+           dodgeVfx.appendChild(dodgeText);
+           
+           // Add to character element
+           charElement.appendChild(dodgeVfx);
+           
+           // Remove after animation completes
+           setTimeout(() => {
+               if (dodgeVfx.parentNode === charElement) {
+                   charElement.removeChild(dodgeVfx);
+               }
+           }, 700); // Slightly longer than animation duration to ensure it completes
+       }
+
+       // Show VFX for rain healing (add this method after applyStageEffects)
+       showRainHealVFX(character, amount) {
+           const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+           if (!characterElement) return;
+           
+           // Create heal VFX with rain style
+           const vfx = document.createElement('div');
+           vfx.className = 'heal-vfx rain-heal-vfx';
+           vfx.textContent = `+${amount}`;
+           
+           // Add the rain droplets
+           const rainDrops = document.createElement('div');
+           rainDrops.className = 'rain-heal-particles';
+           vfx.appendChild(rainDrops);
+           
+           // Append to character element
+           characterElement.appendChild(vfx);
+           
+           // Remove after animation
+           setTimeout(() => {
+               vfx.remove();
+           }, 2000);
        }
    }
 
@@ -1904,28 +2094,24 @@ class GameManager {
    class AIManager {
        constructor(gameManager) {
            this.gameManager = gameManager;
-           this.previousActions = {}; // Track previous actions to avoid repetition
        }
 
        async executeAITurn() {
            try {
                this.gameManager.gameState.phase = 'ai';
                this.gameManager.uiManager.updatePhase('ai');
-               // No need to add log entry here, it's added in endPlayerTurn
-               // this.gameManager.addLogEntry("AI's turn", 'enemy-turn');
 
-               // --- NEW: Process AI effects at start of their turn --- 
+               // Process AI effects at start of their turn WITH duration reduction
                this.gameManager.gameState.aiCharacters.forEach(aiChar => {
                    if (!aiChar.isDead()) {
-                       // Process buffs/debuffs, reduce duration=true
-                       aiChar.processEffects(true); 
+                       // Process buffs/debuffs, reduce duration=true, regenerate resources
+                       aiChar.processEffects(true, true);
                        // Reduce ability cooldowns
                        aiChar.abilities.forEach(ability => ability.reduceCooldown());
                        // Update UI after processing
-                       this.gameManager.uiManager.updateCharacterUI(aiChar); 
+                       this.gameManager.uiManager.updateCharacterUI(aiChar);
                    }
                });
-               // --- END Process AI effects --- 
 
                // Show planning phase overlay
                this.gameManager.uiManager.showPlanningPhase(true);
@@ -2051,6 +2237,9 @@ class GameManager {
                case 'all_allies':
                    possibleTargets = allAIChars; // Target the group
                    break;
+               case 'all_allies_except_self': // Added this case for Carrot Power-up
+                   possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Target the group, excluding self
+                   break;
                default:
                    console.error(` [AI Planner] Unknown target type '${selectedAbility.targetType}'`);
                    possibleTargets = []; // No valid target logic
@@ -2068,9 +2257,9 @@ class GameManager {
                return { ability: selectedAbility, target: null, error: 'No valid targets found' }; // Indicate no valid target
            }
 
-           // Select a random target from the valid list
-           const targetIndex = Math.floor(Math.random() * possibleTargets.length);
-           let selectedTarget = possibleTargets[targetIndex]; // Changed const to let
+           // Select a random target from the valid list for single-target abilities
+           // For group abilities, we'll use the entire group later
+           let selectedTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
 
            console.log(`[AI Planner Debug] Initial target selected for ${selectedAbility.name}: ${selectedTarget.name} (isAI: ${selectedTarget.isAI})`);
 
@@ -2081,9 +2270,12 @@ class GameManager {
                selectedTarget = allAIChars; // Pass the array
            } else if (selectedAbility.targetType === 'all') { // Handle the new 'all' case
                selectedTarget = allPlayerChars; // Pass the array of player characters
+           } else if (selectedAbility.targetType === 'all_allies_except_self') { // Handle Carrot Power-up case
+               selectedTarget = allAIChars.filter(c => c.id !== aiChar.id); // Pass the filtered array
            }
+           // For single target types (enemy, ally, self, any, any_except_self), selectedTarget remains the randomly chosen single character.
 
-           if (selectedTarget) {
+           if (selectedTarget && (!Array.isArray(selectedTarget) || selectedTarget.length > 0)) {
                 const targetName = Array.isArray(selectedTarget) ? `${selectedTarget.length} targets` : selectedTarget.name;
                 console.log(`[AI Planner] Planned action: ${selectedAbility.name} on ${targetName}`);
                return { ability: selectedAbility, target: selectedTarget };
@@ -2097,7 +2289,7 @@ class GameManager {
         async executeAction(action) {
             if (!action || action.casterIndex === undefined || action.abilityIndex === undefined || action.target === undefined) {
                 console.error("AI executeAction called with invalid or incomplete action:", action);
-                this.gameManager.addLogEntry(`AI encountered an error retrieving planned action.`, 'error'); // Use gameManager
+                this.gameManager.addLogEntry(`AI encountered an error retrieving planned action.`, 'error');
                 return;
             }
 
@@ -2108,25 +2300,25 @@ class GameManager {
 
             if (!caster || !ability) {
                 console.error("AI executeAction: Caster or Ability not found for action:", action);
-                this.gameManager.addLogEntry(`AI encountered an error finding character or ability.`, 'error'); // Use gameManager
+                this.gameManager.addLogEntry(`AI encountered an error finding character or ability.`, 'error');
                 return;
             }
             
             // --- VALIDATION CHECKS --- 
             if (caster.isDead() || caster.isStunned()) {
-                this.gameManager.addLogEntry(`${caster.name} cannot execute action (dead or stunned).`, 'enemy-turn'); // Use gameManager
+                this.gameManager.addLogEntry(`${caster.name} cannot execute action (dead or stunned).`, 'enemy-turn');
                 return;
             }
             if (caster.stats.currentMana < ability.manaCost) {
-                this.gameManager.addLogEntry(`${caster.name} does not have enough mana for ${ability.name}. Skipping action.`, 'enemy-turn'); // Use gameManager
+                this.gameManager.addLogEntry(`${caster.name} does not have enough mana for ${ability.name}. Skipping action.`, 'enemy-turn');
                 return;
             }
             if (ability.currentCooldown > 0) {
-                 this.gameManager.addLogEntry(`${caster.name}'s ${ability.name} is still on cooldown (${ability.currentCooldown} turns). Skipping action.`, 'enemy-turn'); // Use gameManager
+                 this.gameManager.addLogEntry(`${caster.name}'s ${ability.name} is still on cooldown (${ability.currentCooldown} turns). Skipping action.`, 'enemy-turn');
                  return;
             }
             if (ability.isDisabled) { 
-                 this.gameManager.addLogEntry(`${caster.name}'s ${ability.name} is disabled. Skipping action.`, 'enemy-turn'); // Use gameManager
+                 this.gameManager.addLogEntry(`${caster.name}'s ${ability.name} is disabled. Skipping action.`, 'enemy-turn');
                  return;
             }
             // --- END VALIDATION CHECKS ---
@@ -2169,6 +2361,10 @@ class GameManager {
                  const livingAllies = gameState.aiCharacters.filter(a => !a.isDead());
                  finalTargetInfo = [...livingEnemies, ...livingAllies];
                  console.log(`[AI Execute] Validating ${finalTargetInfo.length} living characters for 'all'.`);
+             } else if (targetType === 'all_allies_except_self') { // Added this case
+                 // Re-fetch living allies excluding self just before execution
+                 finalTargetInfo = gameState.aiCharacters.filter(a => !a.isDead() && a.instanceId !== caster.instanceId);
+                 console.log(`[AI Execute] Validating ${finalTargetInfo.length} living allies (excluding self) for AoE buff.`);
              } else {
                   console.warn(`[AI Execute] Unhandled target type ${targetType} during re-validation.`);
                   // Attempt to use original planned target if type is unknown, after checking if it's valid
@@ -2237,6 +2433,42 @@ class GameManager {
             this.battlePhaseElement = document.getElementById('battle-phase');
             this.endTurnButton = document.getElementById('end-turn-button');
             this.battleLog = document.getElementById('battle-log');
+            
+            // --- NEW: Initialize Character Stats Menu ---
+            this.characterStatsMenu = document.getElementById('character-stats-menu');
+            if (!this.characterStatsMenu) {
+                console.log('[UIManager] Character stats menu element not found, creating it.');
+                this.characterStatsMenu = document.createElement('div');
+                this.characterStatsMenu.id = 'character-stats-menu';
+                this.characterStatsMenu.className = 'character-stats-menu'; // Add class for styling
+                this.characterStatsMenu.style.display = 'none'; // Start hidden
+                document.body.appendChild(this.characterStatsMenu);
+            
+                // Add event listener to hide menu on escape key
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && this.characterStatsMenu && this.characterStatsMenu.style.display === 'block') {
+                        this.characterStatsMenu.style.display = 'none';
+                    }
+                });
+                
+                // Add event listener to hide menu on click outside (use capture phase)
+                document.addEventListener('click', (event) => {
+                    if (this.characterStatsMenu && this.characterStatsMenu.style.display === 'block') {
+                        const isClickInsideMenu = this.characterStatsMenu.contains(event.target);
+                        // Prevent closing if clicking on the character that opened it (check character-slot)
+                        const clickedCharSlot = event.target.closest('.character-slot'); 
+                        
+                        if (!isClickInsideMenu && !clickedCharSlot) {
+                            this.characterStatsMenu.style.display = 'none';
+                        }
+                    }
+                }, true);
+                
+            } else {
+                console.log('[UIManager] Found existing character stats menu element.');
+                this.characterStatsMenu.style.display = 'none'; // Ensure it starts hidden
+            }
+            // --- END NEW ---
             
             // Create auto-select button
             this.createAutoSelectButton();
@@ -2494,17 +2726,21 @@ class GameManager {
             playerContainer.innerHTML = '';
             aiContainer.innerHTML = '';
             
-            // Render player characters
-            playerCharacters.forEach(function(character) {
-                const charElement = this.createCharacterElement(character);
-                playerContainer.appendChild(charElement);
-            }, this);
+            // Render player characters (Filter out dead ones)
+            playerCharacters
+                .filter(character => !character.isDead())
+                .forEach(function(character) {
+                    const charElement = this.createCharacterElement(character);
+                    playerContainer.appendChild(charElement);
+                }, this);
             
-            // Render AI characters
-            aiCharacters.forEach(function(character) {
-                const charElement = this.createCharacterElement(character, true);
-                aiContainer.appendChild(charElement);
-            }, this);
+            // Render AI characters (Filter out dead ones)
+            aiCharacters
+                .filter(character => !character.isDead())
+                .forEach(function(character) {
+                    const charElement = this.createCharacterElement(character, true);
+                    aiContainer.appendChild(charElement);
+                }, this);
         }
 
         // Create ability UI elements
@@ -2710,10 +2946,14 @@ class GameManager {
             // Use instanceId if available, otherwise fallback to id
             const elementId = character.instanceId || character.id;
             const charElement = document.getElementById(`character-${elementId}`);
+            
+            // --- MODIFIED: Check if element exists before proceeding --- 
             if (!charElement) {
-                console.error(`UI element not found for character: ${elementId}`);
+                // Log a warning instead of an error, as this can happen during initial load
+                console.warn(`[UIManager] updateCharacterUI: UI element not found for character: ${elementId}. Skipping update.`);
                 return; // Exit if element not found
             }
+            // --- END MODIFICATION ---
             
             // --- NEW: Add/Remove character-dead class based on status --- 
             if (character.isDead()) {
@@ -2742,40 +2982,70 @@ class GameManager {
             const buffsDiv = charElement.querySelector('.buffs');
             buffsDiv.innerHTML = '';
             character.buffs.forEach((buff) => {
-                const buffIcon = document.createElement('div');
-                buffIcon.className = 'status-icon buff-icon';
+                const buffIconContainer = document.createElement('div'); // Renamed for clarity
+                buffIconContainer.className = 'status-icon-container buff-container'; // More specific class
+                buffIconContainer.dataset.effectId = buff.id; // Store ID for reference
                 
                 // Add buff icon if available
                 if (buff.icon) {
                     const img = document.createElement('img');
                     img.src = buff.icon;
                     img.alt = buff.name;
-                    img.className = 'effect-icon';
-                    buffIcon.appendChild(img);
+                    img.className = 'status-icon buff-icon'; // Keep buff-icon class for consistency
+                    // --- NEW: Use updated description from buff object --- 
+                    img.title = buff.description ? `${buff.name}: ${buff.description}` : buff.name;
+                    // --- END NEW ---
+                    buffIconContainer.appendChild(img);
                 }
                 
                 // Add turn counter
                 const durationElement = document.createElement('div');
                 durationElement.className = 'status-duration';
                 durationElement.textContent = buff.duration;
-                buffIcon.appendChild(durationElement);
+                buffIconContainer.appendChild(durationElement);
+                
+                // --- NEW: Add Nurturing Toss Stack Indicator --- 
+                if (buff.id === 'nurturing_toss_buff' && buff.currentStacks > 0) {
+                    const stackIndicator = document.createElement('div');
+                    stackIndicator.className = 'nurturing-toss-stack-indicator';
+                    stackIndicator.textContent = buff.currentStacks;
+                    buffIconContainer.appendChild(stackIndicator);
+                    
+                    // Optional: Add glow effect container
+                    const glowEffect = document.createElement('div');
+                    glowEffect.className = 'nurturing-toss-glow';
+                    buffIconContainer.appendChild(glowEffect);
+                    
+                    // Apply animation if needed (could be triggered differently, e.g., via a flag)
+                    // For simplicity, let's assume CSS handles the animation based on class
+                }
+                // --- END NEW ---
                 
                 // Add enhanced tooltip functionality
-                buffIcon.addEventListener('mouseenter', (e) => {
-                    this.showStatusTooltip(e, buff, 'buff');
+                buffIconContainer.addEventListener('mouseenter', (e) => {
+                    // --- NEW: Re-fetch the buff object just before showing tooltip --- 
+                    const currentBuff = character.buffs.find(b => b.id === buff.id);
+                    if (currentBuff) {
+                        this.showStatusTooltip(e, currentBuff, 'buff');
+                    } else {
+                        console.warn(`Tooltip: Could not find current buff with ID ${buff.id} for ${character.name}`);
+                        // Optionally show tooltip with the old data if needed
+                        // this.showStatusTooltip(e, buff, 'buff'); 
+                    }
+                    // --- END NEW ---
                 });
                 
-                buffIcon.addEventListener('mouseleave', () => {
+                buffIconContainer.addEventListener('mouseleave', () => {
                     this.hideStatusTooltip();
                 });
                 
-                buffsDiv.appendChild(buffIcon);
+                buffsDiv.appendChild(buffIconContainer);
             });
             
             // Update debuffs
             const debuffsDiv = charElement.querySelector('.debuffs');
             debuffsDiv.innerHTML = '';
-            
+            debuffsDiv.innerHTML = ''; // This line seems redundant
             character.debuffs.forEach((debuff) => {
                 // --- MODIFICATION START: Skip rendering icon for Birdie's internal stun --- 
                 if (debuff.id === 'birdie_internal_stun') {
@@ -2783,34 +3053,45 @@ class GameManager {
                 }
                 // --- MODIFICATION END ---
 
-                const debuffIcon = document.createElement('div');
-                debuffIcon.className = 'status-icon debuff-icon';
+                const debuffIconContainer = document.createElement('div'); // Use container
+                debuffIconContainer.className = 'status-icon-container debuff-container';
+                debuffIconContainer.dataset.effectId = debuff.id;
                 
                 // Add debuff icon if available
                 if (debuff.icon) {
                     const img = document.createElement('img');
                     img.src = debuff.icon;
                     img.alt = debuff.name;
-                    img.className = 'effect-icon';
-                    debuffIcon.appendChild(img);
+                    img.className = 'status-icon debuff-icon';
+                    // --- NEW: Use updated description --- 
+                    img.title = debuff.description ? `${debuff.name}: ${debuff.description}` : debuff.name;
+                    // --- END NEW ---
+                    debuffIconContainer.appendChild(img);
                 }
                 
                 // Add turn counter
                 const durationElement = document.createElement('div');
                 durationElement.className = 'status-duration';
                 durationElement.textContent = debuff.duration;
-                debuffIcon.appendChild(durationElement);
+                debuffIconContainer.appendChild(durationElement);
                 
                 // Add enhanced tooltip functionality
-                debuffIcon.addEventListener('mouseenter', (e) => {
-                    this.showStatusTooltip(e, debuff, 'debuff');
+                debuffIconContainer.addEventListener('mouseenter', (e) => {
+                    // --- NEW: Re-fetch the debuff object --- 
+                    const currentDebuff = character.debuffs.find(d => d.id === debuff.id);
+                    if (currentDebuff) {
+                        this.showStatusTooltip(e, currentDebuff, 'debuff');
+                    } else {
+                        console.warn(`Tooltip: Could not find current debuff with ID ${debuff.id} for ${character.name}`);
+                    }
+                    // --- END NEW ---
                 });
                 
-                debuffIcon.addEventListener('mouseleave', () => {
+                debuffIconContainer.addEventListener('mouseleave', () => {
                     this.hideStatusTooltip();
                 });
                 
-                debuffsDiv.appendChild(debuffIcon);
+                debuffsDiv.appendChild(debuffIconContainer);
             });
 
             // Update Cham Cham Passive Stack Indicator
@@ -2889,12 +3170,13 @@ class GameManager {
                         siegfriedPassiveElement.classList.add('stack-added');
                         
                         // Special milestone effects for significant buff counts (5 and 10)
-                        if (buffCount === 5 || buffCount === 10) {
+                        // Removed sound effect call causing linter warning
+                        // if (buffCount === 5 || buffCount === 10) {
                             // Play a sound effect if available
-                            if (typeof playSound === 'function') {
-                                playSound('sfx_lion_roar');
-                            }
-                        }
+                            // if (typeof playSound === 'function') {
+                            //     playSound('sfx_lion_roar');
+                            // }
+                        // }
                         
                         // Remove the class after animation completes
                         setTimeout(() => {
@@ -3346,7 +3628,7 @@ class GameManager {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');2
             const timestamp = `${hours}:${minutes}:${seconds}`;
             
             const timestampElement = document.createElement('span');
@@ -3381,10 +3663,11 @@ class GameManager {
         }
 
         // Show game over screen
-        showGameOverScreen(isVictory) {
+        showGameOverScreen(isVictory, context = {}) { // Added context parameter
             // Use the global showGameOverScreen function if available
             if (window.showGameOverScreen) {
-                window.showGameOverScreen(isVictory);
+                 // Pass victory status and the context object (containing storyId, returnUrl)
+                window.showGameOverScreen(isVictory, context);
             } else {
                 // Fallback to simple alert
                 const message = isVictory ? 
@@ -3392,6 +3675,12 @@ class GameManager {
                     "Defeat! Your team has been defeated.";
                     
                 alert(message);
+
+                 // Basic fallback navigation if returnUrl is present in context
+                 if (context.returnUrl) {
+                      console.log(`[UIManager Fallback] Navigating back to: ${context.returnUrl}`);
+                      window.location.href = context.returnUrl; 
+                 }
             }
         }
 
@@ -3460,97 +3749,45 @@ class GameManager {
 
     // Show character stats context menu
     showCharacterStatsMenu(character, x, y) {
-        // Debug output to check character stats structure
-        console.log("Character stats structure:", character.id, character.stats);
-        if (character.buffs && character.buffs.length > 0) {
-            console.log("Buffs:", character.buffs);
+        // Hide the menu if it's already visible
+        if (this.characterStatsMenu.style.display === 'block') {
+            this.characterStatsMenu.style.display = 'none';
+            return;
         }
-        
-        // Remove any existing stats menu
-        const existingMenu = document.getElementById('character-stats-menu');
-        if (existingMenu) {
-            existingMenu.remove();
+
+        // If no character is provided, hide the menu
+        if (!character) {
+            this.characterStatsMenu.style.display = 'none';
+            return;
         }
-        
-        // Check if character is in bottom row
-        const isBottomRow = !character.isAI;
-        
-        // Create stats menu
-        const statsMenu = document.createElement('div');
-        statsMenu.id = 'character-stats-menu';
-        statsMenu.className = 'character-stats-menu';
-        
-        // Add bottom-character class for better positioning if character is in bottom row
-        if (isBottomRow) {
-            statsMenu.classList.add('bottom-character');
-        }
-        
-        // Temporarily add to DOM with visibility:hidden to calculate dimensions
-        statsMenu.style.visibility = 'hidden';
-        document.body.appendChild(statsMenu);
-        
-        // Create header
-        const header = document.createElement('div');
-        header.className = 'stats-menu-header';
-        header.textContent = character.name;
-        statsMenu.appendChild(header);
-        
-        // Create stats section
+
+        // Clear the existing content
+        this.characterStatsMenu.innerHTML = '';
+
+        // Create the character name header
+        const nameHeader = document.createElement('h2');
+        nameHeader.textContent = character.name;
+        nameHeader.classList.add('stats-menu-header');
+        this.characterStatsMenu.appendChild(nameHeader);
+
+        // Get base stats and buff-modified stats
+        const baseStats = character.constructor.BASE_STATS || {};
+        const buffModifiedStats = character.getBuffModifiedStats ? character.getBuffModifiedStats() : {};
+
+        // Basic stats section
         const statsSection = document.createElement('div');
-        statsSection.className = 'stats-menu-section';
+        statsSection.classList.add('stats-menu-section');
         
-        // Add stats
+        const statsHeader = document.createElement('h3');
+        statsHeader.textContent = 'Statistics';
+        statsHeader.classList.add('stats-menu-subheader');
+        statsSection.appendChild(statsHeader);
+        
         const statsList = document.createElement('ul');
-        statsList.className = 'stats-list';
+        statsList.classList.add('stats-list');
         
-        // Use character's base stats (retrieved from registry) to compare with current stats
-        // This ensures all buffs are reflected correctly
-        const baseStats = {};
-        
-        // Attempt to retrieve the original character stats from the registry
-        try {
-            if (window.characterRegistry && window.characterRegistry[character.id]) {
-                const regChar = window.characterRegistry[character.id];
-                if (regChar.stats) {
-                    baseStats.physicalDamage = regChar.stats.physicalDamage || 0;
-                    baseStats.magicalDamage = regChar.stats.magicalDamage || 0;
-                    baseStats.armor = regChar.stats.armor || 0;
-                    baseStats.magicalShield = regChar.stats.magicalShield || 0;
-                    baseStats.lifesteal = regChar.stats.lifesteal || 0;
-                    baseStats.dodgeChance = regChar.stats.dodgeChance || 0;
-                    baseStats.critChance = regChar.stats.critChance || 0;
-                    baseStats.critDamage = regChar.stats.critDamage || 1.5;
-                    baseStats.healingPower = regChar.stats.healingPower || 0;
-                }
-            }
-        } catch (e) {
-            console.warn("Error retrieving base stats:", e);
-        }
-        
-        // Check for any buff-specific origins of stat modifications (like Ready to Slice for Ayane)
-        const buffModifiedStats = {};
-        
-        if (character.buffs && character.buffs.length > 0) {
-            character.buffs.forEach(buff => {
-                // Check specifically for Ready to Slice buff which stores original values
-                if (buff.id === 'ready_to_slice') {
-                    if (character.readyToSliceOriginalPhysicalDamage !== undefined) {
-                        buffModifiedStats.physicalDamage = character.readyToSliceOriginalPhysicalDamage;
-                    }
-                    if (character.readyToSliceOriginalDodgeChance !== undefined) {
-                        buffModifiedStats.dodgeChance = character.readyToSliceOriginalDodgeChance;
-                    }
-                }
-                
-                // Could add other buff-specific handling here if needed
-            });
-        }
-        
-        // Flag to check if any buffs are modifying stats
-        let hasStatBuffs = character.buffs && character.buffs.length > 0;
-        
-        // Define stats to display
-        const statsToDisplay = [
+        // Using the provided stats array
+        const stats = [
             { name: 'Physical DMG', value: character.stats.physicalDamage, key: 'physicalDamage', baseValue: baseStats.physicalDamage, buffValue: buffModifiedStats.physicalDamage },
             { name: 'Magical DMG', value: character.stats.magicalDamage, key: 'magicalDamage', baseValue: baseStats.magicalDamage },
             { name: 'Armor', value: character.stats.armor, key: 'armor', baseValue: baseStats.armor, tooltip: `Reduces physical damage by ${Math.min(80, character.stats.armor)}% (max 80%)` },
@@ -3566,329 +3803,337 @@ class GameManager {
             { name: 'Healing Power', value: character.stats.healingPower, key: 'healingPower', baseValue: baseStats.healingPower }
         ];
         
-        statsToDisplay.forEach(stat => {
-            if (stat.value && stat.value !== 0 && stat.value !== '0%') {
-                const statItem = document.createElement('li');
+        stats.forEach(stat => {
+            const statItem = document.createElement('li');
+            statItem.classList.add('stat-item');
+            
+            const statName = document.createElement('span');
+            statName.classList.add('stat-name');
+            statName.textContent = stat.name;
+            
+            const statValue = document.createElement('span');
+            statValue.classList.add('stat-value');
+            statValue.textContent = stat.value;
+            
+            // Add buff/debuff visual indicators
+            if (stat.baseValue !== undefined && stat.key) {
+                const currentValue = typeof stat.value === 'string' ? parseFloat(stat.value) : stat.value;
+                const baseValue = stat.baseValue;
                 
-                // Check if this stat has a baseValue to compare with current
-                if (hasStatBuffs) {
-                    let originalValue, currentValue;
-                    
-                    // First check if we have a buff-stored original value (like from Ready to Slice)
-                    if (stat.buffValue !== undefined) {
-                        originalValue = stat.buffValue;
-                    } else if (stat.baseValue !== undefined) {
-                        originalValue = stat.baseValue;
-                    } else {
-                        originalValue = null;
+                if (typeof currentValue === 'number' && typeof baseValue === 'number') {
+                    if (currentValue > baseValue) {
+                        statValue.classList.add('buffed');
+                    } else if (currentValue < baseValue) {
+                        statValue.classList.add('debuffed');
                     }
-                    
-                    // Format value based on stat type
-                    if (stat.key === 'dodgeChance' || stat.key === 'critChance' || stat.key === 'lifesteal' || stat.key === 'critDamage') {
-                        currentValue = character.stats[stat.key] || 0;
-                    } else {
-                        currentValue = typeof stat.value === 'string' ? character.stats[stat.key] : stat.value;
-                    }
-                    
-                    // Calculate percentage change if there's a difference and we have the original value
-                    if (originalValue !== null && originalValue !== currentValue) {
-                        const percentChange = originalValue > 0 ? 
-                            ((currentValue - originalValue) / originalValue) * 100 : 
-                            currentValue > 0 ? 100 : 0;
-                        
-                        const isPositive = percentChange > 0;
-                        const changeColor = isPositive ? '#4cd137' : '#e74c3c';
-                        const changeSymbol = isPositive ? '+' : '';
-                        
-                        // Round to nearest integer, but for very small changes (< 1%), show at least 1%
-                        const displayPercent = Math.abs(percentChange) < 1 && percentChange !== 0 ? 
-                            (isPositive ? 1 : -1) : 
-                            Math.round(percentChange);
-                        
-                        const percentText = `${changeSymbol}${displayPercent}%`;
-                        
-                        // Format the value appropriately
-                        let formattedValue;
-                        if (stat.key === 'dodgeChance' || stat.key === 'critChance' || stat.key === 'lifesteal' || stat.key === 'critDamage') {
-                            formattedValue = `${(currentValue * 100).toFixed(1)}%`;
-                        } else if (stat.key === 'hp' || stat.key === 'mana') {
-                            formattedValue = stat.value; // Keep the original format for hp/mana
-                        } else {
-                            formattedValue = Math.round(currentValue);
-                        }
-                        
-                        // Apply colored stat value with percentage indicator
-                        statItem.innerHTML = `
-                            <span class="stat-name">${stat.name}:</span>
-                            <span class="stat-value">
-                                <span style="color: ${changeColor}; font-weight: bold;">${formattedValue}</span> 
-                                <span class="stat-change" style="color: ${changeColor};">(${percentText})</span>
-                            </span>`;
-                    } else {
-                        // Add tooltip if available
-                        if (stat.tooltip) {
-                            statItem.title = stat.tooltip;
-                            statItem.classList.add('has-tooltip');
-                        }
-                        statItem.innerHTML = `<span class="stat-name">${stat.name}:</span> <span class="stat-value">${stat.value}</span>`;
-                    }
-                } else {
-                    // Add tooltip if available
-                    if (stat.tooltip) {
-                        statItem.title = stat.tooltip;
-                        statItem.classList.add('has-tooltip');
-                    }
-                    statItem.innerHTML = `<span class="stat-name">${stat.name}:</span> <span class="stat-value">${stat.value}</span>`;
                 }
-                
-                statsList.appendChild(statItem);
             }
+            
+            // Add tooltip if available
+            if (stat.tooltip) {
+                statItem.setAttribute('title', stat.tooltip);
+                statItem.style.cursor = 'help';
+            }
+            
+            statItem.appendChild(statName);
+            statItem.appendChild(statValue);
+            statsList.appendChild(statItem);
         });
         
         statsSection.appendChild(statsList);
-        statsMenu.appendChild(statsSection);
+        this.characterStatsMenu.appendChild(statsSection);
         
-        // Rest of the method for buffs, abilities, etc. remains the same...
-        
-        // Add active buffs section if character has buffs
-        if (character.buffs && character.buffs.length > 0) {
-            const buffsHeader = document.createElement('div');
-            buffsHeader.className = 'stats-menu-subheader';
-            buffsHeader.textContent = 'Active Buffs';
-            statsMenu.appendChild(buffsHeader);
+        // Abilities section
+        if (character.abilities && character.abilities.length > 0) {
+            const abilitiesSection = document.createElement('div');
+            abilitiesSection.classList.add('stats-menu-section', 'abilities-section');
             
-            const buffsSection = document.createElement('div');
-            buffsSection.className = 'stats-menu-section buffs-section';
+            const abilitiesHeader = document.createElement('h3');
+            abilitiesHeader.textContent = 'Abilities';
+            abilitiesHeader.classList.add('stats-menu-subheader');
+            abilitiesSection.appendChild(abilitiesHeader);
+            
+            character.abilities.forEach((ability, index) => {
+                const abilityItem = document.createElement('div');
+                abilityItem.classList.add('ability-item');
+                
+                const abilityHeader = document.createElement('div');
+                abilityHeader.classList.add('ability-header');
+                
+                // Add ability icon if available
+                if (ability.icon) {
+                    const abilityIcon = document.createElement('img');
+                    abilityIcon.classList.add('ability-icon-small');
+                    abilityIcon.src = ability.icon;
+                    abilityIcon.alt = ability.name;
+                    abilityHeader.appendChild(abilityIcon);
+                }
+                
+                const abilityName = document.createElement('span');
+                abilityName.classList.add('ability-name');
+                abilityName.textContent = ability.name;
+                abilityHeader.appendChild(abilityName);
+                
+                abilityItem.appendChild(abilityHeader);
+                
+                // Add ability description
+                if (ability.description) {
+                    const abilityDescription = document.createElement('div');
+                    abilityDescription.classList.add('ability-description');
+                    abilityDescription.innerHTML = ability.description; // Use innerHTML instead of textContent
+                    abilityItem.appendChild(abilityDescription);
+                }
+                
+                // Add ability details (cost, cooldown)
+                const abilityDetails = document.createElement('div');
+                abilityDetails.classList.add('ability-details');
+                
+                if (ability.manaCost !== undefined) {
+                    const manaCost = document.createElement('span');
+                    manaCost.textContent = `Mana: ${ability.manaCost}`;
+                    manaCost.classList.add('ability-mana-cost');
+                    abilityDetails.appendChild(manaCost);
+                }
+                
+                if (ability.cooldown !== undefined) {
+                    const cooldown = document.createElement('span');
+                    cooldown.textContent = ability.cooldown > 0 ? `Cooldown: ${ability.cooldown} turn${ability.cooldown !== 1 ? 's' : ''}` : 'No cooldown';
+                    cooldown.classList.add('ability-cooldown-info');
+                    
+                    // If ability is on cooldown, show current cooldown
+                    if (ability.currentCooldown && ability.currentCooldown > 0) {
+                        cooldown.textContent += ` (${ability.currentCooldown} turn${ability.currentCooldown !== 1 ? 's' : ''} left)`;
+                        cooldown.classList.add('on-cooldown');
+                    }
+                    
+                    abilityDetails.appendChild(cooldown);
+                }
+                
+                // Add ability keybind
+                const keybinds = ['Q', 'W', 'E', 'R'];
+                if (index < keybinds.length) {
+                    const keybind = document.createElement('span');
+                    keybind.textContent = `Hotkey: ${keybinds[index]}`;
+                    keybind.classList.add('ability-keybind-info');
+                    abilityDetails.appendChild(keybind);
+                }
+                
+                abilityItem.appendChild(abilityDetails);
+                abilitiesSection.appendChild(abilityItem);
+            });
+            
+            this.characterStatsMenu.appendChild(abilitiesSection);
+        }
+        
+        // Passive ability section
+        if (character.passive) {
+            const passiveSection = document.createElement('div');
+            passiveSection.classList.add('stats-menu-section', 'passive-section');
+            
+            const passiveHeader = document.createElement('h3');
+            passiveHeader.textContent = 'Passive';
+            passiveHeader.classList.add('stats-menu-subheader');
+            passiveSection.appendChild(passiveHeader);
+            
+            const passiveItem = document.createElement('div');
+            passiveItem.classList.add('passive-item');
+            
+            // Passive header with icon
+            const passiveHeaderDiv = document.createElement('div');
+            passiveHeaderDiv.classList.add('buff-header'); // Reuse buff header style
+            
+            // REMOVED: Add passive icon if available
+            /*
+            if (character.passive.icon) {
+                const passiveIcon = document.createElement('img');
+                passiveIcon.classList.add('ability-icon-small');
+                passiveIcon.src = character.passive.icon;
+                passiveIcon.alt = character.passive.name;
+                passiveHeaderDiv.appendChild(passiveIcon);
+            }
+            */
+            
+            const passiveName = document.createElement('span');
+            passiveName.classList.add('passive-name');
+            passiveName.textContent = character.passive.name;
+            passiveHeaderDiv.appendChild(passiveName);
+            
+            passiveItem.appendChild(passiveHeaderDiv);
+            
+            // Add passive description
+            if (character.passive.description) {
+                const passiveDescription = document.createElement('div');
+                passiveDescription.classList.add('passive-description');
+                passiveDescription.textContent = character.passive.description;
+                passiveItem.appendChild(passiveDescription);
+            }
+            
+            // Add passive tracking info if available (e.g., lifestealFromPassive for InfernalBirdie)
+            if (character.lifestealFromPassive !== undefined) {
+                const trackingInfo = document.createElement('div');
+                trackingInfo.classList.add('passive-tracking');
+                trackingInfo.textContent = `Total Lifesteal gained: ${(character.lifestealFromPassive * 100).toFixed(1)}%`;
+                passiveItem.appendChild(trackingInfo);
+            }
+            
+            passiveSection.appendChild(passiveItem);
+            this.characterStatsMenu.appendChild(passiveSection);
+        }
+        
+        // Buffs section
+        const buffsSection = document.createElement('div');
+        buffsSection.classList.add('stats-menu-section', 'buffs-section');
+        
+        if (character.buffs && character.buffs.length > 0) {
+            const buffsHeader = document.createElement('h3');
+            buffsHeader.textContent = 'Buffs';
+            buffsHeader.classList.add('stats-menu-subheader');
+            buffsSection.appendChild(buffsHeader);
             
             character.buffs.forEach(buff => {
                 const buffItem = document.createElement('div');
-                buffItem.className = 'buff-item';
+                buffItem.classList.add('buff-item');
                 
                 const buffHeader = document.createElement('div');
-                buffHeader.className = 'buff-header';
+                buffHeader.classList.add('buff-header');
                 
+                // Add buff icon if available
                 if (buff.icon) {
                     const buffIcon = document.createElement('img');
+                    buffIcon.classList.add('buff-icon-small');
                     buffIcon.src = buff.icon;
-                    buffIcon.className = 'buff-icon-small';
+                    buffIcon.alt = buff.name;
                     buffHeader.appendChild(buffIcon);
                 }
                 
                 const buffName = document.createElement('span');
-                buffName.className = 'buff-name';
+                buffName.classList.add('buff-name');
                 buffName.textContent = buff.name;
-                buffHeader.appendChild(buffName);
                 
                 const buffDuration = document.createElement('span');
-                buffDuration.className = 'buff-duration';
-                buffDuration.textContent = `${buff.duration} turns`;
+                buffDuration.classList.add('buff-duration');
+                buffDuration.textContent = `${buff.duration} turn${buff.duration !== 1 ? 's' : ''}`;
+                
+                buffHeader.appendChild(buffName);
                 buffHeader.appendChild(buffDuration);
                 
                 const buffDescription = document.createElement('div');
-                buffDescription.className = 'buff-description';
-                buffDescription.textContent = buff.description;
+                buffDescription.classList.add('buff-description');
+                buffDescription.textContent = buff.description || 'No description available.';
                 
                 buffItem.appendChild(buffHeader);
                 buffItem.appendChild(buffDescription);
                 buffsSection.appendChild(buffItem);
             });
-            
-            statsMenu.appendChild(buffsSection);
         }
         
-        // Add abilities section
-        if (character.abilities && character.abilities.length > 0) {
-            const abilitiesHeader = document.createElement('div');
-            abilitiesHeader.className = 'stats-menu-subheader';
-            abilitiesHeader.textContent = 'Abilities';
-            statsMenu.appendChild(abilitiesHeader);
+        this.characterStatsMenu.appendChild(buffsSection);
+        
+        // Debuffs section
+        const debuffsSection = document.createElement('div');
+        debuffsSection.classList.add('stats-menu-section', 'buffs-section');
+        
+        if (character.debuffs && character.debuffs.length > 0) {
+            const debuffsHeader = document.createElement('h3');
+            debuffsHeader.textContent = 'Debuffs';
+            debuffsHeader.classList.add('stats-menu-subheader');
+            debuffsSection.appendChild(debuffsHeader);
             
-            const abilitiesSection = document.createElement('div');
-            abilitiesSection.className = 'stats-menu-section abilities-section';
-            
-            character.abilities.forEach(ability => {
-                const abilityItem = document.createElement('div');
-                abilityItem.className = 'ability-item';
+            character.debuffs.forEach(debuff => {
+                const debuffItem = document.createElement('div');
+                debuffItem.classList.add('buff-item');
+                debuffItem.style.borderLeftColor = '#e74c3c';
                 
-                const abilityHeader = document.createElement('div');
-                abilityHeader.className = 'ability-header';
+                const debuffHeader = document.createElement('div');
+                debuffHeader.classList.add('buff-header');
                 
-                if (ability.icon) {
-                    const abilityIcon = document.createElement('img');
-                    abilityIcon.src = ability.icon;
-                    abilityIcon.className = 'ability-icon-small';
-                    abilityHeader.appendChild(abilityIcon);
+                // Add debuff icon if available
+                if (debuff.icon) {
+                    const debuffIcon = document.createElement('img');
+                    debuffIcon.classList.add('buff-icon-small');
+                    debuffIcon.src = debuff.icon;
+                    debuffIcon.alt = debuff.name;
+                    debuffHeader.appendChild(debuffIcon);
                 }
                 
-                const abilityName = document.createElement('span');
-                abilityName.className = 'ability-name';
-                abilityName.textContent = ability.name;
-                abilityHeader.appendChild(abilityName);
+                const debuffName = document.createElement('span');
+                debuffName.classList.add('buff-name');
+                debuffName.style.color = '#e74c3c';
+                debuffName.textContent = debuff.name;
                 
-                const abilityDescription = document.createElement('div');
-                abilityDescription.className = 'ability-description';
-                abilityDescription.textContent = ability.description;
+                const debuffDuration = document.createElement('span');
+                debuffDuration.classList.add('buff-duration');
+                debuffDuration.textContent = `${debuff.duration} turn${debuff.duration !== 1 ? 's' : ''}`;
                 
-                const abilityDetails = document.createElement('div');
-                abilityDetails.className = 'ability-details';
-                abilityDetails.innerHTML = `Mana: ${ability.manaCost} | Cooldown: ${ability.cooldown}`;
+                debuffHeader.appendChild(debuffName);
+                debuffHeader.appendChild(debuffDuration);
                 
-                abilityItem.appendChild(abilityHeader);
-                abilityItem.appendChild(abilityDescription);
-                abilityItem.appendChild(abilityDetails);
-                abilitiesSection.appendChild(abilityItem);
+                const debuffDescription = document.createElement('div');
+                debuffDescription.classList.add('buff-description');
+                debuffDescription.textContent = debuff.description || 'No description available.';
+                
+                debuffItem.appendChild(debuffHeader);
+                debuffItem.appendChild(debuffDescription);
+                debuffsSection.appendChild(debuffItem);
             });
-            
-            statsMenu.appendChild(abilitiesSection);
         }
         
-        // Add passive ability if exists
-        if (character.passive) {
-            const passiveHeader = document.createElement('div');
-            passiveHeader.className = 'stats-menu-subheader';
-            passiveHeader.textContent = 'Passive';
-            statsMenu.appendChild(passiveHeader);
-            
-            const passiveSection = document.createElement('div');
-            passiveSection.className = 'stats-menu-section';
-            
-            const passiveItem = document.createElement('div');
-            passiveItem.className = 'passive-item';
-            
-            const passiveName = document.createElement('div');
-            passiveName.className = 'passive-name';
-            passiveName.textContent = character.passive.name;
-            
-            const passiveDescription = document.createElement('div');
-            passiveDescription.className = 'passive-description';
-            passiveDescription.textContent = character.passive.description;
-            
-            passiveItem.appendChild(passiveName);
-            passiveItem.appendChild(passiveDescription);
-            passiveSection.appendChild(passiveItem);
-            
-            statsMenu.appendChild(passiveSection);
-        }
+        this.characterStatsMenu.appendChild(debuffsSection);
         
-        // Add close button
+        // Close button
         const closeButton = document.createElement('button');
-        closeButton.className = 'stats-menu-close';
         closeButton.textContent = 'Close';
+        closeButton.classList.add('stats-menu-close');
         closeButton.addEventListener('click', () => {
-            statsMenu.remove();
+            this.characterStatsMenu.style.display = 'none';
         });
-        statsMenu.appendChild(closeButton);
+        this.characterStatsMenu.appendChild(closeButton);
         
-        // Calculate dimensions and adjust position
-        const menuRect = statsMenu.getBoundingClientRect();
-        const menuWidth = menuRect.width;
-        const menuHeight = menuRect.height;
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
+        // Set the position based on cursor coordinates
+        this.characterStatsMenu.style.left = `${x}px`;
+        this.characterStatsMenu.style.top = `${y}px`;
+        this.characterStatsMenu.style.transform = 'none'; // Remove any transform that might have been set previously
         
-        // Add scrolling if menu height is too large (more than 80% of window height)
-        if (menuHeight > windowHeight * 0.8) {
-            statsMenu.style.maxHeight = `${windowHeight * 0.8}px`;
-            statsMenu.style.overflowY = 'auto';
+        // Calculate if menu would go off-screen and adjust position if needed
+        setTimeout(() => {
+            const menuRect = this.characterStatsMenu.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
             
-            // Add padding to accommodate scrollbar
-            statsMenu.style.paddingRight = '5px';
-        }
-        
-        // Ensure the menu stays within the window bounds
-        let finalX = x;
-        let finalY = y;
-        
-        // Check horizontally
-        if (x + menuWidth > windowWidth - 10) {
-            finalX = Math.max(10, windowWidth - menuWidth - 10);
-        }
-        if (finalX < 10) {
-            finalX = 10;
-        }
-        
-        // Check vertically - make sure we account for the possibly applied max-height
-        const actualHeight = Math.min(menuHeight, windowHeight * 0.8);
-        
-        // If using bottom-character class, we'll position from the bottom instead of the top
-        if (isBottomRow) {
-            // Don't set top position since we're using bottom in the CSS
-            statsMenu.style.left = `${finalX}px`;
-        } else {
-            // If it would go below the bottom of the window, position it higher
-            if (y + actualHeight > windowHeight - 10) {
-                finalY = Math.max(10, windowHeight - actualHeight - 10);
-            }
-            if (finalY < 10) {
-                finalY = 10;
+            // Check if menu extends beyond the right edge of viewport
+            if (x + menuRect.width > viewportWidth) {
+                this.characterStatsMenu.style.left = `${x - menuRect.width}px`;
             }
             
-            // Set final position 
-            statsMenu.style.left = `${finalX}px`;
-            statsMenu.style.top = `${finalY}px`;
-        }
-        
-        // Make visible
-        statsMenu.style.visibility = 'visible';
-        
-        // Add click outside to close
-        document.addEventListener('click', function closeMenu(e) {
-            if (!statsMenu.contains(e.target) && e.target.id !== 'character-stats-menu') {
-                statsMenu.remove();
-                document.removeEventListener('click', closeMenu);
+            // Check if menu extends beyond the bottom edge of viewport
+            if (y + menuRect.height > viewportHeight) {
+                this.characterStatsMenu.style.top = `${y - menuRect.height}px`;
             }
-        });
+            
+            // Make sure menu is not positioned off the left or top edges
+            if (parseFloat(this.characterStatsMenu.style.left) < 0) {
+                this.characterStatsMenu.style.left = '0px';
+            }
+            
+            if (parseFloat(this.characterStatsMenu.style.top) < 0) {
+                this.characterStatsMenu.style.top = '0px';
+            }
+        }, 0);
+        
+        // Show the menu
+        this.characterStatsMenu.style.display = 'block';
     }
 
     // Create auto-select button
     createAutoSelectButton() {
-        // --- NEW: Check if button already exists ---
-        if (document.getElementById('auto-select-button')) {
-            console.log("Auto-select button already exists. Skipping creation.");
-            this.autoSelectButton = document.getElementById('auto-select-button'); // Ensure reference is set
-            return; // Don't create another one
-        }
-        // --- END NEW ---
-
-        const middleSection = document.querySelector('.middle-section');
-        if (middleSection) {
-            // Create the button element
-            const autoSelectButton = document.createElement('button');
-            autoSelectButton.id = 'auto-select-button';
-            autoSelectButton.className = 'auto-select-button';
-            autoSelectButton.textContent = 'Enable Auto Character';
-            autoSelectButton.title = 'Automatically selects the best character for each turn and after abilities are used';
-            
-            // Add it before the end turn button
-            if (this.endTurnButton) {
-                middleSection.insertBefore(autoSelectButton, this.endTurnButton);
-            } else {
-                middleSection.appendChild(autoSelectButton);
-            }
-            
-            // Add event listener
-            autoSelectButton.addEventListener('click', () => {
-                if (this.gameManager.isGameRunning) {
-                    this.gameManager.toggleAutoSelect();
-                }
-            });
-            
-            // Store reference to the button
-            this.autoSelectButton = autoSelectButton;
-        }
+        // Skip button creation - button is disabled in CSS
+        console.log("Auto-select button creation skipped.");
+        return;
     }
     
     // Update the auto-select button state
     updateAutoSelectButton(isEnabled) {
-        if (this.autoSelectButton) {
-            if (isEnabled) {
-                this.autoSelectButton.textContent = 'Disable Auto Character';
-                this.autoSelectButton.classList.add('active');
-            } else {
-                this.autoSelectButton.textContent = 'Enable Auto Character';
-                this.autoSelectButton.classList.remove('active');
-            }
-        }
+        // No-op since button is removed/hidden
     }
 
     // Show tooltip for status effects (buffs/debuffs)
@@ -4100,6 +4345,78 @@ class GameManager {
             modifiersList.appendChild(modifierElement);
         });
     }
+
+    /**
+     * Applies visual styling to mark a character as dead without removing the element.
+     * @param {Character} character - The character to mark.
+     */
+    markCharacterAsDead(character) {
+        const elementId = character.instanceId || character.id;
+        const characterElement = document.getElementById(`character-${elementId}`);
+        if (characterElement) {
+            characterElement.classList.add('character-dead'); // Add a class for styling
+            characterElement.classList.remove('selected', 'valid-target', 'invalid-target', 'aoe-target'); // Remove interaction states
+            console.log(`Marked character ${elementId} as dead visually.`);
+            
+            // Optionally disable ability buttons further
+            const abilityButtons = characterElement.querySelectorAll('.ability');
+            abilityButtons.forEach(button => button.disabled = true);
+        } else {
+            console.warn(`UIManager: Could not find element for character ${elementId} to mark as dead.`);
+        }
+    }
+
+    // --- NEW: Add showFloatingText method ---
+    showFloatingText(targetId, text, type) {
+        console.log(`[UIManager] Showing floating text for ${targetId}: "${text}" (${type})`);
+        // Try finding by instanceId first, then fall back to basic ID
+        const targetElement = document.querySelector(`[data-instance-id="${targetId}"]`) || document.getElementById(`character-${targetId}`);
+        if (!targetElement) {
+            console.warn(`[UIManager] Could not find target element for floating text: ${targetId}`);
+            return;
+        }
+
+        const floatingText = document.createElement('div');
+        // Add base class and specific type class for styling
+        floatingText.className = `floating-text ${type}`;
+        floatingText.textContent = text;
+
+        // Get target position relative to the viewport
+        const rect = targetElement.getBoundingClientRect();
+        // Get the main battle container for relative positioning
+        const container = document.querySelector('.battle-container');
+        if (!container) {
+             console.error("[UIManager] Battle container not found for floating text!");
+             return;
+        }
+        const containerRect = container.getBoundingClientRect();
+
+        // Calculate position relative to the battle container
+        const x = rect.left - containerRect.left + (rect.width / 2);
+        const y = rect.top - containerRect.top; // Position above the element
+
+        floatingText.style.position = 'absolute';
+        floatingText.style.left = `${x}px`;
+        floatingText.style.top = `${y}px`;
+        floatingText.style.transform = 'translateX(-50%)'; // Center horizontally
+        floatingText.style.pointerEvents = 'none'; // Prevent interactions
+        floatingText.style.zIndex = '110'; // Ensure it's above most elements
+
+        // Add to the main battle container
+        container.appendChild(floatingText);
+
+        // Animation: Float up and fade out
+        floatingText.animate([
+            { transform: 'translate(-50%, 0)', opacity: 1 },
+            { transform: 'translate(-50%, -60px)', opacity: 0 } // Float up 60px
+        ], {
+            duration: 1500, // 1.5 seconds
+            easing: 'ease-out'
+        }).onfinish = () => {
+            floatingText.remove(); // Remove element after animation
+        };
+    }
+    // --- END NEW --- 
 }
 
 // Global Game Manager instance creation
