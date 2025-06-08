@@ -41,7 +41,7 @@
         "value": 500
       },
       "parents": ["talent_shoma_1"],
-      "children": []
+      "children": ["talent_shoma_21", "talent_shoma_22"]
     },
     "talent_shoma_4": {
       "id": "talent_shoma_4",
@@ -226,7 +226,7 @@
         "value": 0.2
       },
       "parents": ["talent_shoma_14"],
-      "children": [],
+      "children": ["talent_shoma_20"],
       "position": { "x": -100, "y": 80}
     },
     "talent_shoma_17": {
@@ -241,7 +241,7 @@
         "value": 100
       },
       "parents": ["talent_shoma_15"],
-      "children": [],
+      "children": ["talent_shoma_20"],
       "position": { "x": -200, "y": 60}
     },
     "talent_shoma_18": {
@@ -273,6 +273,162 @@
       "parents": ["talent_shoma_10", "talent_shoma_11"],
       "children": [],
       "position": { "x": 100, "y": 150},
+      "powerful": true
+    },
+    "talent_shoma_20": {
+      "id": "talent_shoma_20",
+      "name": "Unstoppable Farmer",
+      "description": "Using Cottage Run resets all your ability cooldowns to 0 and doesn't end your turn.",
+      "icon": "Icons/stats/unstoppable_farmer.png",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_r",
+        "property": "resetsCooldownsAndContinues",
+        "value": true
+      },
+      "parents": ["talent_shoma_16", "talent_shoma_17"],
+      "children": [],
+      "position": { "x": -50, "y": 300},
+      "powerful": true
+    },
+    "talent_shoma_21": {
+      "id": "talent_shoma_21",
+      "name": "Critical Leech",
+      "description": "Whenever Shoma lands a critical hit or critical heal, he gains 2.5% lifesteal.",
+      "icon": "Icons/stats/lifesteal.png",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "critLifestealBoost",
+        "value": 0.025
+      },
+      "parents": ["talent_shoma_3"],
+      "children": ["talent_shoma_22", "talent_shoma_23"],
+      "position": { "x": -100, "y": 150}
+    },
+    "talent_shoma_22": {
+      "id": "talent_shoma_22",
+      "name": "Quick Smash",
+      "description": "Home Run Smash cooldown reduced to 1 turn, but it no longer stuns enemies.",
+      "icon": "Icons/abilities/homerun_smash.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_q",
+        "property": "cooldown",
+        "value": 1
+      },
+      "parents": ["talent_shoma_3"],
+      "children": ["talent_shoma_24"],
+      "position": { "x": -350, "y": 15}
+    },
+    "talent_shoma_23": {
+      "id": "talent_shoma_23",
+      "name": "Magical Apple",
+      "description": "Apple Throw now also scales with 100% of Magical Damage. Increases Magical Damage by 100.",
+      "icon": "Icons/stats/magical_apple.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_shoma_w",
+          "property": "magicalScaling",
+          "value": 1.0
+        },
+        {
+          "type": "modify_stat",
+          "stat": "magicalDamage",
+          "operation": "add",
+          "value": 100
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_shoma_w",
+          "property": "icon",
+          "value": "Icons/stats/magical_apple.webp"
+        }
+      ],
+      "parents": ["talent_shoma_21"],
+      "children": ["talent_shoma_25", "talent_shoma_26"],
+      "position": { "x": -250, "y": 100},
+      "powerful": false
+    },
+    "talent_shoma_24": {
+      "id": "talent_shoma_24",
+      "name": "Enduring Catch",
+      "description": "Farmer's Catch buff duration increased to 7 turns.",
+      "icon": "Icons/abilities/farmers_catch.jpeg",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_shoma_e",
+        "property": "buffDuration",
+        "value": 7
+      },
+      "parents": ["talent_shoma_22"],
+      "children": ["talent_shoma_26"],
+      "position": { "x": -525, "y": -5}
+    },
+    "talent_shoma_25": {
+      "id": "talent_shoma_25",
+      "name": "Apple Splatter",
+      "description": "Apple Throw's debuff now reduces enemy damage by 40% instead of 20%, but only lasts 3 turns.",
+      "icon": "Icons/debuffs/apple_splash.jpeg",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_shoma_w",
+          "property": "debuffPower",
+          "value": 0.4
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_shoma_w",
+          "property": "debuffDuration",
+          "value": 3
+        }
+      ],
+      "parents": ["talent_shoma_23"],
+      "children": ["talent_shoma_26"],
+      "position": { "x": -550, "y": -140},
+      "powerful": false
+    },
+    "talent_shoma_26": {
+      "id": "talent_shoma_26",
+      "name": "Farmer's Vitality",
+      "description": "Increases HP regeneration by 125 and mana regeneration by 40 per turn.",
+      "icon": "Icons/stats/Regeneration.webp",
+      "effect": [
+        {
+          "type": "modify_stat",
+          "stat": "hpPerTurn",
+          "operation": "add",
+          "value": 125
+        },
+        {
+          "type": "modify_stat",
+          "stat": "manaPerTurn",
+          "operation": "add",
+          "value": 40
+        }
+      ],
+      "parents": ["talent_shoma_24", "talent_shoma_23"],
+      "children": ["talent_shoma_27"],
+      "position": { "x": -575, "y": -75},
+      "powerful": false
+    },
+    "talent_shoma_27": {
+      "id": "talent_shoma_27",
+      "name": "Nurturing Aura",
+      "description": "Increases Shoma's HP by 1200 and all other allies by 575.",
+      "icon": "Icons/stats/team_health.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "teamHealthAura",
+        "value": {
+          "selfBonus": 1200,
+          "allyBonus": 575
+        }
+      },
+      "parents": ["talent_shoma_26"],
+      "children": [],
+      "position": { "x": -755, "y": 175},
       "powerful": true
     }
   }

@@ -1,0 +1,45 @@
+{
+    "id": "training_grounds",
+    "name": "Training Grounds",
+    "description": "Welcome to your first battle! Face Schoolboy Siegfried in a controlled environment to learn the combat basics.",
+    "difficulty": 1,
+    "backgroundImage": "images/stages/training_grounds.png",
+    "backgroundMusic": "sounds/music/tutorial_theme.mp3",
+    "isTutorial": true,
+    "enemies": [
+        {
+            "characterId": "schoolboy_siegfried",
+            "modifications": {
+                "stats": {
+                    "hp": 4200
+                }
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "gold",
+            "value": 100,
+            "chance": 1.0
+        },
+        {
+            "type": "experience",
+            "value": 50,
+            "chance": 1.0
+        }
+    ],
+    "maxTurns": 15,
+    "victoryConditions": [
+        "defeat_all_enemies"
+    ],
+    "defeatConditions": [
+        "all_player_characters_defeated",
+        "max_turns_reached"
+    ],
+    "tutorialFeatures": {
+        "enableHints": true,
+        "showAbilityDescriptions": true,
+        "pauseAfterFirstAbility": true,
+        "showTargetingTips": true
+    }
+} 

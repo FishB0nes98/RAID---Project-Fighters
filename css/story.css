@@ -32,6 +32,11 @@
     font-family: 'Exo 2', sans-serif;
 }
 
+/* General hidden class */
+.hidden {
+    display: none !important;
+}
+
 body {
     background-color: var(--bg-dark);
     color: var(--text-light);
@@ -248,14 +253,19 @@ body {
 
 .bar-text {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    text-align: center;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #fff;
     font-size: 11px;
     font-weight: bold;
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-    z-index: 1;
-    padding: 0 4px;
+    z-index: 3;
+    pointer-events: none;
     white-space: nowrap;
 }
 
@@ -344,6 +354,7 @@ body {
     position: relative;
     cursor: grab;
     user-select: none;
+    min-height: 700px;
 }
 
 .story-map.dragging {
@@ -354,7 +365,7 @@ body {
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 400px;
+    min-height: 700px;
     overflow: hidden;
 }
 
@@ -369,15 +380,41 @@ body {
 }
 
 .path-segment {
+    height: 3px;
+    background: linear-gradient(90deg, 
+        rgba(100, 116, 139, 0.3) 0%, 
+        rgba(100, 116, 139, 0.6) 50%, 
+        rgba(100, 116, 139, 0.3) 100%
+    );
     position: absolute;
-    height: 4px;
-    background: linear-gradient(to right, var(--primary-dark), var(--primary-light));
-    border-radius: 2px;
     z-index: 1;
+    border-radius: 2px;
+    transition: all 0.3s ease;
 }
 
 .path-segment.completed {
-    background: linear-gradient(to right, var(--success), var(--primary-light));
+    background: linear-gradient(90deg, 
+        rgba(34, 197, 94, 0.4) 0%, 
+        rgba(34, 197, 94, 0.8) 50%, 
+        rgba(34, 197, 94, 0.4) 100%
+    );
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.path-arrow {
+    position: absolute;
+    right: -6px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid rgba(100, 116, 139, 0.6);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.path-arrow.completed {
+    border-left-color: rgba(34, 197, 94, 0.8);
 }
 
 .path-segment.active {
@@ -400,63 +437,61 @@ body {
 }
 
 .stage-node {
-    position: absolute;
     width: 200px;
-    padding: 15px;
-    background-color: var(--bg-light);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-medium);
-    border: 2px solid var(--primary-dark);
-    transition: all 0.3s ease;
+    height: 100px;
+    position: absolute;
+    background: linear-gradient(135deg, var(--bg-card), rgba(255, 255, 255, 0.05));
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    padding: 12px;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 2;
-    /* Improve visibility when scaled down */
-    min-height: 100px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
 }
 
 .stage-node:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(126, 87, 194, 0.3);
-    z-index: 3; /* Bring hovered nodes to front */
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .stage-node.completed {
-    border-color: var(--success);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+    border-color: rgba(34, 197, 94, 0.5);
 }
 
 .stage-node.active {
-    border-color: var(--primary-light);
-    box-shadow: 0 0 15px var(--primary-light);
-    animation: stagePulse 2s infinite alternate;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+    border-color: rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .stage-node.locked {
-    border-color: var(--text-dark);
-    opacity: 0.7;
-    filter: grayscale(0.8);
+    opacity: 0.5;
     cursor: not-allowed;
-}
-
-@keyframes stagePulse {
-    from { box-shadow: 0 0 10px var(--primary-light); }
-    to { box-shadow: 0 0 20px var(--primary-light); }
+    filter: grayscale(50%);
 }
 
 .stage-title {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    margin-bottom: 5px;
-    color: var(--text-light);
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .stage-difficulty {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
     display: inline-block;
-    font-size: 0.8rem;
-    padding: 2px 8px;
-    background-color: var(--bg-dark);
-    border-radius: 10px;
-    color: var(--text-medium);
-    margin-bottom: 8px;
+    margin-bottom: 0.3rem;
 }
 
 .difficulty-1 { color: #43a047; }
@@ -471,10 +506,13 @@ body {
 .difficulty-10 { color: #c62828; }
 
 .stage-brief {
-    font-size: 0.85rem;
-    color: var(--text-medium);
-    max-height: 60px;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    line-height: 1.3;
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .stage-status {
@@ -629,6 +667,10 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 15px;
+}
+
+.stage-actions.hidden {
+    display: none;
 }
 
 .action-button {
@@ -872,7 +914,7 @@ body {
 }
 
 .character-select-card {
-    background: linear-gradient(145deg, var(--bg-light), var(--bg-medium));
+    background: linear-gradient(145deg, rgba(30, 36, 48, 0.95), rgba(23, 27, 36, 0.95));
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -882,7 +924,8 @@ body {
     transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     position: relative;
     overflow: hidden;
-    border: 2px solid transparent;
+    border: 2px solid rgba(126, 87, 194, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .character-select-card::before {
@@ -899,8 +942,9 @@ body {
 
 .character-select-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
     border-color: var(--primary);
+    background: linear-gradient(145deg, rgba(35, 41, 53, 0.95), rgba(28, 32, 41, 0.95));
 }
 
 .character-select-card:hover::before {
@@ -926,16 +970,19 @@ body {
 .character-select-card h4 {
     font-size: 1.1rem;
     margin: 6px 0;
-    color: white;
+    color: #f5f5f5;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     transition: color 0.3s ease;
 }
 
 .character-select-card p {
     font-size: 0.9rem;
-    color: var(--text-medium);
+    color: #b0bec5;
     margin: 3px 0;
     transition: color 0.3s ease;
     text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .character-select-card:hover h4 {
@@ -959,6 +1006,7 @@ body {
     font-weight: bold;
     text-align: center;
     transition: transform 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .character-select-card:hover::after {
@@ -1278,4 +1326,256 @@ body {
     pointer-events: none;
     opacity: 0.8;
     z-index: 10;
+}
+
+/* Recruitment specific styles for better visibility */
+.recruitment-cards .character-select-card {
+    background: linear-gradient(145deg, rgba(40, 46, 58, 0.98), rgba(33, 37, 46, 0.98)) !important;
+    border: 2px solid rgba(126, 87, 194, 0.6) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.recruitment-cards .character-select-card h4 {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
+
+.recruitment-cards .character-select-card p {
+    color: #d0d7dd !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+.recruitment-cards .character-select-card:hover {
+    background: linear-gradient(145deg, rgba(45, 51, 63, 0.98), rgba(38, 42, 51, 0.98)) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Character unlock cards and loading states */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.unlock-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.unlock-description {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    margin-bottom: 1.5rem;
+}
+
+.unlock-description h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.unlock-description p {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.unlock-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.unlock-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+
+@keyframes unlockGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.unlock-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
+}
+
+.unlock-card.tutorial-reward::after {
+    content: '🎓';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    background: rgba(52, 152, 219, 0.2);
+    padding: 0.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+}
+
+.unlock-card .character-image-container {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.unlock-card .character-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.unlock-card:hover .character-image-container img {
+    transform: scale(1.1);
+}
+
+.unlock-card .character-info {
+    text-align: center;
+}
+
+.unlock-card .character-info h4 {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.unlock-card .character-info p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    opacity: 0.9;
+}
+
+.unlock-card .character-image-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    pointer-events: none;
+}
+
+.character-unlock-button {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.character-unlock-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(84, 99, 255, 0.4);
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+}
+
+.character-unlock-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(84, 99, 255, 0.3);
+}
+
+/* Stage type-specific styling */
+.stage-node.character-unlock {
+    background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+    border: 2px solid #7c3aed;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+}
+
+.stage-node.character-unlock:hover {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6) !important;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+    transform: translateY(-8px) scale(1.05);
+}
+
+.stage-node.character-unlock .stage-title {
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.stage-node.character-unlock .stage-title::before {
+    content: "🎁 ";
+    margin-right: 0.5rem;
+}
+
+.stage-node.character-unlock .stage-difficulty {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.stage-node.recruit {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+    border: 2px solid #0e7490;
+}
+
+.stage-node.recruit .stage-title::before {
+    content: "👥 ";
+    margin-right: 0.5rem;
+}
+
+.stage-node.choice {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    border: 2px solid #b45309;
+}
+
+.stage-node.choice .stage-title::before {
+    content: "🤔 ";
+    margin-right: 0.5rem;
 }

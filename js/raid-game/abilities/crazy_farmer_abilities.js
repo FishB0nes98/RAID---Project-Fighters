@@ -26,7 +26,9 @@ const farmerReapEffect = (caster, target) => {
         true
     ).setDescription('Armor reduced by 5%.');
 
-    armorReductionDebuff.statModifiers = { armor_percent: -5 };
+    armorReductionDebuff.statModifiers = [
+        { stat: 'armor_percent', value: -5, operation: 'add' }
+    ];
 
     target.addDebuff(armorReductionDebuff);
     log(`${target.name}'s armor has been weakened by ${caster.name}'s Farmer Reap!`, 'debuff');

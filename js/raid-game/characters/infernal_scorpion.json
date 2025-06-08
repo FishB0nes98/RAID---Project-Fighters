@@ -7,7 +7,7 @@
   "rarity": "Epic",
   "stats": {
     "hp": 8070,
-    "mana": 1800,
+    "mana": 5000,
     "physicalDamage": 300,
     "magicalDamage": 50,
     "armor": 20,
@@ -16,8 +16,8 @@
     "critDamage": 1.6,
     "hpRegen": 0,
     "manaRegen": 50,
-    "lifesteal": 0.00,
-    "dodgeChance": 0.30
+    "lifesteal": 0.08,
+    "dodgeChance": 0.1
   },
   "passive": {
     "id": "infernal_chain_reaction",
@@ -36,11 +36,7 @@
       "cooldown": 8,
       "targetType": "enemy",
       "description": "Deals 250% Physical Damage to the target and applies Hooked for 6 turns.",
-      "effect": {
-        "type": "custom",
-        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
-        "functionName": "infernalScorpionGetOverHereEffect"
-      }
+      "functionName": "infernalScorpionGetOverHereEffect"
     },
     {
       "id": "infernal_scorpion_w",
@@ -51,11 +47,7 @@
       "cooldown": 3,
       "targetType": "enemy",
       "description": "Deals 980 (+100% Magical Damage) magical damage to the target and has a 75% chance to apply Burn for 10 turns.",
-      "effect": {
-        "type": "custom",
-        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
-        "functionName": "infernalScorpionFireBreathEffect"
-      }
+      "functionName": "infernalScorpionFireBreathEffect"
     },
     {
       "id": "infernal_scorpion_dual_strike",
@@ -66,26 +58,18 @@
       "cooldown": 3,
       "targetType": "enemy",
       "description": "Deals (250% Physical Damage + 100% Magical Damage) as physical damage to the target twice. Each hit can trigger passives.",
-      "effect": {
-        "type": "custom",
-        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
-        "functionName": "dualBladeStrikeEffect"
-      }
+      "functionName": "dualBladeStrikeEffect"
     },
     {
       "id": "infernal_scorpion_open_portal",
       "name": "Open Portal",
-      "icon": "Icons/abilities/open_portal.png",
+      "icon": "Icons/abilities/open_portal.jfif",
       "type": "custom",
       "manaCost": 100,
       "cooldown": 6,
       "targetType": "self",
       "description": "Opens a chaotic portal, disabling one random non-passive ability on each enemy for 5 turns. Reduces own ability cooldowns by 2 turns.",
-      "effect": {
-        "type": "custom",
-        "script": "js/raid-game/abilities/infernal_scorpion_abilities.js",
-        "functionName": "infernalScorpionOpenPortalEffect"
-      }
+      "functionName": "infernalScorpionOpenPortalEffect"
     }
   ],
   "quotes": {

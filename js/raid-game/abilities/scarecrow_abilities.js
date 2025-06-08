@@ -15,17 +15,20 @@ const scarecrowFearEffect = (caster, targets, abilityData = {}) => {
     playSound('sounds/scarecrow_fear.mp3', 0.8);
     log(`${caster.name} uses ${abilityData.name || 'Fear'} across the battlefield!`, 'ability');
 
-    // Ensure we have a proper targets array
-    let enemyTargets = targets;
+    // For all_enemies target type, targets should already be provided as an array
+    let enemyTargets = [];
     
-    // If targets is not an array or is empty, get all enemies
-    if (!Array.isArray(targets) || targets.length === 0) {
-        // Determine which team is the enemy based on caster's team
+    if (Array.isArray(targets) && targets.length > 0) {
+        // Use the provided targets array (this is the preferred method for all_enemies abilities)
+        enemyTargets = targets.filter(target => target && !target.isDead());
+        log(`${caster.name}'s Fear targets ${enemyTargets.length} enemies (from provided array)`);
+    } else {
+        // Fallback: manually get enemies if targets array wasn't provided
         enemyTargets = caster.isAI ? 
             gameState.playerCharacters.filter(p => !p.isDead()) : 
             gameState.aiCharacters.filter(a => !a.isDead());
             
-        log(`${caster.name}'s Fear targets ${enemyTargets.length} enemies`);
+        log(`${caster.name}'s Fear targets ${enemyTargets.length} enemies (fallback method)`);
     }
     
     // If still no targets, exit early
@@ -70,24 +73,22 @@ const scarecrowFearEffect = (caster, targets, abilityData = {}) => {
                 2, // Duration: 2 turns
                 null,
                 true // isDebuff = true
-            ).setDescription(`Disabled by Scarecrow's Fear for 2 turns.`);
+            ).setDescription(`${ability.name} is disabled by Scarecrow's Fear for 2 turns.`);
 
+            // Store the ability ID for removal
             disableDebuff.disabledAbilityId = ability.id;
 
+            // Disable the ability immediately
             ability.isDisabled = true;
-            ability.disabledDuration = 2;
-
-            disableDebuff.remove = (character) => {
+            
+            // Set up the removal function to re-enable the ability
+            disableDebuff.onRemove = (character) => {
                 const disabledAbility = character.abilities.find(a => a.id === disableDebuff.disabledAbilityId);
-                if (disabledAbility) {
-                    // Only re-enable if the current disable is specifically from this debuff instance
-                    // and the duration has naturally ticked down to 0 (or less) via processEffects
-                    if (disabledAbility.isDisabled && disabledAbility.disabledDuration <= 0) {
-                        disabledAbility.isDisabled = false;
-                        log(`${character.name}'s ${disabledAbility.name} is no longer disabled by Fear.`);
-                        if (uiManager) {
-                            uiManager.updateCharacterUI(character);
-                        }
+                if (disabledAbility && disabledAbility.isDisabled) {
+                    disabledAbility.isDisabled = false;
+                    log(`${character.name}'s ${disabledAbility.name} is no longer disabled by Fear.`);
+                    if (uiManager) {
+                        uiManager.updateCharacterUI(character);
                     }
                 }
             };

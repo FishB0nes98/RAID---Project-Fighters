@@ -87,9 +87,9 @@ const doubleStabEffect = async (caster, target) => {
         ).setDescription(`Reduces Armor by ${armorReductionPercent * 100}% for ${debuffDuration} turns.`);
 
         // Add the stat modifier
-        armorReductionDebuff.statModifiers = {
-            armor: -armorReductionPercent // Negative value for reduction percentage
-        };
+        armorReductionDebuff.statModifiers = [
+            { stat: 'armor', value: -armorReductionPercent, operation: 'add' } // Negative value for reduction percentage
+        ];
         // Specify modifier type as percentage
         armorReductionDebuff.modifierType = 'percentage'; 
 

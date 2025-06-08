@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roguelike Raid Battle</title>
     <link rel="stylesheet" href="css/raid-game.css">
+    <link rel="stylesheet" href="css/statistics.css">
     <link rel="stylesheet" href="css/farmer_cham_cham.css">
     <link rel="stylesheet" href="css/schoolboy_shoma-ball-vfx.css">
     <link rel="stylesheet" href="css/ayane-abilities.css">
@@ -24,6 +25,7 @@
     <link rel="stylesheet" href="css/infernal_raiden_abilities.css">
     <link rel="stylesheet" href="css/angry_carrot_abilities.css">
     <link rel="stylesheet" href="css/farmer_raiden_abilities.css">
+    <link rel="stylesheet" href="css/farmer_cham_cham_talents.css">
     <link rel="stylesheet" href="css/angry_pig_abilities.css">
     <link rel="stylesheet" href="css/angry_chicken_abilities.css">
     <link rel="stylesheet" href="css/angry_bull_abilities.css">
@@ -37,6 +39,301 @@
     <link rel="stylesheet" href="css/hound_abilities.css">
     <link rel="stylesheet" href="css/scarecrow_abilities.css">
     <link rel="stylesheet" href="css/farmer_fang_abilities.css">
+    <link rel="stylesheet" href="css/controller-support.css">
+    <link rel="stylesheet" href="css/bridget.css">
+    <link rel="stylesheet" href="css/bridget_abilities.css">
+    <link rel="stylesheet" href="css/renée.css">
+    <link rel="stylesheet" href="css/zoey.css">
+    <link rel="stylesheet" href="css/xp-rewards.css">
+    <link rel="stylesheet" href="css/stage-modifiers.css">
+    
+    <!-- Quest Completion Styles -->
+    <style>
+        /* Quest Completion Notification */
+        .quest-completion-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #5463ff, #ff6b6b);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1100;
+            max-width: 380px;
+            min-width: 320px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .quest-completion-notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .quest-completion-notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, #ffbd00, #ff8c00);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .quest-completion-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .quest-completion-icon {
+            font-size: 2.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: questPulse 2s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes questPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+        }
+        
+        .quest-completion-text {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .quest-completion-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .quest-completion-name {
+            font-size: 1rem;
+            margin-bottom: 4px;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+        
+        .quest-completion-reward {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+        
+        .quest-completion-progress {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        /* Multiple Quest Notifications */
+        .quest-completion-notification:nth-child(2) {
+            top: 130px;
+            animation-delay: 0.2s;
+        }
+        
+        .quest-completion-notification:nth-child(3) {
+            top: 240px;
+            animation-delay: 0.4s;
+        }
+        
+        .quest-completion-notification:nth-child(4) {
+            top: 350px;
+            animation-delay: 0.6s;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .quest-completion-notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                min-width: auto;
+                padding: 16px 20px;
+                transform: translateY(-100px);
+            }
+            
+            .quest-completion-notification.show {
+                transform: translateY(0);
+            }
+            
+            .quest-completion-content {
+                gap: 12px;
+            }
+            
+            .quest-completion-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 2rem;
+            }
+            
+            .quest-completion-title {
+                font-size: 1.1rem;
+            }
+            
+            .quest-completion-name {
+                font-size: 0.95rem;
+            }
+            
+            .quest-completion-reward {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Stun Break VFX Styles */
+        .stun-break-vfx {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stun-break-text {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: stunBreakTextAnim 2s ease-out forwards;
+            z-index: 101;
+        }
+        
+        @keyframes stunBreakTextAnim {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            30% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            70% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+        
+        .stun-break-particle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: stunBreakParticleAnim 1.5s ease-out forwards var(--delay, 0s);
+        }
+        
+        @keyframes stunBreakParticleAnim {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: 
+                    translate(-50%, -50%) 
+                    translate(calc(cos(var(--angle)) * 60px), calc(sin(var(--angle)) * 60px)) 
+                    scale(0.5);
+            }
+        }
+        
+        /* Quest Progress Notification (for smaller updates) */
+        .quest-progress-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(84, 99, 255, 0.9);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transform: translateX(300px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1050;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .quest-progress-notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .quest-progress-notification {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+                transform: translateY(100px);
+            }
+            
+            .quest-progress-notification.show {
+                                 transform: translateY(0);
+             }
+         }
+         
+         /* Quest completion log entry styling */
+         .log-entry.quest-complete {
+             background: linear-gradient(135deg, rgba(84, 99, 255, 0.2), rgba(255, 107, 107, 0.2));
+             border-left: 4px solid #ffbd00;
+             color: #fff;
+             font-weight: 600;
+             animation: questGlow 2s ease-in-out;
+         }
+         
+         @keyframes questGlow {
+             0%, 100% { 
+                 box-shadow: 0 0 5px rgba(255, 189, 0, 0.3);
+             }
+             50% { 
+                 box-shadow: 0 0 20px rgba(255, 189, 0, 0.6);
+             }
+         }
+    </style>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -45,9 +342,70 @@
         <div id="loading-text" class="loading-text">Loading Game...</div>
     </div>
 
+    <!-- Talents Side Panel -->
+    <div id="talents-panel" class="talents-panel">
+        <div class="talents-panel-header">
+            <h2>Active Talents</h2>
+            <button id="toggle-talents-panel" class="toggle-talents-panel" title="Hide talents">◀</button>
+        </div>
+        <div class="talents-panel-content">
+            <div id="talents-characters-list" class="talents-characters-list">
+                <!-- Character talents will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Panel -->
+    <div id="statistics-panel" class="statistics-panel">
+        <div class="statistics-panel-header">
+            <h2>Battle Statistics</h2>
+            <button id="toggle-statistics-panel" class="toggle-statistics-panel" title="Hide statistics">◀</button>
+        </div>
+        <div class="statistics-panel-content">
+            <div class="statistics-tabs">
+                <button class="statistics-tab active" data-tab="overview">Overview</button>
+                <button class="statistics-tab" data-tab="damage">Damage</button>
+                <button class="statistics-tab" data-tab="healing">Healing</button>
+                <button class="statistics-tab" data-tab="combat">Combat</button>
+                <button class="statistics-tab" data-tab="abilities">Abilities</button>
+            </div>
+            <div class="statistics-content">
+                <div id="statistics-overview" class="statistics-tab-content active">
+                    <!-- Overview content will be loaded here -->
+                </div>
+                <div id="statistics-damage" class="statistics-tab-content">
+                    <!-- Damage statistics will be loaded here -->
+                </div>
+                <div id="statistics-healing" class="statistics-tab-content">
+                    <!-- Healing statistics will be loaded here -->
+                </div>
+                <div id="statistics-combat" class="statistics-tab-content">
+                    <!-- Combat statistics (dodges, crits) will be loaded here -->
+                </div>
+                <div id="statistics-abilities" class="statistics-tab-content">
+                    <!-- Ability statistics will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="battle-container">
+        <!-- Show Talents Button (only visible when panel is hidden) -->
+        <button id="show-talents-button" class="show-talents-button" title="Show talents">▶</button>
+        
+        <!-- Show Statistics Button (only visible when panel is hidden) -->
+        <button id="show-statistics-button" class="show-statistics-button" title="Show statistics">📊</button>
+        
         <!-- Stage Background -->
         <div id="stage-background" class="stage-background"></div>
+        
+        <!-- Stage Modifiers UI -->
+        <div id="stage-modifiers-container" class="stage-modifiers-container" style="display: none;">
+            <div class="stage-modifiers-heading">Stage Effects</div>
+            <div id="stage-modifiers-list" class="stage-modifiers-list">
+                <!-- Stage modifiers will be dynamically populated here -->
+            </div>
+        </div>
         
         <!-- Volume Control -->
         <div class="volume-control">
@@ -64,9 +422,9 @@
 
         <!-- Middle Section with Turn Counter -->
         <div class="middle-section">
-            <div class="turn-counter">Turn: <span id="turn-count">1</span></div>
-            <div id="battle-phase">Player's Turn</div>
             <button id="end-turn-button" class="end-turn-button">End Turn</button>
+            <div id="battle-phase">Player's Turn</div>
+            <div class="turn-counter">Turn: <span id="turn-count">1</span></div>
         </div>
 
         <!-- Player Section (Bottom) -->
@@ -77,12 +435,15 @@
         </div>
 
         <!-- Battle Log -->
-        <div class="battle-log-container">
-            <div class="battle-log-header">
-                <span>Battle Log</span>
+        <div class="battle-log-container" id="battle-log-container">
+            <div class="battle-log-header" id="battle-log-header">
+                <div class="battle-log-drag-handle" id="battle-log-drag-handle">
+                    <span class="battle-log-title">⚔️ Battle Log</span>
+                </div>
                 <div class="battle-log-controls">
                     <button id="clear-log-button" class="log-button" title="Clear log">🗑️</button>
                     <button id="toggle-log-button" class="log-button" title="Toggle log size">⬍</button>
+                    <button id="close-log-button" class="log-button" title="Close battle log">✕</button>
                 </div>
             </div>
             <div class="battle-log-content">
@@ -91,6 +452,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Battle Log Toggle Button (shown when log is closed) -->
+        <button id="show-log-button" class="show-log-button" title="Show battle log" style="display: none;">
+            📋 Log
+        </button>
 
         <!-- Game Over Screen (Hidden by default) -->
         <div id="game-over-container" class="game-over-container">
@@ -116,12 +482,24 @@
         </div>
     </div>
 
+    <!-- Tutorial System -->
+    <script src="js/raid-game/tutorial-manager.js"></script>
+    <link rel="stylesheet" href="css/tutorial.css">
+
+    <!-- VFX Systems -->
+    <script src="js/raid-game/vfx/healing-wind-vfx.js"></script>
+    <link rel="stylesheet" href="css/styles/vfx.css">
+
     <!-- Game Scripts -->
     <!-- Core Classes -->
+    <script src="js/raid-game/stage-modifiers.js"></script>
     <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/character-xp-manager.js"></script>
     <script src="js/raid-game/ability-modifier.js"></script>
     <script src="js/raid-game/talent-manager.js"></script>
     <script src="js/raid-game/passive-factory.js"></script>
+    <script src="js/raid-game/statistics-manager.js"></script>
+    <script src="js/raid-game/quest-manager.js"></script>
 
     <!-- ALL Passive Ability Scripts (Load AFTER PassiveFactory, BEFORE Managers) -->
     <script src="js/raid-game/passives/schoolboy_siegfried_passive.js"></script>
@@ -144,15 +522,26 @@
     <script src="js/raid-game/passives/crazy_farmer_passive.js"></script>
     <script src="js/raid-game/passives/hound_passive.js"></script>
     <script src="js/raid-game/passives/farmer_fang_passive.js"></script>
+    <script src="js/raid-game/passives/bridget_passive.js"></script>
+    <script src="js/raid-game/passives/renée_passive.js"></script>
+    <script src="js/raid-game/passives/zoey_passive.js"></script>
+    <script src="js/raid-game/passives/little_devil_passive.js"></script>
     <!-- Add other passive scripts here -->
 
     <!-- Factories -->
     <!-- <script src="js/raid-game/character-factory.js"></script> -->
     <!-- NOTE: CharacterFactory logic seems integrated into character.js now -->
 
+    <!-- Controller Support -->
+    <script src="js/raid-game/controller-manager.js"></script>
+
+    <!-- Weekly Challenge AI -->
+    <script src="js/raid-game/weekly-challenge-ai.js"></script>
+
     <!-- Managers (Depend on Factories and Passives being registered) -->
     <script src="js/raid-game/stage-manager.js"></script>
     <script src="js/raid-game/game-manager.js"></script>
+    <script src="js/raid-game/statistics-ui-manager.js"></script>
 
     <!-- Character/Ability Specific Scripts (Load AFTER core classes/managers) -->
     <script src="js/raid-game/characters/schoolboy_shoma-ball-selection.js"></script>
@@ -187,6 +576,10 @@
     <script src="js/raid-game/abilities/crow_abilities.js"></script>
     <script src="js/raid-game/abilities/farmer_fang_abilities.js"></script>
     <script src="js/raid-game/abilities/target_dummy_abilities.js"></script>
+    <script src="js/raid-game/abilities/bridget_abilities.js"></script>
+    <script src="js/raid-game/abilities/renée_abilities.js"></script>
+    <script src="js/raid-game/abilities/zoey_abilities.js"></script>
+    <script src="js/raid-game/abilities/little_devil_abilities.js"></script>
 
     <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
@@ -195,6 +588,9 @@
 
     <!-- Firebase Config -->
     <script src="js/firebase-config.js"></script>
+
+    <!-- Talents Panel Script -->
+    <script src="js/raid-game/talents-panel.js"></script>
 
     <script>
         // Function to hide loading screen
@@ -341,11 +737,29 @@
                         }
                     }
                 }
+                
+                // Add tooltip for talent items in the talent panel
+                const talentItem = e.target.closest('.talent-item');
+                if (talentItem && talentItem.dataset.talentId) {
+                    const talentId = talentItem.dataset.talentId;
+                    const talentName = talentItem.dataset.talentName;
+                    const talentDescription = talentItem.dataset.talentDescription;
+                    
+                    if (talentName && talentDescription) {
+                        const rect = talentItem.getBoundingClientRect();
+                        showTooltip(
+                            talentName,
+                            talentDescription,
+                            rect.right + 10,
+                            rect.top
+                        );
+                    }
+                }
             });
             
             // Add mouseout event to hide tooltip
             document.addEventListener('mouseout', (e) => {
-                if (e.target.closest('.ability') || e.target.closest('.magic-shield-counter')) {
+                if (e.target.closest('.ability') || e.target.closest('.magic-shield-counter') || e.target.closest('.talent-item')) {
                     hideTooltip();
                 }
             });
@@ -440,9 +854,121 @@
 
         // Setup battle log controls
         function setupBattleLog() {
-            const battleLogContainer = document.querySelector('.battle-log-container');
+            const battleLogContainer = document.getElementById('battle-log-container');
+            const battleLogHeader = document.getElementById('battle-log-header');
+            const dragHandle = document.getElementById('battle-log-drag-handle');
             const toggleLogButton = document.getElementById('toggle-log-button');
             const clearLogButton = document.getElementById('clear-log-button');
+            const closeLogButton = document.getElementById('close-log-button');
+            const showLogButton = document.getElementById('show-log-button');
+            
+            // Dragging functionality
+            let isDragging = false;
+            let currentX = 0;
+            let currentY = 0;
+            let initialX = 0;
+            let initialY = 0;
+            let xOffset = 0;
+            let yOffset = 0;
+            
+            // Load saved position or use default
+            const savedPosition = localStorage.getItem('battleLogPosition');
+            if (savedPosition) {
+                const position = JSON.parse(savedPosition);
+                xOffset = position.x;
+                yOffset = position.y;
+                setTranslate(xOffset, yOffset, battleLogContainer);
+            } else {
+                // Get initial position from CSS
+                const computedStyle = window.getComputedStyle(battleLogContainer);
+                const right = parseInt(computedStyle.right);
+                const bottom = parseInt(computedStyle.bottom);
+                xOffset = window.innerWidth - right - battleLogContainer.offsetWidth;
+                yOffset = window.innerHeight - bottom - battleLogContainer.offsetHeight;
+            }
+            
+            function setTranslate(xPos, yPos, el) {
+                el.style.position = 'fixed';
+                el.style.left = xPos + 'px';
+                el.style.top = yPos + 'px';
+                el.style.right = 'auto';
+                el.style.bottom = 'auto';
+            }
+            
+            function dragStart(e) {
+                if (e.type === "touchstart") {
+                    initialX = e.touches[0].clientX - xOffset;
+                    initialY = e.touches[0].clientY - yOffset;
+                } else {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+                
+                if (e.target === dragHandle || dragHandle.contains(e.target)) {
+                    isDragging = true;
+                    battleLogContainer.style.cursor = 'grabbing';
+                    dragHandle.style.cursor = 'grabbing';
+                }
+            }
+            
+            function dragEnd(e) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                battleLogContainer.style.cursor = '';
+                dragHandle.style.cursor = 'grab';
+                
+                // Save position to localStorage
+                const position = { x: currentX, y: currentY };
+                localStorage.setItem('battleLogPosition', JSON.stringify(position));
+            }
+            
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    
+                    if (e.type === "touchmove") {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+                    
+                    // Keep the log within viewport bounds
+                    const containerRect = battleLogContainer.getBoundingClientRect();
+                    const maxX = window.innerWidth - containerRect.width;
+                    const maxY = window.innerHeight - containerRect.height;
+                    
+                    currentX = Math.max(0, Math.min(currentX, maxX));
+                    currentY = Math.max(0, Math.min(currentY, maxY));
+                    
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    
+                    setTranslate(currentX, currentY, battleLogContainer);
+                }
+            }
+            
+            // Add event listeners for dragging
+            dragHandle.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+            
+            // Touch events for mobile
+            dragHandle.addEventListener('touchstart', dragStart);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', dragEnd);
+            
+            // Set initial cursor style
+            dragHandle.style.cursor = 'grab';
+            
+            // Load saved visibility state
+            const savedVisibility = localStorage.getItem('battleLogVisible');
+            if (savedVisibility === 'false') {
+                battleLogContainer.style.display = 'none';
+                showLogButton.style.display = 'block';
+            }
             
             // Toggle battle log size
             toggleLogButton.addEventListener('click', () => {
@@ -463,6 +989,154 @@
                     battleLog.appendChild(clearMsg);
                 }
             });
+            
+            // Close battle log
+            closeLogButton.addEventListener('click', () => {
+                battleLogContainer.style.display = 'none';
+                showLogButton.style.display = 'block';
+                localStorage.setItem('battleLogVisible', 'false');
+            });
+            
+            // Show battle log
+            showLogButton.addEventListener('click', () => {
+                battleLogContainer.style.display = 'flex';
+                showLogButton.style.display = 'none';
+                localStorage.setItem('battleLogVisible', 'true');
+            });
+            
+            // Keyboard shortcut to toggle battle log (Ctrl+L or Cmd+L)
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                    e.preventDefault();
+                    
+                    if (battleLogContainer.style.display === 'none') {
+                        // Show battle log
+                        battleLogContainer.style.display = 'flex';
+                        showLogButton.style.display = 'none';
+                        localStorage.setItem('battleLogVisible', 'true');
+                    } else {
+                        // Hide battle log
+                        battleLogContainer.style.display = 'none';
+                        showLogButton.style.display = 'block';
+                        localStorage.setItem('battleLogVisible', 'false');
+                    }
+                }
+            });
+        }
+
+        // Setup talents panel controls
+        function setupTalentsPanel() {
+            const talentsPanel = document.getElementById('talents-panel');
+            const toggleTalentsButton = document.getElementById('toggle-talents-panel');
+            const showTalentsButton = document.getElementById('show-talents-button');
+            
+            // Toggle talents panel visibility
+            toggleTalentsButton.addEventListener('click', () => {
+                talentsPanel.classList.toggle('collapsed');
+                showTalentsButton.style.display = talentsPanel.classList.contains('collapsed') ? 'block' : 'none';
+                
+                // Update button text based on state
+                toggleTalentsButton.textContent = talentsPanel.classList.contains('collapsed') ? '▶' : '◀';
+                toggleTalentsButton.title = talentsPanel.classList.contains('collapsed') ? 'Show talents' : 'Hide talents';
+            });
+            
+            // Show talents panel when clicking the show button
+            showTalentsButton.addEventListener('click', () => {
+                talentsPanel.classList.remove('collapsed');
+                showTalentsButton.style.display = 'none';
+                toggleTalentsButton.textContent = '◀';
+                toggleTalentsButton.title = 'Hide talents';
+            });
+        }
+
+        // Quest notification functions
+        function showQuestCompletionNotification(quest) {
+            // Remove any existing notifications after a delay to prevent overlap
+            const existingNotifications = document.querySelectorAll('.quest-completion-notification');
+            
+            const notification = document.createElement('div');
+            notification.className = 'quest-completion-notification';
+            notification.innerHTML = `
+                <div class="quest-completion-content">
+                    <div class="quest-completion-icon">${quest.icon}</div>
+                    <div class="quest-completion-text">
+                        <div class="quest-completion-title">Quest Complete!</div>
+                        <div class="quest-completion-name">${quest.name}</div>
+                        <div class="quest-completion-reward">🎁 ${quest.reward.name}</div>
+                        <div class="quest-completion-progress">Progress: ${quest.target}/${quest.target}</div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show notification with slight delay for stacking effect
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, existingNotifications.length * 100 + 100);
+
+            // Hide notification after 6 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 600); // Wait for animation to complete
+            }, 6000);
+
+            // Add celebration effect to battle log
+            if (window.gameManager) {
+                window.gameManager.addLogEntry(
+                    `🎉 Quest Completed: "${quest.name}" - Reward: ${quest.reward.name}`,
+                    'quest-complete'
+                );
+            }
+        }
+
+        function showQuestProgressNotification(message) {
+            // Remove any existing progress notification
+            const existingProgress = document.querySelector('.quest-progress-notification');
+            if (existingProgress) {
+                existingProgress.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = 'quest-progress-notification';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 400);
+            }, 3000);
+        }
+
+        // Listen for quest events
+        if (typeof window !== 'undefined') {
+            window.addEventListener('questCompleted', (event) => {
+                const quest = event.detail.quest;
+                console.log('[RAID-GAME] Quest completed:', quest.name);
+                showQuestCompletionNotification(quest);
+            });
+
+            window.addEventListener('questProgress', (event) => {
+                const { questName, progress, target } = event.detail;
+                if (progress % 10 === 0 || progress === target) { // Show every 10 progress or on completion
+                    showQuestProgressNotification(`📈 ${questName}: ${progress}/${target}`);
+                }
+            });
         }
 
         // Initialize and start the game when page loads
@@ -474,6 +1148,88 @@
                 alert("Fatal Error: UI component missing. Cannot initialize game.");
                 return;
             }
+
+            // --- Setup Debug Listener --- 
+            function setupDebugKeys() {
+                document.addEventListener('keydown', (event) => {
+                    // Numpad 1: Toggle Farmer Raiden's HP for lowHealthDodge test
+                    if (event.key === 'Numpad1') {
+                        if (!window.gameManager || !window.gameManager.gameState) return;
+                        
+                        const raiden = window.gameManager.gameState.playerCharacters.find(c => c.id === 'farmer_raiden');
+                        
+                        if (raiden && raiden.lowHealthDodge) {
+                            const currentHpPercent = raiden.stats.currentHp / raiden.stats.maxHp;
+                            let targetHp;
+                            let logMessage;
+                            
+                            if (currentHpPercent >= 0.5) {
+                                // Set HP to 40% to activate
+                                targetHp = Math.floor(raiden.stats.maxHp * 0.4);
+                                logMessage = "Debug: Set Raiden HP to 40% to activate Lightning Evasion.";
+                            } else {
+                                // Set HP to 60% to deactivate
+                                targetHp = Math.floor(raiden.stats.maxHp * 0.6);
+                                logMessage = "Debug: Set Raiden HP to 60% to deactivate Lightning Evasion.";
+                            }
+                            
+                            raiden.stats.currentHp = targetHp;
+                            console.log(logMessage);
+                            
+                            // Manually trigger the check in the passive handler
+                            if (raiden.passiveHandler && typeof raiden.passiveHandler.applyLowHealthDodge === 'function') {
+                                raiden.passiveHandler.applyLowHealthDodge(raiden);
+                            } else {
+                                console.warn("Could not find applyLowHealthDodge on Raiden's passive handler.");
+                            }
+                            
+                            // Update UI
+                            if (window.gameManager.uiManager) {
+                                window.gameManager.uiManager.updateCharacterUI(raiden);
+                            }
+                        } else {
+                            console.log("Debug (Numpad1): Farmer Raiden not found or doesn't have Lightning Evasion talent.");
+                        }
+                    }
+                    
+                    // Shift+R: Test Renée's Bloodthirsty Resilience talent
+                    if (event.key === 'R' && event.shiftKey) {
+                        if (!window.gameManager || !window.gameManager.gameState) return;
+                        
+                        const renee = window.gameManager.gameState.playerCharacters.find(c => c.id === 'renée');
+                        
+                        if (renee) {
+                            // Deal critical damage to Renée
+                            const damageAmount = 1000; // Fixed amount for testing
+                            window.gameManager.applyDamage(damageAmount, 'physical', null, { 
+                                isCritical: true,
+                                target: renee,
+                                source: { name: 'Debug Test' }
+                            });
+                            
+                            console.log(`Debug: Dealt ${damageAmount} critical damage to Renée to test Bloodthirsty Resilience.`);
+                        } else {
+                            console.log("Debug (Shift+R): Renée not found in player team.");
+                        }
+                    }
+                    
+                    // Shift+Q: Test quest progress manually
+                    if (event.key === 'Q' && event.shiftKey) {
+                        if (window.questManager && window.questManager.initialized) {
+                            console.log('Debug: Manually updating quest progress...');
+                            window.questManager.updateQuestProgress('turnsPlayed', 5);
+                            window.questManager.updateQuestProgress('totalDamageDealt', 1000);
+                            console.log('Debug: Added 5 turns and 1000 damage to quest progress');
+                        } else {
+                            console.log('Debug: Quest manager not available');
+                        }
+                    }
+                    
+                    // Add other debug keys here if needed
+                });
+                console.log("Debug key listeners initialized. Press Shift+Q to test quest progress.");
+            }
+            // --- End Debug Listener Setup ---
 
             // --- Wait for Firebase Auth State --- 
             firebaseAuth.onAuthStateChanged(async (user) => {
@@ -487,10 +1243,20 @@
                         setupTooltip();
                         setupGameOverScreen();
                         setupBattleLog();
+                        setupTalentsPanel();
+                        
+                        // Initialize Debug Keys
+                        setupDebugKeys();
 
                         // Initialize the talent manager if available
                         if (window.talentManager) {
                             await window.talentManager.initialize();
+                        }
+
+                        // Initialize the quest manager if available
+                        if (window.questManager) {
+                            await window.questManager.initialize();
+                            console.log('[RAID-GAME] Quest manager initialized');
                         }
 
                         // Access the global gameManager (or create if needed)
@@ -503,14 +1269,42 @@
 
                         // Get stageId (might be from URL for story mode, or default)
                         const urlParams = new URLSearchParams(window.location.search);
-                        let stageId = urlParams.get('stage') || 'test_stage'; // Use URL stage or default
+                        let stageId = urlParams.get('stage') || 'target_dummy_test'; // Default to target dummy test
                         const storyId = urlParams.get('storyId');
                         const stageIndex = urlParams.get('stageIndex');
                         
+                        // Check for data from character selector in localStorage
+                        const savedGameData = localStorage.getItem('raid_game_data');
+                        if (savedGameData) {
+                            try {
+                                const gameData = JSON.parse(savedGameData);
+                                if (gameData.stageId) {
+                                    stageId = gameData.stageId;
+                                    console.log(`Loading stage from localStorage: ${stageId}`);
+                                }
+                                
+                                // Setup selected characters if provided
+                                if (gameData.characters && Array.isArray(gameData.characters)) {
+                                    window.gameManager.stageManager.customPlayerCharacters = gameData.characters;
+                                    console.log(`Loading custom characters from localStorage: ${gameData.characters.join(', ')}`);
+                                }
+                                
+                                // Clear localStorage after reading
+                                localStorage.removeItem('raid_game_data');
+                            } catch (error) {
+                                console.error('Error parsing saved game data:', error);
+                            }
+                        }
+                        
                         // If in story mode context, startGame will handle fetching correct stageId and state
                         // If not, it uses the stageId determined here.
-                        console.log(`Attempting to start game. Story context: ${storyId ? storyId + '['+stageIndex+']' : 'None'}, Fallback Stage ID: ${stageId}`);
+                        console.log(`Attempting to start game. Story context: ${storyId ? storyId + '['+stageIndex+']' : 'None'}, Stage ID: ${stageId}`);
                         await window.gameManager.startGame(stageId); // Call the async startGame
+
+                        // Initialize the talents panel if the talents panel manager is available
+                        if (window.talentsPanelManager) {
+                            window.talentsPanelManager.initialize();
+                        }
 
                         // Hide loading screen AFTER game state is loaded and ready
                         hideLoadingScreen();
@@ -532,6 +1326,28 @@
                 }
             });
             // --- End Firebase Auth Wait ---
+        });
+
+        console.log(">>> Setting up GLOBAL criticalHeal test listener <<<");
+        document.addEventListener('criticalHeal', (event) => {
+            console.log('%c>>> GLOBAL TEST LISTENER: criticalHeal event DETECTED! <<<', 'background: yellow; color: black; font-weight: bold;', event.detail);
+            
+            // Add specific check for Bridget
+            if (event.detail && event.detail.source && event.detail.source.id === 'bridget') {
+                console.log('%c>>> BRIDGET CRITICAL HEAL DETECTED! <<<', 'background: lime; color: black; font-size: 14px; font-weight: bold;');
+                
+                // Check if Bridget has the talent in her applied talents
+                if (event.detail.source.appliedTalents) {
+                    console.log('Bridget\'s applied talents:', event.detail.source.appliedTalents);
+                    if (event.detail.source.appliedTalents.includes('aqueous_renewal')) {
+                        console.log('%c>>> BRIDGET HAS AQUEOUS RENEWAL TALENT! <<<', 'background: blue; color: white; font-weight: bold;');
+                    } else {
+                        console.log('%c>>> BRIDGET DOES NOT HAVE AQUEOUS RENEWAL TALENT! <<<', 'background: red; color: white; font-weight: bold;');
+                    }
+                } else {
+                    console.log('%c>>> BRIDGET HAS NO APPLIED TALENTS ARRAY! <<<', 'background: orange; color: black; font-weight: bold;');
+                }
+            }
         });
     </script>
 </body>

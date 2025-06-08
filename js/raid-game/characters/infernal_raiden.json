@@ -38,10 +38,7 @@
             "targetType": "enemy",
             "description": "Deals 100% Magic Damage, multiplied by 2x for each Blazing Lightning Ball stack on the target. Stuns the target for 2 turns.",
             "icon": "Icons/abilities/thunder_from_the_sky.webp",
-            "effect": {
-                "functionName": "thunderFromTheSkyEffect",
-                "script": "js/raid-game/abilities/infernal_raiden_abilities.js"
-            },
+            "functionName": "thunderFromTheSkyEffect",
             "stunEffect": {
                 "debuffId": "stun",
                 "name": "Stunned",
@@ -62,10 +59,7 @@
             "targetType": "all_enemies",
             "description": "Deals 150% magical damage to all targets.",
             "icon": "Icons/abilities/thunderstruck_infernal.webp",
-            "effect": {
-                "functionName": "thunderstruckInfernalEffect",
-                "script": "js/raid-game/abilities/infernal_raiden_abilities.js"
-            }
+            "functionName": "thunderstruckInfernalEffect"
         },
         {
             "id": "teleportation",
@@ -80,10 +74,10 @@
                 "buffId": "teleportation_buff",
                 "name": "Teleportation Phase",
                 "duration": 3,
-                "statModifiers": {
-                    "dodgeChance": 0.75,
-                    "critChance": 0.50
-                },
+                "statModifiers": [
+                    { "stat": "dodgeChance", "value": 0.75, "operation": "add" },
+                    { "stat": "critChance", "value": 0.50, "operation": "add" }
+                ],
                 "description": "Increased dodge and critical hit chance."
             }
         }
@@ -92,6 +86,7 @@
         "id": "storm_conduit",
         "name": "Storm Conduit",
         "description": "Gains 45 Magic Damage permanently whenever an ability is used.",
-        "icon": "images/icons/passive_storm_conduit_placeholder.png"
+        "icon": "images/icons/passive_storm_conduit_placeholder.png",
+        "functionName": "stormConduitPassive"
     }
 } 

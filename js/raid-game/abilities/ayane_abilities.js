@@ -311,10 +311,10 @@ const ayaneReadyToSliceBaseEffect = (caster, target) => {
     );
     
     // Use statModifiers to be compatible with the standard buff system
-    readyToSliceEffect.statModifiers = {
-        physicalDamage: Math.round(caster.stats.physicalDamage * 0.5), // 50% increase as actual value
-        dodgeChance: 0.2 // 20% dodge chance increase as actual value
-    };
+    readyToSliceEffect.statModifiers = [
+        { stat: 'physicalDamage', value: Math.round(caster.stats.physicalDamage * 0.5), operation: 'add' }, // 50% increase as actual value
+        { stat: 'dodgeChance', value: 0.2, operation: 'add' } // 20% dodge chance increase as actual value
+    ];
     
     // Still keep onApply for backward compatibility and visual effects
     readyToSliceEffect.onApply = (character) => {

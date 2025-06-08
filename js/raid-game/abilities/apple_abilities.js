@@ -317,9 +317,9 @@ const rotSpitEffect = (caster, target) => {
     ).setDescription(`Reduces armor by ${armorReductionPercent * 100}% for ${debuffDuration} turns. Stacks additively.`);
     
     // Set the stat modifier
-    armorReductionDebuff.statModifiers = {
-        armor_percent: -(armorReductionPercent * 100) // Use armor_percent and provide the percentage value (e.g., -5)
-    };
+    armorReductionDebuff.statModifiers = [
+        { stat: 'armor_percent', value: -(armorReductionPercent * 100), operation: 'add' } // Use armor_percent and provide the percentage value (e.g., -5)
+    ];
     
     // Apply the debuff
     target.addDebuff(armorReductionDebuff);

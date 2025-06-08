@@ -1,0 +1,54 @@
+{
+  "id": "boosted_devils",
+  "name": "2v2 - Boosted Devils",
+  "description": "Defeat the Little Devils with boosted stats",
+  "difficulty": 5,
+  "type": "challenge",
+  "backgroundImage": "images/stages/burning_school_gym.png",
+  "backgroundMusic": "sounds/burning_school_gym_bgm.mp3",
+  "enemies": [
+    {
+      "characterId": "little_devil",
+      "level": 5,
+      "modifications": {
+        "hpMultiplier": 10,
+        "damageMultiplier": 3
+      }
+    },
+    {
+      "characterId": "little_devil_female",
+      "level": 5,
+      "modifications": {
+        "hpMultiplier": 10,
+        "damageMultiplier": 3
+      }
+    }
+  ],
+  "requirements": {
+    "teamSize": {
+      "min": 2,
+      "max": 2
+    },
+    "tags": []
+  },
+  "modifiers": [
+    {
+      "id": "burning_ground"
+    }
+  ],
+  "stageEffects": [
+    {
+      "id": "burning_ground"
+    }
+  ],
+  "objectives": {
+    "winConditions": [
+      {
+        "type": "allEnemiesDefeated"
+      }
+    ],
+    "turnLimit": 0
+  },
+  "playerunlocked": false,
+  "isHidden": true
+}

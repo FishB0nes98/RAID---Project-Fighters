@@ -854,4 +854,622 @@
     50% {
         background-position: 100% 50%;
     }
+}
+
+/* Unstoppable Farmer Talent VFX */
+.unstoppable-farmer-vfx {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 100, 50, 0.6) 0%, rgba(200, 50, 0, 0.3) 50%, transparent 80%);
+    box-shadow: 0 0 40px rgba(255, 100, 0, 0.8), inset 0 0 30px rgba(255, 200, 0, 0.7);
+    animation: unstoppablePulse 1.2s forwards;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes unstoppablePulse {
+    0% { opacity: 0; transform: scale(0.2); }
+    40% { opacity: 0.9; transform: scale(1.2); }
+    70% { opacity: 0.6; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.8); }
+}
+
+.unstoppable-farmer-vfx::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 150, 0, 0.4) 0%, rgba(255, 100, 0, 0.2) 50%, transparent 80%);
+    filter: blur(5px);
+    animation: unstoppableInnerPulse 1s forwards;
+}
+
+@keyframes unstoppableInnerPulse {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+.cooldown-reset-animation {
+    animation: cooldownResetFlash 0.7s ease-out;
+}
+
+@keyframes cooldownResetFlash {
+    0% { filter: brightness(1); }
+    30% { filter: brightness(1.5) hue-rotate(30deg); }
+    100% { filter: brightness(1); }
+}
+
+.cooldown-reset-vfx-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Clock-winding animation for cooldown reset */
+.cooldown-reset-indicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.cooldown-reset-indicator::before {
+    content: '⟳';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffcc00;
+    font-size: 2em;
+    text-shadow: 0 0 10px rgba(255, 150, 0, 0.8);
+    animation: resetSpin 1.2s ease-out;
+}
+
+@keyframes resetSpin {
+    0% { transform: translateX(-50%) rotate(0deg) scale(0.5); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateX(-50%) rotate(720deg) scale(1.2); opacity: 0; }
+}
+
+/* Styling for the ability cooldown reset visual in the UI */
+.ability.cooldown-reset {
+    position: relative;
+    overflow: hidden;
+}
+
+.ability.cooldown-reset::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 0%, rgba(255, 150, 0, 0.4) 40%, transparent 60%, rgba(255, 150, 0, 0.4) 100%);
+    background-size: 300% 300%;
+    animation: cooldownResetSweep 0.7s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes cooldownResetSweep {
+    0% { background-position: 0% 0%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { background-position: 100% 100%; opacity: 0; }
+}
+
+/* Clock hands animation */
+.clock-reset-hands {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: 15px;
+    left: 15px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 200, 0, 0.7);
+    box-shadow: 0 0 10px rgba(255, 150, 0, 0.6);
+    animation: clockGlow 1s ease-out;
+    z-index: 11;
+}
+
+.clock-reset-hands::before,
+.clock-reset-hands::after {
+    content: '';
+    position: absolute;
+    background-color: #ffcc00;
+    top: 50%;
+    left: 50%;
+    transform-origin: left center;
+}
+
+.clock-reset-hands::before {
+    width: 10px;
+    height: 2px;
+    animation: hourHandReset 1s linear;
+}
+
+.clock-reset-hands::after {
+    width: 12px;
+    height: 1px;
+    animation: minuteHandReset 1s linear;
+}
+
+@keyframes clockGlow {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+@keyframes hourHandReset {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(-720deg); }
+}
+
+@keyframes minuteHandReset {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(-1440deg); }
+}
+
+/* Critical Leech VFX */
+.critical-leech-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: criticalLeechPulse 2s ease-in-out;
+}
+
+.critical-leech-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, rgba(128, 0, 0, 0.3) 50%, transparent 70%);
+    animation: criticalLeechGlow 2s ease-in-out;
+    border-radius: 50%;
+    transform: scale(0.8);
+}
+
+.critical-leech-stacks {
+    position: relative;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff3030;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.8), 0 0 10px rgba(255, 0, 0, 0.4);
+    animation: criticalLeechText 2s ease-in-out;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 15px;
+    border: 2px solid #ff6060;
+    z-index: 51;
+}
+
+@keyframes criticalLeechPulse {
+    0% { opacity: 0; transform: scale(0.8); }
+    20% { opacity: 1; transform: scale(1.1); }
+    80% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.2); }
+}
+
+@keyframes criticalLeechGlow {
+    0% { opacity: 0; transform: scale(0.8); }
+    20% { opacity: 0.8; transform: scale(1.2); }
+    70% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes criticalLeechText {
+    0% { transform: scale(0.8); opacity: 0; }
+    20% { transform: scale(1.3); opacity: 1; }
+    50% { transform: scale(1); opacity: 1; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+/* Magical Apple talent CSS additions */
+.apple-throw-vfx.magical {
+    box-shadow: 0 0 15px 5px rgba(128, 0, 255, 0.6);
+    background: radial-gradient(circle, rgba(255,20,147,0.9) 0%, rgba(128,0,255,0.7) 70%, rgba(70,0,170,0.5) 100%);
+}
+
+.apple-throw-vfx.magical::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,20,147,0.7) 0%, rgba(128,0,255,0.5) 50%, transparent 80%);
+    animation: magicalPulse 1.5s infinite ease-in-out;
+}
+
+.apple-impact-vfx.magical {
+    box-shadow: 0 0 20px 8px rgba(128, 0, 255, 0.7);
+    background: radial-gradient(circle, rgba(255,20,147,0.9) 0%, rgba(128,0,255,0.7) 50%, rgba(70,0,170,0.5) 100%);
+}
+
+.magical-apple-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.magical-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #f0f;
+    opacity: 0.8;
+    filter: blur(1px);
+    animation: magicalSparkle 1.2s infinite ease-out;
+}
+
+.magical-apple-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.magical-trail-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,20,147,0.9), rgba(128,0,255,0.7));
+    filter: blur(2px);
+    opacity: 0.7;
+    animation: magicalTrail 1s forwards ease-out;
+}
+
+@keyframes magicalPulse {
+    0% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+@keyframes magicalSparkle {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes magicalTrail {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0) translateY(-20px);
+        opacity: 0;
+    }
+}
+
+/* Enhanced duration effect for Farmer's Catch */
+.dodge-buff-indicator-container.extended-duration {
+    position: relative;
+}
+
+.dodge-buff-indicator-container.extended-duration::after {
+    content: '+';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(0, 200, 0, 0.5);
+}
+
+.dodge-buff-vfx.extended {
+    animation-duration: 1.5s;
+    box-shadow: 0 0 20px 10px rgba(0, 255, 100, 0.6);
+}
+
+.wind-streak.extended {
+    opacity: 0.8;
+    height: 4px !important;
+    animation-duration: 0.8s !important;
+}
+
+/* Apple Splash effect with increased power */
+.apple-splash-indicator[data-debuff-id="apple_throw_debuff"] {
+    animation: bobbing 1.5s infinite alternate;
+}
+
+/* Enhanced Apple Splatter effect (40% reduction) */
+.apple-damage-pulse.enhanced {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0) 70%);
+    animation: damagePulseEnhanced 1.5s infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes damagePulseEnhanced {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.1;
+    }
+}
+
+/* Apple Splatter VFX */
+.apple-impact-vfx.enhanced::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    width: calc(100% + 40px);
+    height: calc(100% + 40px);
+    background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, rgba(255,0,0,0) 70%);
+    border-radius: 50%;
+    animation: appleSplatterPulse 1.2s infinite;
+    z-index: 3;
+}
+
+.apple-impact-vfx.enhanced::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    border: 2px dashed rgba(255, 0, 0, 0.8);
+    border-radius: 50%;
+    animation: appleSplatterRotate 4s linear infinite;
+    z-index: 2;
+}
+
+@keyframes appleSplatterPulse {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes appleSplatterRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Enhanced Apple fragment particles */
+.apple-fragment.enhanced {
+    background-color: rgba(255, 60, 60, 0.8);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    animation: appleSplashEnhanced 0.8s ease-out forwards;
+}
+
+@keyframes appleSplashEnhanced {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x, 30px), var(--y, 30px)) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Strong screen shake for enhanced Apple Splatter */
+.strong-shake {
+    animation: strongShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+@keyframes strongShake {
+    0%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translate3d(-8px, 4px, 0);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translate3d(8px, -4px, 0);
+    }
+}
+
+/* Nurturing Aura VFX */
+.nurturing-aura-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: auraGlow 2.5s ease-in-out forwards;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.nurturing-aura-vfx.self {
+    background-color: rgba(20, 255, 100, 0.15);
+    box-shadow: 0 0 20px 5px rgba(20, 255, 100, 0.3);
+}
+
+.nurturing-aura-vfx:not(.self) {
+    background-color: rgba(100, 255, 150, 0.12);
+    box-shadow: 0 0 15px 3px rgba(100, 255, 150, 0.25);
+}
+
+.nurturing-aura-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.nurturing-aura-particles::before,
+.nurturing-aura-particles::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: 
+        radial-gradient(circle, rgba(100, 255, 150, 0.2) 10%, transparent 70%),
+        radial-gradient(circle, rgba(100, 255, 150, 0.15) 20%, transparent 80%);
+    background-size: 50% 50%, 30% 30%;
+    background-position: 0 0, 50% 50%;
+    animation: auraParticles 3s infinite linear;
+}
+
+.nurturing-aura-particles::after {
+    animation-duration: 5s;
+    animation-direction: reverse;
+    opacity: 0.7;
+}
+
+.aura-text {
+    padding: 6px 12px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
+    color: #4eff9a;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-shadow: 0 0 5px rgba(20, 255, 100, 0.9);
+    animation: auraTextPulse 1.5s ease-in-out infinite;
+    margin-top: -80px;
+    white-space: nowrap;
+    border: 2px solid rgba(100, 255, 150, 0.4);
+}
+
+@keyframes auraGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes auraParticles {
+    0% {
+        background-position: 0% 0%, 50% 50%;
+    }
+    100% {
+        background-position: 100% 100%, -50% -50%;
+    }
+}
+
+@keyframes auraTextPulse {
+    0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 5px rgba(20, 255, 100, 0.9);
+    }
+    50% {
+        transform: scale(1.05);
+        text-shadow: 0 0 10px rgba(20, 255, 100, 1);
+    }
+}
+
+/* Special effect log styling for Nurturing Aura */
+.log-entry.special-effect:has(span:contains('Nurturing Aura')) {
+    background-color: rgba(30, 200, 100, 0.2);
+    border-left: 4px solid #3aff90;
+    margin: 4px 0;
+}
+
+.log-entry.special-effect:has(span:contains('Nurturing Aura'))::before {
+    content: '💚';
+    margin-right: 8px;
 } 

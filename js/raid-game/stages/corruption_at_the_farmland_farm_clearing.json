@@ -18,19 +18,14 @@
     },
     "modifiers": [
         {
-            "id": "it_finally_rains",
-            "name": "It finally rains!",
-            "description": "Player characters regenerate 3% max HP each turn. Player abilities cost 0 Mana.",
-            "icon": "🌧️" 
-        },
-        {
-            "id": "pack_power",
-            "name": "Pack Power",
-            "description": "All AI characters deal 20% more damage.",
-            "icon": "🐺", 
+            "id": "its_raining_man",
+            "name": "It's raining man!",
+            "description": "Heavy rain falls from the burning sky! All player characters heal 100 HP each turn.",
+            "icon": "🌧️",
             "effect": {
-                "type": "ai_damage_increase",
-                "value": 0.20 
+                "type": "turn_start_healing_fixed",
+                "value": 100,
+                "target": "players"
             }
         }
     ],

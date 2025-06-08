@@ -1,0 +1,135 @@
+/* CSS for Farmer Cham Cham talent effects */
+
+/* Talent Description Styling */
+.talent-effect {
+    display: block;
+    font-size: 0.9em;
+    margin-top: 4px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-style: italic;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.talent-effect::before {
+    content: '⚡';
+    margin-right: 4px;
+}
+
+.talent-effect:hover {
+    filter: brightness(1.2);
+}
+
+.talent-effect.damage {
+    background-color: rgba(255, 100, 100, 0.2);
+    border-left: 2px solid #ff6464;
+    color: #ff6464;
+}
+
+.talent-effect.utility {
+    background-color: rgba(100, 150, 255, 0.2);
+    border-left: 2px solid #6496ff;
+    color: #6496ff;
+}
+
+.talent-effect.healing {
+    background-color: rgba(100, 255, 150, 0.2);
+    border-left: 2px solid #64ff96;
+    color: #64ff96;
+}
+
+/* Physical damage boost VFX for Farmer's Resilience talent */
+.farmer-resilience-damage-buff {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    opacity: 0;
+    animation: farmer-resilience-damage-pulse 1.5s ease-out forwards;
+}
+
+.farmer-resilience-damage-buff::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255,100,100,0.4) 0%, rgba(255,50,50,0.2) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: farmer-resilience-glow 1.5s ease-out;
+}
+
+.farmer-resilience-phys-text {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff5050;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 80, 80, 0.5);
+    white-space: nowrap;
+    opacity: 0;
+    animation: farmer-resilience-text 1.5s ease-out forwards;
+    z-index: 16;
+}
+
+@keyframes farmer-resilience-damage-pulse {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes farmer-resilience-glow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    70% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes farmer-resilience-text {
+    0% {
+        transform: translate(-50%, -40%);
+        opacity: 0;
+        filter: blur(5px);
+    }
+    20% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        transform: translate(-50%, -80%);
+        opacity: 0;
+    }
+} 

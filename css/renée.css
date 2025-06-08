@@ -1,0 +1,2709 @@
+/* Renée CSS - Visual Effects for Tokyo Mew Mew character */
+
+/* Character Base Styling */
+.character[id^="character-renée"],
+.character[id^="character-renee"] {
+    position: relative;
+}
+
+/* Wolf aura around the character - REMOVED */
+/*
+.character[id^="character-renée"]::after,
+.character[id^="character-renee"]::after {
+    content: '';
+    position: absolute;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(128, 0, 128, 0.15) 0%, rgba(76, 0, 153, 0.05) 70%, rgba(0, 0, 0, 0) 100%);
+    z-index: -1;
+    animation: wolf-aura-pulse 3s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes wolf-aura-pulse {
+    0% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+*/
+
+/* Wolf Claw Strike VFX */
+.renee-claw-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    overflow: visible;
+}
+
+.claw-mark {
+    position: absolute;
+    width: 80%;
+    height: 12px;
+    background: linear-gradient(90deg, rgba(128, 0, 128, 0) 0%, rgba(148, 0, 211, 0.9) 50%, rgba(128, 0, 128, 0) 100%);
+    transform-origin: left center;
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(148, 0, 211, 0.9);
+    animation: claw-mark-slash 0.7s ease-out forwards, claw-pulse 1s ease-in-out;
+    opacity: 0;
+}
+
+.claw-mark:nth-child(1) {
+    top: 30%;
+    transform: rotate(-8deg);
+}
+
+.claw-mark:nth-child(2) {
+    top: 45%;
+    transform: rotate(0deg);
+    animation-delay: 0.05s;
+}
+
+.claw-mark:nth-child(3) {
+    top: 60%;
+    transform: rotate(8deg);
+    animation-delay: 0.1s;
+}
+
+@keyframes claw-mark-slash {
+    0% {
+        left: -20%;
+        width: 0;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    50% {
+        width: 90%;
+        opacity: 1;
+    }
+    100% {
+        left: 100%;
+        width: 70%;
+        opacity: 0;
+    }
+}
+
+@keyframes claw-pulse {
+    0% {
+        box-shadow: 0 0 12px rgba(148, 0, 211, 0.9);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(148, 0, 211, 1);
+    }
+    100% {
+        box-shadow: 0 0 12px rgba(148, 0, 211, 0.9);
+    }
+}
+
+.claw-slash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(148, 0, 211, 0.4) 0%, rgba(128, 0, 128, 0.2) 40%, rgba(128, 0, 128, 0) 70%);
+    z-index: 5;
+    animation: claw-slash-flash 0.6s ease-out forwards;
+}
+
+@keyframes claw-slash-flash {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Hard impact effect */
+.claw-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: transparent;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 rgba(148, 0, 211, 0.8);
+    animation: claw-impact-burst 0.5s ease-out forwards;
+    z-index: 6;
+}
+
+@keyframes claw-impact-burst {
+    0% {
+        width: 0;
+        height: 0;
+        box-shadow: 0 0 0 0 rgba(148, 0, 211, 0.8);
+    }
+    50% {
+        width: 120px;
+        height: 120px;
+        box-shadow: 0 0 30px 10px rgba(148, 0, 211, 0.7);
+        opacity: 0.8;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        box-shadow: 0 0 5px 0 rgba(148, 0, 211, 0);
+        opacity: 0;
+    }
+}
+
+/* Wolf spirit particles for impact */
+.claw-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: rgba(148, 0, 211, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(148, 0, 211, 0.9);
+    animation: claw-particle-fly 0.8s ease-out forwards;
+}
+
+@keyframes claw-particle-fly {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x, 50px), var(--y, 50px)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Target shake animation for hard impact */
+.target-shake {
+    animation: target-impact-shake 0.5s ease-out;
+}
+
+@keyframes target-impact-shake {
+    0% { transform: translate(0, 0) rotate(0); }
+    10% { transform: translate(-5px, 0) rotate(-2deg); }
+    20% { transform: translate(5px, 0) rotate(2deg); }
+    30% { transform: translate(-5px, 0) rotate(-2deg); }
+    40% { transform: translate(3px, 0) rotate(1deg); }
+    50% { transform: translate(-2px, 0) rotate(-1deg); }
+    60% { transform: translate(2px, 0) rotate(0.5deg); }
+    70% { transform: translate(-1px, 0) rotate(-0.5deg); }
+    80% { transform: translate(1px, 0) rotate(0.25deg); }
+    90% { transform: translate(0, 0) rotate(-0.25deg); }
+    100% { transform: translate(0, 0) rotate(0); }
+}
+
+/* Remove wolf spirit active VFX */
+/* Wolf Spirit VFX - REMOVED */
+
+/* Ability enhancements from Wolf Spirit */
+.ability.wolf-spirit-enhanced {
+    position: relative;
+    z-index: 5;
+    box-shadow: 0 0 10px rgba(128, 0, 128, 0.7);
+    animation: wolf-spirit-ability-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes wolf-spirit-ability-pulse {
+    0% {
+        box-shadow: 0 0 5px rgba(128, 0, 128, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(128, 0, 128, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(128, 0, 128, 0.6);
+    }
+}
+
+.cooldown-reduction-indicator {
+    position: absolute;
+    top: -15px;
+    right: -5px;
+    background-color: rgba(128, 0, 128, 0.9);
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 0 6px rgba(128, 0, 128, 0.8);
+    animation: cooldown-indicator-fade 3s ease-out forwards;
+    z-index: 6;
+}
+
+@keyframes cooldown-indicator-fade {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    10% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    70% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Wolf Spirit buff icon styling */
+.buff-icon[data-buff-id^="renee_wolf_spirit"] {
+    position: relative;
+    overflow: visible;
+}
+
+.buff-icon[data-buff-id^="renee_wolf_spirit"]::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(128, 0, 128, 0.7);
+    animation: wolf-spirit-buff-pulse 2s infinite alternate;
+    z-index: 2;
+    pointer-events: none;
+}
+
+@keyframes wolf-spirit-buff-pulse {
+    0% {
+        opacity: 0.5;
+        box-shadow: 0 0 3px rgba(128, 0, 128, 0.5);
+    }
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(128, 0, 128, 0.8);
+    }
+}
+
+/* Passive effects for abilities */
+.character[id^="character-renee"] .ability[data-ability-id="renee_q"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../Icons/abilities/claw_slash.png') no-repeat center center;
+    background-size: 80% 80%;
+    opacity: 0.1;
+    filter: hue-rotate(270deg) brightness(1.5);
+    animation: claw-icon-pulse 4s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes claw-icon-pulse {
+    0% {
+        opacity: 0.1;
+        transform: rotate(-5deg);
+    }
+    100% {
+        opacity: 0.2;
+        transform: rotate(5deg);
+    }
+}
+
+/* Critical hit VFX enhancements */
+.renee-critical-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 60;
+    pointer-events: none;
+}
+
+.critical-slash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 0, 255, 0.4) 0%, rgba(128, 0, 128, 0.2) 50%, rgba(0, 0, 0, 0) 100%);
+    animation: critical-flash 0.8s ease-out forwards;
+}
+
+@keyframes critical-flash {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* Stealth VFX: modern, impactful, and clears cleanly */
+.renee-stealth-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 70;
+    border-radius: 50%;
+    background: radial-gradient(circle at 60% 40%, rgba(128,0,128,0.22) 0%, rgba(76,0,153,0.13) 60%, rgba(0,0,0,0) 100%);
+    box-shadow: 0 0 32px 8px rgba(128,0,128,0.25), 0 0 64px 16px rgba(128,0,128,0.10);
+    animation: renee-stealth-fade 2.5s infinite alternate, renee-stealth-shimmer 3.5s linear infinite;
+    opacity: 0.85;
+    overflow: visible;
+}
+
+@keyframes renee-stealth-fade {
+    0% { opacity: 0.7; filter: blur(0px); }
+    50% { opacity: 1; filter: blur(2px); }
+    100% { opacity: 0.7; filter: blur(0px); }
+}
+
+@keyframes renee-stealth-shimmer {
+    0% { box-shadow: 0 0 32px 8px rgba(128,0,128,0.25), 0 0 64px 16px rgba(128,0,128,0.10); }
+    50% { box-shadow: 0 0 48px 16px rgba(128,0,128,0.32), 0 0 96px 32px rgba(128,0,128,0.18); }
+    100% { box-shadow: 0 0 32px 8px rgba(128,0,128,0.25), 0 0 64px 16px rgba(128,0,128,0.10); }
+}
+
+/* Animated ripple for extra stealth impact */
+.renee-stealth-vfx::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(180,180,255,0.10) 0%, rgba(128,0,128,0.08) 60%, rgba(0,0,0,0) 100%);
+    transform: translate(-50%, -50%) scale(1);
+    animation: renee-stealth-ripple 2.8s infinite cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+    z-index: 71;
+}
+
+@keyframes renee-stealth-ripple {
+    0% { opacity: 0.18; transform: translate(-50%, -50%) scale(0.95); }
+    60% { opacity: 0.32; transform: translate(-50%, -50%) scale(1.08); }
+    100% { opacity: 0.10; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* Make Renée's image semi-transparent when stealthed */
+.character.renee-stealth-active .character-image {
+    opacity: 0.28;
+    transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1);
+    filter: blur(0.5px) brightness(1.08) grayscale(0.12);
+}
+
+/* Mystical Whip VFX */
+.renee-whip-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 55;
+    overflow: visible;
+}
+
+.whip-slash {
+    position: absolute;
+    width: 120%;
+    height: 20px;
+    background: linear-gradient(90deg, 
+        rgba(180, 100, 255, 0) 0%, 
+        rgba(215, 155, 255, 0.4) 10%,
+        rgba(255, 180, 255, 0.9) 30%, 
+        rgba(230, 150, 255, 0.8) 60%,
+        rgba(190, 120, 255, 0.3) 80%,
+        rgba(170, 85, 255, 0) 100%);
+    transform-origin: left center;
+    border-radius: 4px;
+    left: -20%;
+    box-shadow: 0 0 15px rgba(200, 120, 255, 0.9), 0 0 25px rgba(220, 150, 255, 0.6);
+    animation: whip-slash 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.whip-slash:nth-child(1) {
+    top: 47%;
+    transform: rotate(0deg);
+    animation-delay: 0s;
+}
+
+.whip-slash:nth-child(2) {
+    top: 53%;
+    transform: rotate(0deg);
+    animation-delay: 0.05s;
+    opacity: 0.7;
+    height: 15px;
+}
+
+@keyframes whip-slash {
+    0% {
+        left: -20%;
+        width: 0;
+        opacity: 0;
+        filter: blur(0px);
+    }
+    10% {
+        opacity: 1;
+        filter: blur(2px);
+    }
+    30% {
+        filter: blur(1px);
+    }
+    50% {
+        width: 120%;
+        opacity: 1;
+        filter: blur(2px);
+    }
+    100% {
+        left: 120%;
+        width: 100%;
+        opacity: 0;
+        filter: blur(4px);
+    }
+}
+
+.whip-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, 
+        rgba(230, 150, 255, 0.3) 0%, 
+        rgba(200, 120, 255, 0.15) 40%, 
+        rgba(170, 100, 255, 0) 70%);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    z-index: 3;
+    animation: whip-trail-fade 0.8s ease-out forwards;
+    transform: scale(0.7, 0.5) rotate(-10deg);
+}
+
+@keyframes whip-trail-fade {
+    0% {
+        opacity: 0;
+        transform: scale(0.5, 0.3) rotate(-5deg);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1, 0.6) rotate(-15deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2, 0.7) rotate(-20deg);
+    }
+}
+
+.whip-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: transparent;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 rgba(220, 150, 255, 0.8);
+    animation: whip-impact-burst 0.5s ease-out forwards;
+    z-index: 4;
+}
+
+@keyframes whip-impact-burst {
+    0% {
+        width: 0;
+        height: 0;
+        box-shadow: 0 0 0 0 rgba(220, 150, 255, 0.8);
+    }
+    40% {
+        width: 150px;
+        height: 150px;
+        box-shadow: 0 0 40px 15px rgba(220, 150, 255, 0.7);
+        opacity: 0.9;
+    }
+    100% {
+        width: 250px;
+        height: 250px;
+        box-shadow: 0 0 10px 0 rgba(220, 150, 255, 0);
+        opacity: 0;
+    }
+}
+
+.whip-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: rgba(220, 150, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 200, 255, 0.9);
+    animation: whip-particle-fly 1s ease-out forwards;
+}
+
+@keyframes whip-particle-fly {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 1;
+    }
+    40% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(var(--x, 80px), var(--y, 80px)) scale(0);
+        opacity: 0;
+    }
+}
+
+.whip-stun-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0;
+    animation: whip-stun-appear 1.2s ease-out forwards;
+}
+
+@keyframes whip-stun-appear {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.whip-stun-stars {
+    position: absolute;
+    top: 15%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    color: rgba(255, 200, 255, 0.9);
+    text-shadow: 0 0 10px rgba(220, 150, 255, 0.9);
+    animation: whip-stun-stars 1.2s ease-out forwards;
+}
+
+@keyframes whip-stun-stars {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    30% {
+        transform: translateY(-15px) scale(1.3);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-40px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Lunar Curse VFX (R ability) */
+.lunar-curse-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 60;
+    overflow: visible;
+}
+
+.lunar-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(160, 180, 255, 0.3) 0%, 
+        rgba(120, 150, 230, 0.2) 40%, 
+        rgba(70, 100, 200, 0.1) 70%,
+        rgba(0, 0, 0, 0) 100%);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 50px rgba(160, 200, 255, 0.5);
+    filter: blur(5px);
+    animation: lunar-pulse 3s infinite alternate;
+    z-index: 2;
+}
+
+@keyframes lunar-pulse {
+    0% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+.moon-circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+}
+
+.moon {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, 
+        rgba(220, 225, 255, 0.95) 0%, 
+        rgba(180, 200, 255, 0.85) 50%, 
+        rgba(140, 170, 230, 0.75) 100%);
+    box-shadow: 0 0 30px rgba(180, 200, 255, 0.9), 
+                0 0 60px rgba(160, 180, 255, 0.5);
+    animation: moon-rotate 12s linear infinite;
+}
+
+.moon::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(230, 235, 255, 0.9);
+    box-shadow: 0 0 10px rgba(230, 235, 255, 0.8);
+}
+
+.moon::after {
+    content: '';
+    position: absolute;
+    bottom: 15px;
+    left: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(230, 235, 255, 0.8);
+    box-shadow: 0 0 8px rgba(230, 235, 255, 0.7);
+}
+
+@keyframes moon-rotate {
+    0% {
+        transform: rotate(0deg) translateY(-80px) rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg) translateY(-80px) rotate(-360deg);
+    }
+}
+
+.lunar-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.lunar-star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: rgba(230, 240, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(200, 220, 255, 0.8);
+    animation: lunar-star-twinkle 2s infinite alternate;
+}
+
+.lunar-star:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+.lunar-star:nth-child(2) { top: 15%; right: 20%; animation-delay: 0.3s; }
+.lunar-star:nth-child(3) { top: 70%; left: 15%; animation-delay: 0.5s; }
+.lunar-star:nth-child(4) { top: 60%; right: 25%; animation-delay: 0.7s; }
+.lunar-star:nth-child(5) { top: 40%; left: 10%; animation-delay: 0.2s; }
+.lunar-star:nth-child(6) { top: 30%; right: 15%; animation-delay: 0.4s; }
+.lunar-star:nth-child(7) { top: 80%; left: 35%; animation-delay: 0.6s; }
+.lunar-star:nth-child(8) { top: 25%; right: 40%; animation-delay: 0.8s; }
+
+@keyframes lunar-star-twinkle {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Lunar Curse Buff Icon Styling */
+.buff-icon[data-buff-id^="renee_lunar_curse"] {
+    position: relative;
+    overflow: visible;
+}
+
+.buff-icon[data-buff-id^="renee_lunar_curse"]::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(160, 200, 255, 0.8);
+    animation: lunar-buff-pulse 2s infinite alternate;
+    z-index: 2;
+    pointer-events: none;
+}
+
+@keyframes lunar-buff-pulse {
+    0% {
+        opacity: 0.6;
+        box-shadow: 0 0 5px rgba(160, 200, 255, 0.6);
+    }
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 12px rgba(180, 220, 255, 0.9);
+    }
+}
+
+/* Lunar Mark Debuff VFX on target */
+.lunar-mark-debuff {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 55;
+}
+
+.lunar-mark-symbol {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(200, 220, 255, 0.9) 0%, 
+        rgba(160, 180, 255, 0.8) 40%, 
+        rgba(120, 150, 230, 0.4) 70%,
+        rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 15px rgba(160, 200, 255, 0.8), 
+                0 0 30px rgba(140, 180, 255, 0.5);
+    animation: lunar-mark-float 2s ease-in-out infinite alternate;
+}
+
+.lunar-mark-symbol::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: rgba(230, 240, 255, 1);
+    box-shadow: 0 0 5px rgba(230, 240, 255, 0.9);
+}
+
+@keyframes lunar-mark-float {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-10px) scale(1.1);
+        opacity: 1;
+    }
+}
+
+.lunar-mark-aura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(160, 180, 255, 0.1) 0%, 
+        rgba(140, 160, 230, 0.05) 50%, 
+        rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 40px rgba(160, 180, 255, 0.4);
+    animation: lunar-mark-pulse 3s infinite alternate;
+}
+
+@keyframes lunar-mark-pulse {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* Lunar mark about to expire warning effect */
+.lunar-mark-warning {
+    animation: lunar-mark-warning 0.5s infinite alternate;
+}
+
+@keyframes lunar-mark-warning {
+    0% {
+        box-shadow: 0 0 20px rgba(160, 200, 255, 0.8);
+        filter: brightness(1);
+    }
+    100% {
+        box-shadow: 0 0 40px rgba(200, 220, 255, 0.9);
+        filter: brightness(1.2);
+    }
+}
+
+/* Lunar stun effect when mark expires */
+.lunar-stun-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 65;
+}
+
+.lunar-stun-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(200, 220, 255, 0.6) 0%, 
+        rgba(160, 180, 255, 0.3) 50%, 
+        rgba(0, 0, 0, 0) 100%);
+    animation: lunar-stun-flash 1s ease-out forwards;
+}
+
+@keyframes lunar-stun-flash {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.lunar-stun-stars {
+    position: absolute;
+    top: 10%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    color: rgba(200, 220, 255, 1);
+    text-shadow: 0 0 15px rgba(160, 200, 255, 0.9);
+    animation: lunar-stun-stars 1.5s ease-out forwards;
+}
+
+@keyframes lunar-stun-stars {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    30% {
+        transform: translateY(-15px) scale(1.3);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-40px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Lone Wolf Talent VFX */
+.lone-wolf-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    animation: lone-wolf-aura 2s ease-out forwards;
+}
+
+.lone-wolf-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(128, 128, 255, 0.2) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: lone-wolf-pulse 2s ease-out infinite;
+}
+
+.lone-wolf-vfx::after {
+    content: '🐺';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    opacity: 0;
+    animation: lone-wolf-spirit 2s ease-out forwards;
+}
+
+@keyframes lone-wolf-aura {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes lone-wolf-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.8;
+    }
+}
+
+@keyframes lone-wolf-spirit {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(50%);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%);
+    }
+}
+
+/* Style for Renée's talent log entries */
+.log-entry.renee {
+    color: #8a2be2; /* Deep purple color for Renée's entries */
+    font-style: italic;
+}
+
+.log-entry.renee::before {
+    content: '🐺';
+    margin-right: 5px;
+}
+
+/* ===== Opportunistic Spirit Talent VFX ===== */
+
+/* Cooldown Reset VFX */
+.renee-cooldown-reset-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.reset-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 11;
+}
+
+.reset-sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 100, 0.8);
+    box-shadow: 0 0 10px 2px rgba(255, 255, 100, 0.6);
+    animation: reset-sparkle-animation 1.5s ease-out forwards;
+    opacity: 0;
+}
+
+.reset-sparkle:nth-child(1) { top: 50%; left: 50%; animation-delay: 0s; }
+.reset-sparkle:nth-child(2) { top: 30%; left: 30%; animation-delay: 0.1s; }
+.reset-sparkle:nth-child(3) { top: 70%; left: 70%; animation-delay: 0.2s; }
+.reset-sparkle:nth-child(4) { top: 30%; left: 70%; animation-delay: 0.3s; }
+.reset-sparkle:nth-child(5) { top: 70%; left: 30%; animation-delay: 0.15s; }
+.reset-sparkle:nth-child(6) { top: 50%; left: 20%; animation-delay: 0.25s; }
+.reset-sparkle:nth-child(7) { top: 50%; left: 80%; animation-delay: 0.35s; }
+.reset-sparkle:nth-child(8) { top: 20%; left: 50%; animation-delay: 0.4s; }
+
+@keyframes reset-sparkle-animation {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(3) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.reset-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffcc00;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 5px rgba(255, 204, 0, 0.8), 0 0 10px rgba(255, 204, 0, 0.5);
+    z-index: 12;
+    animation: reset-text-animation 1.5s ease-out forwards;
+    white-space: nowrap;
+}
+
+@keyframes reset-text-animation {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.ability.cooldown-reset {
+    animation: cooldown-reset-glow 2s ease-out;
+}
+
+@keyframes cooldown-reset-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+    }
+    20% {
+        box-shadow: 0 0 10px 5px rgba(255, 204, 0, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+    }
+}
+
+/* Extra Turn VFX */
+.renee-extra-turn-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.energy-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.6) 0%, rgba(0, 255, 255, 0) 70%);
+    animation: energy-burst-animation 2s ease-out forwards;
+    z-index: 11;
+}
+
+@keyframes energy-burst-animation {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+.energy-burst::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 20px 10px rgba(0, 255, 255, 0.5);
+    animation: energy-pulse-animation 2s ease-out forwards;
+}
+
+@keyframes energy-pulse-animation {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.extra-turn-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #00ffff;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.8), 0 0 10px rgba(0, 255, 255, 0.5);
+    z-index: 12;
+    animation: extra-turn-text-animation 2s ease-out forwards;
+    white-space: nowrap;
+}
+
+@keyframes extra-turn-text-animation {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Disruptive Lash Talent - Ability Disable VFX */
+.ability-disable-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    animation: ability-disable-flash 0.8s ease-out forwards;
+}
+
+@keyframes ability-disable-flash {
+    0% {
+        box-shadow: inset 0 0 0 3px rgba(128, 0, 128, 0);
+        background: radial-gradient(circle at center, rgba(128, 0, 128, 0.7) 0%, rgba(128, 0, 128, 0) 70%);
+    }
+    30% {
+        box-shadow: inset 0 0 0 3px rgba(128, 0, 128, 0.8);
+        background: radial-gradient(circle at center, rgba(128, 0, 128, 0.7) 10%, rgba(128, 0, 128, 0) 80%);
+    }
+    100% {
+        box-shadow: inset 0 0 0 3px rgba(128, 0, 128, 0);
+        background: radial-gradient(circle at center, rgba(128, 0, 128, 0) 0%, rgba(128, 0, 128, 0) 0%);
+    }
+}
+
+/* Style for the ability element when disabled by Disruptive Lash */
+.ability.disabled[data-talent-source="disruptive_lash"] {
+    position: relative;
+    filter: grayscale(80%) brightness(0.7);
+    cursor: not-allowed;
+    overflow: hidden;
+}
+
+.ability.disabled[data-talent-source="disruptive_lash"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('Icons/effects/ability_disabled.webp');
+    background-size: 24px 24px;
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.ability.disabled[data-talent-source="disruptive_lash"]:hover {
+    filter: grayscale(80%) brightness(0.7);
+    transform: none;
+}
+
+/* Add Chain Whip effect styles */
+.chain-whip {
+    /* Base container has the same positioning but with a blue glow */
+    box-shadow: 0 0 20px rgba(28, 156, 255, 0.6);
+}
+
+.whip-slash.chain-slash {
+    background: linear-gradient(90deg, transparent, #1c9cff, #a3dfff, #e9f7ff);
+    box-shadow: 0 0 10px #1c9cff, 0 0 20px #1c9cff;
+    filter: brightness(1.2);
+}
+
+.whip-trail.chain-trail {
+    background: radial-gradient(circle at center, rgba(163, 223, 255, 0.8), rgba(28, 156, 255, 0.4), transparent);
+    box-shadow: 0 0 15px #1c9cff;
+}
+
+.whip-impact.chain-impact {
+    background: radial-gradient(circle, #ffffff, #a3dfff, #1c9cff);
+    box-shadow: 0 0 30px #1c9cff;
+}
+
+.whip-particle.chain-particle {
+    background: linear-gradient(45deg, #1c9cff, #a3dfff);
+    box-shadow: 0 0 5px #1c9cff, 0 0 10px #a3dfff;
+}
+
+/* Chain Lightning Effect */
+.chain-lightning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+}
+
+.lightning-segment {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 8px;
+    background: linear-gradient(to right, transparent, #1c9cff, #a3dfff, #ffffff, #a3dfff, #1c9cff, transparent);
+    border-radius: 4px;
+    transform: translate(-50%, -50%) rotate(calc(var(--angle, 0) * 1deg));
+    animation: lightning-flicker 0.6s ease-in-out;
+    filter: blur(1px);
+    opacity: 0.8;
+    overflow: visible;
+}
+
+.lightning-segment:nth-child(1) {
+    --angle: 15;
+    animation-delay: 0s;
+    transform-origin: center;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+}
+
+.lightning-segment:nth-child(2) {
+    --angle: -10;
+    animation-delay: 0.1s;
+    width: 70%;
+    transform-origin: center;
+    clip-path: polygon(5% 0, 95% 0, 100% 100%, 0% 100%);
+}
+
+.lightning-segment:nth-child(3) {
+    --angle: 5;
+    animation-delay: 0.2s;
+    width: 90%;
+    transform-origin: center;
+    clip-path: polygon(2% 0, 98% 0, 93% 100%, 7% 100%);
+}
+
+@keyframes lightning-flicker {
+    0% {
+        opacity: 0;
+        filter: blur(5px);
+        box-shadow: 0 0 5px #1c9cff;
+    }
+    25% {
+        opacity: 1;
+        filter: blur(0);
+        box-shadow: 0 0 20px #1c9cff, 0 0 40px #a3dfff;
+    }
+    50% {
+        opacity: 0.7;
+        filter: blur(3px);
+        box-shadow: 0 0 15px #1c9cff;
+    }
+    75% {
+        opacity: 1;
+        filter: blur(0);
+        box-shadow: 0 0 25px #1c9cff, 0 0 50px #a3dfff;
+    }
+    100% {
+        opacity: 0;
+        filter: blur(5px);
+        box-shadow: 0 0 5px #1c9cff;
+    }
+}
+
+/* Show a special effect when Chain Whip hits multiple targets */
+.log-entry.talent-effect.renee:contains("Chain Whip") {
+    color: #1c9cff;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(28, 156, 255, 0.5);
+}
+
+.log-entry.talent-effect.renee:contains("Chain Whip")::before {
+    content: "⚡";
+    margin-right: 5px;
+    animation: chain-whip-log-pulse 1.5s infinite;
+}
+
+@keyframes chain-whip-log-pulse {
+    0% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.7; transform: scale(1); }
+}
+
+/* ----- Moonlit Reflexes Talent VFX ----- */
+.moonlit-reflexes-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    overflow: hidden;
+}
+
+.moon-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(173, 216, 230, 0.4) 0%, rgba(147, 112, 219, 0.3) 40%, rgba(75, 0, 130, 0.1) 70%, transparent 100%);
+    opacity: 0;
+    animation: moon-glow-pulse 2s ease-in-out forwards;
+}
+
+@keyframes moon-glow-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.9;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+.dodge-silhouette {
+    position: absolute;
+    top: 15%;
+    left: 10%;
+    width: 80%;
+    height: 70%;
+    background: url('../Images/wolf_silhouette.png') no-repeat center center;
+    background-size: contain;
+    opacity: 0;
+    filter: drop-shadow(0 0 8px rgba(173, 216, 230, 0.8));
+    animation: dodge-silhouette-effect 1.8s ease-in-out forwards;
+}
+
+@keyframes dodge-silhouette-effect {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.9);
+    }
+    20% {
+        opacity: 0.8;
+        transform: translateX(0) scale(1);
+    }
+    40% {
+        opacity: 0.9;
+        transform: translateX(15px) scale(1.05);
+    }
+    60% {
+        opacity: 0.7;
+        transform: translateX(25px) scale(1.02);
+    }
+    80% {
+        opacity: 0.4;
+        transform: translateX(30px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(40px) scale(0.95);
+    }
+}
+
+.reflexes-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.reflexes-sparkle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 5px #c0c0ff,
+        0 0 10px #a0a0ff,
+        0 0 15px #8080ff;
+    transform: scale(0);
+    opacity: 0;
+    animation: reflexes-sparkle-animation 1.5s ease-out forwards;
+}
+
+.reflexes-sparkle:nth-child(1) { top: 20%; left: 25%; animation-delay: 0.1s; }
+.reflexes-sparkle:nth-child(2) { top: 30%; left: 70%; animation-delay: 0.3s; }
+.reflexes-sparkle:nth-child(3) { top: 60%; left: 20%; animation-delay: 0.5s; }
+.reflexes-sparkle:nth-child(4) { top: 70%; left: 65%; animation-delay: 0.2s; }
+.reflexes-sparkle:nth-child(5) { top: 40%; left: 10%; animation-delay: 0.4s; }
+.reflexes-sparkle:nth-child(6) { top: 50%; left: 80%; animation-delay: 0.6s; }
+.reflexes-sparkle:nth-child(7) { top: 25%; left: 50%; animation-delay: 0.35s; }
+.reflexes-sparkle:nth-child(8) { top: 75%; left: 40%; animation-delay: 0.25s; }
+
+@keyframes reflexes-sparkle-animation {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2) rotate(45deg);
+        opacity: 1;
+    }
+    60% {
+        transform: scale(0.8) rotate(90deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+/* Style for the Moonlit Reflexes buff icon */
+.buff-icon[data-buff-id="moonlit_reflexes_buff"] {
+    background-color: rgba(147, 112, 219, 0.3);
+    border: 1px solid #c0c0ff;
+}
+
+.buff-icon[data-buff-id="moonlit_reflexes_buff"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(173, 216, 230, 0.4) 0%, rgba(147, 112, 219, 0.2) 70%, transparent 100%);
+    pointer-events: none;
+    animation: moonlit-buff-pulse 2s infinite;
+}
+
+@keyframes moonlit-buff-pulse {
+    0% {
+        opacity: 0.3;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.3;
+        transform: scale(0.95);
+    }
+}
+
+/* Tooltip styling for Moonlit Reflexes */
+.status-tooltip[data-buff-id="moonlit_reflexes_buff"] .status-tooltip-description {
+    color: #c0c0ff;
+    text-shadow: 0 0 2px #8080ff;
+}
+
+/* Animation for dodge action with Moonlit Reflexes active */
+.character:has(.buff-icon[data-buff-id="moonlit_reflexes_buff"]) .dodge-text {
+    color: #c0c0ff;
+    text-shadow: 
+        0 0 5px #8080ff,
+        0 0 10px #6060ff;
+    animation: moonlit-dodge-text 1s ease-out;
+}
+
+@keyframes moonlit-dodge-text {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(10px);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1) translateY(-20px);
+    }
+}
+
+/* Special dodge animation effect for when Moonlit Reflexes is active */
+.character:has(.buff-icon[data-buff-id="moonlit_reflexes_buff"]) .dodge-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(173, 216, 230, 0.4) 0%, rgba(147, 112, 219, 0.2) 70%, transparent 100%);
+    opacity: 0;
+    animation: moonlit-dodge-glow 0.8s ease-out;
+}
+
+@keyframes moonlit-dodge-glow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Style for the Moonlit Reflexes buff stack counter */
+.reflexes-stack-counter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 
+        0 0 5px #8080ff,
+        0 0 10px #6060ff,
+        0 0 15px #4040ff;
+    z-index: 25;
+    animation: stack-counter-pulse 1.5s ease-out;
+}
+
+@keyframes stack-counter-pulse {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+/* Enhance moon glow based on stack count */
+.character:has(.buff-icon[data-buff-id="moonlit_reflexes_buff"][data-stacks="2"]) .dodge-vfx::before {
+    animation: moonlit-dodge-glow 0.8s ease-out;
+    opacity: 0.7 !important; /* Brighter for 2 stacks */
+}
+
+.character:has(.buff-icon[data-buff-id="moonlit_reflexes_buff"][data-stacks="3"]) .dodge-vfx::before {
+    animation: moonlit-dodge-glow 0.8s ease-out;
+    opacity: 1 !important; /* Brightest for max stacks */
+    box-shadow: 0 0 20px rgba(147, 112, 219, 0.8) !important;
+}
+
+/* Enhanced buff icon styling for stacks */
+.buff-icon[data-buff-id="moonlit_reflexes_buff"]::before {
+    content: attr(data-stacks);
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    background-color: rgba(75, 0, 130, 0.8);
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 0 5px #8080ff;
+    z-index: 2;
+}
+
+/* Increased glow intensity based on stack count */
+.buff-icon[data-buff-id="moonlit_reflexes_buff"][data-stacks="2"]::after {
+    background: radial-gradient(circle at center, rgba(173, 216, 230, 0.5) 0%, rgba(147, 112, 219, 0.3) 70%, transparent 100%);
+    animation: moonlit-buff-pulse 1.8s infinite;
+}
+
+.buff-icon[data-buff-id="moonlit_reflexes_buff"][data-stacks="3"]::after {
+    background: radial-gradient(circle at center, rgba(173, 216, 230, 0.7) 0%, rgba(147, 112, 219, 0.5) 70%, transparent 100%);
+    animation: moonlit-buff-pulse 1.5s infinite;
+}
+
+/* Add intensity to dodge chance effect based on stack count */
+.character:has(.buff-icon[data-buff-id="moonlit_reflexes_buff"][data-stacks="2"]) .dodge-text {
+    font-size: 24px;
+    text-shadow: 
+        0 0 8px #8080ff,
+        0 0 15px #6060ff;
+}
+
+.character:has(.buff-icon[data-buff-id="moonlit_reflexes_buff"][data-stacks="3"]) .dodge-text {
+    font-size: 28px;
+    text-shadow: 
+        0 0 10px #8080ff,
+        0 0 20px #6060ff,
+        0 0 30px #4040ff;
+}
+
+/* Lunar Resonance VFX (cooldown reduction) */
+.lunar-resonance-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.resonance-sparkles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.resonance-sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #a6c7ff;
+    box-shadow: 0 0 10px 2px rgba(166, 199, 255, 0.7);
+    animation: resonance-sparkle-animation 1.5s ease-out both;
+}
+
+@keyframes resonance-sparkle-animation {
+    0% {
+        transform: translate(0, 0) scale(0.1);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(
+            calc(var(--rand-x, 1) * 40px - 20px), 
+            calc(var(--rand-y, 1) * 40px - 20px)
+        ) scale(1.2);
+        opacity: 0;
+    }
+}
+
+.resonance-sparkle:nth-child(1) { --rand-x: 0.1; --rand-y: 0.7; animation-delay: 0.1s; }
+.resonance-sparkle:nth-child(2) { --rand-x: 0.9; --rand-y: 0.3; animation-delay: 0.2s; }
+.resonance-sparkle:nth-child(3) { --rand-x: 0.5; --rand-y: 0.1; animation-delay: 0.15s; }
+.resonance-sparkle:nth-child(4) { --rand-x: 0.3; --rand-y: 0.8; animation-delay: 0.25s; }
+.resonance-sparkle:nth-child(5) { --rand-x: 0.8; --rand-y: 0.6; animation-delay: 0.0s; }
+.resonance-sparkle:nth-child(6) { --rand-x: 0.2; --rand-y: 0.4; animation-delay: 0.3s; }
+.resonance-sparkle:nth-child(7) { --rand-x: 0.7; --rand-y: 0.2; animation-delay: 0.15s; }
+.resonance-sparkle:nth-child(8) { --rand-x: 0.4; --rand-y: 0.9; animation-delay: 0.1s; }
+
+.resonance-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #a6c7ff;
+    text-shadow: 0 0 8px rgba(166, 199, 255, 0.8);
+    animation: resonance-text-animation 1.5s ease-out both;
+    white-space: nowrap;
+}
+
+@keyframes resonance-text-animation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
+}
+
+.lunar-resonance-glow {
+    animation: lunar-resonance-glow 1.5s ease-out both;
+}
+
+@keyframes lunar-resonance-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(166, 199, 255, 0);
+    }
+    20% {
+        box-shadow: 0 0 15px 5px rgba(166, 199, 255, 0.7);
+    }
+    80% {
+        box-shadow: 0 0 12px 3px rgba(166, 199, 255, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(166, 199, 255, 0);
+    }
+}
+
+/* Lunar Cascade VFX (trigger another ability) */
+.lunar-cascade-vfx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.cascade-moon-projectile {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #eef6ff 5%, #c4dcff 30%, #7ba9ff 60%, #5378d7 100%);
+    box-shadow: 0 0 20px 10px rgba(123, 169, 255, 0.6);
+    z-index: 2;
+    transform: translate(-50%, -50%);
+}
+
+.cascade-moon-projectile::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, transparent 0%, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+    animation: moon-rotation 1s linear infinite;
+}
+
+@keyframes moon-rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.cascade-moon-trail {
+    position: absolute;
+    height: 15px;
+    background: linear-gradient(90deg, rgba(123, 169, 255, 0.1) 0%, rgba(123, 169, 255, 0.8) 100%);
+    border-radius: 4px;
+    z-index: 1;
+    transform-origin: left center;
+    opacity: 0.6;
+}
+
+.cascade-impact-effect {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(166, 199, 255, 0.9) 0%, rgba(166, 199, 255, 0.1) 70%, transparent 100%);
+    transform: translate(-50%, -50%);
+    animation: cascade-impact-pulse 0.8s ease-out forwards;
+    z-index: 3;
+}
+
+@keyframes cascade-impact-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Log entry styling for the talent effects */
+.log-entry.talent-effect.renee:contains("Lunar Resonance") {
+    color: #a6c7ff;
+    text-shadow: 0 0 2px rgba(166, 199, 255, 0.5);
+}
+
+.log-entry.talent-effect.renee:contains("Lunar Resonance")::before {
+    content: '🌙';
+}
+
+.log-entry.talent-effect.renee:contains("Lunar Cascade") {
+    color: #a6c7ff;
+    background: linear-gradient(90deg, rgba(166, 199, 255, 0.1) 0%, rgba(166, 199, 255, 0.2) 100%);
+    animation: cascade-log-pulse 2s ease-in-out infinite;
+}
+
+.log-entry.talent-effect.renee:contains("Lunar Cascade")::before {
+    content: '✧';
+}
+
+@keyframes cascade-log-pulse {
+    0% {
+        background-color: rgba(166, 199, 255, 0.1);
+    }
+    50% {
+        background-color: rgba(166, 199, 255, 0.2);
+    }
+    100% {
+        background-color: rgba(166, 199, 255, 0.1);
+    }
+}
+
+.bloodthirsty-resilience-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.blood-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #ff0000;
+    border-radius: 50%;
+    opacity: 0.8;
+    filter: blur(1px);
+}
+
+.blood-particle:nth-child(1) { top: 20%; left: 30%; animation: blood-particle-float 1.5s ease-out forwards; }
+.blood-particle:nth-child(2) { top: 40%; left: 70%; animation: blood-particle-float 1.5s ease-out 0.2s forwards; }
+.blood-particle:nth-child(3) { top: 60%; left: 20%; animation: blood-particle-float 1.5s ease-out 0.4s forwards; }
+.blood-particle:nth-child(4) { top: 80%; left: 50%; animation: blood-particle-float 1.5s ease-out 0.1s forwards; }
+.blood-particle:nth-child(5) { top: 30%; left: 40%; animation: blood-particle-float 1.5s ease-out 0.3s forwards; }
+.blood-particle:nth-child(6) { top: 50%; left: 60%; animation: blood-particle-float 1.5s ease-out 0.5s forwards; }
+.blood-particle:nth-child(7) { top: 70%; left: 30%; animation: blood-particle-float 1.5s ease-out 0.2s forwards; }
+.blood-particle:nth-child(8) { top: 90%; left: 40%; animation: blood-particle-float 1.5s ease-out 0.4s forwards; }
+
+@keyframes blood-particle-float {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(var(--rand-x, 20px), var(--rand-y, -30px)) scale(1.2);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(var(--rand-x, 40px), var(--rand-y, -60px)) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.buff-icon[data-buff-id="bloodthirsty_resilience_buff"] {
+    position: relative;
+}
+
+.buff-icon[data-buff-id="bloodthirsty_resilience_buff"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0) 70%);
+    animation: bloodthirsty-buff-pulse 2s infinite;
+}
+
+@keyframes bloodthirsty-buff-pulse {
+    0% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 0.3; }
+}
+
+/* Primal Healing Visual Effects */
+.primal-healing-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.primal-blood-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff3434 0%, #940000 100%);
+    filter: drop-shadow(0 0 5px #ff0000);
+    z-index: 101;
+    opacity: 0;
+    transform: scale(0);
+    animation: primal-blood-transform 2s var(--delay) forwards;
+    transform-origin: center;
+}
+
+@keyframes primal-blood-transform {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg) translateY(0);
+        background: radial-gradient(circle, #ff3434 0%, #940000 100%);
+        filter: drop-shadow(0 0 5px #ff0000);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2) rotate(90deg) translateY(50px);
+        background: radial-gradient(circle, #ff3434 0%, #940000 100%);
+        filter: drop-shadow(0 0 5px #ff0000);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1) rotate(180deg) translateY(30px);
+        background: radial-gradient(circle, #ff3434 0%, #940000 100%);
+        filter: drop-shadow(0 0 5px #ff0000);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(0.8) rotate(270deg) translateY(10px);
+        background: radial-gradient(circle, #ff3434 40%, #2bff00 100%);
+        filter: drop-shadow(0 0 8px #3dff00);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1.5) rotate(360deg) translateY(-40px);
+        background: radial-gradient(circle, #2bff00 0%, #11921b 100%);
+        filter: drop-shadow(0 0 12px #3dff00);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(540deg) translateY(-80px);
+        background: radial-gradient(circle, #2bff00 0%, #11921b 100%);
+        filter: drop-shadow(0 0 12px #3dff00);
+    }
+}
+
+.primal-wolf-spirit {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background-image: url('../images/wolf_spirit_outline.webp');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(0.5);
+    filter: drop-shadow(0 0 20px #3dff00);
+    animation: primal-wolf-spirit 2s ease-in-out forwards;
+    z-index: 99;
+}
+
+@keyframes primal-wolf-spirit {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    80% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.primal-healing-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45, 255, 59, 0.6) 0%, rgba(0, 128, 0, 0) 70%);
+    animation: primal-healing-pulse 2s ease-in-out forwards;
+    opacity: 0;
+    transform: scale(0.5);
+    z-index: 98;
+}
+
+@keyframes primal-healing-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    60% {
+        opacity: 0.5;
+        transform: scale(1.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(3);
+    }
+}
+
+.primal-healing-text {
+    position: absolute;
+    font-size: 28px;
+    font-weight: bold;
+    color: #2bff00;
+    text-shadow: 0 0 10px #11921b, 0 0 15px #11921b, 0 0 5px #ffffff;
+    z-index: 102;
+    opacity: 0;
+    transform: translateY(0);
+    animation: primal-healing-text 2s ease-out forwards;
+}
+
+@keyframes primal-healing-text {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0) scale(1.2);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-40px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.5);
+    }
+}
+
+/* Special styling for when Primal Healing crits */
+.primal-healing-vfx.critical .primal-healing-text {
+    color: #ffff00;
+    text-shadow: 0 0 10px #ff6600, 0 0 15px #ff6600, 0 0 5px #ffffff;
+    font-size: 32px;
+    animation: primal-healing-text-critical 2s ease-out forwards;
+}
+
+@keyframes primal-healing-text-critical {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0) scale(1.4);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-40px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.6);
+    }
+}
+
+/* Log entry styling for Primal Healing */
+.log-entry.talent-effect.renee:contains("Primal Healing") {
+    color: #2bff00;
+    background-color: rgba(17, 146, 27, 0.2);
+    animation: primal-healing-log-pulse 2s ease-in-out;
+}
+
+.log-entry.talent-effect.renee:contains("Primal Healing")::before {
+    content: "🐺";
+    margin-right: 5px;
+}
+
+@keyframes primal-healing-log-pulse {
+    0% {
+        background-color: rgba(17, 146, 27, 0.2);
+    }
+    50% {
+        background-color: rgba(43, 255, 0, 0.3);
+    }
+    100% {
+        background-color: rgba(17, 146, 27, 0.2);
+    }
+}
+
+/* End of existing CSS rules */
+
+/* Lunar Empowerment Talent VFX */
+.lunar-empowerment-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: lunar-empowerment-appear 0.5s ease-out forwards;
+}
+
+@keyframes lunar-empowerment-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.lunar-empowerment-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(147, 112, 219, 0.4) 20%, rgba(164, 155, 235, 0.2) 40%, rgba(164, 202, 235, 0) 70%);
+    animation: lunar-empowerment-pulse 2s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes lunar-empowerment-pulse {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.4;
+        transform: scale(0.9);
+    }
+}
+
+.lunar-empowerment-symbol {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #9370db, #a49beb);
+    box-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    z-index: 2;
+    overflow: hidden;
+}
+
+.lunar-empowerment-symbol::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    opacity: 0.7;
+    border-radius: 50%;
+    animation: lunar-empowerment-symbol-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes lunar-empowerment-symbol-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.5;
+    }
+}
+
+/* Lunar Empowerment Buff Icon Styles */
+.buff-icon[data-buff-id="lunar_empowerment_buff"] {
+    border: 2px solid #9370db;
+}
+
+.buff-icon[data-buff-id="lunar_empowerment_buff"]::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(147, 112, 219, 0.5) 20%, rgba(147, 112, 219, 0) 70%);
+    z-index: -1;
+    animation: lunar-empowerment-buff-pulse 2s ease-in-out infinite;
+}
+
+@keyframes lunar-empowerment-buff-pulse {
+    0% {
+        opacity: 0.3;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.3;
+        transform: scale(0.9);
+    }
+}
+
+/* Special style for the empowerment tooltip */
+.status-tooltip[data-buff-id="lunar_empowerment_buff"] .status-tooltip-description {
+    color: #9370db;
+    font-weight: bold;
+}
+
+/* Add lunar effect to critical hits when Lunar Empowerment is active */
+.character:has(.buff-icon[data-buff-id="lunar_empowerment_buff"]) .critical-slash {
+    box-shadow: 0 0 15px 5px rgba(147, 112, 219, 0.7);
+}
+
+/* Add a special glow to character with the buff active */
+.character:has(.buff-icon[data-buff-id="lunar_empowerment_buff"]) .character-image {
+    border: 1px solid #9370db;
+    box-shadow: 0 0 10px 2px rgba(147, 112, 219, 0.4);
+}
+
+/* Add special style to log entries related to Lunar Empowerment */
+.log-entry.talent-effect.renee:contains("Lunar Empowerment") {
+    color: #a49beb;
+    font-weight: bold;
+}
+
+.log-entry.talent-effect.renee:contains("Lunar Empowerment")::before {
+    content: '🌙';
+    margin-right: 5px;
+}
+
+@keyframes lunar-empowerment-log-pulse {
+    0% {
+        text-shadow: 0 0 3px rgba(147, 112, 219, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 8px rgba(147, 112, 219, 0.8);
+    }
+    100% {
+        text-shadow: 0 0 3px rgba(147, 112, 219, 0.3);
+    }
+}
+
+/* Mystical Convergence VFX */
+.mystical-convergence-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.magical-energy-effect {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(138, 43, 226, 0.2) 0%, rgba(138, 43, 226, 0) 70%);
+    animation: magical-pulse 2s ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.magical-energy-effect::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(138, 43, 226, 0.5);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+    animation: magical-ring-expand 2s ease-out;
+}
+
+.magical-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ba55d3;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #8a2be2;
+    opacity: 0.8;
+    animation: magical-particle-float 2s ease-out;
+}
+
+.magical-particle:nth-child(1) { top: 50%; left: 0; animation-delay: 0s; }
+.magical-particle:nth-child(2) { top: 30%; left: 20%; animation-delay: 0.1s; }
+.magical-particle:nth-child(3) { top: 10%; left: 50%; animation-delay: 0.2s; }
+.magical-particle:nth-child(4) { top: 30%; left: 80%; animation-delay: 0.3s; }
+.magical-particle:nth-child(5) { top: 50%; left: 100%; animation-delay: 0.4s; }
+.magical-particle:nth-child(6) { top: 70%; left: 80%; animation-delay: 0.5s; }
+.magical-particle:nth-child(7) { top: 90%; left: 50%; animation-delay: 0.6s; }
+.magical-particle:nth-child(8) { top: 70%; left: 20%; animation-delay: 0.7s; }
+.magical-particle:nth-child(9) { top: 40%; left: 40%; animation-delay: 0.15s; }
+.magical-particle:nth-child(10) { top: 60%; left: 60%; animation-delay: 0.25s; }
+.magical-particle:nth-child(11) { top: 40%; left: 60%; animation-delay: 0.35s; }
+.magical-particle:nth-child(12) { top: 60%; left: 40%; animation-delay: 0.45s; }
+
+@keyframes magical-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes magical-ring-expand {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes magical-particle-float {
+    0% {
+        transform: scale(0) translate(0, 0);
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5) translate(
+            calc(cos(var(--angle, 0deg)) * 100px),
+            calc(sin(var(--angle, 0deg)) * 100px)
+        );
+        opacity: 0;
+    }
+}
+
+/* Style for the ability when it has magical damage type due to the Mystical Convergence talent */
+.ability[data-ability-id="renee_e"][data-damage-type="magical"] {
+    background: linear-gradient(135deg, rgba(72, 61, 139, 0.3), rgba(138, 43, 226, 0.3));
+    border-color: #9370db;
+}
+
+.ability[data-ability-id="renee_e"][data-damage-type="magical"]::before {
+    content: '✧';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 15px;
+    height: 15px;
+    font-size: 16px;
+    color: #ba55d3;
+    text-shadow: 0 0 5px #8a2be2;
+    animation: magic-glow 2s infinite;
+}
+
+@keyframes magic-glow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Adjust the floating text for the talent effect */
+.floating-text.talent-effect {
+    color: #ba55d3;
+    text-shadow: 0 0 5px #8a2be2;
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.predators-vitality-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    animation: predators-vitality-appear 2s ease-out forwards;
+}
+
+.vitality-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,0,0,0.2) 0%, rgba(255,0,0,0) 70%);
+    animation: vitality-pulse 3s infinite;
+}
+
+.vitality-hearts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.vitality-heart {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #ff3333;
+    transform: rotate(45deg);
+    opacity: 0;
+}
+
+.vitality-heart::before,
+.vitality-heart::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #ff3333;
+    border-radius: 50%;
+}
+
+.vitality-heart::before {
+    top: -10px;
+    left: 0;
+}
+
+.vitality-heart::after {
+    top: 0;
+    left: -10px;
+}
+
+.vitality-heart:nth-child(1) { top: 20%; left: 30%; animation: vitality-heart-float 2.5s ease-out 0.1s forwards; }
+.vitality-heart:nth-child(2) { top: 40%; left: 70%; animation: vitality-heart-float 2.5s ease-out 0.3s forwards; }
+.vitality-heart:nth-child(3) { top: 60%; left: 20%; animation: vitality-heart-float 2.5s ease-out 0.5s forwards; }
+.vitality-heart:nth-child(4) { top: 80%; left: 60%; animation: vitality-heart-float 2.5s ease-out 0.2s forwards; }
+.vitality-heart:nth-child(5) { top: 30%; left: 50%; animation: vitality-heart-float 2.5s ease-out 0.4s forwards; }
+.vitality-heart:nth-child(6) { top: 50%; left: 40%; animation: vitality-heart-float 2.5s ease-out 0.6s forwards; }
+
+@keyframes predators-vitality-appear {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes vitality-pulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+}
+
+@keyframes vitality-heart-float {
+    0% {
+        transform: rotate(45deg) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: rotate(45deg) scale(1.2);
+        opacity: 0.8;
+    }
+    60% {
+        transform: rotate(45deg) scale(1) translateY(-40px);
+        opacity: 0.5;
+    }
+    100% {
+        transform: rotate(45deg) scale(0) translateY(-80px);
+        opacity: 0;
+    }
+}
+
+.log-entry.talent-effect.renee:contains("Predator's Vitality") {
+    color: #ff5f5f;
+    animation: vitality-log-pulse 2s infinite;
+}
+
+.log-entry.talent-effect.renee:contains("Predator's Vitality")::before {
+    content: "❤️";
+}
+
+@keyframes vitality-log-pulse {
+    0% { color: #ff5f5f; }
+    50% { color: #ff0000; }
+    100% { color: #ff5f5f; }
+}

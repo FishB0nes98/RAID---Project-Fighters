@@ -1,0 +1,53 @@
+{
+    "id": "little_devil_female",
+    "name": "Little Devil Female",
+    "image": "Loading Screen/Little_Devil_Female.webp",
+    "description": "A cunning little devil with sharp claws and an appetite for mana.",
+    "tags": ["demon", "physical", "mana_drain"],
+    "stats": {
+        "hp": 3100,
+        "mana": 1100,
+        "physicalDamage": 175,
+        "magicalDamage": 55,
+        "armor": 7,
+        "magicalShield": 8,
+        "critChance": 0.06,
+        "critDamage": 1.5,
+        "healingPower": 0.0,
+        "lifesteal": 0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 18,
+        "dodgeChance": 0.03
+    },
+    "passive": {
+        "id": "little_devil_female_resilience",
+        "name": "Devilish Resilience",
+        "description": "Takes 25% less damage from all sources.",
+        "icon": "Icons/passives/devilish_resilience.webp"
+    },
+    "abilities": [
+        {
+            "id": "little_devil_female_q",
+            "name": "Devilish Stab",
+            "description": "Stabs the target with sharp claws, dealing 300 physical damage.",
+            "icon": "Icons/abilities/devilish_stab.webp",
+            "manaCost": 30,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "type": "damage",
+            "damageType": "physical",
+            "fixedDamage": 300
+        },
+        {
+            "id": "little_devil_female_w",
+            "name": "Mana Steal",
+            "description": "Steals 3% of the target's mana and deals 7x that amount as damage to the target.",
+            "icon": "Icons/abilities/mana_steal.webp",
+            "manaCost": 50,
+            "cooldown": 4,
+            "targetType": "enemy",
+            "type": "custom",
+            "functionName": "littleDevilManaStealEffect"
+        }
+    ]
+} 

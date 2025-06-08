@@ -1,0 +1,76 @@
+{
+    "id": "bridget",
+    "name": "Bridget",
+    "image": "Loading Screen/Bridget.png",
+    "description": "A water-themed magical girl with powerful healing abilities. Her attacks create beautiful aquatic displays that both damage enemies and nurture allies.",
+    "tags": ["water", "magical", "support", "damage"],
+    "stats": {
+        "hp": 6920,
+        "mana": 2865,
+        "physicalDamage": 70,
+        "magicalDamage": 222,
+        "armor": 8,
+        "magicalShield": 11,
+        "critChance": 0.00,
+        "critDamage": 1.5,
+        "healingPower": 0.0,
+        "lifesteal": 0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 0
+    },
+    "passive": {
+        "id": "bridget_passive",
+        "name": "Aqua Life Essence",
+        "description": "22% of damage you deal heals a random ally and yourself for the same amount.",
+        "icon": "Icons/abilities/water_essence.png"
+    },
+    "abilities": [
+        {
+            "id": "bridget_q",
+            "name": "Ribbon Wave Rush",
+            "description": "Summon a waterfall that hits two random enemies for {baseDamage} + 85% Magical damage.",
+            "icon": "Icons/abilities/water_cascade.png",
+            "manaCost": 30,
+            "cooldown": 2,
+            "targetType": "aoe_enemy",
+            "type": "custom",
+            "functionName": "bridgetRibbonWaveRushEffect",
+            "baseDamage": 365
+        },
+        {
+            "id": "bridget_w",
+            "name": "Bubble Beam Barrage",
+            "description": "Shoots between 3-7 bubble beams onto random enemies each dealing 125% Magical Damage. Cooldown: 5 turns. The passive healing effect from Aqua Life Essence applies to the total damage dealt.",
+            "baseDescription": "Shoots between 3-7 bubble beams onto random enemies each dealing {damageScaling}% Magical Damage. Cooldown: {cooldown} turns.",
+            "icon": "Icons/abilities/bubble_beam.png",
+            "manaCost": 100,
+            "cooldown": 5,
+            "targetType": "all_enemies",
+            "type": "custom",
+            "functionName": "bridgetBubbleBeamBarrageEffect",
+            "damageScaling": 1.25
+        },
+        {
+            "id": "bridget_e",
+            "name": "Arcane Bubble Shield",
+            "icon": "Icons/abilities/bubble_shield.webp",
+            "manaCost": 200,
+            "cooldown": 10,
+            "targetType": "self",
+            "description": "Creates a water shield that increases magic shield by 12% for 3 turns and summons 3 magical bubbles that automatically target allies or enemies at the end of each turn. Cooldown: 10 turns.",
+            "effectFunctionName": "bridgetArcaneBubbleShieldEffect"
+        },
+        {
+            "id": "bridget_r",
+            "name": "Wave Crush",
+            "icon": "Icons/abilities/wave_crush.webp",
+            "manaCost": 255,
+            "cooldown": 18,
+            "targetType": "all", 
+            "description": "Unleash a devastating wave, dealing 700 magical damage to all enemies and healing all allies for 500 HP. Triggers Aqua Life Essence based on damage dealt. Cooldown: 18 turns.",
+            "effectFunctionName": "bridgetWaveCrushEffect",
+            "requiresTarget": false,
+            "doesNotRequireTarget": true
+        }
+    ]
+} 

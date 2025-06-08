@@ -235,7 +235,7 @@ const shadowStepEffect = (caster, target) => {
         id: 'shadow_step_buff',
         name: 'Shadow Step',
         icon: 'Icons/abilities/shadow_step.png', // Use ability icon or a specific buff icon
-        duration: 4,
+        duration: 2,
         effect: (target) => {
             // The main effect is handled by the buff properties (isUntargetable)
             // and the CSS class applied in addBuff
@@ -310,7 +310,7 @@ const shadowStepAbility = new Ability(
     80, // Mana cost
     13, // Cooldown
     shadowStepEffect
-).setDescription('Turns invisible and untargetable by abilities for 4 turns.')
+).setDescription('Turns invisible and untargetable by abilities for 2 turns.')
  .setTargetType('self');
 // --- End Shadow Step Ability ---
 
@@ -453,6 +453,10 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
 
     log(`${caster.name} dashes to ${currentTarget.name}, dealing ${damageResult.damage} physical damage${damageResult.isCritical ? ' (Critical!)' : ''}.`, 'info');
     playSound('sounds/dash_strike.mp3', 0.7);
+
+    // Define targetElement after damage is applied (in case target was redirected)
+    const targetElementId = currentTarget.instanceId || currentTarget.id;
+    const targetElement = document.getElementById(`character-${targetElementId}`);
 
     // Show floating damage number
     if (targetElement) {

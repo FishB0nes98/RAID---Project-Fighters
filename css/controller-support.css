@@ -1,0 +1,188 @@
+/* Controller Support Styles */
+
+/* Controller cursor */
+.controller-cursor {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid #00a8ff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 0 8px rgba(0, 168, 255, 0.8);
+    display: none;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease-out;
+}
+
+.controller-cursor.cursor-moved {
+    animation: cursorPulse 0.3s ease-out;
+}
+
+@keyframes cursorPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 8px rgba(0, 168, 255, 0.8);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        box-shadow: 0 0 15px rgba(0, 168, 255, 1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 8px rgba(0, 168, 255, 0.8);
+    }
+}
+
+/* Selected element styles */
+.controller-selected {
+    box-shadow: 0 0 0 3px #00a8ff !important;
+    outline: none !important;
+    position: relative;
+    z-index: 10;
+}
+
+.controller-selected::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 8px rgba(0, 168, 255, 0.8);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.ability.controller-selected {
+    border-color: #00a8ff !important;
+    transform: scale(1.05);
+}
+
+/* Controller hints container */
+.controller-hints {
+    display: none !important; /* Hide the hints UI */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    padding: 10px 15px;
+    z-index: 9998;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.controller-hint-item {
+    display: flex;
+    align-items: center;
+    margin: 0 3px;
+}
+
+.controller-hint-button {
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-right: 6px;
+}
+
+.controller-hint-text {
+    color: white;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Controller button icons */
+.a-button {
+    background-image: url('../img/controller/button-a.png');
+}
+
+.b-button {
+    background-image: url('../img/controller/button-b.png');
+}
+
+.x-button {
+    background-image: url('../img/controller/button-x.png');
+}
+
+.y-button {
+    background-image: url('../img/controller/button-y.png');
+}
+
+.lb-button {
+    background-image: url('../img/controller/button-lb.png');
+}
+
+.rb-button {
+    background-image: url('../img/controller/button-rb.png');
+}
+
+.start-button {
+    background-image: url('../img/controller/button-start.png');
+}
+
+.back-button {
+    background-image: url('../img/controller/button-back.png');
+}
+
+/* Controller mode specific styles */
+body.controller-mode .valid-target::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px dashed rgba(0, 168, 255, 0.6);
+    border-radius: inherit;
+    pointer-events: none;
+    animation: targetPulse 2s infinite;
+}
+
+@keyframes targetPulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .controller-hints {
+        bottom: 10px;
+        padding: 8px;
+        gap: 8px;
+    }
+    
+    .controller-hint-button {
+        width: 24px;
+        height: 24px;
+        margin-right: 4px;
+    }
+    
+    .controller-hint-text {
+        font-size: 12px;
+    }
+}
+
+/* Hide controller cursor on touch devices */
+@media (pointer: coarse) {
+    .controller-cursor {
+        display: none !important;
+    }
+} 

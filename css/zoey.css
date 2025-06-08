@@ -1,0 +1,2506 @@
+/* Zoey character-specific CSS */
+
+/* Character styling */
+.character[id^="character-zoey"] {
+    --primary-color: #ff69b4;
+    --secondary-color: #ff9cce;
+    --accent-color: #ffdff5;
+}
+
+/* Strawberry Bell Burst VFX */
+.strawberry-bell-vfx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Bell source styling */
+.strawberry-bell-source {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-image: url('../images/abilities/strawberry_bell.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 0 10px var(--primary-color));
+    animation: bell-glow 1s ease-in-out;
+    z-index: 1001;
+}
+
+@keyframes bell-glow {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: drop-shadow(0 0 5px var(--primary-color));
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        filter: drop-shadow(0 0 20px var(--primary-color));
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: drop-shadow(0 0 10px var(--primary-color));
+    }
+}
+
+/* Beam styling */
+.strawberry-bell-beam {
+    position: absolute;
+    height: 30px;
+    background: linear-gradient(
+        to right,
+        rgba(255, 105, 180, 0.1),
+        rgba(255, 105, 180, 0.7),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 105, 180, 0.7),
+        rgba(255, 105, 180, 0.1)
+    );
+    transform-origin: left center;
+    border-radius: 15px;
+    box-shadow: 0 0 15px var(--primary-color);
+    animation: beam-pulse 1s ease-in-out;
+    overflow: hidden;
+    z-index: 999;
+}
+
+@keyframes beam-pulse {
+    0% {
+        opacity: 0;
+        height: 0;
+    }
+    10% {
+        opacity: 1;
+        height: 30px;
+    }
+    90% {
+        opacity: 1;
+        height: 35px;
+    }
+    100% {
+        opacity: 0;
+        height: 0;
+    }
+}
+
+/* Beam particles */
+.strawberry-bell-particle {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    top: 50%;
+    filter: blur(2px);
+    opacity: 0.8;
+    animation: particle-flow 1.5s linear infinite;
+}
+
+.strawberry-bell-particle:nth-child(odd) {
+    background-color: var(--secondary-color);
+    width: 10px;
+    height: 10px;
+    animation-duration: 1.2s;
+}
+
+.strawberry-bell-particle:nth-child(even) {
+    background-color: var(--accent-color);
+    width: 12px;
+    height: 12px;
+    animation-duration: 1.7s;
+}
+
+.strawberry-bell-particle:nth-child(3n) {
+    background-color: #ffcc00;
+    width: 8px;
+    height: 8px;
+    animation-duration: 1.9s;
+}
+
+@keyframes particle-flow {
+    0% {
+        transform: translateY(-50%) translateX(-10px);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(-80%) translateX(20%);
+        opacity: 0.8;
+    }
+    40% {
+        transform: translateY(-20%) translateX(40%);
+        opacity: 0.9;
+    }
+    60% {
+        transform: translateY(-70%) translateX(60%);
+        opacity: 0.8;
+    }
+    80% {
+        transform: translateY(-30%) translateX(80%);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-50%) translateX(110%);
+        opacity: 0;
+    }
+}
+
+/* Impact effect at target */
+.strawberry-bell-impact {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(
+        circle,
+        white 0%,
+        var(--primary-color) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: impact-burst 1s ease-out;
+    z-index: 1000;
+}
+
+@keyframes impact-burst {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Impact particles */
+.strawberry-bell-impact-particle {
+    position: absolute;
+    width: 4px;
+    height: 25px;
+    background: linear-gradient(to top, transparent, var(--primary-color), white);
+    border-radius: 2px;
+    top: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+    opacity: 0.8;
+    animation: impact-particle 0.8s ease-out;
+}
+
+@keyframes impact-particle {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(0.5) translateY(-15px);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) translateY(-50px);
+        opacity: 0;
+    }
+}
+
+/* Log entry styling for Zoey's ability */
+.log-entry.zoey {
+    color: var(--primary-color);
+}
+
+.log-entry.zoey::before {
+    content: "🔔";
+    margin-right: 5px;
+}
+
+/* Target shake animation for impact */
+@keyframes target-shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+}
+
+.target-shake {
+    animation: target-shake 0.5s ease-in-out;
+}
+
+/* Sparkle Bell Mark CSS */
+.sparkle-bell-mark {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+    animation: sparkle-mark-appear 0.5s ease-out;
+}
+
+.sparkle-bell-mark::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 10%, transparent 70%);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color), inset 0 0 15px var(--primary-color);
+    border-radius: 50%;
+    animation: sparkle-pulse 1.5s ease-in-out infinite;
+}
+
+.sparkle-bell-mark::after {
+    content: '🔔';
+    position: absolute;
+    font-size: 20px;
+    top: -10px;
+    right: -5px;
+    filter: drop-shadow(0 0 5px white);
+    animation: bell-float 2s ease-in-out infinite;
+}
+
+@keyframes sparkle-mark-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes sparkle-pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes bell-float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-3px) rotate(10deg);
+    }
+    50% {
+        transform: translateY(0) rotate(0deg);
+    }
+    75% {
+        transform: translateY(3px) rotate(-10deg);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+/* Status icon styling for the mark */
+.debuff-icon[title*="Sparkle Bell Mark"] {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 0 5px var(--primary-color) !important;
+}
+
+.debuff-icon[title*="Sparkle Bell Mark"]::after {
+    content: '🔔';
+    position: absolute;
+    font-size: 10px;
+    top: -3px;
+    right: -3px;
+}
+
+/* Heart Pounce VFX */
+.heart-pounce-vfx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.heart-pounce-silhouette {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-image: url('../Icons/abilities/heart_pounce.png'), url('../Icons/abilities/strawberry_bell_burst.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 0 10px #ff69b4);
+    z-index: 101;
+    background-color: rgba(255, 105, 180, 0.6);
+    border-radius: 50%;
+}
+
+.heart-pounce-particle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #ff69b4;
+    /* Try multiple backup options for the heart image */
+    mask-image: url('../Icons/effects/heart.png'), url('../Icons/abilities/heart_pounce.png'), url('../Icons/abilities/strawberry_bell_burst.png');
+    -webkit-mask-image: url('../Icons/effects/heart.png'), url('../Icons/abilities/heart_pounce.png'), url('../Icons/abilities/strawberry_bell_burst.png');
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+    z-index: 100;
+    /* Add a heart shape as fallback if no mask image is found */
+    clip-path: path('M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z');
+}
+
+@keyframes target-shake-hard {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-6px, -6px); }
+    20% { transform: translate(6px, -6px); }
+    30% { transform: translate(-6px, 6px); }
+    40% { transform: translate(6px, 6px); }
+    50% { transform: translate(-6px, -6px); }
+    60% { transform: translate(6px, -6px); }
+    70% { transform: translate(-6px, 6px); }
+    80% { transform: translate(6px, 6px); }
+    90% { transform: translate(-6px, -6px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* Vulnerable debuff icon styling */
+.debuff-icon[title*="Vulnerable"] {
+    background-color: rgba(255, 105, 180, 0.3);
+    border: 2px solid #ff69b4;
+}
+
+.debuff-icon[title*="Vulnerable"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Icons/debuffs/vulnerable.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+/* Sparkle Burst VFX - Fix styling */
+.sparkle-burst-vfx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.sparkle-burst-source {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(
+        circle,
+        white 10%,
+        var(--primary-color) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    box-shadow: 0 0 30px var(--primary-color);
+    animation: sparkle-burst 1s ease-out forwards;
+    z-index: 1001;
+}
+
+@keyframes sparkle-burst {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.sparkle-burst-particle {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    transform: translate(-50%, -50%);
+    filter: blur(1px);
+    opacity: 0.8;
+    z-index: 1000;
+}
+
+.sparkle-burst-particle:nth-child(odd) {
+    background-color: var(--secondary-color);
+    width: 8px;
+    height: 8px;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    );
+}
+
+.sparkle-burst-particle:nth-child(even) {
+    background-color: var(--accent-color);
+    width: 12px;
+    height: 12px;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    );
+}
+
+.sparkle-burst-particle:nth-child(3n) {
+    background-color: #ffcc00;
+    width: 10px;
+    height: 10px;
+}
+
+/* Individual target impact effect */
+.sparkle-impact-vfx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.sparkle-impact {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(
+        circle,
+        white 10%,
+        var(--primary-color) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px var(--primary-color);
+    animation: sparkle-impact 0.8s ease-out forwards;
+    z-index: 1000;
+}
+
+@keyframes sparkle-impact {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.sparkle-impact-particle {
+    position: absolute;
+    width: 3px;
+    height: 20px;
+    background: linear-gradient(to top, transparent, var(--primary-color), white);
+    border-radius: 2px;
+    top: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+    opacity: 0.8;
+    animation: impact-sparkle-particle 0.6s ease-out;
+}
+
+@keyframes impact-sparkle-particle {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(0.5) translateY(-10px);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) translateY(-30px);
+        opacity: 0;
+    }
+}
+
+/* Sparkle Bell Mark - Application VFX */
+.sparkle-bell-apply-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 100;
+    animation: mark-apply-appear 0.8s ease-out forwards;
+}
+
+.sparkle-bell-apply-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-color), inset 0 0 10px var(--primary-color);
+    opacity: 0;
+    transform: scale(0.5);
+    animation: mark-ring-appear 0.8s ease-out forwards;
+}
+
+@keyframes mark-ring-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+.sparkle-bell-icon {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    right: -5px;
+    background-image: url('../Icons/abilities/sparkle_bell_mark.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 5px white);
+    transform: scale(0);
+    opacity: 0;
+    animation: bell-icon-appear 1s ease-out forwards;
+}
+
+@keyframes bell-icon-appear {
+    0% {
+        transform: scale(0) rotate(-30deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.2) rotate(10deg);
+        opacity: 1;
+    }
+    80% {
+        transform: scale(1) rotate(-5deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}
+
+.sparkle-bell-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    filter: blur(1px);
+    opacity: 0;
+    animation: bell-particle-float 1.5s ease-out forwards;
+}
+
+.sparkle-bell-particle:nth-child(odd) {
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    animation-duration: 1.2s;
+}
+
+.sparkle-bell-particle:nth-child(even) {
+    width: 10px;
+    height: 10px;
+    background-color: var(--secondary-color);
+    animation-duration: 1.7s;
+}
+
+@keyframes bell-particle-float {
+    0% {
+        transform: translate(0, 0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(
+            calc(var(--particle-x, 0) * 30px),
+            calc(var(--particle-y, 0) * 30px)
+        );
+        opacity: 0;
+    }
+}
+
+/* Sparkle Bell Mark - Trigger VFX */
+.sparkle-bell-trigger-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.sparkle-bell-flash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.8) 10%,
+        rgba(255, 105, 180, 0.6) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    transform: scale(1);
+    opacity: 0;
+    animation: mark-trigger-flash 0.6s ease-out forwards;
+}
+
+@keyframes mark-trigger-flash {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    40% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.sparkle-bell-shatter {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--primary-color);
+    opacity: 0.8;
+    animation: mark-shatter 0.5s ease-out forwards;
+}
+
+@keyframes mark-shatter {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+        border-width: 2px;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+.sparkle-bell-shard {
+    position: absolute;
+    width: 10px;
+    height: 3px;
+    background-color: var(--primary-color);
+    top: 50%;
+    left: 50%;
+    transform-origin: left center;
+    opacity: 0.8;
+    animation: shard-fly 0.7s ease-out forwards;
+}
+
+@keyframes shard-fly {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateX(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateX(50px);
+        opacity: 0;
+    }
+}
+
+/* Glowing Light Arc (R) Effect Styles */
+.glowing-arc-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.glowing-arc-source {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,192,203,0.7) 0%, rgba(255,105,180,0.5) 50%, transparent 70%);
+    animation: arc-source-glow 1s ease-in-out;
+    z-index: 5;
+}
+
+@keyframes arc-source-glow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+.glowing-arc-beam {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    animation: arc-beam-appear 1s ease-out;
+    z-index: 10;
+}
+
+@keyframes arc-beam-appear {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.glowing-arc-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ff69b4;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff69b4, 0 0 20px #ff1493;
+    opacity: 0;
+    animation: arc-particle-flow 1s ease-out;
+}
+
+@keyframes arc-particle-flow {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(-50px) scale(1);
+    }
+    90% {
+        opacity: 1;
+        transform: translateY(-50px) scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+    }
+}
+
+.glowing-arc-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,192,203,0.7) 0%, rgba(255,105,180,0.5) 50%, transparent 70%);
+    animation: arc-impact-burst 1s ease-out forwards;
+    z-index: 50;
+    pointer-events: none;
+}
+
+@keyframes arc-impact-burst {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+.glowing-arc-impact-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 50%;
+    left: 50%;
+    background-color: #ff69b4;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff69b4, 0 0 20px #ff1493;
+    transform: translate(-50%, -50%);
+    animation: arc-impact-particle 1s ease-out forwards;
+}
+
+@keyframes arc-impact-particle {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x, 0px)), calc(-50% + var(--y, 0px))) scale(1) rotate(var(--r, 0deg));
+    }
+}
+
+.glowing-arc-impact-particle:nth-child(1) { --x: 50px; --y: -30px; --r: 45deg; }
+.glowing-arc-impact-particle:nth-child(2) { --x: -40px; --y: 40px; --r: 90deg; }
+.glowing-arc-impact-particle:nth-child(3) { --x: -20px; --y: -50px; --r: 135deg; }
+.glowing-arc-impact-particle:nth-child(4) { --x: 30px; --y: 50px; --r: 180deg; }
+.glowing-arc-impact-particle:nth-child(5) { --x: -50px; --y: -10px; --r: 225deg; }
+.glowing-arc-impact-particle:nth-child(6) { --x: 40px; --y: -40px; --r: 270deg; }
+.glowing-arc-impact-particle:nth-child(7) { --x: 10px; --y: 60px; --r: 315deg; }
+.glowing-arc-impact-particle:nth-child(8) { --x: -60px; --y: 20px; --r: 360deg; }
+
+/* Style for the ability disabled debuff icon */
+.debuff-icon[title*="Ability Disabled"] {
+    background-color: rgba(255, 105, 180, 0.3);
+}
+
+.debuff-icon[title*="Ability Disabled"]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 2px;
+    background-color: #ff1493;
+    transform: translate(-50%, -50%) rotate(45deg);
+    box-shadow: 0 0 5px #ff1493;
+}
+
+/* Add class for entry in battle log */
+.log-entry.zoey[data-ability="Glowing Light Arc"] {
+    color: #ff69b4;
+    font-weight: bold;
+}
+
+.log-entry.zoey[data-ability="Glowing Light Arc"]::before {
+    content: "✨";
+}
+
+/* Ability Disable VFX */
+.ability-disable-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,105,180,0.4) 0%, rgba(255,20,147,0.2) 70%, transparent 100%);
+    border-radius: 50%;
+    z-index: 20;
+    pointer-events: none;
+    animation: ability-disable-pulse 0.8s ease-out forwards;
+}
+
+@keyframes ability-disable-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Style for disabled ability */
+.ability.disabled {
+    opacity: 0.6;
+    position: relative;
+}
+
+.ability.disabled::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    z-index: 2;
+}
+
+.ability.disabled::before {
+    content: "✕";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff1493;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 3;
+    text-shadow: 0 0 5px rgba(255, 20, 147, 0.7);
+}
+
+/* Animation for miss text */
+@keyframes missBounce {
+    0% {
+        transform: scale(0.7) translateY(0);
+        opacity: 0;
+    }
+    25% {
+        transform: scale(1.2) translateY(-20px);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1) translateY(-30px);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.9) translateY(-40px);
+        opacity: 0;
+    }
+}
+
+/* Animation for target that dodges */
+.dodge-animation {
+    animation: dodgeShake 0.5s ease-in-out;
+}
+
+@keyframes dodgeShake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-5px) rotate(-2deg); }
+    40% { transform: translateX(5px) rotate(2deg); }
+    60% { transform: translateX(-3px) rotate(-1deg); }
+    80% { transform: translateX(3px) rotate(1deg); }
+    100% { transform: translateX(0); }
+}
+
+/* Add dodge animation styles for Zoey's dodge talent */
+.zoey-dodge-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+    animation: zoey-dodge-flash 0.6s forwards;
+}
+
+.zoey-dodge-text {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffb6c1;
+    font-weight: bold;
+    font-size: 2rem;
+    text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff1493;
+    animation: zoey-dodge-float 1s forwards;
+    white-space: nowrap;
+    z-index: 15;
+}
+
+.zoey-dodge-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(4px);
+    opacity: 0.7;
+    animation: zoey-dodge-blur 0.6s forwards;
+}
+
+.zoey-dodge-afterimage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.5;
+    transform: translateX(-10px);
+    animation: zoey-afterimage-fade 0.8s forwards;
+}
+
+@keyframes zoey-dodge-flash {
+    0% {
+        box-shadow: inset 0 0 10px #ff69b4, 0 0 20px #ff69b4;
+        background-color: rgba(255, 105, 180, 0.2);
+    }
+    30% {
+        box-shadow: inset 0 0 20px #ff69b4, 0 0 40px #ff69b4;
+        background-color: rgba(255, 105, 180, 0.4);
+    }
+    100% {
+        box-shadow: inset 0 0 0px transparent, 0 0 0px transparent;
+        background-color: rgba(255, 105, 180, 0);
+    }
+}
+
+@keyframes zoey-dodge-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%);
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -100%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -120%);
+    }
+}
+
+@keyframes zoey-dodge-blur {
+    0% {
+        opacity: 0.7;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+}
+
+@keyframes zoey-afterimage-fade {
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-25px);
+    }
+}
+
+/* Style for Zoey's talent-related log entries */
+.log-entry.zoey.talent-effect {
+    color: #ff69b4;
+    font-style: italic;
+}
+
+.log-entry.zoey.talent-effect::before {
+    content: "✨";
+}
+
+/* Pounce Momentum buff styles */
+.buff-icon[title*="Pounce Momentum"] {
+    background-color: rgba(255, 105, 180, 0.3);
+    border: 2px solid #ff69b4;
+}
+
+.buff-icon[title*="Pounce Momentum"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Icons/talents/pounce_momentum.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.pounce-momentum-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    animation: pounce-momentum-appear 0.8s ease-out forwards;
+}
+
+@keyframes pounce-momentum-appear {
+    0% {
+        box-shadow: inset 0 0 10px transparent;
+        background-color: rgba(255, 105, 180, 0);
+    }
+    50% {
+        box-shadow: inset 0 0 30px #ff69b4;
+        background-color: rgba(255, 105, 180, 0.2);
+    }
+    100% {
+        box-shadow: inset 0 0 15px #ff69b4;
+        background-color: rgba(255, 105, 180, 0.1);
+    }
+}
+
+/* Agile Counterforce buff styles */
+.buff-icon[title*="Agile Counterforce"] {
+    background-color: rgba(255, 105, 180, 0.3);
+    border: 2px solid #ff69b4;
+}
+
+.buff-icon[title*="Agile Counterforce"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Icons/talents/agile_counterforce.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.agile-counterforce-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 120;
+}
+
+.agile-counterforce-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(255, 105, 180, 0.2), transparent 70%);
+    box-shadow: 0 0 20px #ff69b4;
+    animation: counterforce-glow 1s ease-out forwards;
+}
+
+@keyframes counterforce-glow {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.agile-counterforce-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #ff69b4;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0;
+    animation: counterforce-particle 1.2s ease-out forwards;
+}
+
+@keyframes counterforce-particle {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(
+            calc(var(--cf-x, 0) * 40px),
+            calc(var(--cf-y, 0) * 40px)
+        );
+    }
+}
+
+/* Stack indicator for Agile Counterforce */
+.buff-container[data-buff-id^="agile_counterforce_buff"] .stack-count {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background-color: #ff69b4;
+    color: white;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(255, 105, 180, 0.7);
+}
+
+/* Allied Bond VFX Styles */
+.allied-bond-beam {
+    position: fixed;
+    height: 6px;
+    background: linear-gradient(
+        to right,
+        rgba(255, 215, 0, 0.8),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 215, 0, 0.8)
+    );
+    border-radius: 3px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    z-index: 150;
+    pointer-events: none;
+    animation: allied-bond-pulse 2s ease-in-out forwards;
+}
+
+@keyframes allied-bond-pulse {
+    0% {
+        opacity: 0;
+        height: 2px;
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
+    }
+    30% {
+        opacity: 1;
+        height: 8px;
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+    }
+    70% {
+        opacity: 0.8;
+        height: 6px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+    100% {
+        opacity: 0;
+        height: 2px;
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
+    }
+}
+
+.allied-bond-glow {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 215, 0, 0.4) 20%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 80%
+    );
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    animation: allied-bond-glow 2s ease-in-out forwards;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes allied-bond-glow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    80% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Allied Bond buff icon styling */
+.buff-icon[title*="Allied Bond"] {
+    background-color: rgba(255, 215, 0, 0.3);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.buff-icon[title*="Allied Bond"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Icons/talents/allied_bond.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.9;
+    z-index: 1;
+}
+
+/* Purifying Magic VFX Styles */
+.purifying-magic-vfx {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    pointer-events: none;
+    z-index: 120;
+    animation: purifying-magic-appear 1.5s ease-out forwards;
+}
+
+@keyframes purifying-magic-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+.purifying-magic-particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: 50%;
+    left: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.9) 20%,
+        rgba(173, 216, 230, 0.8) 50%,
+        transparent 80%
+    );
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(173, 216, 230, 0.7);
+    transform: translate(-50%, -50%);
+    animation: purifying-magic-particle 1.5s ease-out forwards;
+}
+
+@keyframes purifying-magic-particle {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(
+            calc(-50% + var(--pm-x, 0) * 40px),
+            calc(-50% + var(--pm-y, 0) * 40px)
+        ) scale(0.2);
+    }
+}
+
+/* Style for Purifying Magic log entries */
+.log-entry.zoey[data-ability="Purifying Magic"] {
+    color: #add8e6;
+    font-weight: bold;
+}
+
+.log-entry.zoey[data-ability="Purifying Magic"]::before {
+    content: "✨";
+}
+
+/* Style for Allied Bond log entries */
+.log-entry.zoey[data-ability="Allied Bond"] {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.log-entry.zoey[data-ability="Allied Bond"]::before {
+    content: "🤝";
+}
+
+/* Pack Leadership VFX */
+@keyframes packLeadershipPulse {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.pack-leadership-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    margin: -100px 0 0 -100px;
+    border: 3px solid #FFD700;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.1) 50%, transparent 70%);
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* Symbiotic Healing VFX */
+@keyframes symbioticHealPulse {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    70% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes healParticleFloat {
+    0% {
+        transform: rotate(var(--angle, 0deg)) translate(0px, 0px);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(var(--angle, 0deg)) translate(30px, -20px);
+        opacity: 0.8;
+    }
+    100% {
+        transform: rotate(var(--angle, 0deg)) translate(50px, -40px);
+        opacity: 0;
+    }
+}
+
+.symbiotic-healing-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(144, 238, 144, 0.6) 0%, rgba(144, 238, 144, 0.3) 40%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 50;
+}
+
+.symbiotic-heal-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: #90EE90;
+    border-radius: 50%;
+    margin: -3px;
+    pointer-events: none;
+    z-index: 60;
+}
+
+/* Buff icons for new talents */
+.buff-icon[title*="Pack Leadership"] {
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.buff-icon[title*="Pack Leadership"]::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border-radius: 50%;
+    z-index: -1;
+    animation: leadershipGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes leadershipGlow {
+    0% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Log entry styling for new talents */
+.log-entry.zoey[data-ability="Pack Leadership"] {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), transparent);
+    border-left: 3px solid #FFD700;
+}
+
+.log-entry.zoey[data-ability="Pack Leadership"]::before {
+    content: "👑";
+}
+
+.log-entry.zoey[data-ability="Symbiotic Healing"] {
+    background: linear-gradient(90deg, rgba(144, 238, 144, 0.2), transparent);
+    border-left: 3px solid #90EE90;
+}
+
+.log-entry.zoey[data-ability="Symbiotic Healing"]::before {
+    content: "💚";
+}
+
+/* Feline Vitality VFX */
+@keyframes felineVitalityPulse {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+        box-shadow: 0 0 0px rgba(0, 255, 127, 0.5);
+    }
+    20% {
+        transform: scale(1.1);
+        opacity: 0.8;
+        box-shadow: 0 0 20px rgba(0, 255, 127, 0.8);
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 30px rgba(0, 255, 127, 1);
+    }
+    80% {
+        transform: scale(1.05);
+        opacity: 0.6;
+        box-shadow: 0 0 15px rgba(0, 255, 127, 0.6);
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0;
+        box-shadow: 0 0 5px rgba(0, 255, 127, 0.2);
+    }
+}
+
+@keyframes vitalityParticleOrbit {
+    0% {
+        transform: rotate(0deg) translate(70px, 0) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: rotate(360deg) translate(70px, 0) rotate(-360deg);
+        opacity: 1;
+    }
+}
+
+.feline-vitality-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 180px;
+    height: 180px;
+    margin: -90px 0 0 -90px;
+    border: 3px solid #00FF7F;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 127, 0.4) 0%, rgba(0, 255, 127, 0.2) 50%, transparent 70%);
+    pointer-events: none;
+    z-index: 100;
+}
+
+.feline-vitality-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(45deg, #00FF7F, #32CD32);
+    border-radius: 50%;
+    margin: -4px;
+    pointer-events: none;
+    z-index: 80;
+}
+
+/* Enhanced healing VFX for when Feline Vitality activates */
+.heal-vfx.feline-enhanced {
+    color: #00FF7F !important;
+    text-shadow: 0 0 10px #00FF7F, 0 0 20px #32CD32;
+    font-weight: bold;
+    animation: felineHealBounce 1.5s ease-out forwards;
+}
+
+@keyframes felineHealBounce {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    20% {
+        transform: translateY(-30px) scale(1.3);
+        opacity: 1;
+    }
+    40% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 0.9;
+    }
+    60% {
+        transform: translateY(-25px) scale(1.25);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-80px) scale(1.1);
+        opacity: 0;
+    }
+}
+
+/* Log entry styling for Feline Vitality */
+.log-entry.zoey[data-ability="Feline Vitality"] {
+    background: linear-gradient(90deg, rgba(0, 255, 127, 0.2), transparent);
+    border-left: 3px solid #00FF7F;
+}
+
+.log-entry.zoey[data-ability="Feline Vitality"]::before {
+    content: "🌟";
+}
+
+/* Enduring Magic VFX */
+@keyframes enduringMagicPulse {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    60% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes enduringMagicParticle {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(calc(var(--em-x, 1) * 40px), calc(var(--em-y, 1) * 40px)) scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(calc(var(--em-x, 1) * 80px), calc(var(--em-y, 1) * 80px)) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.enduring-magic-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    background: radial-gradient(circle, rgba(138, 43, 226, 0.4) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: enduringMagicPulse 1.5s ease-out;
+    pointer-events: none;
+    z-index: 80;
+}
+
+.enduring-magic-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: linear-gradient(45deg, #8A2BE2, #4B0082);
+    border-radius: 50%;
+    margin: -3px;
+    animation: enduringMagicParticle 1.5s ease-out forwards;
+    animation-delay: calc(var(--i, 0) * 0.1s);
+    pointer-events: none;
+    z-index: 90;
+}
+
+/* Enhanced buff duration indicators */
+.buff-container.enduring-enhanced {
+    border: 2px solid #8A2BE2 !important;
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.6);
+}
+
+.buff-container.enduring-enhanced::after {
+    content: "+1";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #8A2BE2;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+/* Log entry styling for Enduring Magic */
+.log-entry.zoey[data-ability="Enduring Magic"] {
+    background: linear-gradient(90deg, rgba(138, 43, 226, 0.2), transparent);
+    border-left: 3px solid #8A2BE2;
+}
+
+.log-entry.zoey[data-ability="Enduring Magic"]::before {
+    content: "⏳";
+}
+
+/* Feline Combo Talent Effects */
+.feline-combo-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff6b9d;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7),
+                 0 0 10px rgba(255, 107, 157, 0.8);
+    animation: felineComboAppear 1.2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+@keyframes felineComboAppear {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.0);
+    }
+    85% {
+        transform: translate(-50%, -50%) scale(1.0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.log-entry.zoey[data-ability="Feline Combo"] {
+    border-left: 4px solid #ff6b9d;
+}
+
+.log-entry.zoey[data-ability="Feline Combo"]::before {
+    content: "⚡";
+}
+
+/* Enhanced Heart Pounce talent visual effects */
+.log-entry.zoey[data-ability="Enhanced Heart Pounce"] {
+    background: linear-gradient(45deg, #ff1744, #ff6b35);
+}
+
+.log-entry.zoey[data-ability="Enhanced Heart Pounce"]::before {
+    content: "💥";
+}
+
+/* Sparkle Pounce talent visual effects */
+.log-entry.zoey[data-ability="Sparkle Pounce"] {
+    background: linear-gradient(45deg, #e91e63, #9c27b0);
+}
+
+.log-entry.zoey[data-ability="Sparkle Pounce"]::before {
+    content: "⚡";
+}
+
+/* Enhanced damage indicator for Heart Pounce */
+.enhanced-damage-indicator {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #ff1744, #ff6b35);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 12px;
+    z-index: 150;
+    animation: enhancedDamageFloat 2s ease-out forwards;
+    box-shadow: 0 2px 10px rgba(255, 23, 68, 0.5);
+}
+
+@keyframes enhancedDamageFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px);
+    }
+}
+
+/* Sparkle Pounce trigger effect */
+.sparkle-pounce-trigger {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #e91e63, #9c27b0);
+    border-radius: 50%;
+    z-index: 110;
+    animation: sparklePounceActivate 1s ease-out forwards;
+}
+
+@keyframes sparklePounceActivate {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+/* Predatory Instinct VFX */
+.predatory-instinct-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+}
+
+.predatory-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    margin: -100px 0 0 -100px;
+    background: radial-gradient(circle, 
+        rgba(139, 0, 0, 0.8) 0%, 
+        rgba(255, 0, 0, 0.6) 30%, 
+        rgba(139, 0, 0, 0.4) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: predatoryAuraPulse 2s ease-in-out;
+}
+
+@keyframes predatoryAuraPulse {
+    0%, 100% { 
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+.predatory-eyes {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 80px;
+    height: 20px;
+    margin: -10px 0 0 -40px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        #FF0000 20%, 
+        #FF4500 50%, 
+        #FF0000 80%, 
+        transparent 100%);
+    border-radius: 50px;
+    box-shadow: 
+        0 0 20px #FF0000,
+        0 0 40px #FF4500,
+        inset 0 0 10px rgba(255, 0, 0, 0.8);
+    animation: predatoryEyeGlow 2s ease-in-out;
+}
+
+@keyframes predatoryEyeGlow {
+    0%, 100% { 
+        opacity: 0;
+        transform: scaleX(0.5);
+    }
+    25%, 75% { 
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    50% { 
+        opacity: 1;
+        transform: scaleX(1.2);
+        box-shadow: 
+            0 0 30px #FF0000,
+            0 0 60px #FF4500,
+            inset 0 0 15px rgba(255, 0, 0, 1);
+    }
+}
+
+.predatory-text {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #8B0000;
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 10px #FF0000,
+        0 0 20px #FF4500;
+    animation: predatoryTextReveal 2s ease-out;
+    letter-spacing: 2px;
+    white-space: nowrap;
+}
+
+@keyframes predatoryTextReveal {
+    0% { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.8);
+    }
+    30% { 
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    70% { 
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px) scale(1.1);
+    }
+}
+
+/* Disabled ability styling for Predatory Instinct */
+.ability.disabled-by-talent {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    position: relative;
+}
+
+.ability.disabled-by-talent::after {
+    content: "AUTO";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(139, 0, 0, 0.9);
+    color: #FFF;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px solid #FF0000;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Log entry styling for Predatory Instinct */
+.log-entry.zoey[data-ability="Predatory Instinct"] {
+    color: #8B0000;
+    border-left: 3px solid #FF4500;
+    background: linear-gradient(90deg, rgba(139, 0, 0, 0.1), transparent);
+}
+
+.log-entry.zoey[data-ability="Predatory Instinct"]::before {
+    content: "🩸";
+    margin-right: 5px;
+}
+
+/* Powerful talent effect styling */
+.talent-effect.powerful {
+    color: #ff6b35;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 107, 53, 0.6);
+}
+
+/* Double Bell Mark talent effect */
+.log-entry.zoey[data-ability="Double Bell Mark"] {
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.15));
+}
+
+.log-entry.zoey[data-ability="Double Bell Mark"]::before {
+    content: "🔔🔔"; /* Two bell emojis for double mark */
+}
+
+.double-bell-mark-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 15;
+    animation: doubleBellMarkAppear 2s ease-out forwards;
+}
+
+@keyframes doubleBellMarkAppear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Enhanced Light Arc talent effect */
+.log-entry.zoey[data-ability="Enhanced Light Arc"] {
+    background: linear-gradient(45deg, rgba(138, 43, 226, 0.15), rgba(75, 0, 130, 0.15));
+}
+
+.log-entry.zoey[data-ability="Enhanced Light Arc"]::before {
+    content: "⚡"; /* Lightning bolt for enhanced arc */
+}
+
+.enhanced-light-arc-indicator {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #8a2be2;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+    animation: enhancedArcFloat 2s ease-out forwards;
+    z-index: 20;
+    pointer-events: none;
+}
+
+@keyframes enhancedArcFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px);
+    }
+}
+
+/* Sparkle Bell Healing VFX */
+.sparkle-bell-healing-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.sparkle-bell-heal-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #FFD700, #FF69B4);
+    border-radius: 50%;
+    animation: sparkleBellHealFloat 1.5s ease-out forwards;
+    box-shadow: 0 0 8px #FFD700;
+}
+
+@keyframes sparkleBellHealFloat {
+    0% {
+        transform: scale(0.2) translateY(0);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1) translateY(-20px);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.5) translateY(-80px);
+        opacity: 0;
+    }
+}
+
+.heal-number.sparkle-bell-heal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px #FFD700;
+    animation: sparkleBellHealNumber 2s ease-out forwards;
+    z-index: 20;
+}
+
+@keyframes sparkleBellHealNumber {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translateX(-50%) translateY(-20px) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-60px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.bell-heal-sparkle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.6), transparent 70%);
+    border-radius: 50%;
+    animation: bellHealSparkle 1.5s ease-out forwards;
+    z-index: 10;
+}
+
+@keyframes bellHealSparkle {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Bell Recast talent styling */
+.log-entry.zoey[data-ability="Bell Recast"] {
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.15), rgba(255, 105, 180, 0.15));
+    border-left: 3px solid #FFD700;
+}
+
+.log-entry.zoey[data-ability="Bell Recast"]::before {
+    content: "🔔⚡"; /* Bell with lightning for recast */
+}
+
+/* Sparkle Bell Healing talent styling */
+.log-entry.zoey[data-ability="Sparkle Bell Healing"] {
+    background: linear-gradient(45deg, rgba(76, 175, 80, 0.15), rgba(255, 215, 0, 0.15));
+    border-left: 3px solid #4CAF50;
+}
+
+.log-entry.zoey[data-ability="Sparkle Bell Healing"]::before {
+    content: "🔔💚"; /* Bell with green heart for healing */
+}
+
+.log-entry.zoey[data-ability="Sparkle Bell Healing"] {
+    color: #69F0AE;
+}
+
+.log-entry.zoey[data-ability="Sparkle Bell Healing"]::before {
+    content: "💚 ";
+}
+
+/* Bell Mastery VFX Styles */
+.strawberry-bell-mastery-vfx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.strawberry-bell-mastery-source {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff69b4 0%, #ff1493 50%, #dc143c 100%);
+    box-shadow: 0 0 40px #ff69b4, 0 0 60px #ff1493, 0 0 80px #dc143c;
+    animation: bellMasteryPulse 0.8s ease-in-out;
+}
+
+@keyframes bellMasteryPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+        box-shadow: 0 0 20px #ff69b4, 0 0 30px #ff1493, 0 0 40px #dc143c;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+        box-shadow: 0 0 60px #ff69b4, 0 0 80px #ff1493, 0 0 100px #dc143c;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+        box-shadow: 0 0 40px #ff69b4, 0 0 60px #ff1493, 0 0 80px #dc143c;
+    }
+}
+
+.strawberry-bell-mastery-beam {
+    position: absolute;
+    height: 10px;
+    background: linear-gradient(90deg, #ff69b4 0%, #ff1493 50%, #dc143c 100%);
+    box-shadow: 0 0 20px #ff69b4;
+    opacity: 0;
+    animation: beamMasteryPulse 0.6s ease-out forwards;
+}
+
+@keyframes beamMasteryPulse {
+    0% {
+        opacity: 0;
+        transform: scaleX(0);
+        box-shadow: 0 0 10px #ff69b4;
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(0.5);
+        box-shadow: 0 0 30px #ff69b4, 0 0 20px #ff1493;
+    }
+    100% {
+        opacity: 0.8;
+        transform: scaleX(1);
+        box-shadow: 0 0 20px #ff69b4;
+    }
+}
+
+.strawberry-bell-mastery-particle {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ff69b4;
+    box-shadow: 0 0 15px #ff69b4;
+    opacity: 0;
+    animation: particleMasteryFloat 0.8s ease-out forwards;
+}
+
+@keyframes particleMasteryFloat {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+        box-shadow: 0 0 25px #ff69b4, 0 0 15px #ff1493;
+    }
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+        box-shadow: 0 0 15px #ff69b4;
+    }
+}
+
+.strawberry-bell-mastery-impact {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 105, 180, 0.8) 0%, rgba(255, 20, 147, 0.6) 50%, rgba(220, 20, 60, 0.4) 100%);
+    box-shadow: 0 0 50px #ff69b4;
+    opacity: 0;
+    animation: impactMasteryBurst 0.8s ease-out forwards;
+}
+
+@keyframes impactMasteryBurst {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+        box-shadow: 0 0 20px #ff69b4;
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.5);
+        box-shadow: 0 0 80px #ff69b4, 0 0 60px #ff1493, 0 0 40px #dc143c;
+    }
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+        box-shadow: 0 0 50px #ff69b4;
+    }
+}
+
+.strawberry-bell-mastery-impact-particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff1493;
+    box-shadow: 0 0 10px #ff1493;
+    opacity: 0;
+    animation: impactParticleMastery 1.2s ease-out forwards;
+}
+
+@keyframes impactParticleMastery {
+    0% {
+        opacity: 0;
+        transform: scale(0) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.5) translateY(-10px);
+        box-shadow: 0 0 20px #ff1493, 0 0 10px #ff69b4;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-50px);
+        box-shadow: 0 0 5px #ff1493;
+    }
+}
+
+/* Log entry styling for Bell Mastery */
+.log-entry.zoey[data-ability="Bell Mastery"] {
+    color: #ff1493;
+    font-weight: bold;
+    text-shadow: 0 0 5px #ff69b4;
+}
+
+.log-entry.zoey[data-ability="Bell Mastery"]::before {
+    content: "💥 ";
+    color: #dc143c;
+}

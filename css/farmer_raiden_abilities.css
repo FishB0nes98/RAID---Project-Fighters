@@ -175,46 +175,56 @@
 
 /* Zap lightning effect */
 .raiden-zap-effect {
-    position: fixed;
-    height: 8px;
-    background: linear-gradient(90deg, transparent 0%, #ffffff 15%, #00b3ff 50%, #ffffff 85%, transparent 100%);
-    z-index: 1000;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
     pointer-events: none;
+    z-index: 15;
     opacity: 0;
-    transition: opacity 0.05s ease-in;
+    animation: zap-buildup 0.4s ease-out forwards;
 }
 
 .raiden-zap-effect.active {
-    opacity: 1;
 }
 
-.raiden-zap-effect::before {
-    content: '';
+/* Style for the individual particles */
+.zap-particle {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 10%,
-        rgba(255, 255, 255, 0.8) 10%,
-        rgba(255, 255, 255, 0.8) 20%
-    );
-    opacity: 0.3;
-    animation: lightning-flicker 0.15s steps(3) infinite;
+    width: 5px;
+    height: 15px;
+    background: #fffcab;
+    border-radius: 2px;
+    box-shadow: 0 0 10px 3px #ffe400;
+    opacity: 0;
+    animation: zap-particle-fly 0.5s ease-in forwards;
 }
 
-@keyframes lightning-flicker {
+@keyframes zap-buildup {
     0% {
-        opacity: 0.3;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
     }
-    50% {
-        opacity: 0.6;
+    70% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.2);
     }
     100% {
-        opacity: 0.3;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+@keyframes zap-particle-fly {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-30px);
     }
 }
 
@@ -227,638 +237,182 @@
     height: 100%;
     pointer-events: none;
     z-index: 10;
-    animation: zap-impact 0.6s ease-out forwards;
+    animation: zap-impact-flash 0.6s ease-out forwards;
 }
 
 .zap-impact-effect::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(0,179,255,0.6) 40%, transparent 70%);
-    animation: zap-fade 0.6s ease-out forwards;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,230,150,0.9) 30%, rgba(0,179,255,0.6) 60%, transparent 80%);
+    animation: zap-impact-fade 0.6s ease-out forwards;
 }
 
-/* Create lightning bolt arcs around the impact */
 .zap-impact-effect::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    background-image: 
-        radial-gradient(circle, transparent 50%, rgba(255,255,255,0.7) 51%, transparent 52%),
-        radial-gradient(circle, transparent 60%, rgba(255,255,255,0.5) 61%, transparent 62%),
-        radial-gradient(circle, transparent 70%, rgba(255,255,255,0.3) 71%, transparent 72%);
-    animation: zap-impact-circles 0.6s ease-out forwards;
+    width: 90px;
+    height: 90px;
+    border: 4px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    box-shadow: 0 0 20px 7px rgba(255, 230, 150, 0.6) inset, 0 0 10px 3px rgba(255, 255, 255, 0.5);
+    animation: zap-impact-ring 0.6s ease-out forwards;
 }
 
-@keyframes zap-impact {
+@keyframes zap-impact-flash {
     0% {
-        background-color: rgba(0, 179, 255, 0);
+        background-color: rgba(255, 255, 255, 0);
+        backdrop-filter: brightness(100%);
     }
-    20% {
-        background-color: rgba(255, 255, 255, 0.7);
-    }
-    40% {
-        background-color: rgba(0, 179, 255, 0.4);
-    }
-    100% {
-        background-color: rgba(0, 179, 255, 0);
-    }
-}
-
-@keyframes zap-fade {
-    0% {
-        opacity: 1;
-        transform: scale(0.5);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(1.5);
-    }
-}
-
-@keyframes zap-impact-circles {
-    0% {
-        opacity: 1;
-        width: 0;
-        height: 0;
-    }
-    100% {
-        opacity: 0;
-        width: 150px;
-        height: 150px;
-    }
-}
-
-/* Thunder Shield Effects */
-
-/* Shield cast animation */
-.thunder-shield-cast {
-    animation: thunder-shield-cast-anim 0.8s ease-out;
-}
-
-@keyframes thunder-shield-cast-anim {
-    0% {
-        filter: brightness(1);
+    15% {
+        background-color: rgba(255, 230, 150, 0.8);
+        backdrop-filter: brightness(200%) contrast(130%);
     }
     50% {
-        filter: brightness(1.7);
+        background-color: rgba(0, 179, 255, 0.4);
+        backdrop-filter: brightness(130%);
+    }
+    100% {
+        background-color: rgba(0, 179, 255, 0);
+        backdrop-filter: brightness(100%);
+    }
+}
+
+@keyframes zap-impact-fade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.8);
+    }
+}
+
+@keyframes zap-impact-ring {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+        border-width: 5px;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+        border-width: 1px;
+    }
+}
+
+/* Zap Stun Effect - Added for Stunning Zap talent */
+.zap-stun-effect {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.zap-stun-effect .stun-star {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ffff00;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: zap-stun-star 1.5s infinite;
+    filter: drop-shadow(0 0 5px #ffcc00);
+}
+
+.zap-stun-effect .stun-star:nth-child(1) {
+    transform: translateX(-25px) rotate(15deg);
+}
+
+.zap-stun-effect .stun-star:nth-child(2) {
+    transform: translateY(-15px);
+}
+
+.zap-stun-effect .stun-star:nth-child(3) {
+    transform: translateX(25px) rotate(-15deg);
+}
+
+.zap-stun-effect .stun-text {
+    margin-top: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00;
+    animation: zap-stun-text 1.5s infinite;
+    letter-spacing: 1px;
+}
+
+@keyframes zap-stun-star {
+    0%, 100% {
+        opacity: 1;
+        transform: translateY(0) rotate(0);
+    }
+    25% {
+        opacity: 0.7;
+        transform: translateY(-2px) rotate(15deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(0) rotate(0);
     }
     75% {
-        filter: brightness(1.4);
-    }
-    100% {
-        filter: brightness(1);
-    }
-}
-
-/* Thunder Shield burst effect when activated */
-.thunder-shield-burst {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 20;
-    animation: shield-burst-anim 1s ease-out forwards;
-}
-
-.thunder-shield-burst::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(0,179,255,0.5) 30%, transparent 70%);
-    box-shadow: 
-        0 0 20px #00b3ff,
-        0 0 40px #00b3ff;
-    animation: shield-burst-rings 0.8s ease-out;
-}
-
-.thunder-shield-burst::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 150%;
-    height: 150%;
-    border-radius: 50%;
-    background: 
-        radial-gradient(circle, transparent 60%, rgba(255,255,255,0.7) 62%, transparent 65%),
-        radial-gradient(circle, transparent 70%, rgba(255,255,255,0.5) 72%, transparent 75%),
-        radial-gradient(circle, transparent 80%, rgba(255,255,255,0.3) 82%, transparent 85%);
-    animation: shield-burst-outer-rings 1s ease-out;
-}
-
-@keyframes shield-burst-anim {
-    0% {
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-@keyframes shield-burst-rings {
-    0% {
-        width: 100%;
-        height: 100%;
-        opacity: 0.9;
-    }
-    100% {
-        width: 180%;
-        height: 180%;
-        opacity: 0;
-    }
-}
-
-@keyframes shield-burst-outer-rings {
-    0% {
-        width: 100%;
-        height: 100%;
-        opacity: 0.9;
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-    100% {
-        width: 220%;
-        height: 220%;
-        opacity: 0;
-        transform: translate(-50%, -50%) rotate(45deg);
-    }
-}
-
-/* Thunder Shield main effect */
-.thunder-shield-effect {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 5;
-    perspective: 800px;
-    transform-style: preserve-3d;
-}
-
-/* Lightning barrier effect */
-.thunder-shield-effect::before {
-    content: '';
-    position: absolute;
-    top: -10%;
-    left: -10%;
-    width: 120%;
-    height: 120%;
-    border-radius: 50%;
-    background: radial-gradient(circle, transparent 50%, rgba(0,179,255,0.1) 70%, rgba(0,179,255,0.2) 80%, rgba(0,179,255,0.3) 90%, transparent 100%);
-    box-shadow: 
-        inset 0 0 20px rgba(0, 179, 255, 0.5),
-        0 0 15px rgba(0, 179, 255, 0.7);
-    animation: thunder-shield-pulse 3s infinite alternate;
-    z-index: 1;
-}
-
-/* Rotating shield barrier */
-.thunder-shield-effect::after {
-    content: '';
-    position: absolute;
-    top: -15%;
-    left: -15%;
-    width: 130%;
-    height: 130%;
-    border-radius: 50%;
-    border: 2px solid rgba(0, 179, 255, 0.5);
-    box-shadow: 
-        0 0 10px #00b3ff,
-        inset 0 0 15px #00b3ff;
-    animation: thunder-shield-rotate 10s linear infinite;
-    z-index: 2;
-}
-
-/* Lightning arcs */
-.thunder-shield-arc {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    transform-origin: center;
-    pointer-events: none;
-    z-index: 3;
-}
-
-.thunder-shield-arc:nth-child(1) {
-    transform: translate(-50%, -50%) rotate(0deg);
-    animation: thunder-arc-anim 5s linear infinite, thunder-arc-opacity 3s infinite;
-}
-
-.thunder-shield-arc:nth-child(2) {
-    transform: translate(-50%, -50%) rotate(72deg);
-    animation: thunder-arc-anim 5s linear infinite 0.6s, thunder-arc-opacity 3s infinite 0.4s;
-}
-
-.thunder-shield-arc:nth-child(3) {
-    transform: translate(-50%, -50%) rotate(144deg);
-    animation: thunder-arc-anim 5s linear infinite 1.2s, thunder-arc-opacity 3s infinite 0.8s;
-}
-
-.thunder-shield-arc:nth-child(4) {
-    transform: translate(-50%, -50%) rotate(216deg);
-    animation: thunder-arc-anim 5s linear infinite 1.8s, thunder-arc-opacity 3s infinite 1.2s;
-}
-
-.thunder-shield-arc:nth-child(5) {
-    transform: translate(-50%, -50%) rotate(288deg);
-    animation: thunder-arc-anim 5s linear infinite 2.4s, thunder-arc-opacity 3s infinite 1.6s;
-}
-
-.thunder-shield-arc::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 3px;
-    height: 60%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(0, 179, 255, 0.8) 50%, transparent);
-    transform-origin: bottom center;
-    transform: translateX(-50%) scaleY(0);
-    animation: thunder-arc-grow 3s ease-in-out infinite;
-}
-
-.thunder-shield-arc::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 8px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-    box-shadow: 
-        0 0 5px #ffffff,
-        0 0 10px #00b3ff,
-        0 0 15px #00b3ff;
-    transform: translate(-50%, 0);
-    animation: thunder-arc-spark 3s ease-in-out infinite;
-}
-
-/* Fading animation */
-.thunder-shield-effect.fading {
-    animation: thunder-shield-fade 0.5s forwards;
-}
-
-.thunder-shield-effect.fading .thunder-shield-arc {
-    animation: thunder-arc-fade 0.5s forwards !important;
-}
-
-/* Shield animations */
-@keyframes thunder-shield-pulse {
-    0%, 100% {
         opacity: 0.7;
-        box-shadow: 
-            inset 0 0 20px rgba(0, 179, 255, 0.5),
-            0 0 15px rgba(0, 179, 255, 0.7);
-    }
-    50% {
-        opacity: 0.9;
-        box-shadow: 
-            inset 0 0 30px rgba(0, 179, 255, 0.7),
-            0 0 25px rgba(0, 179, 255, 0.9);
+        transform: translateY(2px) rotate(-15deg);
     }
 }
 
-@keyframes thunder-shield-rotate {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes thunder-arc-anim {
-    0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-    100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-
-@keyframes thunder-arc-opacity {
+@keyframes zap-stun-text {
     0%, 100% {
-        opacity: 0.5;
+        opacity: 1;
+        transform: scale(1);
     }
     50% {
-        opacity: 1;
-    }
-}
-
-@keyframes thunder-arc-grow {
-    0%, 100% {
-        transform: translateX(-50%) scaleY(0);
-    }
-    50% {
-        transform: translateX(-50%) scaleY(1);
-    }
-}
-
-@keyframes thunder-arc-spark {
-    0%, 100% {
-        opacity: 0;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
-@keyframes thunder-shield-fade {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-@keyframes thunder-arc-fade {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-/* 3D lightning effects */
-.thunder-shield-3d {
-    position: absolute;
-    top: -20%;
-    left: -20%;
-    width: 140%;
-    height: 140%;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 4;
-    transform-style: preserve-3d;
-    animation: thunder-shield-3d-rotate 15s linear infinite;
-}
-
-.thunder-shield-3d::before,
-.thunder-shield-3d::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: 
-        radial-gradient(circle, transparent 60%, rgba(0,179,255,0.1) 70%, rgba(0,179,255,0.2) 80%, rgba(0,179,255,0.1) 90%, transparent 100%);
-    box-shadow: 
-        0 0 10px rgba(0, 179, 255, 0.5),
-        inset 0 0 15px rgba(0, 179, 255, 0.5);
-}
-
-.thunder-shield-3d::before {
-    transform: translateZ(20px);
-    animation: thunder-shield-3d-pulse 3s infinite alternate;
-}
-
-.thunder-shield-3d::after {
-    transform: translateZ(-20px);
-    animation: thunder-shield-3d-pulse 3s infinite alternate-reverse;
-}
-
-@keyframes thunder-shield-3d-rotate {
-    0% {
-        transform: rotateX(65deg) rotateY(0deg);
-    }
-    100% {
-        transform: rotateX(65deg) rotateY(360deg);
-    }
-}
-
-@keyframes thunder-shield-3d-pulse {
-    0% {
-        opacity: 0.3;
-    }
-    100% {
-        opacity: 0.7;
-    }
-}
-
-/* Electric Shock Ability Styles */
-.electric-shock-cast {
-    animation: electric-shock-cast 1s ease-out;
-}
-
-@keyframes electric-shock-cast {
-    0% {
-        transform: translateY(0);
-        filter: brightness(1);
-    }
-    20% {
-        transform: translateY(-8px);
-        filter: brightness(1.5);
-    }
-    40% {
-        transform: translateY(0);
-        filter: brightness(2);
-    }
-    60% {
-        transform: translateY(-5px);
-        filter: brightness(1.8);
-    }
-    80% {
-        transform: translateY(0);
-        filter: brightness(1.5);
-    }
-    100% {
-        transform: translateY(0);
-        filter: brightness(1);
-    }
-}
-
-/* Electric Shock Wave Effect */
-.electric-shock-wave {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 0 20px #00b3ff, 0 0 40px #00b3ff;
-    z-index: 100;
-    animation: electric-shock-wave 1s ease-out forwards;
-}
-
-@keyframes electric-shock-wave {
-    0% {
-        width: 10px;
-        height: 10px;
-        opacity: 1;
-        border-radius: 50%;
-    }
-    50% {
-        width: 200px;
-        height: 200px;
         opacity: 0.8;
-        border-radius: 50%;
-    }
-    100% {
-        width: 400px;
-        height: 400px;
-        opacity: 0;
-        border-radius: 50%;
+        transform: scale(1.1);
     }
 }
 
-/* Electric Shock Impact Effect */
-.electric-shock-impact {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-    animation: electric-shock-impact 0.8s ease-out forwards;
+/* Style for debuff icon */
+.debuff-icon[title*="Stunned (Zap)"] {
+    background-color: rgba(255, 255, 0, 0.2);
+    border: 1px solid #ffcc00;
 }
 
-.electric-shock-impact::before {
+.debuff-icon[title*="Stunned (Zap)"]::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
-        radial-gradient(circle at 50% 50%, rgba(0, 179, 255, 0.8) 0%, rgba(0, 179, 255, 0) 70%),
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 60%);
-    filter: blur(2px);
-    opacity: 0;
-    animation: electric-shock-flash 0.8s ease-out forwards;
+    background: radial-gradient(circle at center, rgba(255, 255, 0, 0.4) 0%, transparent 70%);
+    animation: zap-stun-pulse 1.5s infinite;
+    z-index: -1;
 }
 
-.electric-shock-impact::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 0;
-    height: 0;
-    background: 
-        linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(0, 179, 255, 0.8));
-    border-radius: 50%;
-    box-shadow: 
-        0 0 30px #00b3ff,
-        0 0 60px #00b3ff;
-    animation: electric-shock-expand 0.8s ease-out forwards;
-}
-
-@keyframes electric-shock-impact {
-    0% {
-        background-color: rgba(0, 179, 255, 0);
-    }
-    15% {
-        background-color: rgba(255, 255, 255, 0.8);
-    }
-    30% {
-        background-color: rgba(0, 179, 255, 0.5);
-    }
-    100% {
-        background-color: rgba(0, 179, 255, 0);
-    }
-}
-
-@keyframes electric-shock-flash {
-    0% {
-        opacity: 0;
-    }
-    15% {
-        opacity: 1;
-    }
-    70% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-@keyframes electric-shock-expand {
-    0% {
-        width: 0;
-        height: 0;
-        opacity: 1;
+@keyframes zap-stun-pulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
     }
     50% {
-        width: 120px;
-        height: 120px;
         opacity: 0.8;
-    }
-    100% {
-        width: 180px;
-        height: 180px;
-        opacity: 0;
-    }
-}
-
-/* Lightning bolts that appear around impacted targets */
-.electric-shock-impact::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        linear-gradient(135deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%),
-        linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%),
-        linear-gradient(225deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%),
-        linear-gradient(315deg, transparent 45%, rgba(255, 255, 255, 0.8) 50%, transparent 55%);
-    background-size: 200% 200%;
-    background-position: center;
-    opacity: 0;
-    animation: electric-shock-lightning 0.5s ease-out forwards;
-}
-
-@keyframes electric-shock-lightning {
-    0% {
-        opacity: 0;
-        background-size: 100% 100%;
-    }
-    30% {
-        opacity: 1;
-        background-size: 150% 150%;
-    }
-    70% {
-        opacity: 0.7;
-        background-size: 180% 180%;
-    }
-    100% {
-        opacity: 0;
-        background-size: 200% 200%;
+        transform: scale(1.2);
     }
 }
 
@@ -1155,4 +709,710 @@
     70% { transform: translate(-3px, 0); }
     80% { transform: translate(3px, 0); }
     90% { transform: translate(-1px, 0); }
+}
+
+/* CSS for Farmer Raiden's permanent Thunder Shield talent */
+.thunder-shield-effect.permanent-shield {
+    animation: thunder-shield-pulse 2s infinite, thunder-shield-rotate 15s linear infinite;
+    opacity: 0.85;
+    /* Add a gold/royal glow for permanent version */
+    box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.3);
+}
+
+.thunder-shield-effect.permanent-shield .thunder-shield-arc {
+    animation: thunder-arc-anim 4s infinite, thunder-arc-opacity 6s infinite, thunder-arc-grow 8s infinite;
+    /* More intense glow for permanent version */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 128, 0.7));
+}
+
+.thunder-shield-effect.permanent-shield::before,
+.thunder-shield-effect.permanent-shield::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    width: 120%;
+    height: 120%;
+    left: -10%;
+    top: -10%;
+    background: radial-gradient(rgba(255, 255, 0, 0.1), rgba(255, 255, 255, 0) 70%);
+    animation: permanent-shield-pulse 4s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes permanent-shield-pulse {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+/* Permanent cooldown indicator */
+.ability-cooldown.permanent-cooldown {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: gold;
+    font-size: 24px;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ability-cooldown.permanent-cooldown::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+    animation: permanent-cooldown-pulse 2s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes permanent-cooldown-pulse {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* Power Growth VFX (for the Empowering Thunder talent) */
+.raiden-power-growth-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.power-growth-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: linear-gradient(to bottom, #ffdd00, #ff8800);
+    border-radius: 50%;
+    bottom: 0;
+    opacity: 0;
+    filter: drop-shadow(0 0 5px rgba(255, 200, 0, 0.8));
+    animation: power-growth-particle 1.5s ease-out forwards;
+}
+
+.power-growth-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffb700;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 180, 0, 0.5);
+    white-space: nowrap;
+    opacity: 0;
+    animation: power-growth-text 1.5s ease-out forwards;
+}
+
+@keyframes power-growth-particle {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-80px) scale(0.1);
+        opacity: 0;
+    }
+}
+
+@keyframes power-growth-text {
+    0% {
+        transform: translate(-50%, -30%);
+        opacity: 0;
+        filter: blur(5px);
+    }
+    20% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        transform: translate(-50%, -80%);
+        opacity: 0;
+    }
+}
+
+/* Lightning Evasion VFX */
+.lightning-evasion-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    animation: lightning-evasion-pulse 2s ease-out;
+}
+
+.lightning-evasion-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(64, 196, 255, 0.6) 0%, rgba(0, 140, 255, 0.3) 50%, rgba(0, 68, 255, 0) 70%);
+    animation: lightning-evasion-glow 1.5s ease-out infinite;
+}
+
+.lightning-evasion-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #40c4ff;
+    text-shadow: 0 0 5px #0091ea, 0 0 10px #0277bd;
+    animation: lightning-evasion-text 2s ease-out;
+    z-index: 101;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 3px 8px;
+    border-radius: 10px;
+    letter-spacing: 1px;
+}
+
+@keyframes lightning-evasion-pulse {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes lightning-evasion-glow {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0.3;
+    }
+}
+
+@keyframes lightning-evasion-text {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    80% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+}
+
+/* Low Health Dodge Status Indicator */
+.character-slot .image-container.low-health-dodge-active {
+    box-shadow: 0 0 15px #40c4ff, 0 0 25px #0091ea;
+}
+
+.character-slot .image-container.low-health-dodge-active::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 24px;
+    height: 24px;
+    background: url('../icons/dodge_icon.png') no-repeat center/contain;
+    animation: low-health-dodge-icon 2s infinite;
+    z-index: 10;
+}
+
+@keyframes low-health-dodge-icon {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.2);
+        filter: brightness(1.5);
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+/* Thunder Perception Talent Visual Effects */
+.thunder-perception-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.thunder-perception-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,255,0,0.1) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: thunder-perception-glow 1.5s ease-out;
+    z-index: -1;
+}
+
+.thunder-perception-text {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #FFF200;
+    text-shadow: 
+        0 0 5px #FFA500,
+        0 0 10px #FF8C00,
+        0 0 15px #FF4500;
+    text-align: center;
+    transform: translateY(-50%);
+    opacity: 0;
+    animation: thunder-perception-text 2s ease-out forwards;
+}
+
+/* Animations for Thunder Perception */
+@keyframes thunder-perception-glow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    70% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes thunder-perception-text {
+    0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+    }
+    15% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: translateY(-40px) scale(1);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-70px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+/* Style for the buff icon in the status effects area */
+.buff-icon[title*="Thunder Perception"] {
+    border: 2px solid #FFA500;
+    box-shadow: 0 0 5px #FFA500;
+    animation: thunder-perception-buff-pulse 1.5s infinite alternate;
+}
+
+@keyframes thunder-perception-buff-pulse {
+    0% {
+        box-shadow: 0 0 5px #FFA500;
+    }
+    100% {
+        box-shadow: 0 0 10px #FFA500, 0 0 15px #FF8C00;
+    }
+}
+
+/* Talent Description Styling */
+.talent-effect {
+    display: block;
+    font-size: 0.9em;
+    margin-top: 4px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-style: italic;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.talent-effect::before {
+    content: '⚡';
+    margin-right: 4px;
+}
+
+.talent-effect:hover {
+    filter: brightness(1.2);
+}
+
+.talent-effect.damage {
+    background-color: rgba(255, 100, 100, 0.2);
+    border-left: 2px solid #ff6464;
+    color: #ff6464;
+}
+
+.talent-effect.utility {
+    background-color: rgba(100, 150, 255, 0.2);
+    border-left: 2px solid #6496ff;
+    color: #6496ff;
+}
+
+.talent-effect.healing {
+    background-color: rgba(100, 255, 150, 0.2);
+    border-left: 2px solid #64ff96;
+    color: #64ff96;
+}
+
+/* Raiden's passive indicator styling with talent enhancement */
+.raiden-passive-indicator.has-talents {
+    border: 2px solid #ffcc00;
+    box-shadow: 0 0 5px #ffcc00;
+    animation: passive-talent-pulse 2s infinite;
+}
+
+@keyframes passive-talent-pulse {
+    0%, 100% {
+        box-shadow: 0 0 5px #ffcc00;
+    }
+    50% {
+        box-shadow: 0 0 10px #ffcc00;
+    }
+}
+
+/* Passive Tooltip Styling */
+.passive-tooltip {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    border: 1px solid #00b3ff;
+    border-radius: 5px;
+    padding: 10px;
+    color: white;
+    font-size: 14px;
+    max-width: 350px;
+    z-index: 1000;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(0, 179, 255, 0.5);
+}
+
+.passive-tooltip.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.passive-tooltip-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #00b3ff;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 179, 255, 0.5);
+    padding-bottom: 5px;
+}
+
+.passive-tooltip-description {
+    color: #e0e0e0;
+    line-height: 1.4;
+}
+
+.passive-base-description {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.passive-tooltip-description .talent-effect {
+    display: block;
+    margin: 5px 0;
+    padding: 3px 0;
+}
+
+/* Remove default title behavior for passive indicator */
+.raiden-passive-indicator[data-tooltip-html="true"] {
+    cursor: pointer;
+}
+
+/* Ensure the passive indicator has hover effects even with HTML tooltip */
+.raiden-passive-indicator[data-tooltip-html="true"]:hover {
+    filter: brightness(1.3);
+}
+
+/* Double Storm talent effect */
+.double-storm-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    animation: double-storm-flash 0.8s ease-out forwards;
+}
+
+.double-storm-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(170,255,255,0.3) 40%, rgba(0,200,255,0) 70%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: double-storm-pulse 1.5s ease-out;
+}
+
+.double-storm-text {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-weight: bold;
+    font-size: 24px;
+    text-shadow: 0 0 10px #00a8ff, 0 0 20px #00a8ff, 0 0 30px #00a8ff;
+    white-space: nowrap;
+    opacity: 0;
+    animation: double-storm-text 2s ease-out forwards;
+}
+
+@keyframes double-storm-flash {
+    0% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes double-storm-pulse {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes double-storm-text {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1) translateY(-20px);
+    }
+}
+
+/* Storm Harbinger talent effect (modification of Double Storm) */
+.double-storm-effect:has(.double-storm-text[textContent="STORM HARBINGER"]) {
+    /* Target specifically when the text is "STORM HARBINGER" */
+    background-color: rgba(255, 230, 153, 0.1);
+}
+
+.double-storm-effect:has(.double-storm-text[textContent="STORM HARBINGER"])::before {
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,230,150,0.3) 40%, rgba(255,180,0,0) 70%);
+    animation-duration: 2s;
+}
+
+.double-storm-effect .double-storm-text[textContent="STORM HARBINGER"] {
+    color: #ffd700;
+    text-shadow: 0 0 10px #ffa500, 0 0 20px #ff8c00, 0 0 30px #ff4500;
+    animation-duration: 2.5s;
+}
+
+/* Shocking Storm talent effect (modification of Double Storm) */
+.double-storm-effect:has(.double-storm-text[textContent="SHOCKING STORM"]) {
+    /* Target specifically when the text is "SHOCKING STORM" */
+    background-color: rgba(240, 100, 255, 0.1);
+}
+
+.double-storm-effect:has(.double-storm-text[textContent="SHOCKING STORM"])::before {
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(240,100,255,0.3) 40%, rgba(180,0,255,0) 70%);
+    animation-duration: 1.8s;
+}
+
+.double-storm-effect .double-storm-text[textContent="SHOCKING STORM"] {
+    color: #e100ff;
+    text-shadow: 0 0 10px #ff00f7, 0 0 20px #c100ff, 0 0 30px #9600ff;
+    animation-duration: 2.2s;
+}
+
+/* CSS for the shocked-disabled-ability icon */
+.shocked-disabled-ability-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: shocked-disabled-pulse 2s infinite;
+}
+
+.shocked-disabled-ability-icon::before {
+    content: "";
+    width: 24px;
+    height: 24px;
+    background-image: url('../Icons/abilities/electric_shock.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 5px #ffcc00);
+    opacity: 0.8;
+    transform: scale(1);
+    animation: shocked-disabled-icon-pulse 2s infinite;
+}
+
+@keyframes shocked-disabled-pulse {
+    0% {
+        box-shadow: 0 0 5px 1px rgba(255, 204, 0, 0.5) inset;
+    }
+    50% {
+        box-shadow: 0 0 10px 3px rgba(255, 204, 0, 0.7) inset;
+    }
+    100% {
+        box-shadow: 0 0 5px 1px rgba(255, 204, 0, 0.5) inset;
+    }
+}
+
+@keyframes shocked-disabled-icon-pulse {
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 3px #ffcc00);
+    }
+    50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 8px #ffcc00);
+    }
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 3px #ffcc00);
+    }
+}
+
+/* CSS for Chain Zap visual effect */
+.zap-chain-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.zap-chain-line {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(to right, rgba(255, 204, 0, 0.1), rgba(255, 255, 255, 0.9), rgba(255, 204, 0, 0.8), rgba(255, 255, 255, 0.9), rgba(255, 204, 0, 0.1));
+    transform-origin: left center;
+    animation: chain-zap-pulse 0.5s ease-in-out;
+    box-shadow: 0 0 12px 4px rgba(255, 230, 150, 0.7);
+    z-index: 25;
+    filter: blur(1px);
+}
+
+@keyframes chain-zap-pulse {
+    0% {
+        opacity: 0;
+        box-shadow: 0 0 5px 1px rgba(255, 230, 150, 0.3);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 18px 5px rgba(255, 230, 150, 0.9);
+    }
+    100% {
+        opacity: 0;
+        box-shadow: 0 0 5px 1px rgba(255, 230, 150, 0.3);
+    }
 } 

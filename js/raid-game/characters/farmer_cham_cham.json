@@ -12,7 +12,7 @@
         "mana": 1200,
         "manaPerTurn": 0,
         "lifesteal": 0,
-        "dodgeChance": 0.1,
+        "dodgeChance": 0,
         "critChance": 0.1,
         "critDamage": 1.6,
         "healingPower": 0.0
@@ -32,9 +32,9 @@
         }
     ],
     "passive": {
-        "id": "farmer_lifesteal",
+        "id": "farmer_cham_cham_passive",
         "name": "Farmer's Resilience",
-        "description": "Every 5th turn, permanently gains 5% Lifesteal.",
+        "description": "Every 5 turns, permanently gains 5% Lifesteal.",
         "icon": "Icons/passives/farmer_lifesteal.png"
     }
 } 

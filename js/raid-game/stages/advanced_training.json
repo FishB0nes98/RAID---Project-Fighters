@@ -1,0 +1,59 @@
+{
+    "id": "advanced_training",
+    "name": "Advanced Training",
+    "description": "Time for a more challenging lesson! Face two Little Devils who will test your skills with their resilience and mana-draining abilities.",
+    "difficulty": 2,
+    "backgroundImage": "images/stages/training_grounds.png",
+    "backgroundMusic": "sounds/music/tutorial_theme.mp3",
+    "isTutorial": true,
+    "enemies": [
+        {
+            "characterId": "little_devil",
+            "modifications": {
+                "stats": {
+                    "hp": 3200,
+                    "mana": 1000
+                }
+            }
+        },
+        {
+            "characterId": "little_devil_female",
+            "modifications": {
+                "stats": {
+                    "hp": 3100,
+                    "mana": 1100
+                }
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "gold",
+            "value": 150,
+            "chance": 1.0
+        },
+        {
+            "type": "experience",
+            "value": 75,
+            "chance": 1.0
+        }
+    ],
+    "maxTurns": 20,
+    "victoryConditions": [
+        "defeat_all_enemies"
+    ],
+    "defeatConditions": [
+        "all_player_characters_defeated",
+        "max_turns_reached"
+    ],
+    "tutorialFeatures": {
+        "enableHints": true,
+        "showAbilityDescriptions": true,
+        "showTargetingTips": true,
+        "showResistanceInfo": true,
+        "showManaManagement": true,
+        "highlightElements": ["hp-bar", "mana-bar"],
+        "initialMessage": "Your HP and mana from the previous stage are preserved! Manage your resources wisely across multiple battles.",
+        "showResourceCarryover": true
+    }
+} 

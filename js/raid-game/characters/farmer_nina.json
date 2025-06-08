@@ -63,8 +63,8 @@
     ],
     "passive": {
         "id": "farmer_nina_passive",
-        "name": "Amplified Buffs",
-        "description": "All buffs applied to Farmer farmer_nina are twice as powerful.",
+        "name": "Evasive Adaptability",
+        "description": "Nina gains 5% dodge chance for each buff active on her.",
         "icon": "Icons/passive_farmer_farmer_nina.png"
     }
 } 

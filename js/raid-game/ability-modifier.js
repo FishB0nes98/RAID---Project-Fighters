@@ -15,9 +15,25 @@
         // Apply all stored modifications
         for (const prop in abilityModifications[abilityId]) {
             ability[prop] = abilityModifications[abilityId][prop];
+            
+            // Always regenerate description after any property change
             if (typeof ability.generateDescription === 'function') {
                 ability.generateDescription();
+                console.log(`[ApplyStoredModifications] Updated description for ${ability.name || ability.id}`);
             }
+        }
+        
+        // If there are any changes, dispatch an event to notify UI components
+        if (Object.keys(abilityModifications[abilityId]).length > 0) {
+            const abilityModifiedEvent = new CustomEvent('abilityModified', {
+                detail: {
+                    abilityId: abilityId,
+                    ability: ability,
+                    properties: Object.keys(abilityModifications[abilityId])
+                },
+                bubbles: true
+            });
+            document.dispatchEvent(abilityModifiedEvent);
         }
     }
     
@@ -27,7 +43,7 @@
         // Apply any stored modifications
         applyStoredModifications(this);
         
-        // Call the original method
+        // Call the original method and pass back its result
         return originalAbilityUse.call(this, caster, targetOrTargets, actualManaCost, options);
     };
     
@@ -63,18 +79,31 @@
             abilityModifications[abilityId] = {};
         }
         
+        // Log modification request
+        console.log(`[StoreAbilityModification] Storing modification for ${abilityId}.${property} = ${value}`);
+        
         // Store the modification
         abilityModifications[abilityId][property] = value;
         
         // Find and update the actual ability if it exists
         const ability = this.abilities.find(a => a.id === abilityId);
         if (ability) {
+            const oldValue = ability[property];
             ability[property] = value;
-            console.log(`Direct application: Modified ${this.name}'s ${abilityId} ${property} to ${value}`);
+            console.log(`[StoreAbilityModification] Modified ${this.name}'s ${abilityId} ${property} from ${oldValue} to ${value}`);
             
             if (typeof ability.generateDescription === 'function') {
+                const oldDescription = ability.description;
                 ability.generateDescription();
-                console.log(`Regenerated description for ${ability.name} in storeAbilityModification`);
+                
+                // Compare descriptions to see if there was a change
+                if (oldDescription !== ability.description) {
+                    console.log(`[StoreAbilityModification] Updated description for ${ability.name}`);
+                    console.log(`Old: ${oldDescription}`);
+                    console.log(`New: ${ability.description}`);
+                } else {
+                    console.log(`[StoreAbilityModification] Description unchanged for ${ability.name} despite property change`);
+                }
             }
             
             // Dispatch an event to notify that the ability was modified
@@ -82,8 +111,10 @@
                 detail: {
                     abilityId: abilityId,
                     property: property,
-                    value: value,
-                    character: this
+                    oldValue: oldValue,
+                    newValue: value,
+                    character: this,
+                    ability: ability
                 },
                 bubbles: true
             });
@@ -93,11 +124,13 @@
             if (window.gameManager && window.gameManager.uiManager && this.instanceId) {
                 try {
                     window.gameManager.uiManager.updateCharacterUI(this);
-                    console.log(`UI updated for ${this.name} after modifying ${abilityId}`);
+                    console.log(`[StoreAbilityModification] UI updated for ${this.name} after modifying ${abilityId}`);
                 } catch (error) {
-                    console.warn(`Error updating UI after ability modification: ${error.message}`);
+                    console.warn(`[StoreAbilityModification] Error updating UI after ability modification: ${error.message}`);
                 }
             }
+        } else {
+            console.warn(`[StoreAbilityModification] Ability ${abilityId} not found on character ${this.name || this.id}`);
         }
     };
     

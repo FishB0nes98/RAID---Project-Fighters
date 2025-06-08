@@ -1,0 +1,436 @@
+{
+    "id": "bridget",
+    "name": "Bridget",
+    "description": "A water-themed magical girl with powerful healing abilities.",
+    "talentPoints": 10,
+    "talentTree": {
+        "healing_affinity": {
+            "id": "healing_affinity",
+            "name": "Healing Affinity",
+            "description": "Increases Bridget's healing power by 8%.",
+            "icon": "Icons/talents/healing_affinity.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "healingPower",
+                "value": 0.08,
+                "operation": "add"
+            },
+            "parents": [],
+            "children": ["surging_tides", "tidal_precision"]
+        },
+        "surging_tides": {
+            "id": "surging_tides",
+            "name": "Surging Tides",
+            "description": "Empowers Ribbon Wave, increasing its base damage to 600. Current scaling with Magical Damage is maintained.",
+            "icon": "Icons/talents/surging_tides.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "bridget_q",
+                "property": "baseDamage",
+                "value": 600,
+                "operation": "set"
+            },
+            "parents": ["healing_affinity"],
+            "children": []
+        },
+        "tidal_precision": {
+            "id": "tidal_precision",
+            "name": "Tidal Precision",
+            "description": "Bridget's water magic flows with newfound precision, increasing her critical strike chance by 15%.",
+            "icon": "Icons/talents/tidal_precision.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "value": 0.15,
+                "operation": "add"
+            },
+            "parents": ["healing_affinity"],
+            "children": ["aqueous_renewal", "crushing_depths", "healing_tsunami"]
+        },
+        "healing_tsunami": {
+            "id": "healing_tsunami",
+            "name": "Healing Tsunami",
+            "description": "Every turn, there is a 50% chance that Bridget's Healing Power is tripled until the start of her next turn.",
+            "icon": "Icons/talents/healing_tsunami.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingTsunamiActive",
+                "value": true
+            },
+            "parents": ["tidal_precision"],
+            "children": [],
+            "position": {
+                "x": -280,
+                "y": 222
+            }
+        },
+        "aqueous_renewal": {
+            "id": "aqueous_renewal",
+            "name": "Aqueous Renewal",
+            "description": "If Bridget's abilities critically heal an ally, she permanently gains a 5% bonus to her Healing Power stat.",
+            "icon": "Icons/talents/aqueous_renewal.webp",
+            "effect": {
+                "type": "on_crit_heal_self_stat_buff_permanent",
+                "stat": "healingPower",
+                "value": 0.05,
+                "operation": "add_permanent_percentage_on_trigger"
+            },
+            "parents": ["tidal_precision"],
+            "children": ["focused_barrage", "bubble_healing"]
+        },
+        "bubble_healing": {
+            "id": "bubble_healing",
+            "name": "Bubble Healing",
+            "description": "Bubble Beam Barrage can now also target allies, healing them for 200% of Bridget's Magical Damage.",
+            "icon": "Icons/talents/bubble_healing.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "bubbleHealingActive",
+                "value": true
+            },
+            "parents": ["aqueous_renewal"],
+            "children": ["enhanced_bubble_shield", "improved_wave_crush"],
+            "position": {
+                "x": 100,
+                "y": -300
+            }
+        },
+        "enhanced_bubble_shield": {
+            "id": "enhanced_bubble_shield",
+            "name": "Enhanced Bubble Shield",
+            "description": "Arcane Bubble Shield now creates twice as many bubbles, improving both its healing and damage potential.",
+            "icon": "Icons/talents/enhanced_bubble_shield.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enhancedBubbleShieldActive",
+                "value": true
+            },
+            "parents": ["bubble_healing"],
+            "children": ["echoing_bubbles"],
+            "position": {
+                "x": 100,
+                "y": -455
+            }
+        },
+        "echoing_bubbles": {
+            "id": "echoing_bubbles",
+            "name": "Echoing Bubbles",
+            "description": "Bridget's passive healing has a 15% chance to launch an additional healing bubble at the target, healing for 50 + 200% of her Magical Damage.",
+            "icon": "Icons/talents/echoing_bubbles.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "echoingBubblesActive",
+                "value": true
+            },
+            "parents": ["enhanced_bubble_shield"],
+            "children": ["resonant_cascade"],
+            "position": {
+                "x": 200,
+                "y": -200
+            }
+        },
+        "resonant_cascade": {
+            "id": "resonant_cascade",
+            "name": "Resonant Cascade",
+            "description": "All of Bridget's abilities have a 100% chance to cast an additional bubble. Enemies receive 100% of Magical Damage as damage, while allies receive 100% of Magical Damage as healing.",
+            "icon": "Icons/talents/resonant_cascade.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "resonantCascadeActive",
+                "value": true
+            },
+            "parents": ["echoing_bubbles"],
+            "children": [],
+            "position": {
+                "x": 200,
+                "y": -100
+            },
+            "powerful": true
+        },
+        "improved_wave_crush": {
+            "id": "improved_wave_crush",
+            "name": "Improved Wave Crush",
+            "description": "Wave Crush's cooldown is reduced to 10 turns and it only costs 100 mana.",
+            "icon": "Icons/talents/improved_wave_crush.webp",
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "bridget_r",
+                    "property": "cooldown",
+                    "value": 10,
+                    "operation": "set"
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "bridget_r",
+                    "property": "manaCost",
+                    "value": 100,
+                    "operation": "set"
+                }
+            ],
+            "parents": ["bubble_healing"],
+            "children": [],
+            "position": {
+                "x": -400,
+                "y": -500
+            }
+        },
+        "focused_barrage": {
+            "id": "focused_barrage",
+            "name": "Focused Barrage",
+            "description": "Only 85% scale but 2 turns cooldown.",
+            "icon": "Icons/talents/focused_barrage.webp",
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "bridget_w",
+                    "property": "cooldown",
+                    "value": 2,
+                    "operation": "set"
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "bridget_w",
+                    "property": "damageScaling",
+                    "value": 0.85,
+                    "operation": "set"
+                }
+            ],
+            "parents": ["aqueous_renewal"],
+            "children": ["enhanced_barrage", "critical_cooldown"]
+        },
+        "enhanced_barrage": {
+            "id": "enhanced_barrage",
+            "name": "Enhanced Barrage",
+            "description": "Fires 5-8 bubbles now.",
+            "icon": "Icons/talents/enhanced_barrage.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enhancedBubbleBarrage",
+                "value": true
+            },
+            "parents": ["focused_barrage"],
+            "children": ["oceanic_harmony"]
+        },
+        "critical_cooldown": {
+            "id": "critical_cooldown",
+            "name": "Critical Cooldown",
+            "description": "When Bridget lands a critical hit or critical heal, all her ability cooldowns are reduced by 1 turn.",
+            "icon": "Icons/talents/critical_cooldown.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "critReducesCooldowns",
+                "value": true
+            },
+            "parents": ["focused_barrage"],
+            "children": ["oceanic_harmony"]
+        },
+        "crushing_depths": {
+            "id": "crushing_depths",
+            "name": "Crushing Depths",
+            "description": "The immense pressure of the deep infuses Bridget's attacks, increasing her Magical Damage by 90.",
+            "icon": "Icons/talents/crushing_depths.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "magicalDamage",
+                "value": 90,
+                "operation": "add"
+            },
+            "parents": ["tidal_precision"],
+            "children": ["tidal_mark", "evasive_insight", "low_tide_power"]
+        },
+        "low_tide_power": {
+            "id": "low_tide_power",
+            "name": "Low Tide Power",
+            "description": "When Bridget's mana is below 50%, she gains an additional 150 Magical Damage.",
+            "icon": "Icons/talents/low_tide_power.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "lowTidePowerActive",
+                "value": true
+            },
+            "parents": ["crushing_depths"],
+            "children": ["chain_wave"],
+            "position": {
+                "x": -177,
+                "y": 0
+            }
+        },
+        "chain_wave": {
+            "id": "chain_wave",
+            "name": "Chain Wave",
+            "description": "Ribbon Wave Rush now hits one additional random enemy, for a total of three targets.",
+            "icon": "Icons/talents/chain_wave.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "chainWaveActive",
+                "value": true
+            },
+            "parents": ["low_tide_power"],
+            "children": ["oceanic_precision", "aquatic_resonance"],
+            "position": {
+                "x": -200,
+                "y": 444
+            }
+        },
+        "oceanic_precision": {
+            "id": "oceanic_precision",
+            "name": "Oceanic Precision",
+            "description": "The ocean's clarity enhances Bridget's focus, granting her an additional 15% critical strike chance.",
+            "icon": "Icons/talents/water_focus.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "value": 0.15,
+                "operation": "add"
+            },
+            "parents": ["chain_wave"],
+            "children": ["endless_cascade"],
+            "position": {
+                "x": -150,
+                "y": 550
+            }
+        },
+        "endless_cascade": {
+            "id": "endless_cascade",
+            "name": "Endless Cascade",
+            "description": "Ribbon Wave Rush has a 10% chance not to end your turn and reset its cooldown when used.",
+            "icon": "Icons/talents/endless_cascade.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "endlessCascadeActive",
+                "value": true
+            },
+            "parents": ["oceanic_precision"],
+            "children": ["water_dance"],
+            "position": {
+                "x": -100,
+                "y": 650
+            }
+        },
+        "water_dance": {
+            "id": "water_dance",
+            "name": "Water Dance",
+            "description": "Bridget Dances with the water, each time she deals damage she casts a water lasso that deals (55% Magical damage) to a random enemy.",
+            "icon": "Icons/talents/water_dance.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "waterDanceActive",
+                "value": true
+            },
+            "parents": ["endless_cascade"],
+            "children": [],
+            "position": {
+                "x": -100,
+                "y": 750
+            },
+            "powerful": true
+        },
+        "aquatic_resonance": {
+            "id": "aquatic_resonance",
+            "name": "Aquatic Resonance",
+            "description": "Bridget's buffs resonate with her water magic, granting 10% critical damage and 20 Magical Damage for each active buff she has.",
+            "icon": "Icons/talents/water_amplify.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "aquaticResonanceActive",
+                "value": true
+            },
+            "parents": ["chain_wave"],
+            "children": ["tidal_mastery"],
+            "position": {
+                "x": -250,
+                "y": 777
+            }
+        },
+        "tidal_mastery": {
+            "id": "tidal_mastery",
+            "name": "Tidal Mastery",
+            "description": "10% chance at the start of your turn to double your Magical Power for this turn.",
+            "icon": "Icons/talents/tidal_mastery.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "tidalMasteryActive",
+                "value": true
+            },
+            "parents": ["aquatic_resonance"],
+            "children": ["bubble_pop"],
+            "position": {
+                "x": -250,
+                "y": 900
+            }
+        },
+        "bubble_pop": {
+            "id": "bubble_pop",
+            "name": "Bubble Pop",
+            "description": "Every turn, places a bubble debuff on a random enemy that pops after 2 turns, dealing 100% of your Magical Damage.",
+            "icon": "Icons/talents/bubble_pop.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "bubblePopActive",
+                "value": true
+            },
+            "debug": true,
+            "parents": ["tidal_mastery"],
+            "children": [],
+            "position": {
+                "x": -250,
+                "y": 1050
+            },
+            "powerful": true
+        },
+        "tidal_mark": {
+            "id": "tidal_mark",
+            "name": "Abyssal Mark",
+            "description": "Ribbon Wave Rush marks enemies with the sigil of the deep. Marked enemies take 50% increased damage from Bridget for 2 turns.",
+            "icon": "Icons/talents/abyssal_mark.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "abyssalMarkActive",
+                "value": true
+            },
+            "parents": ["crushing_depths"],
+            "children": []
+        },
+        "evasive_insight": {
+            "id": "evasive_insight",
+            "name": "Fluid Evasion",
+            "description": "When Bridget lands a critical hit, she gains 21% dodge chance for 2 turns. This effect can stack multiple times.",
+            "icon": "Icons/talents/fluid_evasion.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "fluidEvasionActive",
+                "value": true
+            },
+            "parents": ["crushing_depths"],
+            "children": []
+        },
+        "oceanic_harmony": {
+            "id": "oceanic_harmony",
+            "name": "Oceanic Harmony",
+            "description": "Flowing Essence is enhanced. It now heals Bridget and TWO random allies instead of 1.",
+            "icon": "Icons/talents/oceanic_harmony.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "oceanicHarmonyActive",
+                "value": true
+            },
+            "parents": ["enhanced_barrage", "critical_cooldown"],
+            "children": ["clam_protection_aura"]
+        },
+        "clam_protection_aura": {
+            "id": "clam_protection_aura",
+            "name": "Clam Protection Aura",
+            "description": "Every time Bridget heals an ally, they gain a protective clam shield that blocks 5% of damage for 4 turns. Stacks up to 3 times.",
+            "icon": "Icons/talents/clam_protection.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "clamProtectionAuraActive",
+                "value": true
+            },
+            "parents": ["oceanic_harmony"],
+            "children": [],
+            "powerful": true
+        }
+    }
+} 

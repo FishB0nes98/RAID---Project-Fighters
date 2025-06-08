@@ -5,6 +5,10 @@ class Character {
         this.name = name;
         this.image = image;
         
+        // XP and Level System - NEW
+        this.experience = 0; // Current experience points
+        this.level = 1; // Current level (starts at 1)
+        
         // Store base stats separately
         this.baseStats = {
             physicalDamage: stats.physicalDamage || 0,
@@ -32,6 +36,10 @@ class Character {
         delete this.baseStats.currentHp;
         delete this.baseStats.currentMana;
 
+        // Shield system - NEW
+        this.shield = 0; // Current shield amount
+        this.enableMysticBarrier = false; // Flag for Mystic Barrier talent
+
         this.abilities = [];
         this.buffs = [];
         this.debuffs = [];
@@ -45,6 +53,156 @@ class Character {
             abilities: {}   // { abilityId: { property: { add: 0, multiply: 1 } } }
         };
         // --- END NEW ---
+
+        // Add talent-related properties
+        this.healingReceivedMultiplier = 1.0; // New property for Enhanced Recovery talent
+        this.buffDurationBonus = 0; // New property for Lasting Protection talent
+        this.manaCostMultiplier = 1.0; // Add manaCostMultiplier property
+        
+        // Properties for Farmer Nina's talents
+        this.enablePainIntoPower = false; // <-- NEW: Flag for Pain into Power talent
+        this.critDamageFromTakingDamageBonus = 0; // <-- NEW: Bonus crit damage accumulated
+    }
+
+    // --- XP and Level System Methods ---
+    
+    /**
+     * Calculate required XP for a specific level
+     * @param {number} level - Target level
+     * @returns {number} XP required to reach that level from level 1
+     */
+    static calculateXPRequiredForLevel(level) {
+        if (level <= 1) return 0;
+        
+        let totalXP = 0;
+        for (let i = 1; i < level; i++) {
+            // XP required to go from level i to level i+1
+            totalXP += this.getXPRequiredForLevelUp(i);
+        }
+        return totalXP;
+    }
+    
+    /**
+     * Get XP required to level up from a specific level
+     * @param {number} fromLevel - Current level
+     * @returns {number} XP needed to go to next level
+     */
+    static getXPRequiredForLevelUp(fromLevel) {
+        if (fromLevel === 1) return 1000; // Level 1 to 2: 1000 XP
+        if (fromLevel === 2) return 1500; // Level 2 to 3: 1500 XP (total 2500 from start)
+        
+        // For levels 3+, use a scaling formula
+        // Base XP increases by 500 each level, plus additional scaling
+        const baseIncrease = 500;
+        const scalingFactor = Math.floor(fromLevel / 5) * 250; // Additional 250 XP every 5 levels
+        return 1000 + (fromLevel - 1) * baseIncrease + scalingFactor;
+    }
+    
+    /**
+     * Calculate level from total XP
+     * @param {number} totalXP - Total experience points
+     * @returns {number} Character level
+     */
+    static calculateLevelFromXP(totalXP) {
+        if (totalXP < 0) return 1;
+        
+        let level = 1;
+        let xpForCurrentLevel = 0;
+        
+        while (true) {
+            const xpNeededForNextLevel = this.getXPRequiredForLevelUp(level);
+            if (xpForCurrentLevel + xpNeededForNextLevel > totalXP) {
+                break;
+            }
+            xpForCurrentLevel += xpNeededForNextLevel;
+            level++;
+        }
+        
+        return level;
+    }
+    
+    /**
+     * Get XP progress for current level
+     * @returns {Object} Progress information for current level
+     */
+    getXPProgress() {
+        const currentLevel = this.level;
+        const currentXP = this.experience;
+        
+        // XP required to reach current level
+        const xpForCurrentLevel = Character.calculateXPRequiredForLevel(currentLevel);
+        
+        // XP required to reach next level
+        const xpForNextLevel = Character.calculateXPRequiredForLevel(currentLevel + 1);
+        
+        // Progress within current level
+        const progressXP = currentXP - xpForCurrentLevel;
+        const progressNeeded = xpForNextLevel - xpForCurrentLevel;
+        
+        return {
+            currentLevel: currentLevel,
+            currentXP: currentXP,
+            progressXP: progressXP,
+            progressNeeded: progressNeeded,
+            xpForCurrentLevel: xpForCurrentLevel,
+            xpForNextLevel: xpForNextLevel,
+            progressPercentage: progressNeeded > 0 ? (progressXP / progressNeeded) * 100 : 100
+        };
+    }
+    
+    /**
+     * Add experience points to the character
+     * @param {number} xpAmount - Amount of XP to add
+     * @returns {Object} Level up information
+     */
+    addExperience(xpAmount) {
+        if (typeof xpAmount !== 'number' || xpAmount < 0) {
+            console.warn(`[Character ${this.name}] Invalid XP amount: ${xpAmount}`);
+            return { leveledUp: false, oldLevel: this.level, newLevel: this.level };
+        }
+        
+        const oldLevel = this.level;
+        const oldXP = this.experience;
+        
+        // Add XP
+        this.experience += xpAmount;
+        
+        // Calculate new level
+        const newLevel = Character.calculateLevelFromXP(this.experience);
+        const leveledUp = newLevel > oldLevel;
+        
+        if (leveledUp) {
+            this.level = newLevel;
+            console.log(`[Character ${this.name}] LEVEL UP! ${oldLevel} → ${newLevel} (XP: ${oldXP} → ${this.experience})`);
+        } else {
+            console.log(`[Character ${this.name}] Gained ${xpAmount} XP (Total: ${this.experience})`);
+        }
+        
+        return {
+            leveledUp: leveledUp,
+            oldLevel: oldLevel,
+            newLevel: newLevel,
+            xpGained: xpAmount,
+            totalXP: this.experience
+        };
+    }
+    
+    /**
+     * Set character XP and level (used when loading from Firebase)
+     * @param {number} experience - Total experience points
+     * @param {number} level - Character level (optional, will be calculated if not provided)
+     */
+    setExperienceAndLevel(experience, level = null) {
+        this.experience = Math.max(0, experience || 0);
+        
+        if (level !== null && typeof level === 'number' && level >= 1) {
+            this.level = level;
+        } else {
+            // Calculate level from XP if not provided or invalid
+            this.level = Character.calculateLevelFromXP(this.experience);
+        }
+        
+        console.log(`[Character ${this.name}] Set to Level ${this.level} with ${this.experience} XP`);
     }
 
     // --- NEW: Apply Talent Effects ---
@@ -209,64 +367,200 @@ class Character {
     // Method to recalculate stats based on base stats and modifiers
     recalculateStats(callerContext = 'unknown') {
         // <<< NEW: Log caller context >>>
-        console.log(`[Recalc ${this.name}] Called from: ${callerContext}`);
-        // <<< END NEW LOG >>>
-
-        // Preserve current resource values
+        console.log(`[RecalcStats] Called from ${callerContext} for ${this.name}`);
+        
+        // Store current resources to preserve them
         const preservedCurrentHp = this.stats.currentHp;
         const preservedCurrentMana = this.stats.currentMana;
-
-        // Start with a fresh copy of base stats for recalculation
-        this.stats = { ...this.baseStats };
-
-        // --- Apply Buffs/Debuffs --- 
-        const activeEffects = [...this.buffs, ...this.debuffs];
-        // <<< NEW: Log active effects being processed >>>
-        console.log(`[Recalc ${this.name}] Processing ${activeEffects.length} effects:`, activeEffects.map(e => ({ id: e.id, name: e.name, stacks: e.currentStacks })) );
+        
+        // Reset stats to base values
+        Object.keys(this.baseStats).forEach(stat => {
+            this.stats[stat] = this.baseStats[stat];
+        });
+        
+        // Apply stage modifications if they exist
+        if (this.stageModifications) {
+            console.log(`[RecalcStats] Re-applying stage modifications for ${this.name}:`, this.stageModifications);
+            
+            // Note: For stage modifications, baseStats should already be updated to include them
+            // This is just a safety check in case baseStats weren't properly updated
+            if (this.stageModifications.hpMultiplier && this.stageModifications.hpMultiplier !== 1) {
+                // The baseStats should already include the multiplier, but double-check
+                const expectedHp = Math.floor((this.stats.maxHp || this.stats.hp) * this.stageModifications.hpMultiplier);
+                
+                // Check if the character is already properly initialized with stage modifications
+                // If maxHp is already in the expected range (accounting for the multiplier), don't change it
+                const currentMaxHp = this.stats.maxHp;
+                const isAlreadyCorrect = Math.abs(currentMaxHp - expectedHp) < 100; // Allow small variance
+                
+                // Only apply correction if we're in the middle of character creation/initialization
+                // Don't apply if the character is already in combat (has been initialized properly)
+                const isInCombat = window.gameManager && window.gameManager.gameState && 
+                                 (window.gameManager.gameState.playerCharacters.includes(this) || 
+                                  window.gameManager.gameState.aiCharacters.includes(this));
+                
+                if (!isInCombat && !isAlreadyCorrect && this.stats.maxHp !== expectedHp && this.baseStats.maxHp !== expectedHp) {
+                    console.log(`[RecalcStats] Correcting HP during initialization: expected ${expectedHp}, got ${this.stats.maxHp}, applying stage modification`);
+                    this.stats.maxHp = expectedHp;
+                    if (this.baseStats.maxHp) {
+                        this.baseStats.maxHp = expectedHp;
+                    } else if (this.baseStats.hp) {
+                        this.baseStats.hp = expectedHp;
+                    }
+                } else {
+                    console.log(`[RecalcStats] Skipping HP correction for ${this.name} - character is in combat or already correct (maxHp: ${currentMaxHp}, expected: ${expectedHp})`);
+                }
+            }
+            
+            if (this.stageModifications.speedMultiplier && this.stageModifications.speedMultiplier !== 1) {
+                // The baseStats should already include the multiplier, but double-check
+                const expectedSpeed = Math.floor(this.stats.speed * this.stageModifications.speedMultiplier);
+                if (this.stats.speed !== expectedSpeed && this.baseStats.speed !== expectedSpeed) {
+                    console.log(`[RecalcStats] Correcting Speed: expected ${expectedSpeed}, got ${this.stats.speed}, applying stage modification`);
+                    this.stats.speed = expectedSpeed;
+                    this.baseStats.speed = expectedSpeed;
+                }
+            }
+        }
+        
+        // Set current HP and mana back to their preserved values
+        this.stats.currentHp = preservedCurrentHp;
+        this.stats.currentMana = preservedCurrentMana;
+        
         // <<< END NEW LOG >>>
-
+        
+        // Combine buff and debuff effects for processing
+        const activeEffects = [...this.buffs, ...this.debuffs];
+        
+        // Apply bonusDodgeChance if exists (for Farmer Raiden's Lightning Evasion talent)
+        if (this.bonusDodgeChance !== undefined) {
+            this.stats.dodgeChance = (this.stats.dodgeChance || 0) + this.bonusDodgeChance;
+            console.log(`[RecalcStats] Applied bonus dodge chance +${this.bonusDodgeChance} for ${this.name}, new total: ${this.stats.dodgeChance}`);
+        }
+        
+        // Apply bonusCritChance if exists (for Farmer Raiden's Thunder Perception talent)
+        if (this.bonusCritChance !== undefined) {
+            this.stats.critChance = (this.stats.critChance || 0) + this.bonusCritChance;
+            console.log(`[RecalcStats] Applied bonus crit chance +${this.bonusCritChance} for ${this.name}, new total: ${this.stats.critChance}`);
+        }
+        
         activeEffects.forEach(effect => {
             // --- ADDED DEBUG LOG ---
             if (effect.id === 'nurturing_toss_buff') {
                 console.log(`[Recalc DEBUG - Nurturing Toss] Inspecting effect: ID=${effect.id}, Stacks=${effect.currentStacks}, StatModifiers=`, JSON.stringify(effect.statModifiers));
             }
+            if (effect.id === 'lunar_empowerment_buff') {
+                console.log(`[Character.js DEBUG] recalculateStats: Processing lunar_empowerment_buff.`);
+                console.log(`[Character.js DEBUG] lunar_empowerment_buff statModifiers:`, JSON.stringify(effect.statModifiers));
+            }
             // --- END DEBUG LOG ---
 
             if (effect.statModifiers) {
-                Object.keys(effect.statModifiers).forEach(stat => {
-                    if (this.stats[stat] !== undefined) {
-                        const modifierValue = effect.statModifiers[stat];
-                        if (typeof modifierValue === 'number') {
-                            // --- Explicitly get the LATEST buff object from the list ---
-                            const latestEffectInstance = this.buffs.find(b => b.id === effect.id) || this.debuffs.find(d => d.id === effect.id);
-                            const stacks = (latestEffectInstance && latestEffectInstance.stackable && latestEffectInstance.currentStacks) ? latestEffectInstance.currentStacks : 1;
-                            // --- END Explicit fetch ---
+                // --- Ensure statModifiers is treated as an array ---
+                const modifiers = Array.isArray(effect.statModifiers) ? effect.statModifiers : [effect.statModifiers];
+                // --- End Ensure ---
 
-                            const totalModifier = modifierValue * stacks; // Calculate total bonus
+                // --- Filter out invalid modifiers ---
+                const validModifiers = modifiers.filter(modifier => {
+                    if (!modifier || typeof modifier !== 'object') {
+                        console.warn(`Invalid modifier object in effect ${effect.id}:`, modifier);
+                        return false;
+                    }
+                    if (modifier.stat === undefined || modifier.stat === null) {
+                        console.warn(`Modifier with undefined/null stat in effect ${effect.id}:`, modifier);
+                        return false;
+                    }
+                    if (typeof modifier.value !== 'number') {
+                        console.warn(`Modifier with non-numeric value in effect ${effect.id}:`, modifier);
+                        return false;
+                    }
+                    return true;
+                });
+                // --- End Filter ---
 
-                            // Log before applying per stack
-                            if (stacks > 1) {
-                                console.log(`[Recalc Per Stack] ${this.name}: Effect ${effect.name || effect.id} applying stat ${stat} (Stacks: ${stacks}, Value per stack: ${modifierValue}, Total: ${totalModifier})`);
-                            }
+                // --- CORRECTED LOOP for Array of Modifiers ---
+                // Use the filtered 'validModifiers' array here
+                validModifiers.forEach(modifier => { // Changed from effect.statModifiers.forEach
+                    const stat = modifier.stat;
+                    const modifierValue = modifier.value;
+                    const operation = modifier.operation || 'add'; // Default to add
 
-                            // <<< NEW: Log Healing Power BEFORE modification >>>
-                            const healingPowerBefore = this.stats.healingPower;
-                            // <<< END NEW LOG >>>
+                    if (effect.id === 'lunar_empowerment_buff') {
+                        console.log(`[Character.js DEBUG] recalculateStats (lunar_empowerment_buff): Modifier - stat=${stat}, value=${modifierValue}, operation=${operation}`);
+                        console.log(`[Character.js DEBUG] recalculateStats (lunar_empowerment_buff): BEFORE this.stats.${stat} = ${this.stats[stat]}`);
+                    }
 
-                            // Add the total calculated modifier
-                            this.stats[stat] += totalModifier;
+                    if (this.stats[stat] !== undefined && typeof modifierValue === 'number') {
+                        // Stack logic (remains the same)
+                        const latestEffectInstance = this.buffs.find(b => b.id === effect.id) || this.debuffs.find(d => d.id === effect.id);
+                        const stacks = (latestEffectInstance && latestEffectInstance.stackable && latestEffectInstance.currentStacks) ? latestEffectInstance.currentStacks : 1;
+                        const totalModifier = modifierValue * stacks;
 
-                            // --- ADDED HEALING POWER LOG ---
-                            if (stat === 'healingPower') {
-                                // <<< MODIFIED: Show change >>>
-                                console.log(`[Recalc HEAL final] Stat ${stat} changed from ${healingPowerBefore} to ${this.stats[stat]} after applying ${effect.name || effect.id} (Stacks: ${stacks}, Total Bonus: ${totalModifier})`);
-                            }
-                            // --- END LOG ---
+                        // <<< NEW: Specific log for Low Tide Power >>>
+                        let logLowTide = false;
+                        if (effect.id === 'low_tide_power_buff' && stat === 'magicalDamage') {
+                            console.log(`%c[DEBUG-LOWTIDE] recalculateStats processing Low Tide Power buff. Current MD: ${this.stats.magicalDamage}`, 'color: green; font-weight: bold;');
+                            logLowTide = true;
+                        }
+                        // <<< END NEW >>>
+
+                        if (stacks > 1) {
+                            console.log(`[Recalc Per Stack] ${this.name}: Effect ${effect.name || effect.id} applying stat ${stat} (Stacks: ${stacks}, Value per stack: ${modifierValue}, Total: ${totalModifier})`);
+                        }
+
+                        // Apply based on operation
+                        switch (operation) {
+                            case 'add':
+                                this.stats[stat] += totalModifier;
+                                break;
+                            case 'multiply': // Example for future use
+                                // Be cautious with multiplicative stacking order
+                                this.stats[stat] *= totalModifier;
+                                break;
+                            case 'add_base_percentage': // New operation
+                                const baseStatValue = this.baseStats[stat] || 0;
+                                const percentageBonus = baseStatValue * totalModifier;
+                                this.stats[stat] += percentageBonus;
+                                console.log(`[Recalc ${operation}] Added ${percentageBonus.toFixed(2)} (${(totalModifier * 100).toFixed(1)}% of base ${baseStatValue.toFixed(2)}) to ${stat}. New value: ${this.stats[stat].toFixed(2)}`);
+                                break;
+                            case 'set': 
+                                // Set operation - use the highest value if multiple set operations exist
+                                const currentValue = this.stats[stat];
+                                if (totalModifier > currentValue || currentValue === this.baseStats[stat]) {
+                                    this.stats[stat] = totalModifier;
+                                    console.log(`[Recalc ${operation}] Set ${stat} to ${totalModifier} (was ${currentValue}) from effect ${effect.name || effect.id}`);
+                                } else {
+                                    console.log(`[Recalc ${operation}] Keeping higher ${stat} value ${currentValue} instead of ${totalModifier} from effect ${effect.name || effect.id}`);
+                                }
+                                break;
+                            // Add other operations if needed
+                            default:
+                                 console.warn(`Unsupported operation '${operation}' for stat modifier in effect ${effect.id}`);
+                        }
+
+                        // <<< NEW: Specific log for Low Tide Power (After) >>>
+                        if (logLowTide) {
+                            console.log(`%c[DEBUG-LOWTIDE] MD AFTER applying Low Tide Power buff: ${this.stats.magicalDamage}`, 'color: green; font-weight: bold;');
+                        }
+                        // <<< END NEW >>>
+
+                        // Logging for healing power (remains the same)
+                        if (stat === 'healingPower') {
+                            console.log(`[Recalc HEAL final] Stat ${stat} changed to ${this.stats[stat]} after applying ${effect.name || effect.id} (Stacks: ${stacks}, Total Bonus: ${totalModifier})`);
+                        }
+
+                        if (effect.id === 'lunar_empowerment_buff') {
+                            console.log(`[Character.js DEBUG] recalculateStats (lunar_empowerment_buff): AFTER this.stats.${stat} = ${this.stats[stat]}`);
+                        }
+                    } else {
+                        if (this.stats[stat] === undefined) {
+                            console.warn(`Stat '${stat}' not found on character for effect ${effect.id}`);
                         } else {
                             console.warn(`Invalid stat modifier value for ${stat} in effect ${effect.id}:`, modifierValue);
                         }
                     }
                 });
+                // --- END CORRECTED LOOP ---
             }
             // Potential future handling for non-stat effects like damage multipliers
             // if (effect.effects) { ... }
@@ -284,13 +578,62 @@ class Character {
         // <<< ADDED SPECIFIC HEALING POWER LOG >>>
         console.log(`[Recalc Final Check] ${this.name}'s Healing Power before final log: ${this.stats.healingPower}`);
         // <<< END ADDED LOG >>>
+        
+        // Update the character UI to reflect the recalculated stats
+        if (typeof window !== 'undefined' && window.gameManager && window.gameManager.uiManager) {
+            console.log(`[RecalcStats] Updating UI for ${this.name} after stat recalculation`);
+            window.gameManager.uiManager.updateCharacterUI(this);
+        } else if (typeof updateCharacterUI === 'function') {
+            // Fallback to global function if available
+            updateCharacterUI(this);
+        } else {
+            console.log(`[RecalcStats] No UI update method available for ${this.name}`);
+        }
 
         console.log(`${this.name} stats recalculated:`, this.stats);
 
         // Trigger UI update
-        if (typeof updateCharacterUI === 'function') {
+        if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+            setTimeout(() => window.gameManager.uiManager.updateCharacterUI(this), 0); 
+        } else if (typeof updateCharacterUI === 'function') {
             setTimeout(() => updateCharacterUI(this), 0); 
         }
+        
+        // Update any open stats menu
+        this.updateStatsMenuIfOpen();
+        
+        // Regenerate ability descriptions to reflect stat changes
+        if (this.abilities) {
+            this.abilities.forEach(ability => {
+                if (typeof ability.generateDescription === 'function') {
+                    ability.generateDescription();
+                }
+            });
+        }
+        
+        // <<< NEW: Apply Pain into Power bonus AFTER other modifiers >>>
+        if (this.critDamageFromTakingDamageBonus > 0) {
+            const originalCritDamage = this.stats.critDamage;
+            this.stats.critDamage += this.critDamageFromTakingDamageBonus;
+            console.log(`[RecalcStats - PainIntoPower] Applied +${(this.critDamageFromTakingDamageBonus * 100).toFixed(1)}% Crit Damage. Total: ${(this.stats.critDamage * 100).toFixed(1)}%`);
+        }
+        // <<< END NEW >>>
+
+
+
+        // <<< NEW: Apply Siegfried's Passive Bonus >>>
+        if (this.id === 'schoolboy_siegfried' && this.passiveHandler) {
+            const buffCount = this.buffs.length;
+            const bonusPerBuff = 125; // +125 Physical Damage per buff
+            const passiveBonus = buffCount * bonusPerBuff;
+            
+            if (passiveBonus > 0) {
+                const originalPhysicalDamage = this.stats.physicalDamage;
+                this.stats.physicalDamage += passiveBonus;
+                console.log(`[RecalcStats - Siegfried Passive] Applied +${passiveBonus} Physical Damage for ${buffCount} buffs. Total: ${this.stats.physicalDamage}`);
+            }
+        }
+        // <<< END NEW >>>
     }
 
     // Add an ability to the character
@@ -302,133 +645,341 @@ class Character {
 
     // Use an ability by its index
     useAbility(index, target) {
+        if (index < 0 || index >= this.abilities.length) {
+            console.error(`Invalid ability index: ${index} for ${this.name}`);
+            return false;
+        }
+        
         const ability = this.abilities[index];
-        if (!ability) {
-            console.error(`Ability at index ${index} not found for ${this.name}`);
-            return false;
-        }
 
-        // --- Check talent modifications for mana cost and cooldown ---
-        const abilityMods = this.talentModifiers.abilities[ability.id] || {};
-        
-        // Calculate final mana cost
-        let finalManaCost = ability.manaCost;
-        if(abilityMods.manaCost) {
-            finalManaCost = Math.max(0, Math.round((finalManaCost * (abilityMods.manaCost.multiply || 1)) + (abilityMods.manaCost.add || 0)));
-        }
-        
-        // Check mana
-        if (this.stats.currentMana < finalManaCost) {
-            console.log(`${this.name} does not have enough mana for ${ability.name} (needs ${finalManaCost}, has ${this.stats.currentMana})`);
-            if (window.gameManager && window.gameManager.addLogEntry) {
-                window.gameManager.addLogEntry(`${this.name} needs ${finalManaCost} mana for ${ability.name}!`);
+        // --- NEW: Check for 'It finally rains!' modifier for zero mana cost ---
+        let actualManaCost = ability.manaCost;
+        let skipManaCheck = false;
+        if (window.gameManager && window.gameManager.stageManager) {
+            const rainModifier = window.gameManager.stageManager.getStageModifier('it_finally_rains');
+            if (rainModifier && !this.isAI) { // Only affects player characters
+                skipManaCheck = true;
+                actualManaCost = 0; // Although we skip the check, conceptually the cost is 0
+                // Optional: Log this event?
+                // const log = window.gameManager.addLogEntry.bind(window.gameManager);
+                // log(`${this.name}'s ${ability.name} costs 0 mana due to rain!`);
             }
-            return false;
         }
-        
-        // Calculate final cooldown
-        let finalCooldown = ability.cooldown;
-        // --- Corrected Cooldown Calculation --- 
-        const baseCooldown = ability.baseCooldown !== undefined ? ability.baseCooldown : ability.cooldown; // Get base cooldown if available
-        if(abilityMods.cooldown) {
-             // Apply modifiers to base cooldown
-             finalCooldown = Math.max(0, Math.round((baseCooldown * (abilityMods.cooldown.multiply || 1)) + (abilityMods.cooldown.add || 0)));
-        }
-        // --- End Correction ---
+        // --- END NEW ---
 
-        // Check current cooldown
+        // --- PRE-CHECKS (Modified for mana cost) ---
+        if (ability.isDisabled) {
+             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+             log(`${this.name}'s ${ability.name} is disabled.`);
+             return false;
+        }
         if (ability.currentCooldown > 0) {
-            console.log(`${ability.name} is on cooldown for ${ability.currentCooldown} turns.`);
-            if (window.gameManager && window.gameManager.addLogEntry) {
-                window.gameManager.addLogEntry(`${ability.name} is on cooldown (${ability.currentCooldown} turns)`);
-            }
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            log(`${ability.name} is on cooldown: ${ability.currentCooldown} turns remaining`);
             return false;
         }
-        
-        // Consume mana
-        this.stats.currentMana -= finalManaCost;
-        
-        // Set cooldown (use calculated final cooldown)
-        ability.currentCooldown = finalCooldown;
-        
-        // --- Execute ability effect --- 
-        // Pass talent modifiers to the effect function for things like damage mods
-        const effectOptions = {
-            talentModifiers: abilityMods 
-        };
-        
-        console.log(`[Character ${this.name}] Using ability ${ability.name} with options:`, effectOptions);
-        // --- Pass options to ability.use --- 
-        const success = ability.use(this, target, finalManaCost, effectOptions); // Added options here
+        // --- MODIFIED MANA CHECK ---
+        if (!skipManaCheck && this.stats.currentMana < actualManaCost) { 
+        // --- END MODIFIED MANA CHECK ---
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            log(`${this.name} has not enough mana to use ${ability.name}`);
+            return false;
+        }
+         if (this.isStunned()) {
+             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+             log(`${this.name} is stunned and cannot use ${ability.name}.`);
+             return false;
+         }
+        // --- END PRE-CHECKS ---
 
-        // Update UI
+        // --- Check for Ability Disable Debuff ---
+        const disableDebuff = this.debuffs.find(d => 
+            d.effects && 
+            d.effects.disabledAbilityIndex === index
+        );
+        if (disableDebuff) {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            log(`${this.name} cannot use ${ability.name} because it is disabled by ${disableDebuff.name}.`);
+            return false;
+        }
+        // --- END Ability Disable Check ---
+
+        // --- NEW: Check for Smoke Cloud modifier ---
+        if (window.gameManager && window.gameManager.stageManager && !this.isAI) {
+            // Only affects player characters
+            const smokeModifier = window.gameManager.stageManager.getStageModifier('smoke_cloud');
+            if (smokeModifier && window.stageModifiersRegistry) {
+                // 42% chance to miss
+                if (Math.random() < 0.21) {
+                    // Consume mana since the attempt was made
+                    if (!skipManaCheck) {
+                        this.stats.currentMana -= actualManaCost;
+                        
+                        // Trigger mana animation for wasted casting
+                        if (actualManaCost > 0 && window.gameManager && window.gameManager.uiManager) {
+                            window.gameManager.uiManager.triggerManaAnimation(this, 'drain', actualManaCost);
+                        }
+                    }
+                    
+                    // Put ability on cooldown
+                    ability.currentCooldown = ability.cooldown;
+                    
+                    // Show miss VFX
+                    window.stageModifiersRegistry.createSmokeCloudMissVFX(this);
+                    
+                    // Add to battle log
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+                    log(`${this.name}'s ${ability.name} is obscured by the smoke cloud and misses completely!`, 'miss');
+                    
+                    // Update UI to show cooldown and mana loss
+                    if (window.updateCharacterUI) {
+                        window.updateCharacterUI(this);
+                    }
+                    
+                    // Return false to indicate the ability failed - do NOT execute the ability effect
+                    return false;
+                }
+            }
+        }
+        // --- END Smoke Cloud Check ---
+
+        // --- NEW: Shoma -> Julia Interaction Sound ---
+        let targetIsJulia = false;
+        if (Array.isArray(target)) {
+            targetIsJulia = target.some(t => t && t.id === 'schoolgirl_julia');
+        } else if (target) {
+            targetIsJulia = target.id === 'schoolgirl_julia';
+        }
+
+        // Play interaction sound if Shoma targets Julia with ANY ability
+        if (this.id === 'schoolboy_shoma' && targetIsJulia) { 
+            // <<< ADD DEBUG LOGS HERE >>>
+            console.log(`[DEBUG Interaction Sound] Condition met! Caster: ${this.name}, Target is Julia: ${targetIsJulia}, Ability: ${ability.name}`);
+            const interactionSounds = ['sounds/julia_shoma.mp3', 'sounds/julia_shoma2.mp3'];
+            const randomSound = interactionSounds[Math.floor(Math.random() * interactionSounds.length)];
+            console.log(`[DEBUG Interaction Sound] Chosen sound: ${randomSound}`);
+            const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+            if (typeof playSound === 'function') {
+                 console.log(`[DEBUG Interaction Sound] Calling playSound function.`);
+                 playSound(randomSound);
+            } else {
+                 console.error(`[DEBUG Interaction Sound] playSound function not found or not a function!`);
+            }
+            // Optional: Keep or remove the specific log message
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            log(`${this.name} used ${ability.name} on Julia! (Interaction sound played)`); 
+        } else {
+             // <<< ADD DEBUG LOG HERE >>>
+             if (this.id === 'schoolboy_shoma') {
+                 console.log(`[DEBUG Interaction Sound] Condition NOT met. Caster: ${this.name}, Target is Julia: ${targetIsJulia}, Ability: ${ability.name}`);
+             }
+        }
+        // --- END NEW ---
+
+        // --- CONSUME MANA BEFORE USING ABILITY ---
+        if (!skipManaCheck) {
+            // Consume mana
+            this.stats.currentMana -= actualManaCost;
+            
+            // Trigger mana animation for casting
+            if (actualManaCost > 0 && window.gameManager && window.gameManager.uiManager) {
+                window.gameManager.uiManager.triggerManaAnimation(this, 'drain', actualManaCost);
+                window.gameManager.uiManager.triggerManaAnimation(this, 'casting', actualManaCost);
+            }
+        }
+        
+        // Set cooldown (unless reset by ability effect)
+        ability.currentCooldown = ability.cooldown;
+        
+        // Use the ability and apply its effect
+        // Pass the target(s) directly to the ability's use method
+        // --- MODIFIED: Pass actualManaCost to ability.use --- 
+        const success = ability.use(this, target, actualManaCost);
+        // --- END MODIFIED --- 
+        
+        // Dispatch a custom event for VFX only if successful
+        if (success) {
+            // --- STATISTICS TRACKING: Record basic ability usage ---
+            if (window.statisticsManager) {
+                window.statisticsManager.recordAbilityUse(this, ability.id);
+                console.log(`[Character.useAbility] Recorded statistics for ${this.name} using ${ability.name || ability.id}`);
+            }
+            // --- END STATISTICS TRACKING ---
+            
+            // --- NEW: Check the result for Predator's Focus Cooldown Reduction ---
+            const abilityResult = window.abilityLastResult || {}; // Get result from global storage
+            
+            // Set cooldown AFTER checking the result
+            if (abilityResult.predatorFocusCooldownReduced) {
+                // Apply reduced cooldown if the talent triggered CDR
+                ability.currentCooldown = Math.max(0, ability.cooldown - 1);
+                console.log(`[PredatorFocus Apply] ${ability.name} cooldown set to ${ability.currentCooldown} (reduced by talent).`);
+            } else if (!abilityResult.resetCooldown) {
+                // Apply normal cooldown (unless resetCooldown was true)
+                ability.currentCooldown = ability.cooldown;
+            }
+            // If resetCooldown was true, currentCooldown remains 0 (handled in Ability.use)
+            // --- END NEW --- 
+
+            const abilityUsedEvent = new CustomEvent('AbilityUsed', {
+                detail: {
+                    caster: this,
+                    target: target, // Pass original target info
+                    ability: ability
+                }
+            });
+            document.dispatchEvent(abilityUsedEvent);
+        } else {
+            // Log if ability.use returned false for some internal reason
+            console.warn(`${this.name}'s attempt to use ${ability.name} returned false.`);
+            // Restore mana if the ability use failed internally after mana was spent
+            this.stats.currentMana += actualManaCost; 
+        }
+        
+        // Update UI after ability use
         if (window.updateCharacterUI) {
             window.updateCharacterUI(this);
         }
-
+        
         return success;
     }
 
     // Apply damage, now accepts caster as an argument
     applyDamage(amount, type, caster = null, options = {}) { // Added options object
-        const { isChainReaction = false, isRetaliation = false, bypassMagicalShield = false, bypassArmor = false } = options; // <<< Added bypassArmor
-        // --- MODIFIED: Use the recalculated stats directly ---
-        const totalDodgeChance = this.stats.dodgeChance || 0; // Use the stat calculated in recalculateStats
-
-        // Check if attack is dodged
-        if (Math.random() < totalDodgeChance) {
-        // --- END MODIFICATION ---
-            console.log(`[ApplyDamage Debug - ${this.name}] instanceId: ${this.instanceId || this.id} - DODGED`); // <<< ADDED INSTANCE ID LOG
-            const logFunction = window.gameManager ?
-                window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-            logFunction(`${this.name} dodged the attack!`);
-
-            // --- Trigger passive handler on dodge ---
-            if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
-                this.passiveHandler.onDodge(this);
-            }
-            // --- End Trigger ---
-            
-            // Play dodge animation
-            // Use instanceId if available, otherwise fallback to id
-            const elementId = this.instanceId || this.id;
-            const charElement = document.getElementById(`character-${elementId}`);
-            if (charElement) {
-                // Add dodge animation class
-                charElement.classList.add('dodge-animation');
-                
-                // Create dodge VFX container
-                const dodgeVfx = document.createElement('div');
-                dodgeVfx.className = 'dodge-vfx';
-                
-                // Create the DODGE! text
-                const dodgeText = document.createElement('div');
-                dodgeText.className = 'dodge-text';
-                dodgeText.textContent = 'DODGE!';
-                dodgeVfx.appendChild(dodgeText);
-                
-                // Create image container for afterimage effect
-                const imageContainer = document.createElement('div');
-                imageContainer.className = 'dodge-image-container';
-                dodgeVfx.appendChild(imageContainer);
-                
-                // Add to character element
-                charElement.appendChild(dodgeVfx);
-                
-                // Remove the animation class and VFX element after animation completes
-                setTimeout(() => {
-                    charElement.classList.remove('dodge-animation');
-                    if (dodgeVfx.parentNode === charElement) {
-                        charElement.removeChild(dodgeVfx);
+        // If character is dead, no damage to apply
+        if (this.isDead()) {
+            console.log(`${this.name} is already dead, damage ignored.`);
+            return { damage: 0, isCritical: false, isDodged: false };
+        }
+        
+        // Skip damage if character is untargetable
+        if (this.isUntargetable()) {
+            // Dispatch a damage event with 0 damage
+            if (caster) {
+                console.log(`[Event Dispatch] Character is untargetable, dispatching zero-damage event`);
+                document.dispatchEvent(new CustomEvent('character:damage-dealt', {
+                    detail: {
+                        character: caster,
+                        target: this,
+                        damage: 0,
+                        damageType: type,
+                        isCritical: false,
+                        missed: true
                     }
-                }, 700); // Slightly longer than animation duration to ensure it completes
-                
-                // Also clear any hiding flags
-                delete this._hidingActive;
-                delete this.isUntargetable;
+                }));
+            }
+            return { damage: 0, isCritical: false, isDodged: true };
+        }
+        
+        // Destructure options
+        const { isChainReaction = false, isRetaliation = false, bypassMagicalShield = false, bypassArmor = false } = options;
+
+        // Store original amount for logging
+        const originalAmount = amount;
+        
+        // Apply dodge chance check
+        if (Math.random() < this.stats.dodgeChance) {
+            console.log(`[${this.name}] Dodged an attack of ${amount} ${type} damage`);
+            
+            // --- STATISTICS TRACKING: Record dodge ---
+            if (window.statisticsManager) {
+                window.statisticsManager.recordDodge(this, caster, options.abilityId);
+            }
+            // --- END STATISTICS TRACKING ---
+            
+            // Check specifically for Zoey's dodge for debugging
+            if (this.id === 'zoey') {
+                console.log(`[ZOEY DODGE DETECTED] Zoey dodged an attack! Dispatching event...`);
             }
             
-            return { damage: 0, isCritical: false, dodged: true }; // Add dodged flag
+            // Dispatch a character:dodged event for talents to hook into
+            try {
+                document.dispatchEvent(new CustomEvent('character:dodged', {
+                    detail: {
+                        character: this,
+                        attacker: caster,
+                        damageAmount: amount,
+                        damageType: type
+                    }
+                }));
+                
+                // For Zoey specifically, add extra debug
+                if (this.id === 'zoey') {
+                    console.log(`[ZOEY DODGE EVENT] Event dispatched, verifying if handler will catch it...`);
+                    console.log(`[ZOEY DODGE EVENT] Forcing direct call to passive handler (fallback)...`);
+                    
+                    // Direct call to Zoey's passive handler if exists
+                    if (this.passiveHandler) {
+                        console.log(`[ZOEY DODGE EVENT] Found passiveHandler, attempting direct call`);
+                        try {
+                            if (typeof this.passiveHandler.onCharacterDodged === 'function') {
+                                this.passiveHandler.onCharacterDodged({
+                                    detail: { character: this, attacker: caster }
+                                });
+                                console.log(`[ZOEY DODGE EVENT] Successfully called passive directly`);
+                            } else {
+                                console.log(`[ZOEY DODGE EVENT] No onCharacterDodged method found on passive`);
+                            }
+                        } catch (err) {
+                            console.error(`[ZOEY DODGE EVENT] Error calling passive directly:`, err);
+                        }
+                    } else {
+                        console.log(`[ZOEY DODGE EVENT] No passiveHandler found for direct call`);
+                    }
+                }
+            } catch (error) {
+                console.error(`[DODGE EVENT ERROR] Failed to dispatch dodge event:`, error);
+            }
+            
+            // Trigger the dodge handler in passive for Nimble Strikes talent
+            if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
+                this.passiveHandler.onDodge(this, caster);
+            }
+            
+            // Check if this is Zoey for custom VFX
+            if (this.id === 'zoey' && typeof window.showZoeyDodgeVFX === 'function') {
+                window.showZoeyDodgeVFX(this);
+            } else {
+                // Use enhanced dodge VFX for other characters
+                this.showEnhancedDodgeVFX();
+            }
+            
+            // Add dodge class for Nimble Strikes VFX
+            if (this.dodgeGrantsCritBuff) {
+                const elementId = this.instanceId || this.id;
+                const dodgeText = document.querySelector(`#character-${elementId} .dodge-text`);
+                if (dodgeText) {
+                    dodgeText.classList.add('nimble-strikes-active');
+                    setTimeout(() => {
+                        dodgeText.classList.remove('nimble-strikes-active');
+                    }, 1500);
+                }
+            }
+            
+            // Invoke the game engine's onDodge callback if available
+            if (window.gameEngine && typeof window.gameEngine.onDodge === 'function') {
+                window.gameEngine.onDodge(this, caster);
+            }
+            
+            // Agile Counterforce: direct talent implementation when Zoey dodges
+            if (this.id === 'zoey' && this.hasTalent && this.hasTalent('agile_counterforce')) {
+                const baseMagical = this.stats.magicalDamage || 0;
+                const buffVal = Math.floor(baseMagical * 0.1);
+                const buff = {
+                    id: `agile_counterforce_buff_${Date.now()}`,
+                    name: 'Agile Counterforce',
+                    description: `Increases Magical Damage by ${buffVal} for 4 turns.`,
+                    icon: 'Icons/talents/agile_counterforce.webp',
+                    duration: 4,
+                    statModifiers: [{ stat: 'magicalDamage', value: buffVal, operation: 'add' }]
+                };
+                this.addBuff(buff);
+                if (window.gameManager) {
+                    window.gameManager.addLogEntry(`Agile Counterforce grants +${buffVal} Magical Damage!`, 'zoey talent-effect');
+                }
+            }
+            
+            return { damage: 0, isCritical: false, isDodged: true };
         }
 
         // --- NEW: Affection Damage Reduction Check ---
@@ -492,13 +1043,93 @@ class Character {
                  if (this.id === 'farmer_shoma') {
                     playSound('sounds/fshoma_ouch.mp3', 0.7); // Crit taken sound
                  }
+                 
+                 // --- NEW: Check for Critical Reflexes talent ---
+                 if (critSource.critReducesCooldowns) {
+                     // Reduce all active ability cooldowns by 1
+                     let cooldownsReduced = false;
+                     critSource.abilities.forEach(ability => {
+                         if (ability.currentCooldown > 0) {
+                             ability.reduceCooldown();
+                             cooldownsReduced = true;
+                             
+                             // Add visual feedback for cooldown reduction
+                             setTimeout(() => {
+                                 const sourceElementId = critSource.instanceId || critSource.id;
+                                 const sourceElement = document.getElementById(`character-${sourceElementId}`);
+                                 if (sourceElement) {
+                                     // Find ability elements and add glow effect
+                                     const abilityElements = sourceElement.querySelectorAll('.ability');
+                                     abilityElements.forEach((abilityEl, index) => {
+                                         if (index < critSource.abilities.length && 
+                                             critSource.abilities[index].id === ability.id) {
+                                             // Add glow effect class
+                                             abilityEl.classList.add('cooldown-reduced');
+                                             
+                                             // Remove class after animation completes
+                                             setTimeout(() => {
+                                                 abilityEl.classList.remove('cooldown-reduced');
+                                             }, 1000);
+                                         }
+                                     });
+                                     
+                                     // Add cooldown reduction indicator
+                                     const reflexesVfx = document.createElement('div');
+                                     reflexesVfx.className = 'critical-reflexes-vfx';
+                                     sourceElement.appendChild(reflexesVfx);
+                                     
+                                     // Add floating "-1" indicator
+                                     const indicator = document.createElement('div');
+                                     indicator.className = 'cooldown-reduction-indicator';
+                                     indicator.textContent = '-1 CD';
+                                     indicator.style.left = `${50 + (Math.random() * 40 - 20)}%`;
+                                     indicator.style.top = `${60 + (Math.random() * 20 - 10)}%`;
+                                     reflexesVfx.appendChild(indicator);
+                                     
+                                     // Clean up VFX after animation completes
+                                     setTimeout(() => {
+                                         if (reflexesVfx.parentNode) {
+                                             reflexesVfx.remove();
+                                         }
+                                     }, 1200);
+                                 }
+                             }, 0);
+                         }
+                     });
+                     
+                     if (cooldownsReduced) {
+                         logFunction(`${critSource.name}'s Critical Reflexes reduced active ability cooldowns by 1!`, 'talent-effect');
+                         
+                         // Show floating text if showFloatingText function exists in window.gameManager
+                         if (window.gameManager && typeof window.gameManager.showFloatingText === 'function') {
+                             const elementId = critSource.instanceId || critSource.id;
+                             window.gameManager.showFloatingText(`character-${elementId}`, '-1 CD', 'buff');
+                         }
+                         
+                         // Update UI if available
+                         if (typeof updateCharacterUI === 'function') {
+                             updateCharacterUI(critSource);
+                         }
+                     }
+                 }
+                 
+                 // --- NEW: Check for Critical Power talent ---
+                 if (critSource.enableCriticalPowerBuff && 
+                     critSource.id === 'farmer_nina' && 
+                     typeof window.applyCriticalPowerBuff === 'function') {
+                     
+                     console.log(`[Critical Power] Detected critical hit from ${critSource.name}, applying buff`);
+                     window.applyCriticalPowerBuff(critSource);
+                 }
+                 // --- END NEW ---
             }
         }
         // --- End caster check --- 
         
         // Apply damage modifiers (like Silencing Ring) FROM THE CASTER
         if (caster && typeof caster.calculateDamage === 'function') {
-            damage = caster.calculateDamage(damage, type); 
+            // MODIFIED: Pass target (this) to calculateDamage
+            damage = caster.calculateDamage(damage, type, this); 
         }
         
         let damageAfterMods = damage; // Store damage before armor/shield
@@ -567,15 +1198,78 @@ class Character {
         }
         // --- END Fire Shield Check ---
 
-        console.log(`[ApplyDamage Debug - ${this.name}] Final damage before HP reduction: ${finalDamage}`); // <<< ADDED LOG
+        console.log(`[ApplyDamage Debug - ${this.name}] Final damage before shield/HP reduction: ${finalDamage}`); // <<< ADDED LOG
         const originalHp = this.stats.currentHp; // Store HP before damage
-        console.log(`[ApplyDamage Debug - ${this.name}] HP before reduction: ${originalHp}`); // <<< ADDED LOG
+        const originalShield = this.shield; // Store shield before damage
+        console.log(`[ApplyDamage Debug - ${this.name}] HP before reduction: ${originalHp}, Shield: ${originalShield}`); // <<< ADDED LOG
         
-        this.stats.currentHp = Math.max(0, this.stats.currentHp - finalDamage);
+        // NEW: Apply shield logic
+        let damageToShield = 0;
+        let damageToHp = finalDamage;
         
-        console.log(`[ApplyDamage Debug - ${this.name}] HP after reduction: ${this.stats.currentHp}`); // <<< ADDED LOG
+        if (this.shield > 0) {
+            if (finalDamage <= this.shield) {
+                // Shield absorbs all damage
+                damageToShield = finalDamage;
+                damageToHp = 0;
+                this.shield -= finalDamage;
+                
+                // Trigger shield damaged animation
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.triggerShieldAnimation(this, 'damaged');
+                }
+            } else {
+                // Shield absorbs part of damage, rest goes to HP
+                damageToShield = this.shield;
+                damageToHp = finalDamage - this.shield;
+                this.shield = 0;
+                
+                // Trigger shield broken animation
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.triggerShieldAnimation(this, 'broken');
+                }
+            }
+            
+            // Log shield interaction
+            if (window.gameManager) {
+                if (damageToHp === 0) {
+                    window.gameManager.addLogEntry(`${this.name}'s shield absorbs ${damageToShield} damage!`, 'buff-effect');
+                } else {
+                    window.gameManager.addLogEntry(`${this.name}'s shield absorbs ${damageToShield} damage, ${damageToHp} damage to health!`, 'buff-effect');
+                }
+            }
+        }
+        
+        // Apply damage to HP
+        this.stats.currentHp = Math.max(0, this.stats.currentHp - damageToHp);
+        
+        // Trigger HP animation for damage
+        if (damageToHp > 0 && window.gameManager && window.gameManager.uiManager) {
+            this._lastDamageWasCritical = isCritical;
+            window.gameManager.uiManager.triggerHPAnimation(this, 'damage', damageToHp, isCritical);
+        }
+        
+        console.log(`[ApplyDamage Debug - ${this.name}] HP after reduction: ${this.stats.currentHp}, Shield after: ${this.shield}`); // <<< ADDED LOG
         const actualDamageTaken = originalHp - this.stats.currentHp; // Calculate actual HP lost
-        console.log(`[ApplyDamage Debug - ${this.name}] Actual damage taken: ${actualDamageTaken}`); // <<< ADDED LOG
+        const totalDamageAbsorbed = originalShield - this.shield; // Calculate shield damage absorbed
+        console.log(`[ApplyDamage Debug - ${this.name}] Actual HP damage: ${actualDamageTaken}, Shield damage: ${totalDamageAbsorbed}`); // <<< ADDED LOG
+
+        // --- STATISTICS TRACKING: Record damage dealt and taken ---
+        if (window.statisticsManager && actualDamageTaken > 0) {
+            window.statisticsManager.recordDamageDealt(caster, this, actualDamageTaken, type, isCritical, options.abilityId);
+        }
+        if (window.statisticsManager && totalDamageAbsorbed > 0) {
+            window.statisticsManager.recordShieldAbsorption(this, totalDamageAbsorbed);
+        }
+        // --- END STATISTICS TRACKING ---
+
+        // --- QUEST TRACKING: Record damage dealt by player characters ---
+        if (caster && !caster.isAI && this.isAI && actualDamageTaken > 0) {
+            if (typeof window.questManager !== 'undefined' && window.questManager.initialized) {
+                window.questManager.updateQuestProgress('totalDamageDealt', actualDamageTaken);
+            }
+        }
+        // --- END QUEST TRACKING ---
 
         // --- Apply Lifesteal to the caster --- 
         if (caster && actualDamageTaken > 0) { // Only apply if there is a caster and damage was dealt
@@ -583,6 +1277,23 @@ class Character {
         }
         // --- End Lifesteal Application ---
 
+        // --- NEW: Dispatch damageDealt event ---
+        if (caster && actualDamageTaken > 0) {
+            const damageDealtEvent = new CustomEvent('damageDealt', {
+                detail: {
+                    source: caster,       // The character who dealt the damage
+                    target: this,         // The character who received the damage
+                    damage: actualDamageTaken, // The actual HP lost
+                    type: type,           // 'physical' or 'magical'
+                    isCritical: isCritical, // Boolean
+                    options: options      // Pass along original options if needed
+                }
+            });
+            console.log(`[Event Dispatch] Firing damageDealt: ${caster.name} -> ${this.name}, Damage: ${actualDamageTaken}`);
+            document.dispatchEvent(damageDealtEvent);
+        }
+        // --- END NEW ---
+        
         // Always update UI, even if damage is 0 (e.g., for dodge text)
         updateCharacterUI(this);
         
@@ -694,9 +1405,9 @@ class Character {
                 }
             }
             // --- DEBUG: Log damage value just before setting textContent ---
-            console.log(`[VFX Debug - ${this.name}] Setting damage VFX text. Damage value: ${damage}, isCritical: ${isCritical}`);
+            console.log(`[VFX Debug - ${this.name}] Setting damage VFX text. Damage value: ${actualDamageTaken}, isCritical: ${isCritical}`);
             // --- END DEBUG ---
-            damageVfx.textContent = `-${Math.round(damage)}`;
+            damageVfx.textContent = `-${Math.round(actualDamageTaken)}`;
             damageCharElement.appendChild(damageVfx);
             
             // Add blood splatter VFX for physical damage
@@ -781,16 +1492,174 @@ class Character {
             }
         }
         
+        // <<< NEW: Handle Pain into Power Talent (Farmer Nina) >>>
+        if (this.id === 'farmer_nina' && this.enablePainIntoPower && actualDamageTaken > 0) {
+            const critBonusPerHit = 0.02; // <-- MODIFIED: Reduced from 0.05 to 0.02
+            this.critDamageFromTakingDamageBonus += critBonusPerHit;
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${this.name}'s Pain into Power activates! +${critBonusPerHit * 100}% Crit Damage gained. Total bonus: ${(this.critDamageFromTakingDamageBonus * 100).toFixed(1)}%`, 'talent-effect');
+            // Recalculate stats to apply the new crit damage immediately
+            this.recalculateStats('pain_into_power_triggered'); 
+            
+            // Optional: Show a small VFX
+            if (window.gameManager?.showFloatingText) {
+                window.gameManager.showFloatingText(`character-${this.instanceId || this.id}`, `+${critBonusPerHit * 100}% Crit Dmg`, 'buff');
+            }
+        }
+        // <<< END NEW >>>
+        
+        // After damage is calculated and applied
+        if (actualDamageTaken > 0 && caster) {
+            // Log the event dispatch for debugging
+            console.log(`[Event Dispatch] Firing character:damage-dealt event: ${caster.name} -> ${this.name}, Damage: ${actualDamageTaken}, Type: ${type}, Critical: ${isCritical}`);
+            
+            // Dispatch a damage-dealt event for talents like Water Dance
+            document.dispatchEvent(new CustomEvent('character:damage-dealt', {
+                detail: {
+                    character: caster,
+                    target: this,
+                    damage: actualDamageTaken,
+                    damageType: type,
+                    isCritical: isCritical,
+                    options: options
+                }
+            }));
+            
+            // Also fire the legacy event for backward compatibility
+            if (typeof CustomEvent === 'function') {
+                const damageEvent = new CustomEvent('damageDealt', {
+                    detail: {
+                        source: caster,
+                        target: this,
+                        amount: actualDamageTaken,
+                        type: type,
+                        isCritical: isCritical
+                    }
+                });
+                
+                console.log(`[Event Dispatch] Firing legacy damageDealt event`);
+                document.dispatchEvent(damageEvent);
+            }
+        }
+        
+        // --- NEW: Stun removal mechanic (70% chance when taking damage) ---
+        if (actualDamageTaken > 0 && this.isStunned()) {
+            // 70% chance that damage removes stun
+            if (Math.random() < 0.7) {
+                // Find all stun debuffs
+                const stunDebuffs = this.debuffs.filter(debuff => 
+                    (debuff.id && debuff.id === 'stun') || 
+                    (debuff.id && debuff.id.includes('stun')) ||
+                    (debuff.effects && debuff.effects.cantAct === true) ||
+                    (debuff.name && debuff.name.toLowerCase().includes('stun'))
+                );
+                
+                if (stunDebuffs.length > 0) {
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    
+                    // Remove all stun debuffs
+                    stunDebuffs.forEach(stunDebuff => {
+                        this.removeDebuff(stunDebuff.id);
+                        log(`${this.name} breaks free from ${stunDebuff.name || 'Stun'} after taking damage!`, 'buff-effect');
+                    });
+                    
+                    // Show visual effect for breaking stun
+                    const elementId = this.instanceId || this.id;
+                    const charElement = document.getElementById(`character-${elementId}`);
+                    if (charElement) {
+                        const breakFreeVfx = document.createElement('div');
+                        breakFreeVfx.className = 'stun-break-vfx';
+                        breakFreeVfx.innerHTML = `
+                            <div class="stun-break-text">BREAK FREE!</div>
+                            <div class="stun-break-particles"></div>
+                        `;
+                        charElement.appendChild(breakFreeVfx);
+                        
+                        // Add particle effects
+                        for (let i = 0; i < 8; i++) {
+                            const particle = document.createElement('div');
+                            particle.className = 'stun-break-particle';
+                            particle.style.setProperty('--angle', `${i * 45}deg`);
+                            particle.style.setProperty('--delay', `${i * 0.05}s`);
+                            breakFreeVfx.appendChild(particle);
+                        }
+                        
+                        // Remove VFX after animation
+                        setTimeout(() => {
+                            if (breakFreeVfx.parentNode === charElement) {
+                                charElement.removeChild(breakFreeVfx);
+                            }
+                        }, 2000);
+                    }
+                    
+                    // Update UI to reflect stun removal
+                    if (typeof updateCharacterUI === 'function') {
+                        updateCharacterUI(this);
+                    }
+                }
+            }
+        }
+        // --- END stun removal mechanic ---
+
         return { damage: actualDamageTaken, isCritical: isCritical, dodged: false }; // Return actual damage dealt
     }
 
     // Calculate the final damage after applying modifiers
-    calculateDamage(baseDamage, type) {
+    calculateDamage(baseDamage, type, target = null) {
         let finalDamage = baseDamage;
 
         // Apply buffs/debuffs that modify outgoing damage (if any)
         // Example: buffs could increase finalDamage, debuffs could decrease it
         // Note: This logic should be implemented based on specific buff/debuff effects.
+
+        // --- NEW: Check for outgoing damage reduction from debuffs ---
+        if (this.debuffs && this.debuffs.length > 0) {
+            for (const debuff of this.debuffs) {
+                if (debuff.effects && typeof debuff.effects.damageReductionPercent === 'number') {
+                    const reductionPercent = debuff.effects.damageReductionPercent;
+                    const originalDamage = finalDamage;
+                    finalDamage = Math.max(1, Math.floor(finalDamage * (1 - reductionPercent)));
+                    
+                    console.log(`[Outgoing Damage Reduction] ${this.name} has debuff ${debuff.name || debuff.id} reducing outgoing damage by ${reductionPercent * 100}% - ${originalDamage} → ${finalDamage}`);
+                    
+                    // Add log entry
+                    if (window.gameManager && window.gameManager.addLogEntry) {
+                        window.gameManager.addLogEntry(`${this.name}'s ${debuff.name || 'debuff'} reduces outgoing damage by ${Math.round(reductionPercent * 100)}%!`, 'debuff-effect');
+                    }
+                }
+            }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Apply Debuff Exploitation talent (damage increase per debuff) ---
+        if (this.damagePerDebuff && this.damagePerDebuff > 0 && target) {
+            if (target.debuffs && target.debuffs.length > 0) {
+                const debuffCount = target.debuffs.length;
+                const damageIncrease = this.damagePerDebuff * debuffCount;
+                const originalDamage = finalDamage;
+                
+                // Apply percentage increase for each debuff
+                finalDamage = Math.floor(finalDamage * (1 + damageIncrease));
+                
+                // Log the damage increase
+                console.log(`[Debuff Exploitation] ${this.name} dealing ${Math.round(damageIncrease * 100)}% bonus damage (${debuffCount} debuffs) - ${originalDamage} → ${finalDamage}`);
+                
+                // Show VFX for Debuff Exploitation
+                if (window.showDebuffExploitationVFX && typeof window.showDebuffExploitationVFX === 'function') {
+                    window.showDebuffExploitationVFX(this, target, debuffCount, damageIncrease);
+                }
+                else if (window.gameManager && typeof window.gameManager.showFloatingText === 'function') {
+                    const elementId = this.instanceId || this.id;
+                    window.gameManager.showFloatingText(`character-${elementId}`, `+${Math.round(damageIncrease * 100)}% DMG (${debuffCount} debuffs)`, 'buff');
+                }
+                
+                // Add log entry
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(`${this.name}'s Debuff Exploitation increases damage by ${Math.round(damageIncrease * 100)}% (${debuffCount} debuffs on target)!`, 'talent-effect');
+                }
+            }
+        }
+        // --- END NEW ---
 
         // --- NEW: Apply Stage Modifiers --- 
         if (this.stageModifiers) {
@@ -816,6 +1685,24 @@ class Character {
         let baseHealAmount = amount;
         let isCritical = false;
 
+        // --- NEW: Apply Enhanced Recovery talent effect ---
+        if (this.healingReceivedMultiplier && this.healingReceivedMultiplier !== 1.0) {
+            const originalAmount = baseHealAmount;
+            baseHealAmount = Math.floor(baseHealAmount * this.healingReceivedMultiplier);
+            console.log(`[Heal] ${this.name} has Enhanced Recovery: ${originalAmount} → ${baseHealAmount} (x${this.healingReceivedMultiplier})`);
+            
+            // Show visual effect for Enhanced Recovery talent
+            if (window.showEnhancedRecoveryVFX && typeof window.showEnhancedRecoveryVFX === 'function') {
+                window.showEnhancedRecoveryVFX(this, originalAmount, baseHealAmount);
+            }
+            
+            // Add log entry
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`${this.name}'s Enhanced Recovery increases healing by ${Math.round(baseHealAmount - originalAmount)}.`, 'talent-effect');
+            }
+        }
+        // --- END NEW ---
+
         // --- NEW: Check for Critical Heal ---
         if (caster && caster.stats && Math.random() < (caster.stats.critChance || 0)) {
             let critDamageMultiplier = caster.stats.critDamage || 1.5; // Use critDamage for heals too?
@@ -827,6 +1714,20 @@ class Character {
             baseHealAmount = Math.floor(baseHealAmount * critDamageMultiplier);
             isCritical = true;
             console.log(`[Crit Heal Debug - ${caster.name}] Critical Heal! Multiplier: ${critDamageMultiplier}, Base Amount: ${baseHealAmount}`);
+            
+            // --- DISPATCH CRITICAL HEAL EVENT ---
+            const critHealEvent = new CustomEvent('criticalHeal', {
+                detail: {
+                    source: caster, // The character who performed the heal
+                    target: this,   // The character receiving the heal
+                    healAmount: baseHealAmount, // The crit-modified heal amount
+                    isCritical: true
+                }
+            });
+            console.log(`%c[Critical Heal Event] About to dispatch event from ${caster.name} healing ${this.name}`, 'color: magenta; font-weight: bold;', critHealEvent);
+            document.dispatchEvent(critHealEvent);
+            console.log(`%c[Critical Heal Event] Event dispatched!`, 'color: magenta; font-weight: bold;');
+            // --- END DISPATCH ---
         }
         // --- END NEW ---
 
@@ -835,13 +1736,31 @@ class Character {
         const finalHealAmount = Math.floor(baseHealAmount * (1 + casterHealingPower));
         // --- END MODIFICATION ---
 
-        const actualHealAmount = Math.min(this.stats.maxHp - this.stats.currentHp, finalHealAmount);
+        let actualHealAmount;
+        if (options.allowOverheal) {
+            actualHealAmount = finalHealAmount;
+        } else {
+            actualHealAmount = Math.min(this.stats.maxHp - this.stats.currentHp, finalHealAmount);
+        }
         this.stats.currentHp += actualHealAmount;
+
+        // Trigger HP animation for healing
+        if (actualHealAmount > 0 && window.gameManager && window.gameManager.uiManager) {
+            this._lastHealWasCritical = isCritical;
+            window.gameManager.uiManager.triggerHPAnimation(this, 'healing', actualHealAmount, isCritical);
+        }
 
         // Hook for passive handlers on receiving heal
         if (actualHealAmount > 0 && this.passiveHandler && typeof this.passiveHandler.onHealReceived === 'function') {
             this.passiveHandler.onHealReceived(this, actualHealAmount, isCritical); // Pass isCritical flag
         }
+
+        // --- STATISTICS TRACKING: Record healing done ---
+        if (window.statisticsManager && actualHealAmount > 0) {
+            const healType = options.healType || 'direct';
+            window.statisticsManager.recordHealingDone(caster, this, actualHealAmount, isCritical, options.abilityId, healType);
+        }
+        // --- END STATISTICS TRACKING ---
 
         // --- NEW: Infernal Birdie Drink Up! Cooldown Reduction ---
         if (actualHealAmount > 0 && this.id === 'infernal_birdie') {
@@ -891,6 +1810,84 @@ class Character {
         }
         // --- END MODIFICATION ---
         
+        // --- NEW: Check for Healing Fire stage modifier ---
+        if (actualHealAmount > 0) {
+            // Check if target has healing fire modifier
+            const targetIsPlayer = window.gameManager && 
+                window.gameManager.gameState && 
+                window.gameManager.gameState.playerCharacters && 
+                window.gameManager.gameState.playerCharacters.includes(this);
+                
+            if (targetIsPlayer && this.stageModifiers && this.stageModifiers.healingFire) {
+                const targetFireDamage = Math.floor(actualHealAmount * 0.22); // 22% of heal as fire damage
+                
+                if (targetFireDamage > 0) {
+                    // Apply fire damage to target after the heal
+                    setTimeout(() => {
+                        this.applyDamage(targetFireDamage, 'fire', null, { 
+                            isStageEffect: true,
+                            stageModifierName: 'Healing Fire' 
+                        });
+                        
+                        // Add log entry for target
+                        if (window.gameManager && window.gameManager.addLogEntry) {
+                            window.gameManager.addLogEntry(
+                                `🔥💚 ${this.name}'s healing is corrupted by infernal flames, taking ${targetFireDamage} fire damage!`, 
+                                'stage-effect healing-fire'
+                            );
+                        }
+                        
+                        // Create healing fire damage VFX for target
+                        if (window.stageModifiersRegistry && window.stageModifiersRegistry.createHealingFireDamageVFX) {
+                            window.stageModifiersRegistry.createHealingFireDamageVFX(this, targetFireDamage);
+                        }
+                        
+                        // Update UI after damage
+                        updateCharacterUI(this);
+                    }, 800); // Delay the damage slightly after the heal VFX
+                }
+            }
+            
+            // Check if caster has healing fire modifier (burns the healer too)
+            if (caster) {
+                const casterIsPlayer = window.gameManager && 
+                    window.gameManager.gameState && 
+                    window.gameManager.gameState.playerCharacters && 
+                    window.gameManager.gameState.playerCharacters.includes(caster);
+                    
+                if (casterIsPlayer && caster.stageModifiers && caster.stageModifiers.healingFire) {
+                    const casterFireDamage = Math.floor(actualHealAmount * 0.22); // 22% of heal as fire damage
+                    
+                    if (casterFireDamage > 0) {
+                        // Apply fire damage to caster after the heal
+                        setTimeout(() => {
+                            caster.applyDamage(casterFireDamage, 'fire', null, { 
+                                isStageEffect: true,
+                                stageModifierName: 'Healing Fire' 
+                            });
+                            
+                            // Add log entry for caster
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `🔥💚 ${caster.name} is burned by the corrupted healing energy for ${casterFireDamage} fire damage!`, 
+                                    'stage-effect healing-fire'
+                                );
+                            }
+                            
+                            // Create healing fire damage VFX for caster
+                            if (window.stageModifiersRegistry && window.stageModifiersRegistry.createHealingFireDamageVFX) {
+                                window.stageModifiersRegistry.createHealingFireDamageVFX(caster, casterFireDamage);
+                            }
+                            
+                            // Update UI after damage
+                            updateCharacterUI(caster);
+                        }, 1000); // Delay caster damage slightly more than target damage
+                    }
+                }
+            }
+        }
+        // --- END NEW ---
+        
         updateCharacterUI(this); // Add UI update call here
         
         return { healAmount: Math.floor(actualHealAmount), isCritical: isCritical }; // Return object
@@ -902,16 +1899,100 @@ class Character {
         }
 
         const healAmount = Math.floor(damage * this.stats.lifesteal);
-        this.heal(healAmount);
+        this.heal(healAmount, this, { healType: 'lifesteal' });
         
         // Return the heal amount for VFX and logging
         return healAmount;
     }
 
     regenerateResources() {
-        // Regenerate HP and Mana per turn
-        this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + this.stats.hpPerTurn);
+        // Standard HP/Mana regen from base stats
+        const baseHpRegen = this.stats.hpPerTurn || 0;
+        const baseManaRegen = this.stats.manaPerTurn || 0;
         
+        this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + baseHpRegen);
+        this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + baseManaRegen);
+
+        // --- Handle Stage Modifier Healing (Turn Start Healing) ---
+        if (this.stageModifiers && this.stageModifiers.turnStartHealing) {
+            const healPercent = this.stageModifiers.turnStartHealing;
+            const healAmount = Math.floor(this.stats.maxHp * healPercent);
+            
+            if (healAmount > 0) {
+                const oldHp = this.stats.currentHp;
+                this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + healAmount);
+                const actualHealed = this.stats.currentHp - oldHp;
+                
+                if (actualHealed > 0) {
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`${this.name} is healed for ${actualHealed} HP by the Healing Farm Wind.`, 'stage-effect wind-heal');
+                    
+                    // Show healing VFX
+                    this.showWindHealVFX(actualHealed);
+                }
+            }
+        }
+
+        // --- Handle Fixed Stage Modifier Healing ---
+        if (this.stageModifiers && this.stageModifiers.turnStartHealingFixed) {
+            const healAmount = this.stageModifiers.turnStartHealingFixed;
+            
+            if (healAmount > 0) {
+                const oldHp = this.stats.currentHp;
+                this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + healAmount);
+                const actualHealed = this.stats.currentHp - oldHp;
+                
+                if (actualHealed > 0) {
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`${this.name} is healed for ${actualHealed} HP by the heavy rain!`, 'stage-effect rain-heal');
+                    
+                    // Show heavy rain healing VFX
+                    this.showHeavyRainHealVFX(actualHealed);
+                }
+            }
+        }
+
+        // --- NEW: Handle Natural Regeneration talent --- 
+        const hpRegenPercent = this.hpRegenPercent || 0; // Get property set by talent
+        const manaRegenPercent = this.manaRegenPercent || 0; // Get property set by talent
+        let talentRegenLog = '';
+        let regeneratedHpFromTalent = 0;
+        let regeneratedManaFromTalent = 0;
+
+        if (hpRegenPercent > 0) {
+            const hpToRegen = Math.floor(this.stats.maxHp * hpRegenPercent);
+            if (hpToRegen > 0) {
+                const oldHp = this.stats.currentHp;
+                this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + hpToRegen);
+                regeneratedHpFromTalent = this.stats.currentHp - oldHp;
+                if (regeneratedHpFromTalent > 0) {
+                    talentRegenLog += ` ${regeneratedHpFromTalent} HP`;
+                    // Add simple VFX for HP regen
+                    // this.showRegenVFX(regeneratedHpFromTalent, 'hp');
+                }
+            }
+        }
+
+        if (manaRegenPercent > 0) {
+            const manaToRegen = Math.floor(this.stats.maxMana * manaRegenPercent);
+            if (manaToRegen > 0) {
+                const oldMana = this.stats.currentMana;
+                this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + manaToRegen);
+                regeneratedManaFromTalent = this.stats.currentMana - oldMana;
+                if (regeneratedManaFromTalent > 0) {
+                    talentRegenLog += `${talentRegenLog ? ' and' : ''} ${regeneratedManaFromTalent} Mana`;
+                    // Add simple VFX for Mana regen
+                    // this.showRegenVFX(regeneratedManaFromTalent, 'mana');
+                }
+            }
+        }
+
+        if (talentRegenLog) {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+            log(`${this.name} regenerates${talentRegenLog} from Natural Regeneration.`, 'talent-effect');
+        }
+        // --- END NEW --- 
+
         // Apply Atlantean Kagome passive: heals HP equal to missing mana
         if (this.id === 'atlantean_kagome' && this.passive && this.passive.id === 'atlantean_kagome_passive') {
             const missingMana = this.stats.maxMana - this.stats.currentMana;
@@ -961,121 +2042,520 @@ class Character {
         updateCharacterUI(this);
     }
 
+    // Show wind healing VFX
+    showWindHealVFX(healAmount) {
+        // Use instanceId first, fallback to id for element lookup
+        const elementId = this.instanceId || this.id;
+        const charElement = document.getElementById(`character-${elementId}`);
+        if (charElement) {
+            // Create enhanced wind healing VFX container
+            const windHealContainer = document.createElement('div');
+            windHealContainer.className = 'wind-heal-vfx-container';
+            charElement.appendChild(windHealContainer);
+            
+            // Create main healing number with wind styling
+            const windHealVfx = document.createElement('div');
+            windHealVfx.className = 'wind-heal-vfx healing-wind-number';
+            windHealVfx.textContent = `+${healAmount} HP`;
+            windHealContainer.appendChild(windHealVfx);
+            
+            // Create glowing aura around character
+            const healingAura = document.createElement('div');
+            healingAura.className = 'wind-healing-aura';
+            windHealContainer.appendChild(healingAura);
+            
+            // Create multiple leaf particles that blow across
+            for (let i = 0; i < 8; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'wind-healing-leaf';
+                leaf.style.left = `${Math.random() * 120 - 10}%`;
+                leaf.style.top = `${Math.random() * 120 - 10}%`;
+                leaf.style.animationDelay = `${Math.random() * 1}s`;
+                leaf.style.animationDuration = `${2 + Math.random() * 1}s`;
+                windHealContainer.appendChild(leaf);
+            }
+            
+            // Create sparkle effects
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'wind-healing-sparkle';
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                sparkle.style.animationDelay = `${Math.random() * 2}s`;
+                windHealContainer.appendChild(sparkle);
+            }
+            
+            // Create floating heal particles with wind effect
+            const windParticles = document.createElement('div');
+            windParticles.className = 'wind-heal-particles';
+            windHealContainer.appendChild(windParticles);
+            
+            // Create wind ripple effect
+            const windRipple = document.createElement('div');
+            windRipple.className = 'wind-healing-ripple';
+            windHealContainer.appendChild(windRipple);
+            
+            // Create additional wind effect particles around the character
+            for (let i = 0; i < 10; i++) {
+                const windParticle = document.createElement('div');
+                windParticle.className = 'wind-heal-mini-particle';
+                windParticle.style.left = `${Math.random() * 100}%`;
+                windParticle.style.top = `${Math.random() * 100}%`;
+                windParticle.style.animationDelay = `${Math.random() * 0.8}s`;
+                windHealContainer.appendChild(windParticle);
+            }
+            
+            // Create gentle wind swirl effect
+            const windSwirl = document.createElement('div');
+            windSwirl.className = 'wind-heal-swirl';
+            windHealContainer.appendChild(windSwirl);
+            
+            // Create wind trail effect
+            const windTrail = document.createElement('div');
+            windTrail.className = 'wind-healing-trail';
+            windHealContainer.appendChild(windTrail);
+            
+            // Enhance with healing wind VFX if available
+            if (window.gameManager && window.gameManager.stageManager && window.gameManager.stageManager.healingWindVFX) {
+                window.gameManager.stageManager.healingWindVFX.enhanceHealingNumber(windHealVfx);
+            }
+            
+            // Play healing wind sound if available
+            if (window.gameManager && typeof window.gameManager.playSound === 'function') {
+                window.gameManager.playSound('sounds/wind_heal.mp3', 0.4);
+            }
+            
+            // Remove the VFX elements after animation completes
+            setTimeout(() => {
+                if (windHealContainer && windHealContainer.parentNode) {
+                    windHealContainer.parentNode.removeChild(windHealContainer);
+                }
+            }, 3000);
+        }
+    }
+
+    // Show heavy rain healing VFX for "It's raining man!" modifier
+    showHeavyRainHealVFX(healAmount) {
+        // Use instanceId first, fallback to id for element lookup
+        const elementId = this.instanceId || this.id;
+        const charElement = document.getElementById(`character-${elementId}`);
+        if (charElement) {
+            // Create heavy rain healing VFX container
+            const rainHealContainer = document.createElement('div');
+            rainHealContainer.className = 'heavy-rain-heal-vfx-container';
+            charElement.appendChild(rainHealContainer);
+            
+            // Create main healing number with rain styling
+            const rainHealVfx = document.createElement('div');
+            rainHealVfx.className = 'heavy-rain-heal-vfx rain-healing-number';
+            rainHealVfx.textContent = `+${healAmount} HP`;
+            rainHealContainer.appendChild(rainHealVfx);
+            
+            // Create electric-blue aura around character
+            const healingAura = document.createElement('div');
+            healingAura.className = 'rain-healing-aura';
+            rainHealContainer.appendChild(healingAura);
+            
+            // Create multiple rain droplets that fall around character
+            for (let i = 0; i < 12; i++) {
+                const droplet = document.createElement('div');
+                droplet.className = 'rain-healing-droplet';
+                droplet.style.left = `${Math.random() * 120 - 10}%`;
+                droplet.style.top = `${Math.random() * 50 - 10}%`;
+                droplet.style.animationDelay = `${Math.random() * 0.8}s`;
+                droplet.style.animationDuration = `${1 + Math.random() * 0.5}s`;
+                rainHealContainer.appendChild(droplet);
+            }
+            
+            // Create lightning flash effects
+            for (let i = 0; i < 3; i++) {
+                const lightning = document.createElement('div');
+                lightning.className = 'rain-healing-lightning';
+                lightning.style.left = `${Math.random() * 100}%`;
+                lightning.style.top = `${Math.random() * 100}%`;
+                lightning.style.animationDelay = `${Math.random() * 1.5}s`;
+                rainHealContainer.appendChild(lightning);
+            }
+            
+            // Create floating heal particles with electric effect
+            const rainParticles = document.createElement('div');
+            rainParticles.className = 'rain-heal-particles';
+            rainHealContainer.appendChild(rainParticles);
+            
+            // Create storm ripple effect
+            const stormRipple = document.createElement('div');
+            stormRipple.className = 'rain-healing-ripple';
+            rainHealContainer.appendChild(stormRipple);
+            
+            // Create additional storm effect particles around the character
+            for (let i = 0; i < 8; i++) {
+                const stormParticle = document.createElement('div');
+                stormParticle.className = 'rain-heal-storm-particle';
+                stormParticle.style.left = `${Math.random() * 100}%`;
+                stormParticle.style.top = `${Math.random() * 100}%`;
+                stormParticle.style.animationDelay = `${Math.random() * 1}s`;
+                rainHealContainer.appendChild(stormParticle);
+            }
+            
+            // Create electric swirl effect
+            const electricSwirl = document.createElement('div');
+            electricSwirl.className = 'rain-heal-electric-swirl';
+            rainHealContainer.appendChild(electricSwirl);
+            
+            // Play generated rain healing sound
+            this.generateRainHealSound();
+            
+            // Remove the VFX elements after animation completes
+            setTimeout(() => {
+                if (rainHealContainer && rainHealContainer.parentNode) {
+                    rainHealContainer.parentNode.removeChild(rainHealContainer);
+                }
+            }, 2500);
+        }
+    }
+
+    // Generate gentle rain healing sound using Web Audio API
+    generateRainHealSound() {
+        try {
+            // Create audio context if it doesn't exist
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const duration = 1.5; // 1.5 seconds
+            
+            // Create main gain node for volume control
+            const mainGain = audioContext.createGain();
+            mainGain.connect(audioContext.destination);
+            mainGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+            // Generate gentle rain droplet sounds
+            this.createRainDropletSounds(audioContext, mainGain, 0, duration);
+            
+            // Generate soft healing chime
+            this.createHealingChime(audioContext, mainGain, 0.2);
+
+        } catch (error) {
+            console.warn('[Character] Could not generate rain heal sound:', error);
+        }
+    }
+
+    // Create gentle rain droplet sounds
+    createRainDropletSounds(audioContext, destination, delay, duration) {
+        const dropletCount = 8 + Math.random() * 4; // 8-12 droplets
+        
+        for (let i = 0; i < dropletCount; i++) {
+            const dropDelay = delay + Math.random() * duration * 0.8;
+            
+            // Create a short burst of filtered noise for each droplet
+            const bufferSize = audioContext.sampleRate * 0.1; // 0.1 seconds per droplet
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            // Generate soft white noise
+            for (let j = 0; j < bufferSize; j++) {
+                data[j] = (Math.random() * 2 - 1) * 0.3 * Math.pow(1 - j / bufferSize, 1.5);
+            }
+
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+
+            // Band-pass filter for water droplet sound
+            const bandPass = audioContext.createBiquadFilter();
+            bandPass.type = 'bandpass';
+            bandPass.frequency.setValueAtTime(1200 + Math.random() * 800, audioContext.currentTime);
+            bandPass.Q.setValueAtTime(3, audioContext.currentTime);
+
+            // Envelope for droplet
+            const gain = audioContext.createGain();
+            const startTime = audioContext.currentTime + dropDelay;
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.2, startTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.1);
+
+            source.connect(bandPass);
+            bandPass.connect(gain);
+            gain.connect(destination);
+
+            source.start(startTime);
+            source.stop(startTime + 0.1);
+        }
+    }
+
+    // Create soft healing chime sound
+    createHealingChime(audioContext, destination, delay) {
+        // Create a pleasant healing tone using oscillators
+        const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5 major chord
+        
+        frequencies.forEach((freq, index) => {
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+
+            // Gentle envelope for healing chime
+            const gain = audioContext.createGain();
+            const startTime = audioContext.currentTime + delay + (index * 0.1);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.15, startTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+
+            // Add slight reverb effect with delay
+            const delayNode = audioContext.createDelay();
+            delayNode.delayTime.setValueAtTime(0.1, audioContext.currentTime);
+            const delayGain = audioContext.createGain();
+            delayGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+
+            oscillator.connect(gain);
+            gain.connect(destination);
+            
+            // Connect delay line for reverb
+            gain.connect(delayNode);
+            delayNode.connect(delayGain);
+            delayGain.connect(destination);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.8);
+        });
+    }
+
     addBuff(buff) {
-        const existingBuffIndex = this.buffs.findIndex(b => b.id === buff.id);
-        let buffToApply = buff; // Reference to the buff being processed (new or existing)
-        
-        if (existingBuffIndex !== -1) {
-            const existingBuff = this.buffs[existingBuffIndex];
-            buffToApply = existingBuff; // Work with the existing buff instance
+        // Debug logging for buff name
+        const buffName = buff.name || buff.id || 'unknown buff';
+        console.log(`[AddBuff Debug] Adding ${buffName} to ${this.name}`);
+
+        if (buff && buff.id === 'lunar_empowerment_buff') {
+            console.log(`[Character.js DEBUG] addBuff: Adding lunar_empowerment_buff. Current character buffs:`, JSON.stringify(this.buffs.map(b => b.id)));
+            console.log(`[Character.js DEBUG] lunar_empowerment_buff object being added:`, JSON.stringify(buff));
+        }
+
+        // <<< NEW: Specific log for Low Tide Power >>>
+        if (buff && buff.id === 'low_tide_power_buff') {
+            console.log(`%c[DEBUG-LOWTIDE] addBuff called for Low Tide Power buff on ${this.name}`, 'color: blue; font-weight: bold;');
+        }
+        // <<< END NEW >>>
+
+        // --- NEW: Apply Lasting Protection talent effect ---
+        if (this.buffDurationBonus && this.buffDurationBonus > 0 && buff.duration) {
+            const originalDuration = buff.duration;
+            buff.duration += this.buffDurationBonus;
+            console.log(`[AddBuff] ${this.name} has Lasting Protection: ${buffName} duration ${originalDuration} → ${buff.duration} (+${this.buffDurationBonus} turns)`);
             
-            // --- MODIFIED: Handle Stacking Buffs --- 
-            console.log(`[AddBuff DEBUG - Existing] Found existing buff: ID=${existingBuff.id}, Name=${existingBuff.name}, Stackable=${existingBuff.stackable}, Stacks=${existingBuff.currentStacks}`);
+            // Show visual effect for Lasting Protection talent
+            if (window.showLastingProtectionVFX && typeof window.showLastingProtectionVFX === 'function') {
+                window.showLastingProtectionVFX(this, buffName, originalDuration, buff.duration);
+            }
+            
+            // Add log entry
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`${this.name}'s Lasting Protection extends ${buffName} by ${this.buffDurationBonus} turns.`, 'talent-effect');
+            }
+        }
+        // --- END NEW ---
 
-            if (existingBuff.stackable) { 
-                const oldStacks = existingBuff.currentStacks || 1;
-                existingBuff.currentStacks = Math.min(
-                    oldStacks + 1,
-                    existingBuff.maxStacks || Infinity
-                );
-                const newStacks = existingBuff.currentStacks;
-
-                console.log(`Incremented stack for buff: ${existingBuff.name} on ${this.name} from ${oldStacks} to ${newStacks}`);
-
-                // Directly apply stat change for the added stack
-                if (existingBuff.statModifiers && newStacks > oldStacks) {
-                    Object.keys(existingBuff.statModifiers).forEach(stat => {
-                        if (this.stats[stat] !== undefined) {
-                            const valuePerStack = existingBuff.statModifiers[stat];
-                            if (typeof valuePerStack === 'number') {
-                                const addedValue = valuePerStack * (newStacks - oldStacks);
-                                const oldValue = this.stats[stat];
-                                this.stats[stat] += addedValue;
-                                console.log(`[AddBuff Direct Apply - ${this.name}] Applied +${addedValue} to ${stat} from ${existingBuff.name} (New Stack). Old: ${oldValue}, New: ${this.stats[stat]}`);
-                            }
-                        }
-                    });
-                }
-                
-                // Refresh duration to the new buff's duration
-                existingBuff.duration = buff.duration; 
-                
-                // Update description if method exists
-                if (typeof existingBuff.updateDescription === 'function') {
-                    existingBuff.updateDescription();
-                }
-                
+        // ---- THUNDER PERCEPTION TALENT HOOK ----
+        // Check for Thunder Perception talent (added directly in Character class for reliability)
+        if (this.critOnBuff === true && buff) {
+            const isThunderPerceptionBuff = buff.id && buff.id.startsWith('thunder_perception_crit_');
+            if (!isThunderPerceptionBuff) {
+                console.log(`[Character.addBuff] ${this.name} has critOnBuff talent and is receiving non-TP buff: ${buffName}`);
+                this._shouldApplyThunderPerception = true;
+                this._triggeringBuff = buff;
             } else {
-                // Non-stackable: Just refresh duration (keep longest)
-                existingBuff.duration = Math.max(existingBuff.duration, buff.duration);
-                console.log(`Refreshed duration for non-stackable buff: ${existingBuff.name} on ${this.name}`);
+                console.log(`[Character.addBuff] Skipping Thunder Perception check for TP buff`);
+            }
+        }
+        // ---- END THUNDER PERCEPTION TALENT HOOK ----
+
+        // ... (Original addBuff logic: Find existing, add new buff, apply onApply, recalculate stats) ...
+        // --- NOTE: Make sure this part adds the *original* buff to this.buffs and calls recalculateStats --- 
+        const existingBuff = this.buffs.find(b => b.id === buff.id);
+        let buffAppliedSuccessfully = false;
+        
+        if (existingBuff) {
+            // ... (handle existing buff: stacks, duration refresh) ...
+            this.recalculateStats('addBuff-refresh'); // Recalculate after refreshing existing
+            buffAppliedSuccessfully = true;
+        } else {
+            // ... (handle adding new buff: clone, push to this.buffs, apply onApply) ...
+            if (buff.onApply && typeof buff.onApply === 'function') {
+                const onApplyResult = buff.onApply(this);
+                if (onApplyResult === false) {
+                    console.log(`onApply for buff ${buffName} returned false, buff not applied`);
+                    // If onApply fails, don't add the buff and don't trigger TP
+                    this._shouldApplyThunderPerception = false; 
+                    return false; 
+                }
+            }
+            this.buffs.push(buff); // Add the processed original buff
+            console.log(`Added buff: ${buffName} to ${this.name}`);
+            this.recalculateStats('addBuff-new'); // Recalculate after adding new
+            buffAppliedSuccessfully = true;
+        }
+        // --- END Original addBuff logic --- 
+
+        // ---- APPLY THUNDER PERCEPTION AFTER ORIGINAL BUFF IS ADDED ----
+        if (this._shouldApplyThunderPerception && this.critOnBuff === true) {
+            console.log(`[Character.addBuff] Applying Thunder Perception buff for ${this.name} after ${this._triggeringBuff.name || this._triggeringBuff.id}`);
+            this._shouldApplyThunderPerception = false; // Reset flag
+            
+            // Create the Thunder Perception buff object
+            const critBuff = {
+                id: `thunder_perception_crit_${Date.now()}`, // Unique ID for stacking
+                name: "Thunder Perception",
+                duration: 3, // 3 turns duration
+                icon: "Icons/abilities/lightning_orb.webp", 
+                description: "Increased Critical Chance from Thunder Perception talent.",
+                onApply: (target) => {
+                    target.bonusCritChance = (target.bonusCritChance || 0) + 0.10;
+                    // Note: recalculateStats will be called after adding this buff
+                    if (window.gameManager?.addLogEntry) {
+                        window.gameManager.addLogEntry(`${target.name}'s Thunder Perception activates! +10% Critical Chance for 3 turns.`, 'system-update');
+                    } else {
+                        console.log(`${target.name}'s Thunder Perception activates! +10% Critical Chance for 3 turns.`);
+                    }
+                    return true;
+                },
+                onRemove: (target) => {
+                    target.bonusCritChance = (target.bonusCritChance || 0) - 0.10;
+                    target.recalculateStats('thunder-perception-crit-removed'); // Recalculate when removed
+                    if (window.gameManager?.addLogEntry) {
+                        window.gameManager.addLogEntry(`${target.name}'s Thunder Perception Critical Chance buff fades.`, 'system');
+                    } else {
+                        console.log(`${target.name}'s Thunder Perception Critical Chance buff fades.`);
+                    }
+                    return true;
+                },
+                // Ensure it doesn't trigger itself or other unwanted effects
+                isDebuff: false,
+                maxStacks: Infinity, // Allow stacking
+                stacks: 1
+            };
+            
+            // --- Directly add the crit buff --- 
+            // Apply its onApply effect manually
+            if (critBuff.onApply) {
+                critBuff.onApply(this); 
+            }
+            // Push to the buffs array
+            this.buffs.push(critBuff);
+            console.log(`[Character.addBuff] Directly added Thunder Perception buff (ID: ${critBuff.id}) to ${this.name}`);
+            
+            // Recalculate stats *after* manually adding the TP buff
+            this.recalculateStats('addBuff-thunder-perception');
+            
+            // --- END Direct add --- 
+            
+            // ... (VFX and sound logic remains the same) ...
+            // Create visual effect if possible
+            if (window.gameManager && typeof window.gameManager.uiManager !== 'undefined') {
+                // Add the visual effect
+                try {
+                    const charElement = document.getElementById(`character-${this.instanceId}`);
+                    if (charElement) {
+                        // Create crit effect container
+                        const critEffect = document.createElement('div');
+                        critEffect.className = 'thunder-perception-effect';
+                        charElement.appendChild(critEffect);
+                        
+                        // Create crit text
+                        const critText = document.createElement('div');
+                        critText.className = 'thunder-perception-text';
+                        critText.textContent = '+10% CRIT';
+                        critEffect.appendChild(critText);
+                        
+                        // Remove effect after animation completes
+                        setTimeout(() => {
+                            critEffect.remove();
+                        }, 2000);
+                    }
+                } catch (e) {
+                    console.error(`Error creating Thunder Perception VFX: ${e.message}`);
+                }
             }
             
-        } else {
-            // Buff doesn't exist, add it
-            buffToApply = buff.clone(); // Clone the new buff before adding
-            buffToApply.character = this; // Assign character reference
-            this.buffs.push(buffToApply);
-
-            // Initialize stacks if stackable
-            if (buffToApply.stackable) {
-                buffToApply.currentStacks = 1;
+            // Play sound if possible
+            if (window.gameManager && typeof window.gameManager.playSound === 'function') {
+                window.gameManager.playSound('sounds/buff_applied.mp3', 0.6);
             }
-
-             // Initial application of stats for the first stack
-             if (buffToApply.statModifiers) {
-                 Object.keys(buffToApply.statModifiers).forEach(stat => {
-                     if (this.stats[stat] !== undefined) {
-                         const valuePerStack = buffToApply.statModifiers[stat];
-                         if (typeof valuePerStack === 'number') {
-                             const oldValue = this.stats[stat];
-                             this.stats[stat] += valuePerStack; // Apply for the first stack
-                              console.log(`[AddBuff Direct Apply - ${this.name}] Applied initial +${valuePerStack} to ${stat} from new buff ${buffToApply.name}. Old: ${oldValue}, New: ${this.stats[stat]}`);
-                         }
-                     }
-                 });
-             }
-
-            console.log(`Added buff: ${buffToApply.name} to ${this.name}`);
-
-            // Call passive handler's onBuffAdded method if it exists
-            if (this.passiveHandler && typeof this.passiveHandler.onBuffAdded === 'function') {
-                this.passiveHandler.onBuffAdded(this);
-            }
+            // Clean up temporary trigger buff
+            this._triggeringBuff = null;
         }
+        // ---- END THUNDER PERCEPTION APPLICATION ----
         
-        // --- ADD DEBUG LOG --- 
-        const finalBuffCheck = this.buffs.find(b => b.id === buff.id);
-        if (finalBuffCheck) {
-            console.log(`[AddBuff DEBUG] Before final recalculate. Buff ${finalBuffCheck.name} stacks: ${finalBuffCheck.currentStacks || 'undefined'}, duration: ${finalBuffCheck.duration}`);
-        } else {
-            console.log(`[AddBuff DEBUG] Before final recalculate. Buff ${buff.name} was just added or not found.`);
+        // --- STATISTICS TRACKING: Record buff application ---
+        if (buffAppliedSuccessfully && window.statisticsManager && buff.appliedBy) {
+            window.statisticsManager.recordStatusEffect(buff.appliedBy, this, 'buff', buff.id, false, buff.abilityId);
         }
-        // --- END DEBUG LOG --- 
+        // --- END STATISTICS TRACKING ---
 
-        // <<< NEW: Log before specific recalculate call >>>
-        console.log(`[AddBuff ${this.name}] Calling recalculateStats after modifying ${buff.name} (ID: ${buff.id}, Stacks: ${finalBuffCheck?.currentStacks})`);
-        
-        // Recalculate stats AFTER adding or modifying the buff (mainly for clamping/other effects now)
-        this.recalculateStats('addBuff'); // Pass context
+        // --- DISPATCH BuffApplied EVENT ---
+        if (buffAppliedSuccessfully) {
+            const event = new CustomEvent('BuffApplied', { 
+                detail: { 
+                    character: this, 
+                    buff: buff // The original buff object that was added/refreshed
+                } 
+            });
+            document.dispatchEvent(event);
+            console.log(`[Character.addBuff] Dispatched BuffApplied event for ${this.name} with buff ${buff.name || buff.id}`);
+        }
+        // --- END DISPATCH BuffApplied EVENT ---
 
-        // <<< NEW: Log AFTER specific recalculate call >>>
-        console.log(`[AddBuff ${this.name}] Stats AFTER recalculate called from addBuff: `, JSON.parse(JSON.stringify(this.stats))); // Log a deep copy
+        // NEW: Update shield if buff was applied successfully
+        if (buffAppliedSuccessfully) {
+            this.updateShield();
+        }
 
-        updateCharacterUI(this); // Update UI at the end
+        // Return the status of applying the *original* buff
+        return buffAppliedSuccessfully; 
     }
 
     addDebuff(debuff) {
-        // Similar logic for debuffs if needed, check for existing and refresh/add
+        // Check if we're dealing with a special case for stacking Target Lock
+        const isStackingTargetLock = debuff.id === 'farmer_nina_e_target_lock' && 
+                                     debuff.isPermanent === true && 
+                                     debuff.stackCount > 0;
+                                     
+        // Special handling for stacking debuffs - we've already removed the previous one
+        if (isStackingTargetLock) {
+            // Just add the new debuff with its stack count
+            this.debuffs.push(debuff);
+            debuff.character = this; // Assign character reference
+            
+            console.log(`[Stacking Debuff] Added ${debuff.name} with ${debuff.stackCount} stacks to ${this.name}`);
+            
+            // Call onApply if it exists
+            if (typeof debuff.onApply === 'function') {
+                try {
+                    debuff.onApply(this);
+                } catch (e) {
+                    console.error(`Error executing onApply for stacking debuff ${debuff.id} on ${this.name}:`, e);
+                }
+            }
+            
+            // Recalculate stats after adding the debuff
+            this.recalculateStats();
+            updateCharacterUI(this);
+            return;
+        }
+        
+        // Regular debuff handling (non-stacking cases)
         const existingDebuffIndex = this.debuffs.findIndex(d => d.id === debuff.id);
         if (existingDebuffIndex !== -1) {
-             this.debuffs[existingDebuffIndex].duration = Math.max(this.debuffs[existingDebuffIndex].duration, debuff.duration);
-             console.log(`Refreshed duration for debuff: ${debuff.name} on ${this.name}`);
+            // For permanent debuffs (duration -1), don't reset duration
+            if (this.debuffs[existingDebuffIndex].duration === -1) {
+                console.log(`Kept permanent debuff: ${debuff.name} on ${this.name}`);
+            } else if (debuff.duration === -1) {
+                // If new debuff is permanent but existing isn't, make it permanent
+                this.debuffs[existingDebuffIndex].duration = -1;
+                console.log(`Upgraded debuff: ${debuff.name} on ${this.name} to permanent`);
+            } else {
+                // Normal case: take the longer duration
+                this.debuffs[existingDebuffIndex].duration = Math.max(this.debuffs[existingDebuffIndex].duration, debuff.duration);
+                console.log(`Refreshed duration for debuff: ${debuff.name} on ${this.name}`);
+            }
         } else {
             this.debuffs.push(debuff);
             debuff.character = this; // Assign character reference
 
-            // --- NEW: Call onApply if it exists --- 
+            // Call onApply if it exists
             if (typeof debuff.onApply === 'function') {
                 try {
                     debuff.onApply(this); // Pass the character instance
@@ -1083,9 +2563,14 @@ class Character {
                      console.error(`Error executing onApply for debuff ${debuff.id} on ${this.name}:`, e);
                 }
             }
-            // --- END NEW ---
 
             console.log(`Added debuff: ${debuff.name} to ${this.name}`);
+            
+            // --- STATISTICS TRACKING: Record debuff application ---
+            if (window.statisticsManager && debuff.appliedBy) {
+                window.statisticsManager.recordStatusEffect(debuff.appliedBy, this, 'debuff', debuff.id, true, debuff.abilityId);
+            }
+            // --- END STATISTICS TRACKING ---
             
             // Recalculate stats after adding the debuff
             this.recalculateStats();
@@ -1098,28 +2583,49 @@ class Character {
         if (index !== -1) {
             const buffToRemove = this.buffs[index]; // Get the buff object first
 
+            // <<< NEW: Specific log for Low Tide Power >>>
+            if (buffToRemove && buffToRemove.id === 'low_tide_power_buff') {
+                console.log(`%c[DEBUG-LOWTIDE] removeBuff called for Low Tide Power buff on ${this.name}`, 'color: orange; font-weight: bold;');
+            }
+            // <<< END NEW >>>
+
             // --- MODIFIED: Check for and call .remove() --- 
             if (typeof buffToRemove.remove === 'function') {
                 try {
-                    buffToRemove.remove(this); // Call the buff's specific remove logic
+                    // MODIFIED: Call onRemove which might modify character stats or have side effects
+                    buffToRemove.onRemove(this);
                 } catch (e) {
-                    console.error(`Error executing remove() for buff ${buffToRemove.id} on ${this.name}:`, e);
+                    console.error(`Error executing onRemove() for buff ${buffToRemove.id} on ${this.name}:`, e);
                 }
             }
             // --- END MODIFIED ---
 
+            // Remove the buff from the array AFTER calling onRemove
             this.buffs.splice(index, 1);
-            console.log(`Removed buff: ${buffId} from ${this.name}`);
+            console.log(`Removed buff: ${buffToRemove.name} from ${this.name}`);
             
-            // Recalculate stats AFTER removing the buff
-            this.recalculateStats(); 
+            // Recalculate stats AFTER onRemove has been called and buff is removed from array
+            this.recalculateStats('removeBuff');
 
-            if (typeof updateCharacterUI === 'function') {
-                updateCharacterUI(this); // Update UI after removing the buff
-            }
-        } else {
-             console.log(`Attempted to remove non-existent buff ID: ${buffId} from ${this.name}`);
+            // --- DISPATCH BuffRemoved EVENT ---
+            const event = new CustomEvent('BuffRemoved', { 
+                detail: { 
+                    character: this, 
+                    buffId: buffId,
+                    buff: buffToRemove // The buff object that was removed
+                } 
+            });
+            document.dispatchEvent(event);
+            console.log(`[Character.removeBuff] Dispatched BuffRemoved event for ${this.name} with buff ${buffToRemove.name || buffToRemove.id}`);
+            // --- END DISPATCH BuffRemoved EVENT ---
+
+            // NEW: Update shield after removing buff
+            this.updateShield();
+
+            updateCharacterUI(this); // Update UI after all operations
+            return true;
         }
+        return false;
     }
 
     removeDebuff(debuffId) {
@@ -1154,15 +2660,59 @@ class Character {
     }
 
     processEffects(shouldReduceDuration = false, shouldRegenerateResources = true) {
-        if (shouldReduceDuration) {
-            console.log(`[DEBUG] Processing effects for ${this.name} WITH duration reduction`);
+        if (!this.stats) {
+            console.error(`processEffects called on character ${this.name || this.id} with no stats object.`);
+            return;
         }
-        
-        // Process buffs
+
+        // --- NEW: Turn Start Hooks for Buffs/Debuffs ---
+        // Call onTurnStart for buffs
+        this.buffs.forEach(buff => {
+            if (typeof buff.onTurnStart === 'function') {
+                try {
+                    buff.onTurnStart(this);
+                } catch (error) {
+                    console.error(`Error executing onTurnStart for buff ${buff.name || buff.id}:`, error);
+                }
+            }
+        });
+        // Call onTurnStart for debuffs
+        this.debuffs.forEach(debuff => {
+            if (typeof debuff.onTurnStart === 'function') {
+                try {
+                    debuff.onTurnStart(this);
+                } catch (error) {
+                    console.error(`Error executing onTurnStart for debuff ${debuff.name || debuff.id}:`, error);
+                }
+            }
+        });
+        // --- END Turn Start Hooks ---
+
+        // --- Passive Hook: onTurnStart ---
+        if (this.passiveHandler && typeof this.passiveHandler.onTurnStart === 'function') {
+            try {
+                // Get current turn number from game manager
+                const currentTurn = window.gameManager ? window.gameManager.turnNumber : 1;
+                
+                // Call with character and turn number parameters
+                this.passiveHandler.onTurnStart(this, currentTurn);
+            } catch (error) {
+                console.error(`Error executing onTurnStart passive for ${this.name}:`, error);
+            }
+        }
+        // --- END Passive Hook ---
+
+        // Process buffs first
+        // Loop backwards to handle removals safely
         for (let i = this.buffs.length - 1; i >= 0; i--) {
             const buff = this.buffs[i];
-            
-            // Apply buff effect (per-turn effects, not stat mods which are handled by recalculateStats)
+
+            // ---> ADDED LOGGING 1 <---
+            if (buff.id === 'farmer_nina_w_hiding_buff') {
+                console.log(`%c[HIDING DEBUG - Loop Check 1] Processing Hiding buff. Index: ${i}, Duration BEFORE Decrement: ${buff.duration}, wasHidingBroken: ${buff.wasHidingBroken}`, 'color: cyan');
+            }
+
+            // Apply buff effect (per-turn effects)
             if (typeof buff.effect === 'function') {
                 try {
                     buff.effect(this);
@@ -1170,35 +2720,73 @@ class Character {
                     console.error("Error applying buff effect:", error);
                 }
             }
-            
-            // Reduce duration only if shouldReduceDuration is true
-            if (shouldReduceDuration) {
-                buff.duration--;
-                console.log(`[DEBUG] ${this.name}'s buff ${buff.name || buff.id} reduced to ${buff.duration} turns remaining`);
-            }
-            
-            // Remove if expired
-            if (buff.duration <= 0) {
-                // Store buff details before removing for logging
-                const buffId = buff.id;
-                const buffName = buff.name || 'buff';
-                const characterName = this.name || 'character';
 
-                // Call removeBuff which handles recalculation and removal logic
-                this.removeBuff(buffId); 
-                
-                // Logging moved inside removeBuff or handled separately if needed
+            // MODIFIED: Apply onTurnEnd effect only if durations are being reduced
+            if (shouldReduceDuration && typeof buff.onTurnEnd === 'function') {
                 try {
-                    if (window.gameManager) {
-                        window.gameManager.addLogEntry(`${characterName}'s ${buffName} effect has expired.`);
-                    } else {
-                        addLogEntry(`${characterName}'s ${buffName} effect has expired.`);
+                    buff.onTurnEnd(this);
+                } catch (error) {
+                    console.error(`Error applying onTurnEnd for buff ${buff.name || buff.id}:`, error);
+                }
+            }
+
+            // Reduce duration only if shouldReduceDuration is true AND duration is not permanent (-1)
+            if (shouldReduceDuration && buff.duration !== -1) {
+                buff.duration--;
+                // Set flag for UI animation when duration changes
+                buff.durationChanged = true;
+                // ---> ADDED LOGGING 2 <---
+                if (buff.id === 'farmer_nina_w_hiding_buff') {
+                     console.log(`%c[HIDING DEBUG - Loop Check 2] Hiding buff duration AFTER Decrement: ${buff.duration}, wasHidingBroken: ${buff.wasHidingBroken}`, 'color: cyan');
+                } else {
+                     console.log(`[DEBUG] ${this.name}'s buff ${buff.name || buff.id} reduced to ${buff.duration} turns remaining`);
+                }
+            }
+
+            // ---> ADDED LOGGING 3 <---
+            if (buff.id === 'farmer_nina_w_hiding_buff') {
+                console.log(`%c[HIDING DEBUG - Loop Check 3] BEFORE expiration check. Duration: ${buff.duration}, wasHidingBroken: ${buff.wasHidingBroken}`, 'color: cyan');
+            }
+
+            // Remove if expired (duration <= 0 and not permanent)
+            // ---> MODIFIED CHECK TO <= 0 <---
+            if (buff.duration !== -1 && buff.duration <= 0) {
+                // ---> ADDED LOGGING 4 <---
+                if (buff.id === 'farmer_nina_w_hiding_buff') {
+                     console.log(`%c[HIDING DEBUG - Loop Check 4] Entered EXPIRATION block (duration <= 0). Duration: ${buff.duration}, wasHidingBroken: ${buff.wasHidingBroken}`, 'color: magenta; font-weight: bold;');
+                }
+
+                const buffName = buff.name || buff.id;
+                console.log(`[DEBUG] Buff ${buffName} on ${this.name} expired.`);
+
+                if (buff.id === 'farmer_nina_w_hiding_buff') {
+                    console.warn(`%c[HIDING DEBUG - processEffects] Removing expired hiding buff. Current wasHidingBroken state: ${buff.wasHidingBroken}`, 'color: orange; font-weight: bold;');
+                }
+
+                if (typeof buff.onRemove === 'function') {
+                     // ... existing try/catch for onRemove ...
+                     try {
+                        console.log(`[DEBUG] Calling onRemove for ${buffName}`);
+                        buff.onRemove(this); // Call the buff's specific remove logic
+                    } catch (error) {
+                        console.error(`Error executing onRemove for buff ${buffName}:`, error);
                     }
+                }
+                // Remove from the array
+                this.buffs.splice(i, 1); // <<< REMOVED AFTER onRemove IS CALLED >>>
+
+                // Log expiration
+                try {
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+                    log(`${this.name}'s ${buffName} effect has expired.`);
                 } catch (error) {
                     console.error("Error logging buff expiration:", error);
                 }
+
+                // <<< IMPORTANT: Recalculate stats AFTER removal >>>
+                this.recalculateStats('processEffects-buff-removed');
             }
-        }
+        } // End of buff loop
 
         // Process debuffs (similar loop)
         for (let i = this.debuffs.length - 1; i >= 0; i--) {
@@ -1244,10 +2832,10 @@ class Character {
                 }
             }
 
-            // NEW: Apply onTurnEnd effect if it exists
-            if (typeof debuff.onTurnEnd === 'function') {
+            // MODIFIED: Apply onTurnEnd effect only if durations are being reduced
+            if (shouldReduceDuration && typeof debuff.onTurnEnd === 'function') {
                 try {
-                    debuff.onTurnEnd(this); 
+                    debuff.onTurnEnd(this);
                 } catch (error) {
                     console.error(`Error applying onTurnEnd for debuff ${debuff.name || debuff.id}:`, error);
                 }
@@ -1256,40 +2844,42 @@ class Character {
             // Reduce duration only if shouldReduceDuration is true AND duration is not permanent (-1)
             if (shouldReduceDuration && debuff.duration !== -1) {
                 debuff.duration--;
+                // Set flag for UI animation when duration changes
+                debuff.durationChanged = true;
                 console.log(`[DEBUG] ${this.name}'s debuff ${debuff.name || debuff.id} reduced to ${debuff.duration} turns remaining`);
             }
 
             // Remove if expired (duration > 0 and reaches 0)
             if (debuff.duration === 0) { // Check for exactly 0, ignoring permanent -1
-                 // Store details for logging
-                const debuffId = debuff.id;
-                const debuffName = debuff.name || 'debuff';
-                const characterName = this.name || 'character';
-
-                // Call removeDebuff which handles recalculation and removal logic
-                this.removeDebuff(debuffId);
-
+                // <<< MODIFICATION: Call onRemove directly >>>
+                const debuffName = debuff.name || debuff.id;
+                console.log(`[DEBUG] Debuff ${debuffName} on ${this.name} expired.`);
+                if (typeof debuff.onRemove === 'function') {
+                    try {
+                        console.log(`[DEBUG] Calling onRemove for ${debuffName}`);
+                        debuff.onRemove(this);
+                    } catch (error) {
+                        console.error(`Error executing onRemove for debuff ${debuffName}:`, error);
+                    }
+                }
+                // Remove from the array
+                this.debuffs.splice(i, 1);
+                // <<< END MODIFICATION >>>
+                
+                // Log expiration
                 try {
                     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-                    log(`${characterName}'s ${debuffName} effect has expired.`);
+                    log(`${this.name}'s ${debuffName} effect has expired.`);
                 } catch (error) {
                     console.error("Error logging debuff expiration:", error);
                 }
+                
+                // <<< IMPORTANT: Recalculate stats AFTER removal >>>
+                this.recalculateStats('processEffects-debuff-removed');
             }
         }
 
-        // --- Passive Hook: onTurnStart ---
-        // This hook is called BEFORE duration reduction and resource regen for the turn
-        if (this.passiveHandler && typeof this.passiveHandler.onTurnStart === 'function') {
-            try {
-                this.passiveHandler.onTurnStart(this);
-            } catch (error) {
-                console.error(`Error executing onTurnStart passive for ${this.name}:`, error);
-            }
-        }
-        // --- END Passive Hook ---
-
-        // NEW: Process ability disable durations
+        // --- NEW: Process ability disable durations ---
         this.abilities.forEach(ability => {
             if (ability.isDisabled && shouldReduceDuration) {
                 ability.disabledDuration--;
@@ -1308,130 +2898,15 @@ class Character {
             this.regenerateResources();
         }
 
+        // NEW: Update shield after processing effects (buffs may have expired)
+        this.updateShield();
+
         // Update UI after processing all effects for the turn
         updateCharacterUI(this);
     }
 
     addAbility(ability) {
         this.abilities.push(ability);
-    }
-
-    // Use an ability with the given index on a target or targets
-    useAbility(abilityIndex, target) {
-        if (abilityIndex < 0 || abilityIndex >= this.abilities.length) {
-            console.error(`Invalid ability index: ${abilityIndex} for ${this.name}`);
-            return false;
-        }
-        
-        const ability = this.abilities[abilityIndex];
-
-        // --- NEW: Check for 'It finally rains!' modifier for zero mana cost ---
-        let actualManaCost = ability.manaCost;
-        let skipManaCheck = false;
-        if (window.gameManager && window.gameManager.stageManager) {
-            const rainModifier = window.gameManager.stageManager.getStageModifier('it_finally_rains');
-            if (rainModifier && !this.isAI) { // Only affects player characters
-                skipManaCheck = true;
-                actualManaCost = 0; // Although we skip the check, conceptually the cost is 0
-                // Optional: Log this event?
-                // const log = window.gameManager.addLogEntry.bind(window.gameManager);
-                // log(`${this.name}'s ${ability.name} costs 0 mana due to rain!`);
-            }
-        }
-        // --- END NEW ---
-
-        // --- PRE-CHECKS (Modified for mana cost) ---
-        if (ability.isDisabled) {
-             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-             log(`${this.name}'s ${ability.name} is disabled.`);
-             return false;
-        }
-        if (ability.currentCooldown > 0) {
-            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-            log(`${ability.name} is on cooldown: ${ability.currentCooldown} turns remaining`);
-            return false;
-        }
-        // --- MODIFIED MANA CHECK ---
-        if (!skipManaCheck && this.stats.currentMana < actualManaCost) { 
-        // --- END MODIFIED MANA CHECK ---
-            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-            log(`${this.name} has not enough mana to use ${ability.name}`);
-            return false;
-        }
-         if (this.isStunned()) {
-             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-             log(`${this.name} is stunned and cannot use ${ability.name}.`);
-             return false;
-         }
-        // --- END PRE-CHECKS ---
-
-        // --- Check for Ability Disable Debuff ---
-        const disableDebuff = this.debuffs.find(d => 
-            d.effects && 
-            d.effects.disabledAbilityIndex === abilityIndex
-        );
-        if (disableDebuff) {
-            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-            log(`${this.name} cannot use ${ability.name} because it is disabled by ${disableDebuff.name}.`);
-            return false;
-        }
-        // --- END Ability Disable Check ---
-
-        // --- NEW: Shoma -> Julia Interaction Sound ---
-        let targetIsJulia = false;
-        if (Array.isArray(target)) {
-            targetIsJulia = target.some(t => t && t.id === 'schoolgirl_julia');
-        } else if (target) {
-            targetIsJulia = target.id === 'schoolgirl_julia';
-        }
-
-        // Play interaction sound if Shoma targets Julia with ANY ability
-        if (this.id === 'schoolboy_shoma' && targetIsJulia) { 
-            // <<< ADD DEBUG LOGS HERE >>>
-            console.log(`[DEBUG Interaction Sound] Condition met! Caster: ${this.name}, Target is Julia: ${targetIsJulia}, Ability: ${ability.name}`);
-            const interactionSounds = ['sounds/julia_shoma.mp3', 'sounds/julia_shoma2.mp3'];
-            const randomSound = interactionSounds[Math.floor(Math.random() * interactionSounds.length)];
-            console.log(`[DEBUG Interaction Sound] Chosen sound: ${randomSound}`);
-            const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
-            if (typeof playSound === 'function') {
-                 console.log(`[DEBUG Interaction Sound] Calling playSound function.`);
-                 playSound(randomSound);
-            } else {
-                 console.error(`[DEBUG Interaction Sound] playSound function not found or not a function!`);
-            }
-            // Optional: Keep or remove the specific log message
-            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-            log(`${this.name} used ${ability.name} on Julia! (Interaction sound played)`); 
-        } else {
-             // <<< ADD DEBUG LOG HERE >>>
-             if (this.id === 'schoolboy_shoma') {
-                 console.log(`[DEBUG Interaction Sound] Condition NOT met. Caster: ${this.name}, Target is Julia: ${targetIsJulia}, Ability: ${ability.name}`);
-             }
-        }
-        // --- END NEW ---
-
-        // Use the ability and apply its effect
-        // Pass the target(s) directly to the ability's use method
-        // --- MODIFIED: Pass actualManaCost to ability.use --- 
-        const success = ability.use(this, target, actualManaCost);
-        // --- END MODIFIED --- 
-        
-        // Dispatch a custom event for VFX only if successful
-        if (success) {
-            const abilityUsedEvent = new CustomEvent('AbilityUsed', {
-                detail: {
-                    caster: this,
-                    target: target, // Pass original target info
-                    ability: ability
-                }
-            });
-            document.dispatchEvent(abilityUsedEvent);
-        } else {
-            // Log if ability.use returned false for some internal reason
-            console.warn(`${this.name}'s attempt to use ${ability.name} returned false.`);
-        }
-        
-        return success;
     }
 
     resetAbilityCooldowns() {
@@ -1458,6 +2933,12 @@ class Character {
     hasBuff(buffId) {
         return this.buffs.some(buff => buff.id === buffId);
     }
+    
+    // --- NEW: Helper method to check for Desperate Strength buff ---
+    hasDesperateStrength() {
+        return this.buffs.some(buff => buff.id === 'desperate_strength_buff');
+    }
+    // --- END NEW ---
 
     // --- NEW: Check if character is untargetable by abilities due to buffs ---
     isUntargetable() {
@@ -1525,6 +3006,159 @@ class Character {
         
         return this.debuffs;
     }
+
+    /*
+     * Check if this character has a specific talent
+     * @param {string} talentId - The talent ID to check
+     * @returns {boolean} - Whether the character has the talent
+     */
+    hasTalent(talentId) {
+        if (!this.appliedTalents || !Array.isArray(this.appliedTalents)) {
+            return false;
+        }
+        return this.appliedTalents.includes(talentId);
+    }
+
+    // NEW: Shield calculation methods
+    calculateMysticBarrierShield() {
+        if (!this.enableMysticBarrier) return 0;
+        
+        // Count non-permanent buffs
+        const nonPermanentBuffs = this.buffs.filter(buff => 
+            !buff.isPermanent && 
+            buff.duration > 0
+        );
+        
+        const shieldAmount = nonPermanentBuffs.length * 400;
+        console.log(`[${this.name}] Mystic Barrier: ${nonPermanentBuffs.length} buffs = ${shieldAmount} shield`);
+        return shieldAmount;
+    }
+
+    updateShield() {
+        if (this.enableMysticBarrier) {
+            const newShield = this.calculateMysticBarrierShield();
+            const oldShield = this.shield;
+            this.shield = newShield;
+            
+            if (newShield !== oldShield && window.gameManager) {
+                if (newShield > oldShield) {
+                    window.gameManager.addLogEntry(`${this.name}'s Mystic Barrier increases to ${newShield} shield!`, 'zoey talent-effect');
+                } else if (newShield < oldShield && oldShield > 0) {
+                    window.gameManager.addLogEntry(`${this.name}'s Mystic Barrier decreases to ${newShield} shield.`, 'zoey talent-effect');
+                }
+            }
+        }
+    }
+    
+    // Update the stats menu if it's currently open and showing this character
+    updateStatsMenuIfOpen() {
+        if (window.gameManager && window.gameManager.characterStatsMenu) {
+            const statsMenu = window.gameManager.characterStatsMenu;
+            
+            // Check if the stats menu is visible and if it's showing this character
+            if (statsMenu.style.display === 'block') {
+                // Get the character name from the menu header to check if it matches this character
+                const headerElement = statsMenu.querySelector('.stats-menu-header');
+                if (headerElement && headerElement.textContent === this.name) {
+                    // Refresh the stats menu with updated data
+                    console.log(`[UpdateStatsMenu] Refreshing stats menu for ${this.name} due to stat changes`);
+                    
+                    // Get the current position of the menu (if available)
+                    const rect = statsMenu.getBoundingClientRect();
+                    const x = rect.left;
+                    const y = rect.top;
+                    
+                    // Re-render the stats menu with updated stats
+                    window.gameManager.showCharacterStatsMenu(this, x, y);
+                }
+            }
+        }
+    }
+    
+    // Enhanced dodge VFX method for all characters (except Zoey who has custom implementation)
+    showEnhancedDodgeVFX() {
+        // Get character element
+        const charElement = document.getElementById(`character-${this.instanceId || this.id}`);
+        if (!charElement) return;
+        
+        // Create VFX container
+        const dodgeVfx = document.createElement('div');
+        dodgeVfx.className = 'dodge-vfx';
+        
+        // Create the DODGE! text
+        const dodgeText = document.createElement('div');
+        dodgeText.className = 'dodge-text';
+        dodgeText.textContent = 'DODGE!';
+        dodgeVfx.appendChild(dodgeText);
+        
+        // Create dodge particles
+        const dodgeParticles = document.createElement('div');
+        dodgeParticles.className = 'dodge-particles';
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'dodge-particle';
+            // Add random particle direction variables
+            const dx = (Math.random() - 0.5) * 60; // Random X direction
+            const dy = (Math.random() - 0.5) * 40 - 20; // Random Y direction (bias upward)
+            particle.style.setProperty('--dx', `${dx}px`);
+            particle.style.setProperty('--dy', `${dy}px`);
+            dodgeParticles.appendChild(particle);
+        }
+        dodgeVfx.appendChild(dodgeParticles);
+        
+        // Create afterimage effect
+        const characterImage = charElement.querySelector('.character-image');
+        if (characterImage) {
+            const afterimage = document.createElement('div');
+            afterimage.className = 'dodge-afterimage';
+            afterimage.style.backgroundImage = `url(${characterImage.src})`;
+            dodgeVfx.appendChild(afterimage);
+        }
+        
+        // Create speed lines
+        const speedLines = document.createElement('div');
+        speedLines.className = 'dodge-speed-lines';
+        for (let i = 0; i < 4; i++) {
+            const speedLine = document.createElement('div');
+            speedLine.className = 'speed-line';
+            speedLines.appendChild(speedLine);
+        }
+        dodgeVfx.appendChild(speedLines);
+        
+        // Add to character element
+        charElement.appendChild(dodgeVfx);
+        
+        // Play dodge sound effect
+        if (window.gameManager && window.gameManager.playSound) {
+            window.gameManager.playSound('sounds/dodge_whoosh.mp3', 0.5).catch(() => {
+                // Fallback if specific dodge sound doesn't exist - try generic swoosh
+                window.gameManager.playSound('sounds/whoosh.mp3', 0.4).catch(() => {
+                    console.log('No dodge sound effect available');
+                });
+            });
+        }
+        
+        // Add screen shake effect for dramatic impact
+        this.addDodgeScreenShake();
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            if (dodgeVfx.parentNode === charElement) {
+                charElement.removeChild(dodgeVfx);
+            }
+        }, 900); // Slightly longer than animation duration to ensure it completes
+    }
+    
+    // Add subtle screen shake for dodge effect
+    addDodgeScreenShake() {
+        const battleContainer = document.querySelector('.battle-container');
+        if (battleContainer) {
+            battleContainer.classList.add('dodge-shake');
+            setTimeout(() => {
+                battleContainer.classList.remove('dodge-shake');
+            }, 200);
+        }
+    }
 }
 
 // Ability class definition
@@ -1548,7 +3182,7 @@ class Ability {
         this.currentCooldown = 0;
         this.effect = effect; // (caster, targetOrTargets, ability, actualManaCost, options) => {}
         this.description = ''; // Will be generated
-        this.baseDescription = ''; // Template for description
+        this.baseDescription = ''; // Template for description - IMPORTANT
         this.targetType = 'enemy'; // Default target type ('enemy', 'ally', 'self', 'any', 'aoe_enemy', 'aoe_ally')
         this.requiresTarget = !['aoe_enemy', 'aoe_ally', 'self'].includes(this.targetType); // Default based on initial type
         this.baseDamage = 0; // Add baseDamage property if not present
@@ -1567,15 +3201,38 @@ class Ability {
     use(caster, targetOrTargets, actualManaCost, options = {}) {
         if (this.effect) {
             try {
-                this.effect(caster, targetOrTargets, this, actualManaCost, options); // Pass the ability instance itself
-                this.currentCooldown = this.cooldown; // Set cooldown after successful use
-                return true; // <-- ADD THIS LINE
+                // --- STATISTICS TRACKING: Set ability ID in options for tracking ---
+                options.abilityId = this.id;
+                // --- END STATISTICS TRACKING ---
+                
+                // Call the effect function and capture its return value
+                const effectResult = this.effect(caster, targetOrTargets, this, actualManaCost, options);
+                
+                // Store the result in a global variable for the GameManager to access
+                window.abilityLastResult = effectResult || {};
+                
+                // Set cooldown after successful use, unless the ability effect requests to reset it
+                if (effectResult && effectResult.resetCooldown) {
+                    console.log(`[Ability.use] ${this.name} returned resetCooldown=true, keeping cooldown at 0`);
+                    this.currentCooldown = 0;
+                } else {
+                    this.currentCooldown = this.cooldown;
+                }
+                
+                // Log if ability prevented turn end
+                if (effectResult && effectResult.doesNotEndTurn) {
+                    console.log(`[Ability.use] ${this.name} returned doesNotEndTurn=true`);
+                }
+                
+                return true;
             } catch (error) {
                 console.error(`Error executing ability ${this.name} (${this.id}):`, error);
-                return false; // <-- ADD THIS LINE
+                window.abilityLastResult = {}; // Reset on error
+                return false;
             }
         }
-        return false; // <-- ADD THIS LINE (if no effect exists)
+        window.abilityLastResult = {}; // Reset if no effect
+        return false; // If no effect exists
     }
 
     reduceCooldown() {
@@ -1590,71 +3247,81 @@ class Ability {
      * @returns {Ability} The Ability instance for chaining.
      */
     setDescription(description) {
-        this.baseDescription = description;
+        // Ensure baseDescription is set from the provided description
+        this.baseDescription = description; 
         this.description = this.generateDescription(); // Generate initial description
         return this;
     }
 
     /**
-     * Generates the ability description by replacing placeholders with current values.
+     * Generates the ability description by replacing placeholders with current values
+     * and appending talent information.
      * @returns {string} The generated description string.
      */
     generateDescription() {
+        // Fallback: If baseDescription is somehow empty, try to use the current description as a base
+        // or set a default to avoid errors downstream.
         if (!this.baseDescription) {
-            return '';
+            if (this.description) { // If a description exists (e.g. from JSON initial load)
+                console.warn(`[Ability.generateDescription] Missing baseDescription for ability "${this.id}". Using current description as base.`);
+                this.baseDescription = this.description;
+            } else {
+                console.warn(`[Ability.generateDescription] Missing baseDescription AND description for ability "${this.id}". Setting a default.`);
+                this.baseDescription = `Default description for ${this.name || this.id}.`;
+            }
         }
 
         let generatedDesc = this.baseDescription;
+        let talentEffectsHtml = '';
 
-        // Find all placeholders like {propertyName}
+        // --- Placeholder Replacement --- 
         const placeholders = generatedDesc.match(/\{[a-zA-Z0-9_]+\}/g) || [];
-
         placeholders.forEach(placeholder => {
             const propertyName = placeholder.slice(1, -1); // Remove {}
             let value = this[propertyName]; // Get value from the ability instance
-
-            // --- MODIFIED DEBUG LOG ---
-            console.log(`[generateDescription DEBUG] Ability: ${this.id}, Property: '${propertyName}', Value: ${value}`);
-            // --- END MODIFIED DEBUG LOG ---
-
-            // Handle potential nested properties if needed in the future (e.g., {stats.critChance})
-            // For now, assume direct properties of the ability object
 
             if (value === undefined) {
                 console.warn(`[Ability.generateDescription] Property "${propertyName}" not found on ability "${this.id}" for description generation.`);
                 value = `[${propertyName}]`; // Indicate missing value
             }
 
-            // Format percentages nicely (handle chance, modifier, and percent properties)
+            // Format percentages nicely
             if (typeof value === 'number' && (
                 propertyName.toLowerCase().includes('chance') ||
                 propertyName.toLowerCase().includes('modifier') ||
                 propertyName.toLowerCase().includes('percent')
             )) {
-                // Check if it's likely a fraction (0-1) and convert to percent
                 if (value >= 0 && value <= 1) {
                     value = `${Math.round(value * 100)}%`;
                 }
             }
-
-            // Replace placeholder with the actual value
             generatedDesc = generatedDesc.replace(placeholder, value);
         });
 
-        // --- NEW: Append conditional talent descriptions ---
-        // Check for Farmer Shoma's Apple Throw self-heal talent
-        if (this.id === 'farmer_shoma_w' && this.casterHealPercent && this.casterHealPercent > 0) {
-            const selfHealText = `\n<span class="talent-bonus">Additionally heals you for ${this.casterHealPercent * 100}% of the healing dealt.</span>`;
-            // Check if the bonus text isn't already there to prevent duplication
-            if (!generatedDesc.includes('talent-bonus')) { 
-                generatedDesc += selfHealText;
+        // --- Append Talent Information --- 
+        // This is a generic spot. Character-specific abilities (like Renée's)
+        // should ideally have their own generateDescription methods that handle
+        // their specific talent texts. This generic one won't know about them.
+        // However, if a character-specific generateDescription is not attached, this will run.
+
+        // Example of how talent effects COULD be generically appended if stored on the ability
+        if (this.talentModifiers && typeof this.talentModifiers === 'object') {
+            for (const talentKey in this.talentModifiers) {
+                // This is a very basic example; actual formatting would be more complex
+                // and depend on how talent effects are structured.
+                 if (this.talentModifiers[talentKey] && talentKey !== 'toString') { // Added check for own property
+                    talentEffectsHtml += `\n<span class="talent-effect">Talent: ${talentKey} active.</span>`;
+                 }
             }
         }
-        // Add more checks for other talent-modified descriptions here if needed
-        // --- END NEW ---
 
-        this.description = generatedDesc; // Update the description property
-        return generatedDesc;
+
+        // Combine base description and talent effects
+        const finalDescription = generatedDesc + talentEffectsHtml;
+
+        // Update the ability's description property
+        this.description = finalDescription;
+        return finalDescription;
     }
 
     /**
@@ -1679,7 +3346,8 @@ class Effect {
         this.effect = effect;
         this.isDebuff = isDebuff;
         this.description = "";
-        this.statModifiers = {}; // Store stat modifications
+        // statModifiers will be set explicitly by buffs that need them
+        // this.statModifiers = {}; // Don't initialize as empty object
     }
 
     setDescription(description) {
@@ -1694,20 +3362,31 @@ class Effect {
             this.name,
             this.icon,
             this.duration,
-            this.effect,
+            this.effect, // Copies the main (per-turn) effect function
             this.isDebuff
         );
         
-        // Copy description
         cloned.description = this.description;
         
-        // Deep copy stat modifiers
-        cloned.statModifiers = {};
-        for (const key in this.statModifiers) {
-            cloned.statModifiers[key] = this.statModifiers[key];
+        // Ensure stat modifiers are properly deep copied
+        if (Array.isArray(this.statModifiers)) {
+            cloned.statModifiers = this.statModifiers.map(mod => ({ ...mod })); 
+        } else if (typeof this.statModifiers === 'object' && this.statModifiers !== null) {
+            cloned.statModifiers = { ...this.statModifiers };
         }
         
-        // --- ADDED: Copy stackable properties --- 
+        // Copy Target Lock specific properties
+        if (this.stackCount !== undefined) {
+            cloned.stackCount = this.stackCount;
+        }
+        if (this.isPermanent !== undefined) {
+            cloned.isPermanent = this.isPermanent;
+        }
+        if (this.hasArmorBreach !== undefined) {
+            cloned.hasArmorBreach = this.hasArmorBreach;
+        }
+        
+        // Copy stackable properties 
         if (this.stackable !== undefined) {
             cloned.stackable = this.stackable;
         }
@@ -1717,24 +3396,52 @@ class Effect {
         if (this.currentStacks !== undefined) {
             cloned.currentStacks = this.currentStacks;
         }
-        // --- END ADDED ---
 
         // Copy any other custom properties
         if (this.originalStats) {
             cloned.originalStats = {...this.originalStats};
         }
         
-        // Copy custom methods if they exist
+        // Deep copy effects if they exist
+        if (this.effects) {
+            cloned.effects = JSON.parse(JSON.stringify(this.effects));
+        }
+        
+        // Copy all methods
         if (typeof this.remove === 'function' && this.remove !== Effect.prototype.remove) {
             cloned.remove = this.remove;
         }
-        
+        if (typeof this.onRemove === 'function') {
+            cloned.onRemove = this.onRemove;
+        }
         if (typeof this.onApply === 'function') {
             cloned.onApply = this.onApply;
         }
+        if (typeof this.onTurnStart === 'function') {
+            cloned.onTurnStart = this.onTurnStart;
+        }
+        if (typeof this.onTurnEnd === 'function') {
+            cloned.onTurnEnd = this.onTurnEnd;
+        }
         
-        if (this.effects) {
-            cloned.effects = {...this.effects};
+        // Copy any additional properties we haven't explicitly handled
+        for (const key in this) {
+            if (!cloned.hasOwnProperty(key) && 
+                this.hasOwnProperty(key) && 
+                key !== 'character') { // Skip character reference to avoid circular references
+                try {
+                    // Try to deep copy if possible
+                    if (typeof this[key] === 'object' && this[key] !== null) {
+                        cloned[key] = JSON.parse(JSON.stringify(this[key]));
+                    } else {
+                        cloned[key] = this[key];
+                    }
+                } catch (e) {
+                    // Fall back to simple assignment if deep copy fails
+                    cloned[key] = this[key];
+                    console.log(`Simple copy for property ${key} during Effect clone`);
+                }
+            }
         }
         
         return cloned;
@@ -1787,17 +3494,16 @@ const CharacterFactory = {
     // <<< END ADDED >>>
 
     // Creates a character from a character definition
-    async createCharacter(charData, selectedTalentIds = []) { // Added selectedTalentIds
-        console.log(`[CharFactory] createCharacter called for ID: ${charData ? charData.id : 'UNKNOWN'} with talents:`, selectedTalentIds);
+    async createCharacter(charData, selectedTalentIds = []) { // selectedTalentIds will be ignored here now
+        console.log(`[CharFactory] createCharacter called for ID: ${charData ? charData.id : 'UNKNOWN'}. Talent application deferred to TalentManager.`);
 
         if (!charData || !charData.id || !charData.stats) {
             console.error("[CharFactory] Invalid or incomplete charData received:", charData);
             return null;
         }
 
-        let character; // Declare character variable here
+        let character;
 
-        // <<< MODIFIED: Check for custom class first >>>
         if (charData.id && this.customCharacterClasses[charData.id]) {
             console.log(`[CharFactory] Creating character ${charData.id} using custom class ${this.customCharacterClasses[charData.id].name}`);
             const CustomClass = this.customCharacterClasses[charData.id];
@@ -1806,11 +3512,10 @@ const CharacterFactory = {
                     charData.id,
                     charData.name,
                     charData.image,
-                    { ...charData.stats } // Pass a copy of stats
+                    { ...charData.stats }
                 );
             } catch (error) {
                 console.error(`[CharFactory] Error instantiating custom class ${CustomClass.name} for ${charData.id}:`, error);
-                // Fallback to base class if custom instantiation fails?
                 character = new Character(
                     charData.id,
                     charData.name,
@@ -1819,7 +3524,6 @@ const CharacterFactory = {
                 );
             }
         } else {
-            // <<< MOVED: Base class creation inside else block >>>
             console.log(`[CharFactory] Creating character ${charData.id} using base Character class`);
             character = new Character(
                 charData.id,
@@ -1828,28 +3532,23 @@ const CharacterFactory = {
                 charData.stats
             );
         }
-        // <<< END MODIFICATION >>>
 
-        // --- Common logic for both base and custom characters --- 
         if (!character) {
             console.error(`[CharFactory] Failed to instantiate character object for ${charData.id}`);
-            return null; // Stop if character couldn't be created
+            return null;
         }
 
-        // Assign base stats AFTER potential modifications in custom constructor/init
-        // but BEFORE abilities/passives/talents if they rely on base stats
-        if (!character.baseStats) { // Set base stats only if not already set by a custom constructor
+        if (!character.baseStats) {
              character.baseStats = { ...character.stats };
              console.log(`[CharFactory] Set base stats for ${character.name} from initial stats.`);
         } else {
              console.log(`[CharFactory] Base stats for ${character.name} were already set by constructor.`);
         }
 
-        // Add abilities (BEFORE applying talents that might modify them)
         if (charData.abilities) {
             charData.abilities.forEach(abilityData => {
                 const ability = AbilityFactory.createAbility(abilityData);
-                if (ability) { // Ensure ability creation was successful
+                if (ability) {
                     character.addAbility(ability);
                 } else {
                     console.warn(`[CharFactory] Failed to create ability from data for ${character.name}:`, abilityData);
@@ -1857,19 +3556,33 @@ const CharacterFactory = {
             });
         }
 
-        // Add passive (BEFORE applying talents that might modify it)
+        // >>> TALENT APPLICATION DURING CHARACTER CREATION IS NOW REMOVED/DEFERRED <<<
+        // The TalentManager.enhanceCharacterWithTalents method will handle this after character creation.
+        /*
+        if (selectedTalentIds && selectedTalentIds.length > 0) {
+            console.log(`[CharFactory] DEFERRED: Applying ${selectedTalentIds.length} talents to ${character.name} via TalentManager later.`);
+            // const talentDefinitions = await this.loadTalentDefinitions(character.id);
+            // if (talentDefinitions) {
+            //     this.applyTalents(character, talentDefinitions, selectedTalentIds); // DO NOT APPLY HERE
+            // } else {
+            //     console.warn(`[CharFactory] Could not load talent definitions for ${character.id} during initial creation phase.`);
+            // }
+        }
+        */
+        
+        // character.appliedTalents will be set by TalentManager when it applies talents.
+        // character.appliedTalents = selectedTalentIds; // DO NOT SET HERE
+
         if (charData.passive) {
-            character.passive = { ...charData.passive }; // Store a copy of the passive data
-            // Passive handler instantiation logic (remains complex, keep as is for now)
-             const passiveId = charData.passive.id;
-             console.log(`[CharFactory] Character ${character.name} has passive: ${passiveId}`);
-            // ... (rest of the passive handler logic remains the same) ...
+            character.passive = { ...charData.passive };
+            const passiveId = charData.passive.id;
+            console.log(`[CharFactory] Character ${character.name} has passive: ${passiveId}`);
             const isCustomCharacter = character.constructor !== Character;
-            if (!isCustomCharacter) { // Only lookup for base Character class
+            if (!isCustomCharacter) { 
                 let PassiveHandlerClass = null;
                  if (typeof window.PassiveFactory !== 'undefined' && typeof window.PassiveFactory.getHandlerClass === 'function') {
                      PassiveHandlerClass = window.PassiveFactory.getHandlerClass(passiveId);
-                     if (!PassiveHandlerClass) { // Check hardcoded if not found
+                     if (!PassiveHandlerClass) { 
                         PassiveHandlerClass = this.checkHardcodedPassives(passiveId);
                     }
                  } else {
@@ -1881,8 +3594,14 @@ const CharacterFactory = {
                     try {
                         character.passiveHandler = new PassiveHandlerClass(character);
                         console.log(`[CharFactory] Instantiated passive handler ${PassiveHandlerClass.name} for ${character.name}`);
+                        if (character.passiveHandler && typeof character.passiveHandler.initialize === 'function') {
+                            console.log(`[CharFactory] Initializing passive handler ${character.passiveHandler.constructor.name} for ${character.name}.`);
+                            character.passiveHandler.initialize(character);
+                        } else {
+                            console.log(`[CharFactory] No passive handler or initialize method found for ${character.name}.`);
+                        }
                     } catch (error) {
-                        console.error(`[CharFactory] Error instantiating passive handler ${PassiveHandlerClass.name}:`, error);
+                        console.error(`[CharFactory] Error instantiating or initializing passive handler ${PassiveHandlerClass.name}:`, error);
                     }
                 } else {
                     console.warn(`[CharFactory] No passive handler class found for ${passiveId}`);
@@ -1890,35 +3609,35 @@ const CharacterFactory = {
             }
         }
 
-        // --- >>> NEW: Apply Talents <<< ---
-        if (selectedTalentIds && selectedTalentIds.length > 0) {
-            console.log(`[CharFactory] Applying ${selectedTalentIds.length} talents to ${character.name}...`);
-            const talentDefinitions = await this.loadTalentDefinitions(character.id);
-            if (talentDefinitions) {
-                this.applyTalents(character, talentDefinitions, selectedTalentIds);
-            } else {
-                console.warn(`[CharFactory] Could not load talent definitions for ${character.id} to apply selected talents.`);
+        character.abilities.forEach(ability => {
+            if (typeof ability.generateDescription === 'function') {
+                const generatedDesc = ability.generateDescription();
+                if (ability.description !== generatedDesc) {
+                    ability.description = generatedDesc; 
+                    console.log(`[CharFactory Post-Passive Init Update] Regenerated description for ${character.name}'s ${ability.id} via generateDescription.`);
+                }
+            } 
+        });
+
+        // Load character XP and level data from Firebase
+        if (window.characterXPManager && window.characterXPManager.initialized) {
+            try {
+                await window.characterXPManager.applyXPToCharacter(character);
+                console.log(`[CharFactory] Applied XP data to ${character.name}: Level ${character.level} (${character.experience} XP)`);
+            } catch (error) {
+                console.warn(`[CharFactory] Failed to load XP data for ${character.name}:`, error);
+                // Continue with default values (Level 1, 0 XP) that were set in constructor
             }
-        }
-        // --- >>> END NEW <<< ---
-
-
-        // Initialize passive handler AFTER talents are applied (if handler exists)
-        if (character.passiveHandler && typeof character.passiveHandler.initialize === 'function') {
-            console.log(`[CharFactory] Initializing passive handler ${character.passiveHandler.constructor.name} for ${character.name} AFTER talents.`);
-            character.passiveHandler.initialize(character);
         } else {
-            // console.log(`[CharFactory] No passive handler or initialize method found for ${character.name} after talents.`);
+            console.warn(`[CharFactory] CharacterXPManager not available, using default XP values for ${character.name}`);
         }
 
-        // Final check/recalculation if needed (optional, depends on stat complexity)
-        // character.recalculateStats();
-
-        console.log(`[CharFactory] Finished creating character ${character.name}`, character);
+        console.log(`[CharFactory] Finished creating character ${character.name} (talent application deferred).`, character);
         return character;
     },
 
     // --- NEW: Load Talent Definitions (with caching) ---
+    talentDefinitionsCache: {}, // Add cache object
     async loadTalentDefinitions(characterId) {
         if (this.talentDefinitionsCache[characterId]) {
             return this.talentDefinitionsCache[characterId];
@@ -1926,13 +3645,17 @@ const CharacterFactory = {
         try {
             const response = await fetch(`js/raid-game/talents/${characterId}_talents.json`);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // If 404 or other error, store null and return
+                console.warn(`No talent file found for ${characterId} or failed to load. Status: ${response.status}`);
+                this.talentDefinitionsCache[characterId] = null; 
+                return null;
             }
             const data = await response.json();
-            this.talentDefinitionsCache[characterId] = data.talentTree; // Assuming structure { characterId: ..., talentTree: { ... } }
+            this.talentDefinitionsCache[characterId] = data.talentTree; // Store only the talentTree part
             return data.talentTree;
         } catch (error) {
             console.error(`Error loading talent definitions for ${characterId}:`, error);
+            this.talentDefinitionsCache[characterId] = null; // Cache null on error
             return null;
         }
     },
@@ -1941,121 +3664,130 @@ const CharacterFactory = {
     applyTalents(character, talentDefinitions, selectedTalentIds) {
         selectedTalentIds.forEach(talentId => {
             const talent = talentDefinitions[talentId];
-            if (!talent || !talent.effect) {
-                console.warn(`[CharFactory] Talent ${talentId} not found or has no effect.`);
+            if (!talent) {
+                console.warn(`[CharFactory] Talent ${talentId} not found.`);
                 return;
             }
 
             console.log(`[CharFactory] Applying talent: ${talent.name}`);
-            const effect = talent.effect;
+            
+            // Handle single effect or array of effects
+            const effects = Array.isArray(talent.effect) ? talent.effect : [talent.effect];
+            
+            effects.forEach(effect => {
+                if (!effect || !effect.type) {
+                    console.warn(`[CharFactory] Talent ${talentId} has invalid or missing effect property:`, effect);
+                    return; // Skip this invalid effect
+                }
 
-            switch (effect.type) {
-                case 'modify_stat':
-                     console.log(`[CharFactory] Applying talent: ${talent.name}`); // Line ~1764
-                     if (effect.stat && effect.value !== undefined) {
-                         const operation = effect.operation || 'set';
-                         // Determine if this should modify base stats (e.g., maxHp, maxMana, or if explicitly targeted)
-                         const isBaseStatModification = (effect.target === 'base' || ['maxHp', 'maxMana', 'physicalDamage', 'magicalDamage', 'armor', 'magicalShield', 'speed'].includes(effect.stat)); // Added common base stats
+                switch (effect.type) {
+                    case 'modify_stat':
+                         console.log(`[CharFactory] Applying talent: ${talent.name}`); // Line ~1764
+                         if (effect.stat && effect.value !== undefined) {
+                             const operation = effect.operation || 'set';
+                             // Determine if this should modify base stats (e.g., maxHp, maxMana, or if explicitly targeted)
+                             const isBaseStatModification = (effect.target === 'base' || ['maxHp', 'maxMana', 'physicalDamage', 'magicalDamage', 'armor', 'magicalShield', 'speed'].includes(effect.stat)); // Added common base stats
 
-                         if (isBaseStatModification) {
-                             // Modify the BASE stat directly
-                             if (character.baseStats && character.baseStats[effect.stat] !== undefined) {
-                                 if (operation === 'add') { // Ensure this check works
-                                     character.baseStats[effect.stat] += effect.value;
-                                     console.log(`  - Modifying BASE stat ${effect.stat} adding ${effect.value}`); // Corrected log
-                                 } else if (operation === 'multiply') {
-                                     character.baseStats[effect.stat] *= effect.value;
-                                     console.log(`  - Modifying BASE stat ${effect.stat} multiplying by ${effect.value}`);
-                                 } else { // Default to 'set' - This path should ideally only be hit if operation is explicitly 'set'
-                                     character.baseStats[effect.stat] = effect.value;
-                                     // Corrected log to reflect 'set' operation accurately
-                                     console.log(`  - Setting BASE stat ${effect.stat} to ${effect.value}`);
+                             if (isBaseStatModification) {
+                                 // Modify the BASE stat directly
+                                 if (character.baseStats && character.baseStats[effect.stat] !== undefined) {
+                                     if (operation === 'add') { // Ensure this check works
+                                         character.baseStats[effect.stat] += effect.value;
+                                         console.log(`  - Modifying BASE stat ${effect.stat} adding ${effect.value}`); // Corrected log
+                                     } else if (operation === 'multiply') {
+                                         character.baseStats[effect.stat] *= effect.value;
+                                         console.log(`  - Modifying BASE stat ${effect.stat} multiplying by ${effect.value}`);
+                                     } else { // Default to 'set' - This path should ideally only be hit if operation is explicitly 'set'
+                                         character.baseStats[effect.stat] = effect.value;
+                                         // Corrected log to reflect 'set' operation accurately
+                                         console.log(`  - Setting BASE stat ${effect.stat} to ${effect.value}`);
+                                     }
+                                 } else {
+                                     console.warn(`  - Base stat ${effect.stat} not found or inaccessible`);
                                  }
                              } else {
-                                 console.warn(`  - Base stat ${effect.stat} not found or inaccessible`);
+                                 // Modify the current operational stat using the character's method
+                                 console.log(`  - Modifying operational stat ${effect.stat} using applyStatModification`);
+                                 character.applyStatModification(effect.stat, operation, effect.value);
                              }
+                             character.recalculateStats(); // Recalculate after stat changes // Line ~1823
                          } else {
-                             // Modify the current operational stat using the character's method
-                             console.log(`  - Modifying operational stat ${effect.stat} using applyStatModification`);
-                             character.applyStatModification(effect.stat, operation, effect.value);
+                             console.warn(`  - Invalid stat modification effect:`, effect);
                          }
-                         character.recalculateStats(); // Recalculate after stat changes // Line ~1823
-                     } else {
-                         console.warn(`  - Invalid stat modification effect:`, effect);
-                     }
-                     break;
+                         break;
 
-                case 'modify_ability':
-                    const abilityToModify = character.abilities.find(a => a.id === effect.abilityId);
-                    if (abilityToModify) {
-                        console.log(`  - Storing modifier for ability ${effect.abilityId}: { ${effect.property}: ${effect.value} }`);
-                        // Store the modification details on the ability instance itself
-                        abilityToModify.talentModifiers = abilityToModify.talentModifiers || {};
-                        abilityToModify.talentModifiers[effect.property] = effect.value;
-                        
-                        // IMPORTANT: Also directly modify the ability property value
-                        // This ensures the cooldown and other properties are updated immediately
-                        abilityToModify[effect.property] = effect.value;
-                        console.log(`  - DIRECT MODIFICATION: Set ${effect.abilityId} ${effect.property} to ${effect.value}`);
+                    case 'modify_ability':
+                        const abilityToModify = character.abilities.find(a => a.id === effect.abilityId);
+                        if (abilityToModify) {
+                            console.log(`  - Storing modifier for ability ${effect.abilityId}: { ${effect.property}: ${effect.value} }`);
+                            // Store the modification details on the ability instance itself
+                            abilityToModify.talentModifiers = abilityToModify.talentModifiers || {};
+                            abilityToModify.talentModifiers[effect.property] = effect.value;
+                            
+                            // IMPORTANT: Also directly modify the ability property value
+                            // This ensures the cooldown and other properties are updated immediately
+                            abilityToModify[effect.property] = effect.value;
+                            console.log(`  - DIRECT MODIFICATION: Set ${effect.abilityId} ${effect.property} to ${effect.value}`);
 
-                        // --- NEW: Regenerate description HERE --- 
-                        if (typeof abilityToModify.generateDescription === 'function') {
-                            abilityToModify.generateDescription(); // Generate description right after direct modification
-                            console.log(`  - Regenerated description for ${effect.abilityId} after direct talent application.`);
-                        }
-                        // --- END NEW ---
-                    } else {
-                        console.warn(`  - Ability ${effect.abilityId} not found on character.`);
-                    }
-                    break;
-
-                case 'modify_passive':
-                    if (character.passive && character.passive.id === effect.passiveId) {
-                        console.log(`  - Modifying passive ${effect.passiveId}.${effect.property} to ${effect.value}`);
-                        // Store the modification details on the character's passive data object.
-                        // The passive handler (if it exists) should read from this updated data.
-                        character.passive[effect.property] = effect.value;
-                        // Optionally, notify the handler if it's already initialized and needs to react immediately
-                        if (character.passiveHandler && typeof character.passiveHandler.onTalentModified === 'function') {
-                            character.passiveHandler.onTalentModified(effect.property, effect.value);
-                        }
-                    } else {
-                        console.warn(`  - Passive ${effect.passiveId} not found or ID mismatch.`);
-                    }
-                    break;
-
-                case 'add_ability':
-                    // ... existing add_ability logic ...
-                    break;
-
-                case 'modify_character_property': // Add this case
-                    if (effect.property && effect.value !== undefined) {
-                        character[effect.property] = effect.value;
-                        console.log(`[CharFactory]   - Applying Character Property: ${talent.name} set ${effect.property} to ${effect.value}`);
-
-                        // Specific handling for Farmer Shoma's passive description update
-                        if (character.id === 'farmer_shoma' && character.passive) {
-                            if (effect.property === 'passiveCritBoostValue') {
-                                // Update description for crit value change
-                                const triggerTurn = character.passiveTriggerTurn || 20; // Get current trigger turn
-                                character.passive.description = `You start with 50% crit chance, increased to ${effect.value * 100}% after turn ${triggerTurn}.`;
-                                console.log(`[CharFactory]     - Updated ${character.name}'s passive description for crit boost value.`);
-                            } else if (effect.property === 'passiveTriggerTurn') {
-                                // Update description for trigger turn change
-                                const critBoost = character.passiveCritBoostValue || 0.7; // Get current crit boost
-                                character.passive.description = `You start with 50% crit chance, increased to ${critBoost * 100}% after turn ${effect.value}.`;
-                                console.log(`[CharFactory]     - Updated ${character.name}'s passive description for trigger turn.`);
+                            // --- NEW: Regenerate description HERE --- 
+                            if (typeof abilityToModify.generateDescription === 'function') {
+                                abilityToModify.generateDescription(); // Generate description right after direct modification
+                                console.log(`  - Regenerated description for ${effect.abilityId} after direct talent application.`);
                             }
+                            // --- END NEW ---
+                        } else {
+                            console.warn(`  - Ability ${effect.abilityId} not found on character.`);
                         }
-                    } else {
-                        console.warn(`[CharFactory] Invalid modify_character_property effect for talent ${talentId}:`, effect);
-                    }
-                    break;
+                        break;
 
-                default:
-                    console.warn(`[CharFactory] Unknown talent effect type: ${effect.type} for talent ${talentId}`);
-            }
-        });
+                    case 'modify_passive':
+                        if (character.passive && character.passive.id === effect.passiveId) {
+                            console.log(`  - Modifying passive ${effect.passiveId}.${effect.property} to ${effect.value}`);
+                            // Store the modification details on the character's passive data object.
+                            // The passive handler (if it exists) should read from this updated data.
+                            character.passive[effect.property] = effect.value;
+                            // Optionally, notify the handler if it's already initialized and needs to react immediately
+                            if (character.passiveHandler && typeof character.passiveHandler.onTalentModified === 'function') {
+                                character.passiveHandler.onTalentModified(effect.property, effect.value);
+                            }
+                        } else {
+                            console.warn(`  - Passive ${effect.passiveId} not found or ID mismatch.`);
+                        }
+                        break;
+
+                    case 'add_ability':
+                        // ... existing add_ability logic ...
+                        break;
+
+                    case 'modify_character_property': // Add this case
+                        if (effect.property && effect.value !== undefined) {
+                            character[effect.property] = effect.value;
+                            console.log(`[CharFactory]   - Applying Character Property: ${talent.name} set ${effect.property} to ${effect.value}`);
+
+                            // Specific handling for Farmer Shoma's passive description update
+                            if (character.id === 'farmer_shoma' && character.passive) {
+                                if (effect.property === 'passiveCritBoostValue') {
+                                    // Update description for crit value change
+                                    const triggerTurn = character.passiveTriggerTurn || 20; // Get current trigger turn
+                                    character.passive.description = `You start with 50% crit chance, increased to ${effect.value * 100}% after turn ${triggerTurn}.`;
+                                    console.log(`[CharFactory]     - Updated ${character.name}'s passive description for crit boost value.`);
+                                } else if (effect.property === 'passiveTriggerTurn') {
+                                    // Update description for trigger turn change
+                                    const critBoost = character.passiveCritBoostValue || 0.7; // Get current crit boost
+                                    character.passive.description = `You start with 50% crit chance, increased to ${critBoost * 100}% after turn ${effect.value}.`;
+                                    console.log(`[CharFactory]     - Updated ${character.name}'s passive description for trigger turn.`);
+                                }
+                            }
+                        } else {
+                            console.warn(`[CharFactory] Invalid modify_character_property effect for talent ${talentId}:`, effect);
+                        }
+                        break;
+
+                    default:
+                        console.warn(`[CharFactory] Unknown talent effect type: ${effect.type} for talent ${talentId}`);
+                }
+            }); // End of effects.forEach
+        }); // End of selectedTalentIds.forEach
 
         // After applying all talents, maybe recalculate stats?
         // character.recalculateStats(); // Uncomment if necessary
@@ -2082,6 +3814,21 @@ const CharacterFactory = {
         } else if (passiveId === 'farmer_raiden_zap' && typeof FarmerRaidenPassive !== 'undefined') { // Assuming FarmerRaidenPassive handles this ID
              return FarmerRaidenPassive;
         }
+        // --- NEW: Add Bridget Passive Check ---
+        else if (passiveId === 'bridget_passive' && typeof BridgetPassive !== 'undefined') {
+            return BridgetPassive;
+        }
+        // --- ADD RENEE PASSIVE --- 
+        else if (passiveId === 'renee_passive' && typeof ReneePassive !== 'undefined') {
+            return ReneePassive;
+        }
+        // --- ADD FARMER FANG PASSIVE --- 
+        else if (passiveId === 'fang_full_heal_ally' && typeof FarmerFangPassive !== 'undefined') {
+            return FarmerFangPassive;
+        }
+        // --- END FARMER FANG PASSIVE ---
+        // --- END RENEE PASSIVE ---
+        // --- END NEW ---
         // Add other hardcoded checks here if necessary
         return null;
     },
@@ -2111,7 +3858,11 @@ const CharacterFactory = {
                 throw new Error('Failed to load character registry');
             }
             const data = await response.json();
-            return data.characters || [];
+            
+            // Filter out locked characters
+            const availableCharacters = (data.characters || []).filter(char => !char.locked);
+            console.log(`[CharacterFactory] Found ${availableCharacters.length} available non-locked characters out of ${data.characters ? data.characters.length : 0} total`);
+            return availableCharacters;
         } catch (error) {
             console.error(`Error loading character registry: ${error.message}`);
             return [];
@@ -2259,7 +4010,11 @@ const AbilityFactory = {
                  throw new Error(`HTTP error! status: ${response.status}`);
              }
              const registry = await response.json();
-             return registry.characters || [];
+             
+             // Filter out locked characters
+             const availableCharacters = (registry.characters || []).filter(char => !char.locked);
+             console.log(`[AbilityFactory] Found ${availableCharacters.length} available non-locked characters out of ${registry.characters ? registry.characters.length : 0} total`);
+             return availableCharacters;
         } catch (error) {
              console.error('Could not load character registry:', error);
              return []; // Return empty array on error
@@ -2284,16 +4039,39 @@ const AbilityFactory = {
     },
 
     createAbility(abilityData) {
-        // --- MODIFIED: Check the registry first ---
+        // Check the registry first
         if (this.abilityRegistry[abilityData.id]) {
             console.log(`[AbilityFactory] Using pre-registered ability object for: ${abilityData.id}`);
-            // Return the registered instance directly.
-            // If multiple characters use the same ability ID, they will share the instance (and cooldown state).
-            // This is usually the desired behavior for unique boss abilities.
-            // If unique instances per character are needed, cloning would be required here.
-            return this.abilityRegistry[abilityData.id];
+            const registeredAbility = this.abilityRegistry[abilityData.id];
+            
+            console.log(`[AbilityFactory] ${abilityData.id} initial state - baseDescription: "${registeredAbility.baseDescription}", description: "${registeredAbility.description}"`);
+            
+            // Ensure baseDescription is set from original JSON description if not already present
+            if (!registeredAbility.baseDescription && abilityData.description) {
+                console.log(`[AbilityFactory] Setting baseDescription for registered ability ${abilityData.id} from JSON description.`);
+                registeredAbility.baseDescription = abilityData.description;
+            }
+            // Ensure description is also initialized
+            if (!registeredAbility.description && registeredAbility.baseDescription) {
+                registeredAbility.description = registeredAbility.baseDescription;
+            }
+             // Try to attach character-specific generateDescription if available
+            if (typeof window.getReneeAbilityGenerateDescription === 'function' && abilityData.id.startsWith('renee_')) {
+                const customGenerateDescription = window.getReneeAbilityGenerateDescription(abilityData.id);
+                if (customGenerateDescription) {
+                    console.log(`[AbilityFactory] Attaching Renée-specific generateDescription to registered ${abilityData.id}`);
+                    registeredAbility.generateDescription = customGenerateDescription;
+                }
+            }
+            // Ensure description is generated if a custom method was attached or if it's missing
+            if (typeof registeredAbility.generateDescription === 'function' && (!registeredAbility.description || registeredAbility.description === registeredAbility.baseDescription) ) {
+                console.log(`[AbilityFactory] Calling generateDescription for ${abilityData.id}`);
+                 registeredAbility.generateDescription();
+            }
+
+            console.log(`[AbilityFactory] ${abilityData.id} final state - description: "${registeredAbility.description}"`);
+            return registeredAbility;
         }
-        // --- END MODIFICATION ---
 
         // If not pre-defined, create it using the generic method
         console.log(`[AbilityFactory] Creating generic ability for: ${abilityData.id} (Type: ${abilityData.type || 'N/A'})`);
@@ -2306,16 +4084,92 @@ const AbilityFactory = {
             this.getAbilityEffect(abilityData) // Generate effect based on type
         );
 
-        // Ensure cooldown is properly initialized
+        // --- BEGIN MODIFICATION: Copy additional properties and robustly set baseDescription ---
+        const propertiesToCopy = [
+            // 'baseDescription', // We handle this explicitly below
+            // 'description', // We handle this explicitly below
+            'targetType', 'type', 'functionName',
+            'baseDamage', 'damageScaling', 'healing', 'duration', 'buffValue',
+            'debuffValue', 'chance', 'numProjectiles', 'aoeModifier', 'fixedDamage',
+            'damageType', 'scalingStat', 'targetMaxHpMultiplier', 'effectFunctionName',
+            'isPlaceholder', 'placeholderAbility', 'unlockLevel', 'tags',
+            'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn'
+        ];
+
+        // Debug logging for blazing_lightning_ball specifically
+        if (abilityData.id === 'blazing_lightning_ball') {
+            console.log(`[AbilityFactory Debug] Processing blazing_lightning_ball`);
+            console.log(`[AbilityFactory Debug] abilityData keys:`, Object.keys(abilityData));
+            console.log(`[AbilityFactory Debug] abilityData.doesNotEndTurn:`, abilityData.doesNotEndTurn);
+            console.log(`[AbilityFactory Debug] hasOwnProperty('doesNotEndTurn'):`, abilityData.hasOwnProperty('doesNotEndTurn'));
+            console.log(`[AbilityFactory Debug] typeof doesNotEndTurn:`, typeof abilityData.doesNotEndTurn);
+        }
+
+        for (const prop of propertiesToCopy) {
+            if (abilityData.hasOwnProperty(prop)) {
+                ability[prop] = abilityData[prop];
+                // Debug logging for doesNotEndTurn specifically
+                if (prop === 'doesNotEndTurn') {
+                    console.log(`[AbilityFactory Debug] Copying ${prop} for ${abilityData.id}: ${abilityData[prop]} -> ${ability[prop]}`);
+                }
+            }
+        }
+
+        // Final check for blazing_lightning_ball
+        if (abilityData.id === 'blazing_lightning_ball') {
+            console.log(`[AbilityFactory Debug] Final ability.doesNotEndTurn:`, ability.doesNotEndTurn);
+        }
+        
+        // Robustly set baseDescription and initial description
+        if (abilityData.baseDescription) {
+            ability.baseDescription = abilityData.baseDescription;
+        } else if (abilityData.description) {
+            console.log(`[AbilityFactory] Setting baseDescription for NEW ability ${abilityData.id} from JSON description.`);
+            ability.baseDescription = abilityData.description;
+        } else {
+            console.warn(`[AbilityFactory] NEW ability ${abilityData.id} has no baseDescription or description in data. Defaulting.`);
+            ability.baseDescription = `Default base for ${ability.name || ability.id}`;
+        }
+        
+        // Set initial description to be the base description
+        ability.description = ability.baseDescription;
+
+        // --- END MODIFICATION ---
+
+        // Ensure cooldown is properly initialized (can be after copying if not in propertiesToCopy)
         ability.currentCooldown = 0;
 
-        if (abilityData.description) {
-            ability.setDescription(abilityData.description);
+        // Call setDescription if abilityData.description exists and baseDescription was set from it,
+        // OR if abilityData.baseDescription was used. This will trigger generateDescription.
+        // The goal is to ensure generateDescription runs once AFTER baseDescription is solidly set.
+        // However, the generic Ability.prototype.generateDescription is very basic.
+        // Character-specific generateDescription methods are needed for talent text.
+
+        // Try to attach character-specific generateDescription if available
+        if (typeof window.getReneeAbilityGenerateDescription === 'function' && ability.id.startsWith('renee_')) {
+            const customGenerateDescription = window.getReneeAbilityGenerateDescription(ability.id);
+            if (customGenerateDescription) {
+                console.log(`[AbilityFactory] Attaching Renée-specific generateDescription to NEW ${ability.id}`);
+                ability.generateDescription = customGenerateDescription;
+                 // Call it once to initialize the description with potential talent text structure
+                ability.generateDescription();
+            } else {
+                console.warn(`[AbilityFactory] Could not get Renée-specific generateDescription for ${ability.id}`);
+                // If no custom one, and if a description was in abilityData, ensure it's processed.
+                 if (abilityData.description && typeof ability.setDescription === 'function') {
+                    ability.setDescription(abilityData.description); //This will use the (potentially generic) generateDescription
+                } else if (typeof ability.generateDescription === 'function') {
+                    ability.generateDescription();
+                }
+            }
+        } else if (abilityData.description && typeof ability.setDescription === 'function') {
+            // For non-Renée abilities or if Renée's specific generator isn't found
+             ability.setDescription(abilityData.description);
+        } else if (typeof ability.generateDescription === 'function') {
+            // Fallback if no description in data but generateDescription exists
+            ability.generateDescription();
         }
 
-        if (abilityData.targetType) {
-            ability.setTargetType(abilityData.targetType);
-        }
 
         return ability;
     },
@@ -2334,7 +4188,7 @@ const AbilityFactory = {
         if (this.registeredEffects[abilityData.id]) {
             console.log(`[AbilityFactory] Prioritizing registered custom effect function for ability ID: '${abilityData.id}'`);
             // Return the registered function directly. It already expects (caster, targetOrTargets)
-            return this.registeredEffects[abilityData.id](abilityData); // Pass abilityData so the custom effect can access icon, duration etc.
+            return this.registeredEffects[abilityData.id]; // Return the function, don't call it
         }
         // --- END NEW ---
         
@@ -2349,8 +4203,8 @@ const AbilityFactory = {
                 const actualEffectFunction = this.registeredEffects[customFunctionName]; 
                 // Ensure the function returned matches the expected signature (caster, targetOrTargets)
                 return (caster, targetOrTargets) => {
-                    // Pass abilityData to the custom function
-                    actualEffectFunction(caster, targetOrTargets, abilityData); 
+                    // Call the custom function and return its result
+                    return actualEffectFunction(caster, targetOrTargets, abilityData); 
                 };
             } else {
                 console.error(`Custom ability function name '${customFunctionName || 'UNKNOWN'}' not found or not registered via AbilityFactory.registerAbilityEffect for ability ${abilityData.id}.`);
@@ -2365,6 +4219,7 @@ const AbilityFactory = {
         const effectImplementations = {
             'damage': this.createDamageEffect,
             'heal': this.createHealEffect,
+            'healing': this.createHealingEffectFromData, // New specialized healing type
             'buff': this.createBuffEffect,
             'debuff': this.createDebuffEffect,
             'aoe_damage': this.createAoEDamageEffect,
@@ -2479,7 +4334,7 @@ const AbilityFactory = {
     },
 
     createHealEffect(abilityData) {
-        return (caster, targetOrTargets) => {
+        return (caster, targetOrTargets, abilityObject, actualManaCost, options = {}) => {
             // This effect type expects a single target
             if (Array.isArray(targetOrTargets)) {
                 console.warn(`[AbilityFactory] Heal effect (${abilityData.name}) received an array, expects single target. Using first.`);
@@ -2498,8 +4353,12 @@ const AbilityFactory = {
             const healAmount = baseAmount; 
             // --- END MODIFICATION ---
 
-            // --- MODIFIED: Pass caster to heal method ---
-            const result = target.heal(healAmount, caster);
+            // --- MODIFIED: Pass caster and abilityId to heal method ---
+            const healOptions = {
+                ...options,
+                abilityId: abilityData.id
+            };
+            const result = target.heal(healAmount, caster, healOptions);
             const actualHeal = result.healAmount;
             const isCritical = result.isCritical;
             // --- END MODIFICATION ---
@@ -2515,6 +4374,105 @@ const AbilityFactory = {
             }
             // Update UI for the healed target
             updateCharacterUI(target);
+        };
+    },
+
+    // Specialized healing effect for abilities with "type": "healing" and effects.healing config
+    createHealingEffectFromData(abilityData) {
+        return (caster, targetOrTargets, abilityObject, actualManaCost, options = {}) => {
+            const healingConfig = abilityData.effects?.healing;
+            if (!healingConfig) {
+                console.error(`[AbilityFactory] Healing ability ${abilityData.name} missing healing config in effects`);
+                return;
+            }
+
+            // Determine if this is AoE healing based on target type
+            const isAoE = abilityData.targetType === 'self' && abilityData.name.toLowerCase().includes('circle');
+            
+            if (isAoE) {
+                // Handle AoE healing (like Circle Heal)
+                let targets = [];
+                if (window.gameManager && window.gameManager.gameState) {
+                    // Get all living allies for AoE heal
+                    targets = window.gameManager.gameState.playerCharacters.filter(char => !char.isDead());
+                }
+                
+                if (targets.length === 0) {
+                    addLogEntry(`${caster.name} used ${abilityData.name}, but there were no valid targets.`);
+                    return;
+                }
+
+                let totalActualHeal = 0;
+                let anyCritical = false;
+                
+                addLogEntry(`${caster.name} used ${abilityData.name}, healing all allies!`);
+                
+                targets.forEach(target => {
+                    // Calculate heal amount: fixed + MD scaling
+                    let healAmount = healingConfig.fixedAmount || 0;
+                    if (healingConfig.magicalDamagePercent) {
+                        healAmount += Math.floor((caster.stats.magicalDamage || 0) * healingConfig.magicalDamagePercent);
+                    }
+                    
+                    // Apply the healing with abilityId for statistics
+                    const healOptions = {
+                        ...options,
+                        abilityId: abilityData.id
+                    };
+                    const result = target.heal(healAmount, caster, healOptions);
+                    const actualHeal = result.healAmount;
+                    const isCritical = result.isCritical;
+                    
+                    if (actualHeal > 0) {
+                        if (!isCritical) {
+                            addLogEntry(`${target.name} is healed for ${actualHeal} HP.`, 'heal');
+                        }
+                        if (isCritical) anyCritical = true;
+                        totalActualHeal += actualHeal;
+                        updateCharacterUI(target);
+                    }
+                });
+
+                // Hook for passive handlers
+                if (totalActualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
+                    caster.passiveHandler.onHealDealt(caster, targets, totalActualHeal, anyCritical);
+                }
+            } else {
+                // Handle single target healing (like Lesser Heal)
+                let target = Array.isArray(targetOrTargets) ? targetOrTargets[0] : targetOrTargets;
+                
+                if (!target || typeof target.heal !== 'function') {
+                    console.error(`[AbilityFactory] Invalid target for healing effect (${abilityData.name}):`, target);
+                    return;
+                }
+
+                // Calculate heal amount: fixed + MD scaling
+                let healAmount = healingConfig.fixedAmount || 0;
+                if (healingConfig.magicalDamagePercent) {
+                    healAmount += Math.floor((caster.stats.magicalDamage || 0) * healingConfig.magicalDamagePercent);
+                }
+                
+                // Apply the healing with abilityId for statistics
+                const healOptions = {
+                    ...options,
+                    abilityId: abilityData.id
+                };
+                const result = target.heal(healAmount, caster, healOptions);
+                const actualHeal = result.healAmount;
+                const isCritical = result.isCritical;
+
+                // Log message handled inside heal method if critical
+                if (!isCritical) {
+                    addLogEntry(`${caster.name} used ${abilityData.name} on ${target.name}, healing for ${actualHeal} HP.`, 'heal');
+                }
+
+                // Hook for passive handlers on dealing heal
+                if (actualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
+                    caster.passiveHandler.onHealDealt(caster, target, actualHeal, isCritical);
+                }
+                
+                updateCharacterUI(target);
+            }
         };
     },
 
@@ -2553,15 +4511,49 @@ const AbilityFactory = {
 
             // Add stat modifiers if they exist in buffDetails
             if (buffDetails.statModifiers) {
-                buff.statModifiers = { ...buffDetails.statModifiers };
+                // Preserve array structure for statModifiers
+                if (Array.isArray(buffDetails.statModifiers)) {
+                    buff.statModifiers = [...buffDetails.statModifiers];
+                } else {
+                    // Handle legacy object format
+                    buff.statModifiers = { ...buffDetails.statModifiers };
+                }
             }
+            
             // Add custom effects/flags if they exist in buffDetails
-             if (buffDetails.effects) {
-                 buff.effects = { ...buffDetails.effects };
-             }
+            if (buffDetails.effects) {
+                buff.effects = { ...buffDetails.effects };
+                
+                // Convert certain effects to stat modifiers for proper processing
+                if (!buff.statModifiers) {
+                    buff.statModifiers = [];
+                }
+                
+                // Ensure statModifiers is an array
+                if (!Array.isArray(buff.statModifiers)) {
+                    buff.statModifiers = [buff.statModifiers];
+                }
+                
+                // Convert dodgeChance effect to stat modifier
+                if (typeof buffDetails.effects.dodgeChance === 'number') {
+                    buff.statModifiers.push({
+                        stat: 'dodgeChance',
+                        value: buffDetails.effects.dodgeChance,
+                        operation: 'set' // Set to the exact value (100% = 1.0)
+                    });
+                    console.log(`[CreateBuffEffect] Converted dodgeChance effect (${buffDetails.effects.dodgeChance}) to stat modifier for ${buffDetails.name || abilityData.name}`);
+                }
+                
+                // Can add more effect-to-statModifier conversions here if needed
+                // e.g., if (buffDetails.effects.critChance) { ... }
+            }
             // --- MODIFICATION END ---
 
             // Add the buff to the target
+            // Set tracking properties for statistics
+            buff.appliedBy = caster;
+            buff.abilityId = abilityData.id;
+
             target.addBuff(buff);
             addLogEntry(`${caster.name} used ${abilityData.name} on ${target.name}, applying ${buff.name} for ${buff.duration} turns.`);
 
@@ -2622,6 +4614,10 @@ const AbilityFactory = {
                    debuff.dotType = debuffDetails.dotType || 'magical';
                }
             // --- MODIFICATION END ---
+
+            // Set tracking properties for statistics
+            debuff.appliedBy = caster;
+            debuff.abilityId = abilityData.id;
 
             // Apply the debuff to the target
             target.addDebuff(debuff);
@@ -2786,7 +4782,7 @@ const AbilityFactory = {
     },
 
     createAoEHealEffect(abilityData) {
-        return (caster, targetOrTargets) => {
+        return (caster, targetOrTargets, abilityObject, actualManaCost, options = {}) => {
              // This effect type expects an array of targets
              let targets = [];
              if (Array.isArray(targetOrTargets)) {
@@ -2816,8 +4812,12 @@ const AbilityFactory = {
             targets.forEach(target => {
                 if (!target || target.isDead() || typeof target.heal !== 'function') return;
 
-                // --- MODIFIED: Pass caster to heal method ---
-                const result = target.heal(healAmount, caster);
+                // --- MODIFIED: Pass caster and abilityId to heal method ---
+                const healOptions = {
+                    ...options,
+                    abilityId: abilityData.id
+                };
+                const result = target.heal(healAmount, caster, healOptions);
                 const actualHeal = result.healAmount;
                 const isCritical = result.isCritical;
                 // --- END MODIFICATION ---
@@ -3039,14 +5039,14 @@ const AbilityFactory = {
     // Method to register custom effect functions by name
     registerAbilityEffect(effectName, effectFunction) {
         if (typeof effectFunction !== 'function') {
-            console.error(`[AbilityFactory] Attempted to register non-function for effect: ${effectName}`);
+           
             return;
         }
         if (this.registeredEffects[effectName]) {
-            console.warn(`[AbilityFactory] Overwriting existing registered effect: ${effectName}`);
+            
         }
         this.registeredEffects[effectName] = effectFunction;
-        console.log(`[AbilityFactory] Registered custom effect function: ${effectName}`);
+        
     }
     // <<< END MOVED METHOD >>>
 }; // Closing brace for AbilityFactory
@@ -3058,4 +5058,71 @@ window.AbilityFactory = AbilityFactory;
 window.CharacterFactory = CharacterFactory; // Expose CharacterFactory globally
 window.AbilityFactory = AbilityFactory; // Expose AbilityFactory globally
 window.Effect = Effect; // Make Effect class globally accessible
+
+// Function to show Zoey-specific dodge VFX
+function showZoeyDodgeVFX(character) {
+    try {
+        if (!character) return;
+        
+        const characterId = character.instanceId || character.id;
+        const characterElement = document.getElementById(`character-${characterId}`);
+        
+        if (!characterElement) {
+            console.error(`[ZoeyDodgeVFX] Character element not found for ${characterId}`);
+            return;
+        }
+        
+        // Create a container for the dodge effect
+        const dodgeContainer = document.createElement('div');
+        dodgeContainer.className = 'zoey-dodge-vfx';
+        characterElement.appendChild(dodgeContainer);
+        
+        // Create the DODGE text
+        const dodgeText = document.createElement('div');
+        dodgeText.className = 'zoey-dodge-text';
+        dodgeText.textContent = 'DODGE!';
+        dodgeContainer.appendChild(dodgeText);
+        
+        // Get the image for afterimage effect
+        const imageContainer = characterElement.querySelector('.image-container');
+        const characterImage = characterElement.querySelector('.character-image');
+        
+        if (characterImage && characterImage.src) {
+            // Create blur effect
+            const blurEffect = document.createElement('div');
+            blurEffect.className = 'zoey-dodge-blur';
+            blurEffect.style.backgroundImage = `url(${characterImage.src})`;
+            dodgeContainer.appendChild(blurEffect);
+            
+            // Create afterimage effect
+            const afterImage = document.createElement('div');
+            afterImage.className = 'zoey-dodge-afterimage';
+            afterImage.style.backgroundImage = `url(${characterImage.src})`;
+            dodgeContainer.appendChild(afterImage);
+        }
+        
+        // Play dodge sound
+        if (window.gameManager && window.gameManager.playSound) {
+            window.gameManager.playSound('sounds/dodge.mp3', 0.5);
+        }
+        
+        // Log the dodge
+        if (window.gameManager && window.gameManager.addLogEntry) {
+            window.gameManager.addLogEntry(`${character.name}'s feline reflexes allow her to dodge the attack!`, 'zoey talent-effect');
+        }
+        
+        // Remove the dodge effect after animation completes
+        setTimeout(() => {
+            if (dodgeContainer.parentNode) {
+                characterElement.removeChild(dodgeContainer);
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('[ZoeyDodgeVFX] Error showing dodge VFX:', error);
+    }
+}
+
+// Make the function available globally
+window.showZoeyDodgeVFX = showZoeyDodgeVFX;
   

@@ -33,28 +33,23 @@
 /* Blazing Ball ability VFX */
 .blazing-ball-vfx {
     position: absolute;
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, rgba(255,165,0,1) 0%, rgba(255,60,0,1) 70%, rgba(255,0,0,0.8) 100%);
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #ff6600, #ff0000);
     border-radius: 50%;
-    box-shadow: 0 0 15px 5px rgba(255, 60, 0, 0.8);
-    z-index: 10;
-    animation: blazing-ball-travel 0.5s ease-in forwards;
-    transform-origin: center;
+    box-shadow: 0 0 20px #ff6600;
+    z-index: 20;
+    pointer-events: none;
 }
 
 @keyframes blazing-ball-travel {
-    0% {
-        transform: scale(0.5) translateY(0);
-        opacity: 0.7;
-    }
-    50% {
-        transform: scale(1.2) translateY(calc(var(--travel-distance) / 2));
+    0% { 
+        transform: translate(0, 0) scale(1);
         opacity: 1;
     }
-    100% {
-        transform: scale(1) translateY(var(--travel-distance));
-        opacity: 0.9;
+    100% { 
+        transform: translate(var(--travel-x), var(--travel-y)) scale(1.5);
+        opacity: 0;
     }
 }
 
@@ -64,17 +59,12 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(255, 102, 0, 0.8) 20%, rgba(255, 204, 0, 0.5) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,165,0,0.8) 0%, rgba(255,60,0,0.4) 50%, rgba(255,0,0,0) 100%);
+    box-shadow: 0 0 30px 20px rgba(255, 60, 0, 0.6);
     border-radius: 50%;
-    transform: scale(1);
-    opacity: 1;
-    animation: blazingBallImpact 0.5s ease-out forwards;
+    animation: impact-pulse 0.5s ease-out forwards;
+    z-index: 15;
     pointer-events: none;
-}
-
-@keyframes blazingBallImpact {
-    0% { transform: scale(0.5); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; }
 }
 
 /* Burning Ground VFX */
@@ -90,39 +80,45 @@
     left: 0;
     width: 100%;
     height: 50px;
-    overflow: hidden;
-    pointer-events: none;
+    background: linear-gradient(to top, rgba(255,100,0,0.6), rgba(255,0,0,0.3), transparent);
     z-index: 5;
+    pointer-events: none;
 }
 
 .burning-ground-vfx {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to top, rgba(255,50,0,0.4) 0%, rgba(255,80,0,0.1) 70%, rgba(255,0,0,0) 100%);
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(255,100,0,0.3) 0px,
+        rgba(255,0,0,0.3) 10px,
+        rgba(255,100,0,0.3) 20px
+    );
+    animation: burning-ground-flicker 1s ease-in-out infinite alternate;
+}
+
+@keyframes burning-ground-flicker {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
 }
 
 .ember {
     position: absolute;
-    bottom: 0;
     width: 4px;
     height: 4px;
-    background-color: rgba(255, 165, 0, 0.8);
+    background: radial-gradient(circle, #ff6600, #ff0000);
     border-radius: 50%;
-    animation: ember-float linear;
-    z-index: 6;
-    box-shadow: 0 0 3px 1px rgba(255, 60, 0, 0.5);
+    animation: ember-rise linear;
+    pointer-events: none;
 }
 
-@keyframes ember-float {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 0.7;
+@keyframes ember-rise {
+    0% { 
+        bottom: 0;
+        opacity: 1;
     }
-    100% {
-        transform: translateY(-100px) rotate(360deg);
+    100% { 
+        bottom: 100px;
         opacity: 0;
     }
 }
@@ -160,22 +156,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(255,145,0,0.8) 0%, rgba(255,40,0,0.6) 50%, rgba(255,0,0,0) 100%);
-    box-shadow: 0 0 20px 10px rgba(255, 40, 0, 0.5);
+    background: radial-gradient(circle, rgba(255,80,0,0.7) 0%, rgba(255,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
     border-radius: 50%;
     animation: impact-pulse 1s ease-out forwards;
     z-index: 15;
-}
-
-@keyframes impact-pulse {
-    0% {
-        transform: scale(0.5);
-        opacity: 0.9;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
+    pointer-events: none;
 }
 
 /* CSS for Infernal Astaroth Abilities */
@@ -214,28 +199,28 @@
 /* --- W: Explosion --- */
 .astaroth-explosion-vfx {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,165,0,0.9) 0%, rgba(255,60,0,0.7) 50%, rgba(255,0,0,0) 100%);
-    box-shadow: 0 0 30px 20px rgba(255, 60, 0, 0.7);
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,100,0,0.9) 0%, rgba(255,0,0,0.6) 30%, rgba(0,0,0,0) 70%);
     border-radius: 50%;
-    animation: explosion-pulse 1.5s ease-out forwards;
-    z-index: 20;
+    animation: explosion-expand 1.5s ease-out forwards;
+    z-index: 15;
+    pointer-events: none;
 }
 
-@keyframes explosion-pulse {
-    0% {
-        transform: scale(0.1);
-        opacity: 0;
-    }
-    25% {
-        transform: scale(2);
+@keyframes explosion-expand {
+    0% { 
+        transform: scale(0);
         opacity: 1;
     }
-    100% {
-        transform: scale(3);
+    50% { 
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: scale(2);
         opacity: 0;
     }
 }
@@ -246,22 +231,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(255,145,0,0.8) 0%, rgba(255,40,0,0.6) 50%, rgba(255,0,0,0) 100%);
-    box-shadow: 0 0 20px 10px rgba(255, 40, 0, 0.5);
+    background: radial-gradient(circle, rgba(255,80,0,0.7) 0%, rgba(255,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
     border-radius: 50%;
     animation: impact-pulse 1s ease-out forwards;
     z-index: 15;
-}
-
-@keyframes impact-pulse {
-    0% {
-        transform: scale(0.5);
-        opacity: 0.9;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
+    pointer-events: none;
 }
 
 /* --- E: Molten Armor --- */
@@ -271,40 +245,136 @@
     left: 0;
     width: 100%;
     height: 100%;
-    border: 3px solid rgba(255, 60, 0, 0.7);
-    box-shadow: 0 0 15px 5px rgba(255, 60, 0, 0.5), inset 0 0 15px 5px rgba(255, 60, 0, 0.5);
-    border-radius: 50%;
-    animation: molten-armor-pulse 2s infinite alternate;
-    z-index: 5;
+    background: linear-gradient(45deg, rgba(255,100,0,0.3), rgba(255,0,0,0.3));
+    border: 2px solid #ff6600;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #ff6600;
+    animation: molten-armor-glow 2s ease-in-out infinite alternate;
+    z-index: 10;
     pointer-events: none;
 }
 
-@keyframes molten-armor-pulse {
-    0% {
-        opacity: 0.6;
-        box-shadow: 0 0 15px 5px rgba(255, 60, 0, 0.5), inset 0 0 15px 5px rgba(255, 60, 0, 0.5);
+@keyframes molten-armor-glow {
+    0% { 
+        box-shadow: 0 0 15px #ff6600;
+        border-color: #ff6600;
     }
-    100% {
-        opacity: 0.9;
-        box-shadow: 0 0 20px 8px rgba(255, 60, 0, 0.7), inset 0 0 20px 8px rgba(255, 60, 0, 0.7);
+    100% { 
+        box-shadow: 0 0 25px #ff3300;
+        border-color: #ff3300;
     }
 }
 
-/* Character with Molten Armor active */
-.character-slot.molten-armor-active {
+.molten-armor-active {
     position: relative;
 }
 
-.character-slot.molten-armor-active::before {
-    content: '';
+.astaroth-molten-armor-impact-vfx {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(255,60,0,0.1) 0%, rgba(255,40,0,0.05) 70%, rgba(255,0,0,0) 100%);
+    background: radial-gradient(circle, rgba(255,165,0,0.8) 0%, rgba(255,60,0,0.4) 50%, rgba(255,0,0,0) 100%);
+    border-radius: 50%;
+    animation: impact-pulse 1s ease-out forwards;
+    z-index: 15;
     pointer-events: none;
-    z-index: 3;
+}
+
+/* Molten Aura Passive VFX */
+.molten-aura-passive-vfx {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 2px solid #ff6600;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 102, 0, 0.6);
+    animation: molten-aura-pulse 3s ease-in-out infinite;
+    z-index: 8;
+    pointer-events: none;
+}
+
+@keyframes molten-aura-pulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(255, 102, 0, 0.6);
+        border-color: #ff6600;
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(255, 51, 0, 0.8);
+        border-color: #ff3300;
+    }
+}
+
+.molten-aura-active {
+    position: relative;
+}
+
+.molten-aura-reflection-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    animation: reflection-burst 1s ease-out forwards;
+    z-index: 15;
+    pointer-events: none;
+}
+
+@keyframes reflection-burst {
+    0% { 
+        transform: scale(0.5);
+        opacity: 1;
+        background: radial-gradient(circle, rgba(255,102,0,0.9) 0%, rgba(255,51,0,0.6) 50%, rgba(255,0,0,0) 100%);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Character state indicators */
+.character.molten-armor-active::before {
+    content: "🔥";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 16px;
+    z-index: 20;
+    animation: bounce 1s ease-in-out infinite alternate;
+}
+
+.character.molten-aura-active::after {
+    content: "🌋";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    font-size: 14px;
+    z-index: 20;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); }
+}
+
+@keyframes glow {
+    0% { 
+        text-shadow: 0 0 5px #ff6600;
+        opacity: 0.8;
+    }
+    100% { 
+        text-shadow: 0 0 10px #ff3300;
+        opacity: 1;
+    }
 }
 
 /* Expiration Explosion */

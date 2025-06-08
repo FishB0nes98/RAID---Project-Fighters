@@ -1,12 +1,14 @@
 // Infernal Scorpion Ability: GET OVER HERE
 
 function infernalScorpionGetOverHereEffect(caster, target) {
+    console.log(`[GET OVER HERE] Function called with caster: ${caster?.name}, target: ${target?.name}`);
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
     if (!target) {
+        console.log(`[GET OVER HERE] No target selected!`);
         log("GET OVER HERE: No target selected!", "error");
-        return;
+        return false;
     }
 
     log(`${caster.name} uses GET OVER HERE on ${target.name}!`);
@@ -136,8 +138,16 @@ function infernalScorpionGetOverHereEffect(caster, target) {
     caster.applyLifesteal(damageResult.damage);
 
     // Update UI
-    updateCharacterUI(caster);
-    updateCharacterUI(target);
+    if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+        window.gameManager.uiManager.updateCharacterUI(caster);
+        window.gameManager.uiManager.updateCharacterUI(target);
+    } else if (typeof updateCharacterUI === 'function') {
+        updateCharacterUI(caster);
+        updateCharacterUI(target);
+    }
+    
+    console.log(`[GET OVER HERE] Execution completed successfully`);
+    return true; // Indicate successful ability execution
 }
 
 // -- Removed incorrect registration call --
@@ -198,12 +208,14 @@ if (typeof AbilityFactory !== 'undefined') {
 
 // Infernal Scorpion Ability: Fire Breath
 function infernalScorpionFireBreathEffect(caster, target) {
+    console.log(`[FIRE BREATH] Function called with caster: ${caster?.name}, target: ${target?.name}`);
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
     if (!target) {
+        console.log(`[FIRE BREATH] No target selected!`);
         log("Fire Breath: No target selected!", "error");
-        return;
+        return false;
     }
 
     log(`${caster.name} uses Fire Breath on ${target.name}!`);
@@ -328,12 +340,22 @@ function infernalScorpionFireBreathEffect(caster, target) {
         // --- END NEW ---
     }
 
-    // Lifesteal (unlikely for magical DOT ability, but include if needed)
-    // caster.applyLifesteal(damageResult.damage);
+    // Apply lifesteal for the initial Fire Breath damage
+    if (caster.stats.lifesteal > 0) {
+        caster.applyLifesteal(damageResult.damage);
+    }
 
     // Update UI
-    updateCharacterUI(caster);
-    updateCharacterUI(target);
+    if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+        window.gameManager.uiManager.updateCharacterUI(caster);
+        window.gameManager.uiManager.updateCharacterUI(target);
+    } else if (typeof updateCharacterUI === 'function') {
+        updateCharacterUI(caster);
+        updateCharacterUI(target);
+    }
+    
+    console.log(`[FIRE BREATH] Execution completed successfully`);
+    return true; // Indicate successful ability execution
 }
 
 // --- CSS for VFX (Add to a relevant CSS file, e.g., infernal_scorpion.css) --- 
@@ -440,8 +462,15 @@ const dualBladeStrikeEffect = (caster, target) => {
     // Show VFX
     showDualBladeStrikeVFX(caster, target);
 
+    // Apply lifesteal for total damage dealt
+    if (caster.stats.lifesteal > 0 && totalDamageDealt > 0) {
+        caster.applyLifesteal(totalDamageDealt);
+    }
+
     // Update UI (applyDamage should handle target UI update)
-    if (typeof updateCharacterUI === 'function') {
+    if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+        window.gameManager.uiManager.updateCharacterUI(caster); // Update caster UI (e.g., mana)
+    } else if (typeof updateCharacterUI === 'function') {
         updateCharacterUI(caster); // Update caster UI (e.g., mana)
     }
 
@@ -613,7 +642,11 @@ const infernalScorpionOpenPortalEffect = (caster, target) => { // Target is cast
             enemy.addDebuff(disableDebuff.clone()); // Clone for unique instance
 
             // Update enemy UI
-            updateCharacterUI(enemy);
+            if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+                window.gameManager.uiManager.updateCharacterUI(enemy);
+            } else if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(enemy);
+            }
         });
 
         // Show VFX after processing all enemies
@@ -632,7 +665,11 @@ const infernalScorpionOpenPortalEffect = (caster, target) => { // Target is cast
     });
 
     // Update caster UI
-    updateCharacterUI(caster);
+    if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+        window.gameManager.uiManager.updateCharacterUI(caster);
+    } else if (typeof updateCharacterUI === 'function') {
+        updateCharacterUI(caster);
+    }
 
     return true; // Ability used successfully
 };
@@ -663,4 +700,65 @@ document.addEventListener('DOMContentLoaded', () => {
         window.definedAbilities.infernal_scorpion_dual_strike = dualBladeStrikeAbility;
         window.definedAbilities.infernal_scorpion_open_portal = openPortalAbility; // Add R to fallback
     }
-}); 
+});
+
+// Register the ability effects with AbilityFactory
+function registerInfernalScorpionAbilities() {
+    console.log('[Infernal Scorpion] Registering abilities...');
+    
+    if (window.AbilityFactory && typeof window.AbilityFactory.registerAbilityEffect === 'function') {
+        // Register GET OVER HERE effect
+        window.AbilityFactory.registerAbilityEffect('infernalScorpionGetOverHereEffect', infernalScorpionGetOverHereEffect);
+        window.AbilityFactory.registerAbilityEffect('infernal_scorpion_q', infernalScorpionGetOverHereEffect);
+        
+        // Register Fire Breath effect
+        window.AbilityFactory.registerAbilityEffect('infernalScorpionFireBreathEffect', infernalScorpionFireBreathEffect);
+        window.AbilityFactory.registerAbilityEffect('infernal_scorpion_w', infernalScorpionFireBreathEffect);
+        
+        // Register Dual Blade Strike effect
+        window.AbilityFactory.registerAbilityEffect('dualBladeStrikeEffect', dualBladeStrikeEffect);
+        window.AbilityFactory.registerAbilityEffect('infernal_scorpion_dual_strike', dualBladeStrikeEffect);
+        
+        // Register Open Portal effect
+        window.AbilityFactory.registerAbilityEffect('infernalScorpionOpenPortalEffect', infernalScorpionOpenPortalEffect);
+        window.AbilityFactory.registerAbilityEffect('infernal_scorpion_open_portal', infernalScorpionOpenPortalEffect);
+        
+        console.log('[Infernal Scorpion] Successfully registered all ability effects');
+    } else {
+        console.warn('[Infernal Scorpion] AbilityFactory not available, retrying in 1000ms...');
+        setTimeout(registerInfernalScorpionAbilities, 1000);
+    }
+}
+
+// Initialize registration when the script loads
+(function() {
+    console.log('[Infernal Scorpion] Module loaded, attempting to register abilities...');
+    
+    // Try to register immediately if AbilityFactory is available
+    if (window.AbilityFactory && typeof window.AbilityFactory.registerAbilityEffect === 'function') {
+        console.log('[Infernal Scorpion] AbilityFactory found, registering abilities immediately');
+        registerInfernalScorpionAbilities();
+    } else {
+        console.log('[Infernal Scorpion] AbilityFactory not found yet, waiting for DOMContentLoaded');
+        
+        // Wait for the DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', registerInfernalScorpionAbilities);
+        } else {
+            // DOM already loaded, try initializing now
+            registerInfernalScorpionAbilities();
+        }
+        
+        // Also try registering when the window loads (final fallback)
+        window.addEventListener('load', () => {
+            if (!window.AbilityFactory || typeof window.AbilityFactory.registerAbilityEffect !== 'function') {
+                console.error('[Infernal Scorpion] AbilityFactory still not available on window.load');
+            } else {
+                console.log('[Infernal Scorpion] Retrying ability registration on window.load');
+                registerInfernalScorpionAbilities();
+            }
+        });
+    }
+})();
+
+console.log('[Infernal Scorpion] Abilities loaded successfully'); 

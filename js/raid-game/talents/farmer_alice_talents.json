@@ -1,0 +1,434 @@
+{
+  "characterId": "farmer_alice",
+  "talentTree": {
+    "talent_alice_1": {
+      "id": "talent_alice_1",
+      "name": "Quick Reflexes",
+      "description": "Taking damage has a 50% chance to reduce all ability cooldowns by 1 turn.",
+      "icon": "Icons/talents/quick_reflexes.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "chanceToReduceCooldownsOnHit",
+        "value": 0.5
+      },
+      "parents": [],
+      "children": ["talent_alice_2", "talent_alice_3"]
+    },
+    "talent_alice_2": {
+      "id": "talent_alice_2",
+      "name": "Purifying Fur",
+      "description": "Thick Fur removes all debuffs from Alice when activated.",
+      "icon": "Icons/talents/purifying_fur.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "thick_fur",
+        "property": "removeAllDebuffs",
+        "value": true
+      },
+      "parents": ["talent_alice_1"],
+      "children": ["talent_alice_4", "talent_alice_5"]
+    },
+    "talent_alice_3": {
+      "id": "talent_alice_3",
+      "name": "Reinforced Fur",
+      "description": "Increases Alice's Armor by 8.",
+      "icon": "Icons/talents/reinforced_fur.webp",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "armor",
+        "value": 8,
+        "operation": "add"
+      },
+      "parents": ["talent_alice_1"],
+      "children": ["talent_alice_8", "talent_alice_9"]
+    },
+    "talent_alice_4": {
+      "id": "talent_alice_4",
+      "name": "Fur Coat Endurance",
+      "description": "Thick Fur doesn't end Alice's turn when used.",
+      "icon": "Icons/talents/fur_coat_endurance.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "thick_fur",
+        "property": "doesNotEndTurn",
+        "value": true
+      },
+      "parents": ["talent_alice_2"],
+      "children": ["talent_alice_7"]
+    },
+    "talent_alice_5": {
+      "id": "talent_alice_5",
+      "name": "Restorative Fur",
+      "description": "Thick Fur heals Alice for 35% of her missing HP when activated.",
+      "icon": "Icons/talents/restorative_fur.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "thick_fur",
+        "property": "healingPercent",
+        "value": 0.35
+      },
+      "parents": ["talent_alice_2"],
+      "children": ["talent_alice_6"]
+    },
+    "talent_alice_6": {
+      "id": "talent_alice_6",
+      "name": "Power Carrots",
+      "description": "Carrot Power-up heals 21% of the target's maximum HP instead of missing HP.",
+      "icon": "Icons/talents/power_carrots.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "carrot_power_up",
+        "property": "useMaxHpInstead",
+        "value": true
+      },
+      "parents": ["talent_alice_5"],
+      "children": ["talent_alice_10"]
+    },
+    "talent_alice_7": {
+      "id": "talent_alice_7",
+      "name": "Healing Aura",
+      "description": "When Alice takes damage, all allies are healed for 1% of their missing HP.",
+      "icon": "Icons/talents/healing_aura.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "healAlliesOnDamage",
+        "value": 0.01
+      },
+      "parents": ["talent_alice_4"],
+      "children": ["talent_alice_12"]
+    },
+    "talent_alice_8": {
+      "id": "talent_alice_8",
+      "name": "Enhanced Recovery",
+      "description": "Heals on Alice are 20% stronger.",
+      "icon": "Icons/talents/enhanced_recovery.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "healingReceivedMultiplier",
+        "value": 1.2
+      },
+      "parents": ["talent_alice_3"],
+      "children": ["talent_alice_10"]
+    },
+    "talent_alice_9": {
+      "id": "talent_alice_9",
+      "name": "Lasting Protection",
+      "description": "Buffs on Alice last 2 turns longer.",
+      "icon": "Icons/talents/lasting_protection.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "buffDurationBonus",
+        "value": 2
+      },
+      "parents": ["talent_alice_3"],
+      "children": ["talent_alice_11"]
+    },
+    "talent_alice_10": {
+      "id": "talent_alice_10",
+      "name": "Revitalizing Magic",
+      "description": "Whenever Alice uses an ability, she heals herself for 155 (+250% Magical Shield) HP.",
+      "icon": "Icons/talents/revitalizing_magic.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "healOnAbilityUse",
+        "value": {
+          "baseAmount": 155,
+          "magicalShieldMultiplier": 2.5
+        }
+      },
+      "parents": ["talent_alice_6", "talent_alice_8"],
+      "children": ["talent_alice_11", "talent_alice_12", "talent_alice_14"],
+      "position": { "x": 100, "y": 125 }
+    },
+    "talent_alice_11": {
+      "id": "talent_alice_11",
+      "name": "Adaptive Defense",
+      "description": "Alice starts each battle with 500 HP more per enemy character.",
+      "icon": "Icons/talents/adaptive_defense.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "bonusHpPerEnemy",
+        "value": 500
+      },
+      "parents": ["talent_alice_10", "talent_alice_9"],
+      "children": ["talent_alice_13", "talent_alice_25"],
+      "position": { "x": -200, "y": 500 }
+    },
+    "talent_alice_12": {
+      "id": "talent_alice_12",
+      "name": "Natural Healer",
+      "description": "Increases Alice's healing power by 9%.",
+      "icon": "Icons/talents/natural_healer.webp",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "healingPower",
+        "value": 0.09,
+        "operation": "add"
+      },
+      "parents": ["talent_alice_10", "talent_alice_7"],
+      "children": ["talent_alice_15"],
+      "position": { "x": 125, "y": -340}
+    },
+    "talent_alice_13": {
+      "id": "talent_alice_13",
+      "name": "Mana Conversion",
+      "description": "Alice gains 20% of her Maximum Mana as HP.",
+      "icon": "Icons/talents/mana_conversion.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "manaConversionToHp",
+        "value": 0.2
+      },
+      "parents": ["talent_alice_11"],
+      "children": ["talent_alice_22", "talent_alice_23"],
+      "position": { "x": 250, "y": 800 }
+    },
+    "talent_alice_14": {
+      "id": "talent_alice_14",
+      "name": "Arcane Infusion",
+      "description": "Whenever Alice uses an ability, there is 10% chance that she or her ally receives a buff that increases magic shield by 10% for 3 turns.",
+      "icon": "Icons/talents/arcane_infusion.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "arcaneInfusionChance",
+        "value": 0.1
+      },
+      "parents": ["talent_alice_10"],
+      "children": ["talent_alice_19", "talent_alice_20"],
+      "position": { "x": 275, "y": 800}
+    },
+    "talent_alice_15": {
+      "id": "talent_alice_15",
+      "name": "Shield Transfer",
+      "description": "Characters that heal Alice gain 50% of her magic shield as buff for 5 turns (can stack).",
+      "icon": "Icons/talents/shield_transfer.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "shieldTransferOnHeal",
+        "value": 0.5
+      },
+      "parents": ["talent_alice_12"],
+      "children": ["talent_alice_16", "talent_alice_17"],
+      "position": { "x": 250, "y": -51 }
+    },
+    "talent_alice_16": {
+      "id": "talent_alice_16",
+      "name": "Nimble Movements",
+      "description": "Alice gains 8% dodge chance.",
+      "icon": "Icons/talents/nimble_movements.webp",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "dodgeChance",
+        "value": 0.08,
+        "operation": "add"
+      },
+      "parents": ["talent_alice_15"],
+      "children": ["talent_alice_18"],
+      "position": { "x": 300, "y": -200 }
+    },
+    "talent_alice_17": {
+      "id": "talent_alice_17",
+      "name": "Damage Reflection",
+      "description": "When Alice takes damage, she redirects 3% of the damage back to the attacker.",
+      "icon": "Icons/talents/damage_reflection.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "damageReflectionPercent",
+        "value": 0.03
+      },
+      "parents": ["talent_alice_15"],
+      "children": ["talent_alice_18"],
+      "position": { "x": 300, "y": -150 }
+    },
+    "talent_alice_18": {
+      "id": "talent_alice_18",
+      "name": "Bunny Brigade",
+      "description": "Carrot Power Up affects all allies instead of a single target, and reduces cooldown by 3 turns.",
+      "icon": "Icons/talents/bunny_brigade.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "carrot_power_up",
+          "property": "affectAllAllies",
+          "value": true
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "carrot_power_up",
+          "property": "cooldown",
+          "value": 12,
+          "operation": "set"
+        }
+      ],
+      "parents": ["talent_alice_16", "talent_alice_17"],
+      "children": [],
+      "position": { "x": 400, "y": -175 },
+      "powerful": true
+    },
+    "talent_alice_19": {
+      "id": "talent_alice_19",
+      "name": "Hunter's Instinct",
+      "description": "Pounce no longer stuns, but now deals 200% Physical damage and has a 65% chance to reduce a random Alice ability cooldown by 1 turn.",
+      "icon": "Icons/talents/hunters_instinct.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "pounce",
+          "property": "amount",
+          "value": 2.0,
+          "operation": "set"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "pounce",
+          "property": "description",
+          "value": "Deals 200% AD damage and has a 65% chance to reduce a random Alice ability cooldown by 1 turn.",
+          "operation": "set"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "pounce",
+          "property": "debuffEffect",
+          "value": null,
+          "operation": "set"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "pounce",
+          "property": "cooldownReductionEffect",
+          "value": {
+            "chance": 0.65,
+            "amount": 1
+          },
+          "operation": "set"
+        }
+      ],
+      "parents": ["talent_alice_14"],
+      "children": ["talent_alice_21"],
+      "position": { "x": 375, "y": 425 }
+    },
+    "talent_alice_20": {
+      "id": "talent_alice_20",
+      "name": "Mana Reservoir",
+      "description": "Increase Alice's Mana by 900 but her abilities cost 20% more.",
+      "icon": "Icons/talents/mana_reservoir.webp",
+      "effect": [
+        {
+          "type": "modify_stat",
+          "stat": "maxMana",
+          "value": 900,
+          "operation": "add"
+        },
+        {
+          "type": "modify_character_property",
+          "property": "manaCostMultiplier",
+          "value": 1.2
+        }
+      ],
+      "parents": ["talent_alice_14"],
+      "children": ["talent_alice_21"],
+      "position": { "x": 365, "y": 150 }
+    },
+    "talent_alice_21": {
+      "id": "talent_alice_21",
+      "name": "Agile Hunter",
+      "description": "Pounce has a 40% chance not to end Alice's turn and reset Pounce's cooldown when used.",
+      "icon": "Icons/talents/agile_hunter.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "pounce",
+        "property": "chanceToNotEndTurn",
+        "value": 0.4
+      },
+      "parents": ["talent_alice_19", "talent_alice_20"],
+      "children": [],
+      "position": { "x": 430, "y": 275 },
+      "powerful": true
+    },
+    "talent_alice_22": {
+      "id": "talent_alice_22",
+      "name": "Natural Regeneration",
+      "description": "At game start Alice gains a permanent buff that restores 2% maxhp and 2% maxmana every turn start.",
+      "icon": "Icons/talents/natural_regeneration.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "naturalRegenBuff",
+        "value": {
+          "hpPercent": 0.02,
+          "manaPercent": 0.02
+        }
+      },
+      "parents": ["talent_alice_13"],
+      "children": ["talent_alice_24"],
+      "position": { "x": 300, "y": 500 }
+    },
+    "talent_alice_23": {
+      "id": "talent_alice_23",
+      "name": "Primal Strength",
+      "description": "Pounce damage now scales with 3% of Alice's MAXHP too.",
+      "icon": "Icons/talents/primal_strength.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "pounce",
+        "property": "maxHpScaling",
+        "value": 0.03
+      },
+      "parents": ["talent_alice_13"],
+      "children": ["talent_alice_24"],
+      "position": { "x": 200, "y": 500 }
+    },
+    "talent_alice_24": {
+      "id": "talent_alice_24",
+      "name": "Furry Guardian",
+      "description": "When an ally is targeted by an enemy ability, there is a 50% chance that the ability is redirected to Alice instead.",
+      "icon": "Icons/talents/furry_guardian.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "abilityRedirectionChance",
+        "value": 0.5
+      },
+      "parents": ["talent_alice_22", "talent_alice_23"],
+      "children": [],
+      "position": { "x": 250, "y": 600 },
+      "powerful": true
+    },
+    "talent_alice_25": {
+      "id": "talent_alice_25",
+      "name": "Defensive Fortitude",
+      "description": "Alice gains 4% armor and 4% magical shield.",
+      "icon": "Icons/talents/defensive_fortitude.webp",
+      "effect": [
+        {
+          "type": "modify_stat",
+          "stat": "armor",
+          "value": 8,
+          "operation": "add"
+        },
+        {
+          "type": "modify_stat",
+          "stat": "magicalShield",
+          "value": 8,
+          "operation": "add"
+        }
+      ],
+      "parents": ["talent_alice_11"],
+      "children": ["talent_alice_26"],
+      "position": { "x": -300, "y": 600 }
+    },
+    "talent_alice_26": {
+      "id": "talent_alice_26",
+      "name": "Protective Aura",
+      "description": "Alice creates a magical aura that grants all allies 20% of her Magic Shield, updating each turn.",
+      "icon": "Icons/talents/protective_aura.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "protectiveAuraShield",
+        "value": 0.2
+      },
+      "parents": ["talent_alice_25"],
+      "children": [],
+      "position": { "x": -300, "y": 700 },
+      "powerful": true
+    }
+  }
+} 

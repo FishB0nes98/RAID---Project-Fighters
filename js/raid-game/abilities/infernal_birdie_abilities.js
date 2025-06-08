@@ -178,9 +178,9 @@ const drinkUpEffect = (caster, target) => { // target will be the caster for 'se
     ).setDescription(`Increases Healing Power by ${healingPowerIncrease * 100}% for ${buffDuration} turns.`);
 
     // Add stat modifier
-    healingPowerBuff.statModifiers = {
-        healingPower: healingPowerIncrease
-    };
+    healingPowerBuff.statModifiers = [
+        { stat: 'healingPower', value: healingPowerIncrease, operation: 'add' }
+    ];
 
     caster.addBuff(healingPowerBuff);
     log(`${caster.name} gained ${buffName} for ${buffDuration} turns.`);

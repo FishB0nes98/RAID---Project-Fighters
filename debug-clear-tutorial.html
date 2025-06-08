@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Clear Tutorial Reward</title>
+</head>
+<body>
+    <h1>Debug - Clear Tutorial Reward Status</h1>
+    <button id="clear-tutorial-reward">Clear Tutorial Reward Status</button>
+    <div id="status"></div>
+
+    <!-- Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        document.getElementById('clear-tutorial-reward').addEventListener('click', async () => {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                document.getElementById('status').textContent = 'Not logged in!';
+                return;
+            }
+
+            try {
+                // Clear tutorial reward status
+                await firebase.database().ref(`users/${user.uid}/tutorialRewardClaimed`).remove();
+                document.getElementById('status').textContent = 'Tutorial reward status cleared! You can now test the character unlock again.';
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Wait for auth state
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('status').textContent = `Logged in as: ${user.email}`;
+            } else {
+                document.getElementById('status').textContent = 'Not logged in. Please log in first.';
+            }
+        });
+    </script>
+</body>
+</html> 

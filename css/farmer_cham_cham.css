@@ -827,4 +827,2428 @@
         opacity: 0; 
         transform: translateX(-50px); 
     }
+}
+
+/* Arcane Scratch VFX */
+.arcane-scratch-vfx {
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.arcane-scratch-vfx::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 100, 255, 0.3) 0%,
+        rgba(180, 80, 255, 0.2) 40%,
+        rgba(100, 0, 255, 0.1) 70%,
+        transparent 100%
+    );
+    opacity: 0;
+    animation: arcane-scratch-pulse 0.8s ease-out forwards;
+}
+
+@keyframes arcane-scratch-pulse {
+    0% { transform: scale(0.3); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Critical Reflexes VFX */
+.critical-reflexes-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.cooldown-reduction-indicator {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ffcc00;
+    padding: 2px 6px;
+    border-radius: 4px;
+    animation: cooldown-float 1s ease-out forwards;
+    text-shadow: 0 0 4px #ff6600;
+    box-shadow: 0 0 8px #ff6600;
+}
+
+@keyframes cooldown-float {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+}
+
+/* Add a glow effect for cooldown reduction */
+.ability.cooldown-reduced {
+    animation: cooldown-glow 1s ease-out;
+}
+
+@keyframes cooldown-glow {
+    0% { box-shadow: 0 0 5px 2px rgba(255, 204, 0, 0.7); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+}
+
+/* === Arcane Boomerang Effects === */
+.arcane-boomerang {
+    box-shadow: 0 0 15px 5px rgba(130, 60, 255, 0.7) !important;
+    background-color: rgba(150, 100, 255, 0.3) !important;
+    border: 2px solid rgba(170, 120, 255, 0.8) !important;
+}
+
+.arcane-paw-print {
+    background-color: rgba(150, 100, 255, 0.4) !important;
+    box-shadow: 0 0 8px 2px rgba(130, 60, 255, 0.6) !important;
+}
+
+.arcane-sparkle {
+    background-color: rgba(180, 130, 255, 0.7) !important;
+    box-shadow: 0 0 10px 3px rgba(150, 80, 255, 0.8) !important;
+}
+
+.arcane-impact {
+    background: radial-gradient(circle, rgba(180, 130, 255, 0.8) 0%, rgba(130, 60, 255, 0.4) 50%, transparent 100%) !important;
+    box-shadow: 0 0 20px 6px rgba(150, 80, 255, 0.6) !important;
+}
+
+/* === Mana Restoration VFX === */
+.mana-restore-vfx {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    font-weight: bold;
+    color: #42a5f5;
+    text-shadow: 0 0 6px rgba(66, 165, 245, 0.9), 0 0 10px rgba(66, 165, 245, 0.7);
+    z-index: 100;
+    animation: mana-restore-float 1.5s ease-out forwards;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes mana-restore-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -120%) scale(0.9);
+    }
+}
+
+/* Cooldown reduction indicator for Critical Reflexes talent */
+.cooldown-reduction-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff9800;
+    text-shadow: 0 0 5px rgba(255, 152, 0, 0.8), 0 0 10px rgba(255, 152, 0, 0.6);
+    z-index: 100;
+    animation: cooldown-float 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes cooldown-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -120%) scale(1);
+    }
+}
+
+.ability.cooldown-reduced {
+    animation: cooldown-glow 1s ease-in-out;
+}
+
+@keyframes cooldown-glow {
+    0% {
+        box-shadow: 0 0 0 rgba(255, 152, 0, 0);
+    }
+    50% {
+        box-shadow: 0 0 15px 5px rgba(255, 152, 0, 0.7);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(255, 152, 0, 0);
+    }
+}
+
+/* Add CSS for the Arcane Leap talent and Adaptive Awakening VFX */
+
+.arcane-leap-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(148, 0, 211, 0.3) 0%, rgba(72, 61, 139, 0.2) 40%, rgba(0, 0, 0, 0) 70%);
+    box-shadow: 0 0 15px 5px rgba(138, 43, 226, 0.4);
+    animation: arcane-leap-pulse 1.5s ease-in-out;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes arcane-leap-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+.adaptive-awakening-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.adaptive-awakening-vfx.physical {
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, rgba(139, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0) 70%);
+    box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.3);
+    animation: adaptive-physical-pulse 2s ease-out;
+}
+
+.adaptive-awakening-vfx.magical {
+    background: radial-gradient(circle, rgba(0, 191, 255, 0.2) 0%, rgba(65, 105, 225, 0.1) 40%, rgba(0, 0, 0, 0) 70%);
+    box-shadow: 0 0 10px 3px rgba(65, 105, 225, 0.3);
+    animation: adaptive-magical-pulse 2s ease-out;
+}
+
+.adaptive-awakening-text {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.5);
+    animation: adaptive-text-float 2s ease-out;
+    position: absolute;
+    top: 40%;
+}
+
+.adaptive-awakening-vfx.physical .adaptive-awakening-text {
+    color: #ff4c4c;
+}
+
+.adaptive-awakening-vfx.magical .adaptive-awakening-text {
+    color: #4c9eff;
+}
+
+@keyframes adaptive-physical-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+@keyframes adaptive-magical-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+@keyframes adaptive-text-float {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1) translateY(-30px);
+    }
+}
+
+/* Sharp Focus VFX */
+.sharp-focus-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    animation: sharp-focus-pulse 2s ease-out;
+}
+
+.sharp-focus-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffdd00;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #ff6600, 0 0 10px #ff8800;
+    animation: sharp-focus-text-float 2s ease-out;
+    white-space: nowrap;
+}
+
+.focus-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ffdd00;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+    box-shadow: 0 0 15px 5px rgba(255, 221, 0, 0.6);
+    animation: focus-particle-animate 1.5s ease-out;
+}
+
+@keyframes sharp-focus-pulse {
+    0% {
+        box-shadow: inset 0 0 30px 10px rgba(255, 221, 0, 0.1);
+    }
+    30% {
+        box-shadow: inset 0 0 40px 15px rgba(255, 221, 0, 0.4);
+    }
+    100% {
+        box-shadow: inset 0 0 0 0 rgba(255, 221, 0, 0);
+    }
+}
+
+@keyframes sharp-focus-text-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -30%);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -60%);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -70%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -80%);
+    }
+}
+
+@keyframes focus-particle-animate {
+    0% {
+        left: 50%;
+        top: 50%;
+        opacity: 1;
+        width: 3px;
+        height: 3px;
+    }
+    100% {
+        left: calc(50% + (var(--random-x, 0) * 80px));
+        top: calc(50% + (var(--random-y, 0) * 80px));
+        opacity: 0;
+        width: 12px;
+        height: 12px;
+    }
+}
+
+/* Style for the buff icon when applied */
+.status-icon[title*="Sharp Focus"] {
+    border: 2px solid #ffdd00;
+    box-shadow: 0 0 5px 2px rgba(255, 221, 0, 0.5);
+    animation: sharp-focus-icon-pulse 2s infinite alternate;
+}
+
+@keyframes sharp-focus-icon-pulse {
+    0% {
+        box-shadow: 0 0 5px 2px rgba(255, 221, 0, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 8px 3px rgba(255, 221, 0, 0.7);
+    }
+}
+
+/* Nimble Strikes (Dodge) VFX */
+.nimble-strikes-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 5;
+    animation: nimble-strikes-pulse 2s ease-out forwards;
+}
+
+.nimble-strikes-text {
+    color: #4fe0ff;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #4fe0ff, 0 0 10px #4fe0ff;
+    animation: nimble-strikes-text-float 2s ease-out forwards;
+    text-align: center;
+    padding: 5px 10px;
+    background: rgba(0, 30, 60, 0.6);
+    border-radius: 10px;
+    border: 1px solid #4fe0ff;
+}
+
+@keyframes nimble-strikes-pulse {
+    0% {
+        transform: scale(0.2);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    80% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes nimble-strikes-text-float {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+}
+
+/* Mana Empowerment VFX */
+.mana-empowerment-vfx {
+    position: absolute;
+    pointer-events: none;
+    font-weight: bold;
+    color: #ffc0ff;
+    text-shadow: 0 0 5px #ff60ff, 0 0 10px #ff00ff;
+    font-size: 16px;
+    z-index: 10;
+    animation: mana-empowerment-float 1s ease-out forwards;
+    background: rgba(60, 0, 60, 0.4);
+    border-radius: 5px;
+    padding: 2px 5px;
+    border: 1px solid #ffc0ff;
+}
+
+@keyframes mana-empowerment-float {
+    0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(-5px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-25px) scale(1.1);
+        opacity: 0;
+    }
+}
+
+/* Status icon for Nimble Strikes buff */
+.status-icon[title*="Nimble Strikes"] {
+    background-color: rgba(0, 80, 150, 0.3) !important;
+    box-shadow: 0 0 5px #4fe0ff, inset 0 0 10px rgba(79, 224, 255, 0.5) !important;
+    animation: nimble-strikes-icon-pulse 2s infinite alternate;
+}
+
+@keyframes nimble-strikes-icon-pulse {
+    0% {
+        box-shadow: 0 0 5px #4fe0ff, inset 0 0 10px rgba(79, 224, 255, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 10px #4fe0ff, inset 0 0 15px rgba(79, 224, 255, 0.7);
+    }
+}
+
+/* Status icon for Mana Empowerment passive */
+.character-stats-menu .passive-description .talent-effect.mana-empowerment {
+    color: #ffc0ff !important;
+    text-shadow: 0 0 2px #ff60ff;
+}
+
+/* Dodge text enhancement for Nimble Strikes talent */
+.dodge-text.nimble-strikes-active {
+    color: #4fe0ff !important;
+    text-shadow: 0 0 5px #4fe0ff, 0 0 10px #4fe0ff !important;
+    font-size: 26px !important;
+    animation: dodgeTextEffect 0.8s ease-out forwards, nimble-active-pulse 0.8s ease-in-out forwards !important;
+}
+
+@keyframes nimble-active-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Critical Focus VFX */
+.critical-focus-crit-buff {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.7);
+    animation: critical-focus-pulse 1.5s ease-in-out;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.critical-focus-crit-text {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -130%);
+    color: #ffdf00;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #000, 0 0 10px #000;
+    animation: critical-focus-text-float 2s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes critical-focus-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes critical-focus-text-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -80%);
+    }
+    85% {
+        opacity: 1;
+        transform: translate(-50%, -150%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -180%);
+    }
+}
+
+/* Desperate Strength VFX */
+.desperate-strength-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.desperate-strength-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    color: #ff3333;
+    text-shadow: 0 0 4px #000, 0 0 8px #ff0000;
+    animation: desperate-text-float 2.5s ease-out;
+    white-space: nowrap;
+    z-index: 12;
+}
+
+.desperate-strength-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 0 25px 8px rgba(255, 0, 0, 0.6);
+    animation: desperate-glow-pulse 2.5s ease-in-out;
+    z-index: 11;
+}
+
+@keyframes desperate-text-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -30%);
+        font-size: 14px;
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -60%);
+        font-size: 18px;
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -100%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -120%);
+    }
+}
+
+@keyframes desperate-glow-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    15% {
+        opacity: 0.7;
+        transform: scale(1.02);
+    }
+    30% {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+    70% {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+    85% {
+        opacity: 0.7;
+        transform: scale(1.02);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+}
+
+/* Active Desperate Strength effect for character */
+.character-slot[data-desperate-strength="true"] .image-container {
+    box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.5);
+    animation: desperate-active-pulse 2s infinite alternate;
+}
+
+@keyframes desperate-active-pulse {
+    0% {
+        box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.6);
+    }
+}
+
+/* --- Frenzied Assault VFX --- */
+.frenzied-assault-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    animation: frenzied-pulse 0.8s ease-out;
+}
+
+.frenzied-assault-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(255,50,0,0.4) 0%, rgba(255,120,0,0.2) 40%, rgba(255,0,0,0) 70%);
+    border-radius: 50%;
+    animation: frenzied-glow 0.8s ease-out;
+}
+
+.frenzied-assault-vfx::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('Icons/effects/slash_marks.webp');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(0.5) rotate(-30deg);
+    animation: frenzied-slash 0.8s ease-out;
+}
+
+.frenzied-assault-vfx.feral::after {
+    background-image: url('Icons/effects/multi_slash.webp');
+    animation: frenzied-feral-slash 1s ease-out;
+}
+
+/* Text indicator for Frenzied Assault */
+.frenzied-assault-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff6a00;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff3300, 0 0 15px #ff6600;
+    white-space: nowrap;
+    z-index: 11;
+    opacity: 0;
+    animation: frenzied-text 1s ease-out;
+}
+
+@keyframes frenzied-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    80% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes frenzied-glow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes frenzied-slash {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-30deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    80% {
+        opacity: 0.8;
+        transform: scale(1.1) rotate(5deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2) rotate(10deg);
+    }
+}
+
+@keyframes frenzied-feral-slash {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-20deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.1) rotate(10deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3) rotate(20deg);
+    }
+}
+
+@keyframes frenzied-text {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    25% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    75% {
+        opacity: 1;
+        transform: translate(-50%, -80%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(0.8);
+    }
+}
+
+/* Talent effect description in tooltips */
+.character-stats-menu .talent-effect.frenzied-assault {
+    color: #ff6a00;
+    text-shadow: 0 0 2px #ff0000;
+}
+
+/* --- End Frenzied Assault VFX --- */
+
+/* Arcane Mastery VFX */
+.arcane-mastery-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.arcane-mastery-phys-text,
+.arcane-mastery-mag-text {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: arcane-mastery-text 3s ease-out forwards;
+    white-space: nowrap;
+    margin: 5px 0;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    z-index: 22;
+}
+
+.arcane-mastery-phys-text {
+    color: #ff5a5a;
+    animation-delay: 0.2s;
+}
+
+.arcane-mastery-mag-text {
+    color: #5a9fff;
+    animation-delay: 0.7s;
+}
+
+.arcane-mastery-glow {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(
+        circle, 
+        rgba(255, 215, 0, 0.7) 0%, 
+        rgba(255, 105, 180, 0.5) 25%, 
+        rgba(147, 112, 219, 0.3) 50%, 
+        rgba(0, 0, 0, 0) 75%
+    );
+    opacity: 0;
+    animation: arcane-mastery-glow 3s ease-out forwards;
+    z-index: 21;
+}
+
+.arcane-mastery-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: gold;
+    border-radius: 50%;
+    opacity: 0.8;
+    box-shadow: 0 0 10px 2px rgba(255, 215, 0, 0.7);
+    animation: arcane-mastery-particle 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes arcane-mastery-text {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0) scale(1.2);
+    }
+    40%, 80% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.9);
+    }
+}
+
+@keyframes arcane-mastery-glow {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    60% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes arcane-mastery-particle {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(
+            calc(cos(var(--random-angle, 0deg)) * 20px),
+            calc(sin(var(--random-angle, 90deg)) * 20px)
+        ) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(
+            calc(cos(var(--random-angle, 0deg)) * 100px),
+            calc(sin(var(--random-angle, 90deg)) * 100px)
+        ) scale(0.5);
+    }
+}
+
+/* Style for powerful talent effects in passive description */
+.character-stats-menu .passive-description .talent-effect.powerful {
+    color: gold;
+    text-shadow: 0 0 3px rgba(255, 215, 0, 0.7);
+    font-weight: bold;
+    border-left: 3px solid gold;
+    padding-left: 5px;
+    margin: 5px 0;
 } 
+
+/* Cat Claws Bleeding Effect */
+.cat-claws-bleed-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: cat-claws-bleed 1.5s ease-out;
+}
+
+.cat-claws-bleed-vfx::before,
+.cat-claws-bleed-vfx::after {
+    content: "";
+    position: absolute;
+    background-color: crimson;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: blood-drip 1.5s ease-out;
+}
+
+.cat-claws-bleed-vfx::before {
+    width: 10px;
+    height: 10px;
+    top: 30%;
+    left: 45%;
+    animation-delay: 0.1s;
+}
+
+.cat-claws-bleed-vfx::after {
+    width: 8px;
+    height: 8px;
+    top: 25%;
+    left: 55%;
+    animation-delay: 0.3s;
+}
+
+/* Dynamic blood drops based on stacks */
+.blood-drop {
+    position: absolute;
+    background-color: crimson;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 11;
+    animation: blood-drop-fall 1.2s ease-out;
+}
+
+@keyframes blood-drop-fall {
+    0% {
+        transform: rotate(-45deg) translateY(0) scale(1);
+        opacity: 0.8;
+    }
+    75% {
+        transform: rotate(-45deg) translateY(60px) scale(1.2);
+        opacity: 0.6;
+    }
+    100% {
+        transform: rotate(-45deg) translateY(100px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* High stack bleeding indicator */
+.cat-claws-bleed-vfx.high-stacks {
+    animation: cat-claws-bleed-high 1.5s ease-out;
+}
+
+@keyframes cat-claws-bleed-high {
+    0% {
+        box-shadow: inset 0 0 20px 10px rgba(220, 20, 60, 0.9);
+    }
+    50% {
+        box-shadow: inset 0 0 30px 15px rgba(220, 20, 60, 0.7);
+    }
+    100% {
+        box-shadow: inset 0 0 20px 10px rgba(220, 20, 60, 0);
+    }
+}
+
+/* Very high stack bleeding */
+.cat-claws-bleed-vfx.very-high-stacks {
+    animation: cat-claws-bleed-very-high 1.5s ease-out;
+}
+
+@keyframes cat-claws-bleed-very-high {
+    0% {
+        box-shadow: inset 0 0 30px 15px rgba(220, 20, 60, 1);
+        background-color: rgba(220, 20, 60, 0.3);
+    }
+    50% {
+        box-shadow: inset 0 0 40px 20px rgba(220, 20, 60, 0.8);
+        background-color: rgba(220, 20, 60, 0.4);
+    }
+    100% {
+        box-shadow: inset 0 0 30px 15px rgba(220, 20, 60, 0);
+        background-color: rgba(220, 20, 60, 0);
+    }
+}
+
+/* Stack counter inside bleeding effect */
+.bleeding-stack-counter {
+    position: absolute;
+    top: 30%;
+    right: 30%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: crimson;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 3px 6px;
+    border-radius: 50%;
+    border: 2px solid crimson;
+    z-index: 21;
+    text-shadow: 0 0 3px black;
+    box-shadow: 0 0 5px crimson;
+    animation: stack-pulse 1.5s infinite;
+}
+
+@keyframes stack-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+}
+
+@keyframes cat-claws-bleed {
+    0% {
+        box-shadow: inset 0 0 10px 5px rgba(220, 20, 60, 0.8);
+    }
+    50% {
+        box-shadow: inset 0 0 20px 10px rgba(220, 20, 60, 0.6);
+    }
+    100% {
+        box-shadow: inset 0 0 10px 5px rgba(220, 20, 60, 0);
+    }
+}
+
+@keyframes blood-drip {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+    }
+    70% {
+        transform: translateY(50px) scale(1.2);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(100px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.bleed-damage-text {
+    position: absolute;
+    color: crimson;
+    font-weight: bold;
+    font-size: 24px;
+    text-shadow: 0 0 4px black, 0 0 4px black;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    animation: bleed-damage-float 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes bleed-damage-float {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -80%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -120%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Bleeding Status Icon Enhancement */
+.status-icon[title*="Bleeding"] {
+    position: relative;
+    overflow: visible;
+}
+
+.status-icon[title*="Bleeding"]::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: crimson;
+    border-radius: 50%;
+    bottom: -3px;
+    right: -3px;
+    animation: bleeding-pulse 1.5s infinite;
+}
+
+/* Stack counter on the bleeding debuff icon */
+.bleeding-stack-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: black;
+    color: crimson;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    border: 1px solid crimson;
+    z-index: 3;
+    animation: bleeding-pulse 1.5s infinite;
+    pointer-events: none;
+}
+
+@keyframes bleeding-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Animation for when stack count increases */
+.bleeding-stack-badge.update-stack {
+    animation: stack-update 0.8s ease-out;
+}
+
+@keyframes stack-update {
+    0% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.5);
+        color: white;
+        background-color: crimson;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Add Lasting Buffs VFX CSS */
+.lasting-buffs-vfx {
+    position: absolute;
+    top: 20%;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    z-index: 50;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    animation: lasting-buffs-appear 0.5s ease-in;
+}
+
+.lasting-buffs-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #8de3ff;
+    text-shadow: 0 0 5px #00a0ff, 0 0 10px #0077ff;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border-radius: 15px;
+    animation: lasting-buffs-text 2.5s ease-out;
+    z-index: 51;
+}
+
+.lasting-buffs-glow {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(0, 160, 255, 0.5) 0%, rgba(0, 160, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: 50;
+    opacity: 0.8;
+    animation: lasting-buffs-glow 2.5s ease-out;
+}
+
+@keyframes lasting-buffs-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes lasting-buffs-text {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    10% {
+        transform: translateY(0) scale(1.2);
+        opacity: 1;
+    }
+    60% {
+        transform: translateY(-20px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-30px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes lasting-buffs-glow {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    60% {
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Add Debuff Exploitation VFX CSS */
+.debuff-exploitation-vfx {
+    position: absolute;
+    top: 30%;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    z-index: 50;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.debuff-exploitation-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff7c7c;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #aa0000;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border-radius: 15px;
+    animation: debuff-exploitation-text 2s ease-out;
+    z-index: 51;
+}
+
+.debuff-exploitation-glow {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.4) 0%, rgba(255, 0, 0, 0) 70%);
+    border-radius: 50%;
+    z-index: 50;
+    opacity: 0.7;
+    animation: debuff-exploitation-glow 2s ease-out;
+}
+
+@keyframes debuff-exploitation-text {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    10% {
+        transform: translateY(0) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-15px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-25px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes debuff-exploitation-glow {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    80% {
+        transform: scale(0.9);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(1.3);
+        opacity: 0;
+    }
+}
+
+/* ======= HUNTING MARK TALENT VFX ======= */
+.hunting-mark-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hunting-mark-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FF6600" d="M50,10L60.9,37.1L90,37.1L66.5,54.4L77.5,81.5L50,64.3L22.5,81.5L33.5,54.4L10,37.1L39.1,37.1L50,10z"/></svg>');
+    background-size: 80% 80%;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 8px rgba(255, 102, 0, 0.8));
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+    animation: hunting-mark-appear 0.5s ease-out forwards;
+}
+
+.hunting-mark-text {
+    position: relative;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #FF6600;
+    text-shadow: 0 0 5px #FFC107, 0 0 10px #FF6600;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: hunting-mark-text-float 0.7s ease-out 0.3s forwards;
+}
+
+@keyframes hunting-mark-appear {
+    0% { 
+        transform: scale(0) rotate(0deg); 
+        opacity: 0; 
+    }
+    70% { 
+        transform: scale(1.5) rotate(360deg); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1) rotate(360deg); 
+        opacity: 0.8; 
+    }
+}
+
+@keyframes hunting-mark-text-float {
+    0% { 
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mark consumption effect */
+.hunting-mark-consume-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hunting-mark-consume-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,102,0,0.6) 0%, rgba(255,102,0,0) 70%);
+    animation: hunting-mark-consume-pulse 0.8s ease-out forwards;
+}
+
+.hunting-mark-consume-text {
+    position: relative;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #FFC107;
+    text-shadow: 0 0 5px #FF6600, 0 0 10px #FF6600;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: hunting-mark-consume-text-float 0.6s ease-out 0.2s forwards;
+}
+
+.hunting-mark-multiplier {
+    position: relative;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #FF6600;
+    text-shadow: 0 0 5px #FFC107, 0 0 10px #FF6600, 0 0 15px #FF6600;
+    opacity: 0;
+    transform: scale(0.5);
+    animation: hunting-mark-multiplier-grow 0.8s ease-out 0.4s forwards;
+}
+
+@keyframes hunting-mark-consume-pulse {
+    0% { 
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% { 
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+@keyframes hunting-mark-consume-text-float {
+    0% { 
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hunting-mark-multiplier-grow {
+    0% { 
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    70% { 
+        opacity: 1;
+        transform: scale(1.3);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Styling for the status effect icon */
+.status-icon[title*="Hunting Mark"] {
+    position: relative;
+    overflow: visible;
+    animation: hunting-mark-glow 1.5s infinite alternate;
+}
+
+.status-icon[title*="Hunting Mark"]::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 12px;
+    height: 12px;
+    background-color: #FF6600;
+    border-radius: 50%;
+    border: 1px solid #FFC107;
+    animation: hunting-mark-pulse 1s infinite;
+}
+
+@keyframes hunting-mark-glow {
+    0% { 
+        filter: drop-shadow(0 0 3px rgba(255, 102, 0, 0.7));
+    }
+    100% { 
+        filter: drop-shadow(0 0 6px rgba(255, 102, 0, 1));
+    }
+}
+
+@keyframes hunting-mark-pulse {
+    0% { 
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: scale(1.3);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* ----- Predator's Focus VFX ----- */
+.predators-focus-dodge-vfx {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    pointer-events: none;
+    animation: predators-focus-pulse 2s ease-out forwards;
+}
+
+.predators-focus-dodge-vfx span {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 5px #ff8800, 0 0 10px #ff8800, 0 0 15px #ff8800;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 2px solid #ffd700;
+    animation: dodge-pulse 2s ease-out forwards;
+}
+
+.predators-focus-cooldown-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    pointer-events: none;
+    animation: predators-focus-pulse 2s ease-out forwards;
+}
+
+.predators-focus-cooldown-vfx span {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00ffff;
+    text-shadow: 0 0 5px #0088ff, 0 0 10px #0088ff, 0 0 15px #0088ff;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 2px solid #00ffff;
+    animation: cooldown-pulse 2s ease-out forwards;
+}
+
+@keyframes predators-focus-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    85% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes dodge-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    15% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    75% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes cooldown-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    15% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    30%, 40%, 50%, 60%, 70% {
+        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+    }
+    35%, 45%, 55%, 65% {
+        text-shadow: 0 0 5px #0088ff, 0 0 10px #0088ff; 
+    }
+    85% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}
+
+/* Add style for the buff icon */
+.status-icon[title*="Predator's Focus"] {
+    background-color: rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 5px gold;
+    animation: predators-focus-icon-pulse 2s infinite;
+}
+
+@keyframes predators-focus-icon-pulse {
+    0%, 100% {
+        box-shadow: 0 0 5px gold;
+    }
+    50% {
+        box-shadow: 0 0 10px gold, 0 0 15px orange;
+    }
+}
+
+/* Farmer Cham Cham - Amplified Criticals VFX */
+.amplified-criticals-vfx {
+    position: absolute;
+    top: 35%;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    animation: amplified-criticals-pulse 1.5s ease-in-out;
+}
+
+.amplified-criticals-buff-count {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffcc00;
+    text-shadow: 0 0 5px #ff9900, 0 0 10px #ff6600;
+    margin-bottom: 5px;
+    animation: amplified-criticals-count-float 2s ease-out forwards;
+    opacity: 0;
+}
+
+.amplified-criticals-text {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff3300;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #cc0000;
+    padding: 5px 12px;
+    background: rgba(50, 0, 0, 0.6);
+    border-radius: 5px;
+    border: 2px solid #ff6600;
+    animation: amplified-criticals-text-float 2.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes amplified-criticals-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    70% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes amplified-criticals-count-float {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-15px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-25px);
+        opacity: 0;
+    }
+}
+
+@keyframes amplified-criticals-text-float {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    15% {
+        transform: translateY(0);
+        opacity: 0.9;
+    }
+    40% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    85% {
+        transform: translateY(-20px) scale(1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+}
+
+/* Add glowing border effect for critical hits when Amplified Criticals is active */
+.character-slot[data-amplified-criticals="true"] .damage-vfx.critical {
+    border: 3px solid #ff6600;
+    box-shadow: 0 0 10px #ff9900, 0 0 20px #ffcc00;
+}
+
+/* Highlight the Amplified Criticals talent in the talent panel */
+.talent-item[data-id="talent_cham_cham_22"] .talent-icon {
+    border-color: #ff6600;
+    box-shadow: 0 0 8px #ff9900;
+}
+
+.talent-item[data-id="talent_cham_cham_22"] .talent-name {
+    color: #ffcc00;
+}
+
+/* Amplified Criticals Active Critical Hit VFX */
+.amplified-criticals-hit-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 200;
+}
+
+.amplified-criticals-hit-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,80,0,0.8) 0%, rgba(255,0,0,0.5) 40%, rgba(200,0,0,0) 80%);
+    transform: translate(-50%, -50%);
+    animation: amplified-crit-pulse 0.8s ease-out forwards;
+    box-shadow: 0 0 30px #ff0000, 0 0 60px #ff3300, 0 0 90px #ff6600;
+    z-index: 100;
+}
+
+.amplified-criticals-hit-vfx::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,160,0,0.6) 30%, rgba(255,0,0,0) 70%);
+    border-radius: 50%;
+    animation: amplified-crit-flash 0.6s ease-out forwards;
+    z-index: 101;
+}
+
+.amplified-criticals-hit-rays {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    z-index: 99;
+}
+
+.amplified-criticals-hit-ray {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 0;
+    background: linear-gradient(to top, rgba(255,0,0,0.8), rgba(255,80,0,0.9), rgba(255,160,0,0.7), rgba(255,255,255,0.9));
+    transform-origin: bottom center;
+    animation: amplified-crit-ray 0.6s ease-out forwards;
+}
+
+/* Red energy particles */
+.amplified-crit-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,80,0,0.8) 50%, rgba(255,0,0,0.7) 100%);
+    border-radius: 50%;
+    animation: amplified-crit-particle 1s ease-out forwards;
+    z-index: 102;
+    box-shadow: 0 0 10px #ff3300, 0 0 5px #ff6600;
+}
+
+/* Character aura when talent is active */
+.character-slot[data-amplified-criticals="true"] .image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ff3300, 0 0 20px rgba(255,0,0,0.4);
+    animation: amplified-critical-aura 2s infinite alternate;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.7;
+}
+
+/* Animation for the expanding pulse */
+@keyframes amplified-crit-pulse {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.9;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+/* Animation for the central flash */
+@keyframes amplified-crit-flash {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    50% {
+        width: 60px;
+        height: 60px;
+        opacity: 0.9;
+    }
+    100% {
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+    }
+}
+
+/* Animation for the rays */
+@keyframes amplified-crit-ray {
+    0% {
+        height: 0;
+        opacity: 0.9;
+    }
+    100% {
+        height: 80px;
+        opacity: 0;
+    }
+}
+
+/* Animation for particles */
+@keyframes amplified-crit-particle {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(calc(var(--x-direction) * 80px), calc(var(--y-direction) * 80px)) scale(0.2);
+        opacity: 0;
+    }
+}
+
+/* Animation for character aura */
+@keyframes amplified-critical-aura {
+    0% {
+        box-shadow: 0 0 10px #ff3300, 0 0 15px rgba(255,0,0,0.3);
+        opacity: 0.5;
+    }
+    100% {
+        box-shadow: 0 0 15px #ff6600, 0 0 25px rgba(255,40,0,0.5);
+        opacity: 0.7;
+    }
+}
+
+/* Armor Piercing Claws VFX */
+.armor-pierce-vfx {
+    position: absolute;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 18px;
+    color: #ff9d00;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff6600;
+    z-index: 100;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    animation: armor-pierce-animate 1.5s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+@keyframes armor-pierce-animate {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2) translateY(-10px);
+    }
+    40% {
+        transform: scale(1) translateY(-20px);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1) translateY(-40px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-60px);
+    }
+}
+
+/* Mana-claws VFX */
+.mana-claws-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    animation: mana-claws-pulse 2s ease-out forwards;
+}
+
+.mana-claws-vfx::before,
+.mana-claws-vfx::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(80, 140, 255, 0.5) 0%, rgba(40, 100, 220, 0.3) 50%, rgba(20, 80, 200, 0) 100%);
+    animation: mana-claws-glow 2s ease-out infinite;
+}
+
+.mana-claws-vfx::after {
+    width: 60%;
+    height: 60%;
+    animation-delay: 0.5s;
+}
+
+.mana-claws-text {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #4080ff;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 5px rgba(100, 160, 255, 0.8);
+    white-space: nowrap;
+    animation: mana-claws-text 2s ease-out forwards;
+}
+
+@keyframes mana-claws-pulse {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes mana-claws-glow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.6;
+    }
+}
+
+@keyframes mana-claws-text {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px);
+    }
+}
+
+/* Mimicry Master VFX */
+.mimicry-master-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+    animation: mimicry-master-appear 0.5s ease-out forwards;
+}
+
+.mimicry-master-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffcc00;
+    text-shadow: 0 0 10px #ff9900, 0 0 20px #ff6600;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: mimicry-title-appear 0.5s ease-out 0.2s forwards;
+}
+
+.mimicry-master-buff {
+    font-size: 22px;
+    font-weight: bold;
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ccff, 0 0 20px #0099ff;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: mimicry-buff-appear 0.5s ease-out 0.4s forwards;
+}
+
+.mimicry-master-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    animation: mimicry-shimmer 2s ease-in-out infinite;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.mimicry-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #ffcc00, #00ffcc);
+    border-radius: 50%;
+    opacity: 0.7;
+    filter: blur(2px);
+    animation: mimicry-particle 1.5s ease-out forwards;
+}
+
+/* Animations for Mimicry Master */
+@keyframes mimicry-master-appear {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes mimicry-title-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes mimicry-buff-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes mimicry-shimmer {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes mimicry-particle {
+    0% {
+        transform: scale(0) translate(0, 0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) translate(calc(var(--random-x, 0.5) * 80px), calc(var(--random-y, 0.5) * 80px));
+        opacity: 0;
+    }
+}
+
+/* Cham Cham Debuff Healing VFX */
+.debuff-healing-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.debuff-healing-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2ce62c;
+    text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    animation: debuff-healing-number 2s ease-out forwards;
+    opacity: 0;
+    z-index: 12;
+}
+
+.debuff-healing-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
+    margin-top: 10px;
+    animation: debuff-healing-text 2s ease-out forwards;
+    opacity: 0;
+    z-index: 12;
+}
+
+.debuff-healing-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 11;
+}
+
+.debuff-healing-sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #00ff00;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    animation: debuff-healing-sparkle 1.5s ease-out forwards;
+    opacity: 0;
+}
+
+.debuff-healing-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0,255,0,0.3) 0%, rgba(0,255,0,0) 70%);
+    animation: debuff-healing-glow 2s ease-out forwards;
+    opacity: 0;
+    z-index: 11;
+}
+
+.debuff-healing-vfx::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('Icons/effects/heal_circle.webp') center/contain no-repeat;
+    animation: debuff-healing-circle 2s ease-out forwards;
+    opacity: 0;
+    z-index: 11;
+}
+
+@keyframes debuff-healing-number {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { transform: translateY(-20px); opacity: 1; }
+    80% { transform: translateY(-40px); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
+
+@keyframes debuff-healing-text {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { transform: translateY(10px); opacity: 1; }
+    80% { transform: translateY(20px); opacity: 1; }
+    100% { transform: translateY(30px); opacity: 0; }
+}
+
+@keyframes debuff-healing-sparkle {
+    0% { transform: scale(0); opacity: 0; }
+    20% { transform: scale(1); opacity: 1; }
+    80% { transform: scale(1.5); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes debuff-healing-glow {
+    0% { transform: scale(0.8); opacity: 0; }
+    30% { transform: scale(1.2); opacity: 0.7; }
+    80% { transform: scale(1.4); opacity: 0.3; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes debuff-healing-circle {
+    0% { transform: scale(0.3); opacity: 0; }
+    30% { transform: scale(1); opacity: 0.8; }
+    80% { transform: scale(1.1); opacity: 0.4; }
+    100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* Character effect when Debuff Healing is active */
+.character-slot[data-debuff-healing-active="true"] .image-container {
+    animation: debuff-healing-active-pulse 3s infinite;
+}
+
+@keyframes debuff-healing-active-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+    50% { box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+}
+
+/* Add this to talent description styles */
+.character-stats-menu .passive-description .talent-effect.debuff-healing {
+    color: #2ce62c;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}

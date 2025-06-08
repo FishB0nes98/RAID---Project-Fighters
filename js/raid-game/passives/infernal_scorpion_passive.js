@@ -204,13 +204,19 @@ function infernalScorpionChainReactionPassive(caster, target, ability, damageRes
         // Also pass a flag to prevent infinite loops if the passive could trigger itself (it shouldn't based on description)
         const chainDamageResult = nextTarget.applyDamage(chainDamage, damageResult.type, caster, true); // Added 'true' for isChainReaction, store result
 
-        // --- NEW: Check for and apply debuffs from specific abilities ---
+        // --- ENHANCED: Check for and apply debuffs from specific abilities OR burn DoT ---
         let appliedDebuff = null;
+        let spreadBurn = false;
+        
+        // Check if this chain reaction was triggered by burn damage (DoT)
+        const originalBurnDebuff = target.debuffs.find(d => d.id === 'burn_debuff');
+        const isFromBurnDoT = !ability && originalBurnDebuff; // No ability means it's from DoT tick
+        
         if (ability && ability.id === 'infernal_scorpion_q') { // GET OVER HERE
             const originalHookedDebuff = target.debuffs.find(d => d.id === 'hooked_debuff');
             if (originalHookedDebuff) {
-                log(`Chain Reaction applying Hooked debuff to ${nextTarget.name}.`);
-                appliedDebuff = originalHookedDebuff.clone(); // Assuming Effect has a clone method
+                log(`Chain Reaction spreading Hooked debuff to ${nextTarget.name}!`);
+                appliedDebuff = originalHookedDebuff.clone();
                 nextTarget.addDebuff(appliedDebuff);
                 // Add visual indicator if needed (similar to how it's added in the original ability)
                 const hookedIndicator = document.createElement('div');
@@ -223,19 +229,115 @@ function infernalScorpionChainReactionPassive(caster, target, ability, damageRes
                     if (indicator) indicator.remove();
                 };
             }
-        } else if (ability && ability.id === 'infernal_scorpion_w') { // Fire Breath
-            const originalBurnDebuff = target.debuffs.find(d => d.id === 'burn_debuff');
-            if (originalBurnDebuff) {
-                log(`Chain Reaction applying Burn debuff to ${nextTarget.name}.`);
-                appliedDebuff = originalBurnDebuff.clone(); // Assuming Effect has a clone method
-                nextTarget.addDebuff(appliedDebuff);
-                // Burn might have its own visual indicator on tick, handled by the effect itself
-            }
         }
-        // --- END NEW ---
+        
+        // FIXED: Check for burn spreading regardless of which ability triggered chain reaction  
+        if (originalBurnDebuff) {
+            log(`Chain Reaction spreading Burn debuff to ${nextTarget.name}!`);
+                
+                // Create a new burn debuff with same properties
+                const burnDamage = 455; // Same as original Fire Breath
+                const burnDuration = originalBurnDebuff.duration; // Keep same remaining duration
+                const newBurnDebuff = new Effect(
+                    'burn_debuff',
+                    'Burn',
+                    'images/effects/burn.jfif',
+                    burnDuration,
+                    null,
+                    true
+                ).setDescription(`Taking ${burnDamage} damage at the end of each turn.`);
+
+                // Copy the burn properties from original
+                newBurnDebuff.onTurnEnd = (character) => {
+                    log(`${character.name} takes ${burnDamage} damage from Burn.`);
+                    character.applyDamage(burnDamage, 'magical', caster, true); // isDot = true
+                    
+                    // Play burning sound on tick
+                    const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+                    playSound('sounds/burning.wav'); 
+
+                    // Add simple burn VFX on turn end
+                    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+                    if(charElement){
+                        const turnBurnVfx = document.createElement('div');
+                        turnBurnVfx.className = 'burn-tick-vfx';
+                        charElement.appendChild(turnBurnVfx);
+                        setTimeout(() => turnBurnVfx.remove(), 500);
+                    }
+                };
+
+                // Apply burning VFX when debuff is added
+                newBurnDebuff.onApply = (character) => {
+                    const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+                    if (!characterElement) return;
+                    
+                    // Check if the burn VFX is already applied
+                    if (characterElement.querySelector('.character-burn-vfx')) return;
+                    
+                    // Create the burning VFX container
+                    const burnVfx = document.createElement('div');
+                    burnVfx.className = 'character-burn-vfx';
+                    burnVfx.id = `burn-vfx-${character.instanceId || character.id}`;
+                    
+                    // Add 5-7 ember particles that rise up from random positions
+                    const emberCount = 5 + Math.floor(Math.random() * 3);
+                    for (let i = 0; i < emberCount; i++) {
+                        const ember = document.createElement('div');
+                        ember.className = 'burn-ember';
+                        ember.style.left = `${10 + Math.random() * 80}%`;
+                        ember.style.setProperty('--duration', `${1.5 + Math.random() * 1.5}s`);
+                        ember.style.animationDelay = `${Math.random() * 2}s`;
+                        burnVfx.appendChild(ember);
+                    }
+                    
+                    // Add the VFX to the character element
+                    characterElement.appendChild(burnVfx);
+                    
+                    log(`${character.name} is burning!`, "effect");
+                };
+                
+                // Add onRemove handler to clean up the VFX when debuff is removed
+                newBurnDebuff.onRemove = (character) => {
+                    const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+                    if (!characterElement) return;
+                    
+                    const burnVfx = characterElement.querySelector(`#burn-vfx-${character.instanceId || character.id}`);
+                    if (burnVfx) {
+                        // Fade out animation before removal
+                        burnVfx.style.animation = "fadeOut 0.5s forwards";
+                        setTimeout(() => {
+                            if (burnVfx.parentNode === characterElement) {
+                                characterElement.removeChild(burnVfx);
+                            }
+                        }, 500);
+                    }
+                    
+                    log(`${character.name} is no longer burning.`, "effect");
+                };
+
+                nextTarget.addDebuff(newBurnDebuff);
+                
+                // Apply the VFX immediately after adding the debuff
+                if (newBurnDebuff.onApply) {
+                    newBurnDebuff.onApply(nextTarget);
+                }
+                
+                spreadBurn = true;
+                appliedDebuff = newBurnDebuff;
+        }
+        
+        // Log special message if burn was spread
+        if (spreadBurn) {
+            log(`🔥 The flames spread through the chain reaction! 🔥`);
+        }
+        // --- END ENHANCED ---
 
         // Update UI for the chained target
-        updateCharacterUI(nextTarget);
+        if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+            window.gameManager.uiManager.updateCharacterUI(nextTarget);
+        } else if (typeof updateCharacterUI === 'function') {
+            updateCharacterUI(nextTarget);
+        }
     }
 }
 

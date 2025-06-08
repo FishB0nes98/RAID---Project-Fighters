@@ -17,6 +17,7 @@ class StoryManager {
             rewards: []
         };
         this.characterRegistry = {}; // To store registry data
+        this.characterXPManager = null; // XP Manager for awarding experience
         this.storyProgress = {
             currentStageIndex: 0,
             completedStages: 0,
@@ -28,6 +29,104 @@ class StoryManager {
         // Events
         this.onStoryLoaded = null;
         this.onStageCompleted = null;
+
+        // Initialize XP manager
+        this.initializeXPManager();
+    }
+
+    /**
+     * Initialize the character XP manager
+     */
+    async initializeXPManager() {
+        try {
+            if (typeof CharacterXPManager !== 'undefined') {
+                this.characterXPManager = new CharacterXPManager();
+                await this.characterXPManager.initialize();
+                console.log('[StoryManager] CharacterXPManager initialized');
+            }
+        } catch (error) {
+            console.error('[StoryManager] Error initializing XP manager:', error);
+        }
+    }
+
+    /**
+     * Check if the story is available to the current user
+     * Combines global availability settings with user ownership
+     * @param {string} storyId - The ID of the story to check
+     * @throws {Error} If story is not available
+     */
+    async checkStoryAvailability(storyId) {
+        try {
+            console.log(`[StoryManager] Checking availability for story: ${storyId}`);
+            
+            // Check global story availability settings
+            let isGloballyAvailable = null;
+            try {
+                const globalAvailabilityRef = firebase.database().ref(`globalSettings/storyAvailability/${storyId}`);
+                const globalSnapshot = await globalAvailabilityRef.once('value');
+                if (globalSnapshot.exists()) {
+                    isGloballyAvailable = globalSnapshot.val();
+                    console.log(`[StoryManager] Global availability for ${storyId}:`, isGloballyAvailable);
+                }
+            } catch (error) {
+                console.warn('[StoryManager] Error checking global story availability:', error);
+                // Continue with local checks if global check fails
+            }
+
+            // If globally disabled, deny access immediately
+            if (isGloballyAvailable === false) {
+                throw new Error(`Story "${this.currentStory.title}" is currently not available. Please check back later.`);
+            }
+
+            // If globally enabled, allow access
+            if (isGloballyAvailable === true) {
+                console.log(`[StoryManager] Story ${storyId} is globally enabled, access granted`);
+                return;
+            }
+
+            // If no global setting (null/undefined), check user ownership and local playerunlocked setting
+            const userOwnedStoriesRef = firebase.database().ref(`users/${this.userId}/ownedStories`);
+            const ownedSnapshot = await userOwnedStoriesRef.once('value');
+            let ownedStories = [];
+            
+            if (ownedSnapshot.exists()) {
+                const ownedData = ownedSnapshot.val();
+                if (Array.isArray(ownedData)) {
+                    ownedStories = ownedData;
+                } else if (typeof ownedData === 'object') {
+                    ownedStories = Object.values(ownedData);
+                }
+            }
+
+            // Check if user owns the story
+            const userOwnsStory = ownedStories.includes(storyId);
+            
+            // Check local playerunlocked setting
+            const locallyUnlocked = this.currentStory.playerunlocked === true;
+
+            console.log(`[StoryManager] Story availability check for ${storyId}:`);
+            console.log(`  - User owns: ${userOwnsStory}`);
+            console.log(`  - Locally unlocked: ${locallyUnlocked}`);
+            console.log(`  - Global setting: ${isGloballyAvailable}`);
+
+            if (userOwnsStory || locallyUnlocked) {
+                console.log(`[StoryManager] Story ${storyId} is available to user`);
+                return;
+            }
+
+            // Story is not available
+            throw new Error(`You do not have access to "${this.currentStory.title}". This story may be locked or requires purchase.`);
+
+        } catch (error) {
+            console.error(`[StoryManager] Story availability check failed:`, error);
+            if (error.message.includes('not available') || error.message.includes('do not have access')) {
+                // These are user-facing availability errors, re-throw as-is
+                throw error;
+            } else {
+                // This is a system error, provide a generic message
+                throw new Error(`Unable to verify story availability. Please try again later.`);
+            }
+        }
     }
 
     /**
@@ -56,11 +155,17 @@ class StoryManager {
             }
 
             // 2. Find the specific story definition
-            this.currentStory = this.allStoriesData.find(story => this.normalizeId(story.title) === storyId);
+            this.currentStory = this.allStoriesData.find(story => {
+                // First try explicit ID, then fall back to normalized title
+                return (story.id === storyId) || (this.normalizeId(story.title) === storyId);
+            });
             if (!this.currentStory) {
                 throw new Error(`[StoryManager] Story with ID '${storyId}' not found.`);
             }
             console.log("[StoryManager] Found current story:", this.currentStory.title);
+
+            // 2.5. Check if story is available to the user (global availability + user ownership)
+            await this.checkStoryAvailability(storyId);
 
             // 3. Fetch user's progress for this specific story from Firebase FIRST
             console.log("[StoryManager] Fetching story progress from Firebase...");
@@ -156,11 +261,52 @@ class StoryManager {
             }
 
             try {
-                const response = await fetch(`js/raid-game/characters/${charId}.json`);
-                if (!response.ok) {
-                    throw new Error(`Failed to load data for character ${charId}`);
+                // --- NEW: Load enhanced character stats from Firebase first ---
+                let characterData = null;
+                const userId = this.userId;
+                
+                if (userId) {
+                    try {
+                        // Try to load from users/{userId}/Raid/{characterId}/stats first
+                        const enhancedStatsRef = firebaseDatabase.ref(`users/${userId}/Raid/${charId}/stats`);
+                        const enhancedSnapshot = await enhancedStatsRef.once('value');
+                        
+                        if (enhancedSnapshot.exists()) {
+                            console.log(`[StoryManager] Found enhanced stats for ${charId} in Firebase`);
+                            const enhancedStats = enhancedSnapshot.val();
+                            
+                            // Load base character data for other properties (abilities, name, etc.)
+                            const response = await fetch(`js/raid-game/characters/${charId}.json`);
+                            if (!response.ok) {
+                                throw new Error(`Failed to load base data for character ${charId}`);
+                            }
+                            const baseCharacterData = await response.json();
+                            
+                            // Merge enhanced stats with base character data
+                            characterData = {
+                                ...baseCharacterData,
+                                stats: { ...enhancedStats } // Use enhanced stats from Firebase
+                            };
+                            
+                            console.log(`[StoryManager] Using enhanced stats for ${charId}:`, enhancedStats);
+                        } else {
+                            console.log(`[StoryManager] No enhanced stats found for ${charId}, using base stats`);
+                        }
+                    } catch (error) {
+                        console.warn(`[StoryManager] Error loading enhanced stats for ${charId}:`, error);
+                    }
                 }
-                const characterData = await response.json();
+                
+                // Fallback to base character data if enhanced stats not available
+                if (!characterData) {
+                    const response = await fetch(`js/raid-game/characters/${charId}.json`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load data for character ${charId}`);
+                    }
+                    characterData = await response.json();
+                    console.log(`[StoryManager] Using base stats for ${charId}`);
+                }
+                // --- END NEW ---
                 
                 // Get avatar image from registry
                 const registryEntry = this.characterRegistry[charId];
@@ -246,6 +392,11 @@ class StoryManager {
                 choices: stage.choices || null,
                 recruitTag: stage.recruitTag || null,
                 recruitCount: stage.recruitCount || 0,
+                specificCharacters: stage.specificCharacters || null,
+                isEncounter: stage.isEncounter || false,
+                unlockableCharacters: stage.unlockableCharacters || null,
+                tutorialReward: stage.tutorialReward || false,
+                firstTimeCompletionReward: stage.firstTimeCompletionReward || false,
                 index: index,
                 // A stage is completed if its index is less than the current active index.
                 isCompleted: index < this.storyProgress.currentStageIndex, 
@@ -294,6 +445,11 @@ class StoryManager {
             choices: stage.choices || null,
             recruitTag: stage.recruitTag || null,
             recruitCount: stage.recruitCount || 0,
+            specificCharacters: stage.specificCharacters || null,
+            isEncounter: stage.isEncounter || false,
+            unlockableCharacters: stage.unlockableCharacters || null,
+            tutorialReward: stage.tutorialReward || false,
+            firstTimeCompletionReward: stage.firstTimeCompletionReward || false,
             index: currentStageIndex,
             // Use storyProgress to determine completion status accurately
             isCompleted: currentStageIndex < this.storyProgress.completedStages, 
@@ -308,7 +464,8 @@ class StoryManager {
      * @returns {string} - Normalized ID
      */
     normalizeId(str) {
-        return str.toLowerCase().replace(/\s+/g, '_');
+        if (!str) return '';
+        return str.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
     }
 
     /**
@@ -453,6 +610,10 @@ class StoryManager {
                  const finalTeamState = result.finalTeamState || result.survivingTeamState || [];
                  console.log("[StoryManager] Updating team state from battle result:", finalTeamState);
                  this.updateTeamStateFromBattleResult(finalTeamState);
+                 
+                 // Award XP to characters for story battle victory
+                 await this.awardExperienceForStoryBattle(result);
+                 
                  // Advance the stage index and save progress (including the updated team state)
                  await this.completeCurrentStageAfterVictory();
 
@@ -551,6 +712,163 @@ class StoryManager {
          console.log("Applied battle result state to playerTeam and storyProgress.lastTeamState.");
     }
     // --- END NEW ---
+
+    /**
+     * Award experience points to characters after a successful story battle
+     */
+    async awardExperienceForStoryBattle(battleResult) {
+        if (!this.characterXPManager) {
+            console.warn('[StoryManager] CharacterXPManager not available for XP awarding');
+            return;
+        }
+
+        // Get current stage for difficulty calculation
+        const currentStage = this.getCurrentStage();
+        if (!currentStage) {
+            console.warn('[StoryManager] No current stage found for XP calculation');
+            return;
+        }
+
+        const stageDifficulty = currentStage.difficulty || 1;
+        console.log(`[StoryManager] Awarding XP for story battle. Stage: ${currentStage.name}, Difficulty: ${stageDifficulty}`);
+
+        const finalTeamState = battleResult.finalTeamState || battleResult.survivingTeamState || [];
+        const finalStatesMap = new Map(finalTeamState.map(s => [s.id, s]));
+
+        // Calculate story bonuses - story mode gets additional bonuses
+        const allSurvived = this.playerTeam.every(member => {
+            const finalState = finalStatesMap.get(member.id);
+            return finalState && finalState.currentHP > 0;
+        });
+        
+        const bonuses = {
+            perfectVictory: allSurvived,
+            speedBonus: false, // Story mode doesn't have speed bonus for now
+            underdog: false, // Story mode doesn't have underdog bonus
+            storyMode: true // Special story mode bonus
+        };
+
+        const xpResults = [];
+
+        for (const teamMember of this.playerTeam) {
+            const finalState = finalStatesMap.get(teamMember.id);
+            const survived = finalState && finalState.currentHP > 0;
+            const characterLevel = teamMember.level || finalState?.level || 1;
+
+            try {
+                // Use the enhanced XP calculation with story bonuses
+                const result = await this.characterXPManager.awardExperience(
+                    teamMember.id, 
+                    stageDifficulty, 
+                    characterLevel, 
+                    survived, 
+                    bonuses
+                );
+                
+                if (result) {
+                    xpResults.push({
+                        characterName: teamMember.name,
+                        characterId: teamMember.id,
+                        ...result
+                    });
+                    
+                    if (result.leveledUp) {
+                        console.log(`[StoryManager] 🎉 ${teamMember.name} leveled up! ${result.oldLevel} → ${result.newLevel}`);
+                        this.showLevelUpNotification(teamMember.name, result.newLevel);
+                    } else {
+                        console.log(`[StoryManager] ${teamMember.name} gained ${result.calculationDetails.xpAwarded} XP (Total: ${result.totalXP})`);
+                    }
+                }
+            } catch (error) {
+                console.error(`[StoryManager] Error awarding XP to ${teamMember.name}:`, error);
+            }
+        }
+
+        // Show XP results if available (story UI will handle this differently than game manager)
+        if (xpResults.length > 0) {
+            this.showStoryXPRewards(xpResults, currentStage, bonuses);
+        }
+    }
+
+    /**
+     * Show XP rewards in story mode context
+     */
+    showStoryXPRewards(xpResults, stageInfo, bonuses) {
+        // Delegate to the story UI manager if available
+        if (this.storyUI && typeof this.storyUI.showXPRewards === 'function') {
+            this.storyUI.showXPRewards(xpResults, stageInfo, bonuses);
+        } else {
+            // Fallback: log the results
+            console.log('[StoryManager] XP Results:', xpResults);
+            xpResults.forEach(result => {
+                if (result.leveledUp) {
+                    console.log(`${result.characterName}: +${result.calculationDetails.xpAwarded} XP (Level up! ${result.oldLevel} → ${result.newLevel})`);
+                } else {
+                    console.log(`${result.characterName}: +${result.calculationDetails.xpAwarded} XP (Total: ${result.totalXP})`);
+                }
+            });
+        }
+    }
+
+    /**
+     * Show a level up notification to the player
+     */
+    showLevelUpNotification(characterName, newLevel) {
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.className = 'level-up-notification';
+        notification.innerHTML = `
+            <div class="level-up-content">
+                <div class="level-up-icon">🎉</div>
+                <div class="level-up-text">
+                    <strong>${characterName}</strong> reached Level ${newLevel}!
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    /**
+     * Advance to the next stage without requiring a battle victory
+     * Used for choice stages, character unlock stages, etc.
+     * @returns {boolean} - True if there are more stages, false if the story is complete
+     */
+    async advanceToNextStage() {
+        if (!this.currentStory) throw new Error('No story loaded');
+        if (this.isStoryComplete()) return false;
+
+        // Advance to next stage
+        this.storyProgress.currentStageIndex++;
+        this.storyProgress.completedStages = Math.max(this.storyProgress.completedStages, this.storyProgress.currentStageIndex);
+
+        // Save progress
+        await this.saveStoryProgress();
+        console.log(`[StoryManager] Advanced to stage ${this.storyProgress.currentStageIndex} and saved progress.`);
+
+        const hasMoreStages = this.storyProgress.currentStageIndex < this.getTotalStages();
+
+        // Call event handler if defined
+        if (this.onStageCompleted) {
+            const completedStageId = this.getStageId(this.storyProgress.currentStageIndex - 1);
+            this.onStageCompleted(completedStageId, [], hasMoreStages);
+        }
+
+        return hasMoreStages;
+    }
 
     /**
      * Mark the current stage as completed and advance to the next stage
@@ -1031,6 +1349,56 @@ class StoryManager {
                             break;
                         // --- END NEW --- 
 
+                        // --- NEW: Handle missing percentage restore effects ---
+                        case 'heal_missing_percent':
+                            if (character.stats) {
+                                const maxHP = character.stats.hp ?? character.currentHP ?? 0;
+                                const currentHP = character.currentHP || 0;
+                                const missingHP = Math.max(0, maxHP - currentHP);
+                                const healAmount = Math.floor(missingHP * (effect.amount_percent / 100));
+                                character.currentHP = Math.min(maxHP, currentHP + healAmount);
+                                console.log(`Applied healing potion to ${character.id}. Restored ${healAmount} HP (${effect.amount_percent}% of missing ${missingHP}). New HP: ${character.currentHP}/${maxHP}`);
+                            } else {
+                                console.warn(`Cannot apply healing potion: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'mana_restore_missing_percent':
+                            if (character.stats) {
+                                const maxMana = character.stats.mana ?? character.currentMana ?? 0;
+                                const currentMana = character.currentMana || 0;
+                                const missingMana = Math.max(0, maxMana - currentMana);
+                                const restoreAmount = Math.floor(missingMana * (effect.amount_percent / 100));
+                                character.currentMana = Math.min(maxMana, currentMana + restoreAmount);
+                                console.log(`Applied mana potion to ${character.id}. Restored ${restoreAmount} Mana (${effect.amount_percent}% of missing ${missingMana}). New Mana: ${character.currentMana}/${maxMana}`);
+                            } else {
+                                console.warn(`Cannot apply mana potion: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'heal_and_mana_restore_missing_percent':
+                            if (character.stats) {
+                                const maxHP = character.stats.hp ?? character.currentHP ?? 0;
+                                const currentHP = character.currentHP || 0;
+                                const missingHP = Math.max(0, maxHP - currentHP);
+                                const healAmount = Math.floor(missingHP * (effect.amount_percent / 100));
+                                
+                                const maxMana = character.stats.mana ?? character.currentMana ?? 0;
+                                const currentMana = character.currentMana || 0;
+                                const missingMana = Math.max(0, maxMana - currentMana);
+                                const restoreAmount = Math.floor(missingMana * (effect.amount_percent / 100));
+                                
+                                character.currentHP = Math.min(maxHP, currentHP + healAmount);
+                                character.currentMana = Math.min(maxMana, currentMana + restoreAmount);
+                                console.log(`Applied both potions to ${character.id}. Restored ${healAmount} HP (${effect.amount_percent}% of missing ${missingHP}) and ${restoreAmount} Mana (${effect.amount_percent}% of missing ${missingMana}). New HP: ${character.currentHP}/${maxHP}, New Mana: ${character.currentMana}/${maxMana}`);
+                            } else {
+                                console.warn(`Cannot apply potions: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'none':
+                            console.log(`No effect applied to ${character.id} - choice declined.`);
+                            break;
+
+                        // --- END NEW ---
+
                         default:
                             console.warn(`Unknown choice effect type: ${effect.type}`);
                             break;
@@ -1122,11 +1490,10 @@ class StoryManager {
      */
     async getRecruitmentOffers(stageData) {
         console.log(`[StoryManager] getRecruitmentOffers for stage: ${stageData.name}, tag: ${stageData.recruitTag}, count: ${stageData.recruitCount}`);
-        if (!stageData.recruitTag || stageData.recruitCount <= 0) {
-            console.error("Invalid recruitment stage data:", stageData);
-            return [];
-        }
-
+        console.log(`[StoryManager] Full stageData:`, stageData);
+        console.log(`[StoryManager] stageData.specificCharacters:`, stageData.specificCharacters);
+        console.log(`[StoryManager] Is specificCharacters an array?`, Array.isArray(stageData.specificCharacters));
+        
         try {
             // Ensure character registry is loaded
             await this.loadCharacterRegistry();
@@ -1134,53 +1501,81 @@ class StoryManager {
                 throw new Error("Character registry is empty.");
             }
 
-            const allCharacterIds = Object.keys(this.characterRegistry);
             const currentTeamIds = new Set(this.playerTeam.map(c => c.id));
+            let potentialRecruits = [];
 
-            // Filter characters
-            const potentialRecruits = allCharacterIds.filter(id => {
-                // Check if not already in the team
-                if (currentTeamIds.has(id)) return false;
+            // Check if specific characters are defined (for tutorial or special stages)
+            if (stageData.specificCharacters && Array.isArray(stageData.specificCharacters)) {
+                console.log(`[StoryManager] Using specific characters list:`, stageData.specificCharacters);
+                console.log(`[StoryManager] Current team IDs:`, Array.from(currentTeamIds));
+                console.log(`[StoryManager] Available character registry keys:`, Object.keys(this.characterRegistry));
+                
+                // Filter specific characters to exclude those already in team
+                potentialRecruits = stageData.specificCharacters.filter(id => {
+                    if (currentTeamIds.has(id)) {
+                        console.log(`[StoryManager] Character ${id} already in team, excluding.`);
+                        return false;
+                    }
+                    if (!this.characterRegistry[id]) {
+                        console.warn(`[StoryManager] Character ${id} not found in registry, excluding.`);
+                        console.warn(`[StoryManager] Available registry keys:`, Object.keys(this.characterRegistry));
+                        return false;
+                    }
+                    console.log(`[StoryManager] Character ${id} is available for recruitment.`);
+                    return true;
+                });
+            } else if (stageData.recruitTag && stageData.recruitCount > 0) {
+                // Use original tag-based filtering for regular recruitment stages
+                const allCharacterIds = Object.keys(this.characterRegistry);
+                potentialRecruits = allCharacterIds.filter(id => {
+                    // Check if not already in the team
+                    if (currentTeamIds.has(id)) return false;
 
-                // Get the registry entry for this character
-                const registryEntry = this.characterRegistry[id];
-                if (!registryEntry) return false; // Skip if no registry entry (shouldn't happen)
+                    // Get the registry entry for this character
+                    const registryEntry = this.characterRegistry[id];
+                    if (!registryEntry) return false;
 
-                // Check if the character has tags defined
-                if (!registryEntry.tags || !Array.isArray(registryEntry.tags)) {
-                    // If no tags defined, maybe infer? For now, exclude.
-                    // console.warn(`Character ${id} has no tags in registry.`);
-                    return false; 
-                }
+                    // Check if the character has tags defined
+                    if (!registryEntry.tags || !Array.isArray(registryEntry.tags)) {
+                        return false; 
+                    }
 
-                // Check if the character's tags array includes the required recruitTag
-                const requiredTag = stageData.recruitTag; // Use the exact tag from stage data
-                if (registryEntry.tags.includes(requiredTag)) {
-                    return true; // Found the required tag
-                }
+                    // Check if the character's tags array includes the required recruitTag
+                    const requiredTag = stageData.recruitTag;
+                    return registryEntry.tags.includes(requiredTag);
+                });
 
-                return false; // Default: tag not found
-            });
+                // Shuffle the potential recruits for random selection
+                potentialRecruits = potentialRecruits.sort(() => 0.5 - Math.random());
+            } else {
+                console.error("Invalid recruitment stage data: missing recruitTag/recruitCount or specificCharacters");
+                return [];
+            }
 
             console.log(`[StoryManager] Potential recruits found (${potentialRecruits.length}):`, potentialRecruits);
 
-            // Shuffle the potential recruits
-            const shuffledRecruits = potentialRecruits.sort(() => 0.5 - Math.random());
-
-            // Take the required number of offers
-            const offers = shuffledRecruits.slice(0, stageData.recruitCount);
+            // Take the required number of offers (or all if using specific characters)
+            const maxOffers = stageData.recruitCount || potentialRecruits.length;
+            const offers = potentialRecruits.slice(0, maxOffers);
             console.log(`[StoryManager] Selected offers (${offers.length}):`, offers);
+
+            // If no offers available, return empty array
+            if (offers.length === 0) {
+                console.log(`[StoryManager] No recruitment offers available (all characters may already be recruited).`);
+                return [];
+            }
 
             // Load full data for the offers to return (name, image, etc.)
             const offerDataPromises = offers.map(async (id) => {
                 const registryEntry = this.characterRegistry[id];
-                // Fetch base stats for display if needed (optional, but good for UI)
+                // Fetch base stats for display
                 const baseStats = await this.getBaseStats(id); 
                 return {
                     id: id,
                     name: registryEntry?.name || id,
                     image: registryEntry?.image || 'images/characters/default.png',
-                    stats: baseStats // Include base stats
+                    avatarImage: registryEntry?.image || 'images/characters/default.png', // For UI consistency
+                    stats: baseStats
                 };
             });
 

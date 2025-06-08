@@ -64,7 +64,7 @@
     "passive": {
         "id": "schoolgirl_julia_passive",
         "name": "Healing Empowerment",
-        "description": "Whenever Julia heals herself (including lifesteal) or heals an ally, she permanently gains +50 Physical Damage.",
+        "description": "Whenever Julia heals herself (including lifesteal) or heals an ally, she permanently gains +5 Physical Damage.",
         "icon": "Icons/passives/healing_empowerment.png"
     }
 } 

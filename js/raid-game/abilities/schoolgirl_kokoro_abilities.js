@@ -88,17 +88,20 @@ class SchoolgirlKokoroCharacter extends Character {
     }
     
     // Override the base heal method to prevent default animations for Kokoro
-    heal(amount) {
-        // Apply the healing to stats but without the default animations
-        const healAmount = amount * (1 + this.stats.healingPower);
-        this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + healAmount);
+    // but still call the base method for proper statistics tracking
+    heal(amount, caster = null, options = {}) {
+        // Set option to suppress default VFX but allow base functionality
+        const modifiedOptions = { 
+            ...options, 
+            suppressDefaultVFX: true,
+            suppressUIUpdate: options.suppressUIUpdate 
+        };
         
-        // Update UI without triggering heal animations
-        if (typeof updateCharacterUI === 'function') {
-            updateCharacterUI(this);
-        }
+        // Call the base heal method which handles all the statistics and events
+        const result = super.heal(amount, caster, modifiedOptions);
         
-        return Math.floor(healAmount);
+        // Return the result from base method
+        return result;
     }
     
     // Override the base useAbility method to implement the passive
@@ -121,14 +124,14 @@ class SchoolgirlKokoroCharacter extends Character {
         // Get passive healing amount from passive
         const healAmount = 410;
         
-        // Apply healing to self (directly updating stats since we override heal)
-        const actualHeal = this.heal(healAmount);
+        // Apply healing to self with proper tracking (passive healing is considered self-healing)
+        const actualHeal = this.heal(healAmount, this, { abilityId: 'healing_feedback', healType: 'passive' });
         
         // Log the passive activation
-        log(`${this.name}'s Healing Feedback activates, healing for ${actualHeal} HP.`, 'passive');
+        log(`${this.name}'s Healing Feedback activates, healing for ${actualHeal.healAmount} HP.`, 'passive');
         
         // Show visual effect for passive healing
-        this.showPassiveHealingVFX(actualHeal);
+        this.showPassiveHealingVFX(actualHeal.healAmount);
         
         // Update UI
         if (typeof updateCharacterUI === 'function') {
@@ -167,11 +170,11 @@ const lesserHealEffect = (caster, target) => {
     // Apply healing power multiplier
     const healAmount = Math.floor(baseHealAmount * (1 + caster.stats.healingPower));
     
-    // Apply healing using the target's heal() method
-    const actualHeal = target.heal(healAmount);
+    // Apply healing using the target's heal() method with proper caster tracking
+    const actualHeal = target.heal(healAmount, caster, { abilityId: 'lesser_heal' });
     
     // Log the healing
-    log(`${caster.name} used Lesser Heal on ${target.name}, healing for ${actualHeal} HP.`);
+    log(`${caster.name} used Lesser Heal on ${target.name}, healing for ${actualHeal.healAmount} HP.`);
     
     // Show visual effect for healing (custom VFX for Kokoro)
     const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
@@ -183,7 +186,7 @@ const lesserHealEffect = (caster, target) => {
         // Create healing number display (using a div instead of a span to avoid default heal-vfx styling)
         const healNumber = document.createElement('div');
         healNumber.className = 'lesser-heal-number';
-        healNumber.textContent = `+${actualHeal}`;
+        healNumber.textContent = `+${actualHeal.healAmount}`;
         
         // Create leaf particles container
         const leafContainer = document.createElement('div');
@@ -435,18 +438,18 @@ const circleHealEffect = (caster, target) => {
     
     // Apply healing to all allies
     allAllies.forEach(ally => {
-        // Apply healing power multiplier
-        const healAmount = Math.floor(totalHealAmount * (1 + ally.stats.healingPower)); // Use ally's healing power if intended, or caster's if preferred
+        // Apply healing power multiplier from caster (the one casting the healing spell)
+        const healAmount = Math.floor(totalHealAmount * (1 + caster.stats.healingPower));
         
-        // Apply healing using the ally's heal() method
-        const actualHeal = ally.heal(healAmount, { suppressDefaultVFX: true }); 
+        // Apply healing using the ally's heal() method with proper caster tracking  
+        const actualHeal = ally.heal(healAmount, caster, { suppressDefaultVFX: true, abilityId: 'circle_heal' }); 
         
-        if (actualHeal > 0) {
+        if (actualHeal.healAmount > 0) {
             // Log the healing for each ally
-            log(`${ally.name} was healed for ${actualHeal} HP.`);
+            log(`${ally.name} was healed for ${actualHeal.healAmount} HP.`);
             
             // Show healing VFX for each ally
-            showCircleHealVFX(ally, actualHeal);
+            showCircleHealVFX(ally, actualHeal.healAmount);
         }
         
         // Update UI (heal() method already calls updateCharacterUI)
@@ -565,7 +568,7 @@ const lesserHealAbility = new Ability(
     'lesser_heal',
     'Lesser Heal',
     'Icons/abilities/lesser_heal.jfif',
-    55, // Mana cost
+    40, // Mana cost
     1,  // Cooldown in turns
     lesserHealEffect
 ).setDescription('Heals the selected ally or herself for 410HP.')
@@ -576,7 +579,7 @@ const silencingRingAbility = new Ability(
     'silencing_ring',
     'Silencing Ring',
     'Icons/abilities/silencing_ring.jfif',
-    90, // Mana cost
+    40, // Mana cost
     15, // Cooldown in turns
     silencingRingEffect
 ).setDescription('Places a debuff on the target for 6 turns, reducing their damage output by 30%.')
@@ -587,7 +590,7 @@ const circleHealAbility = new Ability(
     'circle_heal',
     'Circle Heal',
     'Icons/abilities/circle_heal.jfif',
-    125, // Mana cost
+    95, // Mana cost
     9,   // Cooldown in turns
     circleHealEffect
 ).setDescription('Heals all allies for 250HP + 150% of Magic Damage.')
@@ -640,12 +643,10 @@ const protectiveAuraEffect = (caster, target) => {
             );
 
             // Define stat modifiers for the buff
-            buff.statModifiers = {
-                armor_percent: 15, // 15% increase
-                healingPower_percent: 35 // 35% increase (Assuming healingPower is treated like a percentage internally)
-                                          // If healingPower is a flat value that needs 0.35 added, use:
-                                          // healingPower: 0.35 
-            };
+            buff.statModifiers = [
+                { stat: 'armor', value: 15, operation: 'add' }, // +15 armor (flat)
+                { stat: 'healingPower', value: 0.35, operation: 'add' } // +35% healing power (0.35 as flat increase)
+            ];
 
             buff.setDescription('+15% Armor, +35% Healing Power'); // Update description if needed
 
@@ -763,7 +764,7 @@ const protectiveAuraAbility = new Ability(
     'protective_aura',
     'Protective Aura',
     'Icons/abilities/protective_aura.jfif',
-    155, // Mana cost
+    125, // Mana cost
     20,  // Cooldown in turns
     protectiveAuraEffect
 ).setDescription('Gives 15% Increased armor to all allies and increase their healing power by 35% for 7 turns.')

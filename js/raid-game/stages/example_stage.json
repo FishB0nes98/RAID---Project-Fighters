@@ -1,0 +1,81 @@
+{
+  "id": "example_stage",
+  "name": "Example Battle Stage",
+  "description": "A demonstration stage created with the Stage Editor. Face off against multiple enemies in this challenging encounter!",
+  "difficulty": 5,
+  "type": "challenge",
+  "backgroundImage": "images/stages/training_grounds.png",
+  "backgroundMusic": "sounds/music/tutorial_theme.mp3",
+  "enemies": [
+    {
+      "characterId": "infernal_astaroth",
+      "level": 5,
+      "modifications": {
+        "hpMultiplier": 1.5,
+        "damageMultiplier": 1.2,
+        "speedMultiplier": 1.0
+      }
+    },
+    {
+      "characterId": "angry_carrot",
+      "level": 3,
+      "modifications": {
+        "hpMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "speedMultiplier": 1.3
+      }
+    },
+    {
+      "characterId": "blazing_elemental",
+      "level": 4,
+      "modifications": {
+        "hpMultiplier": 0.8,
+        "damageMultiplier": 1.4,
+        "speedMultiplier": 1.1
+      }
+    }
+  ],
+  "playerRequirements": {
+    "minPlayers": 2,
+    "maxPlayers": 4,
+    "requiredTypes": ["any"]
+  },
+  "modifiers": [
+    {
+      "id": "healing_wind"
+    }
+  ],
+  "stageEffects": [
+    {
+      "id": "healing_wind"
+    }
+  ],
+  "objectives": {
+    "winConditions": [
+      {
+        "type": "allEnemiesDefeated"
+      }
+    ],
+    "turnLimit": 15
+  },
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 250,
+      "chance": 1.0
+    },
+    {
+      "type": "xp",
+      "value": 150,
+      "chance": 1.0
+    },
+    {
+      "type": "character",
+      "value": "schoolgirl_ayane",
+      "chance": 0.05
+    }
+  ],
+  "unlockRequirements": [],
+  "playerunlocked": true,
+  "isHidden": false
+} 

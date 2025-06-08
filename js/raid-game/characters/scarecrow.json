@@ -27,7 +27,7 @@
             "targetType": "all_enemies",
             "description": "Disables two abilities for each enemy for 2 turns.",
             "icon": "Icons/abilities/scarecrow_fear.webp",
-            "effectFunctionName": "scarecrowFearEffect"
+            "functionName": "scarecrowFearEffect"
         }
     ],
     "passive": {

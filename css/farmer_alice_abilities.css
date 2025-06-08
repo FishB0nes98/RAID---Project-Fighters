@@ -3,84 +3,99 @@
 /* Pounce Animation */
 @keyframes pounceAnimation {
     0% {
-        transform: translateY(0) scale(1);
+        transform: scale(1);
     }
-    25% {
-        transform: translateY(-60px) scale(1.1);
+    10% {
+        transform: scale(0.9) translateY(5px);
+    }
+    20% {
+        transform: scale(1.1) translateY(-15px);
+    }
+    30% {
+        transform: scale(1.15) translateY(-30px);
+    }
+    40% {
+        transform: scale(1.1) translateY(-15px);
     }
     50% {
-        transform: translateY(-30px) scale(1.05);
+        transform: scale(1) translateY(0);
     }
-    75% {
-        transform: translateY(10px) scale(1);
+    60% {
+        transform: scale(0.95) translateY(2px);
     }
     100% {
-        transform: translateY(0) scale(1);
+        transform: scale(1) translateY(0);
     }
 }
 
 .pounce-animation {
     animation: pounceAnimation 1s ease-in-out;
-    z-index: 100;
-    position: relative;
 }
 
 .pounce-vfx {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(120, 190, 32, 0.2) 0%, rgba(120, 190, 32, 0) 70%);
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(255,222,173,0.7) 0%, rgba(255,222,173,0) 70%);
     border-radius: 50%;
-    animation: pounceVfxPulse 1s ease-out;
-    z-index: -1;
+    animation: pounceVfxPulse 1s ease-in-out;
+    z-index: 2;
 }
 
 @keyframes pounceVfxPulse {
     0% {
-        transform: scale(0.8);
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
         opacity: 0.8;
+        transform: scale(1.2);
     }
     50% {
-        transform: scale(1.3);
         opacity: 0.6;
+        transform: scale(1);
     }
     100% {
-        transform: scale(1.8);
         opacity: 0;
+        transform: scale(1.5);
     }
 }
 
 .pounce-text {
     position: absolute;
-    top: 20%;
+    top: -30px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    color: #78be20;
+    transform: translateX(-50%);
+    font-size: 20px;
     font-weight: bold;
-    font-size: 24px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    color: #ff8800;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    white-space: nowrap;
     animation: pounceTextAnim 1s ease-out;
     z-index: 10;
 }
 
 @keyframes pounceTextAnim {
     0% {
+        top: 0;
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
+        transform: translateX(-50%) scale(0.5);
     }
     20% {
+        top: -20px;
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: translateX(-50%) scale(1.2);
     }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+    50% {
+        top: -30px;
+        transform: translateX(-50%) scale(1);
     }
     100% {
+        top: -40px;
         opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
+        transform: translateX(-50%) scale(0.8);
     }
 }
 
@@ -90,113 +105,141 @@
 }
 
 @keyframes pounceImpactShake {
-    0%, 100% {
+    0% {
         transform: translateX(0);
     }
-    10%, 30%, 50%, 70%, 90% {
-        transform: translateX(-5px);
+    10% {
+        transform: translateX(-5px) rotate(-2deg);
     }
-    20%, 40%, 60%, 80% {
-        transform: translateX(5px);
+    20% {
+        transform: translateX(5px) rotate(2deg);
+    }
+    30% {
+        transform: translateX(-5px) rotate(-2deg);
+    }
+    40% {
+        transform: translateX(4px) rotate(1deg);
+    }
+    50% {
+        transform: translateX(-3px) rotate(-1deg);
+    }
+    60% {
+        transform: translateX(2px) rotate(0.5deg);
+    }
+    70% {
+        transform: translateX(-1px) rotate(-0.5deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0);
     }
 }
 
 .pounce-impact-vfx {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(120, 190, 32, 0.3) 0%, rgba(120, 190, 32, 0) 70%);
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    background: radial-gradient(circle, rgba(255,120,0,0.6) 0%, rgba(255,120,0,0) 70%);
     border-radius: 50%;
-    animation: pounceImpactPulse 0.8s ease-out forwards;
-    z-index: 5;
+    animation: pounceImpactPulse 0.8s ease-in-out;
+    z-index: 2;
 }
 
 @keyframes pounceImpactPulse {
     0% {
-        transform: translate(-50%, -50%) scale(0.2);
-        opacity: 0.7;
+        opacity: 0;
+        transform: scale(0.5);
     }
-    50% {
-        transform: translate(-50%, -50%) scale(1);
+    30% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    60% {
         opacity: 0.5;
+        transform: scale(1);
     }
     100% {
-        transform: translate(-50%, -50%) scale(1.5);
         opacity: 0;
+        transform: scale(1.5);
     }
 }
 
 /* Magic Shield Passive Counter */
 .magic-shield-counter {
     position: absolute;
-    top: -25px;
     right: 5px;
-    background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
-    color: white;
-    border-radius: 5px;
-    padding: 3px 8px;
-    font-size: 14px;
-    font-weight: bold;
+    bottom: 5px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
     display: flex;
-    align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-    transition: all 0.3s ease;
+    align-items: center;
+    color: #00ccff;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 0 5px #00ccff, 0 0 10px rgba(0, 204, 255, 0.5);
+    z-index: 5;
 }
 
 .magic-shield-counter:before {
     content: '';
     position: absolute;
-    top: 100%;
-    right: 10px;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid #d76d77;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #00ccff;
+    animation: pulseShieldCounter 2s infinite;
+    z-index: -1;
 }
 
 .magic-shield-counter .shield-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 4px;
-    background-image: url('../Icons/passive_farmer_alice.png');
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    background-image: url('../Icons/shield_counter.png');
     background-size: contain;
     background-repeat: no-repeat;
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+    background-position: center;
+    opacity: 0.7;
+    z-index: -1;
 }
 
 .shield-gain-vfx {
     position: absolute;
-    top: 20%;
+    top: 10%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    color: #7ca2ff;
+    transform: translateX(-50%);
+    font-size: 24px;
     font-weight: bold;
-    font-size: 18px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: shieldGain 1.5s ease-out forwards;
-    z-index: 5;
+    color: #00ccff;
+    text-shadow: 0 0 5px #ffffff, 0 0 10px #00ccff;
+    white-space: nowrap;
+    animation: shieldGain 1.5s ease-out;
+    z-index: 10;
 }
 
 @keyframes shieldGain {
     0% {
+        top: 50%;
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
+        transform: translateX(-50%) scale(0.5);
     }
     20% {
+        top: 40%;
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: translateX(-50%) scale(1.2);
     }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+    50% {
+        top: 30%;
+        transform: translateX(-50%) scale(1);
     }
     100% {
+        top: 20%;
         opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
+        transform: translateX(-50%) scale(0.8);
     }
 }
 
@@ -204,89 +247,956 @@
 @keyframes pulseShieldCounter {
     0% {
         transform: scale(1);
+        opacity: 0.7;
     }
     50% {
-        transform: scale(1.2);
+        transform: scale(1.15);
+        opacity: 0.4;
     }
     100% {
         transform: scale(1);
+        opacity: 0.7;
     }
 }
 
 .magic-shield-counter.updated {
-    animation: pulseShieldCounter 0.5s ease;
+    animation: pulseShieldCounter 0.5s ease-in-out;
 }
 
 /* Thick Fur Animation and VFX */
 @keyframes thickFurPulse {
     0% {
-        transform: scale(1);
-        opacity: 0.3;
+        opacity: 0;
+        transform: scale(0.8);
     }
-    50% {
-        transform: scale(1.15);
+    30% {
         opacity: 0.7;
+        transform: scale(1.1);
+    }
+    60% {
+        opacity: 0.5;
+        transform: scale(1);
     }
     100% {
-        transform: scale(1);
-        opacity: 0.3;
+        opacity: 0;
+        transform: scale(1.2);
     }
 }
 
 .thick-fur-animation {
     position: relative;
-    filter: drop-shadow(0 0 8px rgba(139, 69, 19, 0.7));
-    animation: thickFurPulse 1s ease-in-out;
-    z-index: 5;
+    z-index: 3;
 }
 
 .thick-fur-vfx {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(139, 69, 19, 0.2) 0%, rgba(139, 69, 19, 0) 70%);
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle, rgba(200,240,255,0.6) 0%, rgba(200,240,255,0) 70%);
     border-radius: 50%;
-    animation: thickFurGlow 1s ease-out;
-    z-index: -1;
+    animation: thickFurGlow 1s ease-in-out;
+    z-index: 2;
 }
 
 @keyframes thickFurGlow {
     0% {
+        opacity: 0;
         transform: scale(0.8);
-        opacity: 0.1;
-        box-shadow: 0 0 10px 5px rgba(139, 69, 19, 0.3);
     }
-    50% {
-        transform: scale(1.3);
+    30% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    60% {
         opacity: 0.5;
-        box-shadow: 0 0 15px 8px rgba(139, 69, 19, 0.5);
+        transform: scale(1);
     }
     100% {
-        transform: scale(1.8);
         opacity: 0;
-        box-shadow: 0 0 20px 10px rgba(139, 69, 19, 0.2);
+        transform: scale(1.2);
     }
 }
 
 .thick-fur-text {
     position: absolute;
-    top: 20%;
+    top: -30px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    color: #8B4513;
+    transform: translateX(-50%);
+    font-size: 20px;
     font-weight: bold;
-    font-size: 24px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    color: #4db8ff;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    white-space: nowrap;
     animation: thickFurTextAnim 1s ease-out;
     z-index: 10;
 }
 
 @keyframes thickFurTextAnim {
     0% {
+        top: 0;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: -20px;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    50% {
+        top: -30px;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: -40px;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* Bunny Bounce Animation and VFX */
+@keyframes bunnyBounceAnimation {
+    0% {
+        transform: scale(1);
+    }
+    20% {
+        transform: scale(0.9) translateY(5px);
+    }
+    30% {
+        transform: scale(1.2) translateY(-20px);
+    }
+    40% {
+        transform: scale(1.1) translateY(-10px);
+    }
+    50% {
+        transform: scale(1) translateY(0);
+    }
+    60% {
+        transform: scale(1.1) translateY(-5px);
+    }
+    70% {
+        transform: scale(1) translateY(0);
+    }
+    80% {
+        transform: scale(1.05) translateY(-3px);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+.bunny-bounce-animation {
+    animation: bunnyBounceAnimation 1.2s ease-in-out;
+}
+
+.bunny-bounce-vfx {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(255,200,230,0.7) 0%, rgba(255,200,230,0) 70%);
+    border-radius: 50%;
+    animation: bunnyBounceVfxPulse 1.2s ease-in-out;
+    z-index: 2;
+}
+
+@keyframes bunnyBounceVfxPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    60% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.bunny-bounce-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff66cc;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    white-space: nowrap;
+    animation: bunnyBounceTextAnim 1.2s ease-out;
+    z-index: 10;
+}
+
+@keyframes bunnyBounceTextAnim {
+    0% {
+        top: 0;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: -20px;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    50% {
+        top: -30px;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: -40px;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* Ally target shield gain animation */
+.ally-shield-gain-vfx {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #00ccff;
+    text-shadow: 0 0 5px #ffffff, 0 0 10px #00ccff;
+    white-space: nowrap;
+    animation: allyShieldGain 1.5s ease-out;
+    z-index: 10;
+}
+
+@keyframes allyShieldGain {
+    0% {
+        top: 50%;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: 40%;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    50% {
+        top: 30%;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: 20%;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* Enemy target impact animation */
+.bunny-bounce-impact {
+    animation: bunnyBounceImpactShake 0.8s ease-in-out;
+}
+
+@keyframes bunnyBounceImpactShake {
+    0% {
+        transform: translateX(0);
+    }
+    10% {
+        transform: translateX(-4px) rotate(-1deg);
+    }
+    20% {
+        transform: translateX(4px) rotate(1deg);
+    }
+    30% {
+        transform: translateX(-4px) rotate(-1deg);
+    }
+    40% {
+        transform: translateX(3px) rotate(0.8deg);
+    }
+    50% {
+        transform: translateX(-2px) rotate(-0.5deg);
+    }
+    60% {
+        transform: translateX(1px) rotate(0.3deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0);
+    }
+}
+
+.bunny-bounce-impact-vfx {
+    position: absolute;
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle, rgba(255,150,230,0.6) 0%, rgba(255,150,230,0) 70%);
+    border-radius: 50%;
+    animation: bunnyBounceImpactPulse 0.8s ease-in-out;
+    z-index: 2;
+}
+
+@keyframes bunnyBounceImpactPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    60% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* Carrot Power Up Animation and VFX */
+@keyframes carrotPowerAnimation {
+    0% {
+        transform: scale(1);
+    }
+    20% {
+        transform: scale(1.05);
+    }
+    40% {
+        transform: scale(1);
+    }
+    60% {
+        transform: scale(1.03);
+    }
+    80% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.carrot-powerup-animation {
+    animation: carrotPowerAnimation 1s ease-in-out;
+}
+
+.carrot-powerup-vfx {
+    position: absolute;
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle, rgba(255,165,0,0.6) 0%, rgba(255,165,0,0) 70%);
+    border-radius: 50%;
+    animation: carrotPowerGlow 1s ease-in-out;
+    z-index: 2;
+}
+
+@keyframes carrotPowerGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    60% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+.carrot-powerup-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff9900;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    white-space: nowrap;
+    animation: carrotPowerTextAnim 1s ease-out;
+    z-index: 10;
+}
+
+@keyframes carrotPowerTextAnim {
+    0% {
+        top: 0;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: -20px;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    50% {
+        top: -30px;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: -40px;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* Healing VFX from Carrot Power Up */
+.healing-vfx {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #33cc33;
+    text-shadow: 0 0 5px #ffffff, 0 0 10px #33cc33;
+    white-space: nowrap;
+    animation: healingAnim 1.5s ease-out;
+    z-index: 10;
+}
+
+@keyframes healingAnim {
+    0% {
+        top: 50%;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: 40%;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    50% {
+        top: 30%;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: 20%;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* Cooldown Reduction VFX */
+.cooldown-reduction-vfx {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #9966ff;
+    text-shadow: 0 0 5px #ffffff, 0 0 10px #9966ff;
+    white-space: nowrap;
+    animation: cdReductionAnim 1.5s ease-out;
+    z-index: 10;
+}
+
+@keyframes cdReductionAnim {
+    0% {
+        top: 50%;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: 40%;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    50% {
+        top: 30%;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: 10%;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* Cooldown reduction VFX when Alice takes damage */
+.alice-cd-reduction-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff9900;
+    text-shadow: 0 0 5px #ffffff, 0 0 10px #ff9900;
+    white-space: nowrap;
+    animation: aliceCdReductionAnim 1.2s ease-out;
+    z-index: 10;
+}
+
+@keyframes aliceCdReductionAnim {
+    0% {
+        top: 50%;
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        top: 40%;
+        opacity: 1;
+        transform: translate(-50%, -40%) scale(1.2);
+    }
+    50% {
+        top: 30%;
+        transform: translate(-50%, -30%) scale(1);
+    }
+    100% {
+        top: 10%;
+        opacity: 0;
+        transform: translate(-50%, -10%) scale(0.8);
+    }
+}
+
+/* Targeting indicators */
+.character.target-ally {
+    box-shadow: 0 0 10px 3px rgba(0, 255, 0, 0.7);
+}
+
+.character.target-enemy {
+    box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.7);
+}
+
+.character.target-any {
+    box-shadow: 0 0 10px 3px rgba(255, 255, 0, 0.7);
+}
+
+/* Carrot Power Up targeting pulse effect */
+.character.target-ally.carrot-powerup-target {
+    animation: carrotTargetPulse 1.5s infinite;
+}
+
+@keyframes carrotTargetPulse {
+    0% { box-shadow: 0 0 10px 3px rgba(0, 255, 0, 0.7); }
+    50% { box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.9); }
+    100% { box-shadow: 0 0 10px 3px rgba(0, 255, 0, 0.7); }
+}
+
+/* Hunter's Instinct Talent Cooldown Reduction VFX */
+.alice-talent-cd-reduction-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.alice-talent-cd-reduction-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(100, 149, 237, 0.7) 0%, rgba(100, 149, 237, 0) 70%);
+    border-radius: 50%;
+    width: 120%;
+    height: 120%;
+    animation: hunterInstinctCdReduction 1.5s ease-out forwards;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.alice-talent-cd-reduction-vfx span {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 0 0 5px #000, 0 0 10px #000;
+    animation: hunterInstinctCdReductionText 1.5s ease-out forwards;
+}
+
+@keyframes hunterInstinctCdReduction {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    30% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    70% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes hunterInstinctCdReductionText {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2) translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1) translateY(-10px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-30px);
+    }
+}
+
+/* Purifying Fur talent effect styles */
+.purifying-effect {
+    position: relative;
+    overflow: visible !important;
+}
+
+.purify-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: visible;
+}
+
+.purify-vfx-container::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(173, 216, 230, 0.7) 30%, rgba(173, 216, 230, 0) 70%);
+    border-radius: 50%;
+    animation: purifyPulse 1.2s ease-out;
+    z-index: 5;
+}
+
+.purify-vfx-container::after {
+    content: 'PURIFIED!';
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 5px #4db8ff, 0 0 10px #4db8ff;
+    white-space: nowrap;
+    animation: purifyTextAnim 1.2s ease-out;
+    z-index: 10;
+}
+
+@keyframes purifyPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    20% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes purifyTextAnim {
+    0% {
+        top: 20px;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+    20% {
+        top: -10px;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    70% {
+        top: -40px;
+        opacity: 0.8;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: -60px;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.7);
+    }
+}
+
+/* --- ADDED: Talent Effect Styling --- */
+.talent-effect {
+    color: #4db8ff; /* Alice blue / light blue */
+    font-weight: bold;
+    font-style: italic;
+    display: inline-block; /* Allows spacing */
+    margin-left: 4px; /* Add a small space before the effect text */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Optional: Add the lightning bolt emoji if needed */
+/* .talent-effect::before {
+    content: "⚡️";
+    margin-right: 2px;
+} */
+/* --- END ADDED --- */
+
+/* New talent effects for Farmer Alice */
+
+/* Fur Coat Endurance effect */
+.fur-coat-endurance-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: furCoatEndurancePulse 0.8s ease-in-out;
+}
+
+@keyframes furCoatEndurancePulse {
+    0% { transform: scale(0.9); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+.fur-coat-endurance-text {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 6px #b37800, 0 0 10px #d89b00;
+    animation: furCoatEnduranceText 1s ease-out;
+    transform-origin: center;
+}
+
+@keyframes furCoatEnduranceText {
+    0% { transform: scale(0.5); opacity: 0; }
+    20% { transform: scale(1.2); opacity: 1; }
+    80% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.1); opacity: 0; }
+}
+
+/* Restorative Fur healing effect */
+.restorative-fur-heal-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 110;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: restorativeFurHealGlow 1.2s ease-in-out;
+}
+
+@keyframes restorativeFurHealGlow {
+    0% { box-shadow: inset 0 0 10px rgba(0, 255, 0, 0); }
+    50% { box-shadow: inset 0 0 40px rgba(0, 255, 0, 0.4); }
+    100% { box-shadow: inset 0 0 10px rgba(0, 255, 0, 0); }
+}
+
+.restorative-fur-heal-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2dff2d;
+    text-shadow: 0 0 8px #138a13, 0 0 12px #067306;
+    animation: restorativeFurHealText 1.2s ease-out;
+}
+
+@keyframes restorativeFurHealText {
+    0% { transform: translateY(10px); opacity: 0; }
+    20% { transform: translateY(-15px); opacity: 1; }
+    80% { transform: translateY(-30px); opacity: 1; }
+    100% { transform: translateY(-40px); opacity: 0; }
+}
+
+.restorative-fur-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.restorative-fur-particles::before,
+.restorative-fur-particles::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: 
+        radial-gradient(circle, rgba(45, 255, 100, 0.8) 5%, rgba(45, 255, 100, 0) 60%),
+        radial-gradient(circle, rgba(45, 255, 100, 0.6) 10%, rgba(45, 255, 100, 0) 70%);
+    background-size: 40px 40px, 30px 30px;
+    background-position: center;
+    animation: restorativeFurParticles 3s ease-out;
+    transform-origin: center;
+    opacity: 0;
+}
+
+@keyframes restorativeFurParticles {
+    0% { transform: scale(0.2); opacity: 0; }
+    30% { transform: scale(1.2); opacity: 0.8; }
+    70% { transform: scale(1.5); opacity: 0.4; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+/* Healing Aura Talent VFX */
+.healing-aura-vfx-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: visible;
+}
+
+.healing-aura-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 11;
+    animation: healingAuraParticles 2s ease-out forwards;
+}
+
+.healing-aura-particles::before,
+.healing-aura-particles::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(144, 238, 144, 0.6) 0%, rgba(144, 238, 144, 0) 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: healingAuraParticlesPulse 1.5s ease-out forwards;
+}
+
+.healing-aura-particles::after {
+    animation-delay: 0.5s;
+}
+
+@keyframes healingAuraParticlesPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+.healing-aura-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    color: #90ee90;
+    font-weight: bold;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    white-space: nowrap;
+    z-index: 12;
+    animation: healingAuraText 1.5s ease-out forwards;
+}
+
+@keyframes healingAuraText {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Recovery Talent Visuals */
+.enhanced-recovery-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: enhancedRecoveryGlow 1.5s ease-in-out;
+}
+
+@keyframes enhancedRecoveryGlow {
+    0% {
+        box-shadow: 0 0 5px 1px rgba(146, 255, 140, 0);
+        background-color: rgba(146, 255, 140, 0);
+    }
+    50% {
+        box-shadow: 0 0 20px 5px rgba(146, 255, 140, 0.5);
+        background-color: rgba(146, 255, 140, 0.2);
+    }
+    100% {
+        box-shadow: 0 0 5px 1px rgba(146, 255, 140, 0);
+        background-color: rgba(146, 255, 140, 0);
+    }
+}
+
+.enhanced-recovery-text {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #92ff8c;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 11;
+    animation: enhancedRecoveryTextAnim 1.5s ease-in-out;
+}
+
+@keyframes enhancedRecoveryTextAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
     }
     20% {
         opacity: 1;
@@ -294,89 +1204,479 @@
     }
     80% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(-50%, -50%) scale(1.1);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 
-/* Bunny Bounce Animation and VFX */
-@keyframes bunnyBounceAnimation {
-    0% {
-        transform: translateY(0) scale(1);
-    }
-    25% {
-        transform: translateY(-80px) scale(1.2);
-    }
-    50% {
-        transform: translateY(-40px) scale(1.1);
-    }
-    65% {
-        transform: translateY(-20px) scale(1.05);
-    }
-    80% {
-        transform: translateY(10px) scale(1);
-    }
-    90% {
-        transform: translateY(-5px) scale(1);
-    }
-    100% {
-        transform: translateY(0) scale(1);
-    }
-}
-
-.bunny-bounce-animation {
-    animation: bunnyBounceAnimation 1.2s ease-in-out;
-    z-index: 100;
-    position: relative;
-}
-
-.bunny-bounce-vfx {
+/* Lasting Protection Talent Visuals */
+.lasting-protection-vfx {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(255, 150, 200, 0.3) 0%, rgba(255, 150, 200, 0) 70%);
-    border-radius: 50%;
-    animation: bunnyBounceVfxPulse 1.2s ease-out;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: lastingProtectionGlow 1.5s ease-in-out;
+}
+
+@keyframes lastingProtectionGlow {
+    0% {
+        box-shadow: 0 0 5px 1px rgba(135, 206, 250, 0);
+        background-color: rgba(135, 206, 250, 0);
+    }
+    50% {
+        box-shadow: 0 0 20px 5px rgba(135, 206, 250, 0.5);
+        background-color: rgba(135, 206, 250, 0.2);
+    }
+    100% {
+        box-shadow: 0 0 5px 1px rgba(135, 206, 250, 0);
+        background-color: rgba(135, 206, 250, 0);
+    }
+}
+
+.lasting-protection-text {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #87cefa;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 11;
+    animation: lastingProtectionTextAnim 1.5s ease-in-out;
+}
+
+@keyframes lastingProtectionTextAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Revitalizing Magic Talent VFX */
+.revitalizing-magic-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.revitalizing-magic-heal {
+    background: rgba(15, 50, 15, 0.7);
+    border: 2px solid #4eff4e;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-shadow: 0 0 3px #000;
+    padding: 5px 10px;
+    box-shadow: 0 0 15px #4eff4e;
+    animation: revitalizingMagicPulse 1.8s ease-out;
+    opacity: 0;
+    transform: translateY(0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.revitalizing-magic-heal .talent-effect {
+    font-size: 1.3em;
+    color: #4eff4e;
+    margin-bottom: 3px;
+}
+
+.revitalizing-magic-heal .talent-detail {
+    font-size: 0.8em;
+    color: #b8ffb8;
+}
+
+@keyframes revitalizingMagicPulse {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    15% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1);
+    }
+    75% {
+        opacity: 1;
+        transform: translateY(-30px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(1);
+    }
+}
+
+/* Adaptive Defense talent VFX */
+.adaptive-defense-vfx {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    color: #5aff5a;
+    text-shadow: 0 0 10px #00ff00, 0 0 20px #0000ff;
+    opacity: 0;
+    animation: adaptive-defense-anim 3s ease-out forwards;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+}
+
+@keyframes adaptive-defense-anim {
+    0% {
+        opacity: 0;
+        top: 20px;
+    }
+    10% {
+        opacity: 1;
+        top: -30px;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        top: -60px;
+    }
+}
+
+/* Add the new talent styles at the end of the file */
+
+/* --- Mana Conversion Talent VFX --- */
+.mana-conversion-vfx {
+    position: absolute;
+    top: 15%;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    animation: manaConversionAnim 3s ease-out forwards;
+    pointer-events: none;
+}
+
+.mana-conversion-vfx span {
+    color: #4fc3f7;
+    text-shadow: 0 0 5px #0288d1, 0 0 10px #29b6f6;
+    font-size: 1.2em;
+    font-weight: bold;
+    background: rgba(3, 169, 244, 0.2);
+    border-radius: 15px;
+    padding: 5px 10px;
+    border: 1px solid #29b6f6;
+    box-shadow: 0 0 8px #03a9f4;
+    animation: manaConversionTextAnim 3s ease-out forwards;
+}
+
+@keyframes manaConversionAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    15% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    85% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes manaConversionTextAnim {
+    0% {
+        transform: scale(0.8);
+    }
+    20% {
+        transform: scale(1.1);
+    }
+    30% {
+        transform: scale(1);
+    }
+    70% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.9);
+    }
+}
+
+/* --- Arcane Infusion Talent VFX --- */
+.arcane-infusion-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.arcane-infusion-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: radial-gradient(circle, rgba(147, 112, 219, 0.4) 0%, rgba(147, 112, 219, 0) 70%);
+    animation: arcaneInfusionGlow 2s ease-out forwards;
     z-index: -1;
 }
 
-@keyframes bunnyBounceVfxPulse {
+.arcane-infusion-text {
+    color: #b388ff;
+    text-shadow: 0 0 5px #7c4dff, 0 0 10px #651fff;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    animation: arcaneInfusionTextAnim 2s ease-out forwards;
+}
+
+.arcane-infusion-value {
+    color: #e1bee7;
+    text-shadow: 0 0 3px #9c27b0, 0 0 6px #ba68c8;
+    font-size: 1.1em;
+    font-weight: bold;
+    background: rgba(156, 39, 176, 0.15);
+    border-radius: 10px;
+    padding: 3px 8px;
+    border: 1px solid #ab47bc;
+    box-shadow: 0 0 8px #9c27b0;
+    animation: arcaneInfusionValueAnim 2s ease-out forwards;
+}
+
+@keyframes arcaneInfusionGlow {
     0% {
+        opacity: 0;
         transform: scale(0.8);
-        opacity: 0.8;
     }
-    50% {
-        transform: scale(1.4);
-        opacity: 0.6;
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(1);
     }
     100% {
-        transform: scale(1.8);
         opacity: 0;
+        transform: scale(1.2);
     }
 }
 
-.bunny-bounce-text {
-    position: absolute;
-    top: 15%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ff69b4;
-    font-weight: bold;
-    font-size: 24px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: bunnyBounceTextAnim 1.2s ease-out;
-    z-index: 10;
-}
-
-@keyframes bunnyBounceTextAnim {
+@keyframes arcaneInfusionTextAnim {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
+        transform: translateY(-20px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes arcaneInfusionValueAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+}
+
+/* --- Shield Transfer Talent VFX --- */
+.shield-transfer-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.shield-transfer-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: radial-gradient(circle, rgba(100, 181, 246, 0.4) 0%, rgba(100, 181, 246, 0) 70%);
+    animation: shieldTransferGlow 2s ease-out forwards;
+    z-index: -1;
+}
+
+.shield-transfer-text {
+    color: #64b5f6;
+    text-shadow: 0 0 5px #1976d2, 0 0 10px #2196f3;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    animation: shieldTransferTextAnim 2s ease-out forwards;
+}
+
+.shield-transfer-value {
+    color: #bbdefb;
+    text-shadow: 0 0 3px #1565c0, 0 0 6px #42a5f5;
+    font-size: 1.1em;
+    font-weight: bold;
+    background: rgba(33, 150, 243, 0.15);
+    border-radius: 10px;
+    padding: 3px 8px;
+    border: 1px solid #42a5f5;
+    box-shadow: 0 0 8px #2196f3;
+    animation: shieldTransferValueAnim 2s ease-out forwards;
+}
+
+@keyframes shieldTransferGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes shieldTransferTextAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes shieldTransferValueAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+}
+
+.damage-reflection-vfx {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: reflectionPulse 1.5s ease-out forwards;
+    z-index: 15;
+    pointer-events: none;
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff6b6b;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.damage-reflection-vfx span {
+    display: inline-block;
+    animation: reflectionTextAnim 1.5s ease-out forwards;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #ff6b6b;
+}
+
+@keyframes reflectionPulse {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
     }
     20% {
         opacity: 1;
@@ -388,310 +1688,475 @@
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
+        transform: translate(-50%, -50%) scale(0.9);
     }
 }
 
-/* Ally target shield gain animation */
-.ally-shield-gain-vfx {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ff69b4;
-    font-weight: bold;
-    font-size: 22px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: allyShieldGain 1.5s ease-out forwards;
-    z-index: 10;
-}
-
-@keyframes allyShieldGain {
+@keyframes reflectionTextAnim {
     0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
+        transform: scale(0.8);
     }
     20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: scale(1.2);
     }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
-    }
-}
-
-/* Enemy target impact animation */
-.bunny-bounce-impact {
-    animation: bunnyBounceImpactShake 0.8s ease-in-out;
-}
-
-@keyframes bunnyBounceImpactShake {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    10%, 30%, 50%, 70%, 90% {
-        transform: translateX(-7px) translateY(-3px) rotate(-3deg);
-    }
-    20%, 40%, 60%, 80% {
-        transform: translateX(7px) translateY(3px) rotate(3deg);
-    }
-}
-
-.bunny-bounce-impact-vfx {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(255, 105, 180, 0.4) 0%, rgba(255, 105, 180, 0) 70%);
-    border-radius: 50%;
-    animation: bunnyBounceImpactPulse 0.8s ease-out forwards;
-    z-index: 5;
-}
-
-@keyframes bunnyBounceImpactPulse {
-    0% {
-        transform: translate(-50%, -50%) scale(0.2);
-        opacity: 0.7;
-    }
-    50% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.6;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1.5);
-        opacity: 0;
-    }
-}
-
-/* Carrot Power Up Animation and VFX */
-@keyframes carrotPowerAnimation {
-    0% {
+    30% {
         transform: scale(1);
     }
-    25% {
-        transform: scale(1.1) rotate(5deg);
-    }
-    50% {
-        transform: scale(1.15) rotate(-5deg);
-    }
-    75% {
-        transform: scale(1.1) rotate(3deg);
-    }
     100% {
-        transform: scale(1);
+        transform: translateY(-40px) scale(0.9);
     }
 }
 
-.carrot-powerup-animation {
-    animation: carrotPowerAnimation 1s ease-in-out;
-    position: relative;
-    z-index: 100;
-    filter: drop-shadow(0 0 10px rgba(255, 140, 0, 0.7));
-}
-
-.carrot-powerup-vfx {
+/* Add a subtle radial glow effect around the character when reflection happens */
+.character.reflection-active::before {
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(255, 140, 0, 0.3) 0%, rgba(255, 140, 0, 0) 70%);
-    border-radius: 50%;
-    animation: carrotPowerGlow 1s ease-out;
-    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.4) 0%, rgba(255, 107, 107, 0) 70%);
+    z-index: 1;
+    animation: reflectionGlow 1s ease-out;
+    pointer-events: none;
 }
 
-@keyframes carrotPowerGlow {
+@keyframes reflectionGlow {
     0% {
-        transform: scale(0.8);
-        opacity: 0.2;
-        box-shadow: 0 0 10px 5px rgba(255, 140, 0, 0.3);
+        opacity: 0;
     }
     50% {
-        transform: scale(1.3);
-        opacity: 0.5;
-        box-shadow: 0 0 15px 8px rgba(255, 140, 0, 0.5);
+        opacity: 1;
     }
     100% {
-        transform: scale(1.8);
         opacity: 0;
-        box-shadow: 0 0 20px 10px rgba(255, 140, 0, 0.2);
     }
 }
 
-.carrot-powerup-text {
+/* Bunny Brigade talent styles */
+.bunny-brigade-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    overflow: visible;
+}
+
+.bunny-brigade-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,192,203,0.4) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    animation: bunnyBrigadeGlow 2s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes bunnyBrigadeGlow {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.bunny-brigade-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff69b4;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 5px white, 0 0 10px white;
+    white-space: nowrap;
+    animation: bunnyBrigadeTextAnim 2s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes bunnyBrigadeTextAnim {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translateX(-50%) translateY(-20px) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(-50%) translateY(-40px) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-50px) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Agile Hunter VFX (40% chance not to end turn) */
+.agile-hunter-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+    border-radius: 10px;
+    box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7);
+    animation: agileHunterPulse 1.2s ease-in-out;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 180, 0, 0.1) 70%);
+}
+
+@keyframes agileHunterPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+.agile-hunter-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffcc00;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ffcc00;
+    white-space: nowrap;
+    animation: agileHunterTextAnim 1.2s ease-out;
+    z-index: 11;
+}
+
+@keyframes agileHunterTextAnim {
+    0% {
+        top: 0;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+    }
+    20% {
+        top: -25px;
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    60% {
+        top: -40px;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        top: -50px;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+}
+
+/* ===== Furry Guardian Talent Styles ===== */
+.furry-guardian-vfx-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.furry-guardian-vfx {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(255,220,150,0.6) 0%, rgba(255,174,74,0.4) 50%, rgba(255,120,0,0) 70%);
+    border-radius: 50%;
+    animation: furryGuardianGlow 1.5s ease-out;
+    pointer-events: none;
+}
+
+@keyframes furryGuardianGlow {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.furry-guardian-text {
+    position: absolute;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff8c00;
+    text-shadow: 0 0 6px #fff, 0 0 10px #ff8c00;
+    z-index: 11;
+    top: -30px;
+    width: 150px;
+    text-align: center;
+    animation: furryGuardianTextAnim 2s ease-out;
+    pointer-events: none;
+}
+
+@keyframes furryGuardianTextAnim {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    15% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-15px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-25px);
+        opacity: 0;
+    }
+}
+
+.ability-redirect-arrow {
+    position: absolute;
+    width: 150px;
+    height: 40px;
+    background-image: url('../../Icons/abilities/redirect_arrow.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    z-index: 15;
+    animation: redirectArrowAnim 1.5s ease-out;
+    pointer-events: none;
+}
+
+@keyframes redirectArrowAnim {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Defensive Fortitude talent effect */
+.defensive-fortitude-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    animation: defensiveFortitudeGlow 2s ease-in-out;
+    opacity: 0;
+}
+
+.defensive-fortitude-text {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-30px);
+    background: rgba(0, 0, 0, 0.7);
+    color: #7eb9ff;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 6;
+    animation: defensiveFortitudeTextAnim 2.5s ease-out;
+    opacity: 0;
+}
+
+@keyframes defensiveFortitudeGlow {
+    0% {
+        opacity: 0;
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0);
+    }
+    20% {
+        opacity: 0.7;
+        box-shadow: 0 0 30px rgba(52, 152, 219, 0.6);
+    }
+    70% {
+        opacity: 0.7;
+        box-shadow: 0 0 30px rgba(52, 152, 219, 0.6);
+    }
+    100% {
+        opacity: 0;
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0);
+    }
+}
+
+@keyframes defensiveFortitudeTextAnim {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px);
+    }
+}
+
+/* ------ Protective Aura VFX ------ */
+.protective-aura-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    animation: protectiveAuraGlow 2s ease-in-out;
+}
+
+.protective-aura-text {
     position: absolute;
     top: 20%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ff8c00;
+    transform: translateX(-50%);
+    color: #9cf0ff;
+    text-shadow: 0 0 5px #00a0ff, 0 0 10px #00a0ff, 0 0 15px #00a0ff;
+    font-size: 16px;
     font-weight: bold;
-    font-size: 24px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: carrotPowerTextAnim 1s ease-out;
-    z-index: 10;
+    text-align: center;
+    width: 100%;
+    animation: protectiveAuraTextAnim 2s ease-in-out;
+    z-index: 11;
 }
 
-@keyframes carrotPowerTextAnim {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -30%) scale(0.8);
-    }
-}
-
-/* Healing VFX from Carrot Power Up */
-.healing-vfx {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #2ecc71;
-    font-weight: bold;
+.protective-aura-text .talent-effect {
     font-size: 22px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: healingAnim 1.5s ease-out forwards;
-    z-index: 10;
+    color: #fefefe;
+    text-shadow: 0 0 5px #00a0ff, 0 0 10px #00a0ff;
 }
 
-@keyframes healingAnim {
+@keyframes protectiveAuraGlow {
     0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
+        box-shadow: 0 0 0 0 rgba(0, 160, 255, 0);
+        background: radial-gradient(circle, rgba(0, 160, 255, 0) 0%, rgba(0, 160, 255, 0) 100%);
     }
     20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
+        box-shadow: 0 0 20px 10px rgba(0, 160, 255, 0.3);
+        background: radial-gradient(circle, rgba(0, 160, 255, 0.2) 0%, rgba(0, 160, 255, 0) 70%);
     }
     80% {
+        box-shadow: 0 0 20px 10px rgba(0, 160, 255, 0.3);
+        background: radial-gradient(circle, rgba(0, 160, 255, 0.2) 0%, rgba(0, 160, 255, 0) 70%);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 160, 255, 0);
+        background: radial-gradient(circle, rgba(0, 160, 255, 0) 0%, rgba(0, 160, 255, 0) 100%);
+    }
+}
+
+@keyframes protectiveAuraTextAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) translateX(-50%);
+    }
+    25% {
         opacity: 1;
-        transform: translate(-50%, -80%) scale(1);
+        transform: translateY(0) translateX(-50%);
+    }
+    75% {
+        opacity: 1;
+        transform: translateY(0) translateX(-50%);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -100%) scale(0.8);
+        transform: translateY(-20px) translateX(-50%);
     }
 }
 
-/* Cooldown Reduction VFX */
-.cooldown-reduction-vfx {
+/* Visual styling for the buff icon in status bar */
+.buff-icon[src*="protective_aura.webp"] {
+    box-shadow: 0 0 5px 2px rgba(0, 160, 255, 0.7);
+    border: 1px solid #00a0ff;
+}
+
+/* Aura pulse effect around Alice when active */
+.character-slot[data-character-id="farmer_alice"] .image-container.protective-aura-active {
+    position: relative;
+}
+
+.character-slot[data-character-id="farmer_alice"] .image-container.protective-aura-active::after {
+    content: '';
     position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #f39c12;
-    font-weight: bold;
-    font-size: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: cdReductionAnim 1.5s ease-out forwards;
-    z-index: 10;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(0, 160, 255, 0.7);
+    box-shadow: 0 0 10px 2px rgba(0, 160, 255, 0.5);
+    animation: auraPulse 2s infinite alternate;
+    z-index: 2;
+    pointer-events: none;
 }
 
-@keyframes cdReductionAnim {
+@keyframes auraPulse {
     0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -20%) scale(1);
+        opacity: 0.5;
+        box-shadow: 0 0 10px 2px rgba(0, 160, 255, 0.5);
     }
     100% {
-        opacity: 0;
-        transform: translate(-50%, 0%) scale(0.8);
-    }
-}
-
-/* Cooldown reduction VFX when Alice takes damage */
-.alice-cd-reduction-vfx {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #f39c12;
-    font-weight: bold;
-    font-size: 18px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    animation: aliceCdReductionAnim 1.2s ease-out forwards;
-    z-index: 15;
-}
-
-@keyframes aliceCdReductionAnim {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -70%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -90%) scale(0.8);
-    }
-}
-
-/* Targeting indicators */
-.character.target-ally {
-    outline: 3px solid rgba(46, 204, 113, 0.7);
-    box-shadow: 0 0 15px 5px rgba(46, 204, 113, 0.5);
-    cursor: pointer;
-    position: relative;
-    z-index: 5;
-}
-
-.character.target-enemy {
-    outline: 3px solid rgba(231, 76, 60, 0.7);
-    box-shadow: 0 0 15px 5px rgba(231, 76, 60, 0.5);
-    cursor: pointer;
-    position: relative;
-    z-index: 5;
-}
-
-.character.target-any {
-    outline: 3px solid rgba(241, 196, 15, 0.7);
-    box-shadow: 0 0 15px 5px rgba(241, 196, 15, 0.5);
-    cursor: pointer;
-    position: relative;
-    z-index: 5;
-}
-
-/* Carrot Power Up targeting pulse effect */
-.character.target-ally.carrot-powerup-target {
-    animation: carrotTargetPulse 1.5s infinite;
-}
-
-@keyframes carrotTargetPulse {
-    0%, 100% {
-        box-shadow: 0 0 15px 5px rgba(46, 204, 113, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 20px 8px rgba(255, 140, 0, 0.7);
+        opacity: 0.8;
+        box-shadow: 0 0 15px 4px rgba(0, 160, 255, 0.7);
     }
 } 

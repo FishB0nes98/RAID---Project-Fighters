@@ -2,7 +2,7 @@
 
 class InfernalBirdiePassive {
     constructor() {
-        this.lifestealIncrease = 0.01; // 1% lifesteal increase
+        this.lifestealIncrease = 0.005; // 0.5% lifesteal increase
         this.totalLifestealGained = 0; // Track total lifesteal gained
     }
 

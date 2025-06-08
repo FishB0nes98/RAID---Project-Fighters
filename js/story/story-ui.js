@@ -98,6 +98,7 @@ class StoryUI {
         this.enemyListElement = document.getElementById('enemy-list');
         this.rewardListElement = document.getElementById('reward-list');
         this.startStageButton = document.getElementById('start-stage-button');
+        this.closeDetailsButton = document.getElementById('close-details-button');
         this.stageChoicesContainer = document.getElementById('stage-choices-container');
         this.choiceListElement = document.getElementById('choice-list');
         this.stageRecruitContainer = document.getElementById('stage-recruit-container');
@@ -171,7 +172,7 @@ class StoryUI {
         if (quitButton) quitButton.addEventListener('click', () => this.quitStory());
         else console.warn('Quit button not found');
 
-        if (newStoryButton) newStoryButton.addEventListener('click', () => this.newStory());
+        if (newStoryButton) newStoryButton.addEventListener('click', async () => await this.newStory());
         else console.warn('New story button not found');
         
         console.log("[StoryUI] Event handlers set up.");
@@ -269,7 +270,19 @@ class StoryUI {
             
             const nameSpan = document.createElement('div');
             nameSpan.className = 'character-name';
-            nameSpan.textContent = character.name;
+            
+            // Create level display
+            const levelSpan = document.createElement('span');
+            levelSpan.className = 'character-level';
+            levelSpan.textContent = `Lv.${character.level || 1} `;
+            
+            // Create name text
+            const nameText = document.createElement('span');
+            nameText.className = 'character-name-text';
+            nameText.textContent = character.name;
+            
+            nameSpan.appendChild(levelSpan);
+            nameSpan.appendChild(nameText);
             
             // Character Stats (HP/Mana)
             const statsDiv = document.createElement('div');
@@ -286,7 +299,12 @@ class StoryUI {
             if (currentHP !== 'N/A' && maxHP !== 'N/A') {
                 const hpPercentage = Math.max(0, Math.min(100, (currentHP / maxHP) * 100));
                 hpBar.style.width = `${hpPercentage}%`;
-                hpBar.innerHTML = `<span class="bar-text">${currentHP}/${maxHP}</span>`;
+            }
+            
+            const hpText = document.createElement('div');
+            hpText.className = 'bar-text';
+            if (currentHP !== 'N/A' && maxHP !== 'N/A') {
+                hpText.textContent = `${currentHP}/${maxHP}`;
             }
             
             // Mana Bar Container
@@ -300,12 +318,19 @@ class StoryUI {
             if (currentMana !== 'N/A' && maxMana !== 'N/A') {
                 const manaPercentage = Math.max(0, Math.min(100, (currentMana / maxMana) * 100));
                 manaBar.style.width = `${manaPercentage}%`;
-                manaBar.innerHTML = `<span class="bar-text">${currentMana}/${maxMana}</span>`;
+            }
+            
+            const manaText = document.createElement('div');
+            manaText.className = 'bar-text';
+            if (currentMana !== 'N/A' && maxMana !== 'N/A') {
+                manaText.textContent = `${currentMana}/${maxMana}`;
             }
             
             // Assemble the bars
             hpBarContainer.appendChild(hpBar);
+            hpBarContainer.appendChild(hpText);
             manaBarContainer.appendChild(manaBar);
+            manaBarContainer.appendChild(manaText);
             statsDiv.appendChild(hpBarContainer);
             statsDiv.appendChild(manaBarContainer);
             
@@ -425,17 +450,23 @@ class StoryUI {
         if (storyTitle === "Blazing School Day" && mapContainerWidth > 0 && mapContainerHeight > 0) {
             console.log("[StoryUI] Applying SPECIFIC layout for 'Blazing School Day'");
 
-            // Define specific positions using double quotes for keys
+            // Increase the effective container height to accommodate more spacing
+            const effectiveHeight = Math.max(mapContainerHeight, 1800); // Increased minimum height for better spacing
+            
+            // Create a cleaner, more organized layout that follows a logical flow
+            // Arranged in a clear path from top to bottom with minimal line crossings
             const layout = {
-                "Burning School Gym": { x: 0.1, y: 0.1 },
-                "School Corridor":    { x: 0.4, y: 0.2 },
-                "School Yard":        { x: 0.7, y: 0.1 },
-                "Classroom 5B Door":  { x: 0.75, y: 0.45 }, // Recruit
-                "Rooftop":            { x: 0.4, y: 0.5 },
-                "Final Choice":       { x: 0.1, y: 0.4 },
-                "Bathroom Entrance":  { x: 0.25, y: 0.75 }, // Recruit
-                "Bathroom Fight":     { x: 0.5, y: 0.8 },    // Added Boss stage
-                "Principal's Office": { x: 0.75, y: 0.75 }    // Fixed key
+                "Burning School Gym": { x: 0.15, y: 0.08 },   // Start: Top left
+                "School Corridor":    { x: 0.45, y: 0.08 },   // Move right
+                "School Yard":        { x: 0.75, y: 0.08 },   // Continue right
+                "Classroom 5B Door":  { x: 0.75, y: 0.25 },   // Recruit: Down from yard
+                "Rooftop":            { x: 0.45, y: 0.25 },   // Center position
+                "Final Choice":       { x: 0.15, y: 0.25 },   // Left choice
+                "Bathroom Entrance":  { x: 0.15, y: 0.42 },   // Recruit: Down from choice
+                "Bathroom Fight":     { x: 0.45, y: 0.42 },   // Battle: Center
+                "Principal's Office": { x: 0.75, y: 0.42 },   // Office: Right path
+                "Returning to the Burning School Gym": { x: 0.45, y: 0.62 }, // Final boss: Center
+                "School Liberation Complete": { x: 0.35, y: 0.92 } // Reward: Further down and offset horizontally
             };
 
             stages.forEach((stage, index) => {
@@ -443,9 +474,9 @@ class StoryUI {
                 let x, y;
 
                 if (posPercent) {
-                    // Calculate absolute pixel values from percentages
+                    // Calculate absolute pixel values from percentages using effective height
                     x = posPercent.x * mapContainerWidth;
-                    y = posPercent.y * mapContainerHeight;
+                    y = posPercent.y * effectiveHeight;
                 } else {
                     // Fallback for any unexpected stages in this story
                     console.warn(`[StoryUI] No specific position defined for stage: ${stage.name}. Using fallback grid.`);
@@ -457,8 +488,9 @@ class StoryUI {
                 }
 
                 // Clamp positions (ensure they don't overlap edges too much)
+                // For Blazing School Day, don't clamp Y to container height since we want scrollable area
                 x = Math.max(minPadding, Math.min(x, mapContainerWidth - stageWidth - minPadding));
-                y = Math.max(minPadding, Math.min(y, mapContainerHeight - stageHeight - minPadding));
+                y = Math.max(minPadding, Math.min(y, effectiveHeight - stageHeight - minPadding));
 
                 positions.push({ x, y });
             });
@@ -601,6 +633,15 @@ class StoryUI {
             nodeElement.classList.add('locked');
         }
         
+        // Add stage type indicator for special styling
+        if (stage.type === 'character_unlock') {
+            nodeElement.classList.add('character-unlock');
+        } else if (stage.type === 'recruit') {
+            nodeElement.classList.add('recruit');
+        } else if (stage.type === 'choice') {
+            nodeElement.classList.add('choice');
+        }
+        
         // Add stage title
         const titleElement = document.createElement('div');
         titleElement.className = 'stage-title';
@@ -609,8 +650,12 @@ class StoryUI {
         // Add difficulty indicator
         const difficultyElement = document.createElement('div');
         difficultyElement.className = 'stage-difficulty';
+        if (stage.difficulty) {
         difficultyElement.classList.add(`difficulty-${stage.difficulty}`);
         difficultyElement.textContent = `Difficulty: ${stage.difficulty}`;
+        } else {
+            difficultyElement.textContent = 'Non-Combat';
+        }
         
         // Add brief description
         const briefElement = document.createElement('div');
@@ -671,9 +716,16 @@ class StoryUI {
         segment.style.left = `${fromX}px`;
         segment.style.top = `${fromY}px`;
         segment.style.transform = `rotate(${angle}deg)`;
-        segment.style.transformOrigin = '0 0'; // Set transform origin to the start point
+        segment.style.transformOrigin = '0 0';
         
-        // Return the created segment element
+        // Add arrow indicator for direction
+        const arrow = document.createElement('div');
+        arrow.className = 'path-arrow';
+        if (isCompleted) {
+            arrow.classList.add('completed');
+        }
+        segment.appendChild(arrow);
+        
         return segment;
     }
 
@@ -715,6 +767,10 @@ class StoryUI {
                 this.showStageDetails(stage); // Show base details
                 await this.renderRecruitmentOffers(stage); // Render recruitment offers
                 break;
+            case 'character_unlock':
+                this.showStageDetails(stage); // Show base details
+                await this.renderCharacterUnlockOffers(stage); // Render character unlock offers
+                break;
             default:
                 console.error("Unknown stage type:", stage.type);
                 this.showStageDetails(stage); // Default to showing details
@@ -733,17 +789,27 @@ class StoryUI {
         
         // Set stage image - use a placeholder if none available or for non-battle stages
         let imagePath = 'images/stages/default.jpg'; // Default image
-        if (stage.type === 'battle' || stage.type === 'boss') {
-            // Try to load specific image for battle/boss stages
+        
+        // Determine if this is a combat stage (battle, boss, or has enemies)
+        const isCombatStage = stage.type === 'battle' || stage.type === 'boss' || 
+                             stage.boss || stage.enemies || 
+                             (!stage.type && stage.difficulty); // If no type but has difficulty, assume battle
+        
+        if (isCombatStage) {
+            // Try to load specific image for combat stages
             // Assuming stage.id is something like 'storyid_stagename'
             // We might need a better way to determine the image filename
             const potentialImageName = stage.id ? `${stage.id}.jpg` : 'default.jpg';
             imagePath = `images/stages/${potentialImageName}`;
         }
+        
         this.stageImageElement.src = imagePath;
         this.stageImageElement.onerror = () => {
             this.stageImageElement.src = 'images/stages/default.jpg'; // Fallback on error
         };
+        
+        // Get the stage actions container for hiding/showing
+        const stageActionsContainer = this.stageDetailsElement.querySelector('.stage-actions');
         
         // Reset visibility states
         this.enemyListElement.parentElement.classList.remove('hidden');
@@ -753,24 +819,50 @@ class StoryUI {
         this.startStageButton.classList.remove('hidden'); // Default to visible
         this.startStageButton.disabled = false; // Default to enabled
         this.startStageButton.textContent = 'Begin Battle'; // Default text
+        if (this.closeDetailsButton) this.closeDetailsButton.classList.remove('hidden'); // Default to visible
+        if (stageActionsContainer) stageActionsContainer.classList.remove('hidden'); // Default to visible
         
         // Handle stage type specifics
         if (stage.type === 'choice') {
             this.enemyListElement.parentElement.classList.add('hidden');
             this.rewardListElement.parentElement.classList.add('hidden');
             this.startStageButton.classList.add('hidden'); // Hide start button
+            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden'); // Hide close button for choices
+            if (stageActionsContainer) stageActionsContainer.classList.add('hidden'); // Hide entire actions container
             this.stageChoicesContainer.classList.remove('hidden');
             this.renderStageChoices(stage.choices); // Render choices
         } else if (stage.type === 'recruit') {
             this.enemyListElement.parentElement.classList.add('hidden');
             this.rewardListElement.parentElement.classList.add('hidden');
-            this.startStageButton.classList.add('hidden'); // Hide start button
+            // Always hide start button for recruitment stages (recruitment is handled by clicking character cards)
+            this.startStageButton.classList.add('hidden');
+            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden'); // Hide close button for recruitment
+            if (stageActionsContainer) stageActionsContainer.classList.add('hidden'); // Hide entire actions container
             this.stageRecruitContainer.classList.remove('hidden');
             this.renderRecruitmentOffers(stage); // Render recruitment offers
-        } else { // Default case (battle/boss)
+        } else if (stage.type === 'character_unlock') {
+            console.log('[StoryUI] Handling character_unlock stage type');
+            this.enemyListElement.parentElement.classList.add('hidden');
+            this.rewardListElement.parentElement.classList.add('hidden');
+            this.startStageButton.classList.add('hidden'); // Hide start button
+            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden'); // Hide close button for character unlock
+            if (stageActionsContainer) stageActionsContainer.classList.add('hidden'); // Hide entire actions container
+            this.stageRecruitContainer.classList.remove('hidden');
+            console.log('[StoryUI] About to call renderCharacterUnlockOffers');
+            this.renderCharacterUnlockOffers(stage); // Render character unlock offers
+        } else if (isCombatStage) {
+            // This is a combat stage (battle, boss, or has enemies/difficulty)
             // Populate enemies and rewards for battle stages
             this.renderEnemyList(this.getMockEnemiesForStage(stage));
             this.renderRewardList(this.getMockRewardsForStage(stage));
+        } else {
+            // Unknown stage type - assume non-combat and hide action buttons for safety
+            this.enemyListElement.parentElement.classList.add('hidden');
+            this.rewardListElement.parentElement.classList.add('hidden');
+            this.startStageButton.classList.add('hidden');
+            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden');
+            if (stageActionsContainer) stageActionsContainer.classList.add('hidden');
+            console.warn('[StoryUI] Unknown stage type:', stage.type, 'for stage:', stage.name);
         }
         
         // Show details panel
@@ -806,11 +898,23 @@ class StoryUI {
                     case 'heal':
                         iconPrefix = '❤️';
                         break;
+                    case 'heal_missing_percent':
+                        iconPrefix = '🧪';
+                        break;
+                    case 'mana_restore_missing_percent':
+                        iconPrefix = '💙';
+                        break;
+                    case 'heal_and_mana_restore_missing_percent':
+                        iconPrefix = '🍯';
+                        break;
                     case 'stat_boost':
                         iconPrefix = '⚔️';
                         break;
                     case 'stat_boost_percent':
                         iconPrefix = '📊';
+                        break;
+                    case 'none':
+                        iconPrefix = '🚫';
                         break;
                 }
             }
@@ -867,6 +971,30 @@ class StoryUI {
                 hideLoadingOverlay(); // Use placeholder
                 console.error("Error applying 'all' target effect:", error);
                 showPopupMessage(`Error applying effect: ${error.message}`, 'error');
+            }
+        } else if (choice.effect && choice.effect.type === 'none') {
+            // Handle 'none' effect type - advance without applying any effect
+            try {
+                showLoadingOverlay(`Processing choice: ${choice.name}...`);
+                const hasMore = await this.storyManager.applyChoiceEffectAndAdvance(choice, null);
+                hideLoadingOverlay();
+                if (hasMore) {
+                    this.closeStageDetails();
+                    this.renderPlayerTeam(); // Update team display
+                    this.updateStageNodes(); // Update map node statuses
+                } else {
+                    // Story complete or error occurred
+                    this.closeStageDetails();
+                    if (!this.storyManager.isStoryComplete()) {
+                        showPopupMessage("Failed to process choice.", 'error');
+                    } else {
+                        this.showStoryCompleteScreen();
+                    }
+                }
+            } catch (error) {
+                hideLoadingOverlay();
+                console.error("Error processing 'none' effect choice:", error);
+                showPopupMessage(`Error processing choice: ${error.message}`, 'error');
             }
         } else {
             // Handle other cases or choices without effects if needed
@@ -959,7 +1087,7 @@ class StoryUI {
             hpBar.className = 'hp-bar';
             hpBar.style.width = `${hpPercentage}%`;
             
-            const hpText = document.createElement('span');
+            const hpText = document.createElement('div');
             hpText.className = 'bar-text';
             hpText.textContent = `HP: ${character.currentHP}/${character.stats.hp}`;
             
@@ -976,7 +1104,7 @@ class StoryUI {
             manaBar.className = 'mana-bar';
             manaBar.style.width = `${manaPercentage}%`;
             
-            const manaText = document.createElement('span');
+            const manaText = document.createElement('div');
             manaText.className = 'bar-text';
             manaText.textContent = `Mana: ${character.currentMana}/${character.stats.mana}`;
             
@@ -1212,6 +1340,23 @@ class StoryUI {
         });
         
         return enemies;
+    }
+
+    /**
+     * Show XP rewards in story mode
+     * @param {Array} xpResults - XP results from the battle
+     * @param {Object} stageInfo - Stage information
+     * @param {Object} bonuses - Bonuses applied
+     */
+    showXPRewards(xpResults, stageInfo, bonuses) {
+        // For now, just log the results - could be enhanced with story-specific UI
+        console.log('[StoryUI] XP Rewards:', xpResults);
+        
+        // You could create a story-specific XP display here
+        // For now, we'll use the same display as the game manager
+        if (window.gameManager && typeof window.gameManager.showXPRewardsDisplay === 'function') {
+            window.gameManager.showXPRewardsDisplay(xpResults, stageInfo, bonuses);
+        }
     }
 
     /**
@@ -1504,17 +1649,152 @@ class StoryUI {
      * Returns to character selection without clearing progress.
      */
     backToSelection() {
-        console.log("Returning to character selection...");
+        // Go back to the main character selector
         window.location.href = 'character-selector.html';
     }
 
     /**
      * Goes to character selection after completing a story (clears progress).
      */
-    newStory() {
-        console.log("Story complete, choosing a new story...");
-        this.storyManager.clearSavedProgress(); // Clear localStorage
-        window.location.href = 'character-selector.html';
+    async newStory() {
+        // Start a new story run (reset progress)
+        const confirmed = confirm('This will reset your current progress in this story. Are you sure?');
+        if (confirmed) {
+            await this.storyManager.resetProgress();
+            // Reload the page to start fresh
+            window.location.reload();
+        }
+    }
+
+    /**
+     * Show a loading overlay
+     * @param {string} message - The loading message to display
+     */
+    showLoadingOverlay(message = 'Loading...') {
+        // Remove existing overlay if present
+        this.hideLoadingOverlay();
+        
+        const overlay = document.createElement('div');
+        overlay.id = 'loading-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+        
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            color: var(--text-primary);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+        `;
+        
+        content.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+            <div style="font-size: 1.1rem; font-weight: 600;">${message}</div>
+        `;
+        
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+    }
+
+    /**
+     * Hide the loading overlay
+     */
+    hideLoadingOverlay() {
+        const existing = document.getElementById('loading-overlay');
+        if (existing) {
+            existing.remove();
+        }
+    }
+
+    /**
+     * Show a popup message
+     * @param {string} message - The message to display
+     * @param {string} type - The type of message ('success', 'error', 'info')
+     * @param {number} duration - How long to show the message in milliseconds
+     */
+    showPopupMessage(message, type = 'info', duration = 3000) {
+        // Remove existing popup if present
+        const existing = document.getElementById('popup-message');
+        if (existing) {
+            existing.remove();
+        }
+        
+        const popup = document.createElement('div');
+        popup.id = 'popup-message';
+        
+        let backgroundColor = 'var(--primary)';
+        let icon = 'ℹ️';
+        
+        switch (type) {
+            case 'success':
+                backgroundColor = '#2ecc71';
+                icon = '✅';
+                break;
+            case 'error':
+                backgroundColor = '#e74c3c';
+                icon = '❌';
+                break;
+            case 'info':
+            default:
+                backgroundColor = 'var(--primary)';
+                icon = 'ℹ️';
+                break;
+        }
+        
+        popup.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${backgroundColor};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 10001;
+            font-weight: 600;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+        `;
+        
+        popup.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.2rem;">${icon}</span>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        // Animate in
+        setTimeout(() => {
+            popup.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Auto-hide after duration
+        setTimeout(() => {
+            popup.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.remove();
+                }
+            }, 300);
+        }, duration);
     }
 
     /**
@@ -1530,9 +1810,12 @@ class StoryUI {
             this.recruitListElement.innerHTML = ''; // Clear loading
 
             if (!offers || offers.length === 0) {
-                this.recruitListElement.innerHTML = '<p>No available allies found matching the criteria.</p>';
+                this.recruitListElement.innerHTML = '<p>No available allies found. All potential allies may already be in your team.</p>';
                 return;
             }
+
+            // Add recruitment cards class for styling
+            this.recruitListElement.className = 'character-grid recruitment-cards';
 
             offers.forEach(offer => {
                 const offerCard = this.createRecruitOfferCard(offer);
@@ -1555,37 +1838,35 @@ class StoryUI {
      */
     createRecruitOfferCard(offer) {
         const card = document.createElement('div');
-        card.className = 'recruit-offer-card character-card selectable'; // Reuse some styles
+        card.className = 'character-select-card';
         card.dataset.characterId = offer.id;
 
         // Image
         const img = document.createElement('img');
         img.src = offer.image || 'images/characters/default.png';
         img.alt = offer.name;
-        img.className = 'character-avatar'; // Reuse style
         card.appendChild(img);
 
-        // Info
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'character-info';
+        // Name
+        const nameElement = document.createElement('h4');
+        nameElement.textContent = offer.name;
+        card.appendChild(nameElement);
 
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'character-name';
-        nameDiv.textContent = offer.name;
-        infoDiv.appendChild(nameDiv);
-
-        // Optional: Basic Stats (HP/Mana)
+        // Basic stats display
         if (offer.stats) {
-            const statsDiv = document.createElement('div');
-            statsDiv.className = 'character-stats small'; // Smaller version
-            statsDiv.innerHTML = `
-                <div class="stat-item"><span class="stat-label">HP:</span> ${offer.stats.hp || 'N/A'}</div>
-                <div class="stat-item"><span class="stat-label">MP:</span> ${offer.stats.mana || 'N/A'}</div>
-            `;
-            infoDiv.appendChild(statsDiv);
+            const statsElement = document.createElement('p');
+            statsElement.innerHTML = `HP: ${offer.stats.hp || 'N/A'} | MP: ${offer.stats.mana || 'N/A'}`;
+            card.appendChild(statsElement);
         }
 
-        card.appendChild(infoDiv);
+        // Add character tags if available
+        if (offer.tags && offer.tags.length > 0) {
+            const tagsElement = document.createElement('p');
+            tagsElement.textContent = `Tags: ${offer.tags.join(', ')}`;
+            tagsElement.style.fontSize = '0.8rem';
+            tagsElement.style.fontStyle = 'italic';
+            card.appendChild(tagsElement);
+        }
 
         // Add click listener to recruit
         card.addEventListener('click', () => this.handleRecruitSelection(offer.id));
@@ -1629,6 +1910,441 @@ class StoryUI {
             showPopupMessage(`Error recruiting: ${error.message}`, 'error');
         } finally {
             hideLoadingOverlay();
+        }
+    }
+
+    /**
+     * Renders the character unlock offers for a character_unlock stage.
+     * @param {Object} stage - The stage data containing unlockableCharacters.
+     */
+    async renderCharacterUnlockOffers(stage) {
+        console.log('[StoryUI] Rendering character unlock offers for stage:', stage.name);
+        
+        // Show loading indicator
+        this.recruitListElement.innerHTML = '<div class="loading">Loading character options...</div>';
+        this.stageRecruitContainer.classList.remove('hidden');
+
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                throw new Error('User not authenticated');
+            }
+
+            // Check if tutorial reward was already claimed
+            if (stage.tutorialReward) {
+                const tutorialRewardRef = firebase.database().ref(`users/${user.uid}/tutorialRewardClaimed`);
+                const snapshot = await tutorialRewardRef.once('value');
+                if (snapshot.val() === true) {
+                    // Show completion message instead of skipping
+                    console.log('[StoryUI] Tutorial reward already claimed, showing completion message');
+                    this.recruitListElement.innerHTML = `
+                        <div class="unlock-description">
+                            <h3>🎉 Tutorial Already Completed! 🎉</h3>
+                            <p>You have already unlocked your tutorial reward character. Thank you for playing!</p>
+                            <button class="character-unlock-button" onclick="window.location.href='character-selector.html'">Return to Character Selector</button>
+                        </div>
+                    `;
+                    this.stageRecruitContainer.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Check if this is a first-time completion reward
+            if (stage.firstTimeCompletionReward) {
+                const storyId = this.storyManager.storyId;
+                console.log('[StoryUI] Checking first-time completion for story:', storyId);
+                
+                // Check if this story has been completed before
+                const storyCompletionRef = firebase.database().ref(`users/${user.uid}/storyCompletions/${storyId}`);
+                const completionSnapshot = await storyCompletionRef.once('value');
+                
+                if (completionSnapshot.exists()) {
+                    console.log('[StoryUI] Story already completed before, skipping first-time reward');
+                    // Story was already completed, skip to next stage without showing unlock
+                    this.closeStageDetails();
+                    const hasMoreStages = await this.storyManager.advanceToNextStage();
+                    if (!hasMoreStages) {
+                        this.showStoryCompleteScreen();
+                    } else {
+                        this.renderPlayerTeam();
+                        this.updateStageNodes();
+                    }
+                    return;
+                }
+
+                // Handle dynamic character fetching for Student tags
+                if (stage.unlockableCharacters === "dynamic_student_tags") {
+                    console.log('[StoryUI] Fetching dynamic Student tagged characters');
+                    
+                    // Get character registry
+                    let characterRegistry = [];
+                    try {
+                        const registryResponse = await fetch('js/raid-game/character-registry.json');
+                        const registryData = await registryResponse.json();
+                        characterRegistry = registryData.characters;
+                    } catch (error) {
+                        console.error('[StoryUI] Error loading character registry:', error);
+                        throw new Error('Failed to load character registry');
+                    }
+
+                    // Filter Student tagged characters
+                    const studentCharacters = characterRegistry.filter(char => 
+                        char.tags && 
+                        char.tags.includes('Student') && 
+                        !char.isHidden && 
+                        char.playerunlocked === false // Only characters that aren't unlocked by default
+                    );
+
+                    console.log('[StoryUI] Found Student characters:', studentCharacters.map(c => c.id));
+
+                    // Check which characters the user already owns
+                    const [unlockedSnapshot, ownedSnapshot] = await Promise.all([
+                        firebase.database().ref(`users/${user.uid}/UnlockedRAIDCharacters`).once('value'),
+                        firebase.database().ref(`users/${user.uid}/ownedCharacters`).once('value')
+                    ]);
+
+                    let ownedCharacterIds = [];
+                    
+                    // Get from UnlockedRAIDCharacters
+                    if (unlockedSnapshot.exists()) {
+                        ownedCharacterIds = [...ownedCharacterIds, ...Object.keys(unlockedSnapshot.val())];
+                    }
+                    
+                    // Get from ownedCharacters
+                    if (ownedSnapshot.exists()) {
+                        const ownedData = ownedSnapshot.val();
+                        if (Array.isArray(ownedData)) {
+                            ownedCharacterIds = [...ownedCharacterIds, ...ownedData];
+                        } else if (typeof ownedData === 'object') {
+                            ownedCharacterIds = [...ownedCharacterIds, ...Object.values(ownedData)];
+                        }
+                    }
+
+                    // Remove duplicates
+                    ownedCharacterIds = [...new Set(ownedCharacterIds)];
+
+                    console.log('[StoryUI] User owned character IDs:', ownedCharacterIds);
+
+                    // Filter out owned characters
+                    const availableCharacters = studentCharacters.filter(char => 
+                        !ownedCharacterIds.includes(char.id)
+                    );
+
+                    console.log('[StoryUI] Available Student characters for reward:', availableCharacters.map(c => c.id));
+
+                    if (availableCharacters.length === 0) {
+                        console.log('[StoryUI] User already owns all Student characters, skipping reward');
+                        this.recruitListElement.innerHTML = `
+                            <div class="unlock-description">
+                                <h3>🎉 Story Complete! 🎉</h3>
+                                <p>You already own all the student characters from this story's reward pool. Great job completing the blazing school liberation!</p>
+                                <button class="character-unlock-button" onclick="location.reload()">Continue</button>
+                            </div>
+                        `;
+                        this.stageRecruitContainer.classList.remove('hidden');
+                        
+                        // Still mark the story as completed for future reference
+                        await storyCompletionRef.set({
+                            completedAt: firebase.database.ServerValue.TIMESTAMP,
+                            rewardClaimed: false,
+                            rewardReason: 'already_owned_all_characters'
+                        });
+                        
+                        return;
+                    }
+
+                    // Convert to the expected format for the UI
+                    stage.unlockableCharacters = availableCharacters.map(char => ({
+                        characterId: char.id,
+                        name: char.name,
+                        description: char.description,
+                        image: char.image
+                    }));
+
+                } else {
+                    // Handle static character lists (existing logic)
+                // Check if user already owns any of the unlockable characters
+                const unlockedCharactersRef = firebase.database().ref(`users/${user.uid}/UnlockedRAIDCharacters`);
+                const unlockedSnapshot = await unlockedCharactersRef.once('value');
+                const unlockedCharacters = unlockedSnapshot.val() || {};
+                
+                console.log('[StoryUI] User unlocked characters:', Object.keys(unlockedCharacters));
+                console.log('[StoryUI] Characters offered in stage:', stage.unlockableCharacters.map(c => c.characterId));
+                
+                // Filter out characters the user already owns
+                const availableCharacters = stage.unlockableCharacters.filter(char => {
+                    const isOwned = unlockedCharacters.hasOwnProperty(char.characterId);
+                    console.log(`[StoryUI] Character ${char.characterId}: owned = ${isOwned}`);
+                    return !isOwned;
+                });
+
+                if (availableCharacters.length === 0) {
+                    console.log('[StoryUI] User already owns all unlockable characters, skipping reward');
+                    // User already owns all characters, skip to next stage
+                    this.recruitListElement.innerHTML = `
+                        <div class="unlock-description">
+                            <h3>🎉 Story Complete! 🎉</h3>
+                            <p>You already own all the characters from this story's reward pool. Great job completing the farmland liberation!</p>
+                            <button class="character-unlock-button" onclick="location.reload()">Continue</button>
+                        </div>
+                    `;
+                    this.stageRecruitContainer.classList.remove('hidden');
+                    
+                    // Still mark the story as completed for future reference
+                    await storyCompletionRef.set({
+                        completedAt: firebase.database.ServerValue.TIMESTAMP,
+                        rewardClaimed: false, // No reward was claimed since user already owned characters
+                        rewardReason: 'already_owned_all_characters'
+                    });
+                    
+                    return;
+                }
+
+                // Set the available characters for display
+                stage.unlockableCharacters = availableCharacters;
+                console.log('[StoryUI] Available characters for first-time reward:', availableCharacters.map(c => c.characterId));
+                }
+            }
+
+            // Clear and prepare the container
+            this.recruitListElement.innerHTML = '';
+
+            if (!stage.unlockableCharacters || stage.unlockableCharacters.length === 0) {
+                console.error('[StoryUI] No unlockable characters found in stage data');
+                this.recruitListElement.innerHTML = '<div class="error-message">No characters available for unlock.</div>';
+                return;
+            }
+
+            // Create the description section
+            const descriptionDiv = document.createElement('div');
+            descriptionDiv.className = 'unlock-description';
+            
+            const titleElement = document.createElement('h3');
+            if (stage.tutorialReward) {
+                titleElement.textContent = '🎓 Choose Your Tutorial Reward! 🎓';
+            } else if (stage.firstTimeCompletionReward) {
+                titleElement.textContent = '🎉 Choose Your Story Completion Reward! 🎉';
+            } else {
+                titleElement.textContent = '⭐ Character Unlock ⭐';
+            }
+            
+            const descElement = document.createElement('p');
+            if (stage.tutorialReward) {
+                descElement.textContent = 'Congratulations on completing the tutorial! Choose one character to unlock permanently:';
+            } else if (stage.firstTimeCompletionReward) {
+                descElement.textContent = 'You have successfully completed this story for the first time! Choose one character to unlock as your reward:';
+            } else {
+                descElement.textContent = 'Choose one character to unlock:';
+            }
+            
+            descriptionDiv.appendChild(titleElement);
+            descriptionDiv.appendChild(descElement);
+            this.recruitListElement.appendChild(descriptionDiv);
+
+            // Create the character selection grid
+            const characterGrid = document.createElement('div');
+            characterGrid.className = 'unlock-cards';
+
+            // Render each unlockable character
+            stage.unlockableCharacters.forEach(character => {
+                const characterCard = this.createCharacterUnlockCard(
+                    character, 
+                    stage.tutorialReward || false, 
+                    stage.firstTimeCompletionReward || false
+                );
+                characterGrid.appendChild(characterCard);
+            });
+
+            this.recruitListElement.appendChild(characterGrid);
+            this.stageRecruitContainer.classList.remove('hidden');
+
+        } catch (error) {
+            console.error('[StoryUI] Error rendering character unlock offers:', error);
+            this.recruitListElement.innerHTML = `<div class="error-message">Error loading character options: ${error.message}</div>`;
+        } finally {
+            // Remove loading indicator if it exists
+            const loadingElement = this.recruitListElement.querySelector('.loading');
+            if (loadingElement) {
+                loadingElement.remove();
+            }
+        }
+    }
+
+    /**
+     * Creates a card element for a character unlock offer.
+     * @param {Object} character - The character unlock data.
+     * @param {boolean} isTutorialReward - Whether this is a tutorial reward.
+     * @param {boolean} isFirstTimeCompletionReward - Whether this is a first-time completion reward.
+     * @returns {HTMLElement} The created card element.
+     */
+    createCharacterUnlockCard(character, isTutorialReward = false, isFirstTimeCompletionReward = false) {
+        const card = document.createElement('div');
+        card.className = 'character-select-card unlock-card';
+        card.dataset.characterId = character.characterId;
+
+        // Add special styling for tutorial rewards
+        if (isTutorialReward) {
+            card.classList.add('tutorial-reward');
+        }
+
+        // Image container for better layout with tall images
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'character-image-container';
+        
+        const img = document.createElement('img');
+        img.src = character.image || `images/characters/${character.characterId}.png`;
+        img.alt = character.name;
+        
+        // Add debugging for image loading
+        console.log(`[Character Unlock] Loading image for ${character.name}:`, img.src);
+        
+        img.onload = () => {
+            console.log(`[Character Unlock] ✓ Image loaded successfully for ${character.name}:`, img.src);
+        };
+        
+        img.onerror = (error) => {
+            console.log(`[Character Unlock] ✗ Image failed to load for ${character.name}:`, img.src);
+            console.log(`[Character Unlock] Trying fallback: Icons/characters/default.png`);
+            img.src = 'Icons/characters/default.png'; // Updated fallback path
+        };
+        
+        imageContainer.appendChild(img);
+        card.appendChild(imageContainer);
+
+        // Character info container
+        const infoContainer = document.createElement('div');
+        infoContainer.className = 'character-info';
+
+        // Name
+        const nameElement = document.createElement('h4');
+        nameElement.textContent = character.name;
+        infoContainer.appendChild(nameElement);
+
+        // Description
+        const descElement = document.createElement('p');
+        descElement.textContent = character.description;
+        infoContainer.appendChild(descElement);
+
+        // Unlock button
+        const unlockButton = document.createElement('button');
+        unlockButton.className = 'character-unlock-button';
+        unlockButton.textContent = isFirstTimeCompletionReward ? '🎉 Claim Reward' : '🔓 Unlock Character';
+        unlockButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleCharacterUnlock(character.characterId, isTutorialReward, isFirstTimeCompletionReward);
+        });
+        infoContainer.appendChild(unlockButton);
+
+        card.appendChild(infoContainer);
+        return card;
+    }
+
+    /**
+     * Handles the unlocking of a character.
+     * @param {string} characterId - The ID of the character to unlock.
+     * @param {boolean} isTutorialReward - Whether this is a tutorial reward.
+     * @param {boolean} isFirstTimeCompletionReward - Whether this is a first-time completion reward.
+     */
+    async handleCharacterUnlock(characterId, isTutorialReward = false, isFirstTimeCompletionReward = false) {
+        console.log(`[StoryUI] Character unlock selected: ${characterId}`);
+        
+        const characterDisplayName = characterId.replace('farmer_', 'Farmer ').replace('_', ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+            
+        if (!confirm(`Are you sure you want to unlock ${characterDisplayName}? This choice cannot be changed.`)) {
+            return;
+        }
+
+        this.showLoadingOverlay('Unlocking character...');
+
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                throw new Error('User not authenticated');
+            }
+
+            // Save unlocked character to Firebase - both locations for consistency
+            let source = 'story_unlock';
+            if (isTutorialReward) {
+                source = 'tutorial_reward';
+            } else if (isFirstTimeCompletionReward) {
+                source = 'first_time_completion_reward';
+            }
+            
+            // Save to UnlockedRAIDCharacters (structured data)
+            const unlockedCharacterRef = firebase.database().ref(`users/${user.uid}/UnlockedRAIDCharacters/${characterId}`);
+            await unlockedCharacterRef.set({
+                unlockedAt: firebase.database.ServerValue.TIMESTAMP,
+                source: source
+            });
+
+            // Also save to ownedCharacters (array format for consistency with character selector)
+            const ownedCharsSnapshot = await firebase.database().ref(`users/${user.uid}/ownedCharacters`).once('value');
+            let ownedCharacters = [];
+            
+            if (ownedCharsSnapshot.exists()) {
+                const ownedData = ownedCharsSnapshot.val();
+                if (Array.isArray(ownedData)) {
+                    ownedCharacters = ownedData;
+                } else if (typeof ownedData === 'object') {
+                    ownedCharacters = Object.values(ownedData);
+                }
+            }
+
+            // Add character if not already in the list
+            if (!ownedCharacters.includes(characterId)) {
+                ownedCharacters.push(characterId);
+                await firebase.database().ref(`users/${user.uid}/ownedCharacters`).set(ownedCharacters);
+            }
+
+            // If this is a tutorial reward, mark it as claimed
+            if (isTutorialReward) {
+                const tutorialRewardRef = firebase.database().ref(`users/${user.uid}/tutorialRewardClaimed`);
+                await tutorialRewardRef.set(true);
+            }
+
+            // If this is a first-time completion reward, mark the story as completed
+            if (isFirstTimeCompletionReward) {
+                const storyId = this.storyManager.storyId;
+                const storyCompletionRef = firebase.database().ref(`users/${user.uid}/storyCompletions/${storyId}`);
+                await storyCompletionRef.set({
+                    completedAt: firebase.database.ServerValue.TIMESTAMP,
+                    rewardClaimed: true,
+                    rewardCharacter: characterId
+                });
+                console.log(`[StoryUI] Marked story ${storyId} as completed with reward ${characterId}`);
+            }
+
+            console.log(`[StoryUI] Character ${characterId} unlocked successfully`);
+
+            // Show a special success message for different reward types
+            if (isTutorialReward) {
+                this.showPopupMessage(`🎓 ${characterDisplayName} has been unlocked for completing the tutorial! 🎓`, "success", 4000);
+            } else if (isFirstTimeCompletionReward) {
+                const storyName = this.storyManager.storyInfo?.title || 'the story';
+                this.showPopupMessage(`🎉 ${characterDisplayName} has been unlocked for completing ${storyName}! 🎉`, "success", 4000);
+            } else {
+                this.showPopupMessage(`${characterDisplayName} has been unlocked!`, "success", 3000);
+            }
+
+            // Advance to next stage
+            this.closeStageDetails();
+            const hasMoreStages = await this.storyManager.advanceToNextStage();
+
+            if (!hasMoreStages) {
+                this.showStoryCompleteScreen();
+            } else {
+                this.renderPlayerTeam(); // Update UI
+                this.updateStageNodes(); // Update map
+            }
+
+        } catch (error) {
+            console.error('[StoryUI] Error unlocking character:', error);
+            this.showPopupMessage(`Error unlocking character: ${error.message}`, 'error');
+        } finally {
+            this.hideLoadingOverlay();
         }
     }
 

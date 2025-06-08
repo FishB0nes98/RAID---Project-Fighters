@@ -98,6 +98,141 @@ const injectSiegfriedCSS = () => {
             filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
             transition: filter 0.5s ease-in-out;
         }
+
+        /* Sword Slash VFX - Q ability */
+        .siegfried-sword-slash-vfx {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            z-index: 1002;
+            pointer-events: none;
+            animation: siegfried-slash-container 0.6s ease-out forwards;
+        }
+
+        .siegfried-sword-slash-vfx::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            width: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 10%, 
+                rgba(255, 255, 255, 0.9) 30%, 
+                #ffffff 50%, 
+                rgba(255, 255, 255, 0.9) 70%, 
+                rgba(255, 255, 255, 0.3) 90%, 
+                transparent 100%
+            );
+            border-radius: 2px;
+            box-shadow: 
+                0 0 4px rgba(255, 255, 255, 0.8),
+                0 0 8px rgba(192, 192, 192, 0.6),
+                0 0 12px rgba(255, 255, 255, 0.4);
+            animation: siegfried-slash-blade 0.6s ease-out forwards;
+        }
+
+        .siegfried-sword-slash-vfx::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(135deg);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 215, 0, 0.3) 10%, 
+                rgba(255, 215, 0, 0.8) 30%, 
+                #ffd700 50%, 
+                rgba(255, 215, 0, 0.8) 70%, 
+                rgba(255, 215, 0, 0.3) 90%, 
+                transparent 100%
+            );
+            border-radius: 1.5px;
+            box-shadow: 
+                0 0 3px rgba(255, 215, 0, 0.8),
+                0 0 6px rgba(255, 215, 0, 0.5);
+            animation: siegfried-slash-trail 0.6s ease-out 0.1s forwards;
+        }
+
+        /* Container animation */
+        @keyframes siegfried-slash-container {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                transform: translate(-50%, -50%) scale(1) rotate(10deg);
+                opacity: 1;
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(1.1) rotate(-5deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(0deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main blade slash animation */
+        @keyframes siegfried-slash-blade {
+            0% {
+                opacity: 0;
+                width: 0;
+                transform: translate(-50%, -50%) rotate(-45deg) scaleX(0);
+            }
+            15% {
+                opacity: 1;
+                width: 80px;
+                transform: translate(-50%, -50%) rotate(-45deg) scaleX(1);
+            }
+            40% {
+                opacity: 1;
+                width: 140px;
+                transform: translate(-50%, -50%) rotate(-45deg) scaleX(1.1);
+            }
+            70% {
+                opacity: 0.8;
+                width: 160px;
+                transform: translate(-50%, -50%) rotate(-45deg) scaleX(1.2);
+            }
+            100% {
+                opacity: 0;
+                width: 180px;
+                transform: translate(-50%, -50%) rotate(-45deg) scaleX(1.3);
+            }
+        }
+
+        /* Secondary trail animation */
+        @keyframes siegfried-slash-trail {
+            0% {
+                opacity: 0;
+                width: 0;
+                transform: translate(-50%, -50%) rotate(135deg) scaleX(0);
+            }
+            20% {
+                opacity: 0.8;
+                width: 60px;
+                transform: translate(-50%, -50%) rotate(135deg) scaleX(1);
+            }
+            50% {
+                opacity: 0.6;
+                width: 100px;
+                transform: translate(-50%, -50%) rotate(135deg) scaleX(1.1);
+            }
+            100% {
+                opacity: 0;
+                width: 120px;
+                transform: translate(-50%, -50%) rotate(135deg) scaleX(1.2);
+            }
+        }
     `;
     
     document.head.appendChild(styleSheet);
@@ -117,15 +252,15 @@ const schoolboySiegfriedLionProtectionEffect = (caster) => {
     const missingHp = caster.stats.maxHp - caster.stats.currentHp;
     const healAmount = Math.floor(missingHp * 0.10);
     if (healAmount > 0) {
-        const actualHeal = caster.heal(healAmount);
-        log(`${caster.name} heals for ${actualHeal} (10% of missing health).`);
+        const healResult = caster.heal(healAmount, caster);
+        log(`${caster.name} heals for ${healResult.healAmount} (10% of missing health).`);
 
         // Add healing VFX
         const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
         if (casterElement) {
             const healVfx = document.createElement('div');
             healVfx.className = 'heal-vfx lion-protection-heal';
-            healVfx.textContent = `+${actualHeal}`;
+            healVfx.textContent = `+${healResult.healAmount}`;
             casterElement.appendChild(healVfx);
             setTimeout(() => healVfx.remove(), 1000);
         }
@@ -148,10 +283,10 @@ const schoolboySiegfriedLionProtectionEffect = (caster) => {
     const bonusMagicalShield = Math.floor(caster.stats.magicalShield * 0.50);
 
     // Define stat modifiers to be applied
-    lionProtectionBuff.statModifiers = {
-        armor: bonusArmor,
-        magicalShield: bonusMagicalShield
-    };
+    lionProtectionBuff.statModifiers = [
+        { stat: 'armor', value: bonusArmor, operation: 'add' },
+        { stat: 'magicalShield', value: bonusMagicalShield, operation: 'add' }
+    ];
     
     // Ensure originalStats is initialized if not present
     if (!lionProtectionBuff.originalStats) {
@@ -165,33 +300,66 @@ const schoolboySiegfriedLionProtectionEffect = (caster) => {
     // Add log entry for the stat gain
     log(`${caster.name} gains +${bonusArmor} Armor and +${bonusMagicalShield} Magical Shield.`);
 
-    // Define the remove function to correctly revert the stats
-    lionProtectionBuff.remove = (character) => {
+    // Define the onRemove function (correct property name for buff system)
+    lionProtectionBuff.onRemove = (character) => {
         // No need to manually revert here, the base removeBuff handles it using originalStats
         log(`${character.name}'s Lion Protection fades.`);
 
-        // Remove VFX
-        const casterElement = document.getElementById(`character-${character.instanceId || character.id}`);
-        if (casterElement) {
-            const shieldVfx = casterElement.querySelector('.lion-protection-shield-vfx');
-            if (shieldVfx) shieldVfx.remove();
+        // Remove VFX using unique ID for reliable removal
+        const shieldVfx = document.getElementById(`lion-shield-${character.instanceId || character.id}`);
+        if (shieldVfx) {
+            // Add fade-out animation before removal
+            shieldVfx.classList.add('lion-shield-fadeout');
+            setTimeout(() => {
+                if (shieldVfx.parentNode) {
+                    shieldVfx.remove();
+                }
+            }, 500); // Allow time for fade-out animation
+        } else {
+            console.warn('Lion Protection shield VFX not found for removal');
         }
+        
+        // Play shield deactivation sound
+        const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+        playSound('sounds/lion_protection_deactivate.mp3', 0.5);
     };
 
     // Apply the buff to the caster
     caster.addBuff(lionProtectionBuff.clone()); 
 
-    // --- Lion Protection VFX --- 
+    // --- Enhanced Lion Protection VFX --- 
     const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
     if (casterElement) {
+        // Create main shield container
         const shieldVfx = document.createElement('div');
         shieldVfx.className = 'lion-protection-shield-vfx';
+        shieldVfx.id = `lion-shield-${caster.instanceId || caster.id}`; // Add unique ID for reliable removal
+        
+        // Create shield layers for better visual effect
+        const shieldCore = document.createElement('div');
+        shieldCore.className = 'lion-shield-core';
+        
+        const shieldRings = document.createElement('div');
+        shieldRings.className = 'lion-shield-rings';
+        
+        const lionSymbol = document.createElement('div');
+        lionSymbol.className = 'lion-shield-symbol';
+        
+        const shieldParticles = document.createElement('div');
+        shieldParticles.className = 'lion-shield-particles';
+        
+        // Assemble the shield VFX
+        shieldVfx.appendChild(shieldCore);
+        shieldVfx.appendChild(shieldRings);
+        shieldVfx.appendChild(lionSymbol);
+        shieldVfx.appendChild(shieldParticles);
+        
         casterElement.appendChild(shieldVfx);
         
-        // Optional: Remove after buff duration? No, remove() handles it.
-        // setTimeout(() => shieldVfx.remove(), lionProtectionBuff.duration * 1000); // Example if remove didn't handle it
+        // Play shield activation sound
+        playSound('sounds/lion_protection_activate.mp3', 0.7);
     }
-    // --- End VFX ---
+    // --- End Enhanced VFX ---
 
     // Play sound
     playSound('sounds/siegfrieda2.mp3', 0.8); // Siegfried's voice line for W
@@ -203,20 +371,75 @@ const schoolboySiegfriedW = new Ability(
     'schoolboy_siegfried_w',
     'Lion Protection',
     'Icons/abilities/lion_protection.jfif',
-    120, // Mana cost
+    65, // Mana cost
     15,  // Cooldown
     schoolboySiegfriedLionProtectionEffect
-).setDescription('Heals for 10% of missing health. Gains 50% bonus Armor and Magical Shield for 5 turns.')
+).setDescription('Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 5 turns.')
  .setTargetType('self');
 
-// Re-register abilities including the new W ability
+// Q: Sword Slash with VFX
+const schoolboySiegfriedSwordSlashEffect = (caster, target) => {
+    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+    const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+
+    if (!target) {
+        log("Siegfried Q: No target selected!", "error");
+        return;
+    }
+
+    log(`${caster.name} performs a Sword Slash against ${target.name}!`);
+
+    // --- Sword Slash VFX ---
+    const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+    if (targetElement) {
+        const slashVfx = document.createElement('div');
+        slashVfx.className = 'siegfried-sword-slash-vfx';
+        targetElement.appendChild(slashVfx);
+
+        // Remove VFX after animation completes
+        setTimeout(() => {
+            slashVfx.remove();
+        }, 600); // Match animation duration
+    }
+    // --- End Sword Slash VFX ---
+
+    // Calculate damage: 100% Physical Damage
+    const baseDamage = caster.stats.physicalDamage;
+
+    // Apply damage
+    const result = target.applyDamage(baseDamage, 'physical', caster);
+    
+    // Log the damage
+    log(`${target.name} takes ${result.damage} physical damage from Sword Slash!${result.isCritical ? ' (Critical Hit!)' : ''}`);
+
+    // Play sound
+    playSound('sounds/siegfrieda1.mp3', 0.8); // Siegfried's voice line for Q
+
+    // Update UI
+    updateCharacterUI(caster);
+    updateCharacterUI(target);
+};
+
+const schoolboySiegfriedQ = new Ability(
+    'schoolboy_siegfried_q',
+    'Sword Slash',
+    'Icons/abilities/sword_slash.jfif',
+    15, // Mana cost
+    0,  // Cooldown
+    schoolboySiegfriedSwordSlashEffect
+).setDescription('Deals 100% Physical Damage.')
+ .setTargetType('enemy');
+
+// Re-register abilities including Q and W abilities
 if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbilities === 'function') {
     AbilityFactory.registerAbilities([
+        schoolboySiegfriedQ,
         schoolboySiegfriedW
     ]);
 } else {
     console.warn("Siegfried abilities defined but AbilityFactory not found or registerAbilities method missing.");
     window.definedAbilities = window.definedAbilities || {};
+    window.definedAbilities.schoolboy_siegfried_q = schoolboySiegfriedQ;
     window.definedAbilities.schoolboy_siegfried_w = schoolboySiegfriedW;
 }
 
@@ -254,7 +477,9 @@ const siegfriedSwordBlessingEffect = (caster, target) => {
     ).setDescription('Gains 15% Lifesteal.');
 
     // Add stat modifier for lifesteal
-    lifestealBuff.statModifiers = { lifesteal: 0.15 };
+    lifestealBuff.statModifiers = [
+        { stat: 'lifesteal', value: 0.15, operation: 'add' }
+    ];
 
     // Define remove function if needed (optional for simple stat buffs)
     lifestealBuff.remove = (character) => {
@@ -277,7 +502,9 @@ const siegfriedSwordBlessingEffect = (caster, target) => {
     ).setDescription('Gains 200 Physical Damage.');
 
     // Add stat modifier for physical damage
-    damageBuff.statModifiers = { physicalDamage: 200 };
+    damageBuff.statModifiers = [
+        { stat: 'physicalDamage', value: 200, operation: 'add' }
+    ];
 
     // Define remove function if needed (optional for simple stat buffs)
     damageBuff.remove = (character) => {
@@ -299,7 +526,7 @@ const siegfriedE = new Ability(
     'schoolboy_siegfried_e', // Ability ID
     'Sword Blessing',        // Ability Name
     'Icons/abilities/sword_blessing.jfif', // Placeholder icon for the ability itself
-    125, // Mana cost
+    100, // Mana cost
     12,  // Cooldown
     siegfriedSwordBlessingEffect
 ).setDescription('Siegfried blesses his sword, gaining 15% Lifesteal and 200 Physical Damage for 6 turns.')
@@ -422,13 +649,13 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
         const healAmount = result.damage; // Heal based on actual damage dealt
 
         // Heal caster
-        const casterHealActual = caster.heal(healAmount);
-        log(`${caster.name} is healed by Judgement for ${casterHealActual} HP.`);
+        const casterHealResult = caster.heal(healAmount, caster);
+        log(`${caster.name} is healed by Judgement for ${casterHealResult.healAmount} HP.`);
         // Add caster heal VFX
         if (casterElement) {
             const healVfx = document.createElement('div');
             healVfx.className = 'heal-vfx judgement-heal-vfx';
-            healVfx.textContent = `+${casterHealActual}`;
+            healVfx.textContent = `+${casterHealResult.healAmount}`;
             casterElement.appendChild(healVfx);
             setTimeout(() => healVfx.remove(), 1200);
         }
@@ -448,10 +675,10 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
 
         // Heal random ally if found
         if (randomAlly) {
-            const allyHealActual = randomAlly.heal(healAmount);
+            const allyHealResult = randomAlly.heal(healAmount, caster);
             // --- NEW: Use ally instanceId if available ---
             const allyName = randomAlly.name || (randomAlly.instanceId || randomAlly.id);
-            log(`${allyName} is healed by Judgement for ${allyHealActual} HP.`);
+            log(`${allyName} is healed by Judgement for ${allyHealResult.healAmount} HP.`);
             // Add ally heal VFX
             const allyElementId = randomAlly.instanceId || randomAlly.id;
             const allyElement = document.getElementById(`character-${allyElementId}`);
@@ -459,7 +686,7 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
             if (allyElement) {
                 const healVfx = document.createElement('div');
                 healVfx.className = 'heal-vfx judgement-heal-vfx'; // Use same style
-                healVfx.textContent = `+${allyHealActual}`;
+                healVfx.textContent = `+${allyHealResult.healAmount}`;
                 allyElement.appendChild(healVfx);
                 setTimeout(() => healVfx.remove(), 1200);
                 updateCharacterUI(randomAlly); // Update ally UI
@@ -481,26 +708,27 @@ const schoolboySiegfriedR = new Ability(
     'schoolboy_siegfried_r', // Ability ID
     'Judgement',             // Ability Name
     'Icons/abilities/judgement.jfif', // Placeholder icon
-    200, // Mana cost
+    100, // Mana cost
     25,  // Cooldown
     schoolboySiegfriedJudgementEffect
-).setDescription('Deals 285% AD physical damage. If damage is dealt, Siegfried and a random ally are healed for the damage amount.') // Updated description
+).setDescription('Deals 285% AD physical damage. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).') // Updated description
  .setTargetType('enemy'); // Target is enemy
 
 // --- Ability Factory Integration ---
 if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbilities === 'function') {
-    // Assuming Siegfried's Q ability might be defined elsewhere or needs to be added here too.
-    // Registering W, E, and R abilities.
+    // Registering Q, W, E, and R abilities.
     AbilityFactory.registerAbilities([
+        schoolboySiegfriedQ,  // Add Q ability here
         schoolboySiegfriedW,
         siegfriedE,
-        schoolboySiegfriedR // Add R ability here
+        schoolboySiegfriedR
     ]);
 } else {
     console.warn("Siegfried abilities defined but AbilityFactory not found or registerAbilities method missing.");
     // Fallback: assign to a global object
     window.definedAbilities = window.definedAbilities || {};
+    window.definedAbilities.schoolboy_siegfried_q = schoolboySiegfriedQ; // Add Q ability here
     window.definedAbilities.schoolboy_siegfried_w = schoolboySiegfriedW;
     window.definedAbilities.schoolboy_siegfried_e = siegfriedE;
-    window.definedAbilities.schoolboy_siegfried_r = schoolboySiegfriedR; // Add R ability here
+    window.definedAbilities.schoolboy_siegfried_r = schoolboySiegfriedR;
 } 

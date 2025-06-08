@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Path Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-image {
+            width: 200px;
+            height: 280px;
+            object-fit: cover;
+            border: 2px solid #fff;
+            margin: 10px;
+            display: inline-block;
+        }
+        .image-container {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Character Image Path Test</h1>
+    
+    <div class="image-container">
+        <h3>Farmer Nina</h3>
+        <img class="test-image" src="Icons/characters/Farmer Nina.png" alt="Farmer Nina" 
+             onload="this.nextElementSibling.innerHTML = '<span class=\'success\'>✓ Image loaded successfully</span>'"
+             onerror="this.nextElementSibling.innerHTML = '<span class=\'error\'>✗ Failed to load image</span>'">
+        <div>Loading...</div>
+    </div>
+    
+    <div class="image-container">
+        <h3>Farmer Raiden</h3>
+        <img class="test-image" src="Icons/characters/Farmer Raiden.png" alt="Farmer Raiden"
+             onload="this.nextElementSibling.innerHTML = '<span class=\'success\'>✓ Image loaded successfully</span>'"
+             onerror="this.nextElementSibling.innerHTML = '<span class=\'error\'>✗ Failed to load image</span>'">
+        <div>Loading...</div>
+    </div>
+    
+    <div class="image-container">
+        <h3>Test Default</h3>
+        <img class="test-image" src="Icons/characters/default.png" alt="Default"
+             onload="this.nextElementSibling.innerHTML = '<span class=\'success\'>✓ Default image loaded</span>'"
+             onerror="this.nextElementSibling.innerHTML = '<span class=\'error\'>✗ Default image failed</span>'">
+        <div>Loading...</div>
+    </div>
+
+    <script>
+        // Log any additional details
+        setTimeout(() => {
+            const images = document.querySelectorAll('.test-image');
+            images.forEach((img, index) => {
+                console.log(`Image ${index + 1}:`, {
+                    src: img.src,
+                    complete: img.complete,
+                    naturalWidth: img.naturalWidth,
+                    naturalHeight: img.naturalHeight
+                });
+            });
+        }, 2000);
+    </script>
+</body>
+</html> 

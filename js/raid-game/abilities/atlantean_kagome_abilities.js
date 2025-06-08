@@ -397,10 +397,10 @@ const spiritwalkEffect = (caster, target) => {
     shieldBuff._originalMagicShield = originalMagicShield;
     
     // Set up stat modifiers directly - this is how the Character class expects them
-    shieldBuff.statModifiers = {
-        armor: armorBuff,
-        magicalShield: magicShieldBuff
-    };
+    shieldBuff.statModifiers = [
+        { stat: 'armor', value: armorBuff, operation: 'add' },
+        { stat: 'magicalShield', value: magicShieldBuff, operation: 'add' }
+    ];
     
     // Set up custom remove function that will be called when the buff expires
     shieldBuff.remove = (character) => {
@@ -508,12 +508,22 @@ const spiritScreamEffect = (caster, target) => {
                     
                     // If the buff has stat modifiers, remove them
                     if (buff.statModifiers) {
-                        Object.keys(buff.statModifiers).forEach(statKey => {
-                            // Only decrease if it's a positive modifier (buff)
-                            if (buff.statModifiers[statKey] > 0) {
-                                enemy.stats[statKey] -= buff.statModifiers[statKey];
-                            }
-                        });
+                        if (Array.isArray(buff.statModifiers)) {
+                            // New format: array of modifier objects
+                            buff.statModifiers.forEach(modifier => {
+                                if (modifier.value > 0) { // Only decrease if it's a positive modifier (buff)
+                                    enemy.stats[modifier.stat] -= modifier.value;
+                                }
+                            });
+                        } else {
+                            // Old format: key-value object (backward compatibility)
+                            Object.keys(buff.statModifiers).forEach(statKey => {
+                                // Only decrease if it's a positive modifier (buff)
+                                if (buff.statModifiers[statKey] > 0) {
+                                    enemy.stats[statKey] -= buff.statModifiers[statKey];
+                                }
+                            });
+                        }
                     }
                 });
                 

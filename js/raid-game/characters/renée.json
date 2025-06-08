@@ -1,0 +1,73 @@
+{
+    "id": "renée",
+    "name": "Renée",
+    "image": "Loading Screen/Renée.png",
+    "description": "A Tokyo Mew Mew character infused with a mystical wolf spirit. Her quick reflexes and claw attacks make her a formidable fighter.",
+    "tags": ["wolf", "physical", "damage", "support"],
+    "stats": {
+        "hp": 7200,
+        "mana": 2400,
+        "physicalDamage": 240,
+        "magicalDamage": 100,
+        "armor": 12,
+        "magicalShield": 9,
+        "critChance": 0.10,
+        "critDamage": 1.8,
+        "healingPower": 0.0,
+        "lifesteal": 0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 0
+    },
+    "passive": {
+        "id": "renee_passive",
+        "name": "Wolf Spirit Aura",
+        "description": "Renée channels a mystical wolf spirit, creating an aura around her that grants her and allies -1 cooldown on a random ability on game start.",
+        "icon": "Icons/abilities/wolf_spirit.png"
+    },
+    "abilities": [
+        {
+            "id": "renee_q",
+            "name": "Wolf Claw Strike",
+            "description": "Renée attacks with her claws, dealing 700 + 1% of target's maximum HP as physical damage. This ability's critical chance is doubled.",
+            "icon": "Icons/abilities/claw_slash.png",
+            "manaCost": 75,
+            "cooldown": 3,
+            "targetType": "enemy",
+            "type": "custom",
+            "functionName": "reneeWolfClawStrikeEffect"
+        },
+        {
+            "id": "renee_w",
+            "name": "Lupine Veil",
+            "description": "Renée becomes untargetable and enters stealth for up to 3 turns. While stealthed, her critical chance is 100%. Using any other ability or letting the effect expire breaks stealth. Does not end your turn.",
+            "icon": "Icons/abilities/lupine_veil.webp",
+            "manaCost": 60,
+            "cooldown": 5,
+            "targetType": "self",
+            "type": "custom",
+            "functionName": "reneeLupineVeilEffect"
+        },
+        {
+            "id": "renee_e",
+            "name": "Mystical Whip",
+            "description": "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.",
+            "icon": "Icons/abilities/whip_lash.webp",
+            "manaCost": 100,
+            "cooldown": 6,
+            "targetType": "enemy",
+            "type": "custom",
+            "functionName": "reneeMysticalWhipEffect"
+        },
+        {
+            "id": "renee_r",
+            "name": "Lunar Curse",
+            "description": "Renée places a moon-powered buff on herself for 5 turns. While active, enemies damaged by her are marked with a debuff for 2 turns. When this debuff expires, the enemy is stunned for 1 turn and takes double damage from all sources while the debuff is active.",
+            "icon": "Icons/abilities/lunar_mark.png",
+            "manaCost": 120,
+            "cooldown": 8,
+            "targetType": "self",
+            "type": "custom",
+            "functionName": "reneeLunarCurseEffect"
+        }
+    ]
+} 

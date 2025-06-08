@@ -1,17 +1,161 @@
 [
   {
+    "id": "tutorial_first_steps",
+    "title": "Tutorial: First Steps",
+    "description": "Learn the basics of combat in a guided tutorial adventure.",
+    "playerunlocked": true,
+    "requirements": {
+      "tags": [],
+      "teamSize": { "min": 1, "max": 1 }
+    },
+    "stages": [
+      {
+        "name": "Training Grounds",
+        "description": "Welcome to your first battle! Face Schoolboy Siegfried in a controlled environment to learn the combat basics.",
+        "difficulty": 1,
+        "type": "battle",
+        "boss": "Schoolboy Siegfried",
+        "isTutorial": true,
+        "backgroundImage": "images/stages/training_grounds.png",
+        "backgroundMusic": "sounds/music/tutorial_theme.mp3"
+      },
+      {
+        "name": "Advanced Training",
+        "description": "Notice how your character's HP and mana carried over from the previous battle - this happens between all stages! Face two Little Devils who will test your skills with their resilience and mana-draining abilities. Watch your mana carefully!",
+        "difficulty": 2,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "little_devil" },
+          { "characterId": "little_devil_female" }
+        ],
+        "isTutorial": true,
+        "tutorialHighlights": ["hp-bar", "mana-bar"],
+        "tutorialMessage": "Your HP and mana from the previous stage are preserved! Manage your resources wisely across multiple battles.",
+        "backgroundImage": "images/stages/training_grounds.png",
+        "backgroundMusic": "sounds/music/tutorial_theme.mp3"
+      },
+      {
+        "name": "The Wise Old Man",
+        "description": "After your battles, you encounter a mysterious old man sitting by a campfire. He smiles warmly and offers you both a healing potion and a mana potion to help on your journey.",
+        "type": "choice",
+        "isEncounter": true,
+        "choices": [
+          {
+            "name": "Accept the Potions",
+            "description": "Gratefully accept both potions. Restores 75% of missing health and mana to the selected character.",
+            "effect": { "type": "heal_and_mana_restore_missing_percent", "target": "selected", "amount_percent": 75 }
+          },
+          {
+            "name": "Politely Decline", 
+            "description": "Thank the old man but decline his generous offer. You prefer to rely on your own strength.",
+            "effect": { "type": "none" }
+          }
+        ]
+      },
+      {
+        "name": "Potential Ally",
+        "description": "As you continue your journey, you come across some individuals who could potentially join your cause. Each has their own unique skills and background. Choose wisely - you can only recruit one of them!",
+        "type": "recruit",
+        "isEncounter": true,
+        "recruitTag": "tutorial_allies",
+        "recruitCount": 3,
+        "specificCharacters": ["farmer_shoma", "farmer_cham_cham", "renée"]
+      },
+      {
+        "name": "Farm Disturbance",
+        "description": "You hear sounds of conflict coming from a nearby farm. Two figures emerge - Farmer Nina and Farmer Raiden, but something seems wrong. They appear weakened but still hostile. A gentle healing wind blows across the battlefield, offering restoration to all who fight here.",
+        "difficulty": 3,
+        "type": "battle",
+        "enemies": [
+          { 
+            "characterId": "farmer_nina",
+            "modifications": {
+              "stats": {
+                "hp": { "operation": "multiply", "value": 0.7 }
+              }
+            }
+          },
+          { 
+            "characterId": "farmer_raiden",
+            "modifications": {
+              "stats": {
+                "hp": { "operation": "multiply", "value": 0.7 }
+              }
+            }
+          }
+        ],
+        "modifiers": [
+          {
+            "id": "healing_farm_wind",
+            "name": "Healing Farm Wind",
+            "description": "A gentle breeze carries healing energy across the battlefield.",
+            "effect": {
+              "type": "turn_start_healing",
+              "value": 0.01
+            }
+          }
+        ],
+        "isTutorial": true,
+        "tutorialHighlights": ["stage-modifiers-indicator", "character-hp"],
+        "tutorialMessage": "Stage modifiers can affect the entire battle! The Healing Farm Wind will restore 1% of each character's maximum HP at the start of every turn. Check the stage modifier indicator at the top of the screen.",
+        "backgroundImage": "images/stages/farm_field.webp",
+        "backgroundMusic": "sounds/music/farmland_ambient.mp3"
+      },
+      {
+        "name": "Tutorial Complete",
+        "description": "Congratulations! You've completed the tutorial. After the battle, both Nina and Raiden approach you. Despite the conflict, they recognize your strength and offer to join your cause. However, you can only choose one of them as your permanent companion.",
+        "type": "character_unlock",
+        "unlockableCharacters": [
+          {
+            "characterId": "farmer_nina",
+            "name": "Farmer Nina",
+            "description": "A skilled farmer who wields a farmer rifle and has evading capabilities.",
+            "image": "Icons/characters/Farmer Nina.png"
+          },
+          {
+            "characterId": "farmer_raiden",
+            "name": "Farmer Raiden", 
+            "description": "A lightning-fast farmer with electrical attacks and evasive techniques.",
+            "image": "Icons/characters/Farmer Raiden.png"
+          }
+        ],
+        "tutorialReward": true
+      }
+    ]
+  },
+  {
+    "id": "blazing_school_day",
     "title": "Blazing School Day",
     "description": "Survive the chaos of a school day gone wrong!",
+    "playerunlocked": false,
     "requirements": {
-      "tags": ["School"],
+      "tags": ["Student"],
       "teamSize": { "min": 2, "max": 2 }
     },
     "stages": [
       {
         "name": "Burning School Gym",
-        "description": "The school gym is ablaze with unnatural fire! Defeat the fiery enemies and find a way forward.",
+        "description": "The school gym is ablaze with unnatural fire! The floor burns beneath your feet as you face the fiery demon. Each turn in this inferno deals damage to all fighters.",
         "difficulty": 3,
-        "boss": "Infernal Astaroth"
+        "type": "battle",
+        "enemies": [
+          { "characterId": "infernal_astaroth" }
+        ],
+        "modifiers": [
+          {
+            "id": "burning_ground",
+            "name": "Burning Ground",
+            "description": "The ground is ablaze with hellish flames! Player characters take 150 fire damage at the start of each turn.",
+            "effect": {
+              "type": "turn_start_damage",
+              "value": 150,
+              "damageType": "fire",
+              "target": "players"
+            }
+          }
+        ],
+        "backgroundImage": "images/stages/burning_school_gym.png",
+        "backgroundMusic": "sounds/burning_school_gym_bgm.mp3"
       },
       {
         "name": "School Corridor",
@@ -37,28 +181,60 @@
       },
       {
         "name": "School Yard",
-        "description": "The school yard crackles with heat. Five Blazing Elementals block the path!",
+        "description": "The school yard crackles with heat. Five Blazing Elementals block the path! Scattered around the yard are medical supplies left behind by fleeing students.",
         "difficulty": 4,
+        "type": "battle",
+        "backgroundImage": "images/stages/school_yard.png",
         "enemies": [
           { "characterId": "blazing_elemental" },
           { "characterId": "blazing_elemental" },
           { "characterId": "blazing_elemental" },
           { "characterId": "blazing_elemental" },
           { "characterId": "blazing_elemental" }
+        ],
+        "modifiers": [
+          {
+            "id": "carried_medicines",
+            "name": "Carried medicines",
+            "description": "Medical supplies scattered around the yard provide periodic mana recovery. Every fifth turn, restores 10% of maximum mana for player characters.",
+            "effect": {
+              "type": "turn_interval_mana_restore_missing_percent",
+              "value": 0.08,
+              "interval": 5,
+              "target": "players"
+            }
+          }
         ]
       },
       {
         "name": "Classroom 5B Door",
         "description": "You find a locked classroom door. Perhaps someone inside can help?",
         "type": "recruit",
-        "recruitTag": "School",
+        "recruitTag": "Student",
         "recruitCount": 3
       },
       {
         "name": "Rooftop",
-        "description": "The school rooftop offers a vantage point, but a fearsome Infernal Scorpion guards it.",
+        "description": "The school rooftop offers a vantage point, but a fearsome Infernal Scorpion guards it. Dense smoke clouds the air and medical supplies are scattered about.",
         "difficulty": 6,
-        "boss": "Infernal Scorpion"
+        "type": "battle",
+        "enemies": [
+          { "characterId": "infernal_scorpion" }
+        ],
+        "modifiers": [
+          {
+            "id": "carried_medicines",
+            "name": "Carried medicines",
+            "description": "Medical supplies scattered around the rooftop provide periodic mana recovery. Every fifth turn, restores 10% of maximum mana for player characters."
+          },
+          {
+            "id": "smoke_cloud",
+            "name": "Smoke Cloud",
+            "description": "Dense smoke clouds the battlefield. Player abilities have a 21% chance to miss completely and go on cooldown."
+          }
+        ],
+        "backgroundImage": "images/stages/school_rooftop.png",
+        "backgroundMusic": "sounds/rooftop_battle.mp3"
       },
       {
         "name": "Final Choice",
@@ -89,7 +265,7 @@
         "name": "Bathroom Entrance",
         "description": "You hear sounds of struggle near the bathroom. Someone is bravely fighting Mr. Birdie, the corrupted cleaning man! Maybe they could join you?",
         "type": "recruit",
-        "recruitTag": "School",
+        "recruitTag": "Student",
         "recruitCount": 3
       },
       {
@@ -97,34 +273,79 @@
         "description": "Infernal Birdie, the corrupted cleaning man, attacks with deadly chains!",
         "difficulty": 8,
         "type": "battle",
-        "boss": "Infernal Birdie",
+        "enemies": [
+          { "characterId": "infernal_birdie" }
+        ],
+        "modifiers": [
+          {
+            "id": "carried_medicines",
+            "name": "Carried medicines",
+            "description": "Medical supplies scattered around the rooftop provide periodic mana recovery. Every fifth turn, restores 10% of maximum mana for player characters."
+          },
+          {
+            "id": "small_space",
+            "name": "Small Space",
+            "description": "The confined space makes dodging impossible! All characters have their dodge chance reduced to 0.",
+            "icon": "🚪"
+          }
+        ],
         "backgroundImage": "images/stages/background4.png",
-        "backgroundMusic": "sounds/bgaudio5.mp3"
+        "backgroundMusic": "sounds/bathroom_battle.mp3"
       },
       {
         "name": "Principal's Office",
         "description": "You've reached the Principal's office. Choose one final ally to face whatever awaits.",
         "type": "recruit",
-        "recruitTag": "School",
+        "recruitTag": "Student",
         "recruitCount": 3
       },
       {
         "name": "Returning to the Burning School Gym",
-        "description": "The flames rage anew! The mastermind behind this chaos, Headmaster Infernus, awaits in the restored inferno.",
+        "description": "The flames rage anew! The mastermind behind this chaos awaits in the restored inferno. The corrupted flames turn all healing into pain, while scattered medical supplies provide mana recovery and the ground burns beneath your feet.",
         "difficulty": 9,
         "type": "battle",
         "enemies": [
           { "characterId": "infernal_ibuki" },
           { "characterId": "infernal_raiden" }
         ],
-        "backgroundImage": "images/stages/background1.png",
-        "backgroundMusic": "sounds/bgaudio1.mp3"
+        "modifiers": [
+          {
+            "id": "carried_medicines",
+            "name": "Carried medicines",
+            "description": "Medical supplies scattered around the rooftop provide periodic mana recovery. Every fifth turn, restores 10% of maximum mana for player characters."
+          },
+          {
+            "id": "burning_ground",
+            "name": "Burning Ground",
+            "description": "The ground is ablaze with hellish flames! Player characters take 150 fire damage at the start of each turn.",
+            "effect": {
+              "type": "turn_start_damage",
+              "value": 150
+            }
+          },
+          {
+            "id": "healing_fire",
+            "name": "Healing Fire",
+            "description": "The infernal flames corrupt all healing! Whenever a player character heals, they take 22% of the heal amount as fire damage."
+          }
+        ],
+        "backgroundImage": "images/stages/burning_school_gym.png",
+        "backgroundMusic": "sounds/burning_school_gym_bgm.mp3"
+      },
+      {
+        "name": "School Liberation Complete",
+        "description": "With the infernal forces defeated, peace returns to the school. Your heroic actions have saved countless students and faculty. In recognition of your bravery, fellow students who witnessed your courage offer to join your cause. Choose one of them as your permanent companion.",
+        "type": "character_unlock",
+        "unlockableCharacters": "dynamic_student_tags",
+        "firstTimeCompletionReward": true
       }
     ]
   },
   {
+    "id": "corruption_at_the_farmland",
     "title": "Corruption at the Farmland",
     "description": "Something is wrong in the peaceful farmland...",
+    "playerunlocked": false,
     "requirements": {
       "tags": ["Farmer"],
       "teamSize": { "min": 1, "max": 1 }
@@ -137,7 +358,7 @@
         "enemies": [
             { "characterId": "angry_carrot" }
         ],
-        "backgroundImage": "images/stages/farmland_entrance.png",
+        "backgroundImage": "images/stages/Stage_1_BG.jpeg",
         "backgroundMusic": "sounds/music/farmland_ambient.mp3"
       },
       {
@@ -157,7 +378,7 @@
           { "characterId": "angry_chicken" },
           { "characterId": "angry_bull" }
         ],
-        "backgroundImage": "images/stages/mutated_ranch.png",
+        "backgroundImage": "images/stages/farmstage2.jpeg",
         "backgroundMusic": "sounds/music/ranch_battle.mp3"
       },
       {
@@ -206,7 +427,7 @@
             { "characterId": "leafy_apple" },
             { "characterId": "rotten_apple" }
         ],
-        "backgroundImage": "images/stages/apple_tree_grove.png",
+        "backgroundImage": "images/stages/under_the_apple_tree.webp",
         "backgroundMusic": "sounds/music/apple_battle.mp3"
       },
       {
@@ -240,7 +461,7 @@
           { "characterId": "crazy_farmer" },
           { "characterId": "hound" }
         ],
-        "backgroundImage": "images/stages/farm_barn.png",
+        "backgroundImage": "images/stages/the_barn.webp",
         "backgroundMusic": "sounds/music/barn_battle.mp3"
       },
       {
@@ -277,8 +498,14 @@
         "description": "You venture into an eerie field dominated by a sinister scarecrow. Dark crows circle overhead, watching your every move.",
         "difficulty": 5,
         "type": "battle",
-        "boss": "scarecrow",
-        "backgroundImage": "images/stages/crowfield.png",
+        "enemies": [
+          { "characterId": "crow" },
+          { "characterId": "crow" },
+          { "characterId": "scarecrow" },
+          { "characterId": "crow" },
+          { "characterId": "crow" }
+        ],
+        "backgroundImage": "images/stages/crowfield.webp",
         "backgroundMusic": "sounds/music/crowfield.mp3"
       },
       {
@@ -312,13 +539,52 @@
           { "characterId": "angry_carrot" },
           { "characterId": "hound" }
         ],
+        "modifiers": [
+          {
+            "id": "its_raining_man",
+            "name": "It's raining man!",
+            "description": "Heavy rain falls from the burning sky! All player characters heal 100 HP each turn.",
+            "icon": "🌧️",
+            "effect": {
+              "type": "turn_start_healing_fixed",
+              "value": 100,
+              "target": "players"
+            }
+          }
+        ],
         "objectives": {
           "winConditions": [
             { "type": "enemyDefeated", "targetId": "farmer_fang" }
           ]
         },
-        "backgroundImage": "images/stages/farm_clearing_final.png",
+        "backgroundImage": "images/stages/farm_clearing.png",
         "backgroundMusic": "sounds/music/final_farm_battle.mp3"
+      },
+      {
+        "name": "Farmland Liberation Complete",
+        "description": "With Farmer FANG defeated, the corruption begins to lift from the farmland. As you survey the peaceful fields, three familiar figures approach you from the distance. Nina, Raiden, and Shoma, fellow farmers who helped in the liberation, offer to join your cause permanently.",
+        "type": "character_unlock",
+        "unlockableCharacters": [
+          {
+            "characterId": "farmer_nina",
+            "name": "Farmer Nina",
+            "description": "A skilled farmer who wields a farmer rifle and has evading capabilities.",
+            "image": "Icons/characters/Farmer Nina.png"
+          },
+          {
+            "characterId": "farmer_raiden",
+            "name": "Farmer Raiden", 
+            "description": "A lightning-fast farmer with electrical attacks and evasive techniques.",
+            "image": "Icons/characters/Farmer Raiden.png"
+          },
+          {
+            "characterId": "farmer_shoma",
+            "name": "Farmer Shoma",
+            "description": "A farm-raised baseball prodigy with extraordinary critical hit chance and healing abilities.",
+            "image": "Icons/characters/Farmer Shoma.png"
+          }
+        ],
+        "firstTimeCompletionReward": true
       }
     ]
   }

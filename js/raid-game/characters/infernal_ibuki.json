@@ -42,14 +42,14 @@
             "manaCost": 80,
             "cooldown": 13,
             "targetType": "self",
-            "description": "Turns invisible and untargetable by abilities for 4 turns.",
+            "description": "Turns invisible and untargetable by abilities for 2 turns.",
             "icon": "Icons/abilities/shadow_step_placeholder.png",
             "sound": "sounds/smoke.mp3",
             "effects": {
                 "buff": {
                     "id": "shadow_step_buff",
                     "name": "Shadow Step",
-                    "duration": 4,
+                    "duration": 2,
                     "isUntargetable": true,
                     "description": "Untargetable by abilities."
                 }

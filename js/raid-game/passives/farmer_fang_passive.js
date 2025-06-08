@@ -48,6 +48,9 @@ class FarmerFangPassive {
     // Other potential passive triggers (onTurnEnd, onTakeDamage, etc.) can be added if needed
 }
 
+// Make the class globally accessible for hardcoded passive checks
+window.FarmerFangPassive = FarmerFangPassive;
+
 // Register the passive class with the PassiveFactory
 if (window.PassiveFactory && typeof window.PassiveFactory.registerPassive === 'function') {
     window.PassiveFactory.registerPassive('fang_full_heal_ally', FarmerFangPassive);

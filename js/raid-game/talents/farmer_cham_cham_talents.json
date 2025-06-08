@@ -1,0 +1,435 @@
+{
+  "characterId": "farmer_cham_cham",
+  "talentTree": {
+    "talent_cham_cham_1": {
+      "id": "talent_cham_cham_1",
+      "name": "Farmer's Resilience",
+      "description": "Farmer's Resilience passive also permanently increases Cham Cham's Physical Damage by 5% of her current value when the passive activates.",
+      "icon": "Icons/talents/farmers_resilience.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "farmerResiliencePhysicalDamageBoost",
+        "value": 0.05
+      },
+      "parents": [],
+      "children": ["talent_cham_cham_2", "talent_cham_cham_3"]
+    },
+    "talent_cham_cham_2": {
+      "id": "talent_cham_cham_2",
+      "name": "Multi-Boomerang",
+      "description": "Boomerang has a 20% chance to trigger 4 times instead of 2, doubling its damage potential.",
+      "icon": "Icons/talents/multi_boomerang.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_boomerang",
+        "property": "extraHitsChance",
+        "value": 0.2
+      },
+      "parents": ["talent_cham_cham_1"],
+      "children": ["talent_cham_cham_4", "talent_cham_cham_5"],
+      "position": { "x": 100, "y": 150 }
+    },
+    "talent_cham_cham_3": {
+      "id": "talent_cham_cham_3",
+      "name": "Vampiric Leap",
+      "description": "Leap also gives Cham Cham 5% additional Lifesteal as a buff for 4 turns.",
+      "icon": "Icons/talents/vampiric_leap.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_leap",
+        "property": "additionalLifestealBuff",
+        "value": 0.05
+      },
+      "parents": ["talent_cham_cham_1"],
+      "children": ["talent_cham_cham_17"],
+      "position": { "x": -180, "y": 350 }
+    },
+    "talent_cham_cham_4": {
+      "id": "talent_cham_cham_4",
+      "name": "Critical Reflexes",
+      "description": "Whenever Cham Cham scores a critical hit, she reduces all her active ability cooldowns by 1 turn.",
+      "icon": "Icons/talents/critical_reflexes.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "critReducesCooldowns",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_2"],
+      "children": ["talent_cham_cham_10"],
+      "position": { "x": 200, "y": 100 }
+    },
+    "talent_cham_cham_5": {
+      "id": "talent_cham_cham_5",
+      "name": "Arcane Scratch",
+      "description": "Enhances Scratch to deal 180% Physical Damage + 100% Magical Damage instead of 125% Physical Damage.",
+      "icon": "Icons/talents/arcane_scratch.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_scratch",
+        "property": "enhancedDamage",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_2"],
+      "children": ["talent_cham_cham_6", "talent_cham_cham_7"],
+      "position": { "x": 200, "y": 200 }
+    },
+    "talent_cham_cham_6": {
+      "id": "talent_cham_cham_6",
+      "name": "Arcane Awakening",
+      "description": "Cham Cham gains 125 Magical Damage at the start of the game. Boomerang now also scales with 100% of Magical Damage.",
+      "icon": "Icons/talents/arcane_awakening.webp",
+      "effect": [
+        {
+          "type": "modify_stat",
+          "stat": "magicalDamage",
+          "operation": "add",
+          "value": 125
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_boomerang",
+          "property": "magicalDamageScaling",
+          "value": 1.0
+        }
+      ],
+      "parents": ["talent_cham_cham_5"],
+      "children": ["talent_cham_cham_8", "talent_cham_cham_9"],
+      "position": { "x": 300, "y": 150 }
+    },
+    "talent_cham_cham_7": {
+      "id": "talent_cham_cham_7",
+      "name": "Arcane Recovery",
+      "description": "Critical strikes restore 10% of Cham Cham's missing mana.",
+      "icon": "Icons/talents/arcane_recovery.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "critRestoresMana",
+        "value": 0.1
+      },
+      "parents": ["talent_cham_cham_5"],
+      "children": ["talent_cham_cham_22"],
+      "position": { "x": 300, "y": 250 }
+    },
+    "talent_cham_cham_8": {
+      "id": "talent_cham_cham_8",
+      "name": "Arcane Leap",
+      "description": "Leap also grants a buff increasing Magical Damage by 50% of Cham Cham's current Magical Damage for 4 turns.",
+      "icon": "Icons/talents/arcane_leap.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_leap",
+        "property": "arcaneLeapMagicalBuff",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_6"],
+      "children": ["talent_cham_cham_16"],
+      "position": { "x": 400, "y": 100 }
+    },
+    "talent_cham_cham_9": {
+      "id": "talent_cham_cham_9",
+      "name": "Adaptive Awakening",
+      "description": "When hit by Physical damage, increase Physical Damage by 1% of the damage received. When hit by Magical damage, increase Magical Damage by 1% of the damage received.",
+      "icon": "Icons/talents/adaptive_awakening.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "adaptiveAwakening",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_6"],
+      "children": ["talent_cham_cham_16"],
+      "position": { "x": 400, "y": 200 }
+    },
+    "talent_cham_cham_10": {
+      "id": "talent_cham_cham_10",
+      "name": "Sharp Focus",
+      "description": "When Cham Cham lands a critical hit, she gains a buff that increases her Critical Chance by 20% for 4 turns.",
+      "icon": "Icons/talents/sharp_focus.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "critGainsFocusBuff",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_4"],
+      "children": ["talent_cham_cham_11", "talent_cham_cham_12", "talent_cham_cham_13"],
+      "position": { "x": 200, "y": 50 }
+    },
+    "talent_cham_cham_11": {
+      "id": "talent_cham_cham_11",
+      "name": "Mana Empowerment",
+      "description": "Abilities now deal additional damage equal to their mana cost.",
+      "icon": "Icons/talents/mana_empowerment.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "manaEmpowerment",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_10"],
+      "children": ["talent_cham_cham_14"],
+      "position": { "x": 200, "y": 0 }
+    },
+    "talent_cham_cham_12": {
+      "id": "talent_cham_cham_12",
+      "name": "Nimble Strikes",
+      "description": "Increases dodge chance by 5%. Dodging attacks grants 5% additional Critical Chance for 5 turns.",
+      "icon": "Icons/talents/nimble_strikes.webp",
+      "effect": [
+        {
+          "type": "modify_stat",
+          "stat": "dodgeChance",
+          "operation": "add",
+          "value": 0.05
+        },
+        {
+          "type": "modify_character_property",
+          "property": "dodgeGrantsCritBuff",
+          "value": true
+        }
+      ],
+      "parents": ["talent_cham_cham_10"],
+      "children": [],
+      "position": { "x": -100, "y": -255 }
+    },
+    "talent_cham_cham_13": {
+      "id": "talent_cham_cham_13",
+      "name": "Critical Focus",
+      "description": "Farmer's Resilience passive now also permanently increases Critical Chance by 2% each time it triggers.",
+      "icon": "Icons/talents/critical_focus.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "passiveIncreasesCritChance",
+        "value": 0.02
+      },
+      "parents": ["talent_cham_cham_10"],
+      "children": ["talent_cham_cham_14"],
+      "position": { "x": 200, "y": -500 }
+    },
+    "talent_cham_cham_14": {
+      "id": "talent_cham_cham_14",
+      "name": "Desperate Strength",
+      "description": "When Cham Cham's HP falls below 30%, she gains a buff that increases her damage by 15%.",
+      "icon": "Icons/talents/desperate_strength.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "desperateStrengthEnabled",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_11", "talent_cham_cham_13"],
+      "children": ["talent_cham_cham_15"],
+      "position": { "x": 250, "y": -100 }
+    },
+    "talent_cham_cham_15": {
+      "id": "talent_cham_cham_15",
+      "name": "Frenzied Assault",
+      "description": "There is an 8% chance that your Scratch (Q), Boomerang (E), and Feral Strike (R) abilities will trigger an additional time when used.",
+      "icon": "Icons/talents/frenzied_assault.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_scratch",
+          "property": "frenziedAssaultChance",
+          "value": 0.08
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_boomerang",
+          "property": "frenziedAssaultChance",
+          "value": 0.08
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_feral_strike",
+          "property": "frenziedAssaultChance",
+          "value": 0.08
+        }
+      ],
+      "parents": ["talent_cham_cham_14"],
+      "children": [],
+      "position": { "x": 250, "y": -200 },
+      "powerful": true
+    },
+    "talent_cham_cham_16": {
+      "id": "talent_cham_cham_16",
+      "name": "Arcane Mastery",
+      "description": "At turn 17, doubles your current Physical Damage and Magical Damage permanently.",
+      "icon": "Icons/talents/arcane_mastery.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "arcaneMasteryEnabled",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_8", "talent_cham_cham_9"],
+      "children": [],
+      "position": { "x": 500, "y": 150 },
+      "powerful": true
+    },
+    "talent_cham_cham_17": {
+      "id": "talent_cham_cham_17",
+      "name": "Cat Claws",
+      "description": "Scratch applies a permanent bleeding debuff on the target that deals 20 damage per stack at the end of each turn.",
+      "icon": "Icons/talents/cat_claws.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_scratch",
+        "property": "appliesBleedingDebuff",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_3"],
+      "children": ["talent_cham_cham_18", "talent_cham_cham_19"],
+      "position": { "x": -180, "y": 450 }
+    },
+    "talent_cham_cham_18": {
+      "id": "talent_cham_cham_18",
+      "name": "Debuff Exploitation",
+      "description": "Cham Cham deals 15% increased damage for each debuff on the enemy target.",
+      "icon": "Icons/talents/debuff_exploitation.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "damagePerDebuff",
+        "value": 0.15
+      },
+      "parents": ["talent_cham_cham_17"],
+      "children": ["talent_cham_cham_20", "talent_cham_cham_26"],
+      "position": { "x": -400, "y": 650 }
+    },
+    "talent_cham_cham_19": {
+      "id": "talent_cham_cham_19",
+      "name": "Lasting Buffs",
+      "description": "Buffs on Cham Cham last 1 turn longer.",
+      "icon": "Icons/talents/lasting_buffs.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "buffDurationBonus",
+        "value": 1
+      },
+      "parents": ["talent_cham_cham_17"],
+      "children": ["talent_cham_cham_22"],
+      "position": { "x": -120, "y": 300 }
+    },
+    "talent_cham_cham_20": {
+      "id": "talent_cham_cham_20",
+      "name": "Hunting Mark",
+      "description": "Boomerang applies a mark debuff to the target. The next Scratch on that target deals double damage and consumes the mark. Mark lasts 3 turns.",
+      "icon": "Icons/talents/hunting_mark.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_boomerang",
+          "property": "appliesHuntingMark",
+          "value": true
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "farmer_scratch",
+          "property": "consumesHuntingMark",
+          "value": true
+        }
+      ],
+      "parents": ["talent_cham_cham_18"],
+      "children": ["talent_cham_cham_21"],
+      "position": { "x": -550, "y": 750 }
+    },
+    "talent_cham_cham_21": {
+      "id": "talent_cham_cham_21",
+      "name": "Predator's Focus",
+      "description": "Consuming Hunting Mark with Scratch grants Cham Cham 50% dodge chance buff for 3 turns and also decreases her active ability cooldowns by 1.",
+      "icon": "Icons/talents/predators_focus.webp",
+      "effect": [
+        {
+          "type": "modify_character_property",
+          "property": "huntingMarkDodgeBuff",
+          "value": true
+        },
+        {
+          "type": "modify_character_property",
+          "property": "huntingMarkCooldownReduction",
+          "value": true
+        }
+      ],
+      "parents": ["talent_cham_cham_20"],
+      "children": [],
+      "position": { "x": -500, "y": 1500 },
+      "powerful": true
+    },
+    "talent_cham_cham_22": {
+      "id": "talent_cham_cham_22",
+      "name": "Amplified Criticals",
+      "description": "Cham Cham gains 10% additional critical strike damage for each buff active on her.",
+      "icon": "Icons/talents/amplified_criticals.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "critDamagePerBuff",
+        "value": 0.1
+      },
+      "parents": ["talent_cham_cham_7", "talent_cham_cham_19"],
+      "children": ["talent_cham_cham_23", "talent_cham_cham_24"],
+      "position": { "x": 100, "y": 350 }
+    },
+    "talent_cham_cham_23": {
+      "id": "talent_cham_cham_23",
+      "name": "Armor Piercing Claws",
+      "description": "Scratch completely ignores enemy armor.",
+      "icon": "Icons/talents/armor_pierce.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "farmer_scratch",
+        "property": "bypassesArmor",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_22"],
+      "children": ["talent_cham_cham_25"],
+      "position": { "x": 300, "y": 1150 }
+    },
+    "talent_cham_cham_24": {
+      "id": "talent_cham_cham_24",
+      "name": "Mana-claws",
+      "description": "Increases maximum mana by 400 and mana regeneration by 30 per turn.",
+      "icon": "Icons/talents/mana_claws.webp",
+      "effect": [
+        {
+          "type": "modify_stat",
+          "stat": "maxMana",
+          "operation": "add",
+          "value": 400
+        },
+        {
+          "type": "modify_stat",
+          "stat": "manaPerTurn",
+          "operation": "add",
+          "value": 30
+        }
+      ],
+      "parents": ["talent_cham_cham_22"],
+      "children": ["talent_cham_cham_25"],
+      "position": { "x": 0, "y": 1400 }
+    },
+    "talent_cham_cham_25": {
+      "id": "talent_cham_cham_25",
+      "name": "Mimicry Master",
+      "description": "Every 6th turn, Cham Cham gains a random buff from other characters' abilities, learning and adapting from their combat style.",
+      "icon": "Icons/talents/mimicry_master.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "mimicryMasterEnabled",
+        "value": true
+      },
+      "parents": ["talent_cham_cham_23", "talent_cham_cham_24"],
+      "children": [],
+      "position": { "x": 150, "y": 1700 },
+      "powerful": true
+    },
+    "talent_cham_cham_26": {
+      "id": "talent_cham_cham_26",
+      "name": "Debuff Healing",
+      "description": "When Cham Cham deals damage to a debuffed enemy, she heals herself for 700 HP.",
+      "icon": "Icons/talents/debuff_healing.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "healOnDebuffedDamage",
+        "value": 700
+      },
+      "parents": ["talent_cham_cham_18"],
+      "children": [],
+      "position": { "x": -350, "y": 500 }
+    }
+  }
+} 

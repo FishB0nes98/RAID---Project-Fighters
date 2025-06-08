@@ -169,9 +169,9 @@ class HoundPassive {
             icon: 'Icons/passives/hound_dead.png', // Replace with actual icon path when available
             duration: Infinity, // Permanent buff
             isPermanent: true,
-            statModifiers: {
-                physicalDamage: 500 // Add flat 500 physical damage
-            },
+            statModifiers: [
+                { stat: 'physicalDamage', value: 500, operation: 'add' }
+            ],
             description: 'Gains 500 Physical Damage from the death of the Hound.'
         };
         

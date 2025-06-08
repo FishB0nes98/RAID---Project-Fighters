@@ -41,8 +41,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     console.log('Executing Homerun ability');
                     
+                    // Debug: Check dodge chance before buff
+                    console.log(`[Homerun Debug] ${caster.name} dodge chance BEFORE buff: ${caster.stats.dodgeChance}`);
+                    
                     // 1. Apply the normal buff effect (100% dodge for 3 turns)
                     originalEffect(caster, target);
+                    
+                    // Debug: Check dodge chance after buff and verify buff was applied
+                    console.log(`[Homerun Debug] ${caster.name} dodge chance AFTER buff: ${caster.stats.dodgeChance}`);
+                    console.log(`[Homerun Debug] ${caster.name} current buffs:`, caster.buffs.map(b => ({ 
+                        id: b.id, 
+                        name: b.name, 
+                        effects: b.effects, 
+                        statModifiers: b.statModifiers 
+                    })));
                     
                     // Play Homerun sound
                     const playSoundHomerun = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};

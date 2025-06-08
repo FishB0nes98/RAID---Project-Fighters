@@ -233,19 +233,19 @@ class CrazyFarmerPassive {
             },
             
             // Define statModifiers for UI display and recalculation
-            statModifiers: {
-                physicalDamage_percent: 100, // +100% means double
-                magicalDamage_percent: 100,
-                armor_percent: 100,
-                magicalShield_percent: 100,
-                maxHp_percent: 100,
-                maxMana_percent: 100,
-                lifesteal_percent: 100,
-                critChance_percent: 100,
-                critDamage_percent: 100,
-                dodgeChance_percent: 100,
-                healingPower_percent: 100
-            }
+            statModifiers: [
+                { stat: 'physicalDamage', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'magicalDamage', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'armor', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'magicalShield', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'maxHp', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'maxMana', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'lifesteal', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'critChance', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'critDamage', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'dodgeChance', value: 1.0, operation: 'add_base_percentage' },
+                { stat: 'healingPower', value: 1.0, operation: 'add_base_percentage' }
+            ]
         };
         
         // Show special VFX for the hound going into frenzy

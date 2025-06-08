@@ -7,12 +7,12 @@
   "description": "A demonic entity engulfed in perpetual flames, commanding the power of the inferno.",
   "stats": {
     "physicalDamage": 250,
-    "magicalDamage": 720,
-    "armor": 20,
-    "magicalShield": 40,
+    "magicalDamage": 400,
+    "armor": 10,
+    "magicalShield": 18,
     "lifesteal": 0,
     "dodgeChance": 0.0,
-    "critChance": 0.12,
+    "critChance": 0.0,
     "critDamage": 2,
     "healingPower": 0,
     "hp": 15000,
@@ -33,10 +33,9 @@
       "icon": "Icons/abilities/blazing_ball.webp",
       "manaCost": 50,
       "cooldown": 5,
-      "type": "damage",
-      "damageType": "magical",
-      "fixedDamage": 1200,
+      "type": "custom",
       "targetType": "enemy",
+      "functionName": "infernalAstarothBlazingBallEffect",
       "description": "Hurls a massive ball of fire at a single target, dealing 1200 magical damage."
     },
     {
@@ -45,9 +44,9 @@
       "icon": "Icons/abilities/explosion.webp",
       "manaCost": 75,
       "cooldown": 3,
-      "type": "damage",
-      "damageType": "magical",
-      "targetType": "aoe_enemy",
+      "type": "custom",
+      "targetType": "all_enemies",
+      "functionName": "infernalAstarothExplosionEffect",
       "description": "Deals 600 (+100% MD) magical damage to all enemies."
     },
     {
@@ -56,8 +55,9 @@
       "icon": "Icons/abilities/molten_armor.webp",
       "manaCost": 60,
       "cooldown": 8,
-      "type": "buff",
+      "type": "custom",
       "targetType": "self",
+      "functionName": "infernalAstarothMoltenArmorEffect",
       "description": "Grants 50% bonus Armor and Magic Shield for 5 turns. When the effect expires or is removed, deals 50% MD magical damage to all enemies."
     }
   ],

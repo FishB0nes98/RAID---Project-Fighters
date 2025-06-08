@@ -1,0 +1,5607 @@
+{
+  "Queue": {
+    "m9q79jr4uhjpy4dk71": {
+      "players": {
+        "blue_1": {
+          "champion": "Noel",
+          "skin": "Lunar Festival Noel"
+        },
+        "blue_2": {
+          "champion": "Angel",
+          "skin": "Angel"
+        },
+        "blue_3": {
+          "champion": "Julia",
+          "skin": "Dragon Tamer Julia"
+        },
+        "blue_4": {
+          "champion": "Astaroth",
+          "skin": "Forest Behemoth Astaroth Gilded"
+        },
+        "blue_5": {
+          "champion": "Scorpion",
+          "skin": "Infernal Scorpion"
+        },
+        "red_1": {
+          "champion": "Shao Kahn",
+          "skin": "Shao Kahn Molten"
+        },
+        "red_2": {
+          "champion": "Mega Man",
+          "skin": "Date Night Mega Man"
+        },
+        "red_3": {
+          "champion": "Birdie",
+          "skin": "Battle Bistro Birdie"
+        },
+        "red_4": {
+          "champion": "Sub Zero",
+          "skin": "Arcade Sub Zero Cybernetic Surge"
+        },
+        "red_5": {
+          "champion": "Juri",
+          "skin": "Juri Villain"
+        }
+      }
+    },
+    "m9q7aqvi2751e7vinmth": {
+      "players": {
+        "blue_1": {
+          "champion": "Shao Kahn",
+          "skin": "Thunderstrike Shao Kahn"
+        },
+        "blue_2": {
+          "champion": "Nina",
+          "skin": "Farmer Nina Blue"
+        },
+        "blue_3": {
+          "champion": "Angel",
+          "skin": "Neon Core Angel"
+        },
+        "blue_4": {
+          "champion": "Akuma",
+          "skin": "Rockstar Akuma"
+        },
+        "blue_5": {
+          "champion": "Reptile",
+          "skin": "Summertime Reptile"
+        },
+        "red_1": {
+          "champion": "Kabal",
+          "skin": "Kabal Yellow"
+        },
+        "red_2": {
+          "champion": "Peacock",
+          "skin": "Captain Peacock"
+        },
+        "red_3": {
+          "champion": "Raiden",
+          "skin": "Raiden Dark"
+        },
+        "red_4": {
+          "champion": "Siegfried",
+          "skin": "Siegfried"
+        },
+        "red_5": {
+          "champion": "Birdie",
+          "skin": "Birdie Toxic"
+        }
+      }
+    },
+    "m9q7c3by1vwl5lvtyf8": {
+      "players": {
+        "blue_1": {
+          "champion": "Erron Black",
+          "skin": "Diablo Erron Black"
+        },
+        "blue_2": {
+          "champion": "Raiden",
+          "skin": "Raiden Yellow Lightning"
+        },
+        "blue_3": {
+          "champion": "Talim",
+          "skin": "Battleborn Talim"
+        },
+        "blue_4": {
+          "champion": "Jun",
+          "skin": "High Elf Jun"
+        },
+        "blue_5": {
+          "champion": "Birdie",
+          "skin": "Sacred Ceremony Birdie"
+        },
+        "red_1": {
+          "champion": "Elphelt",
+          "skin": "Elphelt Black"
+        },
+        "red_2": {
+          "champion": "R Mika",
+          "skin": "Celestial Protector R Mika"
+        },
+        "red_3": {
+          "champion": "Kabal",
+          "skin": "Executioner Kabal"
+        },
+        "red_4": {
+          "champion": "Akuma",
+          "skin": "Voidborn Akuma"
+        },
+        "red_5": {
+          "champion": "Lili",
+          "skin": "Winter Festival Lili"
+        }
+      }
+    }
+  },
+  "Server": {
+    "skinhighlight": {
+      "skin1": {
+        "image": "Skins/Steamforged Nina.jpeg",
+        "name": "Steamforged Nina",
+        "price": 1000
+      },
+      "skin2": {
+        "image": "Skins/Cyber Hunter Elphelt.png",
+        "name": "Cyber Hunter Elphelt",
+        "price": 1000
+      },
+      "skin3": {
+        "image": "Skins/Sacred Ceremony Birdie.jpeg",
+        "name": "Sacred Ceremony Birdie",
+        "price": 2000
+      },
+      "skin4": {
+        "image": "Skins/Battle Bistro Akuma.jpeg",
+        "name": "Battle Bistro Akuma",
+        "price": 2000
+      }
+    }
+  },
+  "builds": {
+    "2_1_1": {
+      "-OIX1NequkicymoOiXzv": {
+        "character": "Elphelt",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "treasure_chest",
+          "icicle_spear",
+          "coral_polearm",
+          "tire_iron_knuckles",
+          "straightshot_aimer"
+        ],
+        "likes": 1,
+        "name": "Tank Sustain",
+        "patch": "2.1.1",
+        "timestamp": 1738959063731
+      },
+      "-OIXAVDu3nAbLxvjQEMm": {
+        "character": "Akuma",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "ra_wand",
+          "djinn_s_lamp",
+          "stormcallers_orb",
+          "times_square_orb",
+          "skyline_prism"
+        ],
+        "name": "Scale Burst",
+        "patch": "2.1.1",
+        "timestamp": 1738961454008
+      },
+      "-OIXBLRx7U3oyseaMwkM": {
+        "character": "Akuma",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "white_veil",
+          "ra_wand",
+          "atlantis_teardrop",
+          "cactus_staff",
+          "abyssal_dune"
+        ],
+        "name": "TA(N)KUMA",
+        "patch": "2.1.1",
+        "timestamp": 1738961676271
+      },
+      "-OIXFTTeKLIhMrhdr523": {
+        "character": "Alice",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "fish_scale_shoulderplate",
+          "oasis_guardian_cloak",
+          "abyssal_anchor",
+          "taxi_drivers_whistle",
+          "bodega_champions_belt"
+        ],
+        "name": "Basic Tank Jungle Build",
+        "patch": "2.1.1",
+        "timestamp": 1738962757543
+      },
+      "-OIXGseMzHiQe7RII75Y": {
+        "character": "Angel",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "broadway_star_badge",
+          "palm_leaf",
+          "scarab_amulet",
+          "seaborne_crown",
+          "sphinx_choker"
+        ],
+        "name": "Support Angel",
+        "patch": "2.1.1",
+        "timestamp": 1738963127125
+      },
+      "-OIXHPOy_eKU9BgA46Gl": {
+        "character": "Angel",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "obsidian_spire",
+          "shinnoks_dark_magic_bubble",
+          "stormcallers_orb",
+          "skyline_prism",
+          "seaborne_crown"
+        ],
+        "name": "Support Mid",
+        "patch": "2.1.1",
+        "timestamp": 1738963265339
+      },
+      "-OIXIHxDfVgUujoJ_1uK": {
+        "character": "Astaroth",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "desert_crafted_hammer",
+          "sand_brick_armor",
+          "fish_scale_shoulderplate",
+          "oasis_guardian_cloak",
+          "shao_kahns_hammer"
+        ],
+        "name": "Teamfight Tank",
+        "patch": "2.1.1",
+        "timestamp": 1738963496780
+      },
+      "-OIXJn0jabpdN_vGc4Y7": {
+        "character": "Ayane",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "zasalamels_scythe",
+          "flask_of_strength",
+          "sand_dagger",
+          "clam_dancers",
+          "scorpion_sword"
+        ],
+        "name": "Scaling Oneshot",
+        "patch": "2.1.1",
+        "timestamp": 1738963890484
+      },
+      "-OIXKOc71S3_50XKbyiB": {
+        "character": "Birdie",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "desert_crafted_hammer",
+          "bodega_champions_belt",
+          "fish_scale_shoulderplate",
+          "sand_brick_armor",
+          "oasis_guardian_cloak"
+        ],
+        "name": "Massive CC tank + Good Stats",
+        "patch": "2.1.1",
+        "timestamp": 1738964048590
+      },
+      "-OIXKn1jUZy3C96Faupw": {
+        "character": "Blanka",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "thorny_shield",
+          "bodega_champions_belt",
+          "desert_crafted_hammer",
+          "sand_brick_armor",
+          "oasis_guardian_cloak"
+        ],
+        "name": "AD + Reflect Tank",
+        "patch": "2.1.1",
+        "timestamp": 1738964152693
+      },
+      "-OIXLy3xgl5E-M2Uh3pA": {
+        "character": "Cham Cham",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "leviathans_fang",
+          "wavebreaker_boots",
+          "atlantean_crown",
+          "coral_polearm",
+          "treasure_chest"
+        ],
+        "likes": 1,
+        "name": "#1 Cham Cham Build",
+        "patch": "2.1.1",
+        "timestamp": 1738964460035
+      },
+      "-OIXMex5ngvVA57xP7GZ": {
+        "character": "Christie",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "clam_dancers",
+          "leviathans_fang",
+          "shao_kahns_hammer",
+          "icicle_spear",
+          "tire_iron_knuckles"
+        ],
+        "likes": 1,
+        "name": "CC 1v1 Carry",
+        "patch": "2.1.1",
+        "timestamp": 1738964643851
+      },
+      "-OIXMuxibStXca8MH2zK": {
+        "character": "Eagle",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "leviathans_fang",
+          "cyber_revolver",
+          "tridents_vow",
+          "straightshot_aimer",
+          "sands_of_eternity"
+        ],
+        "name": "Attack Speed Build",
+        "patch": "2.1.1",
+        "timestamp": 1738964709428
+      },
+      "-OIXNNSPQbyOuw7A4qXS": {
+        "character": "Erron Black",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "flask_of_strength",
+          "pearl_gun",
+          "zasalamels_scythe",
+          "wavebreaker",
+          "icicle_spear"
+        ],
+        "name": "Burst AA",
+        "patch": "2.1.1",
+        "timestamp": 1738964830240
+      },
+      "-OIXO15dVWMEu7IxFF-J": {
+        "character": "FANG",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "scarab_amulet",
+          "taxi_drivers_whistle",
+          "broadway_star_badge",
+          "seaborne_crown",
+          "palm_leaf"
+        ],
+        "name": "Team Utility Build",
+        "patch": "2.1.1",
+        "timestamp": 1738965000814
+      },
+      "-OIXOLSlW90oHbYDGa8M": {
+        "character": "Ibuki",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "empire_phantoms_mask",
+          "clam_dancers",
+          "sand_dagger",
+          "flask_of_strength",
+          "wavebreaker"
+        ],
+        "name": "Mask Build",
+        "patch": "2.1.1",
+        "timestamp": 1738965084214
+      },
+      "-OIXOqYyaxIiqnIEdIap": {
+        "character": "Julia",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "pearl_of_the_depths",
+          "seaborne_crown",
+          "palm_leaf",
+          "mermaid_essence",
+          "sphinx_choker"
+        ],
+        "name": "Basic Healer Build",
+        "patch": "2.1.1",
+        "timestamp": 1738965215683
+      },
+      "-OIXPSgKy1SSUJ_Ijzt1": {
+        "character": "Jun",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "wavebreaker_boots",
+          "tanyas_spear",
+          "coral_polearm",
+          "boots_of_the_sandwalker",
+          "kotal_kahns_atlantean_dagger"
+        ],
+        "likes": 1,
+        "name": "Sustain Build",
+        "patch": "2.1.1",
+        "timestamp": 1738965375962
+      },
+      "-OIXPpD2TiiHbpT_4H2b": {
+        "character": "Juri",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "treasure_chest",
+          "wavebreaker_boots",
+          "shao_kahns_hammer",
+          "tanyas_spear",
+          "venomous_blade"
+        ],
+        "name": "AD to AP conversion with great scaling",
+        "patch": "2.1.1",
+        "timestamp": 1738965472329
+      },
+      "-OIXQHBPvPu1uWAVhImH": {
+        "character": "Kabal",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "treasure_chest",
+          "wavebreaker_boots",
+          "sunforged_gauntlets",
+          "leviathans_fang",
+          "shao_kahns_hammer"
+        ],
+        "name": "Scary anti-cc",
+        "patch": "2.1.1",
+        "timestamp": 1738965591008
+      },
+      "-OIXQmV9bZrtvb8YIHGK": {
+        "character": "Kagome",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "anna_williams_rocket_launcher",
+          "straightshot_aimer",
+          "sands_of_eternity",
+          "coral_polearm",
+          "leviathans_fang"
+        ],
+        "name": "Safe Lifesteal Build",
+        "patch": "2.1.1",
+        "timestamp": 1738965723344
+      },
+      "-OIXRaacQBWe2NFu0GAx": {
+        "character": "Kokoro",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "mermaid_essence",
+          "sphinx_choker",
+          "cybernetic_data_core",
+          "pearl_of_the_depths",
+          "seaborne_crown"
+        ],
+        "liked": true,
+        "likes": 3,
+        "name": "AP Healer Kokoro",
+        "patch": "2.1.1",
+        "timestamp": 1738965936750
+      },
+      "-OIXSDi6neWRgib2eZMJ": {
+        "character": "Kotal Kahn",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "kotal_kahns_atlantean_dagger",
+          "palm_leaf",
+          "thorny_shield",
+          "tideborn_breastplate",
+          "fish_scale_shoulderplate"
+        ],
+        "name": "Self Healing Jungle",
+        "patch": "2.1.1",
+        "timestamp": 1738966101069
+      },
+      "-OIXSRtvKwTz8DsPT3-N": {
+        "character": "Kuma",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "oasis_guardian_cloak",
+          "kotal_kahns_atlantean_dagger",
+          "concrete_barrier_cloak",
+          "taxi_drivers_whistle",
+          "steel_titan_chassis"
+        ],
+        "name": "Support Anti-CC",
+        "patch": "2.1.1",
+        "timestamp": 1738966159169
+      },
+      "-OIXSw1v49OA6-gSVJKl": {
+        "character": "Lili",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "clam_dancers",
+          "shao_kahns_hammer",
+          "golden_arrow",
+          "wavebreaker_boots",
+          "sand_dagger"
+        ],
+        "name": "Heavy Trader",
+        "patch": "2.1.1",
+        "timestamp": 1738966286721
+      },
+      "-OIXTStOSaVKxmhQMdO9": {
+        "character": "Mai",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "tanyas_spear",
+          "venomous_blade",
+          "toxic_alley_shiv",
+          "pharaoh_amulet",
+          "atlantis_teardrop"
+        ],
+        "liked": true,
+        "likes": 2,
+        "name": "AOE dot",
+        "patch": "2.1.1",
+        "timestamp": 1738966425375
+      },
+      "-OIZlEtu74oG2GLpfaMc": {
+        "character": "Mega Man",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "treasure_chest",
+          "tanyas_spear",
+          "venomous_blade",
+          "pearl_gun",
+          "flask_of_strength"
+        ],
+        "name": "On-hit double scale",
+        "patch": "2.1.1",
+        "timestamp": 1739004903031
+      },
+      "-OIZmR2unKkKj_NMJLop": {
+        "character": "Morrigan",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "obsidian_spire",
+          "toxic_alley_shiv",
+          "skyline_prism",
+          "streetlight_rod",
+          "cactus_staff"
+        ],
+        "name": "Burst AOE",
+        "patch": "2.1.1",
+        "timestamp": 1739005215505
+      },
+      "-OIZn1Bk9cMf6TtmWpX_": {
+        "character": "Morrigan",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "streetlight_rod",
+          "cybernetic_data_core",
+          "cactus_staff",
+          "ra_wand",
+          "skyline_prism"
+        ],
+        "name": "Oneshot combo",
+        "patch": "2.1.1",
+        "timestamp": 1739005371720
+      },
+      "-OIZnUxiIQlWbGUX0JKi": {
+        "character": "Nina",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "cyber_revolver",
+          "anna_williams_rocket_launcher",
+          "straightshot_aimer",
+          "wavebreaker",
+          "coral_polearm"
+        ],
+        "name": "Auto Attack Build",
+        "patch": "2.1.1",
+        "timestamp": 1739005493637
+      },
+      "-OIZo4wFXToHqAtZOZ0J": {
+        "character": "Noel",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "anna_williams_rocket_launcher",
+          "venomous_blade",
+          "tanyas_spear",
+          "pearl_gun",
+          "sands_of_eternity"
+        ],
+        "name": "No counter carry",
+        "patch": "2.1.1",
+        "timestamp": 1739005649192
+      },
+      "-OIZp2UlSp3XLsjjcRvQ": {
+        "character": "Peacock",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "tanyas_spear",
+          "venomous_blade",
+          "icicle_spear",
+          "pearl_gun",
+          "anna_williams_rocket_launcher"
+        ],
+        "name": "Spell Heavy Build",
+        "patch": "2.1.1",
+        "timestamp": 1739005901321
+      },
+      "-OIZq0pLaja9IFssPFl_": {
+        "character": "R Mika",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "taxi_drivers_whistle",
+          "oasis_guardian_cloak",
+          "concrete_barrier_cloak",
+          "steel_titan_chassis",
+          "kotal_kahns_atlantean_dagger"
+        ],
+        "name": "Anti-AD team",
+        "patch": "2.1.1",
+        "timestamp": 1739006156654
+      },
+      "-OIZqSSQN-DNfQVBRsDV": {
+        "character": "Raiden",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "cactus_staff",
+          "abyssal_dune",
+          "ra_wand",
+          "djinn_s_lamp",
+          "skyline_prism"
+        ],
+        "name": "AOE Scaler",
+        "patch": "2.1.1",
+        "timestamp": 1739006269811
+      },
+      "-OIZr61KdhICorqHT8b5": {
+        "character": "Reptile",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "toxic_alley_shiv",
+          "venomous_blade",
+          "cactus_staff",
+          "obsidian_spire",
+          "pharaoh_amulet"
+        ],
+        "name": "DoT",
+        "patch": "2.1.1",
+        "timestamp": 1739006440109
+      },
+      "-OIZrk8-PQSsiIgRkPPu": {
+        "character": "Scorpion",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "sand_dagger",
+          "zasalamels_scythe",
+          "clam_dancers",
+          "scorpion_sword",
+          "coral_polearm"
+        ],
+        "name": "Very Safe Assassin",
+        "patch": "2.1.1",
+        "timestamp": 1739006608472
+      },
+      "-OIZs4HcrPXgSCGNyS7k": {
+        "character": "Shinnok",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "djinn_s_lamp",
+          "atlantis_teardrop",
+          "ra_wand",
+          "abyssal_dune",
+          "obsidian_spire"
+        ],
+        "name": "Staff Collector",
+        "patch": "2.1.1",
+        "timestamp": 1739006695104
+      },
+      "-OIZsVZQhl1jym2FjTo3": {
+        "character": "Shizumaru",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "clam_dancers",
+          "street_kings_chain",
+          "flask_of_strength",
+          "golden_arrow",
+          "wavebreaker"
+        ],
+        "name": "Very Strong Earlygame",
+        "patch": "2.1.1",
+        "timestamp": 1739006806835
+      },
+      "-OIZtPAqXB9TkHw4Cmre": {
+        "character": "Shoma",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "oasis_guardian_cloak",
+          "taxi_drivers_whistle",
+          "pyramid_wardstone",
+          "scarab_amulet",
+          "kotal_kahns_atlantean_dagger"
+        ],
+        "likes": 1,
+        "name": "Basic Support Tank Build",
+        "patch": "2.1.1",
+        "timestamp": 1739007042829
+      },
+      "-OIZuY9nsn0XhBNKHwxn": {
+        "character": "Siegfried",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "treasure_chest",
+          "atlantean_crown",
+          "wavebreaker",
+          "sands_of_eternity",
+          "flask_of_strength"
+        ],
+        "name": "Enchanter Support + Siegfried",
+        "patch": "2.1.1",
+        "timestamp": 1739007341770
+      },
+      "-OIZuz4jAQOJdMX-It53": {
+        "character": "Sophitia",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "bodega_champions_belt",
+          "palm_leaf",
+          "sand_brick_armor",
+          "fish_scale_shoulderplate",
+          "kotal_kahns_atlantean_dagger"
+        ],
+        "name": "Self Heal Build",
+        "patch": "2.1.1",
+        "timestamp": 1739007456135
+      },
+      "-OI_VDb2FqvsrJRC1pKO": {
+        "character": "Sub Zero",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "times_square_orb",
+          "stormcallers_orb",
+          "djinn_s_lamp",
+          "ra_wand",
+          "skyline_prism"
+        ],
+        "name": "Burst Mage",
+        "patch": "2.1.1",
+        "timestamp": 1739017218497
+      },
+      "-OI_jc6663iH1a8etzN_": {
+        "character": "Talim",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "zasalamels_scythe",
+          "clam_dancers",
+          "icicle_spear",
+          "sand_dagger",
+          "wavebreaker"
+        ],
+        "name": "CC Assassin",
+        "patch": "2.1.1",
+        "timestamp": 1739021255332
+      },
+      "-OI_kBuXnpdd-JM1QwyV": {
+        "character": "Yugo",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "leviathans_fang",
+          "shao_kahns_hammer",
+          "tire_iron_knuckles",
+          "coral_polearm",
+          "sunforged_gauntlets"
+        ],
+        "name": "AS + Sustain",
+        "patch": "2.1.1",
+        "timestamp": 1739021406080
+      },
+      "-OI_kenf-22BVJdZ26vJ": {
+        "character": "Zasalamel",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "zasalamels_scythe",
+          "wavebreaker",
+          "flask_of_strength",
+          "icicle_spear",
+          "golden_arrow"
+        ],
+        "name": "Heavy AD",
+        "patch": "2.1.1",
+        "timestamp": 1739021528521
+      },
+      "-OKNLkQsdc_NpiOBwAVQ": {
+        "character": "Shao Kahn",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "desert_crafted_hammer",
+          "shao_kahns_hammer",
+          "oasis_guardian_cloak",
+          "sand_brick_armor",
+          "thorny_shield"
+        ],
+        "name": "AD Scaling TANK",
+        "patch": "2.1.1",
+        "timestamp": 1740944115447
+      },
+      "-OLUd1VC8pw6j7-YrvHu": {
+        "character": "Noel",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "venomous_blade",
+          "pearl_gun",
+          "cyber_revolver",
+          "anna_williams_rocket_launcher",
+          "scorpion_sword"
+        ],
+        "name": "Caster Burst",
+        "patch": "2.1.1",
+        "timestamp": 1742140090380
+      }
+    },
+    "2_2": {
+      "-OMY9NNCtUAlOgiVKMrs": {
+        "character": "Talim",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "tanyas_spear",
+          "sand_dagger",
+          "zasalamels_scythe",
+          "coral_polearm",
+          "leviathans_fang"
+        ],
+        "likes": 1,
+        "name": "Caster Assassin",
+        "patch": "2.2",
+        "timestamp": 1743272904203
+      },
+      "-OMYCet5g-GSyBVbYej5": {
+        "character": "Christie",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "clam_dancers",
+          "anna_williams_rocket_launcher",
+          "icicle_spear",
+          "tanyas_spear",
+          "pearl_gun"
+        ],
+        "name": "Teamfight Burst",
+        "patch": "2.2",
+        "timestamp": 1743273766469
+      }
+    },
+    "2_3": {
+      "-ONikx6OFzo9xUe9gGEM": {
+        "character": "Kagome",
+        "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+        "creatorName": "FishB0nes98",
+        "items": [
+          "venomous_blade",
+          "empire_phantoms_mask",
+          "golden_arrow",
+          "tanyas_spear",
+          "sands_of_eternity"
+        ],
+        "name": "Q Build",
+        "patch": "2.3",
+        "timestamp": 1744541307352
+      }
+    }
+  },
+  "characters": {
+    "ARAM": {
+      "Akuma": {
+        "lose": 4,
+        "win": 6
+      },
+      "Alice": {
+        "lose": 4,
+        "win": 0
+      },
+      "Angel": {
+        "lose": 2,
+        "win": 2
+      },
+      "Astaroth": {
+        "lose": 4,
+        "win": 4
+      },
+      "Ayane": {
+        "lose": 6,
+        "win": 4
+      },
+      "Birdie": {
+        "lose": 8,
+        "win": 4
+      },
+      "Blanka": {
+        "lose": 6,
+        "win": 0
+      },
+      "Cham Cham": {
+        "lose": 0,
+        "win": 4
+      },
+      "Christie": {
+        "lose": 8,
+        "win": 6
+      },
+      "Eagle": {
+        "lose": 6,
+        "win": 4
+      },
+      "Elphelt": {
+        "lose": 2,
+        "win": 4
+      },
+      "Erron Black": {
+        "lose": 0,
+        "win": 4
+      },
+      "FANG": {
+        "lose": 4,
+        "win": 8
+      },
+      "Ibuki": {
+        "lose": 2,
+        "win": 0
+      },
+      "Julia": {
+        "lose": 0,
+        "win": 2
+      },
+      "Jun": {
+        "lose": 2,
+        "win": 6
+      },
+      "Juri": {
+        "lose": 4,
+        "win": 2
+      },
+      "Kabal": {
+        "lose": 4,
+        "win": 2
+      },
+      "Kagome": {
+        "lose": 4,
+        "win": 4
+      },
+      "Kokoro": {
+        "lose": 2,
+        "win": 6
+      },
+      "Kotal Kahn": {
+        "lose": 6,
+        "win": 2
+      },
+      "Kuma": {
+        "lose": 0,
+        "win": 2
+      },
+      "Lili": {
+        "lose": 6,
+        "win": 6
+      },
+      "Mai": {
+        "lose": 4,
+        "win": 8
+      },
+      "Mega Man": {
+        "lose": 4,
+        "win": 2
+      },
+      "Morrigan": {
+        "lose": 8,
+        "win": 4
+      },
+      "Nina": {
+        "lose": 6,
+        "win": 4
+      },
+      "Noel": {
+        "lose": 2,
+        "win": 6
+      },
+      "Peacock": {
+        "lose": 4,
+        "win": 4
+      },
+      "R Mika": {
+        "lose": 6,
+        "win": 14
+      },
+      "Raiden": {
+        "lose": 4,
+        "win": 2
+      },
+      "Reptile": {
+        "lose": 4,
+        "win": 2
+      },
+      "Scorpion": {
+        "lose": 6,
+        "win": 0
+      },
+      "Shao Kahn": {
+        "lose": 0,
+        "win": 2
+      },
+      "Shinnok": {
+        "lose": 4,
+        "win": 4
+      },
+      "Shizumaru": {
+        "lose": 4,
+        "win": 8
+      },
+      "Shoma": {
+        "lose": 10,
+        "win": 2
+      },
+      "Siegfried": {
+        "lose": 2,
+        "win": 2
+      },
+      "Sophitia": {
+        "lose": 2,
+        "win": 12
+      },
+      "Sub Zero": {
+        "lose": 8,
+        "win": 0
+      },
+      "Talim": {
+        "lose": 0,
+        "win": 6
+      },
+      "Yugo": {
+        "lose": 2,
+        "win": 0
+      },
+      "Zasalamel": {
+        "lose": 6,
+        "win": 6
+      }
+    },
+    "Akuma": {
+      "bans": 8,
+      "lose": 13,
+      "win": 15
+    },
+    "Alice": {
+      "bans": 2,
+      "lose": 29,
+      "win": 22
+    },
+    "Angel": {
+      "bans": 1,
+      "lose": 54,
+      "win": 36
+    },
+    "Astaroth": {
+      "bans": 1,
+      "lose": 44,
+      "win": 26
+    },
+    "Ayane": {
+      "bans": 1,
+      "lose": 14,
+      "win": 26
+    },
+    "Battle Bistro Birdie": {
+      "lose": 2,
+      "win": 0
+    },
+    "Birdie": {
+      "lose": 77,
+      "win": 56
+    },
+    "Blanka": {
+      "bans": 1,
+      "lose": 16,
+      "win": 32
+    },
+    "Cham Cham": {
+      "bans": 29,
+      "lose": 14,
+      "win": 21
+    },
+    "Christie": {
+      "bans": 1,
+      "lose": 12,
+      "win": 26
+    },
+    "Eagle": {
+      "bans": 2,
+      "lose": 26,
+      "win": 26
+    },
+    "Elphelt": {
+      "bans": 2,
+      "lose": 46,
+      "win": 56
+    },
+    "Erron Black": {
+      "bans": 7,
+      "lose": 32,
+      "win": 30
+    },
+    "FANG": {
+      "bans": 1,
+      "lose": 38,
+      "win": 24
+    },
+    "Ibuki": {
+      "lose": 12,
+      "win": 17
+    },
+    "Julia": {
+      "bans": 2,
+      "lose": 34,
+      "win": 28
+    },
+    "Jun": {
+      "bans": 2,
+      "lose": 30,
+      "win": 22
+    },
+    "Juri": {
+      "bans": 13,
+      "lose": 24,
+      "win": 22
+    },
+    "Kabal": {
+      "bans": 2,
+      "lose": 25,
+      "win": 26
+    },
+    "Kagome": {
+      "lose": 20,
+      "win": 26
+    },
+    "Kokoro": {
+      "bans": 2,
+      "lose": 38,
+      "win": 52
+    },
+    "Kotal Kahn": {
+      "bans": 24,
+      "lose": 44,
+      "win": 50
+    },
+    "Kuma": {
+      "bans": 2,
+      "lose": 20,
+      "win": 28
+    },
+    "Lili": {
+      "lose": 40,
+      "win": 52
+    },
+    "Mai": {
+      "bans": 3,
+      "lose": 26,
+      "win": 33
+    },
+    "Mega Man": {
+      "lose": 56,
+      "win": 48
+    },
+    "Morrigan": {
+      "bans": 1,
+      "lose": 29,
+      "win": 16
+    },
+    "Nina": {
+      "bans": 1,
+      "lose": 24,
+      "win": 44
+    },
+    "Noel": {
+      "bans": 34,
+      "lose": 42,
+      "win": 66
+    },
+    "Peacock": {
+      "bans": 3,
+      "lose": 62,
+      "win": 20
+    },
+    "R Mika": {
+      "bans": 20,
+      "lose": 24,
+      "win": 26
+    },
+    "Raiden": {
+      "lose": 22,
+      "win": 16
+    },
+    "Reptile": {
+      "bans": 4,
+      "lose": 12,
+      "win": 22
+    },
+    "Scorpion": {
+      "bans": 2,
+      "lose": 31,
+      "win": 22
+    },
+    "Shao Kahn": {
+      "bans": 2,
+      "lose": 22,
+      "win": 36
+    },
+    "Shinnok": {
+      "bans": 33,
+      "lose": 30,
+      "win": 36
+    },
+    "Shizumaru": {
+      "bans": 7,
+      "lose": 38,
+      "win": 38
+    },
+    "Shoma": {
+      "bans": 9,
+      "lose": 12,
+      "win": 28
+    },
+    "Siegfried": {
+      "lose": 22,
+      "win": 17
+    },
+    "Sophitia": {
+      "bans": 9,
+      "lose": 22,
+      "win": 37
+    },
+    "Sub Zero": {
+      "bans": 1,
+      "lose": 44,
+      "win": 36
+    },
+    "Talim": {
+      "bans": 1,
+      "lose": 46,
+      "win": 22
+    },
+    "Tanya": {
+      "lose": 4,
+      "win": 6
+    },
+    "Yugo": {
+      "lose": 32,
+      "win": 18
+    },
+    "Zasalamel": {
+      "bans": 29,
+      "lose": 12,
+      "win": 20
+    }
+  },
+  "lootbox": {
+    "basicbox": {
+      "Arcade Christie": 10,
+      "Arcade Noel": 10,
+      "Arcade Raiden": 10,
+      "Arcade Sophitia": 10,
+      "Arcade Sub Zero": 10,
+      "Arcane Sorcerer Sub Zero": 10,
+      "Arctic Beast Yugo": 25,
+      "Arctic Hunter Erron Black": 25,
+      "Arctic Huntress Nina": 25,
+      "Arctic Huntress Noel": 10,
+      "Arctic Huntress Peacock": 10,
+      "Arctic Monster Astaroth": 10,
+      "Atlantean Christie": 10,
+      "Atlantean Kagome": 10,
+      "Atlantean Kotal Kahn": 10,
+      "Atlantean Shinnok": 10,
+      "Atlantean Sub Zero": 25,
+      "Atlantean Zasalamel": 10,
+      "Bandito Eagle": 25,
+      "Bandito Reptile": 25,
+      "Bandito Shinnok": 25,
+      "Battle Bistro Akuma": 10,
+      "Battle Bistro Kuma": 25,
+      "Battle Bistro Lili": 25,
+      "Battle Bistro Shizumaru": 10,
+      "Battle Bistro Sophitia": 10,
+      "Battleborn Ayane": 10,
+      "Battleborn Eagle": 10,
+      "Battleborn Talim": 10,
+      "Battleborn Yugo": 10,
+      "Battleborn Zasalamel": 10,
+      "Blood Predator Reptile": 25,
+      "Blossom Angel": 4,
+      "Blossom Cham Cham": 10,
+      "Blossom Julia": 10,
+      "Blossom Jun": 25,
+      "Blossom Mai": 10,
+      "Blossom Panda": 10,
+      "Blossom Raiden": 10,
+      "Blossom Shizumaru": 10,
+      "Blossom Talim": 10,
+      "Captain Akuma": 25,
+      "Captain Noel": 25,
+      "Captain Peacock": 4,
+      "Captain Talim": 10,
+      "Casual Wear Juri": 25,
+      "Celestial Protector Cham Cham": 10,
+      "Celestial Protector Elphelt": 10,
+      "Celestial Protector Juri": 10,
+      "Celestial Protector Lili": 10,
+      "Celestial Protector R Mika": 10,
+      "Celestial Protector Sophitia": 10,
+      "Chris T": 25,
+      "Country Erron Black": 25,
+      "Cyber Bomber Peacock": 25,
+      "Cyber Hunter Elphelt": 25,
+      "Cyber Ninja Reptile": 10,
+      "Cyber Predator Yugo": 10,
+      "Cyber Revolver Kotal Kahn": 4,
+      "DJ Ibuki": 25,
+      "Demon Hunter Ibuki": 25,
+      "Demon Lord Kotal Kahn": 4,
+      "Desert Demon Shizumaru": 4,
+      "Disco Queen Julia": 10,
+      "Dragon Tamer Julia": 10,
+      "Dragon Tamer Jun": 10,
+      "Dragon Tamer Morrigan": 10,
+      "Dragon Tamer Raiden": 10,
+      "Executioner Kabal": 25,
+      "Farmer Alice": 25,
+      "Farmer Cham Cham": 25,
+      "Farmer FANG": 10,
+      "Farmer Nina": 25,
+      "Farmer Raiden": 25,
+      "Farmer Shoma": 25,
+      "Feather Dancer Mai": 25,
+      "Forest Behemoth Astaroth": 10,
+      "Forest Goddess Angel": 10,
+      "Forest Guardian Morrigan": 10,
+      "Forest Warden Kotal Kahn": 10,
+      "Frosted Kabal": 10,
+      "Gangster Blanka": 25,
+      "Gangster Juri": 25,
+      "Gangster Peacock": 25,
+      "Goth Eagle": 10,
+      "Goth Elphelt": 10,
+      "Goth R Mika": 25,
+      "Goth Reptile": 25,
+      "Goth Sophitia": 10,
+      "High Elf Akuma": 10,
+      "High Elf Eagle": 10,
+      "High Elf Jun": 10,
+      "High Elf Morrigan": 10,
+      "High Elf Noel": 10,
+      "High Elf Siegfried": 25,
+      "Infernal Astaroth": 4,
+      "Infernal Birdie": 10,
+      "Infernal Ibuki": 10,
+      "Infernal Raiden": 10,
+      "Infernal Scorpion": 10,
+      "Jade Ayane": 10,
+      "Jade Panda": 10,
+      "Jade Scorpion": 10,
+      "Jade Siegfried": 10,
+      "Jade Yugo": 10,
+      "Mafia Leader Erron Black": 25,
+      "Maid Elphelt": 25,
+      "Master of Monks Raiden": 25,
+      "Mythic Sentinel Alice": 25,
+      "Neon Core Angel": 10,
+      "Neon Core Cham Cham": 10,
+      "Neon Core Erron Black": 10,
+      "Neon Core Morrigan": 25,
+      "Neon Core Raiden": 10,
+      "Neon Core Sub Zero": 25,
+      "Obsidian Wraith Ayane": 25,
+      "Officer Noel": 25,
+      "Pajama Party Blanka": 25,
+      "Pajama Party Cham Cham": 10,
+      "Pajama Party Christie": 25,
+      "Pajama Party Kokoro": 25,
+      "Pajama Party Shoma": 25,
+      "Panda": 25,
+      "Phoenix R Mika": 25,
+      "Pirate Shoma": 25,
+      "Pop Star R Mika": 25,
+      "Primal Huntress Kagome": 10,
+      "Primal Warrior Juri": 25,
+      "Primal Warrior Kotal Kahn": 25,
+      "Primal Warrior Scorpion": 25,
+      "Primal Warrior Shoma": 10,
+      "Professional Athlete Ibuki": 25,
+      "Professional Baller Blanka": 25,
+      "Professional Footballer Siegfried": 25,
+      "Professional Tennis Player R Mika": 25,
+      "Professional Weightlifter Birdie": 25,
+      "Pyromancer Mega Man": 10,
+      "Rainy Day Julia": 25,
+      "Rainy Day Noel": 25,
+      "Rainy Day R Mika": 10,
+      "Rainy Day Reptile": 25,
+      "Rainy Day Shinnok": 10,
+      "Rainy Day Shizumaru": 10,
+      "Regal Empress Jun": 25,
+      "River Spirit Julia": 25,
+      "Rockstar Akuma": 25,
+      "Rockstar Birdie": 25,
+      "Royal Guard Astaroth": 25,
+      "Sacred Ceremony Birdie": 25,
+      "Sacred Ceremony Julia": 25,
+      "Sacred Ceremony Morrigan": 10,
+      "Sacred Ceremony Nina": 25,
+      "Sacred Ceremony Shoma": 25,
+      "Samurai Shizumaru": 25,
+      "Sand Soldier Astaroth": 25,
+      "Sand Soldier Birdie": 25,
+      "Sand Soldier Talim": 10,
+      "Schoolboy Siegfried": 25,
+      "Schoolgirl Ayane": 25,
+      "Schoolgirl Elphelt": 25,
+      "Schoolgirl Julia": 25,
+      "Schoolgirl Kokoro": 25,
+      "Shadowbane Ayane": 10,
+      "Skater Shoma": 25,
+      "Spectral Archer Kagome": 10,
+      "Steamcore Megaman": 10,
+      "Steamforged Kabal": 25,
+      "Steamforged Nina": 25,
+      "Steamforged Yugo": 25,
+      "Steampunk Ibuki": 25,
+      "Stonebreaker Astaroth": 10,
+      "Street Fighter Yugo": 25,
+      "Summertime Elphelt": 10,
+      "Summertime Jun": 10,
+      "Summertime Kotal Kahn": 4,
+      "Summertime Nina": 4,
+      "Summertime Reptile": 10,
+      "Summertime Shoma": 10,
+      "Superhero Shizumaru": 4,
+      "Thunder God Akuma": 25,
+      "Thunderstrike Shao Kahn": 10,
+      "Underworld Demon Noel": 4,
+      "Voidborn Akuma": 4,
+      "Voidborn Angel": 10,
+      "Voidborn Blanka": 10,
+      "Voidborn FANG": 10,
+      "Voidborn Nina": 10,
+      "Voidborn Peacock": 10,
+      "Voidborn Scorpion": 10,
+      "Warlord Birdie": 10,
+      "Windwood Talim": 10
+    },
+    "blossombox": {
+      "Arcade Christie": 5,
+      "Arcade Noel": 5,
+      "Arcade Raiden": 5,
+      "Arcade Sophitia": 5,
+      "Arcade Sub Zero": 5,
+      "Arcane Sorcerer Sub Zero": 5,
+      "Arctic Beast Yugo": 15,
+      "Arctic Hunter Erron Black": 15,
+      "Arctic Huntress Nina": 15,
+      "Arctic Huntress Noel": 5,
+      "Arctic Huntress Peacock": 5,
+      "Arctic Monster Astaroth": 5,
+      "Atlantean Christie": 5,
+      "Atlantean Kagome": 5,
+      "Atlantean Kotal Kahn": 5,
+      "Atlantean Shinnok": 5,
+      "Atlantean Sub Zero": 15,
+      "Atlantean Zasalamel": 5,
+      "Bandito Eagle": 15,
+      "Bandito Reptile": 15,
+      "Bandito Shinnok": 15,
+      "Battle Bistro Akuma": 5,
+      "Battle Bistro Kuma": 15,
+      "Battle Bistro Lili": 15,
+      "Battle Bistro Shizumaru": 5,
+      "Battle Bistro Sophitia": 5,
+      "Battleborn Ayane": 5,
+      "Battleborn Eagle": 5,
+      "Battleborn Talim": 5,
+      "Battleborn Yugo": 5,
+      "Battleborn Zasalamel": 5,
+      "Blood Predator Reptile": 15,
+      "Blossom Angel": 30,
+      "Blossom Cham Cham": 30,
+      "Blossom Julia": 30,
+      "Blossom Jun": 30,
+      "Blossom Mai": 30,
+      "Blossom Panda": 30,
+      "Blossom Raiden": 30,
+      "Blossom Shizumaru": 30,
+      "Blossom Talim": 30,
+      "Captain Akuma": 15,
+      "Captain Noel": 15,
+      "Captain Peacock": 2,
+      "Captain Talim": 5,
+      "Casual Wear Juri": 15,
+      "Celestial Protector Cham Cham": 5,
+      "Celestial Protector Elphelt": 5,
+      "Celestial Protector Juri": 5,
+      "Celestial Protector Lili": 5,
+      "Celestial Protector R Mika": 5,
+      "Celestial Protector Sophitia": 5,
+      "Chris T": 15,
+      "Country Erron Black": 15,
+      "Cyber Bomber Peacock": 15,
+      "Cyber Hunter Elphelt": 15,
+      "Cyber Ninja Reptile": 5,
+      "Cyber Predator Yugo": 5,
+      "Cyber Revolver Kotal Kahn": 2,
+      "DJ Ibuki": 15,
+      "Demon Hunter Ibuki": 15,
+      "Demon Lord Kotal Kahn": 2,
+      "Desert Demon Shizumaru": 2,
+      "Disco Queen Julia": 5,
+      "Dragon Tamer Julia": 5,
+      "Dragon Tamer Jun": 5,
+      "Dragon Tamer Morrigan": 5,
+      "Dragon Tamer Raiden": 5,
+      "Executioner Kabal": 15,
+      "Farmer Alice": 15,
+      "Farmer Cham Cham": 15,
+      "Farmer FANG": 5,
+      "Farmer Nina": 15,
+      "Farmer Raiden": 15,
+      "Farmer Shoma": 15,
+      "Feather Dancer Mai": 15,
+      "Forest Behemoth Astaroth": 5,
+      "Forest Goddess Angel": 5,
+      "Forest Guardian Morrigan": 5,
+      "Forest Warden Kotal Kahn": 5,
+      "Frosted Kabal": 5,
+      "Gangster Blanka": 15,
+      "Gangster Juri": 15,
+      "Gangster Peacock": 15,
+      "Goth Eagle": 5,
+      "Goth Elphelt": 5,
+      "Goth R Mika": 15,
+      "Goth Reptile": 15,
+      "Goth Sophitia": 5,
+      "High Elf Akuma": 5,
+      "High Elf Eagle": 5,
+      "High Elf Jun": 5,
+      "High Elf Morrigan": 5,
+      "High Elf Noel": 5,
+      "High Elf Siegfried": 15,
+      "Infernal Astaroth": 2,
+      "Infernal Birdie": 5,
+      "Infernal Ibuki": 5,
+      "Infernal Raiden": 5,
+      "Infernal Scorpion": 5,
+      "Jade Ayane": 5,
+      "Jade Panda": 5,
+      "Jade Scorpion": 5,
+      "Jade Siegfried": 5,
+      "Jade Yugo": 5,
+      "Mafia Leader Erron Black": 15,
+      "Maid Elphelt": 15,
+      "Master of Monks Raiden": 15,
+      "Mythic Sentinel Alice": 15,
+      "Neon Core Angel": 5,
+      "Neon Core Cham Cham": 5,
+      "Neon Core Erron Black": 5,
+      "Neon Core Morrigan": 15,
+      "Neon Core Raiden": 5,
+      "Neon Core Sub Zero": 15,
+      "Obsidian Wraith Ayane": 15,
+      "Officer Noel": 15,
+      "Pajama Party Blanka": 15,
+      "Pajama Party Cham Cham": 5,
+      "Pajama Party Christie": 15,
+      "Pajama Party Kokoro": 15,
+      "Pajama Party Shoma": 15,
+      "Panda": 15,
+      "Phoenix R Mika": 15,
+      "Pirate Shoma": 15,
+      "Pop Star R Mika": 15,
+      "Primal Huntress Kagome": 5,
+      "Primal Warrior Juri": 15,
+      "Primal Warrior Kotal Kahn": 15,
+      "Primal Warrior Scorpion": 15,
+      "Primal Warrior Shoma": 5,
+      "Professional Athlete Ibuki": 15,
+      "Professional Baller Blanka": 15,
+      "Professional Footballer Siegfried": 15,
+      "Professional Tennis Player R Mika": 15,
+      "Professional Weightlifter Birdie": 15,
+      "Pyromancer Mega Man": 5,
+      "Rainy Day Julia": 15,
+      "Rainy Day Noel": 15,
+      "Rainy Day R Mika": 5,
+      "Rainy Day Reptile": 15,
+      "Rainy Day Shinnok": 5,
+      "Rainy Day Shizumaru": 5,
+      "Regal Empress Jun": 15,
+      "River Spirit Julia": 15,
+      "Rockstar Akuma": 15,
+      "Rockstar Birdie": 15,
+      "Royal Guard Astaroth": 15,
+      "Sacred Ceremony Birdie": 15,
+      "Sacred Ceremony Julia": 15,
+      "Sacred Ceremony Morrigan": 5,
+      "Sacred Ceremony Nina": 15,
+      "Sacred Ceremony Shoma": 15,
+      "Samurai Shizumaru": 15,
+      "Sand Soldier Astaroth": 15,
+      "Sand Soldier Birdie": 15,
+      "Sand Soldier Talim": 5,
+      "Schoolboy Siegfried": 15,
+      "Schoolgirl Ayane": 15,
+      "Schoolgirl Elphelt": 15,
+      "Schoolgirl Julia": 15,
+      "Schoolgirl Kokoro": 15,
+      "Shadowbane Ayane": 5,
+      "Skater Shoma": 15,
+      "Spectral Archer Kagome": 5,
+      "Steamcore Megaman": 5,
+      "Steamforged Kabal": 15,
+      "Steamforged Nina": 15,
+      "Steamforged Yugo": 15,
+      "Steampunk Ibuki": 15,
+      "Stonebreaker Astaroth": 5,
+      "Street Fighter Yugo": 15,
+      "Summertime Elphelt": 5,
+      "Summertime Jun": 5,
+      "Summertime Kotal Kahn": 2,
+      "Summertime Nina": 2,
+      "Summertime Reptile": 5,
+      "Summertime Shoma": 5,
+      "Superhero Shizumaru": 2,
+      "Thunder God Akuma": 15,
+      "Thunderstrike Shao Kahn": 5,
+      "Underworld Demon Noel": 2,
+      "Voidborn Akuma": 2,
+      "Voidborn Angel": 5,
+      "Voidborn Blanka": 5,
+      "Voidborn FANG": 5,
+      "Voidborn Nina": 5,
+      "Voidborn Peacock": 5,
+      "Voidborn Scorpion": 5,
+      "Warlord Birdie": 5,
+      "Windwood Talim": 5
+    },
+    "halloweenbox": {
+      "Diablo Erron Black": 10,
+      "Jack O Blanka": 10,
+      "Spectral Reaper Ayane": 10,
+      "Witch Julia": 25,
+      "Zombie Astaroth": 10
+    },
+    "pajamapartybox": {
+      "Pajama Party Blanka": 25,
+      "Pajama Party Cham Cham": 10,
+      "Pajama Party Christie": 25,
+      "Pajama Party Kokoro": 25,
+      "Pajama Party Shoma": 25
+    }
+  },
+  "users": {
+    "J1Wanf4kmFMTiG2xOLsvR9bsrYd2": {
+      "ARAM lose": 15,
+      "ARAM win": 15,
+      "BPprogress": {
+        "Item1": 1,
+        "Item10": 1,
+        "Item11": 1,
+        "Item12": 1,
+        "Item13": 1,
+        "Item14": 1,
+        "Item2": 1,
+        "Item3": 1,
+        "Item4": 1,
+        "Item5": 1,
+        "Item6": 1,
+        "Item7": 1,
+        "Item8": 1,
+        "Item9": 1
+      },
+      "BattlePassExp": 2099,
+      "CM": 282143,
+      "FM": 7493,
+      "Icons": {
+        "Angel_Icon": 1,
+        "Angry_Carrot_Icon": 1,
+        "Arcade_Raiden": 1,
+        "Arcade_Sub_Zero": 1,
+        "Ayane_Blade": 1,
+        "Birdie_Sacred": 1,
+        "Bistro_Shizumaru": 1,
+        "Black_Red_Rose": 1,
+        "Captain_Akuma": 1,
+        "Celestial_ChamCham": 1,
+        "Celestial_Elphelt": 1,
+        "Cham_A1": 1,
+        "Elphelt_Heart": 1,
+        "Elphelt_Icon": 1,
+        "Forest_Goddess_Angel": 1,
+        "Goth_Shield": 1,
+        "Infernal_Birdie": 1,
+        "Infernal_Ibuki": 1,
+        "Infernal_Raiden": 1,
+        "Jade_Claws": 1,
+        "Jade_Panda": 1,
+        "Jade_Yugo": 1,
+        "Julia_Icon": 1,
+        "Julia_Sacred": 1,
+        "Kokoro_Butterfly": 1,
+        "Kokoro_Icon": 1,
+        "Lili_Icon": 1,
+        "Morrigan_Darkness": 1,
+        "Nina_Icon": 1,
+        "Nina_Portrait": 1,
+        "Noel_Icon": 1,
+        "Pajama_ChamCham": 1,
+        "Pajama_Shoma": 1,
+        "Panda": 1,
+        "Peacock_Icon": 1,
+        "Pirate_Shoma": 1,
+        "Primal_Kid_Shoma": 1,
+        "Primal_Scorpion": 1,
+        "Regal_Julia": 1,
+        "Root": 1,
+        "Schoolgirl_Julia": 1,
+        "Shoma_Icon": 1,
+        "Steampunk_City": 1,
+        "Steampunk_Hat": 1,
+        "Summertime_Nina": 1,
+        "Summertime_Shoma": 1,
+        "Void_Blanka": 1,
+        "battleborn_ayane": 1,
+        "blossom_julia": 1,
+        "blossom_mai": 1,
+        "blossom_shizumaru": 1,
+        "gangster_peacock": 1,
+        "lovely_kagome": 1,
+        "peacock_bunny": 1,
+        "santa_panda": 1,
+        "snowman": 1,
+        "talim_desert": 1,
+        "winter_lili": 1
+      },
+      "Rank points": 901,
+      "Songs": {
+        "Born of Light (Celestial Protector Lili Theme)": 1,
+        "Capoeira Queen (Christie Theme)": 1,
+        "Date Night Prep": 1,
+        "Date Night Prep (Date Night Mega Man Theme)": 1,
+        "Flight of the Snow Queen Angel (Winter Queen Angel Theme)": 1,
+        "Forest Wanderer (Julia Theme)": 1,
+        "Jingle Bells (Winter Festival Shizumaru Theme)": 1,
+        "Love Day 2024": 1,
+        "Moonlight (Lunar Festival Kokoro Theme)": 1,
+        "Skater Boy Riffs (Skater Shoma Theme)": 1,
+        "Snowball Princess (Winter Festival Lili Theme)": 1,
+        "Starlit Sky (Celestial Protector R Mika Theme)": 1,
+        "Twilight Shadows": 1,
+        "Under The Sea (Atlantean Christie Theme)": 1
+      },
+      "Stickers": {
+        "Ayane_Isthisa": 1,
+        "Ayane_Side_Eye": 1,
+        "Ayane_Try_Me": 1,
+        "Birdie_Ate": 1,
+        "Birdie_Sacred": 1,
+        "Blanka_Scared": 1,
+        "ChamCham_Crazy": 1,
+        "ChamCham_V": 2,
+        "Christie_Heart": 1,
+        "Jackolantern": 1,
+        "Jade_Ayane_Embarassed": 1,
+        "Julia_Sacred": 1,
+        "Juri_Selfie": 1,
+        "Juri_Wicked": 1,
+        "Kokoro_Blushing": 1,
+        "Kuma_Eat": 1,
+        "Mega_Man_Cry": 1,
+        "Nina_Facepalm": 1,
+        "Nina_Smoke": 1,
+        "Rainy_Day_Julia": 1,
+        "Reptile_Confused": 1,
+        "Rmika_Gum": 1,
+        "Scorpion": 1,
+        "Shizumaru_Lmao": 1,
+        "Shoma_Surprised": 1,
+        "angel_thank_you": 1,
+        "chamcham_hello": 1,
+        "chibi_subzero_winter": 1,
+        "lunar_lantern_smile": 1,
+        "peacock_sassy": 1,
+        "reptile_ok": 1,
+        "rmika_excited": 1,
+        "santa_kuma": 1
+      },
+      "activeTitle": "Silent Assassin",
+      "aramGames": 29,
+      "background": "Desert Wars Event",
+      "battleResults": {
+        "5v5_blazing_school_day": {
+          "-OOZD0qEhxasYAALAUOm": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolgirl_kokoro",
+              "schoolgirl_julia",
+              "schoolboy_siegfried",
+              "schoolboy_shoma",
+              "schoolgirl_ayane"
+            ],
+            "timestamp": 1745438121402,
+            "turns": 16,
+            "victory": false
+          },
+          "-OOZD1aKojlPNVZMXXOv": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolgirl_kokoro",
+              "schoolgirl_julia",
+              "schoolboy_siegfried",
+              "schoolboy_shoma",
+              "schoolgirl_ayane"
+            ],
+            "timestamp": 1745438124475,
+            "turns": 17,
+            "victory": false
+          },
+          "-OOZl2xiR-2uNXrOHMWi": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolgirl_julia",
+              "schoolboy_shoma",
+              "schoolgirl_ayane",
+              "schoolgirl_elphelt",
+              "schoolboy_siegfried"
+            ],
+            "timestamp": 1745447305108,
+            "turns": 27,
+            "victory": false
+          }
+        },
+        "farm_showdown": {
+          "-OOZIeepVpub1vNqoOjT": {
+            "survivors": 3,
+            "teamComposition": [
+              "schoolgirl_julia",
+              "cham_cham",
+              "schoolgirl_ayane"
+            ],
+            "timestamp": 1745439599318,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOZNsHSpE49el9k4L7E": {
+            "survivors": 3,
+            "teamComposition": [
+              "schoolgirl_julia",
+              "cham_cham",
+              "schoolgirl_ayane"
+            ],
+            "timestamp": 1745440965823,
+            "turns": 24,
+            "victory": true
+          },
+          "-OOZNsIbR8Z1fNSk5DU4": {
+            "survivors": 3,
+            "teamComposition": [
+              "schoolgirl_julia",
+              "cham_cham",
+              "schoolgirl_ayane"
+            ],
+            "timestamp": 1745440965894,
+            "turns": 24,
+            "victory": true
+          },
+          "-OOdzGj2oDIwDmnWnJxA": {
+            "survivors": 0,
+            "teamComposition": [
+              "farmer_raiden"
+            ],
+            "timestamp": 1745534917601,
+            "turns": 12,
+            "victory": false
+          },
+          "-OOdzHTVN0zc46CGKklC": {
+            "survivors": 0,
+            "teamComposition": [
+              "farmer_raiden"
+            ],
+            "timestamp": 1745534920635,
+            "turns": 13,
+            "victory": false
+          }
+        },
+        "test_dummy_stage": {
+          "-OOnN1zNZBNThpWzqAdq": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_shoma",
+              "farmer_raiden"
+            ],
+            "timestamp": 1745692405750,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOnN7A2rKfaRxH-xAqh": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_shoma",
+              "farmer_raiden"
+            ],
+            "timestamp": 1745692426975,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOnfm_Wlq9JWFQNl6m6": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_shoma",
+              "farmer_raiden"
+            ],
+            "timestamp": 1745697581446,
+            "turns": 11,
+            "victory": true
+          },
+          "-OOnhGzN2k7rrUG2nqwm": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_shoma",
+              "farmer_raiden"
+            ],
+            "timestamp": 1745697973450,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOo6ie1Z4QT7s3u0ScI": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_shoma",
+              "farmer_raiden"
+            ],
+            "timestamp": 1745704905380,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOqLoAn7iMChAPixkr5": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745742414606,
+            "turns": 19,
+            "victory": true
+          },
+          "-OOqLoAtTjipGWrKWn-e": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745742414608,
+            "turns": 19,
+            "victory": true
+          },
+          "-OOqLoBB4jIZSuTrtLPa": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745742414627,
+            "turns": 19,
+            "victory": true
+          },
+          "-OOq_eH2Je600iQd9kpK": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745746306175,
+            "turns": 25,
+            "victory": true
+          },
+          "-OOq_eH83WTbXRjYI696": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745746306179,
+            "turns": 25,
+            "victory": true
+          },
+          "-OOq_eHM-q9oA-kNL7RK": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745746306192,
+            "turns": 25,
+            "victory": true
+          },
+          "-OOqaWpm_nEwPP-GJwus": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745746533773,
+            "turns": 20,
+            "victory": true
+          },
+          "-OOqaWprh0_vMom653GO": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745746533777,
+            "turns": 20,
+            "victory": true
+          },
+          "-OOqaWq8GdKTTb9eAC6X": {
+            "survivors": 4,
+            "teamComposition": [
+              "farmer_shoma",
+              "schoolgirl_kokoro",
+              "farmer_alice",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745746533794,
+            "turns": 20,
+            "victory": true
+          },
+          "-OOrHJmT12ozxVv7lIUy": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745758014652,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOrJTxrtW_jY2530LZy": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745758581000,
+            "turns": 6,
+            "victory": true
+          },
+          "-OOrJTxvJYo0irz3Ffd9": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745758581004,
+            "turns": 6,
+            "victory": true
+          },
+          "-OOrJU9zwkb6qxuI6Zwr": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1745758581839,
+            "turns": 7,
+            "victory": true
+          },
+          "-OOs4bp1x5xsUrp0D9cO": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_kokoro"
+            ],
+            "timestamp": 1745771461984,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOs4c8bHKsXluds42U7": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_kokoro"
+            ],
+            "timestamp": 1745771463302,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_fOXnDVytujU60Li": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745846974085,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_lbJnjyO8a42Ob_M": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745846999537,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_m_-5GewQKoI4vfU": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745847003486,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_p2oQ7p-MRJtH0wA": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745847013649,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_pS5yLn7-WZtauMG": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745847015267,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_rK6Cef_6qYiPgBk": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745847022950,
+            "turns": 1,
+            "victory": true
+          },
+          "-OOw_rZLnLq330vub1Mi": {
+            "survivors": 2,
+            "teamComposition": [
+              "farmer_raiden",
+              "schoolgirl_julia"
+            ],
+            "timestamp": 1745847023925,
+            "turns": 1,
+            "victory": true
+          }
+        }
+      },
+      "cards": [
+        "Juri",
+        "Juri Dark",
+        "Talim",
+        "Lili",
+        "Lili Dark",
+        "Akuma",
+        "Lili Golden",
+        "Mai",
+        "Mai Blue",
+        "Lunar Festival Lili",
+        "Zasalamel",
+        "FANG",
+        "Shinnok",
+        "Zasalamel Evil",
+        "Shinnok Warlock"
+      ],
+      "characterTalents": {
+        "farmer_raiden": {
+          "talent_raiden_1": true,
+          "talent_raiden_14": true,
+          "talent_raiden_15": true,
+          "talent_raiden_16": true,
+          "talent_raiden_2": true,
+          "talent_raiden_20": true,
+          "talent_raiden_21": true,
+          "talent_raiden_22": true,
+          "talent_raiden_5": true,
+          "talent_raiden_7": true
+        },
+        "farmer_shoma": {
+          "talent_shoma_1": true,
+          "talent_shoma_12": true,
+          "talent_shoma_13": true,
+          "talent_shoma_18": true,
+          "talent_shoma_2": true,
+          "talent_shoma_21": true,
+          "talent_shoma_23": true,
+          "talent_shoma_3": true,
+          "talent_shoma_4": true,
+          "talent_shoma_5": true
+        }
+      },
+      "characters": {
+        "ARAM": {
+          "Ayane": {
+            "lose": 1,
+            "win": 0
+          },
+          "Christie": {
+            "lose": 2,
+            "win": 0
+          },
+          "Elphelt": {
+            "lose": 1,
+            "win": 0
+          },
+          "Juri": {
+            "lose": 0,
+            "win": 1
+          },
+          "Kagome": {
+            "lose": 0,
+            "win": 1
+          },
+          "Lili": {
+            "lose": 1,
+            "win": 1
+          },
+          "Nina": {
+            "lose": 2,
+            "win": 0
+          },
+          "Peacock": {
+            "lose": 0,
+            "win": 1
+          },
+          "R Mika": {
+            "lose": 0,
+            "win": 2
+          },
+          "Shinnok": {
+            "lose": 1,
+            "win": 0
+          },
+          "Shizumaru": {
+            "lose": 0,
+            "win": 2
+          }
+        },
+        "Ayane": {
+          "lose": 3,
+          "win": 6,
+          "xp": 1166
+        },
+        "Cham Cham": {
+          "lose": 0,
+          "win": 1
+        },
+        "Christie": {
+          "claimedRewards": {
+            "Dancer": true
+          },
+          "lose": 3,
+          "win": 5,
+          "xp": 1150
+        },
+        "Elphelt": {
+          "lose": 1,
+          "win": 0,
+          "xp": 153
+        },
+        "Erron Black": {
+          "lose": 2,
+          "win": 0,
+          "xp": 112
+        },
+        "Ibuki": {
+          "lose": 1,
+          "win": 1,
+          "xp": 315
+        },
+        "Julia": {
+          "lose": 4,
+          "win": 0,
+          "xp": 293
+        },
+        "Juri": {
+          "lose": 0,
+          "win": 1,
+          "xp": 305
+        },
+        "Kagome": {
+          "lose": 0,
+          "win": 1,
+          "xp": 305
+        },
+        "Kokoro": {
+          "claimedRewards": {
+            "Enchanter": true
+          },
+          "lose": 13,
+          "win": 10,
+          "xp": 2086
+        },
+        "Kotal Kahn": {
+          "lose": 0,
+          "win": 4,
+          "xp": 476
+        },
+        "Lili": {
+          "claimedRewards": {
+            "Rich": true
+          },
+          "lose": 13,
+          "win": 20,
+          "xp": 2874
+        },
+        "Mai": {
+          "lose": 1,
+          "win": 2,
+          "xp": 245
+        },
+        "Mega Man": {
+          "claimedRewards": {
+            "Cyber Warrior": true
+          },
+          "lose": 11,
+          "win": 11,
+          "xp": 2229
+        },
+        "Nina": {
+          "claimedRewards": {
+            "Silent Assassin": true
+          },
+          "lose": 7,
+          "win": 3,
+          "xp": 1143
+        },
+        "Noel": {
+          "claimedRewards": {
+            "Cop": true,
+            "Noel Icon": true
+          },
+          "lose": 15,
+          "win": 23,
+          "xp": 4326
+        },
+        "Peacock": {
+          "claimedRewards": {
+            "Gadgeteer": true,
+            "Peacock Icon": true
+          },
+          "lose": 19,
+          "win": 14,
+          "xp": 2970
+        },
+        "R Mika": {
+          "claimedRewards": {
+            "Tag Team": true
+          },
+          "lose": 9,
+          "win": 5,
+          "xp": 1655
+        },
+        "Shao Kahn": {
+          "lose": 1,
+          "win": 1,
+          "xp": 195
+        },
+        "Shinnok": {
+          "lose": 12,
+          "win": 21,
+          "xp": 4003
+        },
+        "Shizumaru": {
+          "lose": 10,
+          "win": 13,
+          "xp": 2598
+        },
+        "Shoma": {
+          "lose": 0,
+          "win": 4,
+          "xp": 258
+        },
+        "Sophitia": {
+          "lose": 0,
+          "win": 1
+        },
+        "Talim": {
+          "lose": 1,
+          "win": 2,
+          "xp": 314
+        },
+        "Tanya": {
+          "lose": 2,
+          "win": 4,
+          "xp": 729
+        }
+      },
+      "coins": 500,
+      "currentStageSelection": {
+        "id": "test_dummy_stage",
+        "name": "Target Dummy Test"
+      },
+      "currentStorySelection": "corruption_at_the_farmland",
+      "currentTeamSelection": [
+        "farmer_raiden",
+        "schoolgirl_julia"
+      ],
+      "dailyRewards": {
+        "lastClaimed": "2025-04-13T19:49:24.797Z",
+        "streak": 1
+      },
+      "decks": {
+        "currentDeck": {
+          "Akuma": 2,
+          "FANG": 1,
+          "Juri": 2,
+          "Juri Dark": 1,
+          "Lili": 2,
+          "Lili Dark": 2,
+          "Lili Golden": 2,
+          "Lunar Festival Lili": 2,
+          "Mai": 2,
+          "Mai Blue": 2,
+          "Shinnok": 2,
+          "Shinnok Warlock": 1,
+          "Talim": 2,
+          "Zasalamel": 2,
+          "Zasalamel Evil": 1
+        }
+      },
+      "easterEvent": {
+        "eggsCollected": 62,
+        "gamesCompleted": 1,
+        "gamesPlayed": 9,
+        "lastPlayed": "2025-03-31T19:12:59.577Z"
+      },
+      "email": "micskomate@gmail.com",
+      "gameSettings": {
+        "autoSelectEnabled": false,
+        "bgmVolume": 0.7,
+        "sfxVolume": 0.7,
+        "startLogOpen": true
+      },
+      "gems": 5,
+      "hasBattlepass": true,
+      "icon": "talim_desert.webp",
+      "lastPlayedRole": "support",
+      "lastSelectedStory": "blazing_school_day",
+      "matchHistory": {
+        "1744406598041": {
+          "build": {
+            "character": "Shinnok",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZs4HcrPXgSCGNyS7k",
+            "items": [
+              "djinn_s_lamp",
+              "atlantis_teardrop",
+              "ra_wand",
+              "abyssal_dune",
+              "obsidian_spire"
+            ],
+            "name": "Staff Collector",
+            "patch": "2.1.1",
+            "timestamp": 1739006695104
+          },
+          "character": "Shinnok",
+          "date": "2025-04-11T21:23:18.041Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 9,
+            "deaths": 7,
+            "kills": 8
+          },
+          "result": "Defeat",
+          "skin": "Rainy Day Shinnok",
+          "team1": [
+            {
+              "character": "Schoolboy Siegfried Obsidian Sapphire",
+              "name": "Snow"
+            },
+            {
+              "character": "Talim",
+              "name": "Guard"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Erron Black",
+              "name": "Heat"
+            },
+            {
+              "character": "Birdie",
+              "name": "Instafailure"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Astaroth",
+              "name": "Nurse"
+            },
+            {
+              "character": "Reptile",
+              "name": "Bork"
+            },
+            {
+              "character": "Ibuki",
+              "name": "Scout"
+            },
+            {
+              "character": "Elphelt",
+              "name": "G2_Fanboy"
+            },
+            {
+              "character": "Kokoro",
+              "name": "BoyWithLuv"
+            }
+          ],
+          "timestamp": "1744406598041"
+        },
+        "1744541998936": {
+          "build": {
+            "character": "Shinnok",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZs4HcrPXgSCGNyS7k",
+            "items": [
+              "djinn_s_lamp",
+              "atlantis_teardrop",
+              "ra_wand",
+              "abyssal_dune",
+              "obsidian_spire"
+            ],
+            "name": "Staff Collector",
+            "patch": "2.1.1",
+            "timestamp": 1739006695104
+          },
+          "character": "Shinnok",
+          "date": "2025-04-13T10:59:58.936Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 6,
+            "deaths": 1,
+            "kills": 6
+          },
+          "result": "Victory",
+          "skin": "Atlantean Shinnok",
+          "team1": [
+            {
+              "character": "Jun",
+              "name": "CosmicRay"
+            },
+            {
+              "character": "Kabal",
+              "name": "WeirdChamp420"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Erron Black",
+              "name": "Rage_Quit_Pro"
+            },
+            {
+              "character": "Kokoro",
+              "name": "ImmortalLord"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Yugo",
+              "name": "BlueMage"
+            },
+            {
+              "character": "Zasalamel",
+              "name": "ComboBreak3r"
+            },
+            {
+              "character": "Elphelt",
+              "name": "LegendHeart"
+            },
+            {
+              "character": "Kagome",
+              "name": "Edgy_Kawaii_69"
+            },
+            {
+              "character": "Julia",
+              "name": "Absolute_Awkward"
+            }
+          ],
+          "timestamp": "1744541998936"
+        },
+        "1744542070480": {
+          "build": {
+            "character": "Shinnok",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZs4HcrPXgSCGNyS7k",
+            "items": [
+              "djinn_s_lamp",
+              "atlantis_teardrop",
+              "ra_wand",
+              "abyssal_dune",
+              "obsidian_spire"
+            ],
+            "name": "Staff Collector",
+            "patch": "2.1.1",
+            "timestamp": 1739006695104
+          },
+          "character": "Shinnok",
+          "date": "2025-04-13T11:01:10.480Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 5,
+            "deaths": 0,
+            "kills": 5
+          },
+          "result": "Victory",
+          "skin": "Bandito Shinnok",
+          "team1": [
+            {
+              "character": "Jun",
+              "name": "AresWar"
+            },
+            {
+              "character": "Alice",
+              "name": "DigitalStorm"
+            },
+            {
+              "character": "Noel",
+              "name": "HighScore"
+            },
+            {
+              "character": "Peacock",
+              "name": "Time_Save"
+            },
+            {
+              "character": "R Mika",
+              "name": "Viral_Virus"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Astaroth",
+              "name": "WardMaster"
+            },
+            {
+              "character": "Scorpion",
+              "name": "EnergyLord"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Eagle",
+              "name": "MoonKnight"
+            },
+            {
+              "character": "Kotal Kahn",
+              "name": "StarLord"
+            }
+          ],
+          "timestamp": "1744542070480"
+        },
+        "1744542121419": {
+          "build": {
+            "character": "Shinnok",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZs4HcrPXgSCGNyS7k",
+            "items": [
+              "djinn_s_lamp",
+              "atlantis_teardrop",
+              "ra_wand",
+              "abyssal_dune",
+              "obsidian_spire"
+            ],
+            "name": "Staff Collector",
+            "patch": "2.1.1",
+            "timestamp": 1739006695104
+          },
+          "character": "Shinnok",
+          "date": "2025-04-13T11:02:01.419Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 10,
+            "deaths": 8,
+            "kills": 4
+          },
+          "result": "Victory",
+          "skin": "Atlantean Shinnok",
+          "team1": [
+            {
+              "character": "Sophitia",
+              "name": "TourneyPlayer"
+            },
+            {
+              "character": "Alice",
+              "name": "Lara_Croft"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Elphelt",
+              "name": "Filter_Fumble"
+            },
+            {
+              "character": "Julia",
+              "name": "Shadow_Lord777"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Astaroth",
+              "name": "Selfie_Shrug"
+            },
+            {
+              "character": "Birdie",
+              "name": "UwU_Gamer69"
+            },
+            {
+              "character": "Morrigan",
+              "name": "Death_Dealer99"
+            },
+            {
+              "character": "Erron Black",
+              "name": "TriumphBlade"
+            },
+            {
+              "character": "FANG",
+              "name": "Overrated_Ozzie"
+            }
+          ],
+          "timestamp": "1744542121419"
+        },
+        "1744543633049": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-13T11:27:13.049Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 7,
+            "deaths": 1,
+            "kills": 5
+          },
+          "result": "Victory",
+          "skin": "Battle Bistro Shizumaru",
+          "team1": [
+            {
+              "character": "Sophitia",
+              "name": "MythicHero"
+            },
+            {
+              "character": "Zasalamel",
+              "name": "Absolute_Awkward"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Erron Black",
+              "name": "DarkBlade"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "Money_Match"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Lili",
+              "name": "SkillMaster"
+            },
+            {
+              "character": "Blanka",
+              "name": "HarmonyHero"
+            },
+            {
+              "character": "Shinnok",
+              "name": "MightBlade"
+            },
+            {
+              "character": "Peacock",
+              "name": "AstroKnight"
+            },
+            {
+              "character": "Birdie",
+              "name": "LegendHeart"
+            }
+          ],
+          "timestamp": "1744543633049"
+        },
+        "1744545213633": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-13T11:53:33.633Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 2,
+            "deaths": 9,
+            "kills": 3
+          },
+          "result": "Defeat",
+          "skin": "Blossom Shizumaru",
+          "team1": [
+            {
+              "character": "Lili",
+              "name": "Pixel_Ninja_222"
+            },
+            {
+              "character": "Kabal",
+              "name": "Sky"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Peacock",
+              "name": "Hero_5555"
+            },
+            {
+              "character": "Julia",
+              "name": "^_^"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Jun",
+              "name": "Quantum_Warrior_111"
+            },
+            {
+              "character": "Juri",
+              "name": "Shadow_Doge_99"
+            },
+            {
+              "character": "Shinnok",
+              "name": "Or"
+            },
+            {
+              "character": "Elphelt",
+              "name": "Tech_Mage_333"
+            },
+            {
+              "character": "Kotal Kahn",
+              "name": "BTS_Army"
+            }
+          ],
+          "timestamp": "1744545213633"
+        },
+        "1744550670993": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-13T13:24:30.993Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 10,
+            "deaths": 6,
+            "kills": 6
+          },
+          "result": "Victory",
+          "skin": "Desert Demon Shizumaru",
+          "team1": [
+            {
+              "character": "Mai",
+              "name": "Sky"
+            },
+            {
+              "character": "Alice",
+              "name": "Bonk"
+            },
+            {
+              "character": "Shinnok",
+              "name": "SnackSlinger"
+            },
+            {
+              "character": "Peacock",
+              "name": "Cup"
+            },
+            {
+              "character": "Kokoro",
+              "name": "Zoop"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Shao Kahn",
+              "name": "Cyber_Crump"
+            },
+            {
+              "character": "Birdie",
+              "name": "Bob"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Erron Black",
+              "name": "EpicSimp"
+            },
+            {
+              "character": "Shoma",
+              "name": "Door"
+            }
+          ],
+          "timestamp": "1744550670993"
+        },
+        "1744551708574": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-13T13:41:48.574Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 11,
+            "deaths": 1,
+            "kills": 5
+          },
+          "result": "Victory",
+          "skin": "Battle Bistro Shizumaru",
+          "team1": [
+            {
+              "character": "Lili",
+              "name": "Ichigo_Dante"
+            },
+            {
+              "character": "Kotal Kahn",
+              "name": "Ninja_Witcher"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Mega Man",
+              "name": "Hokage_Chief"
+            },
+            {
+              "character": "Birdie",
+              "name": "Twice_Once"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Sophitia",
+              "name": "TheOne2000"
+            },
+            {
+              "character": "Kabal",
+              "name": "John_Wick"
+            },
+            {
+              "character": "Shinnok",
+              "name": "Pepe_Rare"
+            },
+            {
+              "character": "Elphelt",
+              "name": "Wojak_Feels"
+            },
+            {
+              "character": "Kokoro",
+              "name": "Lazy_Liker"
+            }
+          ],
+          "timestamp": "1744551708574"
+        },
+        "1744961903267": {
+          "build": {
+            "character": "Shinnok",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZs4HcrPXgSCGNyS7k",
+            "items": [
+              "djinn_s_lamp",
+              "atlantis_teardrop",
+              "ra_wand",
+              "abyssal_dune",
+              "obsidian_spire"
+            ],
+            "name": "Staff Collector",
+            "patch": "2.1.1",
+            "timestamp": 1739006695104
+          },
+          "character": "Shinnok",
+          "date": "2025-04-18T07:38:23.267Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 4,
+            "deaths": 0,
+            "kills": 9
+          },
+          "result": "Victory",
+          "skin": "Atlantean Shinnok",
+          "team1": [
+            {
+              "character": "Birdie",
+              "name": "G4m1ng_G0d"
+            },
+            {
+              "character": "Scorpion",
+              "name": "Bork"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Eagle",
+              "name": "SadCat"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "AutoTroll_X"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Astaroth",
+              "name": "Bloop"
+            },
+            {
+              "character": "Reptile",
+              "name": "Disaster_Doge"
+            },
+            {
+              "character": "Noel",
+              "name": "Blep"
+            },
+            {
+              "character": "Kagome",
+              "name": "Coach"
+            },
+            {
+              "character": "Angel",
+              "name": "Pizza"
+            }
+          ],
+          "timestamp": "1744961903267"
+        },
+        "1744968969911": {
+          "character": "Tanya",
+          "date": "2025-04-18T09:36:09.911Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 7,
+            "deaths": 2,
+            "kills": 13
+          },
+          "result": "Victory",
+          "skin": "Tanya",
+          "team1": [
+            {
+              "character": "Siegfried",
+              "name": "ThunderStrike"
+            },
+            {
+              "character": "Cham Cham",
+              "name": "Card_Shark"
+            },
+            {
+              "character": "Tanya",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Nina",
+              "name": "Zoom"
+            },
+            {
+              "character": "Shoma",
+              "name": "CosmicKing"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Birdie",
+              "name": "Footsies_Master"
+            },
+            {
+              "character": "Talim",
+              "name": "ProdigyLord"
+            },
+            {
+              "character": "Angel",
+              "name": "JungleLord"
+            },
+            {
+              "character": "Kagome",
+              "name": "HunterLord"
+            },
+            {
+              "character": "FANG",
+              "name": "MelodyMaker"
+            }
+          ],
+          "timestamp": "1744968969911"
+        },
+        "1744969056335": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-18T09:37:36.335Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 4,
+            "deaths": 7,
+            "kills": 14
+          },
+          "result": "Victory",
+          "skin": "Desert Demon Shizumaru",
+          "team1": [
+            {
+              "character": "Mai",
+              "name": "Chair"
+            },
+            {
+              "character": "Birdie",
+              "name": "Clout_Cave"
+            },
+            {
+              "character": "Shinnok",
+              "name": "Floof"
+            },
+            {
+              "character": "Peacock",
+              "name": "Twice_Once"
+            },
+            {
+              "character": "FANG",
+              "name": "SillyGoat"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Christie",
+              "name": "FOMO_Fiasco"
+            },
+            {
+              "character": "Zasalamel",
+              "name": "Wild"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Mega Man",
+              "name": "Chef"
+            },
+            {
+              "character": "R Mika",
+              "name": "Door"
+            }
+          ],
+          "timestamp": "1744969056335"
+        },
+        "1744972126215": {
+          "build": {
+            "character": "Talim",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OI_jc6663iH1a8etzN_",
+            "items": [
+              "zasalamels_scythe",
+              "clam_dancers",
+              "icicle_spear",
+              "sand_dagger",
+              "wavebreaker"
+            ],
+            "name": "CC Assassin",
+            "patch": "2.1.1",
+            "timestamp": 1739021255332
+          },
+          "character": "Talim",
+          "date": "2025-04-18T10:28:46.215Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 11,
+            "deaths": 2,
+            "kills": 7
+          },
+          "result": "Victory",
+          "skin": "Sand Soldier Talim",
+          "team1": [
+            {
+              "character": "Astaroth",
+              "name": "Instahype"
+            },
+            {
+              "character": "Talim",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "Boss_Sl4yer"
+            },
+            {
+              "character": "Mega Man",
+              "name": "HunterKing"
+            },
+            {
+              "character": "Birdie",
+              "name": "Champion_999"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Tanya",
+              "name": "Qwerty"
+            },
+            {
+              "character": "Scorpion",
+              "name": "Link_Zelda"
+            },
+            {
+              "character": "Shinnok",
+              "name": "xX_Cr1nge_Xx"
+            },
+            {
+              "character": "Eagle",
+              "name": "Super_Saiyan_X"
+            },
+            {
+              "character": "Kuma",
+              "name": "GamerGuy99"
+            }
+          ],
+          "timestamp": "1744972126215"
+        },
+        "1744972403929": {
+          "build": {
+            "character": "Talim",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OI_jc6663iH1a8etzN_",
+            "items": [
+              "zasalamels_scythe",
+              "clam_dancers",
+              "icicle_spear",
+              "sand_dagger",
+              "wavebreaker"
+            ],
+            "name": "CC Assassin",
+            "patch": "2.1.1",
+            "timestamp": 1739021255332
+          },
+          "character": "Talim",
+          "date": "2025-04-18T10:33:23.929Z",
+          "gameMode": "1v1",
+          "kda": {
+            "assists": 0,
+            "deaths": 1,
+            "kills": 0
+          },
+          "opponent": {
+            "character": "Kokoro",
+            "name": "Neo",
+            "skin": "Kokoro"
+          },
+          "result": "Defeat",
+          "skin": "Sand Soldier Talim",
+          "stats": {
+            "assists": 0,
+            "deaths": 1,
+            "kills": 0
+          },
+          "timestamp": "1744972403929"
+        },
+        "1744972702204": {
+          "character": "Shizumaru",
+          "date": "2025-04-18T10:38:22.204Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 9,
+            "deaths": 6,
+            "kills": 8
+          },
+          "result": "Defeat",
+          "skin": "Desert Demon Shizumaru",
+          "team1": [
+            {
+              "character": "Yugo",
+              "name": "Creepy_Crawl3r"
+            },
+            {
+              "character": "Scorpion",
+              "name": "SpringBloom"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Mega Man",
+              "name": "Fear_Less"
+            },
+            {
+              "character": "Kokoro",
+              "name": "Overrated_Ozzie"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Lili",
+              "name": "Complete_List"
+            },
+            {
+              "character": "Reptile",
+              "name": "AutumnSpirit"
+            },
+            {
+              "character": "Shinnok",
+              "name": "WinStreak"
+            },
+            {
+              "character": "Nina",
+              "name": "BardMaster"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "RoyalGuard"
+            }
+          ],
+          "timestamp": "1744972702204"
+        },
+        "1744977496698": {
+          "character": "Tanya",
+          "date": "2025-04-18T11:58:16.698Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 4,
+            "deaths": 3,
+            "kills": 11
+          },
+          "result": "Victory",
+          "skin": "Tanya",
+          "team1": [
+            {
+              "character": "Siegfried",
+              "name": "AceShot"
+            },
+            {
+              "character": "Scorpion",
+              "name": "Pixel_Ninja_222"
+            },
+            {
+              "character": "Elphelt",
+              "name": "LameStream"
+            },
+            {
+              "character": "Peacock",
+              "name": "Pr0_G4mer_69"
+            },
+            {
+              "character": "Shoma",
+              "name": "NotFound"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Sophitia",
+              "name": "Bonk"
+            },
+            {
+              "character": "Birdie",
+              "name": "Sonic_Fast"
+            },
+            {
+              "character": "Tanya",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Mega Man",
+              "name": "NRG_Gamer"
+            },
+            {
+              "character": "Kokoro",
+              "name": "Ash"
+            }
+          ],
+          "timestamp": "1744977496698"
+        },
+        "1744977554828": {
+          "character": "Tanya",
+          "date": "2025-04-18T11:59:14.828Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 10,
+            "deaths": 1,
+            "kills": 9
+          },
+          "result": "Victory",
+          "skin": "Tanya",
+          "team1": [
+            {
+              "character": "Astaroth",
+              "name": "NightShade"
+            },
+            {
+              "character": "Reptile",
+              "name": "WarriorMage"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FrostByte"
+            },
+            {
+              "character": "Elphelt",
+              "name": "StarDust"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "Yeet"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Lili",
+              "name": "ThunderStrike"
+            },
+            {
+              "character": "Alice",
+              "name": "NightStalker"
+            },
+            {
+              "character": "Tanya",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Nina",
+              "name": "BlazingPhoenix"
+            },
+            {
+              "character": "R Mika",
+              "name": "GloryBringer"
+            }
+          ],
+          "timestamp": "1744977554828"
+        },
+        "1744977617004": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-18T12:00:17.004Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 8,
+            "deaths": 9,
+            "kills": 2
+          },
+          "result": "Defeat",
+          "skin": "Battle Bistro Shizumaru",
+          "team1": [
+            {
+              "character": "Birdie",
+              "name": "Happy_Gamer"
+            },
+            {
+              "character": "Cham Cham",
+              "name": "Goku_x_Chief"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Noel",
+              "name": "AceShot"
+            },
+            {
+              "character": "Angel",
+              "name": "ElitePlayer"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Mai",
+              "name": "HadesShade"
+            },
+            {
+              "character": "Alice",
+              "name": "EliteSniper"
+            },
+            {
+              "character": "Mega Man",
+              "name": "NatureFury"
+            },
+            {
+              "character": "Elphelt",
+              "name": "SpeedRunner"
+            },
+            {
+              "character": "Kokoro",
+              "name": "SkillMaster"
+            }
+          ],
+          "timestamp": "1744977617004"
+        },
+        "1744978285082": {
+          "build": {
+            "character": "Shizumaru",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZsVZQhl1jym2FjTo3",
+            "items": [
+              "clam_dancers",
+              "street_kings_chain",
+              "flask_of_strength",
+              "golden_arrow",
+              "wavebreaker"
+            ],
+            "name": "Very Strong Earlygame",
+            "patch": "2.1.1",
+            "timestamp": 1739006806835
+          },
+          "character": "Shizumaru",
+          "date": "2025-04-18T12:11:25.082Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 3,
+            "deaths": 1,
+            "kills": 6
+          },
+          "result": "Victory",
+          "skin": "Superhero Shizumaru",
+          "team1": [
+            {
+              "character": "Jun",
+              "name": "WolfPack"
+            },
+            {
+              "character": "Kotal Kahn",
+              "name": "...."
+            },
+            {
+              "character": "Shizumaru",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Mega Man",
+              "name": "ZeusThunder"
+            },
+            {
+              "character": "Shoma",
+              "name": "TopLaner"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Mai",
+              "name": "NightBlade"
+            },
+            {
+              "character": "Cham Cham",
+              "name": "SpearMaster"
+            },
+            {
+              "character": "Tanya",
+              "name": "TidalWave"
+            },
+            {
+              "character": "Noel",
+              "name": "TemplarKnight"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "TacticianKing"
+            }
+          ],
+          "timestamp": "1744978285082"
+        },
+        "1744978332347": {
+          "build": {
+            "character": "Shinnok",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZs4HcrPXgSCGNyS7k",
+            "items": [
+              "djinn_s_lamp",
+              "atlantis_teardrop",
+              "ra_wand",
+              "abyssal_dune",
+              "obsidian_spire"
+            ],
+            "name": "Staff Collector",
+            "patch": "2.1.1",
+            "timestamp": 1739006695104
+          },
+          "character": "Shinnok",
+          "date": "2025-04-18T12:12:12.347Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 8,
+            "deaths": 6,
+            "kills": 5
+          },
+          "result": "Defeat",
+          "skin": "Atlantean Shinnok",
+          "team1": [
+            {
+              "character": "Jun",
+              "name": "hyp3r_troll"
+            },
+            {
+              "character": "Juri",
+              "name": "13579"
+            },
+            {
+              "character": "Noel",
+              "name": "Lisa_BlackPink"
+            },
+            {
+              "character": "Peacock",
+              "name": "Cyber_Samurai_99"
+            },
+            {
+              "character": "Julia",
+              "name": "Manga_Reader"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Yugo",
+              "name": "BlackPink_Blink"
+            },
+            {
+              "character": "Scorpion",
+              "name": "Uchiha_Gamer"
+            },
+            {
+              "character": "Shinnok",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Mega Man",
+              "name": "Twice_Once"
+            },
+            {
+              "character": "R Mika",
+              "name": "Doctor_Strange"
+            }
+          ],
+          "timestamp": "1744978332347"
+        },
+        "1745081571748": {
+          "build": {
+            "character": "Ayane",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIXJn0jabpdN_vGc4Y7",
+            "items": [
+              "zasalamels_scythe",
+              "flask_of_strength",
+              "sand_dagger",
+              "clam_dancers",
+              "scorpion_sword"
+            ],
+            "name": "Scaling Oneshot",
+            "patch": "2.1.1",
+            "timestamp": 1738963890484
+          },
+          "character": "Ayane",
+          "date": "2025-04-19T16:52:51.750Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 6,
+            "deaths": 2,
+            "kills": 9
+          },
+          "result": "Victory",
+          "skin": "Spectral Reaper Ayane",
+          "team1": [
+            {
+              "character": "Mai",
+              "name": "RhythmKing"
+            },
+            {
+              "character": "Talim",
+              "name": "Instabomb"
+            },
+            {
+              "character": "Ayane",
+              "name": "FishB0nes98"
+            },
+            {
+              "character": "Noel",
+              "name": "Sock"
+            },
+            {
+              "character": "Angel",
+              "name": "BM_King"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Christie",
+              "name": "Zxcv"
+            },
+            {
+              "character": "Blanka",
+              "name": "Mate"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "Woosh"
+            },
+            {
+              "character": "Erron Black",
+              "name": "Grumpy"
+            },
+            {
+              "character": "Kokoro",
+              "name": "SillyGoat"
+            }
+          ],
+          "timestamp": "1745081571748"
+        }
+      },
+      "mostRecentMatch": {
+        "gameMode": "ARAM",
+        "id": "1744406514617",
+        "result": "Victory",
+        "timestamp": 1744406514678
+      },
+      "oneVsOneGamesPlayed": 18,
+      "profileColor": "#796349",
+      "profileSticker": "Juri_Wicked",
+      "questPoints": 2620,
+      "quests": {
+        "blossom_devotee": {
+          "champion": "Talim",
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1
+        },
+        "blossom_gatherer": {
+          "claimed": false,
+          "completed": false,
+          "progress": 1
+        },
+        "gang_domination": {
+          "claimed": false,
+          "completed": true,
+          "completionCount": 0,
+          "games": 5,
+          "progress": 5
+        },
+        "gang_hitman": {
+          "claimed": false,
+          "completed": true,
+          "completionCount": 0,
+          "multikills": 4,
+          "progress": 4
+        },
+        "gang_loyalty": {
+          "champion": "Ayane",
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1
+        },
+        "gang_warfare": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1745081572664,
+          "progress": 1
+        },
+        "sakura_warrior": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 0,
+          "streak": 0
+        },
+        "street_enforcer": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1,
+          "streak": 1
+        },
+        "territory_control": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1745081572664,
+          "progress": 6963,
+          "totalDamage": 6963
+        },
+        "turf_war": {
+          "claimed": false,
+          "completed": true,
+          "completionCount": 0,
+          "objectives": 30,
+          "progress": 30
+        }
+      },
+      "ranked lose": 60,
+      "ranked win": 65,
+      "selectedSkins": [
+        null,
+        "Summertime Shoma",
+        "Lunar Festival Lili",
+        "Spectral Reaper Ayane"
+      ],
+      "skins": {
+        "Akuma": 1,
+        "Alice": 1,
+        "Angel": 1,
+        "Arcade Noel": 1,
+        "Arcade Sub Zero": 1,
+        "Arctic Huntress Nina": 1,
+        "Arctic Huntress Noel": 1,
+        "Arctic Huntress Peacock": 1,
+        "Astaroth": 1,
+        "Atlantean Christie": 1,
+        "Atlantean Kagome": 1,
+        "Atlantean Shinnok": 1,
+        "Ayane": 1,
+        "Bandito Shinnok": 1,
+        "Bandito Shinnok Fel Fire": 1,
+        "Battle Bistro Shizumaru": 1,
+        "Battleborn Ayane": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Blossom Angel": 1,
+        "Blossom Cham Cham": 1,
+        "Blossom Julia": 1,
+        "Blossom Mai": 1,
+        "Blossom Raiden": 1,
+        "Blossom Shizumaru": 1,
+        "Blossom Talim": 1,
+        "Captain Noel": 1,
+        "Celestial Protector Cham Cham": 1,
+        "Celestial Protector Cham Cham Blue": 1,
+        "Celestial Protector Elphelt": 1,
+        "Celestial Protector Lili": 1,
+        "Cham Cham": 1,
+        "Chris T": 1,
+        "Christie": 1,
+        "Country Erron Black": 1,
+        "Cyber Hunter Elphelt": 1,
+        "Desert Demon Shizumaru": 1,
+        "Dragon Tamer Julia": 1,
+        "Dragon Tamer Morrigan": 1,
+        "Eagle": 1,
+        "Easter Bunny Peacock": 1,
+        "Easter Bunny R Mika": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "FANG": 1,
+        "Farmer Nina": 1,
+        "Farmer Raiden": 1,
+        "Farmer Shoma": 1,
+        "Feather Dancer Mai": 1,
+        "Forest Behemoth Astaroth Ashen": 1,
+        "Forest Goddess Angel": 1,
+        "Gangster Peacock": 1,
+        "Goth Eagle": 1,
+        "Goth Elphelt": 1,
+        "Goth Elphelt Crimson Noir": 1,
+        "Goth R Mika": 1,
+        "Heartbreaker Ibuki": 1,
+        "High Elf Noel": 1,
+        "Ibuki": 1,
+        "Infernal Julia": 1,
+        "Infernal Scorpion": 1,
+        "Jade Panda": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Juri": 1,
+        "Kabal": 1,
+        "Kagome": 1,
+        "Kokoro": 1,
+        "Kokoro Black": true,
+        "Kotal Kahn": 1,
+        "Kuma": 1,
+        "Lili": 1,
+        "Lovely Kagome": 1,
+        "Lunar Festival Kokoro": 1,
+        "Lunar Festival Lili": 1,
+        "Mai": 1,
+        "Master of Monks Raiden": 1,
+        "Mega Man": 1,
+        "Morrigan": 1,
+        "Neon Core Angel": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Pajama Party Cham Cham": 1,
+        "Pajama Party Kokoro": 1,
+        "Panda": 1,
+        "Peacock": 1,
+        "Pirate Shoma": 1,
+        "Primal Warrior Shoma": 1,
+        "Professional Weightlifter Birdie": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Rainy Day Julia": 1,
+        "Rainy Day Noel": 1,
+        "Rainy Day R Mika": 1,
+        "Rainy Day R Mika Moss": 1,
+        "Rainy Day R Mika Ocean": 1,
+        "Rainy Day R Mika Rose": 1,
+        "Rainy Day R Mika Twilight": 1,
+        "Rainy Day Reptile": 1,
+        "Rainy Day Shinnok": 1,
+        "Rainy Day Shizumaru": 1,
+        "Red Stone Ibuki": 1,
+        "Regal Empress Jun": 1,
+        "Reptile": 1,
+        "Reptile Sand": 1,
+        "River Spirit Julia": 1,
+        "River Spirit Julia Golden": 1,
+        "Sacred Ceremony Julia": 1,
+        "Sacred Ceremony Shoma": 1,
+        "Sand Soldier Talim": 1,
+        "Schoolgirl Ayane": 1,
+        "Schoolgirl Julia": 1,
+        "Schoolgirl Kokoro": 1,
+        "Scorpion": 1,
+        "Shao Kahn": 1,
+        "Shinnok": 1,
+        "Shizumaru": 1,
+        "Shoma": 1,
+        "Shoma Red": true,
+        "Shoma Schoolboy": 1,
+        "Siegfried": 1,
+        "Skater Shoma": 1,
+        "Sophitia": 1,
+        "Spectral Reaper Ayane": 1,
+        "Steamforged Nina": 1,
+        "Sub Zero": 1,
+        "Summertime Nina": 1,
+        "Summertime Shoma": 1,
+        "Superhero Shizumaru": 1,
+        "Talim": 1,
+        "Thunderstrike Shao Kahn": 1,
+        "Underworld Demon Noel": 1,
+        "Voidborn Angel": 1,
+        "Winter Festival Juri": 1,
+        "Winter Festival Lili": 1,
+        "Winter Festival Shizumaru": "",
+        "Winter Queen Angel": 1,
+        "Witch Julia": 1,
+        "Yugo": 1,
+        "Zasalamel": 1
+      },
+      "titles": {
+        "Atlantean Warrior": true,
+        "Celestial Protector": true,
+        "Guardian Angel": true,
+        "Lover": true,
+        "Nature Lover": true,
+        "Santa Clause": true,
+        "Shining Star": true,
+        "Snake": true,
+        "Snow Angel": true,
+        "Snowflake": true,
+        "battleborn": true,
+        "brave_girl": true,
+        "cop": true,
+        "cupid": true,
+        "cyber_warrior": true,
+        "dancer": true,
+        "daughter": true,
+        "enchanter": true,
+        "gadgeteer": true,
+        "little_samurai": true,
+        "rich": true,
+        "silent_assassin": true,
+        "spirit_blossom": true,
+        "sporty": true,
+        "tag_team": true
+      },
+      "username": "FishB0nes98"
+    },
+    "MW83lo21LVeKVYwNDhW1VZtA4Vd2": {
+      "BattlePassExp": 111,
+      "Bundles": {
+        "EasterBundle": 1,
+        "StarterStickers": 1
+      },
+      "CM": 11176,
+      "FM": 22450,
+      "Icons": {
+        "Ayane_Blade": 1
+      },
+      "Raid": {
+        "Stage1": 1,
+        "Stage2": 1,
+        "Stage3": 1,
+        "Stage4": 1,
+        "Stage5": 1
+      },
+      "Rank points": 11,
+      "Stickers": {
+        "Ayane_Isthisa": 1,
+        "Ayane_Side_Eye": 1,
+        "Birdie_Ate": 1,
+        "Blanka_Scared": 1,
+        "ChamCham_Crazy": 1,
+        "ChamCham_V": 1,
+        "Christie_Heart": 1,
+        "Jade_Ayane_Embarassed": 1,
+        "Juri_Selfie": 1,
+        "Rainy_Day_Julia": 1,
+        "Rmika_Gum": 1,
+        "Shizumaru_Lmao": 1,
+        "Shoma_Surprised": 1
+      },
+      "advent2024": {
+        "day1": true
+      },
+      "background": "Pirate Event",
+      "characters": {
+        "Akuma": {
+          "lose": 0,
+          "win": 1
+        },
+        "Angel": {
+          "lose": 1,
+          "win": 0
+        },
+        "Astaroth": {
+          "lose": 1,
+          "win": 1
+        },
+        "Ayane": {
+          "lose": 2,
+          "win": 1,
+          "xp": 171
+        },
+        "Birdie": {
+          "lose": 0,
+          "win": 1
+        },
+        "Cham Cham": {
+          "lose": 1,
+          "win": 0
+        },
+        "Elphelt": {
+          "lose": 1,
+          "win": 0
+        },
+        "Morrigan": {
+          "lose": 1,
+          "win": 1
+        },
+        "Reptile": {
+          "lose": 0,
+          "win": 1
+        },
+        "Scorpion": {
+          "lose": 0,
+          "win": 1
+        },
+        "Talim": {
+          "lose": 0,
+          "win": 2,
+          "xp": 305
+        }
+      },
+      "email": "horus.bv@gmail.com",
+      "friends": {
+        "-O59JHQIH-zFH-_IpT1N": {
+          "id": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+          "name": "FishB0nes98"
+        }
+      },
+      "icon": "Julia.png",
+      "matchHistory": {
+        "1743867816982": {
+          "character": "Talim",
+          "date": "2025-04-05T15:43:36.982Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 8,
+            "deaths": 9,
+            "kills": 14
+          },
+          "result": "Victory",
+          "skin": "Captain Talim",
+          "team1": [
+            {
+              "character": "Shao Kahn",
+              "name": "BowMaster"
+            },
+            {
+              "character": "Talim",
+              "name": "horuskutya"
+            },
+            {
+              "character": "Akuma",
+              "name": "BlazingPhoenix"
+            },
+            {
+              "character": "Nina",
+              "name": "Dark_UwU_666"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "FrostByte"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Mai",
+              "name": "AnubisGuard"
+            },
+            {
+              "character": "Alice",
+              "name": "FreyaLight"
+            },
+            {
+              "character": "Mega Man",
+              "name": "Player12345"
+            },
+            {
+              "character": "Erron Black",
+              "name": "Zxcvbnm420"
+            },
+            {
+              "character": "Kokoro",
+              "name": "Demon_UwU_Lord"
+            }
+          ],
+          "timestamp": "1743867816982"
+        },
+        "1743867849498": {
+          "character": "Talim",
+          "date": "2025-04-05T15:44:09.498Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 4,
+            "deaths": 2,
+            "kills": 8
+          },
+          "result": "Victory",
+          "skin": "Captain Talim",
+          "team1": [
+            {
+              "character": "Shao Kahn",
+              "name": "BowMaster"
+            },
+            {
+              "character": "Talim",
+              "name": "horuskutya"
+            },
+            {
+              "character": "Akuma",
+              "name": "BlazingPhoenix"
+            },
+            {
+              "character": "Nina",
+              "name": "Dark_UwU_666"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "FrostByte"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Mai",
+              "name": "AnubisGuard"
+            },
+            {
+              "character": "Alice",
+              "name": "FreyaLight"
+            },
+            {
+              "character": "Mega Man",
+              "name": "Player12345"
+            },
+            {
+              "character": "Erron Black",
+              "name": "Zxcvbnm420"
+            },
+            {
+              "character": "Kokoro",
+              "name": "Demon_UwU_Lord"
+            }
+          ],
+          "timestamp": "1743867849498"
+        },
+        "1743868985387": {
+          "build": {
+            "character": "Ayane",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIXJn0jabpdN_vGc4Y7",
+            "items": [
+              "zasalamels_scythe",
+              "flask_of_strength",
+              "sand_dagger",
+              "clam_dancers",
+              "scorpion_sword"
+            ],
+            "name": "Scaling Oneshot",
+            "patch": "2.1.1",
+            "timestamp": 1738963890484
+          },
+          "character": "Ayane",
+          "date": "2025-04-05T16:03:05.387Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 4,
+            "deaths": 7,
+            "kills": 5
+          },
+          "result": "Defeat",
+          "skin": "Ayane",
+          "team1": [
+            {
+              "character": "Shao Kahn",
+              "name": "WindWalker"
+            },
+            {
+              "character": "Reptile",
+              "name": "TopLaner"
+            },
+            {
+              "character": "Mai",
+              "name": "JungleKing"
+            },
+            {
+              "character": "Elphelt",
+              "name": "LightningBolt"
+            },
+            {
+              "character": "Kuma",
+              "name": "PhoenixRising"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Christie",
+              "name": "MidLegend"
+            },
+            {
+              "character": "Zasalamel",
+              "name": "ThunderStrike"
+            },
+            {
+              "character": "Ayane",
+              "name": "horuskutya"
+            },
+            {
+              "character": "Erron Black",
+              "name": "JungleTerror"
+            },
+            {
+              "character": "Angel",
+              "name": "StormRider"
+            }
+          ],
+          "timestamp": "1743868985387"
+        }
+      },
+      "oneVsOneGamesPlayed": 1,
+      "quests": {
+        "crisisInTheKingdom": {
+          "progress": 1
+        },
+        "gang_domination": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "games": 1,
+          "progress": 1
+        },
+        "gang_hitman": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "multikills": 1,
+          "progress": 1
+        },
+        "gang_loyalty": {
+          "champion": "Ayane",
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1
+        },
+        "gang_warfare": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1743867850794,
+          "progress": 2
+        },
+        "play3games": {
+          "progress": 1
+        },
+        "street_enforcer": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 0,
+          "streak": 0
+        },
+        "territory_control": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1743867850794,
+          "progress": 12779,
+          "totalDamage": 12779
+        },
+        "turf_war": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "objectives": 3,
+          "progress": 3
+        }
+      },
+      "ranked lose": 1,
+      "ranked win": 1,
+      "skins": {
+        "Akuma": 1,
+        "Angel": 1,
+        "Arctic Huntress Nina": 1,
+        "Arctic Monster Astaroth": 1,
+        "Astaroth": 1,
+        "Ayane": 1,
+        "Battle Bistro Lili": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Blood Predator Reptile": 1,
+        "Blossom Cham Cham": 1,
+        "Blossom Jun": 1,
+        "Blossom Shizumaru": 1,
+        "Blossom Talim": 1,
+        "Captain Akuma": 1,
+        "Captain Talim": 1,
+        "Casual Wear Juri": 1,
+        "Cham Cham": 1,
+        "Chocolate Bunny Alice": 1,
+        "Cyber Bomber Peacock": 1,
+        "Cyber Hunter Elphelt": 1,
+        "DJ Ibuki": 1,
+        "Demon Hunter Ibuki": 1,
+        "Disco Queen Julia": 1,
+        "Dragon Tamer Raiden": 1,
+        "Easter Bunny Peacock": 1,
+        "Easter Bunny R Mika": 1,
+        "Easter Bunny Shinnok": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "Farmer Nina": 1,
+        "Farmer Raiden": 1,
+        "Forest Behemoth Astaroth": 1,
+        "Forest Guardian Morrigan": 1,
+        "Goth R Mika": 1,
+        "Goth Reptile": 1,
+        "Goth Sophitia": 1,
+        "Ibuki": 1,
+        "Infernal Astaroth": 1,
+        "Infernal Birdie": 1,
+        "Infernal Julia": 1,
+        "Infernal Scorpion": 1,
+        "Jade Panda": 1,
+        "Jade Scorpion": 1,
+        "Jade Yugo": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Juri": 1,
+        "Kotal Kahn": 1,
+        "Maid Elphelt": 1,
+        "Master of Monks Raiden": 1,
+        "Morrigan": 1,
+        "Mythic Sentinel Alice": 1,
+        "Neon Core Cham Cham": 1,
+        "Neon Core Morrigan": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Obsidian Wraith Ayane": 1,
+        "Officer Noel": 1,
+        "Pajama Party Shoma": 1,
+        "Peacock": 1,
+        "Pirate Shoma": 1,
+        "Pop Star R Mika": 1,
+        "Primal Huntress Kagome": 1,
+        "Primal Warrior Juri": 1,
+        "Primal Warrior Kotal Kahn": 1,
+        "Professional Athlete Ibuki": 1,
+        "Professional Baller Blanka": 1,
+        "Professional Weightlifter Birdie": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Regal Empress Jun": 1,
+        "Reptile": 1,
+        "River Spirit Julia": 1,
+        "Rockstar Akuma": 1,
+        "Rockstar Birdie": 1,
+        "Sacred Ceremony Birdie": 1,
+        "Sand Soldier Astaroth": 1,
+        "Sand Soldier Birdie": 1,
+        "Sand Soldier Talim": 1,
+        "Schoolgirl Elphelt": 1,
+        "Schoolgirl Julia": 1,
+        "Schoolgirl Kokoro": 1,
+        "Scorpion": 1,
+        "Street Fighter Yugo": 1,
+        "Summertime Jun": 1,
+        "Summertime Shoma": 1,
+        "Talim": 1,
+        "Thunder God Akuma": 1,
+        "Warlord Birdie": 1,
+        "Yugo": 1
+      },
+      "username": "horuskutya"
+    },
+    "Otso4kYEapfYVBBwyNZ45gsoY0T2": {
+      "BattlePassExp": 0,
+      "CM": 2958,
+      "FM": 0,
+      "Icons": {
+        "Ayane_Blade": 1,
+        "Captain_Akuma": 1,
+        "Infernal_Ibuki": 1,
+        "Pirate_Shoma": 1
+      },
+      "Raid": {
+        "Stage1": 1,
+        "Stage2": 1,
+        "Stage3": 1,
+        "Stage4": 1,
+        "Stage5": 1
+      },
+      "background": "Arctic Hunting Event",
+      "characters": {
+        "Angel": {
+          "lose": 9,
+          "win": 6
+        },
+        "Ayane": {
+          "lose": 1,
+          "win": 0
+        },
+        "Birdie": {
+          "lose": 0,
+          "win": 1
+        },
+        "Blanka": {
+          "lose": 1,
+          "win": 1
+        },
+        "Christie": {
+          "lose": 1,
+          "win": 0
+        },
+        "Elphelt": {
+          "lose": 1,
+          "win": 2
+        },
+        "Erron Black": {
+          "lose": 1,
+          "win": 0
+        },
+        "Ibuki": {
+          "lose": 0,
+          "win": 2
+        },
+        "Julia": {
+          "lose": 12,
+          "win": 15
+        },
+        "Juri": {
+          "lose": 1,
+          "win": 0
+        },
+        "Kotal Kahn": {
+          "lose": 7,
+          "win": 6
+        },
+        "Morrigan": {
+          "lose": 0,
+          "win": 1
+        },
+        "Noel": {
+          "lose": 0,
+          "win": 1
+        },
+        "Peacock": {
+          "lose": 1,
+          "win": 0
+        },
+        "R Mika": {
+          "lose": 6,
+          "win": 4
+        },
+        "Scorpion": {
+          "lose": 1,
+          "win": 2
+        },
+        "Shoma": {
+          "lose": 7,
+          "win": 9
+        },
+        "Siegfried": {
+          "lose": 0,
+          "win": 2
+        },
+        "Sub Zero": {
+          "lose": 2,
+          "win": 0
+        },
+        "Yugo": {
+          "lose": 2,
+          "win": 0
+        }
+      },
+      "email": "micsiboy@gmail.com",
+      "freelootbox": {
+        "basicbox": 0
+      },
+      "friends": {
+        "-O50eXgHmDuBJfoo95RN": {
+          "id": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+          "name": "FishB0nes98"
+        }
+      },
+      "icon": "Pirate_Shoma.png",
+      "profileColor": "#000000",
+      "selectedSkins": [
+        null,
+        "Angel",
+        "Shoma",
+        "Dragon Tamer Julia"
+      ],
+      "skins": {
+        "Akuma": 1,
+        "Angel": 1,
+        "Astaroth": 1,
+        "Ayane": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Captain Akuma": 1,
+        "Cham Cham": 1,
+        "Christie": 1,
+        "Demon Hunter Ibuki": 1,
+        "Dragon Tamer Julia": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "Ibuki": 1,
+        "Infernal Julia": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Juri": 1,
+        "Kotal Kahn": 1,
+        "Morrigan": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Peacock": 1,
+        "Phoenix R Mika": 1,
+        "Pirate Shoma": 1,
+        "Pirate Shoma Blue": 1,
+        "Pirate Shoma Jade": 1,
+        "Pirate Shoma Monochrome": 1,
+        "Professional Footballer Siegfried": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Reptile": 1,
+        "Scorpion": 1,
+        "Shoma": 1,
+        "Sub Zero": 1,
+        "Talim": 1,
+        "Yugo": 1
+      },
+      "username": "Micsiboy"
+    },
+    "URnbYaSooUaxjUCVyPm05vaB7N13": {
+      "BattlePassExp": 76,
+      "CM": 22373,
+      "FM": 1100,
+      "Icons": {
+        "santa_kuma": 1,
+        "snowman": 1,
+        "winter_lili": 1
+      },
+      "RaidInventory": {
+        "active_modifiers": {
+          "atlantean_raid_stage1": [
+            "RapidGoldenArrows"
+          ],
+          "atlantean_raid_stage3": [
+            "SpiritEssence"
+          ]
+        },
+        "currencies": {
+          "cm": 1000,
+          "fm": 200
+        },
+        "items": {
+          "Murky Water Vial": 1,
+          "Void Essence": 1
+        }
+      },
+      "Rank points": 15,
+      "Songs": {
+        "Forest Wanderer (Julia Theme)": 1
+      },
+      "Stickers": {
+        "chibi_subzero_winter": 1,
+        "elf_shizumaru": 1
+      },
+      "Titles": {
+        "Santa Claus": 1,
+        "Snowflake": 1
+      },
+      "advent2024": {
+        "day1": true,
+        "day10": true,
+        "day11": true,
+        "day12": true,
+        "day13": true,
+        "day15": true,
+        "day16": true,
+        "day17": true,
+        "day19": true,
+        "day2": true,
+        "day20": true,
+        "day21": true,
+        "day22": true,
+        "day23": true,
+        "day3": true,
+        "day4": true,
+        "day5": true,
+        "day6": true,
+        "day7": true,
+        "day8": true,
+        "day9": true
+      },
+      "background": "Cyber City Event",
+      "characters": {
+        "Alice": {
+          "lose": 0,
+          "win": 2,
+          "xp": 319
+        },
+        "Birdie": {
+          "lose": 2,
+          "win": 0,
+          "xp": 202
+        }
+      },
+      "email": "bbalu15@freemail.hu",
+      "icon": "Yugo.png",
+      "inventory": {
+        "freelootbox": 3
+      },
+      "profileColor": "#9d2a2a",
+      "profileSticker": "elf_shizumaru",
+      "ranked lose": 1,
+      "ranked win": 1,
+      "selectedSkins": [
+        null,
+        "Jade Yugo",
+        "Neon Core Angel",
+        "Rockstar Akuma"
+      ],
+      "skins": {
+        "Akuma": 1,
+        "Alice": 1,
+        "Angel": 1,
+        "Arctic Hunter Erron Black": 1,
+        "Astaroth": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Cham Cham": 1,
+        "DJ Ibuki": 1,
+        "Demon Hunter Ibuki": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "Ibuki": 1,
+        "Jade Yugo": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Kagome": 1,
+        "Kotal Kahn": 1,
+        "Kuma": 1,
+        "Mafia Leader Erron Black": 1,
+        "Morrigan": 1,
+        "Neon Core Angel": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Pajama Party Cham Cham Cotton Candy": 1,
+        "Pajama Party Christie": 1,
+        "Peacock": 1,
+        "Primal Warrior Scorpion": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Reptile": 1,
+        "Rockstar Akuma": 1,
+        "Sacred Ceremony Morrigan": 1,
+        "Sand Soldier Astaroth": 1,
+        "Schoolboy Siegfried": 1,
+        "Schoolgirl Ayane": 1,
+        "Scorpion": 1,
+        "Shadowbane Ayane": 1,
+        "Shoma Schoolboy": 1,
+        "Summertime Reptile": 1,
+        "Talim": 1,
+        "Winter Festival Lili": 1,
+        "Witch Julia Scarlet": 1,
+        "Yugo": 1
+      },
+      "username": "R3MMUS"
+    },
+    "dR7iO0O3PWh8UFDWBQHE94V2SG62": {
+      "ARAM win": 1,
+      "BattlePassExp": 78,
+      "CM": 768,
+      "Rank points": 0,
+      "aramGames": 1,
+      "characters": {
+        "ARAM": {
+          "Morrigan": {
+            "lose": 0,
+            "win": 1
+          }
+        },
+        "Kagome": {
+          "lose": 2,
+          "win": 0,
+          "xp": 189
+        },
+        "Morrigan": {
+          "lose": 0,
+          "win": 1,
+          "xp": 255
+        }
+      },
+      "email": "jovonni.leopoldo@thefluent.org",
+      "icon": "Julia.png",
+      "matchHistory": {
+        "1741477793202": {
+          "character": "Kagome",
+          "date": "2025-03-08T23:49:53.171Z",
+          "kda": {
+            "assists": 4,
+            "deaths": 6,
+            "kills": 8
+          },
+          "result": "Defeat",
+          "skin": "Kagome",
+          "team1": [
+            {
+              "character": "Siegfried",
+              "name": "BM_King"
+            },
+            {
+              "character": "Kotal Kahn",
+              "name": "FlashBlade"
+            },
+            {
+              "character": "Mai",
+              "name": "ShadowBlade"
+            },
+            {
+              "character": "Kagome",
+              "name": "mangopango"
+            },
+            {
+              "character": "Angel",
+              "name": "RhythmLord"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Sophitia",
+              "name": "BlazingPhoenix"
+            },
+            {
+              "character": "Birdie",
+              "name": "M8"
+            },
+            {
+              "character": "Morrigan",
+              "name": "Tilt_Master"
+            },
+            {
+              "character": "Erron Black",
+              "name": "ShieldHeart"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "SpeedForce"
+            }
+          ],
+          "timestamp": "1741477793202"
+        },
+        "1741477859270": {
+          "character": "Morrigan",
+          "date": "2025-03-08T23:50:59.242Z",
+          "gameMode": "ARAM",
+          "kda": {
+            "assists": 4,
+            "deaths": 0,
+            "kills": 8
+          },
+          "result": "Victory",
+          "skin": "Morrigan",
+          "team1": [
+            {
+              "character": "Christie",
+              "name": "BladeRunner"
+            },
+            {
+              "character": "R Mika",
+              "name": "Deku_AllMight"
+            },
+            {
+              "character": "Kotal Kahn",
+              "name": "LegendaryPlayer"
+            },
+            {
+              "character": "Reptile",
+              "name": "SkillLord"
+            },
+            {
+              "character": "Lili",
+              "name": "CarryMaster"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Raiden",
+              "name": "C9_Pro"
+            },
+            {
+              "character": "Morrigan",
+              "name": "mangopango"
+            },
+            {
+              "character": "Astaroth",
+              "name": "BowMaster"
+            },
+            {
+              "character": "Eagle",
+              "name": "NovaBlast"
+            },
+            {
+              "character": "Shizumaru",
+              "name": "Saitama_OPM"
+            }
+          ],
+          "timestamp": "1741477859270"
+        }
+      },
+      "quests": {
+        "champion_mastery": {
+          "champion": "Morrigan",
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1
+        },
+        "combat_prowess": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1741477794111,
+          "progress": 9355,
+          "totalDamage": 9355
+        },
+        "daily_games": {
+          "claimed": false,
+          "completed": true,
+          "lastReset": 1741477794111,
+          "progress": 2
+        },
+        "multikill_hunter": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "multikills": 1,
+          "progress": 1
+        },
+        "objective_taker": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "objectives": 4,
+          "progress": 4
+        },
+        "survival_expert": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "games": 1,
+          "progress": 1
+        },
+        "team_player": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1741477794111,
+          "progress": 8,
+          "totalAssists": 8
+        },
+        "win_streak": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1,
+          "streak": 1
+        }
+      },
+      "ranked lose": 1,
+      "skins": {
+        "Akuma": 1,
+        "Angel": 1,
+        "Astaroth": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Cham Cham": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "Ibuki": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Kotal Kahn": 1,
+        "Morrigan": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Peacock": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Reptile": 1,
+        "Scorpion": 1,
+        "Talim": 1,
+        "Yugo": 1
+      },
+      "username": "mangopango"
+    },
+    "dYGT7BqlrmftmX1WCy2N5XvLSIR2": {
+      "BattlePassExp": 107,
+      "CM": 1234,
+      "FM": 8000,
+      "Rank points": 16,
+      "characters": {
+        "Angel": {
+          "lose": 0,
+          "win": 2,
+          "xp": 272
+        },
+        "Kabal": {
+          "lose": 2,
+          "win": 1,
+          "xp": 247
+        },
+        "Siegfried": {
+          "lose": 1,
+          "win": 1,
+          "xp": 134
+        }
+      },
+      "email": "juhaszbalint350@gmail.com",
+      "icon": "Julia.png",
+      "matchHistory": {
+        "1745187014157": {
+          "character": "Angel",
+          "date": "2025-04-20T22:10:14.157Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 5,
+            "deaths": 8,
+            "kills": 5
+          },
+          "result": "Victory",
+          "skin": "Angel",
+          "team1": [
+            {
+              "character": "Astaroth",
+              "name": "CombatKing"
+            },
+            {
+              "character": "Scorpion",
+              "name": "8Bit_Hero"
+            },
+            {
+              "character": "Angel",
+              "name": "Juhibalika"
+            },
+            {
+              "character": "Noel",
+              "name": "Complete_List"
+            },
+            {
+              "character": "Julia",
+              "name": "DaggerLord"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Shao Kahn",
+              "name": "MythicHero"
+            },
+            {
+              "character": "Juri",
+              "name": "TimeLord"
+            },
+            {
+              "character": "Sub Zero",
+              "name": "q"
+            },
+            {
+              "character": "Mega Man",
+              "name": "GoldGuardian"
+            },
+            {
+              "character": "Battle Bistro Birdie",
+              "name": "Table"
+            }
+          ],
+          "timestamp": "1745187014157"
+        },
+        "1745187077732": {
+          "build": {
+            "character": "Siegfried",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIZuY9nsn0XhBNKHwxn",
+            "items": [
+              "treasure_chest",
+              "atlantean_crown",
+              "wavebreaker",
+              "sands_of_eternity",
+              "flask_of_strength"
+            ],
+            "name": "Enchanter Support + Siegfried",
+            "patch": "2.1.1",
+            "timestamp": 1739007341770
+          },
+          "character": "Siegfried",
+          "date": "2025-04-20T22:11:17.732Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 3,
+            "deaths": 11,
+            "kills": 2
+          },
+          "result": "Defeat",
+          "skin": "Siegfried",
+          "team1": [
+            {
+              "character": "Shao Kahn",
+              "name": "BloodLord777"
+            },
+            {
+              "character": "Reptile",
+              "name": "Robot_Warrior_777"
+            },
+            {
+              "character": "Akuma",
+              "name": "Emoji_Expat"
+            },
+            {
+              "character": "Nina",
+              "name": "Nurse"
+            },
+            {
+              "character": "Angel",
+              "name": "Fam"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Siegfried",
+              "name": "Juhibalika"
+            },
+            {
+              "character": "Kabal",
+              "name": "SwipeSnub"
+            },
+            {
+              "character": "Raiden",
+              "name": "Viral_Virus"
+            },
+            {
+              "character": "Peacock",
+              "name": "Door"
+            },
+            {
+              "character": "Birdie",
+              "name": "TreePhone"
+            }
+          ],
+          "timestamp": "1745187077732"
+        },
+        "1745187128744": {
+          "character": "Kabal",
+          "date": "2025-04-20T22:12:08.744Z",
+          "gameMode": "5v5",
+          "kda": {
+            "assists": 10,
+            "deaths": 0,
+            "kills": 9
+          },
+          "result": "Victory",
+          "skin": "Executioner Kabal",
+          "team1": [
+            {
+              "character": "Jun",
+              "name": "Big"
+            },
+            {
+              "character": "Talim",
+              "name": "Neural_Knight_000"
+            },
+            {
+              "character": "Raiden",
+              "name": "Smol"
+            },
+            {
+              "character": "Erron Black",
+              "name": "C9_Pro"
+            },
+            {
+              "character": "Birdie",
+              "name": "LampKing"
+            }
+          ],
+          "team2": [
+            {
+              "character": "Lili",
+              "name": "Coach"
+            },
+            {
+              "character": "Kabal",
+              "name": "Juhibalika"
+            },
+            {
+              "character": "Akuma",
+              "name": ":(("
+            },
+            {
+              "character": "Elphelt",
+              "name": "Fam"
+            },
+            {
+              "character": "R Mika",
+              "name": "Agent"
+            }
+          ],
+          "timestamp": "1745187128744"
+        },
+        "1745187256343": {
+          "build": {
+            "character": "Kabal",
+            "creator": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+            "creatorName": "FishB0nes98",
+            "id": "-OIXQHBPvPu1uWAVhImH",
+            "items": [
+              "treasure_chest",
+              "wavebreaker_boots",
+              "sunforged_gauntlets",
+              "leviathans_fang",
+              "shao_kahns_hammer"
+            ],
+            "name": "Scary anti-cc",
+            "patch": "2.1.1",
+            "timestamp": 1738965591008
+          },
+          "character": "Kabal",
+          "date": "2025-04-20T22:14:16.343Z",
+          "gameMode": "1v1",
+          "kda": {
+            "assists": 0,
+            "deaths": 1,
+            "kills": 0
+          },
+          "opponent": {
+            "character": "Siegfried",
+            "name": "Cringe_Creep",
+            "skin": "Siegfried"
+          },
+          "result": "Defeat",
+          "skin": "Executioner Kabal",
+          "stats": {
+            "assists": 0,
+            "deaths": 1,
+            "kills": 0
+          },
+          "timestamp": "1745187256343"
+        }
+      },
+      "quests": {
+        "blossom_devotee": {
+          "champion": "Kabal",
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1
+        },
+        "blossom_gatherer": {
+          "claimed": false,
+          "completed": false,
+          "progress": 1
+        },
+        "gang_domination": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "games": 1,
+          "progress": 1
+        },
+        "gang_hitman": {
+          "claimed": false,
+          "completed": true,
+          "completionCount": 0,
+          "multikills": 2,
+          "progress": 2
+        },
+        "gang_loyalty": {
+          "champion": "Kabal",
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1
+        },
+        "gang_warfare": {
+          "claimed": false,
+          "completed": true,
+          "lastReset": 1745187015014,
+          "progress": 3
+        },
+        "sakura_warrior": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 0,
+          "streak": 0
+        },
+        "street_enforcer": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "progress": 1,
+          "streak": 1
+        },
+        "territory_control": {
+          "claimed": false,
+          "completed": false,
+          "lastReset": 1745187015014,
+          "progress": 14450,
+          "totalDamage": 14450
+        },
+        "turf_war": {
+          "claimed": false,
+          "completed": false,
+          "completionCount": 0,
+          "objectives": 5,
+          "progress": 5
+        }
+      },
+      "ranked lose": 1,
+      "ranked win": 2,
+      "skins": {
+        "Akuma": 1,
+        "Angel": 1,
+        "Astaroth": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Cham Cham": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "Executioner Kabal": 1,
+        "Ibuki": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Kotal Kahn": 1,
+        "Morrigan": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Peacock": 1,
+        "Primal Warrior Scorpion": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Reptile": 1,
+        "Scorpion": 1,
+        "Talim": 1,
+        "Yugo": 1
+      },
+      "username": "Juhibalika"
+    },
+    "xXRxXykdcNd2m9PYlNtoJVoZNnt1": {
+      "BattlePassExp": 342,
+      "CM": 3491,
+      "FM": 200,
+      "Songs": {
+        "Forest Wanderer (Julia Theme)": 1
+      },
+      "Stickers": {
+        "Ayane_Side_Eye": 1,
+        "Shizumaru_Lmao": 1,
+        "Shoma_Surprised": 1
+      },
+      "advent2024": {
+        "day22": true
+      },
+      "background": "Dragonlands Event",
+      "characters": {
+        "Angel": {
+          "lose": 1,
+          "win": 1
+        },
+        "Julia": {
+          "lose": 0,
+          "win": 1
+        },
+        "Shoma": {
+          "lose": 1,
+          "win": 1
+        }
+      },
+      "currentStageSelection": {
+        "id": "5v5_blazing_school_day",
+        "name": "5v5 - Blazing School Day"
+      },
+      "currentStorySelection": "blazing_school_day",
+      "currentTeamSelection": [
+        "schoolboy_shoma",
+        "schoolgirl_kokoro",
+        "schoolgirl_julia",
+        "schoolboy_siegfried",
+        "schoolgirl_ayane"
+      ],
+      "easterEvent": {
+        "eggsCollected": 15,
+        "gamesPlayed": 14,
+        "lastPlayed": "2025-03-31T21:10:05.086Z"
+      },
+      "email": "micsiboyxbox@gmail.com",
+      "freelootbox": {
+        "basicbox": 0,
+        "pajamapartybox": 0
+      },
+      "friends": {
+        "-O50h2gJ2UekQLdht4Cv": {
+          "id": "J1Wanf4kmFMTiG2xOLsvR9bsrYd2",
+          "name": "FishB0nes98"
+        }
+      },
+      "icon": "Shoma.png",
+      "inventory": {
+        "freelootbox": 1
+      },
+      "modifiers": {
+        "farm_1": {
+          "modifier_id": "critical_mastery",
+          "selected": true
+        }
+      },
+      "profileColor": "#22582b",
+      "quests": {
+        "crisisInTheKingdom": {
+          "claimed": false,
+          "completed": false,
+          "progress": 2
+        },
+        "play10DraftModeGames": {
+          "claimed": false,
+          "completed": false,
+          "progress": 0
+        },
+        "play3games": {
+          "claimed": true,
+          "completed": true,
+          "progress": 3
+        },
+        "play5gamesWithShizumaru": {
+          "claimed": false,
+          "completed": false,
+          "progress": 0
+        },
+        "showWhatYouThink": {
+          "claimed": false,
+          "completed": false,
+          "progress": 0
+        },
+        "winAsSpecificCharacter": {
+          "claimed": true,
+          "completed": true,
+          "progress": 1
+        }
+      },
+      "selectedSkins": [
+        null,
+        "Kotal Kahn",
+        "Angel",
+        "Julia"
+      ],
+      "skins": {
+        "Akuma": 1,
+        "Angel": 1,
+        "Astaroth": 1,
+        "Birdie": 1,
+        "Blanka": 1,
+        "Captain Noel": 1,
+        "Cham Cham": 1,
+        "Elphelt": 1,
+        "Erron Black": 1,
+        "Ibuki": 1,
+        "Julia": 1,
+        "Jun": 1,
+        "Kotal Kahn": 1,
+        "Morrigan": 1,
+        "Nina": 1,
+        "Noel": 1,
+        "Pajama Party Blanka": 1,
+        "Panda": 1,
+        "Peacock": 1,
+        "R Mika": 1,
+        "Raiden": 1,
+        "Reptile": 1,
+        "Scorpion": 1,
+        "Shoma Schoolboy": 1,
+        "Summertime Shoma": 1,
+        "Talim": 1,
+        "Yugo": 1
+      },
+      "username": "Micsiboy XBOX"
+    }
+  }
+}

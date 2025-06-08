@@ -1,0 +1,440 @@
+{
+  "talentTree": {
+    "talent_zoey_root": {
+      "id": "talent_zoey_root",
+      "name": "Feline Lifesteal",
+      "description": "Zoey's wildcat DNA enhances her survival. She gains 7% lifesteal, recovering health equal to a portion of the damage she deals.",
+      "icon": "Icons/talents/feline_lifesteal.webp",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "lifesteal",
+        "value": 0.07,
+        "operation": "add"
+      },
+      "position": { "x": 0, "y": 0 },
+      "isRoot": true,
+      "children": ["mana_drain", "cat_agility"]
+    },
+    "mana_drain": {
+      "id": "mana_drain",
+      "name": "Essence Theft",
+      "description": "Zoey's attacks drain the essence of her foes. When she deals damage, she steals 2% of the damage dealt as mana from the target.",
+      "icon": "Icons/talents/essence_theft.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableManaSteal",
+        "value": true
+      },
+      "parents": ["talent_zoey_root"],
+      "children": ["weakening_strike"],
+      "position": { "x": -177, "y": 200 }
+    },
+    "weakening_strike": {
+      "id": "weakening_strike",
+      "name": "Weakening Strike",
+      "description": "Zoey's damaging abilities have a 10% chance to weaken her foes. Affected enemies deal 20% less damage for 2 turns.",
+      "icon": "Icons/talents/weakening_strike.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableWeakeningStrike",
+        "value": true
+      },
+      "parents": ["mana_drain"],
+      "children": ["improved_sparkle_burst", "improved_heart_pounce"],
+      "position": { "x": -177, "y": 350 }
+    },
+    "improved_sparkle_burst": {
+      "id": "improved_sparkle_burst",
+      "name": "Improved Sparkle Burst",
+      "description": "Zoey's mastery over her Sparkle Burst increases its accuracy. Hit chance increases from 50% to 80%.",
+      "icon": "Icons/talents/enhanced_targeting.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableImprovedSparkleburst",
+        "value": true
+      },
+      "parents": ["weakening_strike"],
+      "children": ["rapid_combat"],
+      "position": { "x": -500, "y": 755 }
+    },
+    "improved_heart_pounce": {
+      "id": "improved_heart_pounce",
+      "name": "Improved Heart Pounce",
+      "description": "Zoey's Heart Pounce becomes more accurate but the vulnerability it inflicts is shorter. Hit chance increases by 10%, but Vulnerable debuff duration reduced from 5 to 2 turns.",
+      "icon": "Icons/talents/perfect_aim.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableImprovedHeartPounce",
+        "value": true
+      },
+      "parents": ["weakening_strike"],
+      "children": ["feline_combo", "rapid_combat"],
+      "position": { "x": -155, "y": 755 }
+    },
+    "rapid_combat": {
+      "id": "rapid_combat",
+      "name": "Rapid Combat",
+      "description": "Zoey's mastery over both precision and magic reach perfect harmony. All of her abilities have their cooldowns reduced by 1 turn, allowing for more frequent ability usage.",
+      "icon": "Icons/talents/rapid_combat.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "zoey_q",
+          "property": "cooldown",
+          "value": -1,
+          "operation": "add"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "zoey_w", 
+          "property": "cooldown",
+          "value": -1,
+          "operation": "add"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "zoey_e",
+          "property": "cooldown", 
+          "value": -1,
+          "operation": "add"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "zoey_r",
+          "property": "cooldown",
+          "value": -1,
+          "operation": "add"
+        }
+      ],
+      "parents": ["improved_heart_pounce", "improved_sparkle_burst"],
+      "children": ["double_bell_mark", "enhanced_light_arc"],
+      "position": { "x": -327, "y": 900 }
+    },
+    "feline_combo": {
+      "id": "feline_combo",
+      "name": "Feline Combo",
+      "description": "Zoey's combat mastery allows her to chain her attacks together. Heart Pounce has a 35% chance to reset its cooldown and allow another action without ending the turn.",
+      "icon": "Icons/talents/feline_combo.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableFelineCombo",
+        "value": true
+      },
+      "parents": ["combat_mastery", "improved_heart_pounce"],
+      "children": ["enhanced_heart_pounce", "sparkle_pounce"],
+      "position": { "x": 55, "y": 900 }
+    },
+    "enhanced_heart_pounce": {
+      "id": "enhanced_heart_pounce",
+      "name": "Enhanced Heart Pounce",
+      "description": "Zoey's Heart Pounce becomes even more devastating. It now scales with additional 50% physical damage and 50% magical damage, increasing the total scaling from 125% to 225%.",
+      "icon": "Icons/talents/enhanced_heart_pounce.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableEnhancedHeartPounce",
+        "value": true
+      },
+      "parents": ["feline_combo"],
+      "children": [],
+      "position": { "x": -300, "y": 800 }
+    },
+    "sparkle_pounce": {
+      "id": "sparkle_pounce",
+      "name": "Sparkle Pounce",
+      "description": "Zoey's Sparkle Burst becomes even more dynamic. When Sparkle Burst successfully hits an enemy, it has a 10% chance to automatically cast Heart Pounce on that same target without using mana or triggering cooldown.",
+      "icon": "Icons/talents/sparkle_pounce.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableSparklePounce",
+        "value": true
+      },
+      "parents": ["feline_combo"],
+      "children": ["predatory_instinct"],
+      "position": { "x": 160, "y": 1050 }
+    },
+    "predatory_instinct": {
+      "id": "predatory_instinct",
+      "name": "Predatory Instinct",
+      "description": "Zoey's predatory nature takes over completely. Heart Pounce is disabled as a manual ability but automatically activates at the start of each turn, targeting the enemy with the lowest health. This automatic cast ignores cooldowns and costs no mana.",
+      "icon": "Icons/talents/bloodthirsty_predator.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enablePredatoryInstinct",
+        "value": true
+      },
+      "parents": ["sparkle_pounce"],
+      "children": [],
+      "position": { "x": 160, "y": 1200 },
+      "powerful": true
+    },
+    "cat_agility": {
+      "id": "cat_agility",
+      "name": "Feline Reflexes",
+      "description": "Zoey's cat-like reflexes allow her to dodge incoming attacks. She gains 8% dodge chance.",
+      "icon": "Icons/talents/feline_reflexes.webp",
+      "effect": {
+        "type": "modify_stat",
+        "stat": "dodgeChance",
+        "value": 0.08,
+        "operation": "add"
+      },
+      "parents": ["talent_zoey_root"],
+      "children": ["pounce_momentum", "agile_counterforce"],
+      "position": { "x": 177, "y": 200 }
+    },
+    "pounce_momentum": {
+      "id": "pounce_momentum",
+      "name": "Pounce Momentum",
+      "description": "Zoey's Heart Pounce has a 20% chance to grant her a 10% dodge buff for 3 turns when it hits a target.",
+      "icon": "Icons/talents/pounce_momentum.webp",
+      "effect": {
+        "type": "modify_ability",
+        "abilityId": "zoey_w",
+        "property": "onHitEffect",
+        "value": {
+          "type": "chance_effect",
+          "chance": 0.2,
+          "effect": {
+            "type": "apply_buff",
+            "buffId": "pounce_momentum_buff",
+            "name": "Pounce Momentum",
+            "icon": "Icons/talents/pounce_momentum.webp",
+            "duration": 3,
+            "effect": {
+              "type": "modify_stat",
+              "stat": "dodgeChance",
+              "value": 0.1,
+              "operation": "add"
+            }
+          }
+        }
+      },
+      "parents": ["cat_agility"],
+      "children": ["allied_bond", "purifying_magic"],
+      "position": { "x": 355, "y": 400 }
+    },
+    "agile_counterforce": {
+      "id": "agile_counterforce",
+      "name": "Agile Counterforce",
+      "description": "When Zoey successfully dodges an attack, she gains a buff increasing her Magical Damage by 10% of her current value for 4 turns. This effect can stack.",
+      "icon": "Icons/talents/agile_counterforce.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "onDodgeEffects",
+        "value": {
+          "type": "apply_buff",
+          "buffId": "agile_counterforce_buff",
+          "name": "Agile Counterforce",
+          "icon": "Icons/talents/agile_counterforce.webp",
+          "duration": 4,
+          "isStackable": true,
+          "effect": {
+            "type": "modify_stat_percentage",
+            "stat": "magicalDamage",
+            "percentage": 0.1,
+            "operation": "add"
+          }
+        }
+      },
+      "parents": ["cat_agility"],
+      "children": ["combat_mastery"],
+      "position": { "x": 264, "y": 400 }
+    },
+    "allied_bond": {
+      "id": "allied_bond",
+      "name": "Allied Bond",
+      "description": "At the start of combat, Zoey forms a bond with her strongest ally, gaining 20% of their highest stat permanently for the duration of the battle.",
+      "icon": "Icons/talents/allied_bond.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableAlliedBond",
+        "value": true
+      },
+      "parents": ["pounce_momentum"],
+      "children": ["pack_leadership", "symbiotic_healing"],
+      "position": { "x": 100, "y": 100 }
+    },
+    "pack_leadership": {
+      "id": "pack_leadership",
+      "name": "Pack Leadership",
+      "description": "Zoey's inspiring presence strengthens her allies. All party members gain 5% of Zoey's total stats, sharing in her feline prowess and magical power.",
+      "icon": "Icons/talents/pack_leadership.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enablePackLeadership",
+        "value": true
+      },
+      "parents": ["allied_bond"],
+      "children": ["feline_vitality"],
+      "position": { "x": 50, "y": -200 }
+    },
+    "symbiotic_healing": {
+      "id": "symbiotic_healing",
+      "name": "Symbiotic Healing",
+      "description": "Zoey's bond with her allies creates a web of shared vitality. When she deals damage, 1% of that damage is converted into healing that restores both herself and all party members.",
+      "icon": "Icons/talents/symbiotic_healing.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableSymbioticHealing",
+        "value": true
+      },
+      "parents": ["allied_bond"],
+      "children": ["feline_vitality"],
+      "position": { "x": 150, "y": -100 }
+    },
+    "feline_vitality": {
+      "id": "feline_vitality",
+      "name": "Feline Vitality",
+      "description": "Zoey's mastery over life energy reaches its peak. Her feline resilience makes all healing effects 35% more powerful when applied to her, allowing her to recover from wounds with supernatural efficiency.",
+      "icon": "Icons/talents/feline_vitality.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableFelineVitality",
+        "value": true
+      },
+      "parents": ["pack_leadership", "symbiotic_healing"],
+      "children": [],
+      "position": { "x": 100, "y": -200 },
+      "powerful": true
+    },
+    "purifying_magic": {
+      "id": "purifying_magic",
+      "name": "Purifying Magic",
+      "description": "Zoey's magical abilities have a 10% chance to cleanse one random debuff from herself when she uses any ability.",
+      "icon": "Icons/talents/purifying_magic.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enablePurifyingMagic",
+        "value": true
+      },
+      "parents": ["pounce_momentum"],
+      "children": ["enduring_magic"],
+      "position": { "x": 310, "y": 400 }
+    },
+    "combat_mastery": {
+      "id": "combat_mastery",
+      "name": "Combat Mastery",
+      "description": "Zoey's mastery over her combat abilities reduces their cooldowns. Heart Pounce cooldown is reduced by 1 turn, and Sparkle Burst cooldown is reduced by 2 turns.",
+      "icon": "Icons/talents/combat_mastery.webp",
+      "effect": [
+        {
+          "type": "modify_ability",
+          "abilityId": "zoey_w",
+          "property": "cooldown",
+          "value": -1,
+          "operation": "add"
+        },
+        {
+          "type": "modify_ability",
+          "abilityId": "zoey_e",
+          "property": "cooldown",
+          "value": -2,
+          "operation": "add"
+        }
+      ],
+      "parents": ["agile_counterforce"],
+      "children": ["enduring_magic", "feline_combo"],
+      "position": { "x": 264, "y": 500 }
+    },
+    "enduring_magic": {
+      "id": "enduring_magic",
+      "name": "Enduring Magic",
+      "description": "Zoey's mastery over magical energies allows her to sustain beneficial effects longer. All buffs applied to Zoey last 1 additional turn, extending their duration and maximizing their effectiveness.",
+      "icon": "Icons/talents/enduring_magic.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableEnduringMagic",
+        "value": true
+      },
+      "parents": ["purifying_magic", "combat_mastery"],
+      "children": ["mystic_barrier"],
+      "position": { "x": 287, "y": 600 }
+    },
+    "mystic_barrier": {
+      "id": "mystic_barrier",
+      "name": "Mystic Barrier",
+      "description": "Zoey's magical prowess manifests as a protective barrier. She gains 400 shield for each active non-permanent buff on her. Shield absorbs damage before health and disappears when buffs are lost.",
+      "icon": "Icons/talents/mystic_barrier.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableMysticBarrier",
+        "value": true
+      },
+      "parents": ["enduring_magic"],
+      "children": [],
+      "position": { "x": 287, "y": 750 },
+      "powerful": true
+    },
+    "double_bell_mark": {
+      "id": "double_bell_mark",
+      "name": "Double Bell Mark",
+      "description": "Zoey's mastery over her Sparkle Bell Mark reaches new heights. When applying a Sparkle Bell Mark, she has a 15% chance to apply it twice instead of once, creating a double-marked enemy that suffers even more from her focused attacks.",
+      "icon": "Icons/talents/double_bell_mark.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableDoubleBellMark",
+        "value": true
+      },
+      "parents": ["rapid_combat"],
+      "children": ["bell_recast"],
+      "position": { "x": -500, "y": 1500 }
+    },
+    "bell_recast": {
+      "id": "bell_recast",
+      "name": "Bell Recast",
+      "description": "Zoey's mastery over the Strawberry Bell reaches perfection. After using Strawberry Bell Burst, she has a 10% chance to immediately recast it on the same target without consuming mana or triggering cooldown.",
+      "icon": "Icons/talents/bell_recast.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableBellRecast",
+        "value": true
+      },
+      "parents": ["double_bell_mark"],
+      "children": ["bell_mastery"],
+      "position": { "x": -500, "y": 1650 }
+    },
+    "enhanced_light_arc": {
+      "id": "enhanced_light_arc",
+      "name": "Enhanced Light Arc",
+      "description": "Zoey's Glowing Light Arc becomes significantly more powerful through her mastery of magical energies. The scaling increases from 100% to 175% Magical Damage, making it a devastating area attack.",
+      "icon": "Icons/talents/enhanced_light_arc.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableEnhancedLightArc",
+        "value": true
+      },
+      "parents": ["rapid_combat"],
+      "children": ["sparkle_bell_healing"],
+      "position": { "x": -154, "y": 1400 }
+    },
+    "sparkle_bell_healing": {
+      "id": "sparkle_bell_healing",
+      "name": "Sparkle Bell Healing",
+      "description": "Zoey's Sparkle Bell Mark becomes a source of self-restoration. When a marked enemy takes boosted damage from the mark, Zoey heals herself for 35% of that boosted damage, turning her enemies' pain into her recovery.",
+      "icon": "Icons/talents/sparkle_bell_healing.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableSparkleBellHealing",
+        "value": true
+      },
+      "parents": ["enhanced_light_arc"],
+      "children": ["bell_mastery"],
+      "position": { "x": -154, "y": 1550 }
+    },
+    "bell_mastery": {
+      "id": "bell_mastery",
+      "name": "Bell Mastery",
+      "description": "Zoey's complete mastery over her Strawberry Bell transforms it into a devastating weapon of mass destruction. Strawberry Bell Burst now hits ALL ENEMIES instead of a single target, dealing 200% magical damage to each enemy with no reduction in power.",
+      "icon": "Icons/talents/bell_mastery.webp",
+      "effect": {
+        "type": "modify_character_property",
+        "property": "enableBellMastery",
+        "value": true
+      },
+      "parents": ["bell_recast", "sparkle_bell_healing"],
+      "children": [],
+      "position": { "x": -327, "y": 1750 },
+      "powerful": true
+    }
+  }
+} 

@@ -21,86 +21,34 @@
         {
             "id": "pounce",
             "name": "Pounce",
-            "type": "damage",
-            "damageType": "physical",
+            "description": "Deals 50% AD damage and has a 65% chance to stun the target for 4 turns.",
             "manaCost": 50,
             "cooldown": 2,
-            "targetType": "enemy",
-            "description": "Deals 50% AD damage and has a 65% chance to stun the target for 4 turns.",
-            "amount": 0.5,
-            "icon": "Icons/abilities/pounce.jpeg",
-            "debuffEffect": {
-                "debuffId": "stun",
-                "name": "Stunned",
-                "duration": 4,
-                "chance": 0.65,
-                "effects": {
-                    "cantAct": true
-                }
-            }
+            "icon": "Icons/abilities/pounce.jpeg"
         },
         {
             "id": "thick_fur",
             "name": "Thick Fur",
-            "type": "buff",
+            "description": "Increases Armor and Magic Shield by 20 for 10 turns.",
             "manaCost": 100,
             "cooldown": 18,
-            "targetType": "self",
-            "description": "Increases Armor and Magic Shield by 20 for 10 turns.",
-            "icon": "Icons/abilities/thick_fur.jpeg",
-            "buffEffect": {
-                "buffId": "thick_fur_buff",
-                "name": "Thick Fur",
-                "duration": 10,
-                "effects": {
-                    "armorBoost": 20,
-                    "magicShieldBoost": 20
-                }
-            }
+            "icon": "Icons/abilities/thick_fur.jpeg"
         },
         {
             "id": "bunny_bounce",
             "name": "Bunny Bounce",
-            "type": "utility",
+            "description": "If used on an ally: Gives 50% of Magic Shield to that target. If used on an enemy: Deals 600% of Magic Shield as physical damage.",
             "manaCost": 100,
             "cooldown": 8,
-            "targetType": "any",
-            "description": "If used on an ally: Gives 50% of Magic Shield to that target. If used on an enemy: Deals 600% of Magic Shield as physical damage.",
-            "icon": "Icons/abilities/bunny_bounce.webp",
-            "effects": {
-                "allyEffect": {
-                    "buffId": "bunny_bounce_shield_buff",
-                    "name": "Bunny Shield",
-                    "duration": 5,
-                    "magicShieldPercent": 0.5
-                },
-                "enemyEffect": {
-                    "damage": {
-                        "type": "physical",
-                        "magicShieldMultiplier": 6
-                    }
-                }
-            }
+            "icon": "Icons/abilities/bunny_bounce.webp"
         },
         {
             "id": "carrot_power_up",
             "name": "Carrot Power Up",
-            "type": "healing",
+            "description": "Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target's active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.",
             "manaCost": 155,
             "cooldown": 15,
-            "targetType": "ally",
-            "description": "Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target's active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.",
-            "icon": "Icons/abilities/carrot_power_up.webp",
-            "effects": {
-                "healing": {
-                    "missingHealthPercent": 0.21,
-                    "minimumPercent": 0.02
-                },
-                "cooldownReduction": 5,
-                "specialCooldown": {
-                    "reduceOnDamage": 1
-                }
-            }
+            "icon": "Icons/abilities/carrot_power_up.webp"
         }
     ],
     "passive": {

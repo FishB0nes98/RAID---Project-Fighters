@@ -68,8 +68,22 @@
     "name": "Farmer Raiden",
     "image": "Icons/characters/Farmer Raiden.png",
     "tags": ["Farmer", "Magical", "Carry"]
+  },
+  {
+    "name": "Bridget",
+    "image": "Icons/characters/Bridget.png",
+    "tags": ["Magical", "Support", "Mew"]
+  },
+  {
+    "name": "Renée",
+    "image": "Icons/characters/Renée.png",
+    "tags": ["Physical", "Carry", "Solo", "Mew"]
+  },
+  {
+    "name": "Zoey",
+    "image": "Icons/characters/Zoey.png",
+    "tags": ["Magical", "Carry", "Mew"]
   }
-  
 
   
 ] 

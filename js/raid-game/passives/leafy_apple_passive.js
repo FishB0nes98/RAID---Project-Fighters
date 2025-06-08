@@ -43,9 +43,13 @@ class LeafyApplePassive {
                 buff.setDescription('Permanently gains 25% increased Healing Power.');
 
                 // Use statModifiers for the permanent increase
-                buff.statModifiers = {
-                    healingPower_percent: 25 // 25% increase
-                };
+                buff.statModifiers = [
+                    { 
+                        stat: 'healingPower', 
+                        value: 0.25, // 25% as decimal
+                        operation: 'add' 
+                    }
+                ];
 
                 // onApply and remove can be simplified or removed if only used for stat manipulation
                 // Keep if needed for VFX or other side effects

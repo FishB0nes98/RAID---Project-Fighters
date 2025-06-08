@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage Editor - Card Game</title>
+    <link rel="stylesheet" href="css/stage-editor.css">
+</head>
+<body>
+    <div class="editor-container">
+        <header class="editor-header">
+            <h1>🎮 Stage Editor</h1>
+            <div class="header-actions">
+                <button id="new-stage-btn" class="btn btn-primary">New Stage</button>
+                <button id="load-stage-btn" class="btn btn-secondary">Load Stage</button>
+                <button id="save-stage-btn" class="btn btn-success">Save Stage</button>
+                <button id="preview-stage-btn" class="btn btn-info">Preview</button>
+            </div>
+        </header>
+
+        <div class="editor-content">
+            <!-- Stage Basic Info -->
+            <section class="editor-section">
+                <h2>📋 Basic Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="stage-id">Stage ID*</label>
+                        <input type="text" id="stage-id" placeholder="unique_stage_id" required>
+                        <small>Unique identifier for the stage (no spaces, use underscores)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="stage-name">Stage Name*</label>
+                        <input type="text" id="stage-name" placeholder="Epic Battle Arena" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stage-description">Description</label>
+                        <textarea id="stage-description" placeholder="Describe what happens in this stage..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="stage-difficulty">Difficulty</label>
+                        <input type="number" id="stage-difficulty" min="1" max="10" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="stage-type">Stage Type</label>
+                        <select id="stage-type">
+                            <option value="story">Story</option>
+                            <option value="challenge">Challenge</option>
+                            <option value="weekly_challenge">Weekly Challenge</option>
+                            <option value="boss">Boss</option>
+                            <option value="tutorial">Tutorial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="story-title">Story Title</label>
+                        <input type="text" id="story-title" placeholder="Epic Adventure Arc">
+                        <small>Only needed for story stages</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Media Assets -->
+            <section class="editor-section">
+                <h2>🎨 Media Assets</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="background-image">Background Image</label>
+                        <input type="text" id="background-image" placeholder="images/stages/background.png">
+                        <div class="asset-preview" id="background-preview">
+                            <div class="preview-placeholder">No image selected</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="background-music">Background Music</label>
+                        <input type="text" id="background-music" placeholder="sounds/battle_theme.mp3">
+                        <div class="audio-controls">
+                            <button type="button" id="play-music-btn" class="btn btn-small">▶️ Test</button>
+                            <button type="button" id="stop-music-btn" class="btn btn-small">⏹️ Stop</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enemies Configuration -->
+            <section class="editor-section">
+                <h2>👹 Enemies</h2>
+                <div class="enemies-container">
+                    <div class="section-header">
+                        <button id="add-enemy-btn" class="btn btn-primary">Add Enemy</button>
+                        <div class="enemy-count">Enemies: <span id="enemy-count">0</span></div>
+                    </div>
+                    <div id="enemies-list" class="enemies-list">
+                        <!-- Enemy entries will be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Player Requirements -->
+            <section class="editor-section">
+                <h2>👥 Player Requirements</h2>
+                <div class="player-requirements">
+                    <div class="form-group">
+                        <label for="min-players">Minimum Players</label>
+                        <input type="number" id="min-players" min="1" max="5" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="max-players">Maximum Players</label>
+                        <input type="number" id="max-players" min="1" max="5" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label>Required Character Types</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="school"> School Characters</label>
+                            <label><input type="checkbox" value="farmer"> Farmer Characters</label>
+                            <label><input type="checkbox" value="atlantean"> Atlantean Characters</label>
+                            <label><input type="checkbox" value="any"> Any Type</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stage Modifiers -->
+            <section class="editor-section">
+                <h2>⚡ Stage Modifiers</h2>
+                <div class="modifiers-container">
+                    <div class="section-header">
+                        <button id="add-modifier-btn" class="btn btn-primary">Add Modifier</button>
+                        <div class="modifier-count">Active: <span id="modifier-count">0</span></div>
+                    </div>
+                    <div id="modifiers-list" class="modifiers-list">
+                        <!-- Modifier entries will be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Win/Lose Conditions -->
+            <section class="editor-section">
+                <h2>🏆 Objectives & Conditions</h2>
+                <div class="objectives-container">
+                    <div class="form-group">
+                        <label>Win Conditions</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="allEnemiesDefeated" checked> Defeat All Enemies</label>
+                            <label><input type="checkbox" value="surviveTurns"> Survive X Turns</label>
+                            <label><input type="checkbox" value="protectAlly"> Protect Ally</label>
+                            <label><input type="checkbox" value="reachLocation"> Reach Location</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="turn-limit">Turn Limit (0 = no limit)</label>
+                        <input type="number" id="turn-limit" min="0" value="0">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rewards -->
+            <section class="editor-section">
+                <h2>🎁 Rewards</h2>
+                <div class="rewards-container">
+                    <div class="section-header">
+                        <button id="add-reward-btn" class="btn btn-primary">Add Reward</button>
+                        <div class="reward-count">Rewards: <span id="reward-count">0</span></div>
+                    </div>
+                    <div id="rewards-list" class="rewards-list">
+                        <!-- Reward entries will be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Settings -->
+            <section class="editor-section">
+                <h2>⚙️ Advanced Settings</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><input type="checkbox" id="player-unlocked"> Player Unlocked</label>
+                        <small>Whether this stage is unlocked by default</small>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="is-hidden"> Hidden Stage</label>
+                        <small>Hide from stage selection (for testing)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="unlock-requirements">Unlock Requirements</label>
+                        <textarea id="unlock-requirements" placeholder="Enter JSON array of unlock requirements"></textarea>
+                        <small>JSON format: [{"type": "stageComplete", "value": "stage_id"}]</small>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="editor-footer">
+            <div class="footer-info">
+                <span>Stage Editor v1.0</span>
+                <span id="save-status">Ready</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- File input for loading stages -->
+    <input type="file" id="file-input" accept=".json" style="display: none;">
+
+    <!-- Modals -->
+    <div id="enemy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add/Edit Enemy</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="enemy-character-id">Character ID*</label>
+                    <select id="enemy-character-id" required>
+                        <option value="">Select Enemy...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="enemy-level">Level</label>
+                    <input type="number" id="enemy-level" min="1" max="100" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Stat Modifications</label>
+                    <div class="stat-modifications">
+                        <div class="stat-mod">
+                            <label>HP Multiplier</label>
+                            <input type="number" id="enemy-hp-mult" step="0.1" value="1.0">
+                        </div>
+                        <div class="stat-mod">
+                            <label>Damage Multiplier</label>
+                            <input type="number" id="enemy-dmg-mult" step="0.1" value="1.0">
+                        </div>
+                        <div class="stat-mod">
+                            <label>Speed Multiplier</label>
+                            <input type="number" id="enemy-speed-mult" step="0.1" value="1.0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-enemy-btn" class="btn btn-success">Save Enemy</button>
+                <button id="cancel-enemy-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modifier-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Stage Modifier</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modifier-select">Select Modifier*</label>
+                    <select id="modifier-select" required>
+                        <option value="">Choose a modifier...</option>
+                    </select>
+                </div>
+                <div id="modifier-description" class="modifier-description">
+                    Select a modifier to see its description
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-modifier-btn" class="btn btn-success">Add Modifier</button>
+                <button id="cancel-modifier-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reward-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Reward</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="reward-type">Reward Type*</label>
+                    <select id="reward-type" required>
+                        <option value="">Select type...</option>
+                        <option value="gold">Gold</option>
+                        <option value="xp">Experience Points</option>
+                        <option value="character">Character Unlock</option>
+                        <option value="stage">Stage Unlock</option>
+                        <option value="story">Story Unlock</option>
+                        <option value="item">Item</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reward-value">Value*</label>
+                    <input type="text" id="reward-value" placeholder="100 or character_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="reward-chance">Drop Chance (0-1)</label>
+                    <input type="number" id="reward-chance" step="0.01" min="0" max="1" value="1.0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-reward-btn" class="btn btn-success">Add Reward</button>
+                <button id="cancel-reward-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/stage-editor.js"></script>
+</body>
+</html> 

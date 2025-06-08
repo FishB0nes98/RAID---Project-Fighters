@@ -1,0 +1,603 @@
+/* Statistics Panel Styles */
+.statistics-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 380px;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-left: 2px solid #4a90e2;
+    z-index: 1500; /* Higher than stage effects (1000) to ensure it appears on top */
+    transition: right 0.3s ease;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+}
+
+.statistics-panel.visible {
+    right: 0;
+}
+
+.statistics-panel-header {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2a5a8a;
+}
+
+.statistics-panel-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.toggle-statistics-panel {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.toggle-statistics-panel:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.statistics-panel-content {
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+.statistics-tabs {
+    display: flex;
+    background: #0f1419;
+    border-bottom: 1px solid #2a5a8a;
+}
+
+.statistics-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #8a9ba8;
+    padding: 12px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.statistics-tab:hover {
+    color: #4a90e2;
+    background: rgba(74, 144, 226, 0.1);
+}
+
+.statistics-tab.active {
+    color: #4a90e2;
+    border-bottom-color: #4a90e2;
+    background: rgba(74, 144, 226, 0.15);
+}
+
+.statistics-content {
+    padding: 15px;
+}
+
+.statistics-tab-content {
+    display: none;
+}
+
+.statistics-tab-content.active {
+    display: block;
+}
+
+.statistics-section {
+    margin-bottom: 25px;
+}
+
+.statistics-section h3 {
+    color: #4a90e2;
+    font-size: 16px;
+    margin: 0 0 15px 0;
+    border-bottom: 1px solid #2a5a8a;
+    padding-bottom: 5px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-label {
+    color: #8a9ba8;
+    font-size: 14px;
+}
+
+.stat-value {
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.performer-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 12px;
+}
+
+.performer-icon {
+    font-size: 18px;
+    width: 30px;
+    text-align: center;
+}
+
+.performer-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.performer-title {
+    font-size: 12px;
+    color: #8a9ba8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.performer-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+}
+
+.performer-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #4a90e2;
+    text-align: right;
+    min-width: 80px;
+}
+
+.character-stats-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.character-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.character-info {
+    flex: 1;
+}
+
+.character-name {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.character-name.player-character {
+    color: #4a90e2;
+}
+
+.character-name.ai-character {
+    color: #e24a4a;
+}
+
+.damage-breakdown, .healing-breakdown, .combat-breakdown {
+    display: flex;
+    gap: 8px;
+}
+
+.damage-type, .healing-type, .crit-type {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #8a9ba8;
+}
+
+.damage-type.physical {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffb347;
+}
+
+.damage-type.magical {
+    background: rgba(138, 43, 226, 0.2);
+    color: #da70d6;
+}
+
+.healing-type.self {
+    background: rgba(50, 205, 50, 0.2);
+    color: #90ee90;
+}
+
+.healing-type.lifesteal {
+    background: rgba(220, 20, 60, 0.2);
+    color: #ff6b6b;
+}
+
+.crit-type.dealt {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+}
+
+.crit-type.received {
+    background: rgba(255, 99, 71, 0.2);
+    color: #ff6347;
+}
+
+.character-stats {
+    text-align: right;
+}
+
+.stat-main {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.crit-info, .dps-info, .hps-info, .shield-info, .efficiency-info, .dodge-info {
+    font-size: 10px;
+    color: #8a9ba8;
+}
+
+.dodge-info {
+    color: #90ee90;
+}
+
+.show-statistics-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+    border: 2px solid #2a5a8a;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    display: none; /* Hidden by default, shown when statistics panel is collapsed */
+    align-items: center;
+    justify-content: center;
+    z-index: 1001; /* Higher z-index to ensure it's visible */
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+.show-statistics-button:hover {
+    background: linear-gradient(135deg, #5ba0f2 0%, #4588cd 100%);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+}
+
+.ability-stats-list, .character-abilities-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.ability-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ability-name {
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.ability-stats {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.usage-count {
+    font-size: 12px;
+    color: #4a90e2;
+    font-weight: bold;
+}
+
+.damage-stat, .healing-stat {
+    font-size: 10px;
+    color: #8a9ba8;
+}
+
+.character-abilities {
+    margin-bottom: 20px;
+}
+
+.character-abilities h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.ability-usage-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ability-usage-row .ability-name {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.ability-usage, .ability-damage, .ability-healing {
+    font-size: 10px;
+    color: #8a9ba8;
+}
+
+/* Enhanced Abilities Section */
+.abilities-overview {
+    max-height: none;
+    padding-bottom: 20px;
+}
+
+.character-ability-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.character-ability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.character-ability-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.character-ability-summary {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.summary-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #8a9ba8;
+}
+
+.summary-icon {
+    font-size: 14px;
+}
+
+.abilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.ability-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.ability-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #4a90e2;
+    transform: translateY(-1px);
+}
+
+.ability-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.ability-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    flex-shrink: 0;
+}
+
+.ability-icon-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+}
+
+.ability-icon-placeholder {
+    font-size: 16px;
+    color: #4a90e2;
+}
+
+.ability-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ability-name {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ability-usage-count {
+    font-size: 11px;
+    color: #4a90e2;
+    font-weight: bold;
+}
+
+.ability-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.ability-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ability-stat.damage-stat {
+    border-color: rgba(231, 76, 60, 0.3);
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.ability-stat.healing-stat {
+    border-color: rgba(46, 204, 113, 0.3);
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.ability-stat.crit-stat {
+    border-color: rgba(241, 196, 15, 0.3);
+    background: rgba(241, 196, 15, 0.1);
+}
+
+.ability-stat.buff-stat {
+    border-color: rgba(52, 152, 219, 0.3);
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.ability-stat.debuff-stat {
+    border-color: rgba(155, 89, 182, 0.3);
+    background: rgba(155, 89, 182, 0.1);
+}
+
+.stat-icon {
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.stat-details {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.stat-value {
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 9px;
+    color: #8a9ba8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-avg {
+    font-size: 9px;
+    color: #4a90e2;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Custom scrollbar styling for better UX */
+.statistics-panel-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.statistics-panel-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.statistics-panel-content::-webkit-scrollbar-thumb {
+    background: rgba(74, 144, 226, 0.6);
+    border-radius: 4px;
+}
+
+.statistics-panel-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(74, 144, 226, 0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .abilities-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .character-ability-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .character-ability-summary {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .ability-stats-grid {
+        grid-template-columns: 1fr;
+    }
+} 

@@ -10,7 +10,7 @@
         "hp": 7800,
         "hpPerTurn": 0,
         "mana": 1900,
-        "manaPerTurn": 20,
+        "manaPerTurn": 0,
         "lifesteal": 0,
         "dodgeChance": 0.05,
         "critChance": 0.00,

@@ -25,7 +25,7 @@
             "manaCost": 100, 
             "cooldown": 0,
             "targetType": "all", 
-            "description": "Deals 300 magical damage to all enemies and heals all allies for 355 HP.",
+            "description": "Deals 220 magical damage to all enemies and heals all allies for 355 HP.",
             "icon": "Icons/abilities/blaze_bomb.png" 
         }
     ],

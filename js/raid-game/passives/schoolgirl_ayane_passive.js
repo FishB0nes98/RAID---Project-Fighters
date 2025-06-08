@@ -37,7 +37,7 @@ class SchoolgirlAyanePassive {
         ).setDescription(`+${this.physicalDamageBonus} Physical Damage for ${this.buffDuration} turns.`);
 
         // Add the stat modifier
-        adBuff.statModifiers = { physicalDamage: this.physicalDamageBonus };
+        adBuff.statModifiers = [{ stat: 'physicalDamage', value: this.physicalDamageBonus, operation: 'add' }];
 
         // Define remove function for cleanup
         adBuff.remove = (char) => {

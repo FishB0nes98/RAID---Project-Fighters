@@ -80,7 +80,9 @@ const schoolgirlAyaneButterflyDaggerEffect = (caster, target) => {
             false // Not a debuff
         ).setDescription('Increases dodge chance by 50%.');
 
-        dodgeBuff.statModifiers = { dodgeChance: 0.50 };
+        dodgeBuff.statModifiers = [
+            { stat: 'dodgeChance', value: 0.50, operation: 'add' }
+        ];
 
         // Define remove function for cleanup if needed (optional for short buffs)
         dodgeBuff.remove = (character) => {
@@ -166,10 +168,10 @@ const schoolgirlAyaneWEffect = (caster, targets) => { // Target type is all_alli
         ).setDescription(`Increases Physical Damage by ${physicalDamageIncrease} and Magical Damage by ${magicalDamageIncrease} (20% boost).`);
 
         // Add the calculated flat stat modifiers
-        buff.statModifiers = {
-            physicalDamage: physicalDamageIncrease,
-            magicalDamage: magicalDamageIncrease
-        };
+        buff.statModifiers = [
+            { stat: 'physicalDamage', value: physicalDamageIncrease, operation: 'add' },
+            { stat: 'magicalDamage', value: magicalDamageIncrease, operation: 'add' }
+        ];
         
         // The existing addBuff in character.js should handle storing original values 
         // and applying the flat modifier.
@@ -233,10 +235,10 @@ const schoolgirlAyaneEEffect = (caster) => {
     ).setDescription(`Gains 100% dodge chance and increases Physical Damage by 250% of current total Physical Damage (+${physicalDamageIncrease} AD) for 2 turns.`);
 
     // Add the stat modifiers
-    buff.statModifiers = {
-        dodgeChance: 1.0, // 100% dodge chance
-        physicalDamage: physicalDamageIncrease // Flat AD increase
-    };
+    buff.statModifiers = [
+        { stat: 'dodgeChance', value: 1.0, operation: 'add' }, // 100% dodge chance
+        { stat: 'physicalDamage', value: physicalDamageIncrease, operation: 'add' } // Flat AD increase
+    ];
 
     // Define remove function for cleanup
     buff.remove = (character) => {

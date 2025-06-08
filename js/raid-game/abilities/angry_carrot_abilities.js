@@ -107,9 +107,9 @@ const angerEffect = (caster, target) => {
     ).setDescription(`Physical Damage increased by ${damageIncrease * 100}% for ${buffDuration} turns.`);
 
     // Add statModifiers to increase physical damage
-    damageBuff.statModifiers = {
-        physicalDamage: caster.baseStats.physicalDamage * damageIncrease // Increase by 500% of base damage
-    };
+    damageBuff.statModifiers = [
+        { stat: 'physicalDamage', value: caster.baseStats.physicalDamage * damageIncrease, operation: 'add' } // Increase by 500% of base damage
+    ];
     // Store the base damage value at the time of application for removal
     damageBuff.originalBaseDamage = caster.baseStats.physicalDamage;
 

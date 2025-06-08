@@ -1,0 +1,733 @@
+/* Tutorial System Styles */
+
+/* Tutorial Overlay */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: none;
+    pointer-events: none;
+}
+
+.tutorial-overlay-visible {
+    pointer-events: none; /* Keep overlay non-interactive */
+}
+
+.tutorial-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.tutorial-overlay-visible .tutorial-backdrop {
+    opacity: 1;
+    pointer-events: none !important;
+}
+
+/* Tutorial Highlight */
+.tutorial-highlight {
+    position: fixed;
+    z-index: 10001;
+    border: 3px solid #00ff88;
+    border-radius: 12px;
+    background: rgba(0, 255, 136, 0.1);
+    box-shadow: 
+        0 0 20px rgba(0, 255, 136, 0.5),
+        inset 0 0 20px rgba(0, 255, 136, 0.1);
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tutorial-highlight-visible {
+    opacity: 1;
+    transform: scale(1);
+    animation: tutorial-pulse 2s infinite;
+}
+
+@keyframes tutorial-pulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(0, 255, 136, 0.5),
+            inset 0 0 20px rgba(0, 255, 136, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(0, 255, 136, 0.8),
+            inset 0 0 30px rgba(0, 255, 136, 0.2);
+    }
+}
+
+/* Tutorial Tooltip */
+.tutorial-tooltip {
+    position: fixed;
+    z-index: 10010 !important;
+    max-width: 400px;
+    min-width: 300px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #00ff88;
+    border-radius: 16px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 255, 136, 0.3);
+    display: none;
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: 'Arial', sans-serif;
+}
+
+.tutorial-tooltip-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.tutorial-tooltip-content {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    pointer-events: all !important;
+}
+
+/* Tutorial Tooltip Header */
+.tutorial-tooltip-header {
+    background: linear-gradient(90deg, #00ff88 0%, #00cc6a 100%);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorial-tooltip-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a1a2e;
+    text-shadow: none;
+}
+
+.tutorial-tooltip-progress {
+    background: rgba(26, 26, 46, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #1a1a2e;
+}
+
+/* Tutorial Tooltip Body */
+.tutorial-tooltip-body {
+    padding: 20px;
+}
+
+.tutorial-tooltip-description {
+    margin: 0;
+    line-height: 1.6;
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+/* Tutorial Tooltip Footer */
+.tutorial-tooltip-footer {
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid rgba(0, 255, 136, 0.2);
+    pointer-events: all !important;
+    z-index: 10011 !important;
+}
+
+.tutorial-button {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    pointer-events: all !important;
+    z-index: 10012 !important;
+    position: relative;
+}
+
+.tutorial-button:hover {
+    background: linear-gradient(135deg, #00cc6a 0%, #00aa55 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 255, 136, 0.3);
+}
+
+.tutorial-button:active {
+    transform: translateY(0);
+}
+
+.tutorial-skip-button {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+}
+
+.tutorial-skip-button:hover {
+    background: linear-gradient(135deg, #ee5a5a 0%, #dd4444 100%);
+    box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+}
+
+/* Positioning Classes */
+.tutorial-tooltip-center {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tutorial-tooltip-center.tutorial-tooltip-visible {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.tutorial-tooltip-top::before {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #00ff88;
+}
+
+.tutorial-tooltip-bottom::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid #00ff88;
+}
+
+.tutorial-tooltip-left::before {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid #00ff88;
+}
+
+.tutorial-tooltip-right::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid #00ff88;
+}
+
+/* Tutorial Active State */
+body.tutorial-active {
+    /* Remove overflow hidden to prevent battle log going off-screen */
+}
+
+body.tutorial-active .battle-container > *:not(.tutorial-overlay):not(.tutorial-tooltip):not(.tutorial-highlight) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Tutorial Interaction Modes */
+.tutorial-no-interact .battle-container > *:not(.tutorial-overlay):not(.tutorial-tooltip):not(.tutorial-highlight):not(.stage-modifiers-indicator):not(.stage-modifier-indicator):not(.character-hp) {
+    pointer-events: none;
+}
+
+.tutorial-no-interact .tutorial-overlay,
+.tutorial-no-interact .tutorial-tooltip,
+.tutorial-no-interact .tutorial-highlight,
+.tutorial-no-interact .battle-log-container,
+.tutorial-no-interact .stage-modifiers-indicator,
+.tutorial-no-interact .stage-modifier-indicator,
+.tutorial-no-interact .character-hp {
+    pointer-events: all !important;
+}
+
+.tutorial-hover-only .battle-container > *:not(.tutorial-overlay):not(.tutorial-tooltip):not(.tutorial-highlight):not(.battle-log-container):not(.stage-modifiers-indicator):not(.stage-modifier-indicator):not(.character-hp) {
+    pointer-events: none;
+}
+
+.tutorial-hover-only .tutorial-overlay,
+.tutorial-hover-only .tutorial-tooltip,
+.tutorial-hover-only .tutorial-highlight,
+.tutorial-hover-only .battle-log-container,
+.tutorial-hover-only .stage-modifiers-indicator,
+.tutorial-hover-only .stage-modifier-indicator,
+.tutorial-hover-only .character-hp {
+    pointer-events: all !important;
+}
+
+/* Special handling for player character container in hover mode */
+.tutorial-hover-only #player-characters-container {
+    pointer-events: none !important;
+}
+
+/* In hover-only mode, Q ability can be hovered but clicking is blocked by overlay */
+.tutorial-hover-only #player-characters-container .ability:nth-child(1) {
+    pointer-events: all !important;
+}
+
+/* Allow hovering only on Q ability in hover-only mode, but disable clicking */
+.tutorial-hover-only #player-characters-container .ability:nth-child(1) {
+    cursor: help !important;
+    position: relative;
+}
+
+.tutorial-hover-only #player-characters-container .ability:nth-child(1):hover {
+    transform: scale(1.05) !important;
+    opacity: 0.9 !important;
+}
+
+/* Create click-blocking overlay for Q ability in hover mode */
+.tutorial-hover-only #player-characters-container .ability:nth-child(1)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: 1;
+    pointer-events: auto;
+    cursor: help;
+}
+
+/* Ensure Q ability can trigger tooltips during tutorial */
+body.tutorial-active #player-characters-container .ability:nth-child(1) {
+    position: relative !important;
+    z-index: 10001 !important;
+}
+
+/* Make sure all tooltip-related elements work */
+body.tutorial-active .tooltip,
+body.tutorial-active .tooltip-title,
+body.tutorial-active .tooltip-description {
+    pointer-events: all !important;
+    z-index: 10004 !important;
+}
+
+.tutorial-full-interact {
+    /* In full interact mode, don't restrict anything */
+}
+
+.tutorial-full-interact .tutorial-overlay,
+.tutorial-full-interact .tutorial-tooltip,
+.tutorial-full-interact .tutorial-highlight,
+.tutorial-full-interact .stage-modifiers-indicator,
+.tutorial-full-interact .stage-modifier-indicator,
+.tutorial-full-interact .character-hp {
+    pointer-events: all;
+}
+
+/* Ensure battle log is always visible and positioned correctly during tutorial */
+body.tutorial-active .battle-log-container {
+    z-index: 10001 !important;
+    position: fixed !important;
+    right: 20px !important;
+    bottom: 20px !important;
+    pointer-events: all !important;
+    width: 300px !important;
+    max-height: 400px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Ensure stage modifiers indicator and character HP are always visible during tutorial */
+body.tutorial-active .stage-modifiers-indicator,
+body.tutorial-active .stage-modifier-indicator,
+body.tutorial-active .stage-modifiers,
+body.tutorial-active .stage-modifier,
+body.tutorial-active [class*="stage-modifier"],
+body.tutorial-active [class*="modifier"],
+body.tutorial-active .character-hp {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    pointer-events: all !important;
+    z-index: 10001 !important;
+}
+
+/* Ensure stage modifiers indicator is properly positioned */
+body.tutorial-active .stage-modifiers-indicator,
+body.tutorial-active .stage-modifier-indicator,
+body.tutorial-active .stage-modifiers,
+body.tutorial-active .stage-modifier {
+    position: relative !important;
+}
+
+/* Ensure character HP bars are visible and interactive */
+body.tutorial-active .character-hp,
+body.tutorial-active .health-bar,
+body.tutorial-active .mana-bar {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: all !important;
+}
+
+/* Ensure tooltips work during tutorial */
+body.tutorial-active #tooltip {
+    z-index: 10004 !important;
+    pointer-events: all !important;
+}
+
+/* Lock W, E, R abilities during tutorial for player characters */
+body.tutorial-active #player-characters-container .ability:nth-child(2),
+body.tutorial-active #player-characters-container .ability:nth-child(3),
+body.tutorial-active #player-characters-container .ability:nth-child(4) {
+    opacity: 0.3 !important;
+    pointer-events: none !important;
+    filter: grayscale(100%) !important;
+    position: relative;
+}
+
+body.tutorial-active #player-characters-container .ability:nth-child(2)::after,
+body.tutorial-active #player-characters-container .ability:nth-child(3)::after,
+body.tutorial-active #player-characters-container .ability:nth-child(4)::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    z-index: 10;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Keep Q ability (first ability) fully interactive */
+body.tutorial-active #player-characters-container .ability:nth-child(1) {
+    pointer-events: all !important;
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+/* Lock Q ability when tutorial hasn't reached clicking step yet */
+body.tutorial-active.q-ability-locked #player-characters-container .ability:nth-child(1) {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    position: relative;
+}
+
+body.tutorial-active.q-ability-locked #player-characters-container .ability:nth-child(1)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 0, 0, 0.15);
+    z-index: 15;
+    border: 2px solid #ff4444;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* Add special highlighting for the Q ability during tutorial */
+body.tutorial-active #player-characters-container .ability:nth-child(1) {
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.6) !important;
+    border: 2px solid rgba(0, 255, 136, 0.8) !important;
+}
+
+/* Tutorial Specific Animations */
+@keyframes tutorial-highlight-attention {
+    0%, 100% {
+        border-color: #00ff88;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+    }
+    25% {
+        border-color: #ffaa00;
+        box-shadow: 0 0 25px rgba(255, 170, 0, 0.6);
+    }
+    75% {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 25px rgba(255, 107, 107, 0.6);
+    }
+}
+
+.tutorial-highlight.attention {
+    animation: tutorial-highlight-attention 1.5s infinite;
+}
+
+/* Tutorial Tooltip Entry Animations */
+.tutorial-tooltip.slide-in-top {
+    transform: translateY(-30px) scale(0.9);
+}
+
+.tutorial-tooltip.slide-in-bottom {
+    transform: translateY(30px) scale(0.9);
+}
+
+.tutorial-tooltip.slide-in-left {
+    transform: translateX(-30px) scale(0.9);
+}
+
+.tutorial-tooltip.slide-in-right {
+    transform: translateX(30px) scale(0.9);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tutorial-tooltip {
+        max-width: 90vw;
+        min-width: unset;
+        margin: 10px;
+    }
+    
+    .tutorial-tooltip-center {
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .tutorial-tooltip-header {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    
+    .tutorial-tooltip-title {
+        font-size: 16px;
+        text-align: center;
+    }
+    
+    .tutorial-tooltip-progress {
+        text-align: center;
+        align-self: center;
+    }
+    
+    .tutorial-tooltip-body {
+        padding: 16px;
+    }
+    
+    .tutorial-tooltip-footer {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .tutorial-button {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+    .tutorial-tooltip {
+        background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+        border-color: #00ff88;
+    }
+    
+    .tutorial-tooltip-description {
+        color: #f0f0f0;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .tutorial-highlight {
+        border-width: 4px;
+        border-color: #00ff00;
+        background: rgba(0, 255, 0, 0.2);
+    }
+    
+    .tutorial-tooltip {
+        border-width: 3px;
+        border-color: #00ff00;
+    }
+    
+    .tutorial-tooltip-header {
+        background: #00ff00;
+    }
+    
+    .tutorial-tooltip-title {
+        color: #000000;
+    }
+}
+
+/* Dynamic Tutorial Warnings */
+.tutorial-dynamic-warning {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10005 !important;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #00ff88;
+    border-radius: 12px;
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 255, 136, 0.3);
+    opacity: 0;
+    transform: translateX(100px) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: 'Arial', sans-serif;
+    pointer-events: all !important;
+}
+
+.tutorial-dynamic-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+.tutorial-dynamic-warning.tutorial-dynamic-warning {
+    border-color: #ff6b6b;
+}
+
+.tutorial-dynamic-warning.tutorial-dynamic-info {
+    border-color: #4dabf7;
+}
+
+.tutorial-dynamic-warning.tutorial-dynamic-tip {
+    border-color: #69db7c;
+}
+
+.tutorial-dynamic-content {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.tutorial-dynamic-header {
+    background: linear-gradient(90deg, #00ff88 0%, #00cc6a 100%);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorial-dynamic-warning .tutorial-dynamic-header {
+    background: linear-gradient(90deg, #ff6b6b 0%, #ee5a5a 100%);
+}
+
+.tutorial-dynamic-info .tutorial-dynamic-header {
+    background: linear-gradient(90deg, #4dabf7 0%, #339af0 100%);
+}
+
+.tutorial-dynamic-tip .tutorial-dynamic-header {
+    background: linear-gradient(90deg, #69db7c 0%, #51cf66 100%);
+}
+
+.tutorial-dynamic-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #1a1a2e;
+    text-shadow: none;
+}
+
+.tutorial-dynamic-type {
+    background: rgba(26, 26, 46, 0.3);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #1a1a2e;
+    text-transform: uppercase;
+}
+
+.tutorial-dynamic-body {
+    padding: 16px;
+}
+
+.tutorial-dynamic-description {
+    margin: 0;
+    line-height: 1.5;
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.tutorial-dynamic-footer {
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.tutorial-dynamic-ok {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tutorial-dynamic-ok:hover {
+    background: linear-gradient(135deg, #00cc6a 0%, #00aa55 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 255, 136, 0.3);
+}
+
+/* Pulsing animation for urgent warnings */
+.tutorial-dynamic-warning.tutorial-dynamic-warning {
+    animation: tutorial-warning-pulse 2s infinite;
+}
+
+@keyframes tutorial-warning-pulse {
+    0%, 100% {
+        box-shadow: 
+            0 15px 30px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 107, 107, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 15px 30px rgba(0, 0, 0, 0.4),
+            0 0 30px rgba(255, 107, 107, 0.6);
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .tutorial-highlight,
+    .tutorial-tooltip,
+    .tutorial-button,
+    .tutorial-dynamic-warning {
+        transition: none;
+        animation: none;
+    }
+    
+    .tutorial-highlight-visible {
+        animation: none;
+    }
+    
+    .tutorial-overlay .tutorial-backdrop {
+        transition: opacity 0.2s ease;
+    }
+} 

@@ -8,7 +8,14 @@
       { "type": "enemyDefeated", "targetId": "infernal_birdie" }
     ]
   },
-  "stageEffects": [],
+  "stageEffects": [
+    {
+      "id": "small_space",
+      "name": "Small Space",
+      "description": "The confined space makes dodging impossible! All characters have their dodge chance reduced to 0.",
+      "icon": "🚪"
+    }
+  ],
   "enemies": [
     {
       "characterId": "infernal_birdie"

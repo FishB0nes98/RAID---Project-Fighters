@@ -6,7 +6,9 @@
             "image": "Icons/characters/Schoolboy Shoma.png",
             "rarity": "rare",
             "type": "fighter",
-            "description": "A talented high school baseball player who uses his bat and physical prowess in combat."
+            "tags": ["Student", "Physical", "Support"],
+            "description": "A talented high school baseball player who uses his bat and physical prowess in combat.",
+            "playerunlocked": true
         },
         {
             "id": "test_boss",
@@ -14,7 +16,9 @@
             "image": "Icons/characters/Test Boss.png",
             "rarity": "legendary",
             "type": "boss",
-            "description": "A powerful boss created for testing new characters and abilities."
+            "description": "A powerful boss created for testing new characters and abilities.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "shao_kahn_boss",
@@ -22,7 +26,9 @@
             "image": "Icons/characters/Shao Kahn.png",
             "rarity": "legendary",
             "type": "boss",
-            "description": "The Emperor of Outworld, a powerful warrior with unrivaled strength. His hammer strikes fear into the hearts of his enemies."
+            "description": "The Emperor of Outworld, a powerful warrior with unrivaled strength. His hammer strikes fear into the hearts of his enemies.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "cham_cham",
@@ -30,7 +36,9 @@
             "image": "Icons/characters/Cham Cham.png",
             "rarity": "epic",
             "type": "fighter",
-            "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang."
+            "tags": ["Carry", "Physical", "Solo"],
+            "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang.",
+            "playerunlocked": false
         },
         {
             "id": "ayane",
@@ -38,7 +46,9 @@
             "image": "Icons/characters/Ayane.png",
             "rarity": "epic",
             "type": "assassin",
-            "description": "A swift assassin who uses teleportation and shadow techniques. Her Combat Reflexes passive lets her reduce ability cooldowns."
+            "tags": ["Carry", "Physical", "Solo"],
+            "description": "A swift assassin who uses teleportation and shadow techniques. Her Combat Reflexes passive lets her reduce ability cooldowns.",
+            "playerunlocked": false
         },
         {
             "id": "farmer_nina",
@@ -46,8 +56,9 @@
             "image": "Icons/characters/Farmer Nina.png",
             "rarity": "epic",
             "type": "assassin",
-            "tags": ["Farmer"],
-            "description": "A precision sniper with enhanced buff capabilities. Her Amplified Buffs passive doubles the power of all buffs applied to her."
+            "tags": ["Carry", "Physical", "Farmer"],
+            "description": "A precision sniper with enhanced buff capabilities. Her Amplified Buffs passive doubles the power of all buffs applied to her.",
+            "playerunlocked": false
         },
         {
             "id": "farmer_raiden",
@@ -55,8 +66,9 @@
             "image": "Icons/characters/Farmer Raiden.png",
             "rarity": "epic",
             "type": "mage",
-            "tags": ["Farmer"],
-            "description": "A powerful farmer who harnesses the power of lightning. His Thunder Mastery passive allows him to deal bonus magical damage and gain magical shield when using lightning abilities."
+            "tags": ["Carry", "Magical", "Farmer"],
+            "description": "A powerful farmer who harnesses the power of lightning. His Thunder Mastery passive allows him to deal bonus magical damage and gain magical shield when using lightning abilities.",
+            "playerunlocked": false
         },
         {
             "id": "atlantean_kagome",
@@ -64,7 +76,9 @@
             "image": "Icons/characters/Atlantean Kagome.png",
             "rarity": "epic",
             "type": "mage",
-            "description": "A mystical archer from Atlantis whose arrows are imbued with ancient magic. Her Atlantean Blessing passive converts missing mana into healing."
+            "tags": ["Magical", "Atlantean"],
+            "description": "A mystical archer from Atlantis whose arrows are imbued with ancient magic. Her Atlantean Blessing passive converts missing mana into healing.",
+            "playerunlocked": false
         },
         {
             "id": "farmer_alice",
@@ -72,8 +86,9 @@
             "image": "Icons/characters/Farmer Alice.png",
             "rarity": "epic",
             "type": "tank",
-            "tags": ["Farmer"],
-            "description": "A bulky tank with magical resistance. Her Magical Resistance passive allows her to gain permanent Magic Shield when taking magical damage."
+            "tags": ["Tank", "Support", "Farmer", "Physical"],
+            "description": "A bulky tank with magical resistance. Her Magical Resistance passive allows her to gain permanent Magic Shield when taking magical damage.",
+            "playerunlocked": false
         },
         {
             "id": "farmer_shoma",
@@ -81,8 +96,9 @@
             "image": "Icons/characters/Farmer Shoma.png",
             "rarity": "legendary",
             "type": "fighter",
-            "tags": ["Farmer"],
-            "description": "A farm-raised baseball prodigy with extraordinary critical hit chance. His Farming Experience passive increases his already high crit chance after turn 20."
+            "tags": ["Tank", "Support", "Farmer"],
+            "description": "A farm-raised baseball prodigy with extraordinary critical hit chance. His Farming Experience passive increases his already high crit chance after turn 20.",
+            "playerunlocked": false
         },
         {
             "id": "schoolgirl_kokoro",
@@ -90,7 +106,9 @@
             "image": "Icons/characters/Schoolgirl Kokoro.png",
             "rarity": "epic",
             "type": "support",
-            "description": "A healer who specializes in restorative abilities. Her Healing Feedback passive lets her recover health whenever she uses any ability."
+            "tags": ["Support", "Student"],
+            "description": "A healer who specializes in restorative abilities. Her Healing Feedback passive lets her recover health whenever she uses any ability.",
+            "playerunlocked": false
         },
         {
             "id": "schoolboy_siegfried",
@@ -98,7 +116,9 @@
             "image": "Icons/characters/Schoolboy Siegfried.png",
             "rarity": "epic",
             "type": "fighter",
-            "description": "A determined schoolboy warrior who grows stronger with every boon. His passive grants bonus Physical Damage per active buff."
+            "tags": ["Student", "Physical", "Carry"],
+            "description": "A determined schoolboy warrior who grows stronger with every boon. His passive grants bonus Physical Damage per active buff.",
+            "playerunlocked": false
         },
         {
             "id": "schoolgirl_julia",
@@ -106,7 +126,9 @@
             "image": "Icons/characters/Schoolgirl Julia.png",
             "rarity": "epic",
             "type": "fighter",
-            "description": "A energetic fighter who grows stronger whenever she heals or is healed. Her passive grants permanent Physical Damage on healing."
+            "tags": ["Student", "Physical", "Support"],
+            "description": "A energetic fighter who grows stronger whenever she heals or is healed. Her passive grants permanent Physical Damage on healing.",
+            "playerunlocked": false
         },
         {
             "id": "schoolgirl_ayane",
@@ -114,7 +136,9 @@
             "image": "Icons/characters/Schoolgirl Ayane.png",
             "rarity": "epic",
             "type": "assassin",
-            "description": "A swift assassin who uses agility and daggers. Her Combat Reflexes passive boosts her damage after dodging."
+            "tags": ["Carry", "Physical", "Student"],
+            "description": "A swift assassin who uses agility and daggers. Her Combat Reflexes passive boosts her damage after dodging.",
+            "playerunlocked": false
         },
         {
             "id": "schoolgirl_elphelt",
@@ -122,7 +146,9 @@
             "image": "Icons/characters/Schoolgirl Elphelt.png",
             "rarity": "epic",
             "type": "fighter",
-            "description": "A cheerful shooter who bolsters her defenses when using abilities."
+            "tags": ["Tank", "Hybrid", "Student"],
+            "description": "A cheerful shooter who bolsters her defenses when using abilities.",
+            "playerunlocked": false
         },
         {
             "id": "blazing_elemental",
@@ -130,7 +156,9 @@
             "image": "Icons/characters/Blazing Elemental.png",
             "rarity": "rare",
             "type": "mage",
-            "description": "A fiery being that unleashes explosive power, harming foes and healing allies."
+            "description": "A fiery being that unleashes explosive power, harming foes and healing allies.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "infernal_birdie",
@@ -138,7 +166,9 @@
             "image": "Icons/characters/Infernal Birdie.png",
             "rarity": "epic",
             "type": "fighter",
-            "description": "A relentless warrior wielding enchanted chains, capable of striking multiple foes and stunning them."
+            "description": "A relentless warrior wielding enchanted chains, capable of striking multiple foes and stunning them.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "farmer_cham_cham",
@@ -146,50 +176,63 @@
             "image": "Icons/characters/Farmer Cham Cham.png",
             "rarity": "epic",
             "type": "fighter",
-            "tags": ["Farmer"],
-            "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang."
+            "tags": ["Carry", "Physical", "Farmer"],
+            "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang.",
+            "playerunlocked": true
         },
         {
             "id": "angry_bull",
             "name": "Angry Bull",
             "image": "images/characters/angry_bull_avatar.png",
             "tags": ["Enemy", "Beast"],
-            "description": "A furious bull, mutated by dark influences."
+            "description": "A furious bull, mutated by dark influences.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "monster_apple",
             "name": "Monster Apple",
             "image": "images/characters/apples/monster_apple_avatar.png",
             "tags": ["Enemy", "Plant", "Mutated"],
-            "description": "A grotesque, oversized apple with a hunger for flesh."
+            "description": "A grotesque, oversized apple with a hunger for flesh.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "healthy_apple",
             "name": "Healthy Apple",
             "image": "images/characters/apples/healthy_apple_avatar.png",
             "tags": ["Enemy", "Plant", "Support"],
-            "description": "A vibrant apple that seems to radiate restorative energy."
+            "description": "A vibrant apple that seems to radiate restorative energy.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "angry_apple",
             "name": "Angry Apple",
             "image": "images/characters/apples/angry_apple_avatar.png",
             "tags": ["Enemy", "Plant", "Aggressive"],
-            "description": "This apple looks furious and ready to attack."
+            "description": "This apple looks furious and ready to attack.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "leafy_apple",
             "name": "Leafy Apple",
             "image": "images/characters/apples/leafy_apple_avatar.png",
             "tags": ["Enemy", "Plant", "Magic"],
-            "description": "An apple covered in leaves, pulsing with natural magic."
+            "description": "An apple covered in leaves, pulsing with natural magic.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "rotten_apple",
             "name": "Rotten Apple",
             "image": "images/characters/apples/rotten_apple_avatar.png",
             "tags": ["Enemy", "Plant", "Debuff"],
-            "description": "A decaying apple spreading blight."
+            "description": "A decaying apple spreading blight.",
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "farmer_fang",
@@ -197,7 +240,61 @@
             "image": "images/characters/farmer_fang_avatar.png",
             "tags": ["Boss"],
             "rarity": "Epic",
-            "path": "js/raid-game/characters/farmer_fang.json"
+            "path": "js/raid-game/characters/farmer_fang.json",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "bridget",
+            "name": "Bridget",
+            "image": "Icons/characters/Bridget.png",
+            "rarity": "epic",
+            "type": "support",
+            "tags": ["Magical", "Support", "Carry", "Mew Mew"],
+            "description": "A water-themed magical girl with powerful healing abilities. Her attacks create beautiful aquatic displays that both damage enemies and nurture allies.",
+            "playerunlocked": false
+        },
+        {
+            "id": "renée",
+            "name": "Renée",
+            "image": "Icons/characters/Renée.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "tags": ["Carry", "Physical", "Mew Mew", "Solo"],
+            "description": "A Tokyo Mew Mew character who channels a mystical wolf spirit. Her swift claw attacks and spiritual connection make her a formidable fighter.",
+            "playerunlocked": true
+        },
+        {
+            "id": "zoey",
+            "name": "Zoey",
+            "image": "Icons/characters/Zoey.png",
+            "rarity": "epic",
+            "type": "mage",
+            "tags": ["Mew Mew", "Magical"],
+            "description": "A Tokyo Mew Mew character infused with wildcat DNA. As the leader of the Mew Mews, she wields the power of the Strawberry Bell to cast devastating magical attacks.",
+            "playerunlocked": false
+        },
+        {
+            "id": "little_devil",
+            "name": "Little Devil",
+            "image": "Loading Screen/Little_Devil.webp",
+            "rarity": "rare",
+            "type": "fighter",
+            "tags": ["Enemy", "Demon", "Tutorial"],
+            "description": "A mischievous little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "little_devil_female",
+            "name": "Little Devil Female",
+            "image": "Loading Screen/Little_Devil_Female.webp",
+            "rarity": "rare",
+            "type": "fighter",
+            "tags": ["Enemy", "Demon", "Tutorial"],
+            "description": "A cunning little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
+            "playerunlocked": false,
+            "isHidden": true
         }
     ]
 } 

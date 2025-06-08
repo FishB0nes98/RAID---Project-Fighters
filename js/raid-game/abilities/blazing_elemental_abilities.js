@@ -25,7 +25,7 @@ const blazeBombEffect = (caster, targets) => { // Target parameter is not used f
 
     // Target all enemies (player characters)
     const enemies = gameState.playerCharacters || [];
-    const damageAmount = 300;
+    const damageAmount = 220;
     const damageType = 'magical';
 
     log(`${caster.name} unleashes a wave of fire towards enemies!`);
@@ -42,6 +42,7 @@ const blazeBombEffect = (caster, targets) => { // Target parameter is not used f
                 enemyElement.appendChild(impactVfx);
                 setTimeout(() => impactVfx.remove(), 800);
             }
+            
             enemy.applyDamage(damageAmount, damageType, caster);
         }
     });
@@ -67,7 +68,7 @@ const blazeBomb = new Ability(
     100, // Mana cost
     0,   // Cooldown
     blazeBombEffect
-).setDescription('Deals 300 magical damage to all enemies.')
+).setDescription('Deals 220 magical damage to all enemies.')
  .setTargetType('all'); // Affects everyone, logic differentiates allies/enemies
 
 // --- Ability Factory Integration ---

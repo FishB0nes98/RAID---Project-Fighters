@@ -1,0 +1,427 @@
+{
+    "talentTree": {
+        "deadly_precision": {
+            "id": "deadly_precision",
+            "name": "Deadly Precision",
+            "description": "⚡ Doubles your Physical Damage at game start, making your shots even more lethal.",
+            "icon": "Icons/talents/deadly_precision.webp",
+            "tier": 1,
+            "root": true,
+            "cost": 3,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "physicalDamage",
+                "operation": "multiply",
+                "value": 2
+            },
+            "children": ["aoe_target_lock", "evasive_hiding"]
+        },
+        "aoe_target_lock": {
+            "id": "aoe_target_lock",
+            "name": "Mass Targeting",
+            "description": "⚡ Target Lock now affects all enemies when used.",
+            "icon": "Icons/talents/target_lock_aoe.webp",
+            "tier": 2,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_e",
+                "property": "affectAllEnemies",
+                "value": true
+            },
+            "parents": ["deadly_precision"],
+            "children": ["piercing_rounds", "enhanced_ammunition"]
+        },
+        "evasive_hiding": {
+            "id": "evasive_hiding",
+            "name": "Shadow Stance",
+            "description": "⚡ When using Hiding, gain 50% dodge chance for 2 turns.",
+            "icon": "Icons/talents/evasive_hiding.webp",
+            "tier": 2,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_w",
+                "property": "grantsDodgeChance",
+                "value": 0.5
+            },
+            "parents": ["deadly_precision"],
+            "children": ["critical_dodge", "critical_recuperation"]
+        },
+        "critical_recuperation": {
+            "id": "critical_recuperation",
+            "name": "Critical Recuperation",
+            "description": "⚡ Hiding has a chance equal to your Critical Strike Chance to critically heal you, multiplying the heal amount by your Critical Damage.",
+            "icon": "Icons/talents/crit_heal_hiding.webp",
+            "tier": 3,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_w",
+                "property": "enableCriticalHidingHeal",
+                "value": true
+            },
+            "parents": ["evasive_hiding"],
+            "children": ["critical_power", "pinpointing_weakness"],
+            "position": {"x": -100, "y": 225}
+        },
+        "piercing_rounds": {
+            "id": "piercing_rounds",
+            "name": "Piercing Rounds",
+            "description": "⚡ Sniper Shot has a 10% chance to pierce to an additional enemy, dealing 50% of the damage.",
+            "icon": "Icons/talents/piercing_shot.webp",
+            "tier": 3,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_q",
+                "property": "piercingChance",
+                "value": 0.1
+            },
+            "parents": ["aoe_target_lock"],
+            "children": ["bloodthirst", "deadeye", "armor_ignore"]
+        },
+        "enhanced_ammunition": {
+            "id": "enhanced_ammunition",
+            "name": "Enhanced Ammunition",
+            "description": "⚡ Sniper Shot deals 600 base damage instead of 400 (scaling remains the same).",
+            "icon": "Icons/talents/enhanced_ammo.webp",
+            "tier": 3,
+            "cost": 3,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_q",
+                "property": "baseDamage",
+                "value": 600
+            },
+            "parents": ["aoe_target_lock"],
+            "children": ["critical_dodge"]
+        },
+        "armor_ignore": {
+            "id": "armor_ignore",
+            "name": "Armor Ignore",
+            "description": "⚡ Sniper Shot has a 15% chance to ignore the target's armor.",
+            "icon": "Icons/talents/armor_pierce.webp",
+            "tier": 4,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_q",
+                "property": "armorIgnoreChance",
+                "value": 0.15
+            },
+            "parents": ["piercing_rounds"],
+            "children": ["extended_protection", "physical_growth"],
+            "position": {"x": -150, "y": -455}
+        },
+        "bloodthirst": {
+            "id": "bloodthirst",
+            "name": "Bloodthirst",
+            "description": "⚡ Gain 15% lifesteal at the start of the game, allowing you to heal from your shots.",
+            "icon": "Icons/talents/lifesteal.webp",
+            "tier": 4,
+            "cost": 2,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "lifesteal",
+                "operation": "add",
+                "value": 0.15
+            },
+            "parents": ["piercing_rounds"],
+            "children": ["extended_protection", "deadly_retreat"]
+        },
+        "deadeye": {
+            "id": "deadeye",
+            "name": "Deadeye",
+            "description": "⚡ Gain 10% additional critical strike chance for all your attacks.",
+            "icon": "Icons/talents/critical_focus.webp",
+            "tier": 4,
+            "cost": 2,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "operation": "add",
+                "value": 0.1
+            },
+            "parents": ["piercing_rounds"],
+            "children": ["physical_growth"]
+        },
+        "extended_protection": {
+            "id": "extended_protection",
+            "name": "Extended Protection",
+            "description": "⚡ All buffs applied to Nina last 2 turns longer.",
+            "icon": "Icons/talents/time_extension.webp",
+            "tier": 5,
+            "cost": 3,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "buffDurationExtension",
+                "value": 2
+            },
+            "parents": ["bloodthirst"],
+            "children": ["enhanced_target_lock", "damage_to_mana"]
+        },
+        "deadly_retreat": {
+            "id": "deadly_retreat",
+            "name": "Deadly Retreat",
+            "description": "⚡ When Hiding expires naturally, Nina gains a buff increasing Physical Damage by 12% for 2 turns.",
+            "icon": "Icons/talents/post_hiding_damage.webp",
+            "tier": 5,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_w",
+                "property": "enablePostHidingDamageBuff",
+                "value": true
+            },
+            "parents": ["bloodthirst"],
+            "children": ["physical_growth"]
+        },
+        "enhanced_target_lock": {
+            "id": "enhanced_target_lock",
+            "name": "Enhanced Targeting",
+            "description": "⚡ Target Lock now increases physical damage taken by 30% instead of 15%.",
+            "icon": "Icons/talents/enhanced_targeting.webp",
+            "tier": 6,
+            "cost": 3,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_e",
+                "property": "damageAmpPercent",
+                "value": 30
+            },
+            "parents": ["extended_protection"],
+            "children": ["armor_breach"]
+        },
+        "damage_to_mana": {
+            "id": "damage_to_mana",
+            "name": "Tactical Recovery",
+            "description": "⚡ Nina restores mana equal to 2% of the physical damage she deals.",
+            "icon": "Icons/talents/mana_recovery.webp",
+            "tier": 6,
+            "cost": 3,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "damageToManaPercent",
+                "value": 0.02
+            },
+            "parents": ["extended_protection"],
+            "children": ["armor_breach"]
+        },
+        "armor_breach": {
+            "id": "armor_breach",
+            "name": "Armor Breach",
+            "description": "⚡ Target Lock also reduces the target's armor by 5%.",
+            "icon": "Icons/talents/armor_breach.webp",
+            "tier": 7,
+            "cost": 3,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_e",
+                "property": "reducesArmorBy",
+                "value": 0.05
+            },
+            "parents": ["enhanced_target_lock", "damage_to_mana"],
+            "children": ["unshakeable_focus"]
+        },
+        "critical_dodge": {
+            "id": "critical_dodge",
+            "name": "Combat Reflexes",
+            "description": "⚡ When Nina dodges an attack, she gains 100% critical strike chance for 2 turns.",
+            "icon": "Icons/talents/dodge_critical.webp",
+            "tier": 4,
+            "cost": 3,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableDodgeCriticalBuff",
+                "value": true
+            },
+            "parents": ["evasive_hiding", "enhanced_ammunition"],
+            "children": ["critical_power"]
+        },
+        "physical_growth": {
+            "id": "physical_growth",
+            "name": "Survivalist Instinct",
+            "description": "⚡ At the end of each turn, Nina gains 1% of her physical damage as additional physical damage.",
+            "icon": "Icons/talents/physical_growth.webp",
+            "tier": 6,
+            "cost": 4,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enablePhysicalGrowth",
+                "value": true
+            },
+            "parents": ["deadeye", "deadly_retreat"],
+            "children": ["critical_power", "focused_precision"]
+        },
+        "focused_precision": {
+            "id": "focused_precision",
+            "name": "Focused Precision",
+            "description": "⚡ Sniper Shot now scales with 75% Physical Damage instead of 50%, increasing its overall damage.",
+            "icon": "Icons/talents/sniper_focus.webp",
+            "tier": 7,
+            "cost": 3,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_q",
+                "property": "damageScalingPercent",
+                "value": 0.75
+            },
+            "parents": ["physical_growth"],
+            "children": ["pain_into_power"],
+            "position": { "x": 300, "y": 375}
+        },
+        "critical_power": {
+            "id": "critical_power",
+            "name": "Critical Power",
+            "description": "⚡ When Nina lands a critical hit, she gains 100 Physical Damage for 3 turns. This effect can stack.",
+            "icon": "Icons/talents/crit_power.webp",
+            "tier": 7,
+            "cost": 4,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableCriticalPowerBuff",
+                "value": true
+            },
+            "parents": ["critical_dodge", "physical_growth"],
+            "children": ["deadly_accuracy"],
+            "position": { "x": -325, "y": 375}
+        },
+        "unshakeable_focus": {
+            "id": "unshakeable_focus",
+            "name": "Unshakeable Focus",
+            "description": "⚡ Target Lock never expires and can be applied multiple times to the same target, stacking its effects.",
+            "icon": "Icons/talents/perfect_aim.webp",
+            "tier": 8,
+            "cost": 5,
+            "powerful": true,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_e",
+                "property": "permanentAndStackingTargetLock",
+                "value": true
+            },
+            "parents": ["armor_breach"],
+            "children": []
+        },
+        "deadly_accuracy": {
+            "id": "deadly_accuracy",
+            "name": "Deadly Accuracy",
+            "description": "⚡ Gain 20% additional critical strike chance for all your attacks.",
+            "icon": "Icons/talents/sharpshooter.webp",
+            "tier": 8,
+            "cost": 4,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "operation": "add",
+                "value": 0.2
+            },
+            "parents": ["critical_power"],
+            "children": ["bullet_rain"],
+            "position": { "x": -200, "y": 375}
+        },
+        "bullet_rain": {
+            "id": "bullet_rain",
+            "name": "Bullet Rain",
+            "description": "⚡ At the start of your turn, rain bullets on all target-locked enemies, dealing 25% of your Physical Damage per target with lock. These attacks can critically hit.",
+            "icon": "Icons/talents/bullet_rain.webp",
+            "tier": 9,
+            "cost": 5,
+            "powerful": true,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableBulletRain",
+                "value": true
+            },
+            "parents": ["deadly_accuracy"],
+            "children": [],
+            "position": { "x": 0, "y": 450}
+        },
+        "pain_into_power": {
+            "id": "pain_into_power",
+            "name": "Pain into Power",
+            "description": "⚡ Whenever Nina takes damage, she permanently gains 2% critical damage.",
+            "icon": "Icons/talents/pain_power.webp",
+            "tier": 8,
+            "cost": 4,
+            "powerful": true,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enablePainIntoPower",
+                "value": true
+            },
+            "parents": ["focused_precision"],
+            "children": [],
+            "position": { "x": 300, "y": 450}
+        },
+        "pinpointing_weakness": {
+            "id": "pinpointing_weakness",
+            "name": "Pinpointing Weakness",
+            "description": "⚡ Target Lock also decreases the target's dodge chance by 8%.",
+            "icon": "Icons/talents/pinpointing_weakness.webp",
+            "tier": 4,
+            "cost": 2,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_e",
+                "property": "appliesDodgeReduction",
+                "value": true
+            },
+            "parents": ["critical_recuperation"],
+            "children": ["debuff_exploitation", "cleanse_on_hiding"],
+            "position": { "x": -178, "y": 450}
+        },
+        "debuff_exploitation": {
+            "id": "debuff_exploitation",
+            "name": "Debuff Exploitation",
+            "description": "⚡ Nina deals 10% increased damage for each debuff on her target.",
+            "icon": "Icons/talents/debuff_damage.webp",
+            "tier": 5,
+            "cost": 3,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "damagePerDebuff",
+                "value": 0.1
+            },
+            "parents": ["pinpointing_weakness"],
+            "children": ["rural_resourcefulness"],
+            "position": { "x": -600, "y": 520}
+        },
+        "cleanse_on_hiding": {
+            "id": "cleanse_on_hiding",
+            "name": "Shadow Purge",
+            "description": "⚡ Activating Hiding cleanses all debuffs from Nina.",
+            "icon": "Icons/talents/cleanse.webp",
+            "tier": 5,
+            "cost": 3,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_w",
+                "property": "cleanseDebuffsOnActivation",
+                "value": true
+            },
+            "parents": ["pinpointing_weakness"],
+            "children": ["rural_resourcefulness"],
+            "position": { "x": -120, "y": 520}
+        },
+        "rural_resourcefulness": {
+            "id": "rural_resourcefulness",
+            "name": "Rural Resourcefulness",
+            "description": "⚡ When Nina activates Hiding, she has a 50% chance to find farm resources that grant additional effects:\n• Corn: +5% armor for 3 turns\n• Apple: Instantly heals for 560HP\n• Pumpkin: +50 physical damage for 3 turns\n• Cucumber: +5% dodge chance for 3 turns\n• Water Bottle: Instantly restores 500 mana\n• Egg: Deals 400 damage to a random enemy at turn end for 3 turns",
+            "icon": "Icons/talents/farm_resources.webp",
+            "tier": 6,
+            "cost": 5,
+            "powerful": true,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "farmer_nina_w",
+                "property": "enableFarmResources",
+                "value": true
+            },
+            "parents": ["debuff_exploitation", "cleanse_on_hiding"],
+            "children": [],
+            "position": { "x": -350, "y": 600}
+        }
+    }
+} 

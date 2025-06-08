@@ -1,1 +1,88 @@
-[] 
+[
+    {
+        "id": "random_battle_1v1",
+        "name": "Random Battle (1v1)",
+        "description": "Face a random opponent in single combat! Test your skills against unpredictable foes.",
+        "difficulty": 1,
+        "playerunlocked": true,
+        "requirements": {
+            "tags": [],
+            "teamSize": { "min": 1, "max": 1 }
+        },
+        "type": "random_battle",
+        "enemyPool": [
+            "farmer_cham_cham",
+            "farmer_raiden", 
+            "farmer_shoma",
+            "farmer_nina",
+            "farmer_alice",
+            "renée",
+            "zoey",
+            "bridget",
+            "schoolboy_siegfried",
+            "schoolboy_shoma",
+            "schoolgirl_elphelt",
+            "schoolgirl_ayane",
+            "schoolgirl_kokoro",
+            "schoolgirl_julia"
+        ],
+        "enemyCount": 1,
+        "backgroundImage": "images/stages/training_grounds.png",
+        "backgroundMusic": "sounds/music/battle_theme.mp3",
+        "rewards": [
+            {
+                "type": "gold",
+                "value": 200,
+                "chance": 1.0
+            },
+            {
+                "type": "experience", 
+                "value": 100,
+                "chance": 1.0
+            }
+        ]
+    },
+    {
+        "id": "random_battle_2v2",
+        "name": "Random Battle (2v2)",
+        "description": "Team up with an ally to face two random opponents! Coordinate your strategies for victory.",
+        "difficulty": 3,
+        "playerunlocked": true,
+        "requirements": {
+            "tags": [],
+            "teamSize": { "min": 2, "max": 2 }
+        },
+        "type": "random_battle",
+        "enemyPool": [
+            "farmer_cham_cham",
+            "farmer_raiden",
+            "farmer_shoma", 
+            "farmer_nina",
+            "farmer_alice",
+            "renée",
+            "zoey",
+            "bridget",
+            "schoolboy_siegfried",
+            "schoolboy_shoma",
+            "schoolgirl_elphelt",
+            "schoolgirl_ayane",
+            "schoolgirl_kokoro",
+            "schoolgirl_julia"
+        ],
+        "enemyCount": 2,
+        "backgroundImage": "images/stages/training_grounds.png",
+        "backgroundMusic": "sounds/music/battle_theme.mp3",
+        "rewards": [
+            {
+                "type": "gold",
+                "value": 400,
+                "chance": 1.0
+            },
+            {
+                "type": "experience",
+                "value": 200,
+                "chance": 1.0
+            }
+        ]
+    }
+] 

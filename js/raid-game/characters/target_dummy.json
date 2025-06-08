@@ -7,7 +7,7 @@
         "magicalDamage": 0,
         "armor": 0,
         "magicalShield": 0,
-        "hp": 10000, 
+        "hp": 100000, 
         "hpPerTurn": 0,
         "mana": 0,
         "manaPerTurn": 0,

@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Configuration
     const CONFIG = {
-        maxTalentPoints: 10,          // Maximum available talent points
+        defaultTalentPoints: 0,       // Default talent points for new characters (changed from maxTalentPoints)
         nodeSize: 64,                 // Size of talent node in pixels
         baseFontSize: 16,             // Base font size for scaling
         zoomStep: 0.1,                // Zoom step amount
@@ -38,8 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let classData = null;             // Class specialization data
     let selectedTalents = {};         // Selected talents: { talentId: rank }
     let availableTalentPoints = 0;    // Points available to spend
+    let maxTalentPoints = 0;          // Maximum talent points for this character (loaded from Firebase)
     let userId = null;                // Current user ID
     let characterId = null;           // Character ID
+    let characterXPManager = null;    // Character XP Manager instance
     let currentTooltipId = null;      // Currently displayed tooltip
     
     // UI References
@@ -53,6 +55,36 @@ document.addEventListener('DOMContentLoaded', () => {
     let startPoint = { x: 0, y: 0 };  // Start point for panning
     let scrollPosition = { left: 0, top: 0 }; // Current scroll position
 
+    // --- Controller Support State ---
+    let controllerManager = null;     // Reference to ControllerManager instance
+    let isControllerMode = false;     // Is controller actively used on this screen
+    let currentControllerElement = null; // Currently selected DOM element by controller
+    let currentNavSection = 'talent-grid'; // 'talent-grid', 'header', 'map'
+    const navGroups = {              // Available navigation groups
+        'talent-grid': [],           // Populated dynamically
+        'header': [],                // Populated from DOM
+        'map': []                    // Populated from DOM
+    };
+    const navGroupOrder = ['header', 'talent-grid', 'map'];
+    let controllerUpdateInterval = null; // Interval ID for controller updates
+    const controllerCooldowns = {    // Cooldowns for controller actions
+        navigation: 0,
+        action: 0,
+        zoom: 0,
+        pan: 0,
+        switchGroup: 0
+    };
+    const COOLDOWN_TIMES = {         // Cooldown durations in ms
+        navigation: 150,            // DPad/Stick Nav
+        action: 300,                // A/B/Start/Back
+        zoom: 100,                  // LT/RT
+        pan: 50,                   // Right Stick Pan
+        switchGroup: 250            // LB/RB
+    };
+    let lastInputTime = 0;           // Timestamp of the last controller input
+    let controllerCursor = null;     // Visual indicator for controller focus
+    // --- End Controller Support State ---
+
     // DOM Elements
     const elements = {
         loadingScreen: document.getElementById('loading-screen'),
@@ -61,9 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
         talentTreeCanvas: document.getElementById('talent-tree-canvas'),
         characterImage: document.getElementById('character-image'),
         characterName: document.getElementById('character-name'),
+        characterLevel: document.getElementById('character-level'),
+        xpFill: document.getElementById('xp-fill'),
+        xpText: document.getElementById('xp-text'),
         talentPointsInfo: document.getElementById('talent-points-info'),
         pointsAvailable: document.getElementById('points-available'),
         pointsTotal: document.getElementById('points-total'),
+        talentControls: document.getElementById('talent-controls'),
         saveButton: document.getElementById('save-talents-button'),
         resetButton: document.getElementById('reset-talents-button'),
         backButton: document.getElementById('back-button'),
@@ -116,6 +152,23 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoading('Loading talents...');
         
         try {
+            // --- Controller Support Initialization for Talents Screen ---
+            if (typeof window.ControllerManager === 'function') {
+                console.log("[Talents] ControllerManager class found. Initializing instance for talent screen.");
+                // Create a new instance specifically for this screen.
+                // Pass null for gameManager as it's not directly needed here.
+                controllerManager = new window.ControllerManager(null);
+                controllerManager.initialize(); // Initialize the new instance
+
+                createControllerCursor(); // Create the visual cursor
+                setupControllerListeners(); // Set up listeners to activate/deactivate based on input
+                console.log("[Talents] Controller support initialized for this screen.");
+            } else {
+                controllerManager = null; // Ensure it's null if class isn't found
+                console.warn("[Talents] ControllerManager class not found. Controller support disabled.");
+            }
+            // --- End Controller Support Initialization ---
+
             // Wait for Firebase auth to be ready
             await waitForFirebaseAuth();
             
@@ -136,12 +189,24 @@ document.addEventListener('DOMContentLoaded', () => {
             // Initialize sound effects
             initializeSounds();
 
+            // Initialize character XP manager
+            if (typeof window.characterXPManager !== 'undefined') {
+                characterXPManager = window.characterXPManager;
+                if (!characterXPManager.initialized) {
+                    await characterXPManager.initialize();
+                }
+                console.log('[Talents] Using global CharacterXPManager');
+            }
+
             // Fetch character base data (for name, image, etc.)
             characterData = await fetchCharacterBaseData(characterId);
             updateHeader();
             updateClassInfo();
+            
+            // Load and display character XP data
+            await updateCharacterXPDisplay();
 
-            // --- Fetch definitions and user selections concurrently ---
+            // --- Fetch definitions, user selections, and talent points concurrently ---
             const fetchTalentDefinitions = async () => {
                 try {
                     const response = await fetch(`js/raid-game/talents/${characterId}_talents.json`);
@@ -174,17 +239,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
 
-            // Wait for both fetches to complete
-            const [definitions, selections] = await Promise.all([
+            const fetchTalentPoints = async () => {
+                try {
+                    const snapshot = await firebaseDatabase.ref(`users/${userId}/characterTalentPoints/${characterId}`).once('value');
+                    const points = snapshot.val();
+                    return points !== null ? points : CONFIG.defaultTalentPoints; // Default to 0 if not found
+                } catch (dbError) {
+                    console.error('Error fetching talent points:', dbError);
+                    showNotification(`Error loading talent points: ${dbError.message}`, 'error');
+                    return CONFIG.defaultTalentPoints; // Default to 0 on error
+                }
+            };
+
+            // Wait for all three fetches to complete
+            const [definitions, selections, talentPoints] = await Promise.all([
                 fetchTalentDefinitions(),
-                fetchSelectedTalents()
+                fetchSelectedTalents(),
+                fetchTalentPoints()
             ]);
 
             talentDefinitions = definitions;
             selectedTalents = selections;
+            maxTalentPoints = talentPoints;
             // ----------------------------------------------------------
 
-            // Calculate available talent points (NOW that selections are loaded)
+            // Calculate available talent points (NOW that selections and max points are loaded)
             availableTalentPoints = calculateAvailablePoints();
             updateTalentPointsDisplay(); // Update points display after calculation
             
@@ -198,6 +277,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Apply animation after everything is loaded
             setTimeout(() => {
                 animateTreeReveal();
+                // --- Controller: Select initial element ---
+                populateNavGroups();
+                // Check the newly created instance's mode (it might detect a connected controller immediately)
+                if (controllerManager && controllerManager.isControllerMode) { 
+                    activateControllerModeTalents();
+                } else {
+                    deactivateControllerModeTalents(); // Ensure it starts deactivated if manager isn't active
+                }
+                // --- End Controller Initial Selection ---
             }, 500);
             
             hideLoading();
@@ -256,14 +344,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Update character level and XP display
+     */
+    async function updateCharacterXPDisplay() {
+        if (!characterXPManager || !characterId) {
+            console.warn('[Talents] Cannot update XP display - missing manager or character ID');
+            return;
+        }
+
+        try {
+            const xpData = await characterXPManager.getCharacterXP(characterId);
+            
+            // Update level display
+            if (elements.characterLevel) {
+                elements.characterLevel.textContent = xpData.level;
+            }
+
+            // Update XP bar and text
+            if (elements.xpFill && elements.xpText) {
+                const xpProgress = (xpData.currentXP / xpData.xpForNextLevel) * 100;
+                elements.xpFill.style.width = `${Math.min(xpProgress, 100)}%`;
+                elements.xpText.textContent = `${xpData.currentXP} / ${xpData.xpForNextLevel} XP`;
+            }
+
+            console.log(`[Talents] Updated XP display - Level ${xpData.level}, XP: ${xpData.currentXP}/${xpData.xpForNextLevel}`);
+        } catch (error) {
+            console.error('[Talents] Error updating XP display:', error);
+            // Set default values on error
+            if (elements.characterLevel) {
+                elements.characterLevel.textContent = '1';
+            }
+            if (elements.xpFill && elements.xpText) {
+                elements.xpFill.style.width = '0%';
+                elements.xpText.textContent = '0 / 1000 XP';
+            }
+        }
+    }
+
     function updateTalentPointsDisplay() {
         // Calculate used points
         const usedPoints = calculateUsedPoints();
-        availableTalentPoints = CONFIG.maxTalentPoints - usedPoints;
+        availableTalentPoints = maxTalentPoints - usedPoints;
         
         // Update display
         elements.pointsAvailable.textContent = availableTalentPoints;
-        elements.pointsTotal.textContent = CONFIG.maxTalentPoints;
+        elements.pointsTotal.textContent = maxTalentPoints;
         
         // Color coding
         elements.talentPointsInfo.style.color = 
@@ -287,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function calculateAvailablePoints() {
-        return CONFIG.maxTalentPoints - calculateUsedPoints();
+        return maxTalentPoints - calculateUsedPoints();
     }
 
     // --- Tree Layout & Rendering ---
@@ -592,7 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
         node.addEventListener('click', () => handleTalentClick(talent.id));
         node.addEventListener('mouseenter', (e) => {
             showTooltip(e, talent.id);
-            playSound('hover');
+            // Only play hover sound if not in controller mode or if element is controller-selected
+            if (!isControllerMode || node === currentControllerElement) {
+                playSound('hover');
+            }
         });
         node.addEventListener('mouseleave', hideTooltip);
     }
@@ -660,6 +789,10 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.backButton.addEventListener('click', () => {
             // Navigate back to character selector, potentially passing charId
             window.location.href = `character-selector.html`;
+            // --- Controller: Cleanup on navigate away ---
+            stopControllerUpdates();
+            removeControllerCursor();
+            // --- End Controller Cleanup ---
         });
     }
 
@@ -676,6 +809,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
+            // --- NEW: Prevent selecting a second powerful talent ---
+            if (talent.powerful) {
+                const hasOtherPowerfulSelected = Object.keys(selectedTalents).some(selectedId => {
+                    const otherTalent = talentDefinitions[selectedId];
+                    return otherTalent && otherTalent.powerful && selectedId !== talentId;
+                });
+                if (hasOtherPowerfulSelected) {
+                    showNotification("Only one powerful talent can be selected", "warning");
+                    return;
+                }
+            }
+            // --- END NEW ---
+
             // Select the talent
             if (talent.maxRank && talent.maxRank > 1) {
                 // Multi-rank talent
@@ -778,6 +924,81 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification("Talents reset. Click Save to apply changes.", "info");
     }
 
+    // --- Talent Points Management ---
+    
+    /**
+     * Get talent points for the current character
+     */
+    async function getTalentPoints() {
+        if (!userId || !characterId) {
+            return CONFIG.defaultTalentPoints;
+        }
+        
+        try {
+            const snapshot = await firebaseDatabase.ref(`users/${userId}/characterTalentPoints/${characterId}`).once('value');
+            const points = snapshot.val();
+            return points !== null ? points : CONFIG.defaultTalentPoints;
+        } catch (error) {
+            console.error('Error fetching talent points:', error);
+            return CONFIG.defaultTalentPoints;
+        }
+    }
+
+    /**
+     * Set talent points for the current character
+     */
+    async function setTalentPoints(points) {
+        if (!userId || !characterId) {
+            throw new Error('User not authenticated or character not selected');
+        }
+        
+        if (typeof points !== 'number' || points < 0) {
+            throw new Error('Invalid talent points value');
+        }
+        
+        try {
+            await firebaseDatabase.ref(`users/${userId}/characterTalentPoints/${characterId}`).set(points);
+            maxTalentPoints = points;
+            updateTalentPointsDisplay();
+            console.log(`Set talent points for ${characterId}: ${points}`);
+            return true;
+        } catch (error) {
+            console.error('Error setting talent points:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Add talent points to the current character
+     */
+    async function addTalentPoints(pointsToAdd) {
+        if (!userId || !characterId) {
+            throw new Error('User not authenticated or character not selected');
+        }
+        
+        if (typeof pointsToAdd !== 'number' || pointsToAdd <= 0) {
+            throw new Error('Invalid talent points value');
+        }
+        
+        try {
+            const currentPoints = await getTalentPoints();
+            const newPoints = currentPoints + pointsToAdd;
+            await setTalentPoints(newPoints);
+            showNotification(`Gained ${pointsToAdd} talent point${pointsToAdd > 1 ? 's' : ''}!`, 'success');
+            return newPoints;
+        } catch (error) {
+            console.error('Error adding talent points:', error);
+            throw error;
+        }
+    }
+
+    // --- Expose functions for external use ---
+    window.TalentPointsManager = {
+        getTalentPoints,
+        setTalentPoints,
+        addTalentPoints
+    };
+
     // --- Tooltip Logic ---
     function showTooltip(event, talentId) {
         // Cancel any pending hide
@@ -797,8 +1018,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update tooltip content
         elements.tooltipIcon.src = talent.icon || 'images/icons/default_ability.png';
         elements.tooltipName.textContent = talent.name;
-        elements.tooltipDescription.textContent = talent.description;
-        
+        // elements.tooltipDescription.textContent = talent.description;
+
+        // --- MODIFIED: Use innerHTML to allow styling --- 
+        let descriptionHtml = talent.description;
+        // Try to find talent-specific additions (simple approach, might need refinement)
+        const talentMarker = "Talent:";
+        const talentIndex = descriptionHtml.indexOf(talentMarker);
+        if (talentIndex !== -1) {
+            const baseDesc = descriptionHtml.substring(0, talentIndex);
+            const talentDesc = descriptionHtml.substring(talentIndex);
+            // Determine class based on simple keywords (can be improved)
+            let talentClass = 'utility';
+            if (talentDesc.toLowerCase().includes('damage')) talentClass = 'damage';
+            else if (talentDesc.toLowerCase().includes('heal') || talentDesc.toLowerCase().includes('lifesteal')) talentClass = 'healing';
+            
+            descriptionHtml = `${baseDesc.trim()}<br><span class="talent-effect ${talentClass}">${talentDesc.replace(talentMarker, 'Talent:').trim()}</span>`;
+        }
+        elements.tooltipDescription.innerHTML = descriptionHtml.replace(/\n/g, '<br>'); // Replace \n with <br>
+        // --- END MODIFICATION --- 
+
         // Set powerful talent attribute
         if (isPowerful) {
             elements.talentTooltip.dataset.powerful = "true";
@@ -824,6 +1063,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show requirements
                 const requirements = getRequirementsText(talent);
                 elements.tooltipRequirements.textContent = requirements || "";
+                
+                // --- NEW: Add specific message for powerful talent lock ---
+                if (talent.powerful) {
+                    const hasOtherPowerfulSelected = Object.keys(selectedTalents).some(selectedId => {
+                        const otherTalent = talentDefinitions[selectedId];
+                        return otherTalent && otherTalent.powerful && selectedId !== talentId;
+                    });
+                    if (hasOtherPowerfulSelected) {
+                        elements.tooltipRequirements.textContent = "Requires: Only one powerful talent allowed.";
+                    } else if (!requirements) {
+                        // If it's a root powerful talent and none are selected, it should be available, but we show generic reqs if locked for other reasons
+                        elements.tooltipRequirements.textContent = "Requires: Base talent"; // Placeholder if needed
+                    }
+                }
+                // --- END NEW ---
                 break;
         }
         
@@ -869,7 +1123,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Use timer to avoid flicker when moving between nodes
         window.tooltipHideTimer = setTimeout(() => {
             elements.talentTooltip.classList.remove('visible');
-            currentTooltipId = null;
+            // Only reset tooltip ID if not controller selected (controller keeps tooltip open)
+            if (!currentControllerElement || talentId !== currentControllerElement.dataset.talentId) {
+                currentTooltipId = null;
+            }
         }, 100);
     }
 
@@ -1081,8 +1338,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasSelectedParent = talent.parents && 
             talent.parents.some(parentId => selectedTalents[parentId]);
         
-        // If starting node or has selected parent, it's available
+        // If starting node or has selected parent, it's potentially available
         if (isStartingNode || hasSelectedParent) {
+            // --- NEW: Check for powerful talent restriction ---
+            if (talent.powerful) {
+                // Check if another powerful talent is already selected
+                const hasOtherPowerfulSelected = Object.keys(selectedTalents).some(selectedId => {
+                    const otherTalent = talentDefinitions[selectedId];
+                    return otherTalent && otherTalent.powerful && selectedId !== talentId;
+                });
+
+                if (hasOtherPowerfulSelected) {
+                    return 'locked'; // Lock if another powerful talent is already selected
+                }
+            }
+            // --- END NEW ---
             return 'available';
         }
         
@@ -1348,6 +1618,382 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // --- Controller Support Functions ---
+
+    function createControllerCursor() {
+        if (!controllerCursor) {
+            controllerCursor = document.createElement('div');
+            controllerCursor.className = 'controller-cursor talents-cursor'; // Add specific class
+            document.body.appendChild(controllerCursor);
+        }
+        controllerCursor.style.display = 'none'; // Start hidden
+    }
+
+    function removeControllerCursor() {
+        if (controllerCursor && controllerCursor.parentNode) {
+            controllerCursor.parentNode.removeChild(controllerCursor);
+            controllerCursor = null;
+        }
+    }
+
+    function positionControllerCursor(element) {
+        if (!controllerCursor || !element || !isControllerMode) return;
+
+        const rect = element.getBoundingClientRect();
+        // Position cursor slightly offset or centered, adjust as needed
+        controllerCursor.style.left = `${rect.left + window.scrollX - 5}px`; // Offset example
+        controllerCursor.style.top = `${rect.top + window.scrollY - 5}px`;
+        controllerCursor.style.width = `${rect.width + 10}px`;
+        controllerCursor.style.height = `${rect.height + 10}px`;
+        controllerCursor.style.display = 'block';
+
+        // Also update tooltip for the selected element
+        if (element.classList.contains('talent-node')) {
+            // Simulate a mouse event at the element's center for the tooltip
+            const fakeEvent = {
+                clientX: rect.left + rect.width / 2,
+                clientY: rect.top + rect.height / 2
+            };
+            showTooltip(fakeEvent, element.dataset.talentId);
+        } else {
+            hideTooltip(); // Hide tooltip if not a talent node
+        }
+    }
+
+    function selectControllerElement(element) {
+        if (!element) return;
+
+        if (currentControllerElement) {
+            currentControllerElement.classList.remove('controller-selected');
+        }
+        currentControllerElement = element;
+        currentControllerElement.classList.add('controller-selected');
+        currentControllerElement.focus(); // Optional: improve accessibility
+        positionControllerCursor(currentControllerElement);
+        currentControllerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+
+    function deselectControllerElement() {
+        if (currentControllerElement) {
+            currentControllerElement.classList.remove('controller-selected');
+            hideTooltip(); // Hide tooltip when deselecting
+            currentControllerElement = null;
+        }
+        if (controllerCursor) {
+            controllerCursor.style.display = 'none';
+        }
+    }
+
+    function setupControllerListeners() {
+        if (!controllerManager) return;
+
+        // Listen for controller connection/disconnection if manager provides events
+        // Or periodically check controllerManager.isControllerMode
+
+        // Use a simpler interval check for activation/deactivation
+        setInterval(() => {
+            if (controllerManager && controllerManager.isControllerMode && !isControllerMode) {
+                activateControllerModeTalents();
+            }
+        }, 500);
+
+        // Listen for user interaction that disables controller mode
+        window.addEventListener('mousemove', () => { if (isControllerMode) deactivateControllerModeTalents(); });
+        window.addEventListener('click', () => { if (isControllerMode) deactivateControllerModeTalents(); });
+        window.addEventListener('keydown', (e) => {
+            // Ignore gamepad keys triggering keydown
+            if (!e.code || !e.code.startsWith('Gamepad')) {
+                if (isControllerMode) deactivateControllerModeTalents();
+            }
+        });
+    }
+
+    function activateControllerModeTalents() {
+        if (isControllerMode || !controllerManager) return; // Also check if controllerManager exists
+        console.log("[Talents] Activating Controller Mode");
+        isControllerMode = true;
+        document.body.classList.add('controller-mode-talents'); // Specific body class
+        startControllerUpdates();
+        // Select initial element if none selected
+        if (!currentControllerElement && navGroups[currentNavSection]?.length > 0) {
+            selectControllerElement(navGroups[currentNavSection][0]);
+        } else if (currentControllerElement) {
+            // Re-select and position cursor
+            selectControllerElement(currentControllerElement);
+        }
+    }
+
+    function deactivateControllerModeTalents() {
+        if (!isControllerMode || !controllerManager) return; // Also check if controllerManager exists
+        console.log("[Talents] Deactivating Controller Mode");
+        isControllerMode = false;
+        document.body.classList.remove('controller-mode-talents');
+        stopControllerUpdates();
+        deselectControllerElement();
+    }
+
+    function startControllerUpdates() {
+        if (!controllerUpdateInterval && controllerManager) {
+            console.log("[Talents] Starting controller update loop.");
+            controllerUpdateInterval = setInterval(pollControllerInput, 50); // Poll ~20 times/sec
+        }
+    }
+
+    function stopControllerUpdates() {
+        if (controllerUpdateInterval) {
+            console.log("[Talents] Stopping controller update loop.");
+            clearInterval(controllerUpdateInterval);
+            controllerUpdateInterval = null;
+        }
+    }
+
+    function checkCooldown(action) {
+        const now = Date.now();
+        if (now < controllerCooldowns[action]) {
+            return false; // Still in cooldown
+        }
+        controllerCooldowns[action] = now + COOLDOWN_TIMES[action];
+        return true; // Cooldown passed
+    }
+
+    function pollControllerInput() {
+        if (!isControllerMode || !controllerManager) {
+            stopControllerUpdates(); // Stop if mode disabled or manager lost
+            return;
+        }
+
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const primaryGamepad = Object.values(gamepads).find(gp => gp && gp.connected);
+
+        if (!primaryGamepad) {
+            // Optional: Deactivate if controller disconnects?
+            // deactivateControllerModeTalents();
+            return;
+        }
+
+        let inputDetected = false;
+        const now = Date.now();
+
+        // --- Panning (Right Stick) ---
+        const rightStickX = primaryGamepad.axes[2];
+        const rightStickY = primaryGamepad.axes[3];
+        const panDeadzone = 0.25;
+        if (Math.abs(rightStickX) > panDeadzone || Math.abs(rightStickY) > panDeadzone) {
+            inputDetected = true;
+            if (now > controllerCooldowns.pan) { // Use a simple time check for panning
+                const panSpeed = 15;
+                elements.talentTreeArea.scrollLeft += rightStickX * panSpeed;
+                elements.talentTreeArea.scrollTop += rightStickY * panSpeed;
+                controllerCooldowns.pan = now + COOLDOWN_TIMES.pan; // Apply cooldown
+            }
+        }
+
+        // --- Zooming (LT/RT) ---
+        const leftTrigger = primaryGamepad.buttons[6];
+        const rightTrigger = primaryGamepad.buttons[7];
+        if (leftTrigger?.pressed || rightTrigger?.pressed) {
+            inputDetected = true;
+            if (checkCooldown('zoom')) {
+                if (leftTrigger.pressed) zoomCanvas(-CONFIG.zoomStep); // Zoom Out
+                if (rightTrigger.pressed) zoomCanvas(CONFIG.zoomStep);  // Zoom In
+            }
+        }
+
+        // --- Navigation (D-Pad/Left Stick) ---
+        const leftStickX = primaryGamepad.axes[0];
+        const leftStickY = primaryGamepad.axes[1];
+        const navDeadzone = 0.5;
+        let navDirection = null;
+
+        if (primaryGamepad.buttons[14]?.pressed || leftStickX < -navDeadzone) navDirection = 'left';
+        else if (primaryGamepad.buttons[15]?.pressed || leftStickX > navDeadzone) navDirection = 'right';
+        else if (primaryGamepad.buttons[12]?.pressed || leftStickY < -navDeadzone) navDirection = 'up';
+        else if (primaryGamepad.buttons[13]?.pressed || leftStickY > navDeadzone) navDirection = 'down';
+
+        if (navDirection) {
+            inputDetected = true;
+            if (checkCooldown('navigation')) {
+                navigate(navDirection);
+            }
+        }
+
+        // --- Action Buttons ---
+        const buttonMap = controllerManager.buttonMap || {}; // Use manager's map if available
+        const pressedButtons = primaryGamepad.buttons
+            .map((button, index) => ({ button, index }))
+            .filter(item => item.button.pressed)
+            .map(item => buttonMap[item.index] || `Button${item.index}`);
+
+        if (pressedButtons.length > 0) {
+            inputDetected = true;
+            handleActionButtons(pressedButtons);
+        }
+
+        if (inputDetected) {
+            lastInputTime = now;
+        }
+    }
+
+    function handleActionButtons(pressedButtons) {
+        if (!checkCooldown('action')) return;
+
+        // Handle one action per cooldown period
+        const action = pressedButtons[0]; // Prioritize first detected button
+
+        switch (action) {
+            case 'A': // Confirm/Select
+                if (currentControllerElement) {
+                    currentControllerElement.click(); // Simulate click
+                }
+                break;
+            case 'B': // Back/Cancel
+                elements.backButton.click();
+                break;
+            case 'Start': // Save
+                elements.saveButton.click();
+                break;
+            case 'Back': // Reset
+                elements.resetButton.click();
+                break;
+            case 'LB': // Switch Group Left
+                switchNavGroup(-1);
+                break;
+            case 'RB': // Switch Group Right
+                switchNavGroup(1);
+                break;
+            // Add X, Y if needed for future actions
+        }
+    }
+
+    function switchNavGroup(direction) {
+        if (!checkCooldown('switchGroup')) return;
+
+        const currentGroupIndex = navGroupOrder.indexOf(currentNavSection);
+        let nextGroupIndex = (currentGroupIndex + direction + navGroupOrder.length) % navGroupOrder.length;
+
+        // Ensure the next group has navigable elements
+        let attempts = 0;
+        while (navGroups[navGroupOrder[nextGroupIndex]].length === 0 && attempts < navGroupOrder.length) {
+            nextGroupIndex = (nextGroupIndex + direction + navGroupOrder.length) % navGroupOrder.length;
+            attempts++;
+        }
+
+        if (navGroups[navGroupOrder[nextGroupIndex]].length > 0) {
+            currentNavSection = navGroupOrder[nextGroupIndex];
+            // Select the first element in the new group
+            selectControllerElement(navGroups[currentNavSection][0]);
+        } else {
+            console.warn("Could not find a navigable group.");
+        }
+    }
+
+    function populateNavGroups() {
+        navGroups['header'] = Array.from(elements.talentControls.querySelectorAll('[data-controller-nav][data-nav-group="header"]'));
+        navGroups['map'] = Array.from(elements.talentTreeArea.querySelector('.map-controls').querySelectorAll('[data-controller-nav][data-nav-group="map"]'));
+        navGroups['talent-grid'] = Array.from(elements.talentTreeCanvas.querySelectorAll('.talent-node'));
+        console.log("Populated Nav Groups:", navGroups);
+    }
+
+    function navigate(direction) {
+        if (!currentControllerElement) {
+            // If nothing selected, select the first element in the current group
+            if (navGroups[currentNavSection]?.length > 0) {
+                selectControllerElement(navGroups[currentNavSection][0]);
+            }
+            return;
+        }
+
+        const currentGroup = navGroups[currentNavSection];
+        if (!currentGroup || currentGroup.length === 0) return;
+
+        let nextElement = null;
+
+        if (currentNavSection === 'talent-grid') {
+            nextElement = findNearestTalentNode(direction);
+        } else {
+            // Simple list navigation for header/map buttons
+            const currentIndex = currentGroup.indexOf(currentControllerElement);
+            if (currentIndex === -1) {
+                nextElement = currentGroup[0]; // Default to first if current not found
+            } else {
+                if (direction === 'right' || direction === 'down') {
+                    nextElement = currentGroup[(currentIndex + 1) % currentGroup.length];
+                } else if (direction === 'left' || direction === 'up') {
+                    nextElement = currentGroup[(currentIndex - 1 + currentGroup.length) % currentGroup.length];
+                }
+            }
+        }
+
+        if (nextElement) {
+            selectControllerElement(nextElement);
+        }
+    }
+
+    function findNearestTalentNode(direction) {
+        if (!currentControllerElement || currentNavSection !== 'talent-grid') return null;
+
+        const nodes = navGroups['talent-grid'];
+        if (nodes.length <= 1) return null;
+
+        const currentRect = currentControllerElement.getBoundingClientRect();
+        const currentCenter = {
+            x: currentRect.left + currentRect.width / 2,
+            y: currentRect.top + currentRect.height / 2
+        };
+
+        let bestCandidate = null;
+        let minDistance = Infinity;
+
+        nodes.forEach(node => {
+            if (node === currentControllerElement) return; // Skip self
+
+            const nodeRect = node.getBoundingClientRect();
+            const nodeCenter = {
+                x: nodeRect.left + nodeRect.width / 2,
+                y: nodeRect.top + nodeRect.height / 2
+            };
+
+            const dx = nodeCenter.x - currentCenter.x;
+            const dy = nodeCenter.y - currentCenter.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+
+            let angleMatches = false;
+            const angleTolerance = Math.PI / 3; // Allow some variance (e.g., 60 degrees)
+
+            switch (direction) {
+                case 'right': angleMatches = Math.abs(angle) < angleTolerance; break;
+                case 'left': angleMatches = Math.abs(angle - Math.PI) < angleTolerance || Math.abs(angle + Math.PI) < angleTolerance; break;
+                case 'down': angleMatches = Math.abs(angle - Math.PI / 2) < angleTolerance; break;
+                case 'up': angleMatches = Math.abs(angle + Math.PI / 2) < angleTolerance; break;
+            }
+
+            // Prioritize nodes in the correct direction, then by distance
+            if (angleMatches) {
+                // Weight distance more heavily for nodes directly in line
+                let effectiveDistance = distance;
+                // Add a penalty for perpendicular distance to prioritize nodes more 'in line'
+                if (direction === 'left' || direction === 'right') {
+                    effectiveDistance += Math.abs(dy) * 2; // Penalize vertical offset
+                } else {
+                    effectiveDistance += Math.abs(dx) * 2; // Penalize horizontal offset
+                }
+
+                if (effectiveDistance < minDistance) {
+                    minDistance = effectiveDistance;
+                    bestCandidate = node;
+                }
+            }
+        });
+
+        return bestCandidate;
+    }
+
+    // --- End Controller Support Functions ---
+
     // --- Start Initialization ---
-    initialize();
+    initialize().catch(error => {
+        console.error("Talent Screen Initialization failed:", error);
+        showLoading("Error initializing talents. Please refresh.", true);
+    });
 }); 

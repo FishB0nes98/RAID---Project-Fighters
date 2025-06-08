@@ -1,0 +1,527 @@
+/* Bridget Abilities CSS */
+
+/* Water Source VFX (Q ability - Ribbon Wave Rush) */
+.bridget-water-source-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.bridget-water-circle {
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    top: 10%;
+    left: 10%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.3) 0%, rgba(0, 162, 255, 0.1) 70%, rgba(0, 162, 255, 0) 100%);
+    animation: water-circle-expand 1.5s ease-out;
+    opacity: 0;
+}
+
+@keyframes water-circle-expand {
+    0% {
+        transform: scale(0.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+.bridget-water-particle {
+    position: absolute;
+    width: 4px;
+    height: 10px;
+    background: rgba(173, 216, 230, 0.7);
+    border-radius: 50%;
+    animation: water-particle-float 1.5s ease-out;
+    opacity: 0;
+}
+
+@keyframes water-particle-float {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateY(-100px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Water Impact VFX */
+.bridget-water-impact-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.bridget-water-splash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.5) 0%, rgba(0, 162, 255, 0.2) 60%, rgba(0, 162, 255, 0) 100%);
+    animation: water-splash 0.8s ease-out;
+    opacity: 0;
+}
+
+@keyframes water-splash {
+    0% {
+        transform: scale(0.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.bridget-water-impact-vfx.critical .bridget-water-splash {
+    background: radial-gradient(circle, rgba(200, 230, 255, 0.7) 0%, rgba(30, 180, 255, 0.4) 60%, rgba(0, 162, 255, 0) 100%);
+    animation: water-splash-critical 1s ease-out;
+}
+
+@keyframes water-splash-critical {
+    0% {
+        transform: scale(0.2);
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}
+
+.bridget-water-droplet {
+    position: absolute;
+    background: rgba(173, 216, 230, 0.8);
+    border-radius: 50%;
+    animation: water-droplet 1s ease-out;
+    opacity: 0;
+}
+
+.bridget-water-impact-vfx.critical .bridget-water-droplet {
+    background: rgba(200, 230, 255, 0.9);
+    filter: drop-shadow(0 0 3px rgba(100, 200, 255, 0.7));
+}
+
+@keyframes water-droplet {
+    0% {
+        width: 3px;
+        height: 3px;
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    100% {
+        width: 2px;
+        height: 2px;
+        transform: translate(var(--x, 40px), var(--y, 40px));
+        opacity: 0;
+    }
+}
+
+/* Passive Healing VFX */
+.bridget-passive-heal-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.bridget-heal-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(173, 255, 200, 0.3) 0%, rgba(0, 200, 150, 0.1) 70%, rgba(0, 200, 150, 0) 100%);
+    animation: heal-circle-pulse 1.5s ease-out;
+    opacity: 0;
+}
+
+@keyframes heal-circle-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(1.1);
+        opacity: 0;
+    }
+}
+
+.bridget-heal-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #00ff88;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 255, 150, 0.8);
+    animation: heal-text-float 1.5s ease-out;
+    opacity: 0;
+    z-index: 11;
+}
+
+@keyframes heal-text-float {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-30px);
+        opacity: 0;
+    }
+}
+
+.bridget-heal-bubble {
+    position: absolute;
+    background: rgba(100, 255, 200, 0.6);
+    border-radius: 50%;
+    animation: heal-bubble-float 2s ease-out;
+    opacity: 0;
+}
+
+@keyframes heal-bubble-float {
+    0% {
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+}
+
+/* Bubble Beam Barrage (W) VFX */
+.bridget-bubble-source-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.bridget-bubble-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(120, 200, 255, 0.3) 0%, rgba(0, 150, 255, 0.1) 70%, rgba(0, 150, 255, 0) 100%);
+    animation: bubble-glow-pulse 2s ease-out;
+    opacity: 0;
+}
+
+@keyframes bubble-glow-pulse {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.1;
+    }
+    40% {
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(1.1);
+        opacity: 0;
+    }
+}
+
+.bridget-bubble {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(173, 216, 230, 0.7) 40%, rgba(0, 162, 255, 0.5) 100%);
+    border-radius: 50%;
+    box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.6);
+    animation: bubble-float 2s ease-out;
+    opacity: 0;
+}
+
+@keyframes bubble-float {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.9;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(var(--x, 20px), var(--y, -60px)) scale(1.2);
+        opacity: 0;
+    }
+}
+
+.bridget-bubble-impact-vfx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.bridget-bubble-splash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.4) 0%, rgba(0, 162, 255, 0.2) 60%, rgba(0, 162, 255, 0) 100%);
+    animation: bubble-splash 0.8s ease-out;
+    opacity: 0;
+}
+
+.bridget-bubble-impact-vfx.critical .bridget-bubble-splash {
+    background: radial-gradient(circle, rgba(200, 230, 255, 0.6) 0%, rgba(30, 180, 255, 0.4) 60%, rgba(0, 162, 255, 0) 100%);
+    animation: bubble-splash-critical 1s ease-out;
+}
+
+@keyframes bubble-splash {
+    0% {
+        transform: scale(0.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.3);
+        opacity: 0;
+    }
+}
+
+@keyframes bubble-splash-critical {
+    0% {
+        transform: scale(0.2);
+        opacity: 0.9;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.bridget-impact-bubble {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(173, 216, 230, 0.7) 40%, rgba(0, 162, 255, 0.5) 100%);
+    border-radius: 50%;
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.6);
+    animation: impact-bubble-pop 0.8s ease-out;
+    opacity: 0;
+}
+
+.bridget-bubble-impact-vfx.critical .bridget-impact-bubble {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(190, 230, 255, 0.8) 40%, rgba(30, 180, 255, 0.6) 100%);
+    filter: drop-shadow(0 0 3px rgba(100, 200, 255, 0.7));
+}
+
+@keyframes impact-bubble-pop {
+    0% {
+        transform: scale(0.2);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    70% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Bridget's Bubble Beam Projectiles */
+.bridget-bubble-beam {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 15;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.bridget-bubble-projectile {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(173, 216, 230, 0.8) 40%, rgba(0, 162, 255, 0.6) 100%);
+    box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(0, 162, 255, 0.5);
+    filter: drop-shadow(0 0 5px rgba(100, 200, 255, 0.4));
+    transform-origin: center;
+    z-index: 16;
+    will-change: transform;
+}
+
+.bridget-bubble-projectile::before {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 30%;
+    height: 30%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    filter: blur(1px);
+}
+
+.bridget-bubble-trail {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(173, 216, 230, 0.4) 50%, rgba(0, 162, 255, 0) 100%);
+    filter: blur(2px);
+    opacity: 0.7;
+    transform-origin: center;
+    z-index: 15;
+}
+
+/* Wave Crush Heal VFX */
+.bridget-wave-crush-heal-vfx.critical .wave-crush-heal-aura {
+    box-shadow: 0 0 30px 15px rgba(127, 255, 212, 0.9), 0 0 50px 25px rgba(173, 255, 200, 0.7);
+}
+
+/* --- Aqueous Renewal Talent VFX (New) --- */
+.bridget-aqueous-renewal-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 20; /* Ensure it's above other elements */
+    overflow: visible; /* Allow particles to go outside bounds slightly */
+}
+
+.aqueous-renewal-aura {
+    position: absolute;
+    width: 90%; /* Slightly smaller than character */
+    height: 90%;
+    top: 5%;
+    left: 5%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(137, 207, 240, 0.5) 0%, rgba(100, 180, 220, 0.2) 60%, rgba(100, 180, 220, 0) 100%);
+    animation: aqueous-renewal-aura-pulse 1.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes aqueous-renewal-aura-pulse {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.aqueous-renewal-text {
+    position: relative; /* Relative to the container for centering */
+    color: #e0f7fa; /* Light cyan */
+    font-size: 14px; /* Adjust as needed */
+    font-weight: bold;
+    text-shadow: 0 0 5px #00bcd4, 0 0 8px #00bcd4; /* Cyan glow */
+    padding: 3px 8px;
+    background-color: rgba(0, 105, 128, 0.5); /* Darker semi-transparent aqua background */
+    border-radius: 5px;
+    animation: aqueous-renewal-text-float 2s ease-out forwards;
+    opacity: 0;
+    margin-top: -30px; /* Start above the character center slightly */
+}
+
+@keyframes aqueous-renewal-text-float {
+    0% {
+        transform: translateY(10px) scale(0.8);
+        opacity: 0;
+    }
+    25% {
+        transform: translateY(-10px) scale(1.1);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-40px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-60px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.aqueous-renewal-particle {
+    position: absolute;
+    width: 5px;
+    height: 8px;
+    background-color: rgba(173, 216, 230, 0.9); /* Light blue */
+    border-radius: 50%;
+    opacity: 0;
+    animation: aqueous-renewal-particle-rise 1.5s ease-out forwards;
+    filter: drop-shadow(0 0 2px rgba(200, 240, 255, 0.7));
+}
+
+@keyframes aqueous-renewal-particle-rise {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(calc(cos(var(--angle)) * var(--distance)), calc(sin(var(--angle)) * var(--distance) - 40px)) scale(0.8);
+        opacity: 0;
+    }
+} 

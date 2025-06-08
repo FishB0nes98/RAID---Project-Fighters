@@ -129,7 +129,8 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
 
         // Apply heal to all alive allies (including the caster)
         alliesToHeal.forEach(ally => {
-            const actualHeal = ally.heal(healAmount);
+            const healResult = ally.heal(healAmount, caster);
+            const actualHeal = healResult.healAmount; // Extract healAmount from result object
             log(`${ally.name} is healed for ${actualHeal}.`);
             
             // Trigger passive if heal was successful and caster has the handler
@@ -184,155 +185,7 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
     window.definedAbilities.schoolgirl_julia_q = schoolgirl_julia_q;
 }
 
-// Schoolgirl Julia Ability Implementations
-
-// Register Schoolgirl Julia's abilities
-document.addEventListener('DOMContentLoaded', () => {
-    // Q Ability - Healing Kick
-    const healingKick = new Ability(
-        'schoolgirl_julia_q',
-        'Healing Kick',
-        'Icons/abilities/healing_kick.jfif',
-        60, // mana cost
-        1,  // cooldown (Changed from 2)
-        (caster, targets) => {
-            // This inner definition seems redundant with the one above.
-            // We should rely on the schoolgirlJuliaHealingKickEffect function defined earlier.
-            // For safety, let's call the main effect function here.
-            schoolgirlJuliaHealingKickEffect(caster, targets);
-            // The code below is now removed as it's handled by schoolgirlJuliaHealingKickEffect
-
-            /*
-            if (!Array.isArray(targets)) {
-                targets = [targets]; // Convert to array if single target is passed
-            }
-
-            // Get all enemies
-            if (window.gameManager) {
-                if (caster.isAI) {
-                    targets = window.gameManager.gameState.playerCharacters.filter(c => !c.isDead());
-                } else {
-                    targets = window.gameManager.gameState.aiCharacters.filter(c => !c.isDead());
-                }
-            }
-
-            // Return if no targets
-            if (!targets.length) {
-                return false;
-            }
-
-            const damageType = 'physical';
-            // Use 200% physical damage as specified in the ability description
-            const damageMultiplier = 2.0;
-            const damageAmount = Math.floor(damageMultiplier * caster.stats.physicalDamage);
-            let totalDamageDealt = 0; // Track total damage for healing
-
-            addLogEntry(`${caster.name} used Healing Kick, targeting all enemies!`);
-
-            // Apply damage to all targets
-            targets.forEach(target => {
-                if (!target || target.isDead()) return; // Skip dead targets
-
-                // Set damage source for VFX and critical strike calculation
-                target.isDamageSource = caster;
-
-                const result = target.applyDamage(damageAmount, damageType);
-                totalDamageDealt += result.damage; // Accumulate total damage dealt
-
-                // Clear the damage source
-                target.isDamageSource = null;
-
-                let message = `${target.name} takes ${result.damage} ${damageType} damage`;
-                if (result.isCritical) {
-                    message += " (Critical Hit!)";
-                }
-
-                addLogEntry(message);
-
-                // Apply lifesteal REMOVED
-                // const lifestealHealAmount = caster.applyLifesteal(result.damage);
-                // if (lifestealHealAmount > 0) {
-                //     addLogEntry(`${caster.name} healed for ${lifestealHealAmount} from lifesteal.`);
-                // }
-
-                // Check if target died from this damage
-                if (target.isDead()) {
-                    addLogEntry(`${target.name} has been defeated!`);
-                }
-            });
-
-            // Calculate heal amount (65% of total damage dealt)
-            const healAmount = Math.floor(totalDamageDealt * 0.65);
-
-            if (healAmount > 0) {
-                // Determine which team to heal based on caster
-                let alliesToHeal = [];
-                if (window.gameManager && window.gameManager.gameState) {
-                    if (caster.isAI) {
-                        alliesToHeal = window.gameManager.gameState.aiCharacters.filter(c => !c.isDead());
-                    } else {
-                        alliesToHeal = window.gameManager.gameState.playerCharacters.filter(c => !c.isDead());
-                    }
-                } else {
-                    log("Warning: Could not access game state to determine allies.", "error");
-                    alliesToHeal.push(caster); // Fallback: heal caster
-                }
-
-                log(`${caster.name}'s Healing Kick generates ${healAmount} healing for the team!`);
-
-                // Apply heal to all alive allies (including the caster)
-                alliesToHeal.forEach(ally => {
-                    const actualHeal = ally.heal(healAmount);
-                    log(`${ally.name} is healed for ${actualHeal}.`);
-                    
-                    // Trigger passive if heal was successful and caster has the handler
-                    if (actualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
-                        caster.passiveHandler.onHealDealt(caster, ally, actualHeal);
-                    }
-
-                    // Optionally add healing VFX to each ally
-                     const allyElement = document.getElementById(`character-${ally.instanceId || ally.id}`);
-                    if (allyElement) {
-                        const healVfx = document.createElement('div');
-                        healVfx.className = 'heal-vfx'; // Use existing heal VFX class
-                        healVfx.textContent = `+${actualHeal}`;
-                        allyElement.appendChild(healVfx);
-                        
-                        const healParticles = document.createElement('div');
-                        healParticles.className = 'heal-particles'; // Use existing particle class
-                        allyElement.appendChild(healParticles);
-                        
-                        setTimeout(() => {
-                            allyElement.querySelectorAll('.heal-vfx, .heal-particles').forEach(el => el.remove());
-                        }, 1000);
-                    }
-                });
-            }
-
-            // Add visual effects
-            const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
-            if (casterElement) {
-                // Add a kick animation class
-                casterElement.classList.add('healing-kick-animation');
-
-                // Remove the animation class after it completes
-                setTimeout(() => {
-                    casterElement.classList.remove('healing-kick-animation');
-                }, 1000);
-            }
-            */
-        }
-    );
-    
-    // Set the description and target type
-    healingKick.setDescription('Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 65% of the total damage dealt.');
-    healingKick.setTargetType('all_enemies');
-    
-    // Register the ability
-    if (typeof AbilityFactory !== 'undefined') {
-        AbilityFactory.registerAbilities([healingKick]);
-    }
-});
+// Removed redundant Q ability registration - already handled above
 
 // Ability definition for Schoolgirl Julia's W: Sprout Planting
 
@@ -374,15 +227,16 @@ const schoolgirlJuliaSproutPlantingEffect = (caster, target) => {
         false // isDebuff = false
     ).setDescription('A healing sprout that will bloom after 2 turns, restoring health.');
 
-    // Define the remove function (called when buff expires or is removed)
-    sproutBuff.remove = (buffedCharacter) => {
+    // Define the onRemove function (called when buff expires or is removed)
+    sproutBuff.onRemove = (buffedCharacter) => {
         log(`The Healing Sprout on ${buffedCharacter.name} blooms!`);
 
         // Calculate heal amount based on Julia's (caster's) healingPower
         const baseHeal = 1250;
         const healAmount = Math.floor(baseHeal * (1 + (caster.stats.healingPower || 0)));
 
-        const actualHeal = buffedCharacter.heal(healAmount);
+        const healResult = buffedCharacter.heal(healAmount, caster);
+        const actualHeal = healResult.healAmount; // Extract healAmount from result object
         log(`${buffedCharacter.name} is healed for ${actualHeal} HP.`);
 
         // Trigger Julia's passive if applicable (heal dealt by Julia)
@@ -442,6 +296,30 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
 // Add basic CSS for VFX placeholders (ideally move to a dedicated CSS file)
 const juliaWStyle = document.createElement('style');
 juliaWStyle.textContent = `
+/* Healing Kick Wind VFX */
+.healing-kick-wind-vfx {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(200, 255, 255, 0.7);
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(150, 230, 230, 0.8);
+    pointer-events: none;
+    z-index: 14;
+    animation: windyEffect 0.6s ease-out forwards;
+}
+
+@keyframes windyEffect {
+    0% {
+        opacity: 0.8;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--wind-x, 50px), var(--wind-y, -30px)) scale(0.5);
+    }
+}
+
 .sprout-planting-vfx {
     position: absolute;
     bottom: 0;
@@ -475,10 +353,85 @@ juliaWStyle.textContent = `
     100% { transform: scale(1.5); opacity: 0; }
 }
 
+.spirits-strength-heal-vfx {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #90EE90;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-shadow: 0 0 3px #228B22;
+    animation: floatUpFade 1.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.spirits-strength-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(144, 238, 144, 0.6) 0%, rgba(144, 238, 144, 0) 60%);
+    border-radius: 50%;
+    animation: spiritParticles 1.5s ease-out forwards;
+    z-index: 12;
+    pointer-events: none;
+}
+
+@keyframes spiritParticles {
+    0% { transform: scale(0); opacity: 0; }
+    30% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
 /* Placeholder for buff icon in UI */
 .status-icon[style*="sprout_planting.jfif"] {
     background-color: #90EE90; /* Light Green background for placeholder */
     border: 1px solid #3CB371; /* Medium Sea Green border */
+}
+
+/* Pushback Attack VFX */
+.julia-push-caster-animation {
+    animation: juliaPushCaster 0.5s ease-out;
+}
+
+@keyframes juliaPushCaster {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); filter: brightness(1.2); }
+    100% { transform: translateX(0); }
+}
+
+.pushback-animation {
+    animation: pushbackTarget 0.8s ease-out;
+}
+
+@keyframes pushbackTarget {
+    0% { transform: translateX(0); }
+    30% { transform: translateX(-15px); }
+    60% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
+}
+
+.julia-push-impact-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255, 255, 0, 0.8) 0%, rgba(255, 255, 0, 0) 70%);
+    border-radius: 50%;
+    animation: pushImpact 0.8s ease-out forwards;
+    z-index: 12;
+    pointer-events: none;
+}
+
+@keyframes pushImpact {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
 }
 `;
 document.head.appendChild(juliaWStyle);
@@ -656,7 +609,8 @@ const schoolgirlJuliaSpiritsStrengthEffect = (caster, target) => { // Target par
 
     // Apply heal to all alive allies (including the caster if they are alive)
     alliesToHeal.forEach(ally => {
-        const actualHeal = ally.heal(healAmount);
+        const healResult = ally.heal(healAmount, caster);
+        const actualHeal = healResult.healAmount; // Extract healAmount from result object
         totalHealed += actualHeal;
         log(`${ally.name} is healed for ${actualHeal} by Spirits Strength.`);
 

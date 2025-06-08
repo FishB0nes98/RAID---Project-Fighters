@@ -188,7 +188,9 @@ const chamChamWEffect = (caster, target) => { // Target is unused here, could be
 
     // Add stat modifiers directly to the buff object before applying
     // Assuming the framework automatically applies and removes these based on duration
-    lifestealBuff.statModifiers = { lifesteal: 0.08 };
+    lifestealBuff.statModifiers = [
+        { stat: 'lifesteal', value: 0.08, operation: 'add' }
+    ];
 
     // Define the remove function to ensure stats are reset if manual cleanup is needed
     // (Though the framework might handle statModifiers automatically)

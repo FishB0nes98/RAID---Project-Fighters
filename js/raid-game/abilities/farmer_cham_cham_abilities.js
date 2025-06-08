@@ -4,95 +4,585 @@
 
 // Ability Definition: Scratch (Farmer)
 const farmerScratchEffect = (caster, target) => {
+    if (!target || target.isDead() || (target.isUntargetable && target.isUntargetable())) {
+        return { damage: 0, success: false };
+    }
+
+    // Get the scratch ability for enhanced properties
+    const scratchAbility = caster.abilities.find(a => a.id === 'farmer_scratch');
+    
+    const damageType = 'physical';
+    let physicalDamage = Math.floor(caster.stats.physicalDamage * 1.25);
+    let magicalDamage = 0;
+    
+    // --- Arcane Scratch Talent Enhancement ---
+    if (scratchAbility?.enhancedDamage) {
+        physicalDamage = Math.floor(caster.stats.physicalDamage * 1.8); // 180% physical damage
+        magicalDamage = caster.stats.magicalDamage; // 100% magical damage
+    }
+
+    // --- Mana Empowerment Talent ---
+    if (caster.manaEmpowerment && scratchAbility) {
+        const manaCost = scratchAbility.manaCost || 0;
+        const manaBonus = Math.floor(manaCost);
+        physicalDamage += manaBonus;
+    }
+    
+    // Total damage for base calculation
+    let calculatedDamage = physicalDamage;
+    if (magicalDamage > 0) {
+        calculatedDamage += magicalDamage;
+    }
+
+    // --- NEW: Check for Hunting Mark debuff to double damage ---
+    let huntingMarkConsumed = false;
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
-    const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
-
-    if (!target || target.isDead()) {
-        log(`${caster.name} tries to Scratch, but the target is invalid.`);
-        return;
-    }
-
-    log(`${caster.name} uses Scratch (Farmer) on ${target.name}!`);
-    // playSound('sounds/meow_scratch.mp3', 0.7); // TODO: Add sound
-
-    // Damage Calculation
-    const damageMultiplier = 1.25; // 125% Physical Damage
-    const physicalDamage = Math.floor((caster.stats.physicalDamage || 0) * damageMultiplier);
-
-    // Apply Damage
-    if (physicalDamage > 0) {
-        const physResult = target.applyDamage(physicalDamage, 'physical', caster);
-        log(`${target.name} takes ${physResult.damage} physical damage from Scratch.`);
-
-        // Trigger caster's lifesteal if applicable (especially from passive)
-        if (caster.stats.lifesteal > 0) {
-            caster.applyLifesteal(physResult.damage);
-        }
-    }
-
-    // Create main VFX container
-    const targetElementId = target.instanceId || target.id;
-    const targetElement = document.getElementById(`character-${targetElementId}`);
-    if (targetElement) {
-        // Create cat paw scratch VFX
-        const scratchVfx = document.createElement('div');
-        scratchVfx.className = 'farmer-scratch-vfx';
-        targetElement.appendChild(scratchVfx);
+    
+    if (scratchAbility?.consumesHuntingMark) {
+        const huntingMarkDebuff = target.debuffs.find(d => 
+            d.id === 'hunting_mark_debuff' && 
+            (!d.sourceId || d.sourceId === (caster.instanceId || caster.id))
+        );
         
-        // Add impact star (anime style)
-        const impactStar = document.createElement('div');
-        impactStar.className = 'farmer-scratch-impact';
-        scratchVfx.appendChild(impactStar);
-        
-        // Add flying soil particles (8 particles)
-        for (let i = 0; i < 8; i++) {
-            const soilParticle = document.createElement('div');
-            soilParticle.className = 'soil-particle';
-            // Random positions
-            const x = Math.random() * 120 - 60; // -60 to 60
-            const y = Math.random() * 120 - 60; // -60 to 60
+        if (huntingMarkDebuff) {
+            // Double the calculated damage
+            calculatedDamage *= 2;
+            huntingMarkConsumed = true;
             
-            // Set custom property for particle animation
-            soilParticle.style.setProperty('--x', `${x}px`);
-            soilParticle.style.setProperty('--y', `${y}px`);
+            // Create hunting mark consume VFX
+            const targetElementId = target.instanceId || target.id;
+            const targetElement = document.getElementById(`character-${targetElementId}`);
             
-            // Position randomly in the container
-            soilParticle.style.top = `${40 + Math.random() * 20}%`;
-            soilParticle.style.left = `${40 + Math.random() * 20}%`;
-            
-            // Add animation with slight delay based on index
-            soilParticle.style.animation = `soil-particle-fly 0.6s ease-out ${i * 0.08}s forwards`;
-            
-            scratchVfx.appendChild(soilParticle);
-        }
-        
-        // Clean up after animation completes
-        setTimeout(() => {
-            if (scratchVfx.parentNode) {
-                scratchVfx.remove();
+            if (targetElement) {
+                const markConsumeVfx = document.createElement('div');
+                markConsumeVfx.className = 'hunting-mark-consume-vfx';
+                targetElement.appendChild(markConsumeVfx);
+                
+                // Create hunting mark consume text
+                const consumeText = document.createElement('div');
+                consumeText.className = 'hunting-mark-consume-text';
+                consumeText.textContent = 'MARK CONSUMED';
+                markConsumeVfx.appendChild(consumeText);
+                
+                // Create damage multiplier indicator
+                const multiplierText = document.createElement('div');
+                multiplierText.className = 'hunting-mark-multiplier';
+                multiplierText.textContent = 'x2 DAMAGE';
+                markConsumeVfx.appendChild(multiplierText);
+                
+                // Remove VFX after animation completes
+                setTimeout(() => {
+                    if (markConsumeVfx.parentNode) {
+                        markConsumeVfx.remove();
+                    }
+                }, 1500);
             }
-        }, 1000);
-    }
-
-    // Update UI
-    if (typeof updateCharacterUI === 'function') {
-        updateCharacterUI(target);
-        // Update caster if lifesteal triggered
-        if (caster.stats.lifesteal > 0) {
-            updateCharacterUI(caster);
+            
+            // Remove the debuff
+            target.removeDebuff('hunting_mark_debuff');
+            
+            log(`${caster.name}'s Scratch consumes Hunting Mark on ${target.name}, dealing double damage!`, 'talent-effect');
+            
+            // --- NEW: Apply Predator's Focus effects ---
+            if (caster.huntingMarkDodgeBuff || caster.huntingMarkCooldownReduction) {
+                // Create a container for VFX
+                const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+                
+                // Apply dodge chance buff if talent is active
+                if (caster.huntingMarkDodgeBuff) {
+                    // Create a dodge chance buff
+                    const predatorsDodgeBuff = new Effect(
+                        'predators_focus_dodge_buff',
+                        'Predator\'s Focus',
+                        'Icons/talents/predators_focus.webp',
+                        3, // 3 turns duration
+                        null,
+                        false // Not a debuff
+                    );
+                    
+                    // Set description and stat modifiers
+                    predatorsDodgeBuff.description = 'Increases dodge chance by 50% after consuming a Hunting Mark.';
+                    predatorsDodgeBuff.statModifiers = [{
+                        stat: 'dodgeChance',
+                        value: 0.5,
+                        operation: 'add'
+                    }];
+                    
+                    // Apply the buff
+                    caster.addBuff(predatorsDodgeBuff);
+                    
+                    log(`${caster.name}'s Predator's Focus increases dodge chance by 50% for 3 turns!`, 'talent-effect');
+                    
+                    // Show VFX
+                    if (casterElement) {
+                        const dodgeVfx = document.createElement('div');
+                        dodgeVfx.className = 'predators-focus-dodge-vfx';
+                        dodgeVfx.innerHTML = '<span>+50% DODGE</span>';
+                        casterElement.appendChild(dodgeVfx);
+                        
+                        setTimeout(() => {
+                            if (dodgeVfx.parentNode) {
+                                dodgeVfx.remove();
+                            }
+                        }, 2000);
+                    }
+                }
+                
+                // Apply cooldown reduction if talent is active
+                if (caster.huntingMarkCooldownReduction) {
+                    // Reduce all ability cooldowns by 1
+                    let abilitiesReduced = 0;
+                    
+                    caster.abilities.forEach(ability => {
+                        if (ability.currentCooldown > 0) {
+                            console.log(`[PredatorFocus DEBUG] Before reduce: ${ability.name} cooldown is ${ability.currentCooldown}`); // Log before
+                            ability.reduceCooldown();
+                            console.log(`[PredatorFocus DEBUG] After reduce: ${ability.name} cooldown is ${ability.currentCooldown}`); // Log after
+                            abilitiesReduced++;
+                            
+                            // Add visual feedback
+                            if (casterElement) {
+                                const abilityElements = casterElement.querySelectorAll('.ability');
+                                abilityElements.forEach((abilityEl, index) => {
+                                    if (index < caster.abilities.length && 
+                                        caster.abilities[index].id === ability.id) {
+                                        // Add cooldown reduced effect
+                                        abilityEl.classList.add('cooldown-reduced');
+                                        
+                                        // Remove class after animation
+                                        setTimeout(() => {
+                                            abilityEl.classList.remove('cooldown-reduced');
+                                        }, 1000);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    if (abilitiesReduced > 0) {
+                        log(`${caster.name}'s Predator's Focus reduced the cooldown of ${abilitiesReduced} abilities by 1 turn!`, 'talent-effect');
+                        
+                        // Show cooldown reduction VFX
+                        if (casterElement) {
+                            const cooldownVfx = document.createElement('div');
+                            cooldownVfx.className = 'predators-focus-cooldown-vfx';
+                            cooldownVfx.innerHTML = '<span>COOLDOWNS -1</span>';
+                            casterElement.appendChild(cooldownVfx);
+                            
+                            setTimeout(() => {
+                                if (cooldownVfx.parentNode) {
+                                    cooldownVfx.remove();
+                                }
+                            }, 2000);
+                        }
+                    }
+                }
+            }
+            // --- END NEW ---
         }
     }
+    // --- END NEW ---
+
+    // --- Check for Armor Piercing Claws talent ---
+    const bypassArmor = scratchAbility?.bypassesArmor || false;
+    const options = {
+        bypassArmor: bypassArmor
+    };
+
+    // If we're bypassing armor, show a VFX to indicate this
+    if (bypassArmor) {
+        // Log the armor bypass effect
+        log(`${caster.name}'s Armor Piercing Claws bypass ${target.name}'s armor!`, 'talent-effect');
+        
+        // Add visual effect for armor piercing if desired
+        const targetElementId = target.instanceId || target.id;
+        const targetElement = document.getElementById(`character-${targetElementId}`);
+        
+        if (targetElement) {
+            // Create a simple armor break VFX
+            const armorBreakVfx = document.createElement('div');
+            armorBreakVfx.className = 'armor-pierce-vfx';
+            armorBreakVfx.textContent = 'ARMOR BYPASSED';
+            armorBreakVfx.style.position = 'absolute';
+            armorBreakVfx.style.top = '50%';
+            armorBreakVfx.style.left = '50%';
+            armorBreakVfx.style.transform = 'translate(-50%, -50%)';
+            armorBreakVfx.style.color = '#ff9d00';
+            armorBreakVfx.style.fontWeight = 'bold';
+            armorBreakVfx.style.fontSize = '18px';
+            armorBreakVfx.style.textShadow = '0 0 5px #ff0000';
+            armorBreakVfx.style.zIndex = '10';
+            armorBreakVfx.style.animation = 'floatUpFade 1.5s ease-out forwards';
+            targetElement.appendChild(armorBreakVfx);
+            
+            setTimeout(() => {
+                if (armorBreakVfx.parentNode) {
+                    armorBreakVfx.remove();
+                }
+            }, 1500);
+        }
+    }
+    // --- End Armor Piercing logic ---
+
+    // Apply damage to target with options
+    const damageDealt = target.applyDamage(calculatedDamage, damageType, caster, options);
+    
+    // Create result object to return (this is needed for the acted flag)
+    const physResult = {
+        damage: damageDealt.damage,
+        isCritical: damageDealt.isCritical,
+        success: true, // This flag indicates the ability was used successfully
+        predatorFocusCooldownReduced: huntingMarkConsumed && caster.huntingMarkCooldownReduction // Indicate if we reduced cooldowns
+    };
+    
+    // Log the ability use
+    if (damageDealt.isCritical) {
+        log(`${caster.name}'s Scratch critically hits ${target.name} for ${damageDealt.damage} damage!`, 'critical');
+    } else {
+        log(`${caster.name} scratches ${target.name} for ${damageDealt.damage} damage!`);
+    }
+
+    // --- Cat Claws Talent: Apply Bleeding Debuff ---
+    if (scratchAbility?.appliesBleedingDebuff && !target.isDead()) {
+        // Check for existing bleeding debuff
+        const existingBleedingDebuff = target.debuffs.find(debuff => debuff.id === 'cat_claws_bleeding');
+        
+        if (existingBleedingDebuff) {
+            // Increment stacks if debuff already exists
+            existingBleedingDebuff.currentStacks = (existingBleedingDebuff.currentStacks || 1) + 1;
+            
+            // Update description with new stack count
+            updateBleedingDescription(existingBleedingDebuff);
+            
+            log(`${caster.name}'s Cat Claws increases bleeding on ${target.name} to ${existingBleedingDebuff.currentStacks} stacks!`, 'talent-effect');
+            
+            // Update stack counter badge if it exists
+            updateBleedingStackBadge(target, existingBleedingDebuff.currentStacks);
+        } else {
+            // Create and apply a new bleeding debuff
+            const bleedingDebuff = new Effect(
+                'cat_claws_bleeding',
+                'Bleeding',
+                'Icons/effects/bleeding.webp',
+                -1, // Permanent (-1)
+                null, // No per-turn effect function (handled by processEffects)
+                true // Is a debuff
+            );
+            
+            // Set debuff properties
+            bleedingDebuff.description = `Deals 20 damage per stack at the end of each turn.`;
+            bleedingDebuff.stackable = true;
+            bleedingDebuff.currentStacks = 1;
+            bleedingDebuff.maxStacks = 99; // Very high max stacks
+            
+            // Add damage over time effect
+            bleedingDebuff.effect = {
+                type: 'damage_over_time',
+                value: 20 // Base damage per stack
+            };
+            
+            // Add custom onApply to create the stack counter
+            bleedingDebuff.onApply = function(character) {
+                // Set description with stack information
+                const stacks = this.currentStacks || 1;
+                const damagePerStack = 20;
+                const totalDamage = stacks * damagePerStack;
+                this.description = `Deals ${damagePerStack} damage per stack (${totalDamage} total) at the end of each turn.`;
+                
+                // Create the stack badge
+                createBleedingStackBadge(character, stacks);
+                return true; // Return true to allow the buff to be applied
+            };
+            
+            // Add special onTurnEnd handler to apply damage based on stacks
+            bleedingDebuff.onTurnEnd = function(character) {
+                const stacks = this.currentStacks || 1;
+                const bleedDamage = stacks * 20; // 20 damage per stack
+                
+                // Apply damage directly to HP
+                const originalHp = character.stats.currentHp;
+                character.stats.currentHp = Math.max(0, character.stats.currentHp - bleedDamage);
+                const actualDamage = originalHp - character.stats.currentHp;
+                
+                // Log the effect
+                const logFn = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                logFn(`${character.name} bleeds for ${actualDamage} damage from Cat Claws (${stacks} stacks)!`, 'debuff-effect');
+                
+                // Show bleeding VFX with stack counter
+                showBleedingVFX(character, stacks, actualDamage);
+                
+                // Update UI
+                if (typeof updateCharacterUI === 'function') {
+                    updateCharacterUI(character);
+                }
+                
+                // Check if target died from bleeding
+                if (character.stats.currentHp <= 0) {
+                    logFn(`${character.name} has succumbed to bleeding!`, 'death');
+                    if (window.gameManager) {
+                        window.gameManager.handleCharacterDeath(character);
+                    }
+                }
+            };
+            
+            // Apply the debuff
+            target.addDebuff(bleedingDebuff);
+            log(`${caster.name}'s Cat Claws inflicts Bleeding on ${target.name}!`, 'talent-effect');
+        }
+    }
+    // --- End Cat Claws Talent ---
+
+    // Frenzied Assault talent check
+    if (scratchAbility && scratchAbility.frenziedAssaultChance) {
+        const frenziedChance = scratchAbility.frenziedAssaultChance;
+        if (Math.random() < frenziedChance) {
+            log(`${caster.name}'s Frenzied Assault triggers Scratch a second time!`, 'talent-effect');
+            
+            // Create frenzied effect VFX
+            const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+            if (targetElement) {
+                const frenziedVFX = document.createElement('div');
+                frenziedVFX.className = 'frenzied-assault-vfx';
+                targetElement.appendChild(frenziedVFX);
+                
+                // Remove VFX after animation
+                setTimeout(() => {
+                    if (frenziedVFX.parentNode === targetElement) {
+                        frenziedVFX.remove();
+                    }
+                }, 1000);
+            }
+            
+            // Trigger a second damage instance
+            const secondDamage = target.applyDamage(calculatedDamage, damageType, caster);
+            if (secondDamage.isCritical) {
+                log(`${caster.name}'s second Scratch critically hits ${target.name} for ${secondDamage.damage} damage!`, 'critical');
+            } else {
+                log(`${caster.name}'s second Scratch hits ${target.name} for ${secondDamage.damage} damage!`);
+            }
+            
+            // Update the result with combined damage info
+            physResult.damage += secondDamage.damage;
+            physResult.isCritical = physResult.isCritical || secondDamage.isCritical;
+            
+            // --- Cat Claws: Apply second stack of bleeding if talent is active ---
+            if (scratchAbility?.appliesBleedingDebuff && !target.isDead()) {
+                const existingBleedingDebuff = target.debuffs.find(debuff => debuff.id === 'cat_claws_bleeding');
+                
+                if (existingBleedingDebuff) {
+                    // Increment stacks for the second hit
+                    existingBleedingDebuff.currentStacks = (existingBleedingDebuff.currentStacks || 1) + 1;
+                    
+                    // Update description with new stack count
+                    updateBleedingDescription(existingBleedingDebuff);
+                    
+                    log(`${caster.name}'s second hit increases bleeding on ${target.name} to ${existingBleedingDebuff.currentStacks} stacks!`, 'talent-effect');
+                    
+                    // Update stack counter badge
+                    updateBleedingStackBadge(target, existingBleedingDebuff.currentStacks);
+                }
+                // No need to create a new debuff since it would have been created by the first hit
+            }
+            // --- End Cat Claws second application ---
+        }
+    }
+
+    return physResult;
 };
 
+// Helper function to create bleeding stack badge on the status icon
+function createBleedingStackBadge(character, stacks) {
+    setTimeout(() => {
+        // Find the bleeding status icon in the character's UI
+        const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!characterElement) return;
+        
+        const statusIcons = characterElement.querySelectorAll('.status-icon[title*="Bleeding"]');
+        statusIcons.forEach(icon => {
+            // Check if badge already exists
+            if (!icon.querySelector('.bleeding-stack-badge')) {
+                const badge = document.createElement('div');
+                badge.className = 'bleeding-stack-badge';
+                badge.textContent = stacks;
+                icon.appendChild(badge);
+            }
+        });
+    }, 100); // Small delay to ensure the icon is rendered
+}
+
+// Helper function to update the bleeding stack badge
+function updateBleedingStackBadge(character, stacks) {
+    setTimeout(() => {
+        const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!characterElement) return;
+        
+        const statusIcons = characterElement.querySelectorAll('.status-icon[title*="Bleeding"]');
+        statusIcons.forEach(icon => {
+            let badge = icon.querySelector('.bleeding-stack-badge');
+            if (badge) {
+                badge.textContent = stacks;
+                // Add a quick animation to highlight the change
+                badge.classList.remove('update-stack');
+                void badge.offsetWidth; // Trigger reflow
+                badge.classList.add('update-stack');
+            } else {
+                // Create badge if it doesn't exist
+                createBleedingStackBadge(character, stacks);
+            }
+            
+            // Update the tooltip title to include stack count
+            const debuff = character.debuffs.find(d => d.id === 'cat_claws_bleeding');
+            if (debuff) {
+                updateBleedingDescription(debuff);
+                icon.setAttribute('title', `${debuff.name} (${stacks} stacks): ${debuff.description}`);
+            }
+        });
+    }, 100);
+}
+
+// Helper function to update the bleeding description
+function updateBleedingDescription(debuff) {
+    const stacks = debuff.currentStacks || 1;
+    const damagePerStack = 20;
+    const totalDamage = stacks * damagePerStack;
+    debuff.description = `Deals ${damagePerStack} damage per stack (${totalDamage} total) at the end of each turn.`;
+    return debuff.description;
+}
+
+// Helper function to show the bleeding VFX with stack counter
+function showBleedingVFX(character, stacks, damage) {
+    const targetElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!targetElement) return;
+    
+    // Create bleeding VFX container
+    const bleedVFX = document.createElement('div');
+    bleedVFX.className = 'cat-claws-bleed-vfx';
+    
+    // Add intensity class based on stack count
+    if (stacks >= 10) {
+        bleedVFX.classList.add('very-high-stacks');
+    } else if (stacks >= 5) {
+        bleedVFX.classList.add('high-stacks');
+    }
+    
+    targetElement.appendChild(bleedVFX);
+    
+    // Add stack counter
+    const stackCounter = document.createElement('div');
+    stackCounter.className = 'bleeding-stack-counter';
+    stackCounter.textContent = `x${stacks}`;
+    bleedVFX.appendChild(stackCounter);
+    
+    // Add dynamic blood drops based on stack count
+    const numDrops = Math.min(Math.floor(stacks / 2) + 2, 10); // Scale drops with stacks, cap at 10
+    
+    for (let i = 0; i < numDrops; i++) {
+        const bloodDrop = document.createElement('div');
+        bloodDrop.className = 'blood-drop';
+        
+        // Random size based on stacks
+        const size = 5 + Math.random() * 3 * Math.min(stacks / 3, 3);
+        bloodDrop.style.width = `${size}px`;
+        bloodDrop.style.height = `${size * 1.3}px`; // Make drops slightly elongated
+        
+        // Random position
+        const left = 20 + Math.random() * 60; // 20-80% horizontal position
+        const top = 20 + Math.random() * 40; // 20-60% vertical start position
+        bloodDrop.style.left = `${left}%`;
+        bloodDrop.style.top = `${top}%`;
+        
+        // Random animation delay
+        bloodDrop.style.animationDelay = `${Math.random() * 0.5}s`;
+        
+        bleedVFX.appendChild(bloodDrop);
+    }
+    
+    // Add floating damage number
+    const damageText = document.createElement('div');
+    damageText.className = 'bleed-damage-text';
+    
+    // Make text larger for higher damage
+    if (damage > 100) {
+        damageText.style.fontSize = '32px';
+        damageText.style.fontWeight = '900';
+    } else if (damage > 50) {
+        damageText.style.fontSize = '28px';
+        damageText.style.fontWeight = '800';
+    }
+    
+    damageText.textContent = `-${damage}`;
+    targetElement.appendChild(damageText);
+    
+    // Remove VFX after animation
+    setTimeout(() => {
+        if (bleedVFX.parentNode === targetElement) {
+            bleedVFX.remove();
+        }
+        if (damageText.parentNode === targetElement) {
+            damageText.remove();
+        }
+    }, 1500);
+}
+
+// Create the Scratch ability
 const farmerScratchAbility = new Ability(
-    'farmer_scratch',               // id
-    'Scratch (Farmer Version)',     // name
+    'farmer_scratch',              // id
+    'Scratch (Farmer Version)',    // name
     'Icons/abilities/scratch_farmer.jpeg', // icon
-    10,                             // manaCost
-    0,                              // cooldown
-    farmerScratchEffect             // effect function
-).setDescription('Scratches the target with farming tools, dealing 125% Physical Damage.')
- .setTargetType('enemy');
+    30,                            // mana cost
+    2,                             // cooldown
+    farmerScratchEffect            // effect function
+);
+
+// Set base description
+farmerScratchAbility.baseDescription = 'Scratches the target with your cat claws, dealing 125% Physical Damage.';
+
+// Add custom generateDescription method
+farmerScratchAbility.generateDescription = function() {
+    let description = this.baseDescription;
+    
+    // Add Arcane Scratch talent info if present
+    if (this.enhancedDamage) {
+        description += `\n<span class="talent-effect damage">Arcane Scratch: Deals 180% Physical + 100% Magical Damage instead.</span>`;
+    }
+    
+    // Add Cat Claws talent info if present
+    if (this.appliesBleedingDebuff) {
+        description += `\n<span class="talent-effect damage">Cat Claws: Applies a permanent bleeding debuff that deals 20 damage per stack at the end of each turn.</span>`;
+    }
+    
+    // Add Hunting Mark consumption info if present
+    if (this.consumesHuntingMark) {
+        description += `\n<span class="talent-effect damage">Hunting Mark: Deals double damage to marked targets and consumes the mark.</span>`;
+        
+        // Add Predator's Focus talent info if character has this property
+        if (this.character && (this.character.huntingMarkDodgeBuff || this.character.huntingMarkCooldownReduction)) {
+            description += `\n<span class="talent-effect utility">Predator's Focus: Consuming Hunting Mark grants 50% dodge chance for 3 turns and reduces all ability cooldowns by 1.</span>`;
+        }
+    }
+    
+    // Add Mana Empowerment info if the character has that talent
+    if (this.character && this.character.manaEmpowerment) {
+        description += `\n<span class="talent-effect damage">Mana Empowerment: Also deals bonus damage equal to the ability's mana cost (${this.manaCost}).</span>`;
+    }
+    
+    // Add Frenzied Assault talent info if present
+    if (this.frenziedAssaultChance) {
+        description += `\n<span class="talent-effect damage">Frenzied Assault: ${this.frenziedAssaultChance * 100}% chance to trigger this ability a second time.</span>`;
+    }
+    
+    return description;
+};
+
+farmerScratchAbility.description = farmerScratchAbility.generateDescription(); // Generate initial description
+farmerScratchAbility.setTargetType('enemy');
+
+// Register the ability with the factory
+if (window.AbilityFactory) {
+    window.AbilityFactory.registerAbilities([farmerScratchAbility]);
+} else {
+    console.error("AbilityFactory not found, cannot register farmerScratchAbility");
+}
 
 // Ability Definition: Leap (Farmer Version)
 const farmerLeapEffect = (caster, target) => { // Target is not used but kept for consistency
@@ -129,9 +619,63 @@ const farmerLeapEffect = (caster, target) => { // Target is not used but kept fo
         null, // Effect logic handled by Character.recalculateStats
         false // Is not a debuff
     ).setDescription(`Empowered stance increases Physical Damage by ${bonusPhysDamage} (50% base).`);
-    physDamageBuff.statModifiers = { physicalDamage: bonusPhysDamage };
+    physDamageBuff.statModifiers = [{ stat: 'physicalDamage', value: bonusPhysDamage, operation: 'add' }];
     caster.addBuff(physDamageBuff.clone()); // Apply a clone
     log(`${caster.name} gains +${bonusPhysDamage} Physical Damage for ${buffDuration} turns.`);
+    
+    // 3. Lifesteal Buff (Added by Vampiric Leap talent)
+    const leapAbility = caster.abilities.find(a => a.id === "farmer_leap");
+    if (leapAbility?.additionalLifestealBuff) {
+        const additionalLifesteal = leapAbility.additionalLifestealBuff;
+        const lifestealBuff = new Effect(
+            'farmer_leap_lifesteal_buff',
+            'Vampiric Leap',
+            'Icons/talents/vampiric_leap.webp',
+            buffDuration,
+            null,
+            false
+        ).setDescription(`Grants an additional ${additionalLifesteal * 100}% lifesteal from damage dealt.`);
+        lifestealBuff.statModifiers = [{ stat: 'lifesteal', value: additionalLifesteal, operation: 'add' }];
+        caster.addBuff(lifestealBuff.clone());
+        log(`${caster.name} gains ${additionalLifesteal * 100}% Lifesteal for ${buffDuration} turns from Vampiric Leap!`, 'talent-effect');
+    }
+
+    // 4. Magical Damage Buff (Added by Arcane Leap talent)
+    if (leapAbility?.arcaneLeapMagicalBuff) {
+        // Calculate bonus based on CURRENT magical damage
+        const bonusMagicalDamage = Math.floor((caster.stats.magicalDamage || 0) * 0.50);
+        
+        if (bonusMagicalDamage > 0) {
+            const magicDamageBuff = new Effect(
+                'farmer_leap_magic_buff',
+                'Arcane Leap',
+                'Icons/talents/arcane_leap.webp',
+                buffDuration,
+                null,
+                false
+            ).setDescription(`Arcane energy grants +${bonusMagicalDamage} Magical Damage (50% current).`);
+            
+            magicDamageBuff.statModifiers = [{ stat: 'magicalDamage', value: bonusMagicalDamage, operation: 'add' }];
+            caster.addBuff(magicDamageBuff.clone());
+            log(`${caster.name} gains +${bonusMagicalDamage} Magical Damage for ${buffDuration} turns from Arcane Leap!`, 'talent-effect');
+            
+            // Add an arcane glow effect when both buffs are applied
+            setTimeout(() => {
+                const casterElementId = caster.instanceId || caster.id;
+                const casterElement = document.getElementById(`character-${casterElementId}`);
+                
+                if (casterElement) {
+                    const arcaneGlow = document.createElement('div');
+                    arcaneGlow.className = 'arcane-leap-glow';
+                    casterElement.appendChild(arcaneGlow);
+                    
+                    setTimeout(() => {
+                        arcaneGlow.remove();
+                    }, 1500);
+                }
+            }, 300); // Add after the main leap effect starts
+        }
+    }
 
     // Add VFX
     const casterElementId = caster.instanceId || caster.id;
@@ -211,8 +755,28 @@ const farmerLeapAbility = new Ability(
     70,                             // manaCost
     10,                             // cooldown
     farmerLeapEffect                // effect function
-).setDescription('Leaps into an agile stance, gaining 50% Dodge Chance and 50% bonus Physical Damage for 4 turns.')
- .setTargetType('self'); // This ability targets the caster
+);
+// Set base description separately for clarity
+farmerLeapAbility.baseDescription = 'Leaps into an agile stance, gaining 50% Dodge Chance and 50% bonus Physical Damage for 4 turns.';
+farmerLeapAbility.description = farmerLeapAbility.generateDescription(); // Generate initial description
+farmerLeapAbility.setTargetType('self'); // This ability targets the caster
+
+// Add custom generateDescription method to handle the talent changes
+farmerLeapAbility.generateDescription = function() {
+    let description = this.baseDescription;
+    
+    // Add Vampiric Leap talent description
+    if (this.additionalLifestealBuff) {
+        description += `\n<span class="talent-effect healing">Vampiric Leap: Grants ${this.additionalLifestealBuff * 100}% additional Lifesteal for 4 turns.</span>`;
+    }
+    
+    // Add Arcane Leap talent description
+    if (this.arcaneLeapMagicalBuff) {
+        description += `\n<span class="talent-effect damage">Arcane Leap: Also increases Magical Damage by 50% of current value for 4 turns.</span>`;
+    }
+    
+    return description;
+};
 
 // Ability Definition: Boomerang (Farmer Version)
 const farmerBoomerangEffect = (caster, target) => {
@@ -229,7 +793,54 @@ const farmerBoomerangEffect = (caster, target) => {
 
     // Damage Calculation (250% Physical Damage)
     const damageMultiplier = 2.5;
-    const physicalDamage = Math.floor((caster.stats.physicalDamage || 0) * damageMultiplier);
+    let physicalDamage = Math.floor((caster.stats.physicalDamage || 0) * damageMultiplier);
+    
+    // Check for Arcane Awakening talent (magical damage scaling)
+    const boomerangAbility = caster.abilities.find(a => a.id === "farmer_boomerang");
+    const magicalDamageScaling = boomerangAbility?.magicalDamageScaling;
+    let magicalDamage = 0;
+    
+    if (magicalDamageScaling && caster.stats.magicalDamage > 0) {
+        magicalDamage = Math.floor((caster.stats.magicalDamage || 0) * magicalDamageScaling);
+        log(`${caster.name}'s Arcane Awakening adds magical power to the Boomerang!`, 'talent-effect');
+    }
+
+    // Apply Mana Empowerment talent bonus damage if active
+    if (caster.manaEmpowerment && boomerangAbility) {
+        const manaCost = boomerangAbility.manaCost || 50;
+        physicalDamage += manaCost;
+        
+        // Create mana empowerment VFX
+        const casterElementId = caster.instanceId || caster.id;
+        const casterElement = document.getElementById(`character-${casterElementId}`);
+        if (casterElement) {
+            const manaEmpowermentVfx = document.createElement('div');
+            manaEmpowermentVfx.className = 'mana-empowerment-vfx';
+            manaEmpowermentVfx.textContent = `+${manaCost} DMG`;
+            manaEmpowermentVfx.style.left = `${40 + Math.random() * 20}%`;
+            manaEmpowermentVfx.style.top = `${40 + Math.random() * 20}%`;
+            casterElement.appendChild(manaEmpowermentVfx);
+            
+            setTimeout(() => {
+                if (manaEmpowermentVfx.parentNode) {
+                    manaEmpowermentVfx.remove();
+                }
+            }, 1500);
+        }
+        
+        log(`${caster.name}'s Mana Empowerment adds ${manaCost} damage!`, 'talent-effect');
+    }
+    
+    const totalDamagePerHit = physicalDamage + magicalDamage;
+
+    // Check for Multi-Boomerang talent
+    const extraHitsChance = boomerangAbility?.extraHitsChance;
+    const willPerformExtraHits = extraHitsChance && Math.random() <= extraHitsChance;
+    const totalHits = willPerformExtraHits ? 4 : 2;
+    
+    if (willPerformExtraHits) {
+        log(`${caster.name}'s Multi-Boomerang activates for ${totalHits} total hits!`, 'talent-effect');
+    }
 
     // Apply VFX
     const targetElementId = target.instanceId || target.id;
@@ -241,6 +852,12 @@ const farmerBoomerangEffect = (caster, target) => {
         // Create cat-themed boomerang VFX
         const boomerangVfx = document.createElement('div');
         boomerangVfx.className = 'farmer-boomerang-vfx';
+        
+        // Add magical effect class if magical damage is added
+        if (magicalDamage > 0) {
+            boomerangVfx.classList.add('arcane-boomerang');
+        }
+        
         document.body.appendChild(boomerangVfx);
         
         // Position and animate the boomerang
@@ -255,6 +872,12 @@ const farmerBoomerangEffect = (caster, target) => {
         const createPawPrint = (x, y, delay) => {
             const pawPrint = document.createElement('div');
             pawPrint.className = 'paw-print';
+            
+            // Add magical effect if magical damage is added
+            if (magicalDamage > 0) {
+                pawPrint.classList.add('arcane-paw-print');
+            }
+            
             pawPrint.style.left = `${x}px`;
             pawPrint.style.top = `${y}px`;
             pawPrint.style.opacity = '0';
@@ -278,6 +901,12 @@ const farmerBoomerangEffect = (caster, target) => {
         const createSparkle = (x, y) => {
             const sparkle = document.createElement('div');
             sparkle.className = 'boomerang-sparkle';
+            
+            // Add magical effect if magical damage is added
+            if (magicalDamage > 0) {
+                sparkle.classList.add('arcane-sparkle');
+            }
+            
             sparkle.style.left = `${x}px`;
             sparkle.style.top = `${y}px`;
             document.body.appendChild(sparkle);
@@ -325,241 +954,202 @@ const farmerBoomerangEffect = (caster, target) => {
             setTimeout(() => {
                 // First hit
                 if (!target.isDead()) {
-                    const firstHitResult = target.applyDamage(physicalDamage, 'physical', caster);
-                    log(`${target.name} takes ${firstHitResult.damage} physical damage from the first Boomerang hit!`);
+                    // Apply damage
+                    const damageResult = target.applyDamage(totalDamagePerHit, 'physical', caster);
+                    
+                    // Log hit
+                    if (damageResult.isCritical) {
+                        log(`${caster.name}'s Boomerang critically hits ${target.name} for ${damageResult.damage} damage!`, 'critical');
+                    } else {
+                        log(`${caster.name}'s Boomerang hits ${target.name} for ${damageResult.damage} damage!`);
+                    }
                     
                     // Create impact effect
-                    const impactEffect = document.createElement('div');
-                    impactEffect.className = 'boomerang-impact';
-                    targetElement.appendChild(impactEffect);
+                    const impactVfx = document.createElement('div');
+                    impactVfx.className = 'boomerang-impact';
                     
-                    // Create damage number VFX
-                    const damageVfx = document.createElement('div');
-                    damageVfx.className = 'damage-vfx';
-                    damageVfx.textContent = firstHitResult.damage;
-                    targetElement.appendChild(damageVfx);
-                    
-                    // Create sparkles around impact point
-                    for (let i = 0; i < 4; i++) {
-                        const angle = i * Math.PI / 2;
-                        const offsetX = Math.cos(angle) * 40;
-                        const offsetY = Math.sin(angle) * 40;
-                        createSparkle(targetRect.left + targetRect.width/2 + offsetX, targetRect.top + targetRect.height/2 + offsetY);
+                    // Add magical effect if magical damage is added
+                    if (magicalDamage > 0) {
+                        impactVfx.classList.add('arcane-impact');
                     }
                     
+                    targetElement.appendChild(impactVfx);
+                    
+                    // Remove impact after animation completes
                     setTimeout(() => {
-                        if (impactEffect.parentNode) {
-                            impactEffect.remove();
+                        if (impactVfx.parentNode) {
+                            impactVfx.remove();
                         }
-                        if (damageVfx.parentNode) {
-                            damageVfx.remove();
-                        }
-                    }, 1500);
+                    }, 500);
                     
-                    // Trigger lifesteal if applicable
-                    if (caster.stats.lifesteal > 0) {
-                        caster.applyLifesteal(firstHitResult.damage);
-                    }
-                }
-                
-                // Animate return throw
+                    // Return animation after hit
                 boomerangVfx.classList.remove('throw');
                 boomerangVfx.classList.add('return');
-                boomerangVfx.style.transform = 'translate(0, 0) rotate(2160deg)';
-                
-                // Create paw prints along return path
-                for (let i = 0; i < pathPoints; i++) {
-                    // Calculate position along the return path
-                    const ratio = i / (pathPoints - 1);
-                    const x = targetX + (casterRect.left + casterRect.width/2 - targetX) * ratio;
-                    const y = targetY + (casterRect.top + casterRect.height/2 - targetY) * ratio;
                     
-                    // Create paw print with delay
-                    createPawPrint(x, y, ratio * 400);
+                    // Reset transform for return animation
+                    boomerangVfx.style.transform = `translate(0, 0) rotate(-1080deg)`;
                     
-                    // Create sparkle randomly along the return path
-                    if (Math.random() > 0.5) {
-                        setTimeout(() => {
-                            createSparkle(x + (Math.random() * 30 - 15), y + (Math.random() * 30 - 15));
-                        }, ratio * 400 + Math.random() * 200);
-                    }
-                }
-                
-                // Second hit after short delay
+                    // Second hit
                 setTimeout(() => {
                     if (!target.isDead()) {
-                        const secondHitResult = target.applyDamage(physicalDamage, 'physical', caster);
-                        log(`${target.name} takes ${secondHitResult.damage} physical damage from the second Boomerang hit!`);
+                            // Apply second hit damage
+                            const secondDamageResult = target.applyDamage(totalDamagePerHit, 'physical', caster);
+                            
+                            // Log second hit
+                            if (secondDamageResult.isCritical) {
+                                log(`${caster.name}'s Boomerang critically hits ${target.name} again for ${secondDamageResult.damage} damage!`, 'critical');
+                        } else {
+                                log(`${caster.name}'s Boomerang hits ${target.name} again for ${secondDamageResult.damage} damage!`);
+                        }
                         
                         // Create second impact effect
-                        const impactEffect2 = document.createElement('div');
-                        impactEffect2.className = 'boomerang-impact';
-                        targetElement.appendChild(impactEffect2);
+                            const secondImpactVfx = document.createElement('div');
+                            secondImpactVfx.className = 'boomerang-impact';
                         
-                        // Create second damage number VFX
-                        const damageVfx2 = document.createElement('div');
-                        damageVfx2.className = 'damage-vfx';
-                        damageVfx2.textContent = secondHitResult.damage;
-                        targetElement.appendChild(damageVfx2);
-                        
+                        // Add magical effect if magical damage is added
+                        if (magicalDamage > 0) {
+                                secondImpactVfx.classList.add('arcane-impact');
+                            }
+                            
+                            targetElement.appendChild(secondImpactVfx);
+                            
+                            // Remove second impact after animation completes
                         setTimeout(() => {
-                            if (impactEffect2.parentNode) {
-                                impactEffect2.remove();
+                                if (secondImpactVfx.parentNode) {
+                                    secondImpactVfx.remove();
+                                }
+                            }, 500);
+                            
+                            // Check for Multi-Boomerang bonus hits (talent ability)
+                            if (willPerformExtraHits) {
+                                let hitCount = 2; // Already did 2 hits
+                                
+                                // Function to execute remaining hits
+                                const executeExtraHit = () => {
+                                    if (hitCount < totalHits && !target.isDead()) {
+                                        // Apply damage for extra hit
+                                        const extraHitResult = target.applyDamage(totalDamagePerHit, 'physical', caster);
+                                        
+                                        // Log extra hit
+                                        if (extraHitResult.isCritical) {
+                                            log(`${caster.name}'s Multi-Boomerang critically hits ${target.name} for ${extraHitResult.damage} additional damage!`, 'critical');
+                                } else {
+                                            log(`${caster.name}'s Multi-Boomerang hits ${target.name} for ${extraHitResult.damage} additional damage!`);
+                                        }
+                                        
+                                        // Create impact for extra hit
+                                        const extraImpactVfx = document.createElement('div');
+                                        extraImpactVfx.className = 'boomerang-impact';
+                                        extraImpactVfx.style.transform = `translate(${Math.random() * 30 - 15}px, ${Math.random() * 30 - 15}px)`;
+                                        
+                                if (magicalDamage > 0) {
+                                            extraImpactVfx.classList.add('arcane-impact');
+                                        }
+                                        
+                                        targetElement.appendChild(extraImpactVfx);
+                                        
+                                        // Remove extra impact after animation
+                                setTimeout(() => {
+                                            if (extraImpactVfx.parentNode) {
+                                                extraImpactVfx.remove();
+                                            }
+                                        }, 500);
+                                        
+                                        // Increment hit counter
+                                        hitCount++;
+                                        
+                                        // Schedule next hit if needed
+                                        if (hitCount < totalHits) {
+                                            setTimeout(executeExtraHit, 300);
+                                        } else {
+                                            // Final hit completed, apply Hunting Mark after all damage
+                                            applyHuntingMarkIfActive();
+                                        }
+                                    } else {
+                                        // No more hits needed, apply Hunting Mark
+                                        applyHuntingMarkIfActive();
+                                    }
+                                };
+                                
+                                // Start executing extra hits
+                                setTimeout(executeExtraHit, 300);
+                                        } else {
+                                // No extra hits, apply Hunting Mark after the two standard hits
+                                applyHuntingMarkIfActive();
                             }
-                            if (damageVfx2.parentNode) {
-                                damageVfx2.remove();
-                            }
-                        }, 1500);
-                        
-                        // Trigger lifesteal if applicable
-                        if (caster.stats.lifesteal > 0) {
-                            caster.applyLifesteal(secondHitResult.damage);
                         }
-                    }
-                    
-                    // Clean up VFX
+                    }, 700); // Timing for second hit
+                }
+                
+                // Clean up the VFX after animation completes
                     setTimeout(() => {
                         if (boomerangVfx.parentNode) {
                             boomerangVfx.remove();
                         }
-                    }, 200);
-                    
-                    // 20% chance not to go on cooldown
-                    const noCooldownRoll = Math.random();
-                    if (noCooldownRoll <= 0.2) { // 20% chance
-                        // Find the ability in caster's abilities array and reset its cooldown counter
-                        const boomerangAbility = caster.abilities.find(ability => ability.id === 'farmer_boomerang');
-                        if (boomerangAbility) {
-                            boomerangAbility.currentCooldown = 0;
-                            log(`${caster.name}'s Boomerang returned perfectly! No cooldown.`, 'system');
-                            
-                            // Add no cooldown visual effect - dancing paw prints
-                            const abilityElement = document.querySelector(`.ability[data-ability-id="farmer_boomerang"]`);
-                            if (abilityElement) {
-                                const noCooldownFlash = document.createElement('div');
-                                noCooldownFlash.className = 'boomerang-no-cooldown-flash';
-                                abilityElement.appendChild(noCooldownFlash);
-                                
-                                // Add dancing paw prints
-                                for (let i = 0; i < 6; i++) {
-                                    const paw = document.createElement('div');
-                                    paw.className = 'paw-dance';
-                                    
-                                    // Random starting positions
-                                    paw.style.top = `${Math.random() * 80 + 10}%`; // 10-90%
-                                    paw.style.left = `${Math.random() * 80 + 10}%`; // 10-90%
-                                    
-                                    // Random travel paths
-                                    const tx = (Math.random() * 30 - 15); // -15 to 15px
-                                    const ty = (Math.random() * 30 - 15); // -15 to 15px
-                                    const tx2 = tx + (Math.random() * 20 - 10); // additional -10 to 10px
-                                    const ty2 = ty - 20; // always up 20px
-                                    
-                                    paw.style.setProperty('--tx', `${tx}px`);
-                                    paw.style.setProperty('--ty', `${ty}px`);
-                                    paw.style.setProperty('--tx2', `${tx2}px`);
-                                    paw.style.setProperty('--ty2', `${ty2}px`);
-                                    
-                                    // Animate with delay
-                                    paw.style.animation = `paw-no-cooldown 0.8s ease-out ${i * 0.1}s forwards`;
-                                    
-                                    noCooldownFlash.appendChild(paw);
-                                }
-                                
-                                // Remove after animation completes
-                                setTimeout(() => {
-                                    if (noCooldownFlash && noCooldownFlash.parentNode) {
-                                        noCooldownFlash.remove();
-                                    }
-                                }, 1000);
-                            }
-                        }
-                    }
-                    
-                    // Update UI
-                    if (typeof updateCharacterUI === 'function') {
-                        updateCharacterUI(target);
-                        updateCharacterUI(caster);
-                    }
-                }, 500); // Time for second hit
-                
-            }, 500); // Time for first hit
-        }, 100); // Small delay to start animation
+                }, 1400);
+            }, 500); // Timing for first hit
+        }, 100);
+    }
+    
+    // --- NEW: Apply Hunting Mark debuff if talent is active ---
+    function applyHuntingMarkIfActive() {
+        if (!target.isDead() && boomerangAbility?.appliesHuntingMark) {
+            // Check for existing Hunting Mark to refresh it
+            const existingMark = target.debuffs.find(d => d.id === 'hunting_mark_debuff');
+            
+            if (existingMark) {
+                // Refresh the existing mark duration
+                existingMark.duration = 3;
+                log(`${caster.name}'s Boomerang refreshes the Hunting Mark on ${target.name}!`, 'talent-effect');
     } else {
-        // Fallback if VFX can't be rendered, just apply damage
-        if (!target.isDead()) {
-            // First hit
-            const firstHitResult = target.applyDamage(physicalDamage, 'physical', caster);
-            log(`${target.name} takes ${firstHitResult.damage} physical damage from the first Boomerang hit!`);
-            
-            // Second hit
-            const secondHitResult = target.applyDamage(physicalDamage, 'physical', caster);
-            log(`${target.name} takes ${secondHitResult.damage} physical damage from the second Boomerang hit!`);
-            
-            // Trigger lifesteal if applicable
-            if (caster.stats.lifesteal > 0) {
-                caster.applyLifesteal(firstHitResult.damage + secondHitResult.damage);
-            }
-            
-            // 20% chance not to go on cooldown
-            const noCooldownRoll = Math.random();
-            if (noCooldownRoll <= 0.2) { // 20% chance
-                // Find the ability in caster's abilities array and reset its cooldown counter
-                const boomerangAbility = caster.abilities.find(ability => ability.id === 'farmer_boomerang');
-                if (boomerangAbility) {
-                    boomerangAbility.currentCooldown = 0;
-                    log(`${caster.name}'s Boomerang returned perfectly! No cooldown.`, 'system');
-                    
-                    // Try to add visual effect
-                    const abilityElement = document.querySelector(`.ability[data-ability-id="farmer_boomerang"]`);
-                    if (abilityElement) {
-                        const noCooldownFlash = document.createElement('div');
-                        noCooldownFlash.className = 'boomerang-no-cooldown-flash';
-                        abilityElement.appendChild(noCooldownFlash);
-                        
-                        // Add dancing paw prints
-                        for (let i = 0; i < 6; i++) {
-                            const paw = document.createElement('div');
-                            paw.className = 'paw-dance';
-                            
-                            // Random starting positions
-                            paw.style.top = `${Math.random() * 80 + 10}%`; // 10-90%
-                            paw.style.left = `${Math.random() * 80 + 10}%`; // 10-90%
-                            
-                            // Random travel paths
-                            const tx = (Math.random() * 30 - 15); // -15 to 15px
-                            const ty = (Math.random() * 30 - 15); // -15 to 15px
-                            const tx2 = tx + (Math.random() * 20 - 10); // additional -10 to 10px
-                            const ty2 = ty - 20; // always up 20px
-                            
-                            paw.style.setProperty('--tx', `${tx}px`);
-                            paw.style.setProperty('--ty', `${ty}px`);
-                            paw.style.setProperty('--tx2', `${tx2}px`);
-                            paw.style.setProperty('--ty2', `${ty2}px`);
-                            
-                            // Animate with delay
-                            paw.style.animation = `paw-no-cooldown 0.8s ease-out ${i * 0.1}s forwards`;
-                            
-                            noCooldownFlash.appendChild(paw);
-                        }
-                        
-                        // Remove after animation completes
-                        setTimeout(() => {
-                            if (noCooldownFlash && noCooldownFlash.parentNode) {
-                                noCooldownFlash.remove();
-                            }
-                        }, 1000);
+                // Create new Hunting Mark debuff
+                const huntingMark = new window.Effect(
+                    'hunting_mark_debuff',
+                    'Hunting Mark',
+                    'Icons/effects/hunting_mark.webp',
+                    3, // 3 turns duration
+                    null, // No per-turn effect function
+                    true // Is a debuff
+                );
+                
+                // Add description
+                huntingMark.description = `The next Scratch from Cham Cham deals double damage to this target and consumes the mark.`;
+                
+                // Store the source caster ID to ensure only the right Cham Cham can consume it
+                huntingMark.sourceId = caster.instanceId || caster.id;
+                
+                // Apply visual styling for this debuff through CSS classes
+                target.addDebuff(huntingMark);
+                
+                // Create the Hunting Mark VFX
+                const markVfx = document.createElement('div');
+                markVfx.className = 'hunting-mark-vfx';
+                targetElement.appendChild(markVfx);
+                
+                // Create floating text indicator
+                const markText = document.createElement('div');
+                markText.className = 'hunting-mark-text';
+                markText.textContent = 'MARKED';
+                markVfx.appendChild(markText);
+                
+                // Remove VFX after animation
+                            setTimeout(() => {
+                    if (markVfx.parentNode) {
+                        markVfx.remove();
                     }
-                }
-            }
-            
-            // Update UI
-            if (typeof updateCharacterUI === 'function') {
-                updateCharacterUI(target);
-                updateCharacterUI(caster);
+                }, 2000);
+                
+                log(`${caster.name}'s Hunting Mark talent marks ${target.name} for extra damage!`, 'talent-effect');
             }
         }
     }
+    // --- END NEW ---
+    
+    // Return structure with damage info
+    return {
+        damage: totalDamagePerHit * totalHits, // Report total damage done
+        success: true
+    };
 };
 
 const farmerBoomerangAbility = new Ability(
@@ -567,10 +1157,41 @@ const farmerBoomerangAbility = new Ability(
     'Boomerang (Farmer Version)',   // name
     'Icons/abilities/boomerang_farmer.jpeg', // icon (Placeholder)
     50,                             // manaCost
-    7,                              // cooldown
+    6,                              // cooldown
     farmerBoomerangEffect           // effect function
-).setDescription('Throws a farming boomerang that deals 250% Physical Damage twice. Has a 20% chance not to go on cooldown.')
- .setTargetType('enemy');
+);
+// Set base description separately
+farmerBoomerangAbility.baseDescription = 'Throws a cat-themed boomerang, dealing 250% Physical Damage twice.';
+
+// Add custom generateDescription method to handle the talent changes
+farmerBoomerangAbility.generateDescription = function() {
+    let description = this.baseDescription;
+    
+    // Add Multi-Boomerang talent info if present
+    if (this.extraHitsChance) {
+        description += `\n<span class="talent-effect damage">Multi-Boomerang: Has a ${this.extraHitsChance * 100}% chance to hit 4 times instead of 2.</span>`;
+    }
+    
+    // Add Arcane Awakening talent info if present
+    if (this.magicalDamageScaling) {
+        description += `\n<span class="talent-effect damage">Arcane Awakening: Also deals ${this.magicalDamageScaling * 100}% Magical Damage on each hit.</span>`;
+    }
+    
+    // Add Mana Empowerment info if the character has that talent
+    if (this.caster && this.caster.manaEmpowerment) {
+        description += `\n<span class="talent-effect damage">Mana Empowerment: Also deals bonus damage equal to the ability's mana cost (${this.manaCost}).</span>`;
+    }
+    
+    // Add Hunting Mark talent info if present
+    if (this.appliesHuntingMark) {
+        description += `\n<span class="talent-effect damage">Hunting Mark: Applies a mark to the target. The next Scratch will deal double damage to the marked target and consume the mark. The mark lasts for 3 turns.</span>`;
+    }
+    
+    return description;
+};
+
+farmerBoomerangAbility.description = farmerBoomerangAbility.generateDescription(); // Generate initial description
+farmerBoomerangAbility.setTargetType('enemy');
 
 // Ability Definition: Feral Strike (Farmer Version)
 const farmerFeralStrikeEffect = (caster, target) => {
@@ -591,11 +1212,31 @@ const farmerFeralStrikeEffect = (caster, target) => {
     const casterElementId = caster.instanceId || caster.id;
     const casterElement = document.getElementById(`character-${casterElementId}`);
 
-    if (!targetElement || !casterElement) {
-        log(`VFX elements not found, applying damage directly.`);
-        // Apply damage directly if no VFX possible
-        executeAllStrikes();
-        return;
+    // Check for Mana Empowerment talent
+    const feralStrikeAbility = caster.abilities.find(a => a.id === "farmer_feral_strike");
+    let manaEmpowermentBonus = 0;
+    
+    if (caster.manaEmpowerment && feralStrikeAbility) {
+        const manaCost = feralStrikeAbility.manaCost || 100;
+        manaEmpowermentBonus = manaCost;
+        
+        // Create mana empowerment VFX
+        if (casterElement) {
+            const manaEmpowermentVfx = document.createElement('div');
+            manaEmpowermentVfx.className = 'mana-empowerment-vfx';
+            manaEmpowermentVfx.textContent = `+${manaCost} DMG`;
+            manaEmpowermentVfx.style.left = `${40 + Math.random() * 20}%`;
+            manaEmpowermentVfx.style.top = `${40 + Math.random() * 20}%`;
+            casterElement.appendChild(manaEmpowermentVfx);
+            
+            setTimeout(() => {
+                if (manaEmpowermentVfx.parentNode) {
+                    manaEmpowermentVfx.remove();
+                }
+            }, 1500);
+        }
+        
+        log(`${caster.name}'s Mana Empowerment adds ${manaCost} damage!`, 'talent-effect');
     }
 
     // Create main container for all VFX
@@ -703,7 +1344,14 @@ const farmerFeralStrikeEffect = (caster, target) => {
     // Function to execute a single strike with damage calculation
     function executeSingleStrike(strikeNumber) {
         // Regular damage calculation - 100% of physical damage
-        const baseDamage = caster.stats.physicalDamage || 0;
+        let baseDamage = caster.stats.physicalDamage || 0;
+        
+        // Add mana empowerment bonus to each strike (divided by 6 for balance)
+        if (manaEmpowermentBonus > 0) {
+            // We divide by number of strikes for balance
+            const bonusPerStrike = Math.floor(manaEmpowermentBonus / 6);
+            baseDamage += bonusPerStrike;
+        }
         
         // Each strike has 50% crit chance regardless of character's crit stat
         const critRoll = Math.random();
@@ -750,9 +1398,44 @@ const farmerFeralStrikeEffect = (caster, target) => {
             caster.applyLifesteal(damageResult.damage);
         }
         
+        // IMPORTANT: Call the passive handler's onCriticalHit method
+        if (isCritical && caster.passiveHandler && typeof caster.passiveHandler.onCriticalHit === 'function') {
+            caster.passiveHandler.onCriticalHit(caster, target, damageResult.damage);
+        }
+        
+        // Check for crit mana restoration
+        if (isCritical && caster.critRestoresMana) {
+            const missingMana = caster.stats.maxMana - caster.stats.currentMana;
+            const manaRestored = Math.floor(missingMana * caster.critRestoresMana);
+            if (manaRestored > 0) {
+                caster.stats.currentMana = Math.min(caster.stats.maxMana, caster.stats.currentMana + manaRestored);
+                log(`${caster.name}'s Arcane Recovery restores ${manaRestored} mana from critical hit!`, 'talent-effect');
+                
+                // Add mana restoration VFX
+                const casterElementId = caster.instanceId || caster.id;
+                const casterElement = document.getElementById(`character-${casterElementId}`);
+                if (casterElement) {
+                    const manaVfx = document.createElement('div');
+                    manaVfx.className = 'mana-restore-vfx';
+                    manaVfx.textContent = `+${manaRestored} MP`;
+                    casterElement.appendChild(manaVfx);
+                    
+                    setTimeout(() => {
+                        if (manaVfx.parentNode) {
+                            manaVfx.remove();
+                        }
+                    }, 1500);
+                }
+            }
+        }
+        
         // Update UI after each strike
         if (typeof updateCharacterUI === 'function') {
             updateCharacterUI(target);
+            // Update caster UI too if mana was restored
+            if (isCritical && caster.critRestoresMana) {
+                updateCharacterUI(caster);
+            }
         }
     }
 
@@ -767,7 +1450,14 @@ const farmerFeralStrikeEffect = (caster, target) => {
             if (target.isDead()) break;
             
             // Regular damage calculation - 100% of physical damage
-            const baseDamage = caster.stats.physicalDamage || 0;
+            let baseDamage = caster.stats.physicalDamage || 0;
+            
+            // Add mana empowerment bonus to each strike (divided by 6 for balance)
+            if (manaEmpowermentBonus > 0) {
+                // We divide by number of strikes for balance
+                const bonusPerStrike = Math.floor(manaEmpowermentBonus / 6);
+                baseDamage += bonusPerStrike;
+            }
             
             // Each strike has 50% crit chance
             const critRoll = Math.random();
@@ -799,6 +1489,48 @@ const farmerFeralStrikeEffect = (caster, target) => {
             updateCharacterUI(caster);
         }
     }
+
+    // After the executeAllStrikes function is called and animations complete
+    
+    // Add Frenzied Assault check after all the strikes have been executed
+    setTimeout(() => {
+        // Frenzied Assault talent check
+        const feralStrikeAbility = caster.abilities.find(a => a.id === 'farmer_feral_strike');
+        if (feralStrikeAbility && feralStrikeAbility.frenziedAssaultChance && !options?.isFromFrenziedAssault) {
+            const frenziedChance = feralStrikeAbility.frenziedAssaultChance;
+            if (Math.random() < frenziedChance) {
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`${caster.name}'s Frenzied Assault triggers Feral Strike a second time!`, 'talent-effect');
+                
+                // Create frenzied effect VFX
+                const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+                if (targetElement) {
+                    const frenziedVFX = document.createElement('div');
+                    frenziedVFX.className = 'frenzied-assault-vfx feral';
+                    targetElement.appendChild(frenziedVFX);
+                    
+                    // Remove VFX after animation
+                    setTimeout(() => {
+                        if (frenziedVFX.parentNode === targetElement) {
+                            frenziedVFX.remove();
+                        }
+                    }, 1000);
+                }
+                
+                // Trigger the Feral Strike effect again with a slight delay
+                setTimeout(() => {
+                    // We're calling the same effect but setting a flag to avoid infinite recursion
+                    farmerFeralStrikeEffect(caster, target, { isFromFrenziedAssault: true });
+                }, 500);
+            }
+        }
+    }, 2500); // Wait for all the original strikes to finish
+    
+    // Return a basic success indicator since this is an animated ability
+    return {
+        damage: 0, // Damage is applied per strike, not returned
+        isCritical: false
+    };
 };
 
 const farmerFeralStrikeAbility = new Ability(
@@ -810,6 +1542,21 @@ const farmerFeralStrikeAbility = new Ability(
     farmerFeralStrikeEffect         // effect function
 ).setDescription('Unleashes a flurry of 6 strikes, each dealing 100% Physical Damage with 50% chance to critically hit.')
  .setTargetType('enemy');
+
+// Add custom generateDescription method to handle the talent changes
+farmerFeralStrikeAbility.generateDescription = function() {
+    let description = 'Unleashes a flurry of 6 strikes, each dealing 100% Physical Damage with 50% chance to critically hit.';
+    
+    // Add Mana Empowerment info if the character has that talent
+    if (this.caster && this.caster.manaEmpowerment) {
+        description += `\n<span class="talent-effect damage">Mana Empowerment: Also deals bonus damage equal to the ability's mana cost (${this.manaCost}), distributed across all strikes.</span>`;
+    }
+    
+    return description;
+};
+
+// Update descriptions
+farmerFeralStrikeAbility.description = farmerFeralStrikeAbility.generateDescription();
 
 // Register the ability
 if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbilities === 'function') {

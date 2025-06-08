@@ -28,7 +28,7 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                     <div class="ball-option" data-ball-id="grass_ball" style="cursor: pointer;" onclick="window.shomaSelectBall('grass_ball')">
                         <img src="Icons/abilities/grassball.jfif" alt="Grass Ball">
                         <h3>Grass Ball</h3>
-                        <p>Heals ally for 450 + 2% target max HP</p>
+                        <p>Heals ally for 450 + 2% target max HP (scales with Healing Power)</p>
                     </div>
                     <div class="ball-option" data-ball-id="fire_ball" style="cursor: pointer;" onclick="window.shomaSelectBall('fire_ball')">
                         <img src="Icons/abilities/fireball.jfif" alt="Fire Ball">
@@ -45,6 +45,11 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                         <h3>Water Ball</h3>
                         <p>Deals 550 damage to main target and 180 to all other enemies</p>
                     </div>
+                    <div class="controller-hints">
+                        <span class="controller-hint">D-Pad/Left Stick: Navigate</span>
+                        <span class="controller-hint">A: Select Ball</span>
+                        <span class="controller-hint">B: Auto-select Fire Ball</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -52,6 +57,25 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
         // Add the modal to the document
         document.body.appendChild(modalContainer);
         console.log('Ball selection modal added to DOM');
+
+        // Temporarily disable main game controller and enable ball selection controller
+        const gameControllerWasActive = window.gameManager?.controllerManager?.isControllerMode || false;
+        if (window.gameManager?.controllerManager) {
+            // Hide the main game's controller cursor
+            const mainCursor = document.querySelector('.controller-cursor');
+            if (mainCursor) {
+                mainCursor.style.display = 'none';
+            }
+            
+            // Store the state but don't fully disable controller mode
+            window.ballSelectionControllerState = {
+                wasActive: gameControllerWasActive,
+                mainCursor: mainCursor
+            };
+        }
+        
+        // Enable controller support for ball selection
+        enableControllerSupport(modalContainer);
 
         // Add CSS styles for the modal
         const styleElement = document.createElement('style');
@@ -186,6 +210,61 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
             .ball-option:hover::before {
                 opacity: 1;
             }
+            
+            /* Controller support styling */
+            .ball-option.controller-selected {
+                border-color: #4d4dff !important;
+                box-shadow: 0px 6px 12px rgba(77, 77, 255, 0.5) !important;
+                transform: translateY(-5px) scale(1.05) !important;
+            }
+            
+            .ball-option.controller-selected::before {
+                opacity: 1 !important;
+            }
+            
+            .controller-ball-cursor {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border: 3px solid #4d4dff;
+                border-radius: 8px;
+                box-shadow: 0 0 15px rgba(77, 77, 255, 0.8);
+                animation: controllerPulse 1s infinite alternate;
+                pointer-events: none;
+                z-index: 100;
+            }
+            
+            @keyframes controllerPulse {
+                0% { 
+                    opacity: 0.7; 
+                    transform: scale(1);
+                }
+                100% { 
+                    opacity: 1; 
+                    transform: scale(1.02);
+                }
+            }
+            
+            .ball-selection-content h2 {
+                color: #4d4dff;
+                margin-bottom: 10px;
+            }
+            
+            .controller-hints {
+                margin-top: 15px;
+                color: #cccccc;
+                font-size: 14px;
+                text-align: center;
+            }
+            
+            .controller-hint {
+                display: inline-block;
+                margin: 0 10px;
+                padding: 5px 10px;
+                background: rgba(77, 77, 255, 0.2);
+                border-radius: 5px;
+                border: 1px solid #4d4dff;
+            }
         `;
         document.head.appendChild(styleElement);
 
@@ -195,6 +274,20 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
             selectBall(shomaCharacter, ballId);
             
             // Clean up
+            if (window.cleanupBallSelectionController) {
+                window.cleanupBallSelectionController();
+                delete window.cleanupBallSelectionController;
+            }
+            
+            // Restore main game controller cursor
+            if (window.ballSelectionControllerState) {
+                const { wasActive, mainCursor } = window.ballSelectionControllerState;
+                if (mainCursor && wasActive) {
+                    mainCursor.style.display = 'block';
+                }
+                delete window.ballSelectionControllerState;
+            }
+            
             document.body.removeChild(modalContainer);
             document.head.removeChild(styleElement);
             
@@ -220,6 +313,20 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                     selectBall(shomaCharacter, selectedBallId);
                     
                     // Clean up
+                    if (window.cleanupBallSelectionController) {
+                        window.cleanupBallSelectionController();
+                        delete window.cleanupBallSelectionController;
+                    }
+                    
+                    // Restore main game controller cursor
+                    if (window.ballSelectionControllerState) {
+                        const { wasActive, mainCursor } = window.ballSelectionControllerState;
+                        if (mainCursor && wasActive) {
+                            mainCursor.style.display = 'block';
+                        }
+                        delete window.ballSelectionControllerState;
+                    }
+                    
                     document.body.removeChild(modalContainer);
                     document.head.removeChild(styleElement);
                     
@@ -243,6 +350,20 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
             selectBall(shomaCharacter, 'fire_ball');
             
             // Clean up
+            if (window.cleanupBallSelectionController) {
+                window.cleanupBallSelectionController();
+                delete window.cleanupBallSelectionController;
+            }
+            
+            // Restore main game controller cursor
+            if (window.ballSelectionControllerState) {
+                const { wasActive, mainCursor } = window.ballSelectionControllerState;
+                if (mainCursor && wasActive) {
+                    mainCursor.style.display = 'block';
+                }
+                delete window.ballSelectionControllerState;
+            }
+            
             if (document.body.contains(modalContainer)) {
                 document.body.removeChild(modalContainer);
             }
@@ -269,6 +390,264 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
         console.error('Error showing ball selection:', error);
         if (onSelectionComplete) onSelectionComplete();
     }
+}
+
+/**
+ * Enable controller support for ball selection modal
+ * @param {HTMLElement} modalContainer - The modal container element
+ */
+function enableControllerSupport(modalContainer) {
+    const ballOptions = modalContainer.querySelectorAll('.ball-option');
+    let selectedIndex = 0;
+    let isControllerActive = false;
+    let controllerCursor = null;
+    let lastInputTime = 0;
+    const inputCooldown = 200; // ms between inputs
+    
+    // Create controller cursor
+    function createControllerCursor() {
+        const cursor = document.createElement('div');
+        cursor.className = 'controller-ball-cursor';
+        cursor.style.position = 'absolute';
+        cursor.style.top = '0';
+        cursor.style.left = '0';
+        cursor.style.width = '100%';
+        cursor.style.height = '100%';
+        cursor.style.border = '3px solid #4d4dff';
+        cursor.style.borderRadius = '8px';
+        cursor.style.boxShadow = '0 0 15px rgba(77, 77, 255, 0.8)';
+        cursor.style.pointerEvents = 'none';
+        cursor.style.zIndex = '100';
+        cursor.style.animation = 'controllerPulse 1s infinite alternate';
+        return cursor;
+    }
+    
+    // Update cursor position
+    function updateCursorPosition() {
+        if (!ballOptions[selectedIndex]) return;
+        
+        const selectedOption = ballOptions[selectedIndex];
+        
+        // Remove cursor from all options
+        ballOptions.forEach(option => {
+            option.classList.remove('controller-selected');
+            const existingCursors = option.querySelectorAll('.controller-ball-cursor');
+            existingCursors.forEach(cursor => cursor.remove());
+        });
+        
+        // Add cursor and styling to current option
+        selectedOption.classList.add('controller-selected');
+        
+        // Make sure the option has relative positioning for absolute cursor
+        if (getComputedStyle(selectedOption).position === 'static') {
+            selectedOption.style.position = 'relative';
+        }
+        
+        const newCursor = createControllerCursor();
+        selectedOption.appendChild(newCursor);
+        
+        console.log(`Controller cursor moved to ball option ${selectedIndex}: ${selectedOption.getAttribute('data-ball-id')}`);
+    }
+    
+    // Select current ball
+    function selectCurrentBall() {
+        if (ballOptions[selectedIndex]) {
+            const ballId = ballOptions[selectedIndex].getAttribute('data-ball-id');
+            console.log(`Controller selected ball: ${ballId}`);
+            
+            // Trigger the click event
+            if (window.shomaSelectBall) {
+                window.shomaSelectBall(ballId);
+            } else {
+                ballOptions[selectedIndex].click();
+            }
+        }
+    }
+    
+    // Controller input handler
+    function handleControllerInput(event) {
+        if (!isControllerActive) return;
+        
+        const now = Date.now();
+        if (now - lastInputTime < inputCooldown) return;
+        
+        const gamepads = navigator.getGamepads();
+        for (let i = 0; i < gamepads.length; i++) {
+            const gamepad = gamepads[i];
+            if (!gamepad) continue;
+            
+            // D-Pad navigation
+            let inputDetected = false;
+            if (gamepad.buttons[14] && gamepad.buttons[14].pressed) { // D-Pad Left
+                selectedIndex = Math.max(0, selectedIndex - 1);
+                updateCursorPosition();
+                inputDetected = true;
+            } else if (gamepad.buttons[15] && gamepad.buttons[15].pressed) { // D-Pad Right
+                selectedIndex = Math.min(ballOptions.length - 1, selectedIndex + 1);
+                updateCursorPosition();
+                inputDetected = true;
+            } else if (gamepad.buttons[12] && gamepad.buttons[12].pressed) { // D-Pad Up
+                if (selectedIndex >= 2) {
+                    selectedIndex = Math.max(0, selectedIndex - 2);
+                    updateCursorPosition();
+                    inputDetected = true;
+                }
+            } else if (gamepad.buttons[13] && gamepad.buttons[13].pressed) { // D-Pad Down
+                if (selectedIndex < 2) {
+                    selectedIndex = Math.min(ballOptions.length - 1, selectedIndex + 2);
+                    updateCursorPosition();
+                    inputDetected = true;
+                }
+            }
+            
+            // Left stick navigation
+            const leftStickX = gamepad.axes[0];
+            const leftStickY = gamepad.axes[1];
+            const deadzone = 0.3;
+            
+            if (Math.abs(leftStickX) > deadzone) {
+                if (leftStickX > deadzone) { // Right
+                    selectedIndex = Math.min(ballOptions.length - 1, selectedIndex + 1);
+                    updateCursorPosition();
+                    inputDetected = true;
+                } else if (leftStickX < -deadzone) { // Left
+                    selectedIndex = Math.max(0, selectedIndex - 1);
+                    updateCursorPosition();
+                    inputDetected = true;
+                }
+            }
+            
+            if (Math.abs(leftStickY) > deadzone) {
+                if (leftStickY < -deadzone) { // Up
+                    if (selectedIndex >= 2) {
+                        selectedIndex = Math.max(0, selectedIndex - 2);
+                        updateCursorPosition();
+                        inputDetected = true;
+                    }
+                } else if (leftStickY > deadzone) { // Down
+                    if (selectedIndex < 2) {
+                        selectedIndex = Math.min(ballOptions.length - 1, selectedIndex + 2);
+                        updateCursorPosition();
+                        inputDetected = true;
+                    }
+                }
+            }
+            
+            // Update last input time if any navigation input was detected
+            if (inputDetected) {
+                lastInputTime = now;
+            }
+            
+            // A button - Select ball
+            if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
+                selectCurrentBall();
+                break;
+            }
+            
+            // B button - Auto-select Fire Ball
+            if (gamepad.buttons[1] && gamepad.buttons[1].pressed) {
+                console.log('Controller B button pressed - auto-selecting Fire Ball');
+                if (window.shomaSelectBall) {
+                    window.shomaSelectBall('fire_ball');
+                }
+                break;
+            }
+        }
+    }
+    
+    // Start controller support
+    function startControllerSupport() {
+        isControllerActive = true;
+        selectedIndex = 0; // Start with first ball (grass ball)
+        updateCursorPosition();
+        
+        // Start polling for controller input
+        const controllerInterval = setInterval(() => {
+            handleControllerInput();
+            
+            // Stop if modal is no longer in DOM
+            if (!document.body.contains(modalContainer)) {
+                clearInterval(controllerInterval);
+                isControllerActive = false;
+            }
+        }, 100); // Check every 100ms
+        
+        console.log('Ball selection controller support enabled');
+    }
+    
+    // Keyboard support as backup
+    function handleKeyboardInput(event) {
+        if (!isControllerActive) return;
+        
+        switch(event.key) {
+            case 'ArrowLeft':
+                selectedIndex = Math.max(0, selectedIndex - 1);
+                updateCursorPosition();
+                event.preventDefault();
+                break;
+            case 'ArrowRight':
+                selectedIndex = Math.min(ballOptions.length - 1, selectedIndex + 1);
+                updateCursorPosition();
+                event.preventDefault();
+                break;
+            case 'ArrowUp':
+                if (selectedIndex >= 2) {
+                    selectedIndex = Math.max(0, selectedIndex - 2);
+                    updateCursorPosition();
+                }
+                event.preventDefault();
+                break;
+            case 'ArrowDown':
+                if (selectedIndex < 2) {
+                    selectedIndex = Math.min(ballOptions.length - 1, selectedIndex + 2);
+                    updateCursorPosition();
+                }
+                event.preventDefault();
+                break;
+            case 'Enter':
+            case ' ':
+                selectCurrentBall();
+                event.preventDefault();
+                break;
+            case 'Escape':
+                // Auto-select Fire Ball on escape
+                if (window.shomaSelectBall) {
+                    window.shomaSelectBall('fire_ball');
+                }
+                event.preventDefault();
+                break;
+        }
+    }
+    
+    // Add keyboard listener
+    document.addEventListener('keydown', handleKeyboardInput);
+    
+    // Auto-start controller support if controller is connected
+    const gamepads = navigator.getGamepads();
+    const hasController = Array.from(gamepads).some(gamepad => gamepad !== null);
+    
+    if (hasController) {
+        startControllerSupport();
+    } else {
+        // Listen for controller connection
+        const controllerConnectHandler = (event) => {
+            console.log('Controller connected during ball selection');
+            startControllerSupport();
+            window.removeEventListener('gamepadconnected', controllerConnectHandler);
+        };
+        window.addEventListener('gamepadconnected', controllerConnectHandler);
+    }
+    
+    // Cleanup function
+    window.cleanupBallSelectionController = function() {
+        isControllerActive = false;
+        document.removeEventListener('keydown', handleKeyboardInput);
+        ballOptions.forEach(option => {
+            option.classList.remove('controller-selected');
+            const cursor = option.querySelector('.controller-ball-cursor');
+            if (cursor) cursor.remove();
+        });
+    };
 }
 
 /**
@@ -300,7 +679,7 @@ function selectBall(shomaCharacter, ballId) {
                 // Grass Ball - Healing effect
                 ballThrowAbility.id = 'ball_throw_grass';
                 ballThrowAbility.name = 'Grass Ball Throw';
-                ballThrowAbility.description = 'Heals ally for 450 + 2% of target\'s max HP.';
+                ballThrowAbility.description = 'Heals ally for 450 + 2% of target\'s max HP. Scales with Healing Power.';
                 ballThrowAbility.type = 'heal';
                 ballThrowAbility.targetType = 'ally';
                 ballThrowAbility.healAmount = undefined;
@@ -322,25 +701,17 @@ function selectBall(shomaCharacter, ballId) {
                     // Calculate heal amount: 450 base + 2% of target's max HP
                     const baseHeal = 450;
                     const percentHpHeal = Math.floor(target.stats.maxHp * 0.02);
-                    let totalHealAmount = baseHeal + percentHpHeal;
-
-                    // --- NEW: Check for Critical Heal ---
-                    let isCriticalHeal = false;
-                    if (Math.random() < (caster.stats.critChance || 0)) {
-                        totalHealAmount = Math.floor(totalHealAmount * (caster.stats.critDamage || 1.5));
-                        isCriticalHeal = true;
-                    }
-                    // --- END NEW ---
+                    const totalHealAmount = baseHeal + percentHpHeal;
                     
-                    // Apply healing
-                    const actualHeal = target.heal(totalHealAmount);
-                    
-                    // Updated log entry
-                    let logMessage = `${caster.name} used Grass Ball on ${target.name}, healing for ${actualHeal} HP (${baseHeal} + ${percentHpHeal} from max HP).`;
-                    if (isCriticalHeal) {
-                        logMessage += " (Critical Heal!)";
-                    }
-                    addLogEntry(logMessage, isCriticalHeal ? 'critical heal' : 'heal');
+                                    // Apply healing
+                const healResult = target.heal(totalHealAmount, caster);
+                
+                // Updated log entry
+                let logMessage = `${caster.name} used Grass Ball on ${target.name}, healing for ${healResult.healAmount} HP (${baseHeal} + ${percentHpHeal} from max HP).`;
+                if (healResult.isCritical) {
+                    logMessage += " (Critical Heal!)";
+                }
+                addLogEntry(logMessage, healResult.isCritical ? 'critical heal' : 'heal');
                     
                     // Play Grass Ball sound
                     const playSoundGrass = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
@@ -358,15 +729,14 @@ function selectBall(shomaCharacter, ballId) {
                         grassParticles.className = 'grass-ball-particles';
                         targetElement.appendChild(grassParticles);
 
-                        // --- NEW: Critical Heal Indicator ---
-                        if (isCriticalHeal) {
-                            const critHealText = document.createElement('div');
-                            critHealText.className = 'crit-heal-vfx';
-                            critHealText.textContent = `CRIT HEAL!`;
-                            targetElement.appendChild(critHealText);
-                            setTimeout(() => critHealText.remove(), 1000);
-                        }
-                        // --- END NEW ---
+                                                    // Critical Heal Indicator
+                            if (healResult.isCritical) {
+                                const critHealText = document.createElement('div');
+                                critHealText.className = 'crit-heal-vfx';
+                                critHealText.textContent = `CRIT HEAL!`;
+                                targetElement.appendChild(critHealText);
+                                setTimeout(() => critHealText.remove(), 1000);
+                            }
                         
                         // Remove VFX after animation completes
                         setTimeout(() => {

@@ -87,27 +87,7 @@
 */ 
 
 /* --- Siegfried W: Lion Protection --- */
-.lion-protection-shield-vfx {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border-radius: 50%; /* Make it circular */
-    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0) 70%); /* Golden glow */
-    animation: lionProtectionPulse 1.5s infinite ease-in-out;
-    pointer-events: none; /* Don't interfere with clicks */
-    z-index: 1; /* Behind character info */
-    border: 2px solid rgba(255, 215, 0, 0.5);
-}
-
-@keyframes lionProtectionPulse {
-    0%, 100% {
-        transform: scale(0.95);
-        opacity: 0.6;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 0.9;
-    }
-}
+/* Duplicate Lion Protection CSS removed - see enhanced version below */
 
 .heal-vfx.lion-protection-heal {
     color: #90ee90; /* Light green heal text */
@@ -331,29 +311,261 @@
     transition: filter 0.5s ease-in-out;
 }
 
-/* Lion Protection (W) Shield VFX */
+/* === Enhanced Lion Protection (W) Shield VFX === */
 .lion-protection-shield-vfx {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background-image: url('../Icons/vfx/lion_shield_overlay.png'); /* Placeholder - needs actual asset */
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    pointer-events: none;
+    z-index: 10;
+    border-radius: inherit;
     opacity: 0;
-    animation: lionShieldFadeIn 0.5s ease-out forwards, lionShieldPulse 1.5s infinite alternate 0.5s;
-    pointer-events: none; /* Allow clicks through */
-    z-index: 10; /* Appear above character image */
+    animation: lionShieldMajesticEntrance 1s ease-out forwards;
 }
 
-@keyframes lionShieldFadeIn {
-    from { opacity: 0; transform: scale(0.8); }
-    to { opacity: 0.7; transform: scale(1); } /* Slightly transparent */
+/* Core shield energy */
+.lion-shield-core {
+    position: absolute;
+    top: 5%; left: 5%;
+    width: 90%; height: 90%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 215, 0, 0.4) 0%,
+        rgba(255, 165, 0, 0.3) 30%,
+        rgba(255, 140, 0, 0.2) 60%,
+        rgba(255, 215, 0, 0.1) 80%,
+        transparent 100%
+    );
+    border-radius: inherit;
+    animation: lionShieldCorePulse 2s infinite ease-in-out;
 }
 
-@keyframes lionShieldPulse {
-    from { opacity: 0.6; transform: scale(0.98); }
-    to { opacity: 0.8; transform: scale(1.02); }
+/* Rotating energy rings */
+.lion-shield-rings {
+    position: absolute;
+    top: 10%; left: 10%;
+    width: 80%; height: 80%;
+    border: 2px solid rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.5),
+        inset 0 0 10px rgba(255, 215, 0, 0.3);
+    animation: lionShieldRingsRotate 4s linear infinite;
+}
+
+.lion-shield-rings::before {
+    content: '';
+    position: absolute;
+    top: -15px; left: -15px;
+    width: calc(100% + 30px);
+    height: calc(100% + 30px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 50%;
+    animation: lionShieldRingsRotate 6s linear infinite reverse;
+}
+
+.lion-shield-rings::after {
+    content: '';
+    position: absolute;
+    top: 15px; left: 15px;
+    width: calc(100% - 30px);
+    height: calc(100% - 30px);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 50%;
+    animation: lionShieldRingsRotate 3s linear infinite;
+}
+
+/* Lion symbol in center */
+.lion-shield-symbol {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 30px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 50% 50% 0 0;
+    animation: lionSymbolMajestic 3s infinite ease-in-out;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    box-shadow: 
+        0 0 8px rgba(255, 215, 0, 0.6),
+        inset 0 -2px 4px rgba(255, 140, 0, 0.4);
+}
+
+/* Lion symbol details */
+.lion-shield-symbol::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 20px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+
+.lion-shield-symbol::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 8px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 0 0 50% 50%;
+    box-shadow: 0 0 4px rgba(255, 215, 0, 0.4);
+}
+
+/* Floating golden particles */
+.lion-shield-particles {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.lion-shield-particles::before,
+.lion-shield-particles::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+    animation: lionParticleFloat 3s infinite linear;
+}
+
+.lion-shield-particles::before {
+    top: 20%; left: 15%;
+    animation-delay: 0s;
+}
+
+.lion-shield-particles::after {
+    top: 70%; right: 20%;
+    animation-delay: 1.5s;
+}
+
+/* Shield fade-out animation for removal */
+.lion-shield-fadeout {
+    animation: lionShieldMajesticExit 0.8s ease-in forwards !important;
+}
+
+/* Keyframe animations */
+@keyframes lionShieldMajesticEntrance {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.3) rotate(-180deg);
+        filter: brightness(3);
+    }
+    50% { 
+        opacity: 0.8; 
+        transform: scale(1.1) rotate(0deg);
+        filter: brightness(1.5);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+    }
+}
+
+@keyframes lionShieldMajesticExit {
+    0% { 
+        opacity: 1; 
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% { 
+        opacity: 0.3; 
+        transform: scale(1.2);
+        filter: brightness(2);
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(0.1) rotate(180deg);
+        filter: brightness(0);
+    }
+}
+
+@keyframes lionShieldCorePulse {
+    0%, 100% { 
+        opacity: 0.6;
+        transform: scale(0.95);
+    }
+    50% { 
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes lionShieldRingsRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes lionSymbolMajestic {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        box-shadow: 
+            0 0 8px rgba(255, 215, 0, 0.6),
+            inset 0 -2px 4px rgba(255, 140, 0, 0.4);
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+        box-shadow: 
+            0 0 12px rgba(255, 215, 0, 0.8),
+            0 0 20px rgba(255, 165, 0, 0.6),
+            inset 0 -2px 4px rgba(255, 140, 0, 0.6);
+    }
+}
+
+@keyframes lionParticleFloat {
+    0% { 
+        opacity: 0; 
+        transform: translateY(100%) scale(0.5); 
+    }
+    20% { 
+        opacity: 1; 
+        transform: translateY(80%) scale(1); 
+    }
+    80% { 
+        opacity: 1; 
+        transform: translateY(20%) scale(1); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateY(0%) scale(0.5); 
+    }
+}
+
+/* Enhanced responsiveness for different screen sizes */
+@media (max-width: 768px) {
+    .lion-shield-symbol {
+        width: 30px;
+        height: 24px;
+    }
+    
+    .lion-shield-symbol::before {
+        width: 38px;
+        height: 16px;
+        top: -6px;
+    }
+    
+    .lion-shield-symbol::after {
+        width: 16px;
+        height: 6px;
+        bottom: -4px;
+    }
+    
+    .lion-shield-particles::before,
+    .lion-shield-particles::after {
+        width: 3px;
+        height: 3px;
+    }
 }
 
 /* Lion Protection (W) Heal VFX */
