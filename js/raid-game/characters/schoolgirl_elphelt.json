@@ -44,7 +44,7 @@
             "name": "Affection",
             "type": "buff",
             "manaCost": 100,
-            "cooldown": 12,
+            "cooldown": 9,
             "targetType": "enemy",
             "description": "Places a heart onto the target enemy, causing them to deal 50% less damage to Elphelt for 4 turns.",
             "icon": "Icons/abilities/affection.jfif",
@@ -67,7 +67,7 @@
             "type": "custom",
             "damageType": "physical",
             "manaCost": 100,
-            "cooldown": 22,
+            "cooldown": 14,
             "targetType": "enemy",
             "description": "Deals 350% Physical Damage to the target. Has a 50% chance to pierce to another random enemy for 50% of the original damage, potentially chaining multiple times.",
             "icon": "Icons/abilities/piercing_bullet.jfif"

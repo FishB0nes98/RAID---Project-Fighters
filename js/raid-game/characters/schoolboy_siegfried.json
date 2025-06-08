@@ -37,7 +37,7 @@
             "name": "Lion Protection",
             "type": "buff",
             "manaCost": 65,
-            "cooldown": 15,
+            "cooldown": 10,
             "targetType": "self",
             "description": "Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 5 turns.",
             "icon": "Icons/abilities/lion_protection.jfif"
@@ -47,7 +47,7 @@
             "name": "Sword Blessing",
             "type": "buff",
             "manaCost": 100,
-            "cooldown": 12,
+            "cooldown": 9,
             "targetType": "self",
             "description": "Siegfried blesses his sword, gaining 15% Lifesteal and 200 Physical Damage for 6 turns.",
             "icon": "Icons/abilities/sword_blessing.jfif"
@@ -58,7 +58,7 @@
             "type": "damage",
             "damageType": "physical",
             "manaCost": 100,
-            "cooldown": 25,
+            "cooldown": 15,
             "targetType": "enemy",
             "description": "Deals 350% AD physical damage, ignoring armor. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).",
             "icon": "Icons/abilities/judgement.png"

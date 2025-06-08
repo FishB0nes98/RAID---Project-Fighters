@@ -122,6 +122,299 @@
             left: 100%;
             background: linear-gradient(to left, transparent, var(--secondary));
         }
+
+        /* Changelog Button */
+        .changelog-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--elevation-2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .changelog-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .changelog-button:hover::before {
+            transform: rotate(45deg) translateX(100%);
+        }
+
+        .changelog-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .changelog-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+
+        /* Version Badge */
+        .version-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 6px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Changelog Modal */
+        .changelog-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .changelog-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .changelog-content {
+            background: linear-gradient(135deg, #1a1c2a 0%, #23253a 100%);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            max-width: 800px;
+            max-height: 90vh;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .changelog-modal.show .changelog-content {
+            transform: scale(1);
+        }
+
+        .changelog-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .changelog-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .changelog-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .changelog-version {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .changelog-subtitle {
+            margin: 8px 0 0 0;
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .changelog-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .changelog-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .changelog-body {
+            padding: 30px;
+            max-height: calc(90vh - 120px);
+            overflow-y: auto;
+            color: var(--neutral-100);
+        }
+
+        .changelog-section {
+            margin-bottom: 30px;
+        }
+
+        .changelog-section h3 {
+            color: var(--primary-light);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .character-changes {
+            background: var(--bg-hover);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            position: relative;
+        }
+
+        .character-changes.siegfried { border-left-color: #fbbf24; }
+        .character-changes.kokoro { border-left-color: #10b981; }
+        .character-changes.ayane { border-left-color: #8b5cf6; }
+        .character-changes.elphelt { border-left-color: #f472b6; }
+        .character-changes.shoma { border-left-color: #06b6d4; }
+
+        .character-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .character-emoji {
+            font-size: 1.2rem;
+        }
+
+        .character-rationale {
+            font-size: 0.9rem;
+            color: var(--neutral-400);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .change-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .change-item {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .change-arrow {
+            color: var(--primary-light);
+            font-weight: bold;
+        }
+
+        .developer-notes {
+            background: linear-gradient(135deg, rgba(84, 99, 255, 0.1), rgba(255, 107, 107, 0.1));
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(84, 99, 255, 0.2);
+        }
+
+        .notes-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        /* Scrollbar Styling */
+        .changelog-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .changelog-body::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+            border-radius: 10px;
+        }
+
+        .changelog-body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .changelog-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
         
         /* Main Content Layout */
         .content-wrapper {
@@ -2454,9 +2747,18 @@
 </head>
 <body>
     <div class="app-container">
-        
+        <!-- Header Section -->
+        <header class="app-header">
+            <h1>Character Selector</h1>
+            <button class="changelog-button" onclick="showChangelog()">
+                <svg class="changelog-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+                What's New
+                <span class="version-badge">v0.1.1</span>
+            </button>
+        </header>
 
-        
         <!-- Quest Panel -->
         <div class="quest-panel" id="quest-panel">
             <div class="quest-header">
@@ -6460,6 +6762,173 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
                 }
             };
 
+        });
+    </script>
+
+    <!-- Changelog Modal -->
+    <div class="changelog-modal" id="changelog-modal">
+        <div class="changelog-content">
+            <div class="changelog-header">
+                <h1 class="changelog-title">
+                    🚀 Patch Notes
+                    <span class="changelog-version">v0.1.1</span>
+                </h1>
+                <p class="changelog-subtitle">School Characters Cooldown Balancing</p>
+                <button class="changelog-close" onclick="hideChangelog()">&times;</button>
+            </div>
+            
+            <div class="changelog-body">
+                <div class="changelog-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                        </svg>
+                        Character Balance Changes
+                    </h3>
+                    
+                    <div class="character-changes siegfried">
+                        <div class="character-name">
+                            <span class="character-emoji">🛡️</span>
+                            <strong>Schoolboy Siegfried</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Siegfried was struggling with long defensive cooldowns, making him less viable in sustained fights.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Lion Protection (W):</strong> Cooldown reduced <span class="change-arrow">15 → 10</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Sword Blessing (E):</strong> Cooldown reduced <span class="change-arrow">12 → 9</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Judgement (R):</strong> Cooldown reduced <span class="change-arrow">25 → 15</span> turns
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="character-changes kokoro">
+                        <div class="character-name">
+                            <span class="character-emoji">💚</span>
+                            <strong>Schoolgirl Kokoro</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> As a primary healer/support, Kokoro's abilities were too infrequent to provide consistent team support.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Silencing Ring (W):</strong> Cooldown reduced <span class="change-arrow">15 → 9</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Circle Heal (E):</strong> Cooldown reduced <span class="change-arrow">9 → 8</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Protective Aura (R):</strong> Cooldown reduced <span class="change-arrow">20 → 16</span> turns
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="character-changes ayane">
+                        <div class="character-name">
+                            <span class="character-emoji">🦋</span>
+                            <strong>Schoolgirl Ayane</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Ayane's utility and damage abilities were not available frequently enough to maintain her intended role as a mobile damage dealer.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Butterfly Trail (W):</strong> Cooldown reduced <span class="change-arrow">10 → 9</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Quick Reflexes (E):</strong> Cooldown reduced <span class="change-arrow">12 → 11</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Execute Attack (R):</strong> Cooldown reduced <span class="change-arrow">20 → 15</span> turns
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="character-changes elphelt">
+                        <div class="character-name">
+                            <span class="character-emoji">💕</span>
+                            <strong>Schoolgirl Elphelt</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Elphelt's longer cooldowns prevented her from effectively controlling enemies and dealing consistent damage.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Affection (E):</strong> Cooldown reduced <span class="change-arrow">12 → 9</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Piercing Bullet (R):</strong> Cooldown reduced <span class="change-arrow">22 → 14</span> turns
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="character-changes shoma">
+                        <div class="character-name">
+                            <span class="character-emoji">⚾</span>
+                            <strong>Schoolboy Shoma</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Shoma's utility abilities needed to be more accessible, and Heavy Ball needed to be more impactful.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Catch! (E):</strong> Cooldown reduced <span class="change-arrow">11 → 9</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Heavy Ball:</strong> Debuff duration increased <span class="change-arrow">2 → 4</span> turns
+                                <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 4px; font-style: italic;">
+                                    The Heavy Ball now applies damage reduction for 4 turns instead of 2, making it more strategically valuable
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="developer-notes">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Developer Notes
+                    </h3>
+                    <p>These changes are designed to improve the viability of school faction characters in both story mode and single stages. The reduced cooldowns should allow players to use these characters' signature abilities more frequently, leading to more engaging and dynamic gameplay patterns.</p>
+                    <p>The Heavy Ball buff specifically addresses feedback that the debuff duration was too short to be meaningful in longer encounters.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Changelog Modal Functions
+        function showChangelog() {
+            const modal = document.getElementById('changelog-modal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function hideChangelog() {
+            const modal = document.getElementById('changelog-modal');
+            modal.classList.remove('show');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('changelog-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideChangelog();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('changelog-modal').classList.contains('show')) {
+                hideChangelog();
+            }
         });
     </script>
 </body>

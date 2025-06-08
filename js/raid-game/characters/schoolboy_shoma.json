@@ -57,7 +57,7 @@
             "name": "Catch!",
             "type": "buff",
             "manaCost": 65,
-            "cooldown": 11,
+            "cooldown": 9,
             "targetType": "ally_or_self",
             "description": "Gives himself or an ally 85% dodge chance for 3 turns.",
             "icon": "Icons/abilities/catch.jfif",

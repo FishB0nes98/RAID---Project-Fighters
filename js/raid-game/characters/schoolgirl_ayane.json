@@ -34,7 +34,7 @@
             "name": "Butterfly Trail (Schoolgirl Version)",
             "type": "buff",
             "manaCost": 85,
-            "cooldown": 10,
+            "cooldown": 9,
             "targetType": "all_allies",
             "description": "Gives ALL allies a buff increasing Physical Damage and Magical Damage by 20% for 4 turns.",
             "icon": "Icons/abilities/butterfly_trail_schoolgirl.webp"
@@ -44,7 +44,7 @@
             "name": "Quick Reflexes",
             "type": "buff",
             "manaCost": 100,
-            "cooldown": 12,
+            "cooldown": 11,
             "targetType": "self",
             "description": "Gains 100% dodge chance and increases Physical Damage by 250% of total Physical Damage for 2 turns.",
             "icon": "Icons/abilities/quick_reflexes.webp"
@@ -53,7 +53,7 @@
             "id": "schoolgirl_ayane_r",
             "name": "Execute Attack",
             "manaCost": 200,
-            "cooldown": 20,
+            "cooldown": 15,
             "targetType": "enemy",
             "description": "Deals 250% Physical Damage. If the target is below 25% HP, deals 600% Physical Damage instead. Cooldown resets if this ability defeats the target.",
             "icon": "Icons/abilities/execute_attack_schoolgirl.webp"

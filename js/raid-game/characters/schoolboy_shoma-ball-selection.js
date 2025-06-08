@@ -38,7 +38,7 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                     <div class="ball-option" data-ball-id="heavy_ball" style="cursor: pointer;" onclick="window.shomaSelectBall('heavy_ball')">
                         <img src="Icons/abilities/heavyball.jfif" alt="Heavy Ball">
                         <h3>Heavy Ball</h3>
-                        <p>Deals 200 damage and reduces the target's damage by 20% for 2 turns</p>
+                        <p>Deals 200 damage and reduces the target's damage by 20% for 4 turns</p>
                     </div>
                     <div class="ball-option" data-ball-id="water_ball" style="cursor: pointer;" onclick="window.shomaSelectBall('water_ball')">
                         <img src="Icons/abilities/waterball.jfif" alt="Water Ball">
@@ -817,7 +817,7 @@ function selectBall(shomaCharacter, ballId) {
                 // Heavy Ball - Debuff effect
                 ballThrowAbility.id = 'ball_throw_heavy';
                 ballThrowAbility.name = 'Heavy Ball Throw'; 
-                ballThrowAbility.description = 'Deals 200 damage and reduces the target\'s damage by 20% for 2 turns.';
+                ballThrowAbility.description = 'Deals 200 damage and reduces the target\'s damage by 20% for 4 turns.';
                 ballThrowAbility.type = 'damage';
                 ballThrowAbility.targetType = 'enemy';
                 ballThrowAbility.damageType = 'physical';
@@ -846,13 +846,13 @@ function selectBall(shomaCharacter, ballId) {
                         id: 'heavy_ball_debuff',
                         name: 'Heavy Ball Damage Reduction',
                         icon: 'Icons/abilities/heavyball.jfif',
-                        duration: 2,
+                        duration: 4,
                         isDebuff: true,
                         effects: { damageReductionPercent: 0.20 },
                         description: 'Damage dealt reduced by 20%.'
                     };
                     target.addDebuff(debuff);
-                    addLogEntry(`${target.name} is affected by Heavy Ball, reducing their damage by 20% for 2 turns.`);
+                    addLogEntry(`${target.name} is affected by Heavy Ball, reducing their damage by 20% for 4 turns.`);
                     
                     // Play Heavy Ball sound
                     const playSoundHeavy = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
