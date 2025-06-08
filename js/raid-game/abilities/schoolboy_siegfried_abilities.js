@@ -372,7 +372,7 @@ const schoolboySiegfriedW = new Ability(
     'Lion Protection',
     'Icons/abilities/lion_protection.jfif',
     65, // Mana cost
-    15,  // Cooldown
+    10,  // Cooldown
     schoolboySiegfriedLionProtectionEffect
 ).setDescription('Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 5 turns.')
  .setTargetType('self');
@@ -527,7 +527,7 @@ const siegfriedE = new Ability(
     'Sword Blessing',        // Ability Name
     'Icons/abilities/sword_blessing.jfif', // Placeholder icon for the ability itself
     100, // Mana cost
-    12,  // Cooldown
+    9,  // Cooldown
     siegfriedSwordBlessingEffect
 ).setDescription('Siegfried blesses his sword, gaining 15% Lifesteal and 200 Physical Damage for 6 turns.')
  .setTargetType('self'); // Target is self
@@ -709,7 +709,7 @@ const schoolboySiegfriedR = new Ability(
     'Judgement',             // Ability Name
     'Icons/abilities/judgement.jfif', // Placeholder icon
     100, // Mana cost
-    25,  // Cooldown
+    15,  // Cooldown
     schoolboySiegfriedJudgementEffect
 ).setDescription('Deals 285% AD physical damage. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).') // Updated description
  .setTargetType('enemy'); // Target is enemy

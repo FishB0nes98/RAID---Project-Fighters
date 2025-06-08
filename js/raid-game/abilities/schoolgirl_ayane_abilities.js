@@ -189,7 +189,7 @@ const schoolgirlAyaneW = new Ability(
     'Butterfly Trail (Schoolgirl Version)',
     'Icons/abilities/butterfly_trail_schoolgirl.webp',
     85, // Mana cost
-    10, // Cooldown
+    9, // Cooldown
     schoolgirlAyaneWEffect
 ).setDescription('Gives ALL allies a buff increasing Physical Damage and Magical Damage by 20% for 4 turns.')
  .setTargetType('all_allies'); // Important: Set target type for UI/targeting logic
@@ -257,7 +257,7 @@ const schoolgirlAyaneE = new Ability(
     'Quick Reflexes',
     'Icons/abilities/quick_reflexes.webp', // Placeholder icon
     100, // Mana cost
-    12, // Cooldown
+    11, // Cooldown
     schoolgirlAyaneEEffect
 ).setDescription('Gains 100% dodge chance and increases Physical Damage by 250% of total Physical Damage for 2 turns.') // Update description
  .setTargetType('self');
@@ -342,7 +342,7 @@ const schoolgirlAyaneR = new Ability(
     'Execute Attack',
     'Icons/abilities/execute_attack_schoolgirl.webp', // Placeholder icon
     200, // Mana cost
-    20, // Cooldown
+    15, // Cooldown
     schoolgirlAyaneREffect
 ).setDescription('Deals 250% Physical Damage. If the target is below 25% HP, deals 600% Physical Damage instead. Cooldown resets if this ability defeats the target.') // Update description
  .setTargetType('enemy');

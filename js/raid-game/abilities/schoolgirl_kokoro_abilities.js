@@ -580,7 +580,7 @@ const silencingRingAbility = new Ability(
     'Silencing Ring',
     'Icons/abilities/silencing_ring.jfif',
     40, // Mana cost
-    15, // Cooldown in turns
+    9, // Cooldown in turns
     silencingRingEffect
 ).setDescription('Places a debuff on the target for 6 turns, reducing their damage output by 30%.')
  .setTargetType('enemy'); // Can only target enemies
@@ -591,7 +591,7 @@ const circleHealAbility = new Ability(
     'Circle Heal',
     'Icons/abilities/circle_heal.jfif',
     95, // Mana cost
-    9,   // Cooldown in turns
+    8,   // Cooldown in turns
     circleHealEffect
 ).setDescription('Heals all allies for 250HP + 150% of Magic Damage.')
  .setTargetType('self'); // Target self but affect all allies
@@ -765,7 +765,7 @@ const protectiveAuraAbility = new Ability(
     'Protective Aura',
     'Icons/abilities/protective_aura.jfif',
     125, // Mana cost
-    20,  // Cooldown in turns
+    16,  // Cooldown in turns
     protectiveAuraEffect
 ).setDescription('Gives 15% Increased armor to all allies and increase their healing power by 35% for 7 turns.')
  .setTargetType('self'); // Target self but affect all allies

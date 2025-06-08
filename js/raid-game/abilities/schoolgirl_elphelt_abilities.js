@@ -373,7 +373,7 @@ const schoolgirlElpheltE = new Ability(
     'Affection',
     'Icons/abilities/affection.jfif', // Use buff icon for ability?
     100, // Mana cost
-    12,  // Cooldown
+    9,  // Cooldown
     schoolgirlElpheltAffectionEffect
 ).setDescription('Places a heart onto the target enemy, causing them to deal 50% less damage to Elphelt for 4 turns.')
  .setTargetType('enemy');
@@ -550,7 +550,7 @@ const schoolgirlElpheltR = new Ability(
     'Piercing Bullet',
     'Icons/abilities/piercing_bullet.jfif',
     100, // Mana cost
-    22,  // Cooldown
+    14,  // Cooldown
     schoolgirlElpheltPiercingBulletEffect // Use the custom effect function
 ).setDescription('Deals 350% Physical Damage to the target. Has a 50% chance to pierce to another random enemy for 50% of the original damage, potentially chaining multiple times.')
  .setTargetType('enemy');
