@@ -3,7 +3,7 @@
     "name": "Schoolboy Shoma",
     "image": "Loading Screen/Schoolboy Shoma.png",
     "stats": {
-        "physicalDamage": 210,
+        "physicalDamage": 220,
         "magicalDamage": 0,
         "armor": 11,
         "magicalShield": 13,
@@ -24,16 +24,16 @@
             "type": "damage",
             "damageType": "physical",
             "amount": 1.25,
-            "manaCost": 40,
+            "manaCost": 45,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 125% physical damage to the target. Has a 35% chance to stun the target for 2 turns. Has a 50% chance to permanently increase Shoma's critical hit chance by 5%.",
+            "description": "Deals 125% physical damage to the target. Has a 40% chance to stun the target for 2 turns. Has a 50% chance to permanently increase Shoma's critical hit chance by 5%.",
             "icon": "Icons/abilities/boink.jfif",
             "debuffEffect": {
                 "debuffId": "stun",
                 "name": "Stunned",
                 "duration": 2,
-                "chance": 0.35,
+                "chance": 0.4,
                 "effects": {
                     "cantAct": true
                 }

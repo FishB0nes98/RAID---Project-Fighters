@@ -41,6 +41,11 @@ function isUserLoggedIn() {
     return !!firebaseAuth.currentUser;
 }
 
+// Export to window for global access
+window.auth = firebaseAuth;
+window.database = firebaseDatabase;
+window.firebase = firebase;
+
 // Add a listener for auth state changes for debugging/logging
 firebaseAuth.onAuthStateChanged(user => {
     if (user) {

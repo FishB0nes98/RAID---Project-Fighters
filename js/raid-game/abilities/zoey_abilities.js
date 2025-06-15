@@ -3,6 +3,184 @@
  * Implements all abilities for the character Zoey
  */
 
+/**
+ * Zoey Statistics Enhancement
+ * Enhanced statistics tracking for all of Zoey's abilities to match comprehensive tracking systems
+ */
+
+/**
+ * Global helper function to track Zoey's ability usage for statistics
+ */
+function trackZoeyAbilityUsage(character, abilityId, effectType, amount = 0, isCritical = false) {
+    if (!window.statisticsManager || !character) {
+        console.warn(`[ZoeyStats] StatisticsManager or character not available for tracking ${abilityId}`);
+        return;
+    }
+    
+    try {
+        window.statisticsManager.recordAbilityUsage(character, abilityId, effectType, amount, isCritical);
+        console.log(`[ZoeyStats] Tracked ${abilityId} usage: ${effectType}, amount: ${amount}, crit: ${isCritical}`);
+    } catch (error) {
+        console.error(`[ZoeyStats] Error tracking ability usage for ${abilityId}:`, error);
+    }
+}
+
+/**
+ * Track Strawberry Bell Burst statistics
+ */
+function trackStrawberryBellStats(caster, target, damageResult, isBellMastery = false, isRecast = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const abilityId = isBellMastery ? 'zoey_q_bell_mastery' : 'zoey_q';
+        const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+        
+        // Track damage dealt
+        if (damageAmount > 0) {
+            window.statisticsManager.recordDamageDealt(caster, damageAmount, 'magical', false);
+        }
+        
+        // Track ability usage with special flags
+        const usageData = {
+            effectType: 'damage',
+            amount: damageAmount,
+            isCritical: false, // Bell can't crit
+            isBellMastery: isBellMastery,
+            isRecast: isRecast
+        };
+        
+        window.statisticsManager.recordAbilityUsage(caster, abilityId, usageData.effectType, usageData.amount, usageData.isCritical);
+        
+        console.log(`[ZoeyStats] Tracked Bell Burst: ${damageAmount} damage, mastery: ${isBellMastery}, recast: ${isRecast}`);
+    } catch (error) {
+        console.error('[ZoeyStats] Error tracking Bell Burst stats:', error);
+    }
+}
+
+/**
+ * Track Heart Pounce statistics
+ */
+function trackHeartPounceStats(caster, target, damageResult, isSuccessful, isEnhanced = false, comboActivated = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const abilityId = isEnhanced ? 'zoey_w_enhanced' : 'zoey_w';
+        
+        if (isSuccessful) {
+            const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+            
+            // Track damage dealt
+            if (damageAmount > 0) {
+                window.statisticsManager.recordDamageDealt(caster, damageAmount, 'magical', false);
+            }
+            
+            // Track successful ability usage
+            window.statisticsManager.recordAbilityUsage(caster, abilityId, 'damage', damageAmount, false);
+            
+            // Track combo activation if it occurred
+            if (comboActivated) {
+                window.statisticsManager.recordAbilityUsage(caster, 'zoey_w_feline_combo', 'utility', 0, false);
+            }
+        } else {
+            // Track failed attempt
+            window.statisticsManager.recordAbilityUsage(caster, abilityId + '_failed', 'debuff_self', 0, false);
+        }
+        
+        console.log(`[ZoeyStats] Tracked Heart Pounce: success: ${isSuccessful}, enhanced: ${isEnhanced}, combo: ${comboActivated}`);
+    } catch (error) {
+        console.error('[ZoeyStats] Error tracking Heart Pounce stats:', error);
+    }
+}
+
+/**
+ * Track Sparkle Burst statistics
+ */
+function trackSparkleburstStats(caster, target, damageResult, isHit, isImproved = false, sparklePounceTriggered = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const abilityId = isImproved ? 'zoey_e_improved' : 'zoey_e';
+        
+        if (isHit) {
+            const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+            
+            // Track damage dealt
+            if (damageAmount > 0) {
+                window.statisticsManager.recordDamageDealt(caster, damageAmount, 'magical', false);
+            }
+            
+            // Track hit
+            window.statisticsManager.recordAbilityUsage(caster, abilityId, 'damage', damageAmount, false);
+            
+            // Track Sparkle Pounce talent activation
+            if (sparklePounceTriggered) {
+                window.statisticsManager.recordAbilityUsage(caster, 'zoey_e_sparkle_pounce', 'utility', 0, false);
+            }
+        } else {
+            // Track miss
+            window.statisticsManager.recordAbilityUsage(caster, abilityId + '_miss', 'miss', 0, false);
+        }
+        
+        console.log(`[ZoeyStats] Tracked Sparkle Burst: hit: ${isHit}, improved: ${isImproved}, pounce: ${sparklePounceTriggered}`);
+    } catch (error) {
+        console.error('[ZoeyStats] Error tracking Sparkle Burst stats:', error);
+    }
+}
+
+/**
+ * Track Glowing Light Arc statistics
+ */
+function trackGlowingLightArcStats(caster, target, damageResult, isHit, abilityDisabled = false, isEnhanced = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const abilityId = isEnhanced ? 'zoey_r_enhanced' : 'zoey_r';
+        
+        if (isHit) {
+            const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+            
+            // Track damage dealt
+            if (damageAmount > 0) {
+                window.statisticsManager.recordDamageDealt(caster, damageAmount, 'magical', false);
+            }
+            
+            // Track successful hit
+            window.statisticsManager.recordAbilityUsage(caster, abilityId, 'damage', damageAmount, false);
+            
+            // Track ability disable effect
+            if (abilityDisabled) {
+                window.statisticsManager.recordAbilityUsage(caster, abilityId + '_disable', 'debuff', 0, false);
+            }
+        } else {
+            // Track miss
+            window.statisticsManager.recordAbilityUsage(caster, abilityId + '_miss', 'miss', 0, false);
+        }
+        
+        console.log(`[ZoeyStats] Tracked Light Arc: hit: ${isHit}, disabled: ${abilityDisabled}, enhanced: ${isEnhanced}`);
+    } catch (error) {
+        console.error('[ZoeyStats] Error tracking Light Arc stats:', error);
+    }
+}
+
+/**
+ * Track Combat Reflexes passive statistics
+ */
+function trackCombatReflexesStats(character, dodgeAmount, damageBonus) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track dodge that triggered the passive
+        window.statisticsManager.recordAbilityUsage(character, 'zoey_passive_dodge', 'utility', dodgeAmount, false);
+        
+        // Track damage bonus gained
+        window.statisticsManager.recordAbilityUsage(character, 'zoey_passive_damage_bonus', 'buff', damageBonus, false);
+        
+        console.log(`[ZoeyStats] Tracked Combat Reflexes: dodge triggers, +${damageBonus} damage bonus`);
+    } catch (error) {
+        console.error('[ZoeyStats] Error tracking Combat Reflexes stats:', error);
+    }
+}
+
 // Description update functions (defined early for talent manager access)
 function updateHeartPounceDescription(ability, character = null) {
     console.log('[Zoey] updateHeartPounceDescription called', ability?.id, character?.name || 'no character');
@@ -352,6 +530,743 @@ window.zoeyGlowingLightArcEffect = function(casterOrData, targets, abilityInstan
     }
 })();
 
+// Main execution function for Heart Pounce
+function executeHeartPounce(caster, target, abilityInstance) {
+    console.log('[Heart Pounce] executeHeartPounce called with:', {
+        caster: caster.name,
+        target: target.name,
+        abilityId: abilityInstance.id
+    });
+    
+    try {
+        // Get reference to game manager
+        const gameManager = window.gameManager || {
+            addLogEntry: (msg, className) => { console.log(msg); }
+        };
+        
+        // Determine hit chance based on talents
+        let hitChance = 0.5; // Base 50% chance
+        if (caster.enableImprovedHeartPounce) {
+            hitChance = 0.6; // Improved to 60% with talent
+        }
+        
+        // Roll for hit success
+        const hitRoll = Math.random();
+        const isSuccessful = hitRoll < hitChance;
+        
+        // Add log entry for the attempt
+        gameManager.addLogEntry(`${caster.name} pounces at ${target.name}...`, 'zoey player-turn');
+        
+        // Show the VFX
+        showHeartPounceVFX(caster, target, isSuccessful);
+        
+        // Wait for animation before applying effects
+        setTimeout(() => {
+            try {
+                if (isSuccessful) {
+                    // Successful pounce - deal damage
+                    let baseDamage = 855;
+                    let magicalScaling = 1.25; // Base 125% magical damage
+                    let physicalScaling = 0; // Base 0% physical damage
+                    
+                    // Check for Enhanced Heart Pounce talent
+                    if (caster.enableEnhancedHeartPounce) {
+                        magicalScaling += 0.5; // +50% magical damage (125% -> 175%)
+                        physicalScaling += 0.5; // +50% physical damage (0% -> 50%)
+                    }
+                    
+                    // Calculate total damage
+                    const magicalBonus = Math.round(caster.stats.magicalDamage * magicalScaling);
+                    const physicalBonus = Math.round(caster.stats.physicalDamage * physicalScaling);
+                    const totalDamage = baseDamage + magicalBonus + physicalBonus;
+                    
+                    // Create damage calculation event for passive integration
+                    const attackCalculationEvent = new CustomEvent('attack:calculation', {
+                        detail: {
+                            caster: caster,
+                            target: target,
+                            damage: totalDamage,
+                            type: 'magical',
+                            source: "Heart Pounce"
+                        }
+                    });
+                    
+                    // Dispatch the event to allow passive to modify damage
+                    document.dispatchEvent(attackCalculationEvent);
+                    
+                    // Get the potentially modified damage from the event
+                    const modifiedDamage = attackCalculationEvent.detail.damage;
+                    
+                    // Apply damage to the target
+                    const damageOptions = {
+                        source: "Heart Pounce",
+                        abilityId: 'zoey_w'
+                    };
+                    
+                    const damageResult = target.applyDamage(modifiedDamage, 'magical', caster, damageOptions);
+                    
+                    // Extract the damage amount safely
+                    const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
+                        ? damageResult.damage 
+                        : (typeof damageResult === 'number' ? damageResult : modifiedDamage);
+                    
+                    // Track statistics for successful Heart Pounce
+                    if (window.trackHeartPounceStats) {
+                        window.trackHeartPounceStats(caster, target, damageResult, true, caster.enableEnhancedHeartPounce, false);
+                    }
+                    
+                    // Add log entry for successful hit
+                    if (caster.enableEnhancedHeartPounce) {
+                        gameManager.addLogEntry(`${caster.name}'s Enhanced Heart Pounce connects, dealing ${damageAmount} damage to ${target.name}!`, 'zoey player-turn');
+                    } else {
+                        gameManager.addLogEntry(`${caster.name}'s Heart Pounce connects, dealing ${damageAmount} damage to ${target.name}!`, 'zoey player-turn');
+                    }
+                    
+                    // Create damage taken event to notify passive
+                    const damageTakenEvent = new CustomEvent('damage:taken', {
+                        detail: {
+                            caster: caster,
+                            target: target,
+                            damage: damageAmount,
+                            type: 'magical',
+                            source: "Heart Pounce"
+                        }
+                    });
+                    
+                    // Dispatch the damage taken event
+                    document.dispatchEvent(damageTakenEvent);
+                    
+                    // Check for Feline Combo talent
+                    if (caster.enableFelineCombo) {
+                        const comboChance = 0.35; // 35% chance
+                        if (Math.random() < comboChance) {
+                            // Reset cooldown and allow another action
+                            abilityInstance.currentCooldown = 0;
+                            
+                            // Track Feline Combo activation
+                            if (window.trackHeartPounceStats) {
+                                window.trackHeartPounceStats(caster, target, damageResult, true, caster.enableEnhancedHeartPounce, true);
+                            }
+                            
+                            // Prevent turn from ending
+                            if (window.gameManager && typeof window.gameManager.preventTurnEnd === 'function') {
+                                window.gameManager.preventTurnEnd(caster);
+                            }
+                            
+                            gameManager.addLogEntry(`${caster.name}'s Feline Combo activates! Heart Pounce is ready again!`, 'zoey combo');
+                        }
+                    }
+                    
+                } else {
+                    // Failed pounce - apply vulnerability debuff to Zoey
+                    gameManager.addLogEntry(`${caster.name}'s Heart Pounce misses! She becomes vulnerable...`, 'zoey player-turn');
+                    
+                    // Track failed Heart Pounce
+                    if (window.trackHeartPounceStats) {
+                        window.trackHeartPounceStats(caster, target, null, false, caster.enableEnhancedHeartPounce, false);
+                    }
+                    
+                    // Determine debuff duration based on talents
+                    let debuffDuration = 5; // Base 5 turns
+                    if (caster.enableImprovedHeartPounce) {
+                        debuffDuration = 2; // Reduced to 2 turns with talent
+                    }
+                    
+                    // Apply vulnerability debuff to caster
+                    applyHeartPounceVulnerability(caster, debuffDuration);
+                }
+                
+                // Create explicit ability used event
+                const abilityUsedEvent = new CustomEvent('ability:used', {
+                    detail: {
+                        caster: caster,
+                        target: target,
+                        ability: abilityInstance,
+                        hit: isSuccessful
+                    }
+                });
+                console.log('[Heart Pounce] Dispatching ability:used event with hit:', isSuccessful);
+                document.dispatchEvent(abilityUsedEvent);
+                
+            } catch (innerError) {
+                console.error('[Zoey Abilities] Error in delayed Heart Pounce execution:', innerError);
+                gameManager.addLogEntry(`Error executing Heart Pounce: ${innerError.message}`, 'system');
+            }
+        }, 800); // Wait for animation
+        
+        return true; // Return true to indicate the ability was successfully used
+    } catch (error) {
+        console.error('[Zoey Abilities] Error executing Heart Pounce:', error);
+        if (window.gameManager) {
+            window.gameManager.addLogEntry(`Error executing Heart Pounce: ${error.message}`, 'system');
+        }
+        return false; // Return false to indicate the ability failed
+    }
+}
+
+// Apply vulnerability debuff when Heart Pounce fails
+function applyHeartPounceVulnerability(caster, duration) {
+    try {
+        // Access Effect class if available
+        const Effect = window.Effect;
+        
+        if (Effect) {
+            // Create the vulnerability debuff
+            const debuffId = 'heart_pounce_vulnerability';
+            const debuffName = 'Heart Pounce Vulnerability';
+            const debuffIcon = "Icons/debuffs/vulnerability.png";
+            
+            // Create the Effect instance
+            const vulnerabilityDebuff = new Effect(
+                debuffId,
+                debuffName,
+                debuffIcon,
+                duration,
+                null, // No per-turn effect
+                true  // isDebuff = true
+            ).setDescription(`Armor and Magic Shield reduced to 0 for ${duration} turns due to failed Heart Pounce.`);
+            
+            // Store original values
+            const originalArmor = caster.stats.armor;
+            const originalMagicalShield = caster.stats.magicalShield;
+            
+            // Define the apply function to set armor/shield to 0
+            vulnerabilityDebuff.apply = function(character) {
+                // Store original values in the debuff for restoration
+                this.originalArmor = character.stats.armor;
+                this.originalMagicalShield = character.stats.magicalShield;
+                
+                // Set armor and magical shield to 0
+                character.stats.armor = 0;
+                character.stats.magicalShield = 0;
+                
+                if (window.gameManager) {
+                    window.gameManager.addLogEntry(`${character.name}'s armor and magical defenses are stripped away!`, 'zoey');
+                }
+                
+                // Update UI
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                }
+            };
+            
+            // Define the remove function to restore original values
+            vulnerabilityDebuff.remove = function(character) {
+                // Restore original armor and shield values
+                if (this.originalArmor !== undefined) {
+                    character.stats.armor = this.originalArmor;
+                }
+                if (this.originalMagicalShield !== undefined) {
+                    character.stats.magicalShield = this.originalMagicalShield;
+                }
+                
+                if (window.gameManager) {
+                    window.gameManager.addLogEntry(`${character.name}'s defenses are restored!`, 'zoey');
+                }
+                
+                // Update UI
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                }
+            };
+            
+            // Apply the debuff
+            caster.addDebuff(vulnerabilityDebuff);
+        } else {
+            // Fallback approach if Effect class not available
+            console.warn('[Heart Pounce] Effect class not available, using fallback debuff application');
+            
+            // Store original values on the character
+            caster.heartPounceOriginalArmor = caster.stats.armor;
+            caster.heartPounceOriginalMagicalShield = caster.stats.magicalShield;
+            
+            // Set to 0
+            caster.stats.armor = 0;
+            caster.stats.magicalShield = 0;
+            
+            // Set a timer to restore after duration
+            setTimeout(() => {
+                if (caster.heartPounceOriginalArmor !== undefined) {
+                    caster.stats.armor = caster.heartPounceOriginalArmor;
+                    delete caster.heartPounceOriginalArmor;
+                }
+                if (caster.heartPounceOriginalMagicalShield !== undefined) {
+                    caster.stats.magicalShield = caster.heartPounceOriginalMagicalShield;
+                    delete caster.heartPounceOriginalMagicalShield;
+                }
+                
+                if (window.gameManager) {
+                    window.gameManager.addLogEntry(`${caster.name}'s defenses are restored!`, 'zoey');
+                    
+                    // Update UI
+                    if (window.gameManager.uiManager) {
+                        window.gameManager.uiManager.updateCharacterUI(caster);
+                    }
+                }
+            }, duration * 1000); // Convert turns to milliseconds (assuming 1 turn = 1 second)
+        }
+        
+    } catch (error) {
+        console.error('[Heart Pounce] Error applying vulnerability debuff:', error);
+    }
+}
+
+// Show visual effects for Heart Pounce
+function showHeartPounceVFX(caster, target, isSuccessful) {
+    try {
+        // Create container for the VFX
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'heart-pounce-vfx';
+        document.body.appendChild(vfxContainer);
+        
+        // Find character elements
+        let casterElement = document.getElementById(`character-${caster.id}`);
+        let targetElement = document.getElementById(`character-${target.id}`);
+        
+        // Fallback element finding
+        if (!casterElement && caster.instanceId) {
+            casterElement = document.getElementById(`character-${caster.instanceId}`);
+        }
+        if (!targetElement && target.instanceId) {
+            targetElement = document.getElementById(`character-${target.instanceId}`);
+        }
+        
+        let casterX, casterY, targetX, targetY;
+        
+        // Get positions or use fallbacks
+        if (!casterElement || !targetElement) {
+            console.warn('[Heart Pounce VFX] Could not find character elements, using fallback positions');
+            casterX = window.innerWidth * 0.25;
+            casterY = window.innerHeight * 0.75;
+            targetX = window.innerWidth * 0.75;
+            targetY = window.innerHeight * 0.25;
+        } else {
+            const casterRect = casterElement.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            
+            casterX = casterRect.left + casterRect.width / 2;
+            casterY = casterRect.top + casterRect.height / 2;
+            targetX = targetRect.left + targetRect.width / 2;
+            targetY = targetRect.top + targetRect.height / 2;
+        }
+        
+        // Create pounce trail effect
+        const pounceTrail = document.createElement('div');
+        pounceTrail.className = isSuccessful ? 'heart-pounce-trail-success' : 'heart-pounce-trail-miss';
+        
+        // Calculate trail properties
+        const deltaX = targetX - casterX;
+        const deltaY = targetY - casterY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+        
+        pounceTrail.style.position = 'absolute';
+        pounceTrail.style.left = `${casterX}px`;
+        pounceTrail.style.top = `${casterY - 3}px`;
+        pounceTrail.style.width = `${distance}px`;
+        pounceTrail.style.height = '6px';
+        pounceTrail.style.transform = `rotate(${angle}deg)`;
+        pounceTrail.style.transformOrigin = '0 50%';
+        
+        vfxContainer.appendChild(pounceTrail);
+        
+        // Create heart particles along the trail
+        for (let i = 0; i < 8; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'heart-pounce-particle';
+            heart.innerHTML = '💗';
+            
+            const progress = i / 7;
+            const heartX = casterX + (deltaX * progress) + (Math.random() - 0.5) * 20;
+            const heartY = casterY + (deltaY * progress) + (Math.random() - 0.5) * 20;
+            
+            heart.style.position = 'absolute';
+            heart.style.left = `${heartX - 10}px`;
+            heart.style.top = `${heartY - 10}px`;
+            heart.style.animationDelay = `${i * 0.1}s`;
+            
+            vfxContainer.appendChild(heart);
+        }
+        
+        // Create impact effect at target
+        setTimeout(() => {
+            if (isSuccessful) {
+                // Success impact
+                const successImpact = document.createElement('div');
+                successImpact.className = 'heart-pounce-success-impact';
+                successImpact.innerHTML = '💖✨';
+                successImpact.style.position = 'absolute';
+                successImpact.style.left = `${targetX - 30}px`;
+                successImpact.style.top = `${targetY - 30}px`;
+                vfxContainer.appendChild(successImpact);
+                
+                // Add screen shake for successful hit
+                if (document.body) {
+                    document.body.classList.add('screen-shake');
+                    setTimeout(() => {
+                        document.body.classList.remove('screen-shake');
+                    }, 300);
+                }
+            } else {
+                // Miss effect
+                const missEffect = document.createElement('div');
+                missEffect.className = 'heart-pounce-miss-effect';
+                missEffect.innerHTML = '💔';
+                missEffect.style.position = 'absolute';
+                missEffect.style.left = `${targetX - 20}px`;
+                missEffect.style.top = `${targetY - 20}px`;
+                vfxContainer.appendChild(missEffect);
+                
+                // Add vulnerability effect to caster
+                if (casterElement) {
+                    const vulnerabilityEffect = document.createElement('div');
+                    vulnerabilityEffect.className = 'heart-pounce-vulnerability-effect';
+                    vulnerabilityEffect.innerHTML = '🛡️💥';
+                    casterElement.appendChild(vulnerabilityEffect);
+                    
+                    setTimeout(() => {
+                        if (vulnerabilityEffect.parentNode) {
+                            vulnerabilityEffect.parentNode.removeChild(vulnerabilityEffect);
+                        }
+                    }, 2000);
+                }
+            }
+        }, 500);
+        
+        // Clean up after animation
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                vfxContainer.parentNode.removeChild(vfxContainer);
+            }
+        }, 2000);
+        
+    } catch (error) {
+        console.error('[Zoey VFX] Error in showHeartPounceVFX:', error);
+    }
+}
+
+// Main execution function for Sparkle Burst  
+function executeSparkleburst(caster, targets, abilityInstance) {
+    console.log('[Sparkle Burst] executeSparkleburst called with:', {
+        caster: caster.name,
+        targets: targets.length,
+        abilityId: abilityInstance.id
+    });
+    
+    try {
+        // Get reference to game manager
+        const gameManager = window.gameManager || {
+            addLogEntry: (msg, className) => { console.log(msg); }
+        };
+        
+        // Ensure targets is an array
+        if (!Array.isArray(targets)) {
+            targets = [targets];
+        }
+        
+        // Determine hit chance based on talents
+        let hitChance = 0.5; // Base 50% chance
+        if (caster.enableImprovedSparkleburst) {
+            hitChance = 0.8; // Improved to 80% with talent
+        }
+        
+        // Add log entry for the cast
+        gameManager.addLogEntry(`${caster.name} unleashes a burst of sparkles at all enemies!`, 'zoey player-turn');
+        
+        // Show the VFX
+        showSparkleburstVFX(caster, targets);
+        
+        // Track hits for cooldown reduction
+        let hitCount = 0;
+        
+        // Wait for animation before applying effects
+        setTimeout(() => {
+            try {
+                // Process each target
+                const processNextTarget = (index) => {
+                    if (index >= targets.length) {
+                        // All targets processed, apply cooldown reduction
+                        if (hitCount > 0) {
+                            const cooldownReduction = hitCount;
+                            abilityInstance.currentCooldown = Math.max(0, abilityInstance.currentCooldown - cooldownReduction);
+                            gameManager.addLogEntry(`Sparkle Burst cooldown reduced by ${cooldownReduction} turn(s) for hitting ${hitCount} target(s)!`, 'zoey');
+                        }
+                        
+                        // Create explicit ability used event
+                        const abilityUsedEvent = new CustomEvent('ability:used', {
+                            detail: {
+                                caster: caster,
+                                target: targets,
+                                ability: abilityInstance,
+                                hit: hitCount > 0,
+                                hitCount: hitCount
+                            }
+                        });
+                        console.log('[Sparkle Burst] Dispatching ability:used event with hitCount:', hitCount);
+                        document.dispatchEvent(abilityUsedEvent);
+                        
+                        return;
+                    }
+                    
+                    const target = targets[index];
+                    
+                    // Roll for hit success
+                    const hitRoll = Math.random();
+                    const isHit = hitRoll < hitChance;
+                    
+                    if (isHit) {
+                        hitCount++;
+                        
+                        // Calculate damage (200% magical damage)
+                        const baseDamage = Math.round(caster.stats.magicalDamage * 2.0);
+                        
+                        // Create damage calculation event for passive integration
+                        const attackCalculationEvent = new CustomEvent('attack:calculation', {
+                            detail: {
+                                caster: caster,
+                                target: target,
+                                damage: baseDamage,
+                                type: 'magical',
+                                source: "Sparkle Burst"
+                            }
+                        });
+                        
+                        // Dispatch the event to allow passive to modify damage
+                        document.dispatchEvent(attackCalculationEvent);
+                        
+                        // Get the potentially modified damage from the event
+                        const modifiedDamage = attackCalculationEvent.detail.damage;
+                        
+                        // Apply damage to the target
+                        const damageOptions = {
+                            source: "Sparkle Burst",
+                            abilityId: 'zoey_e'
+                        };
+                        
+                        const damageResult = target.applyDamage(modifiedDamage, 'magical', caster, damageOptions);
+                        
+                        // Extract the damage amount safely
+                        const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
+                            ? damageResult.damage 
+                            : (typeof damageResult === 'number' ? damageResult : modifiedDamage);
+                        
+                        // Add log entry for hit
+                        gameManager.addLogEntry(`${caster.name}'s sparkles hit ${target.name} for ${damageAmount} damage!`, 'zoey player-turn');
+                        
+                        // Track statistics for successful hit
+                        if (window.trackSparkleburstStats) {
+                            window.trackSparkleburstStats(caster, target, damageResult, true, caster.enableImprovedSparkleburst, false);
+                        }
+                        
+                        // Show impact VFX
+                        showSparkleImpactVFX(target);
+                        
+                        // Create damage taken event to notify passive
+                        const damageTakenEvent = new CustomEvent('damage:taken', {
+                            detail: {
+                                caster: caster,
+                                target: target,
+                                damage: damageAmount,
+                                type: 'magical',
+                                source: "Sparkle Burst"
+                            }
+                        });
+                        
+                        // Dispatch the damage taken event
+                        document.dispatchEvent(damageTakenEvent);
+                        
+                        // Check for Sparkle Pounce talent
+                        if (caster.enableSparklePounce) {
+                            const pounceChance = 0.1; // 10% chance
+                            if (Math.random() < pounceChance) {
+                                // Track Sparkle Pounce activation
+                                if (window.trackSparkleburstStats) {
+                                    window.trackSparkleburstStats(caster, target, damageResult, true, caster.enableImprovedSparkleburst, true);
+                                }
+                                
+                                // Automatically cast Heart Pounce
+                                setTimeout(() => {
+                                    gameManager.addLogEntry(`${caster.name}'s Sparkle Pounce activates! Automatic Heart Pounce on ${target.name}!`, 'zoey combo');
+                                    
+                                    // Find Heart Pounce ability
+                                    const heartPounceAbility = caster.abilities.find(a => a.id === 'zoey_w');
+                                    if (heartPounceAbility) {
+                                        // Execute Heart Pounce without mana cost or cooldown
+                                        executeHeartPounce(caster, target, heartPounceAbility);
+                                    }
+                                }, 500);
+                            }
+                        }
+                    } else {
+                        // Miss
+                        gameManager.addLogEntry(`${caster.name}'s sparkles miss ${target.name}!`, 'zoey player-turn');
+                        
+                        // Track miss statistics
+                        if (window.trackSparkleburstStats) {
+                            window.trackSparkleburstStats(caster, target, null, false, caster.enableImprovedSparkleburst, false);
+                        }
+                        
+                        // Show miss VFX
+                        showSparkleMissVFX(target);
+                    }
+                    
+                    // Process next target after a delay
+                    setTimeout(() => {
+                        processNextTarget(index + 1);
+                    }, 300);
+                };
+                
+                // Start processing targets
+                processNextTarget(0);
+                
+            } catch (innerError) {
+                console.error('[Zoey Abilities] Error in delayed Sparkle Burst execution:', innerError);
+                gameManager.addLogEntry(`Error executing Sparkle Burst: ${innerError.message}`, 'system');
+            }
+        }, 800); // Wait for animation
+        
+        return true; // Return true to indicate the ability was successfully used
+    } catch (error) {
+        console.error('[Zoey Abilities] Error executing Sparkle Burst:', error);
+        if (window.gameManager) {
+            window.gameManager.addLogEntry(`Error executing Sparkle Burst: ${error.message}`, 'system');
+        }
+        return false; // Return false to indicate the ability failed
+    }
+}
+
+// Show visual effects for Sparkle Burst
+function showSparkleburstVFX(caster, targets) {
+    try {
+        // Create container for the VFX
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'sparkle-burst-vfx';
+        document.body.appendChild(vfxContainer);
+        
+        // Find caster element
+        let casterElement = document.getElementById(`character-${caster.id}`);
+        if (!casterElement && caster.instanceId) {
+            casterElement = document.getElementById(`character-${caster.instanceId}`);
+        }
+        
+        let casterX, casterY;
+        
+        if (!casterElement) {
+            // Fallback position
+            casterX = window.innerWidth * 0.25;
+            casterY = window.innerHeight * 0.75;
+        } else {
+            const casterRect = casterElement.getBoundingClientRect();
+            casterX = casterRect.left + casterRect.width / 2;
+            casterY = casterRect.top + casterRect.height / 2;
+        }
+        
+        // Create burst source effect
+        const burstSource = document.createElement('div');
+        burstSource.className = 'sparkle-burst-source';
+        burstSource.style.position = 'absolute';
+        burstSource.style.left = `${casterX - 40}px`;
+        burstSource.style.top = `${casterY - 40}px`;
+        burstSource.style.width = '80px';
+        burstSource.style.height = '80px';
+        burstSource.style.borderRadius = '50%';
+        burstSource.style.background = 'radial-gradient(circle, #ffeb3b 0%, #ff9800 50%, #e91e63 100%)';
+        burstSource.style.boxShadow = '0 0 30px #ffeb3b, 0 0 50px #ff9800';
+        burstSource.style.animation = 'sparkleSourcePulse 0.6s ease-out';
+        vfxContainer.appendChild(burstSource);
+        
+        // Create sparkle particles spreading to all targets
+        targets.forEach((target, targetIndex) => {
+            let targetElement = document.getElementById(`character-${target.id}`);
+            if (!targetElement && target.instanceId) {
+                targetElement = document.getElementById(`character-${target.instanceId}`);
+            }
+            
+            let targetX, targetY;
+            
+            if (!targetElement) {
+                // Fallback positions
+                targetX = window.innerWidth * (0.6 + (targetIndex * 0.1));
+                targetY = window.innerHeight * (0.3 + ((targetIndex % 2) * 0.4));
+            } else {
+                const targetRect = targetElement.getBoundingClientRect();
+                targetX = targetRect.left + targetRect.width / 2;
+                targetY = targetRect.top + targetRect.height / 2;
+            }
+            
+            // Create sparkle trail to each target
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-burst-particle';
+                sparkle.innerHTML = '✨';
+                
+                // Random spread pattern
+                const angle = Math.random() * 360;
+                const spread = 50 + Math.random() * 100;
+                const finalX = targetX + Math.cos(angle * Math.PI / 180) * spread;
+                const finalY = targetY + Math.sin(angle * Math.PI / 180) * spread;
+                
+                sparkle.style.position = 'absolute';
+                sparkle.style.left = `${casterX}px`;
+                sparkle.style.top = `${casterY}px`;
+                sparkle.style.fontSize = '20px';
+                sparkle.style.transition = 'all 0.8s ease-out';
+                sparkle.style.animationDelay = `${targetIndex * 0.1 + i * 0.05}s`;
+                sparkle.style.animation = 'sparkleFloat 1.2s ease-out forwards';
+                
+                vfxContainer.appendChild(sparkle);
+                
+                // Animate to target position
+                setTimeout(() => {
+                    sparkle.style.left = `${finalX}px`;
+                    sparkle.style.top = `${finalY}px`;
+                    sparkle.style.opacity = '0';
+                }, 100 + targetIndex * 50);
+            }
+        });
+        
+        // Clean up after animation
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                vfxContainer.parentNode.removeChild(vfxContainer);
+            }
+        }, 2000);
+        
+    } catch (error) {
+        console.error('[Zoey VFX] Error in showSparkleburstVFX:', error);
+    }
+}
+
+// Show miss VFX for sparkle burst
+function showSparkleMissVFX(target) {
+    try {
+        const targetElement = document.getElementById(`character-${target.id}`);
+        if (!targetElement) return;
+        
+        const missEffect = document.createElement('div');
+        missEffect.className = 'sparkle-miss-effect';
+        missEffect.innerHTML = 'MISS';
+        missEffect.style.position = 'absolute';
+        missEffect.style.top = '-30px';
+        missEffect.style.left = '50%';
+        missEffect.style.transform = 'translateX(-50%)';
+        missEffect.style.color = '#999';
+        missEffect.style.fontSize = '16px';
+        missEffect.style.fontWeight = 'bold';
+        missEffect.style.animation = 'missBounce 1.5s ease-out forwards';
+        targetElement.appendChild(missEffect);
+        
+        setTimeout(() => {
+            if (missEffect.parentNode) {
+                missEffect.parentNode.removeChild(missEffect);
+            }
+        }, 1500);
+        
+    } catch (error) {
+        console.error('[Zoey VFX] Error in showSparkleMissVFX:', error);
+    }
+}
+
 // Main execution function for Strawberry Bell Burst
 function executeStrawberryBellBurst(caster, target, abilityInstance) {
     console.log('[Strawberry Bell] executeStrawberryBellBurst called with:', {
@@ -435,7 +1350,8 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                         const damageOptions = {
                             forceCrit: false,
                             preventCrit: true,
-                            source: "Strawberry Bell Burst (Bell Mastery)"
+                            source: "Strawberry Bell Burst (Bell Mastery)",
+                            abilityId: 'zoey_q'
                         };
                         
                         // Create damage calculation event for passive integration
@@ -468,6 +1384,11 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                         
                         // Add log entry for the damage with zoey class for styling
                         gameManager.addLogEntry(`${caster.name}'s Bell Mastery devastates ${targetName} for ${damageAmount} magical damage!`, 'zoey player-turn');
+                        
+                        // Track Bell Mastery statistics
+                        if (window.trackStrawberryBellStats) {
+                            window.trackStrawberryBellStats(caster, currentTarget, damageResult, true, abilityInstance.isRecast || false);
+                        }
                         
                         // Create damage taken event to notify passive
                         const damageTakenEvent = new CustomEvent('damage:taken', {
@@ -519,7 +1440,8 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                     const damageOptions = {
                         forceCrit: false,
                         preventCrit: true,
-                        source: "Strawberry Bell Burst"
+                        source: "Strawberry Bell Burst",
+                        abilityId: 'zoey_q'
                     };
                     
                     // Create damage calculation event for passive integration
@@ -549,6 +1471,11 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                     
                     // Add log entry for the damage with zoey class for styling
                     gameManager.addLogEntry(`${caster.name}'s Strawberry Bell Burst hits ${target.name} for ${damageAmount} magical damage!`, 'zoey player-turn');
+                    
+                    // Track single-target Bell Burst statistics
+                    if (window.trackStrawberryBellStats) {
+                        window.trackStrawberryBellStats(caster, target, damageResult, false, abilityInstance.isRecast || false);
+                    }
                     
                     // Create explicit ability used event to notify passive
                     const abilityUsedEvent = new CustomEvent('ability:used', {
@@ -1494,7 +2421,8 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
                 // Apply damage
                 const damageResult = await target.applyDamage(modifiedDamage, 'magical', caster, {
                     sourceAbility: abilityInstance,
-                    isCritical: false // This ability cannot crit as per design
+                    isCritical: false, // This ability cannot crit as per design
+                    abilityId: 'zoey_r'
                 });
                 
                 // Extract the damage amount safely
@@ -1517,9 +2445,16 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
                 document.dispatchEvent(damageTakenEvent);
                 
                 // If the damage was successful, disable a random ability
+                let abilityDisabled = false;
                 if (!damageResult.dodged && !damageResult.missed) {
                     hitResults.push(target);
                     await disableRandomAbility(target);
+                    abilityDisabled = true;
+                }
+                
+                // Track successful Light Arc hit
+                if (window.trackGlowingLightArcStats) {
+                    window.trackGlowingLightArcStats(caster, target, damageResult, true, abilityDisabled, caster.enableEnhancedLightArc);
                 }
                 
                 // Show impact VFX on the target
@@ -1553,6 +2488,11 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
                 }
                 
                 gameManager.addLogEntry(`${target.name} is not hit by Glowing Light Arc.`);
+                
+                // Track miss statistics
+                if (window.trackGlowingLightArcStats) {
+                    window.trackGlowingLightArcStats(caster, target, null, false, false, caster.enableEnhancedLightArc);
+                }
                 
                 // Use the showFloatingText method if it exists
                 if (gameManager.showFloatingText && target.id) {

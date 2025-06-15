@@ -1,0 +1,53 @@
+{
+    "id": "hellhorn",
+    "name": "HellHorn",
+    "image": "Loading Screen/HellHorn.png",
+    "rarity": "epic", 
+    "type": "demon",
+    "description": "A fearsome horned demon that guards the gates of Hell Castle with its burning fury and demonic strength.",
+    "stats": {
+        "physicalDamage": 298,
+        "magicalDamage": 0,
+        "armor": 21,
+        "magicalShield": 15,
+        "hp": 10800,
+        "hpPerTurn": 0,
+        "mana": 5200,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.08,
+        "critChance": 0.0,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "hellhorn_tackle",
+            "name": "Tackle",
+            "type": "custom",
+            "manaCost": 35,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Deals 500 + (100% Physical Damage) to the target and has 50% chance to stun it for 1 turn.",
+            "icon": "Icons/abilities/hellhorn_tackle.png"
+        },
+        {
+            "id": "hellhorn_stomp",
+            "name": "Stomp",
+            "type": "custom",
+            "manaCost": 100,
+            "cooldown": 5,
+            "targetType": "all_enemies",
+            "description": "Stomps the ground, dealing 220% Physical Damage to all enemies and has 50% chance to stun each.",
+            "icon": "Icons/abilities/hellhorn_stomp.png"
+        }
+    ],
+    "passive": {
+        "id": "unstoppable_passive",
+        "name": "Unstoppable",
+        "description": "HellHorn cannot be stunned. Any stun effects applied to it are immediately negated.",
+        "icon": "Icons/passives/unstoppable.png",
+        "script": "js/raid-game/passives/unstoppable_passive.js"
+    },
+    "tags": ["Enemy", "Demon", "Guardian", "Hell"]
+} 

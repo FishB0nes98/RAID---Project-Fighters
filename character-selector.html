@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Character Selector</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Nunito:wght@400;600;700&display=swap">
+    <!-- New: Reuse raid-game styles for unified quest panel -->
+    <link rel="stylesheet" href="css/raid-game.css">
+    <!-- Selector-specific overrides -->
+    <style id="selector-overrides">
+      /* Restore scrolling and normal body dimensions */
+      body { height: auto !important; overflow-y: auto !important; }
+      /* Quest panel scrolling */
+      .quests-panel { max-height: 85vh; overflow-y: auto; }
+      /* Hide completed quests */
+      .quests-panel .quest-item.completed { display: none; }
+    </style>
     <style>
         :root {
             /* Main color scheme */
@@ -123,11 +134,65 @@
             background: linear-gradient(to left, transparent, var(--secondary));
         }
 
-        /* Changelog Button */
-        .changelog-button {
+        /* Header Buttons Container */
+        .header-buttons {
             position: absolute;
             top: 0;
             right: 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Navigation Buttons */
+        .nav-button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--elevation-1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .nav-button:hover::before {
+            transform: rotate(45deg) translateX(100%);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(84, 99, 255, 0.4);
+        }
+
+        .nav-icon {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+        }
+
+        /* Changelog Button */
+        .changelog-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -512,7 +577,6 @@
         
         .tab-content {
             display: none;
-            max-height: 580px;
             overflow-y: auto;
             overflow-x: hidden;
             flex: 1;
@@ -806,7 +870,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px;
-            max-height: 580px;
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -1009,6 +1072,67 @@
         .talents-button:hover {
             background-color: rgba(255, 107, 107, 0.25);
             color: var(--secondary-light);
+        }
+
+        /* Talent Point Indicator */
+        .talent-points-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1f2937;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 10;
+            animation: talent-pulse 2s infinite ease-in-out;
+        }
+
+        .talent-points-indicator.hidden {
+            display: none;
+        }
+
+        @keyframes talent-pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 4px 16px rgba(251, 191, 36, 0.6);
+            }
+        }
+
+        .talent-points-indicator::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
+            animation: talent-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes talent-glow {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
         }
         
         /* Team Preview Section */
@@ -2743,37 +2867,78 @@
             background: var(--primary-light);
             transform: translateY(-1px);
         }
+
+        /* Overrides for Character Selector */
+        body { height: auto !important; overflow-y: auto !important; }
+        /* Ensure quest panel itself can scroll if too tall */
+        .quests-panel { max-height: 85vh; overflow-y: auto; }
+        /* Hide completed quests as an extra safeguard */
+        .quests-panel .quest-item.completed { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Header Section -->
         <header class="app-header">
-            <h1>Character Selector</h1>
-            <button class="changelog-button" onclick="showChangelog()">
-                <svg class="changelog-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                </svg>
-                What's New
-                <span class="version-badge">v0.1.1</span>
-            </button>
+            <h1></h1>
+            <div class="header-buttons">
+                <button class="nav-button" onclick="window.location.href='skin-shop.html'">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
+                    </svg>
+                    Skin Shop
+                </button>
+                <button class="nav-button" onclick="window.location.href='skin-selector.html'">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V7H1V9H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V9H21ZM19 19H5V9H19V19Z"/>
+                    </svg>
+                    Skin Selector
+                </button>
+                <button class="changelog-button" onclick="showChangelog()">
+                    <svg class="changelog-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    What's New
+                    <span class="version-badge">v0.2</span>
+                </button>
+                <button class="nav-button" onclick="showOldChangelog()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+                    </svg>
+                    v0.1.1
+                </button>
+            </div>
         </header>
 
-        <!-- Quest Panel -->
-        <div class="quest-panel" id="quest-panel">
-            <div class="quest-header">
-                <h2>⚔️ Quest Journal</h2>
-                <p>Complete challenges to unlock rewards</p>
+        <!-- New Quest Panel Toggle -->
+        <button class="quest-panel-toggle" id="quest-panel-toggle" title="Toggle Quest Panel (SHIFT key)">
+            🎯 Quests
+        </button>
+
+        <!-- New Quests Panel (managed by quest-ui-manager.js) -->
+        <div class="quests-panel" id="quests-panel" style="display: none;">
+            <div class="quests-panel-header">
+                <h3>🎯 Character Quests</h3>
+                <button class="toggle-quests-button" id="toggle-quests-button">▼</button>
             </div>
-            <div class="quest-list" id="quest-list">
-                <!-- Quests will be populated here -->
+            <div class="quests-panel-content" id="quests-panel-content">
+                <div class="quests-loading" id="quests-loading">
+                    <p>Loading quests...</p>
+                </div>
+                <div class="quests-list" id="quests-list"></div>
+                <div class="quests-empty" id="quests-empty" style="display: none;">
+                    <p>No active quests for selected character</p>
+                </div>
             </div>
         </div>
         
         <!-- Quest Toggle Button -->
+        <!-- Legacy quest-toggle button disabled -->
+        <!--
         <button class="quest-toggle" id="quest-toggle" title="Toggle Quest Journal">
             📜
         </button>
+        -->
         
         <main class="content-wrapper">
             <!-- Story/Stage Selection Panel -->
@@ -2823,7 +2988,7 @@
         
         <!-- Team Preview Section -->
         <section class="team-preview">
-            <h2 id="selected-team-title">Your Squad</h2>
+            <h2 id="selected-team-title">Your Team</h2>
             <div class="team-slots" id="team-slots">
                 <!-- Slots will be dynamically generated -->
             </div>
@@ -2865,6 +3030,9 @@
     <!-- Quest Manager -->
     <script src="js/raid-game/quest-manager.js"></script>
     
+    <!-- New Quest UI Manager -->
+    <script src="js/raid-game/quest-ui-manager.js"></script>
+    
     <!-- Controller Support -->
     <script src="js/character-selector-controller.js"></script>
 
@@ -2890,6 +3058,7 @@
             let activeRuns = [];
             let currentSelectionMode = 'story';
             let characterXPManager = null;
+            let currentUserId = null; // Store current user ID globally
 
             // UI Element Variables
             let characterGrid, storyContainer, stageContainer, weeklyChallengesContainer, teamSlotsContainer,
@@ -2980,6 +3149,7 @@
                     if (user) {
                         console.log("User logged in:", user.uid);
                         const userId = user.uid;
+                        currentUserId = userId; // Set global user ID
                         // Fetch user data (including owned characters)
                         try {
                             const snapshot = await firebaseDatabase.ref(`users/${userId}/ownedCharacters`).once('value');
@@ -3145,6 +3315,20 @@
                             if (typeof window.questManager !== 'undefined') {
                                 await window.questManager.initialize();
                                 console.log('[CharacterSelector] Quest manager initialized');
+                                
+                                // Check for 'complete_to_the_hell_we_go_story' quest completion
+                                console.log('[CharacterSelector] About to call checkAndCompleteHellStoryQuest...');
+                                console.log('[CharacterSelector] Current userId:', userId);
+                                console.log('[CharacterSelector] checkAndCompleteHellStoryQuest function exists:', typeof checkAndCompleteHellStoryQuest);
+                                
+                                try {
+                                    await checkAndCompleteHellStoryQuest(userId);
+                                    console.log('[CharacterSelector] checkAndCompleteHellStoryQuest completed');
+                                } catch (hellQuestError) {
+                                    console.error('[CharacterSelector] Error in checkAndCompleteHellStoryQuest:', hellQuestError);
+                                }
+                            } else {
+                                console.log('[CharacterSelector] Quest manager not available, skipping hell story quest check');
                             }
                         } catch (error) {
                             console.error("Error initializing quest manager:", error);
@@ -3158,6 +3342,9 @@
                         
                         // Load XP data for character cards
                         await updateAllCharacterXPDisplays();
+                        
+                        // Load talent point indicators for character cards
+                        await updateAllTalentPointIndicators();
                     } else {
                         console.log("User not logged in. Redirecting to index.html");
                         window.location.href = 'index.html';
@@ -3202,29 +3389,25 @@
                     }
                 });
 
-                // Initialize weekly challenges
+                // Initialize weekly challenges – Healing Forbidden replaces old Siegfried challenge
                 allWeeklyChallenges = [
                     {
-                        id: 'siegfried_and_supports',
-                        name: 'Siegfried and Supports',
-                        description: 'Face the legendary warrior Siegfried and his powerful supporters in this epic 5v5 battle. Only the strongest teams will prevail!',
-                        difficulty: 8,
-                        teamSize: 5,
-                        enemies: ['farmer_shoma', 'schoolgirl_kokoro', 'siegfried', 'bridget', 'farmer_alice'],
+                        id: 'healing_forbidden_challenge',
+                        name: 'Healing Forbidden Challenge',
+                        description: 'No healing magic can save you! Defeat Farmer Raiden, Schoolgirl Elphelt, Farmer Nina and Schoolgirl Ayane with a team of only 3 heroes.',
+                        difficulty: 7,
+                        teamSize: 3,
+                        enemies: ['farmer_raiden', 'schoolgirl_elphelt', 'farmer_nina', 'schoolgirl_ayane'],
                         modifiers: [{
-                            id: 'extended_buffs',
-                            name: 'Extended Buffs',
-                            description: 'All buffs last 2 turns longer than normal'
-                        }, {
-                            id: 'enhanced_healing',
-                            name: 'Enhanced Healing',
-                            description: 'Foe characters gain 20% healing power at game start'
+                            id: 'healing_disabled',
+                            name: 'Healing Disabled',
+                            description: 'All healing is blocked for the entire battle.'
                         }],
                         rewards: [{
                             type: 'character',
-                            id: 'schoolboy_siegfried',
-                            name: 'Schoolboy Siegfried',
-                            icon: '🎓'
+                            id: 'zoey',
+                            name: 'Zoey',
+                            icon: '🍓'
                         }],
                         timeRemaining: 'Resets in 3 days, 12 hours',
                         isAvailable: true
@@ -3243,18 +3426,31 @@
                 tagFiltersContainer = document.getElementById('tag-filters');
                 teamRestrictionText = document.getElementById('team-restriction-text');
                 questPanel = document.getElementById('quest-panel');
+                // If legacy quest panel is absent, create a harmless stub to avoid runtime errors
+                if (!questPanel) {
+                    questPanel = document.createElement('div');
+                }
                 questToggle = document.getElementById('quest-toggle');
                 questList = document.getElementById('quest-list');
 
                 // Initial Population
                 setupTabSwitching();
-                setupQuestPanel();
+                // setupQuestPanel(); // Legacy quest panel disabled – replaced by QuestUIManager
                 updateTeamSizeUI(maxTeamSize, minTeamSize);
                 populateTagFilters(Array.from(allTags));
                 populateCharacterGrid(allCharacters);
                 populateStoryGrid(allStories);
                 populateStageGrid(allStages);
                 populateWeeklyChallenges(allWeeklyChallenges);
+                
+                // Add window focus listener to refresh talent point indicators when returning from talents page
+                window.addEventListener('focus', () => {
+                    if (currentUserId) {
+                        updateAllTalentPointIndicators().catch(error => {
+                            console.error('Error updating talent point indicators on window focus:', error);
+                        });
+                    }
+                });
 
             } catch (error) {
                 console.error("Error loading initial data:", error);
@@ -3290,6 +3486,90 @@
                     characterGrid.appendChild(card);
                 });
                 applyStoryRestrictions();
+                
+                // Update talent point indicators after grid population
+                if (currentUserId) {
+                    updateAllTalentPointIndicators().catch(error => {
+                        console.error('Error updating talent point indicators in populateCharacterGrid:', error);
+                    });
+                }
+            }
+
+            // Talent Points Management Functions
+            async function getUnusedTalentPoints(characterId, userId) {
+                if (!userId) {
+                    console.warn('No user ID provided for talent points check');
+                    return 0;
+                }
+
+                try {
+                    // Get total talent points for the character
+                    const totalPointsSnapshot = await firebaseDatabase.ref(`users/${userId}/characterTalentPoints/${characterId}`).once('value');
+                    const totalPoints = totalPointsSnapshot.val() || 0;
+
+                    // Get selected talents for the character (stored as boolean values)
+                    const characterTalentsSnapshot = await firebaseDatabase.ref(`users/${userId}/characterTalents/${characterId}`).once('value');
+                    const characterTalents = characterTalentsSnapshot.val() || {};
+
+                    // Also check selectedTalents path as fallback (for characters that use rank-based talents)
+                    const selectedTalentsSnapshot = await firebaseDatabase.ref(`users/${userId}/selectedTalents/${characterId}`).once('value');
+                    const selectedTalents = selectedTalentsSnapshot.val() || {};
+
+                    // Calculate used points
+                    let usedPoints = 0;
+                    
+                    // Count boolean talents (each true talent = 1 point used)
+                    for (const talentId in characterTalents) {
+                        if (characterTalents[talentId] === true) {
+                            usedPoints += 1;
+                        }
+                    }
+                    
+                    // Count rank-based talents (each rank = 1 point used)
+                    for (const talentId in selectedTalents) {
+                        usedPoints += selectedTalents[talentId] || 0;
+                    }
+
+                    const unusedPoints = Math.max(0, totalPoints - usedPoints);
+                    console.log(`[TalentPoints] ${characterId}: Total=${totalPoints}, Used=${usedPoints}, Unused=${unusedPoints}`);
+                    return unusedPoints;
+                } catch (error) {
+                    console.error(`Error getting unused talent points for ${characterId}:`, error);
+                    return 0;
+                }
+            }
+
+            async function updateAllTalentPointIndicators() {
+                if (!currentUserId) {
+                    console.log('No user ID available for talent point indicators');
+                    return;
+                }
+
+                const characterCards = document.querySelectorAll('.character-card');
+                
+                for (const card of characterCards) {
+                    const characterId = card.dataset.id;
+                    const indicator = card.querySelector('.talent-points-indicator');
+                    
+                    if (!indicator) continue; // Skip if no indicator (locked characters)
+
+                    try {
+                        const unusedPoints = await getUnusedTalentPoints(characterId, currentUserId);
+                        
+                        indicator.textContent = unusedPoints;
+                        indicator.dataset.points = unusedPoints;
+                        
+                        if (unusedPoints > 0) {
+                            indicator.classList.remove('hidden');
+                            indicator.title = `${unusedPoints} unused talent point${unusedPoints > 1 ? 's' : ''}`;
+                        } else {
+                            indicator.classList.add('hidden');
+                        }
+                    } catch (error) {
+                        console.error(`Error updating talent point indicator for ${characterId}:`, error);
+                        indicator.classList.add('hidden');
+                    }
+                }
             }
 
             /**
@@ -3403,7 +3683,17 @@
                 
                 // Add the active runs container before the story grid
                 const storySectionHeader = document.querySelector('.selector-panel .panel-header');
-                storySectionHeader.parentNode.insertBefore(activeRunsContainer, storySectionHeader.nextSibling);
+                if (storySectionHeader && storySectionHeader.parentNode) {
+                    storySectionHeader.parentNode.insertBefore(activeRunsContainer, storySectionHeader.nextSibling);
+                } else {
+                    // Fallback: add to story container if header not found
+                    const storyContainer = document.getElementById('story-stage-grid');
+                    if (storyContainer && storyContainer.parentNode) {
+                        storyContainer.parentNode.insertBefore(activeRunsContainer, storyContainer);
+                    } else {
+                        console.warn('Could not find suitable location to insert active runs container');
+                    }
+                }
             }
             
             // Helper function to get story ID (prefer explicit ID, fall back to normalized title)
@@ -3703,6 +3993,7 @@
                         ${iconPath ? `<img src="${iconPath}" alt="${character.name}">` : `<div class="no-image">No Img</div>`}
                         ${!isOwned ? '<div class="lock-overlay">🔒</div>' : ''}
                         ${isOwned ? '<div class="character-level">Lv.1</div>' : ''}
+                        ${isOwned ? '<div class="talent-points-indicator hidden" data-points="0">0</div>' : ''}
                     </div>
                     <div class="character-info">
                         <div class="character-name">${character.name}</div>
@@ -3783,25 +4074,40 @@
                         cardElement.title = "This character cannot be used in this stage";
                     }
                 }
+                // 3. Apply Weekly Challenge Requirements (if a weekly challenge is selected)
+                else if (currentSelectionMode === 'weekly' && selectedWeeklyChallenge) {
+                    // Check for excluded characters (enemy team)
+                    if (selectedWeeklyChallenge.enemies && selectedWeeklyChallenge.enemies.includes(character.id)) {
+                        isRestricted = true;
+                        cardElement.title = "This character is part of the enemy team and cannot be selected for this weekly challenge";
+                    }
+                }
                 
-                // 3. Apply Active Tag Filter
+                // 4. Apply Active Tag Filter
                 if (activeTagFilter && (!character.tags || !character.tags.includes(activeTagFilter))) {
                     isHiddenByTagFilter = true;
                 }
 
-                // Ensure locked cards are visually distinct even if restricted by tags/story
+                // Apply visual restrictions
                 if (cardElement.classList.contains('locked')) {
                     cardElement.style.cursor = 'not-allowed';
                     // Opacity is handled by the .locked CSS class
                 } else if (isRestricted) {
-                    // If restricted by story/tags but owned
+                    // If restricted by story/stage/weekly but owned
                     cardElement.classList.add('restricted');
                     cardElement.style.opacity = '0.5';
                     cardElement.style.cursor = 'not-allowed';
+                } else {
+                    // Clear restriction styling if not restricted
+                    cardElement.classList.remove('restricted');
+                    cardElement.style.opacity = '';
+                    cardElement.style.cursor = '';
                 }
                 
                 if(isHiddenByTagFilter) {
                     cardElement.classList.add('hidden');
+                } else {
+                    cardElement.classList.remove('hidden');
                 }
             }
             
@@ -3835,7 +4141,7 @@
                     teamSlotsContainer.appendChild(slot);
                 }
                 updateTeamSlotsUI();
-                selectedTeamTitle.textContent = `Your Squad (${selectedCharacters.length}/${maxTeamSize})`;
+                selectedTeamTitle.textContent = `Your Team (${selectedCharacters.length}/${maxTeamSize})`;
             }
             
             function populateStoryGrid(stories) {
@@ -3963,10 +4269,18 @@
                     }
                 }
                 
+                // Check weekly challenge enemy exclusions
+                if (currentSelectionMode === 'weekly' && selectedWeeklyChallenge && selectedWeeklyChallenge.enemies && selectedWeeklyChallenge.enemies.includes(character.id)) {
+                    showTooltip(`Character ${character.name} cannot be used in this weekly challenge.`);
+                    return;
+                }
+                
                 selectedCharacters.push(character);
                 highlightSelectedCards();
                 updateTeamSlotsUI();
                 updateStartButtonState();
+                // New: Notify QuestUIManager about the character change
+                document.dispatchEvent(new CustomEvent('characterSelected', { detail: { character } }));
             }
             
             function selectStory(storyTitle) {
@@ -4252,7 +4566,7 @@
                         // Optional: Tag filter for School characters
                         filterCharactersByTag('School');
                     } else if (stageId === 'farm_showdown') {
-                        updateTeamSizeUI(3, 1); // 3v3 battle
+                        updateTeamSizeUI(5, 1); // 3v3 battle
                     } else {
                         updateTeamSizeUI(4, 1); // Default for other stages
                     }
@@ -4320,7 +4634,9 @@
                         }
                     }
                 } else if (currentSelectionMode === 'weekly' && selectedWeeklyChallenge) {
-                    text = `Weekly Challenge: ${selectedWeeklyChallenge.name}. Team Size: ${selectedWeeklyChallenge.teamSize} heroes. Modifiers: ${selectedWeeklyChallenge.modifiers.map(m => m.description).join(', ')}`;
+                    const bannedList = (selectedWeeklyChallenge.enemies || []).map(id => id.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+                    const modifiersText = selectedWeeklyChallenge.modifiers.map(m => m.description).join(', ');
+                    text = `Weekly Challenge: ${selectedWeeklyChallenge.name}. Team Size: ${selectedWeeklyChallenge.teamSize}. Modifiers: ${modifiersText}. You cannot pick: ${bannedList}.`;
                 }
                 
                 teamRestrictionText.textContent = text;
@@ -4350,8 +4666,31 @@
                     }
                 }
 
+                // Remove excluded characters if stage selected
+                if (currentSelectionMode === 'stage' && selectedStage && 
+                    selectedStage.playerCharacterRestrictions && 
+                    selectedStage.playerCharacterRestrictions.excluded) {
+                    const excludedCharacters = selectedStage.playerCharacterRestrictions.excluded;
+                    const originalLength = selectedCharacters.length;
+                    selectedCharacters = selectedCharacters.filter(c => !excludedCharacters.includes(c.id));
+                    if (selectedCharacters.length !== originalLength) {
+                        teamChanged = true;
+                        console.log(`Removed ${originalLength - selectedCharacters.length} excluded characters from team`);
+                    }
+                }
+
+                // Remove banned enemy characters if weekly challenge selected
+                if (currentSelectionMode === 'weekly' && selectedWeeklyChallenge && selectedWeeklyChallenge.enemies) {
+                    const banned = selectedWeeklyChallenge.enemies;
+                    const originalLen = selectedCharacters.length;
+                    selectedCharacters = selectedCharacters.filter(c => !banned.includes(c.id));
+                    if (selectedCharacters.length !== originalLen) {
+                        teamChanged = true;
+                    }
+                }
+
                 if (teamChanged) {
-                    selectedTeamTitle.textContent = `Your Squad (${selectedCharacters.length}/${maxTeamSize})`;
+                    selectedTeamTitle.textContent = `Your Team (${selectedCharacters.length}/${maxTeamSize})`;
                     updateTeamSlotsUI();
                     highlightSelectedCards();
                     updateStartButtonState();
@@ -4405,7 +4744,7 @@
                 });
                 
                 // Update the team title with current count/max
-                selectedTeamTitle.textContent = `Your Squad (${selectedCharacters.length}/${maxTeamSize})`;
+                selectedTeamTitle.textContent = `Your Team (${selectedCharacters.length}/${maxTeamSize})`;
                 updateStartButtonState(); // Check validity after UI update
             }
 
@@ -4557,108 +4896,26 @@
                         
                         console.log('Starting weekly challenge:', selectedWeeklyChallenge.id, 'with team IDs:', characterIdsToSend);
                         
-                        // Create stage object for the weekly challenge that matches the JSON file
+                        // Build stage object dynamically from the selectedWeeklyChallenge definition
                         const weeklyStageData = {
                             id: selectedWeeklyChallenge.id,
                             name: selectedWeeklyChallenge.name,
                             description: selectedWeeklyChallenge.description,
                             difficulty: selectedWeeklyChallenge.difficulty,
                             type: 'weekly_challenge',
-                            backgroundImage: "images/stages/burning_school_gym.jpg",
+                            backgroundImage: "images/stages/burning_school_gym.jpg", // generic backdrop (override in JSON if needed)
                             backgroundMusic: "sounds/battle-epic.mp3",
-                            enemies: [
-                                {
-                                    characterId: "farmer_shoma",
-                                    modifications: {
-                                        stats: {
-                                            hp: { operation: "multiply", value: 1.2 },
-                                            attack: { operation: "multiply", value: 1.1 },
-                                            defense: { operation: "multiply", value: 1.1 }
-                                        }
-                                    }
-                                },
-                                {
-                                    characterId: "schoolgirl_kokoro",
-                                    modifications: {
-                                        stats: {
-                                            hp: { operation: "multiply", value: 1.2 },
-                                            attack: { operation: "multiply", value: 1.1 },
-                                            mana: { operation: "multiply", value: 1.1 }
-                                        }
-                                    }
-                                },
-                                {
-                                    characterId: "schoolboy_siegfried",
-                                    modifications: {
-                                        stats: {
-                                            hp: { operation: "multiply", value: 1.5 },
-                                            attack: { operation: "multiply", value: 1.3 },
-                                            defense: { operation: "multiply", value: 1.2 }
-                                        }
-                                    }
-                                },
-                                {
-                                    characterId: "bridget",
-                                    modifications: {
-                                        stats: {
-                                            hp: { operation: "multiply", value: 1.2 },
-                                            mana: { operation: "multiply", value: 1.2 },
-                                            attack: { operation: "multiply", value: 1.1 }
-                                        }
-                                    }
-                                },
-                                {
-                                    characterId: "farmer_alice",
-                                    modifications: {
-                                        stats: {
-                                            hp: { operation: "multiply", value: 1.2 },
-                                            attack: { operation: "multiply", value: 1.1 },
-                                            defense: { operation: "multiply", value: 1.1 }
-                                        }
-                                    }
-                                }
-                            ],
-                            modifiers: [
-                                {
-                                    id: "extended_buffs",
-                                    name: "Extended Buffs",
-                                    description: "All buffs last 2 turns longer than normal",
-                                    type: "global",
-                                    effect: {
-                                        buffDurationMultiplier: 2
-                                    }
-                                },
-                                {
-                                    id: "enhanced_healing",
-                                    name: "Enhanced Healing",
-                                    description: "Foe characters gain 20% healing power at game start",
-                                    type: "ai_enhancement",
-                                    effect: {
-                                        type: "ai_healing_power_increase",
-                                        value: 0.20
-                                    }
-                                }
-                            ],
-                            rewards: [
-                                {
-                                    type: "character",
-                                    id: "schoolboy_siegfried",
-                                    name: "Schoolboy Siegfried",
-                                    chance: 1.0
-                                }
-                            ],
+                            enemies: (selectedWeeklyChallenge.enemies || []).map(enemyId => ({ characterId: enemyId })),
+                            modifiers: selectedWeeklyChallenge.modifiers || [],
+                            rewards: selectedWeeklyChallenge.rewards || [],
                             requirements: {
                                 teamSize: {
-                                    min: 1,
-                                    max: 5
+                                    min: selectedWeeklyChallenge.teamSize || 1,
+                                    max: selectedWeeklyChallenge.teamSize || 4
                                 }
                             },
-                            unlockRequirements: {
-                                type: "always_unlocked"
-                            },
-                            stageEffects: {
-                                buffDurationExtension: 2
-                            },
+                            unlockRequirements: { type: 'always_unlocked' },
+                            stageEffects: {},
                             isWeeklyChallenge: true
                         };
                         
@@ -6762,6 +7019,328 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
                 }
             };
 
+            // Function to check and complete "To The Hell We Go" story quest
+            async function checkAndCompleteHellStoryQuest(userId) {
+                try {
+                    console.log('[CharacterSelector] Checking hell story quest completion...');
+                    
+                    // Check if quest manager is available and initialized
+                    if (!window.questManager || !window.questManager.initialized) {
+                        console.log('[CharacterSelector] Quest manager not available, skipping hell story quest check');
+                        return;
+                    }
+                    
+                    const questId = 'complete_to_the_hell_we_go_story';
+                    
+                    // Check quest progress from Firebase - story quests are in main questProgress path
+                    console.log(`[CharacterSelector] Fetching Firebase data for quest: ${questId}`);
+                    const progressSnapshot = await firebaseDatabase.ref(`users/${userId}/questProgress/${questId}`).once('value');
+                    const completedSnapshot = await firebaseDatabase.ref(`users/${userId}/completedQuests/${questId}`).once('value');
+                    console.log(`[CharacterSelector] Firebase data fetched successfully`);
+                    
+                    // Debug: Check what quest data exists in Firebase
+                    console.log(`[CharacterSelector] Progress snapshot exists:`, progressSnapshot.exists());
+                    console.log(`[CharacterSelector] Progress value:`, progressSnapshot.exists() ? progressSnapshot.val() : 'No data');
+                    
+                    // Debug: Let's also check if there are any similar quest IDs in Firebase
+                    const allProgressSnapshot = await firebaseDatabase.ref(`users/${userId}/RAIDQUEST`).once('value');
+                    if (allProgressSnapshot.exists()) {
+                        const allProgress = allProgressSnapshot.val();
+                        const allQuestIds = Object.keys(allProgress);
+                        const storyRelatedIds = allQuestIds.filter(id => id.includes('story') || id.includes('hell') || id.includes('complete'));
+                        console.log(`[CharacterSelector] Story/hell-related quest IDs in Firebase:`, storyRelatedIds);
+                        
+                        // Show some progress values for debugging
+                        storyRelatedIds.forEach(id => {
+                            console.log(`[CharacterSelector] ${id}: ${allProgress[id]}`);
+                        });
+                    }
+                    
+                    // Find the quest definition to get the target
+                    let quest = null;
+                    let target = 1; // Default target for story completion quests
+                    
+                    // Try to find the quest in different ways
+                    if (window.questManager.questRegistry) {
+                        if (Array.isArray(window.questManager.questRegistry)) {
+                            quest = window.questManager.questRegistry.find(q => q.id === questId);
+                        } else if (typeof window.questManager.questRegistry === 'object') {
+                            quest = window.questManager.questRegistry[questId];
+                        }
+                    }
+                    
+                    // If we found the quest, use its target, otherwise use default
+                    if (quest && quest.target) {
+                        target = quest.target;
+                    }
+                    
+                    console.log(`[CharacterSelector] Quest found:`, quest);
+                    console.log(`[CharacterSelector] Using target: ${target}`);
+                    
+                    // Debug: Log quest registry structure to understand what's available
+                    console.log(`[CharacterSelector] Quest registry type:`, typeof window.questManager.questRegistry);
+                    console.log(`[CharacterSelector] Quest registry is array:`, Array.isArray(window.questManager.questRegistry));
+                    
+                    // Debug: Look for hell-related quests
+                    if (window.questManager.questRegistry) {
+                        if (Array.isArray(window.questManager.questRegistry)) {
+                            const hellQuests = window.questManager.questRegistry.filter(q => 
+                                q.id && (q.id.includes('hell') || q.id.includes('story') || q.name && q.name.toLowerCase().includes('hell'))
+                            );
+                            console.log(`[CharacterSelector] Found hell-related quests:`, hellQuests);
+                        } else if (typeof window.questManager.questRegistry === 'object') {
+                            const questIds = Object.keys(window.questManager.questRegistry);
+                            const hellQuestIds = questIds.filter(id => id.includes('hell') || id.includes('story'));
+                            console.log(`[CharacterSelector] Available quest IDs:`, questIds.slice(0, 10), '... (showing first 10)');
+                            console.log(`[CharacterSelector] Hell-related quest IDs:`, hellQuestIds);
+                        }
+                    }
+                    
+                    // Debug: Check what quest data exists in Firebase (moved outside the conditional)
+                    console.log(`[CharacterSelector] Progress snapshot exists:`, progressSnapshot.exists());
+                    console.log(`[CharacterSelector] Progress value:`, progressSnapshot.exists() ? progressSnapshot.val() : 'No data');
+                    
+                    // Debug: Let's also check if there are any similar quest IDs in Firebase
+                    const allQuestProgressSnapshot = await firebaseDatabase.ref(`users/${userId}/questProgress`).once('value');
+                    if (allQuestProgressSnapshot.exists()) {
+                        const allProgress = allQuestProgressSnapshot.val();
+                        const allQuestIds = Object.keys(allProgress);
+                        const storyRelatedIds = allQuestIds.filter(id => id.includes('story') || id.includes('hell') || id.includes('complete'));
+                        console.log(`[CharacterSelector] Story/hell-related quest IDs in Firebase:`, storyRelatedIds);
+                        
+                        // Show some progress values for debugging
+                        storyRelatedIds.forEach(id => {
+                            console.log(`[CharacterSelector] ${id}: ${allProgress[id]}`);
+                        });
+                    } else {
+                        console.log(`[CharacterSelector] No questProgress data found in Firebase`);
+                    }
+                    
+                    if (progressSnapshot.exists()) {
+                        const progress = progressSnapshot.val();
+                        const isAlreadyCompleted = completedSnapshot.exists() && completedSnapshot.val();
+                        
+                        console.log(`[CharacterSelector] Hell story quest progress: ${progress}/${target}, completed: ${isAlreadyCompleted}`);
+                        
+                        // If progress reaches target and not already completed, complete it
+                        if (progress >= target && !isAlreadyCompleted) {
+                            console.log('[CharacterSelector] Hell story quest is at target, completing it...');
+                            
+                            // Use the quest manager's completeQuest method to handle rewards properly
+                            if (window.questManager && typeof window.questManager.completeQuest === 'function') {
+                                try {
+                                    await window.questManager.completeQuest(questId);
+                                    console.log('[CharacterSelector] ✅ Hell story quest completed with rewards via quest manager!');
+                                } catch (error) {
+                                    console.error('[CharacterSelector] Error completing quest via quest manager:', error);
+                                    // Fallback to manual completion
+                                    await firebaseDatabase.ref(`users/${userId}/completedQuests/${questId}`).set(true);
+                                    console.log('[CharacterSelector] ✅ Hell story quest completed manually (fallback)');
+                                }
+                            } else {
+                                // Fallback to manual completion if quest manager not available
+                                await firebaseDatabase.ref(`users/${userId}/completedQuests/${questId}`).set(true);
+                                console.log('[CharacterSelector] ✅ Hell story quest completed manually (quest manager not available)');
+                            }
+                            
+                            // Show a notification if possible
+                            if (typeof showTooltip === 'function') {
+                                showTooltip('📚 "To The Hell We Go" story quest completed!');
+                            }
+                            
+                            // Refresh the quest UI if available
+                            if (window.questUIManager && typeof window.questUIManager.refreshQuestPanel === 'function') {
+                                window.questUIManager.refreshQuestPanel();
+                            }
+                        } else if (isAlreadyCompleted) {
+                            console.log('[CharacterSelector] Hell story quest already completed');
+                        } else {
+                            console.log(`[CharacterSelector] Hell story quest not ready for completion (${progress}/${target})`);
+                        }
+                    } else {
+                        console.log('[CharacterSelector] Hell story quest progress not found in Firebase or quest not ready for completion');
+                        if (!quest) {
+                            console.log('[CharacterSelector] Hell story quest definition not found in quest registry, using default target');
+                        }
+                    }
+                } catch (error) {
+                    console.error('[CharacterSelector] Error checking/completing hell story quest:', error);
+                }
+            }
+
+            // Global function to manually complete a quest that's at its target
+            window.manuallyCompleteQuest = async function(questId) {
+                try {
+                    console.log(`[CharacterSelector] Manually completing quest: ${questId}`);
+                    
+                    if (!firebaseAuth.currentUser) {
+                        console.error('[CharacterSelector] User not authenticated');
+                        return { success: false, error: 'User not authenticated' };
+                    }
+                    
+                    const userId = firebaseAuth.currentUser.uid;
+                    
+                    // Check current progress (use questProgress for story quests, RAIDQUEST for raid quests)
+                    let progressSnapshot, completedSnapshot;
+                    
+                    if (questId.includes('story') || questId.includes('complete_')) {
+                        // Story completion quests use questProgress path
+                        progressSnapshot = await firebaseDatabase.ref(`users/${userId}/questProgress/${questId}`).once('value');
+                        completedSnapshot = await firebaseDatabase.ref(`users/${userId}/completedQuests/${questId}`).once('value');
+                    } else {
+                        // Regular raid quests use RAIDQUEST path
+                        progressSnapshot = await firebaseDatabase.ref(`users/${userId}/RAIDQUEST/${questId}`).once('value');
+                        completedSnapshot = await firebaseDatabase.ref(`users/${userId}/RAIDQUESTDONE/${questId}`).once('value');
+                    }
+                    
+                    if (progressSnapshot.exists()) {
+                        const progress = progressSnapshot.val();
+                        const isAlreadyCompleted = completedSnapshot.exists() && completedSnapshot.val();
+                        
+                        // Find the quest definition to get target
+                        let quest = null;
+                        let target = 1;
+                        
+                        if (window.questManager && window.questManager.questRegistry) {
+                            if (Array.isArray(window.questManager.questRegistry)) {
+                                quest = window.questManager.questRegistry.find(q => q.id === questId);
+                            } else if (typeof window.questManager.questRegistry === 'object') {
+                                quest = window.questManager.questRegistry[questId];
+                            }
+                        }
+                        
+                        if (quest && quest.target) {
+                            target = quest.target;
+                        }
+                        
+                        console.log(`[CharacterSelector] Quest ${questId}: progress=${progress}, target=${target}, completed=${isAlreadyCompleted}`);
+                        
+                        if (progress >= target && !isAlreadyCompleted) {
+                            // Use quest manager's completeQuest method for proper reward handling
+                            if (window.questManager && typeof window.questManager.completeQuest === 'function') {
+                                try {
+                                    await window.questManager.completeQuest(questId);
+                                    console.log(`[CharacterSelector] ✅ Quest ${questId} completed with rewards via quest manager!`);
+                                } catch (error) {
+                                    console.error(`[CharacterSelector] Error completing quest ${questId} via quest manager:`, error);
+                                    // Fallback to manual completion
+                                    if (questId.includes('story') || questId.includes('complete_')) {
+                                        await firebaseDatabase.ref(`users/${userId}/completedQuests/${questId}`).set(true);
+                                    } else {
+                                        const updates = {};
+                                        updates[`users/${userId}/RAIDQUESTDONE/${questId}`] = true;
+                                        updates[`users/${userId}/RAIDQUEST/${questId}`] = target;
+                                        await firebaseDatabase.ref().update(updates);
+                                    }
+                                }
+                            } else {
+                                // Fallback to manual completion if quest manager not available
+                                if (questId.includes('story') || questId.includes('complete_')) {
+                                    await firebaseDatabase.ref(`users/${userId}/completedQuests/${questId}`).set(true);
+                                } else {
+                                    const updates = {};
+                                    updates[`users/${userId}/RAIDQUESTDONE/${questId}`] = true;
+                                    updates[`users/${userId}/RAIDQUEST/${questId}`] = target;
+                                    await firebaseDatabase.ref().update(updates);
+                                }
+                                
+                                // Update quest manager manually
+                                if (window.questManager && window.questManager.completedQuests) {
+                                    window.questManager.completedQuests.add(questId);
+                                }
+                            }
+                            
+                            console.log(`[CharacterSelector] ✅ Quest ${questId} completed successfully!`);
+                            
+                            // Refresh UI
+                            if (window.questUIManager && typeof window.questUIManager.refreshQuestPanel === 'function') {
+                                window.questUIManager.refreshQuestPanel();
+                            }
+                            
+                            if (typeof showTooltip === 'function') {
+                                showTooltip(`📚 Quest "${quest?.name || questId}" completed!`);
+                            }
+                            
+                            return { success: true, message: `Quest ${questId} completed` };
+                        } else if (isAlreadyCompleted) {
+                            console.log(`[CharacterSelector] Quest ${questId} already completed`);
+                            return { success: false, error: 'Quest already completed' };
+                        } else {
+                            console.log(`[CharacterSelector] Quest ${questId} not ready for completion (${progress}/${target})`);
+                            return { success: false, error: `Quest not ready for completion (${progress}/${target})` };
+                        }
+                    } else {
+                        console.log(`[CharacterSelector] No progress data found for quest ${questId}`);
+                        return { success: false, error: 'No progress data found' };
+                    }
+                } catch (error) {
+                    console.error(`[CharacterSelector] Error manually completing quest ${questId}:`, error);
+                    return { success: false, error: error.message };
+                }
+            };
+
+            // Convenience function to complete the hell story quest specifically
+            window.completeHellStoryQuest = async function() {
+                return await window.manuallyCompleteQuest('complete_to_the_hell_we_go_story');
+            };
+
+            // Debug function to see all available quest progress data
+            window.debugShowAllQuestProgress = async function() {
+                try {
+                    if (!firebaseAuth.currentUser) {
+                        console.error('User not authenticated');
+                        return;
+                    }
+                    
+                    const userId = firebaseAuth.currentUser.uid;
+                    console.log(`[Debug] Fetching all quest progress for user: ${userId}`);
+                    
+                    // Get all quest progress data
+                    const progressSnapshot = await firebaseDatabase.ref(`users/${userId}/RAIDQUEST`).once('value');
+                    const completedSnapshot = await firebaseDatabase.ref(`users/${userId}/RAIDQUESTDONE`).once('value');
+                    
+                    if (progressSnapshot.exists()) {
+                        const allProgress = progressSnapshot.val();
+                        const allQuestIds = Object.keys(allProgress);
+                        
+                        console.log(`[Debug] Found ${allQuestIds.length} quests with progress data:`);
+                        
+                        // Filter for story/hell/complete related quests
+                        const storyRelated = allQuestIds.filter(id => 
+                            id.includes('story') || 
+                            id.includes('hell') || 
+                            id.includes('complete') ||
+                            id.includes('conquer') ||
+                            id.toLowerCase().includes('hell')
+                        );
+                        
+                        console.log(`[Debug] Story/Hell-related quest IDs:`, storyRelated);
+                        
+                        // Show progress for each story-related quest
+                        storyRelated.forEach(questId => {
+                            const progress = allProgress[questId];
+                            const isCompleted = completedSnapshot.exists() && completedSnapshot.val()[questId];
+                            console.log(`[Debug] ${questId}: progress=${progress}, completed=${isCompleted}`);
+                        });
+                        
+                        // Show ALL quest IDs for reference
+                        console.log(`[Debug] All quest IDs:`, allQuestIds.sort());
+                        
+                        return {
+                            allQuestIds,
+                            storyRelated,
+                            progressData: allProgress
+                        };
+                    } else {
+                        console.log('[Debug] No quest progress data found');
+                        return null;
+                    }
+                } catch (error) {
+                    console.error('[Debug] Error fetching quest progress:', error);
+                    return null;
+                }
+            };
+
         });
     </script>
 
@@ -6771,10 +7350,184 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
             <div class="changelog-header">
                 <h1 class="changelog-title">
                     🚀 Patch Notes
+                    <span class="changelog-version">v0.2</span>
+                </h1>
+                <p class="changelog-subtitle">Schoolgirl Julia Balance Adjustments</p>
+                <button class="changelog-close" onclick="hideChangelog()">&times;</button>
+            </div>
+            
+            <div class="changelog-body">
+                <div class="changelog-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                        </svg>
+                        Character Balance Changes
+                    </h3>
+                    
+                    <div class="character-changes julia">
+                        <div class="character-name">
+                            <span class="character-emoji">💚</span>
+                            <strong>Schoolgirl Julia - Healing Kick (Q) Nerf</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Julia's Healing Kick was significantly overpowered, providing excessive healing output that made encounters trivial. In testing, the ability healed 15.4k over 25 turns while dealing 8.1k damage, creating an unsustainable power level.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Mana Cost:</strong> Increased <span class="change-arrow">60 → 80</span> mana
+                            </li>
+                            <li class="change-item">
+                                <strong>Cooldown:</strong> Increased <span class="change-arrow">1 → 2</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Healing Efficiency:</strong> Reduced <span class="change-arrow">65% → 40%</span> of total damage dealt
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> These changes will require more strategic use of Julia's healing ability while still maintaining her role as a hybrid damage/support character. The increased mana cost and cooldown prevent spam usage, while the reduced healing efficiency brings her in line with other support characters.
+                        </div>
+                    </div>
+
+                    <div class="character-changes kokoro">
+                        <div class="character-name">
+                            <span class="character-emoji">💚</span>
+                            <strong>Schoolgirl Kokoro - Silencing Ring (W) Enhancement</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Silencing Ring was providing limited utility as a pure damage reduction debuff. Adding a damage-over-time component makes it more impactful and creates meaningful pressure on enemies.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>DOT Effect:</strong> Now deals <span class="change-highlight">90 damage per turn</span> for the duration (6 turns)
+                            </li>
+                            <li class="change-item">
+                                <strong>Total Damage:</strong> Can deal up to <span class="change-highlight">540 damage</span> over full duration
+                            </li>
+                            <li class="change-item">
+                                <strong>Visual Effects:</strong> Added new DOT damage VFX with energy drain particles
+                            </li>
+                            <li class="change-item">
+                                <strong>Status Indicator:</strong> Removed persistent status icon for cleaner UI
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> Silencing Ring now serves as both a damage mitigation tool and a significant damage source, making Kokoro more versatile in both support and offensive roles. The DOT effect provides consistent pressure while maintaining the original damage reduction utility.
+                        </div>
+                    </div>
+
+                    <div class="character-changes multiple">
+                        <div class="character-name">
+                            <span class="character-emoji">⚖️</span>
+                            <strong>Additional Balance Changes</strong>
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>⚾ Schoolboy Shoma:</strong> Boink stun chance <span class="change-arrow">35% → 40%</span>, mana cost <span class="change-arrow">40 → 45</span>, Physical Damage <span class="change-arrow">210 → 220</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>🛡️ Schoolboy Siegfried:</strong> Lion Protection cooldown <span class="change-arrow">10 → 6</span> turns, buff duration <span class="change-arrow">5 → 3</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>🐰 Farmer Alice:</strong> Pounce stun chance <span class="change-arrow">65% → 85%</span>, duration <span class="change-arrow">4 → 1</span> turn. Bunny Bounce reworked for allies
+                            </li>
+                            <li class="change-item">
+                                <strong>🐺 Renée:</strong> Mystical Whip critical hit formula changed <span class="change-arrow">1400 + 100% → 1000 + 100%</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>⚡ Farmer Raiden:</strong> Electric Shock & Storm Circle now have <span class="change-highlight">80% hit chance</span> per target
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="gameplay-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Gameplay Improvements
+                    </h3>
+                    
+                    <div class="improvement-item">
+                        <h4>🤖 AI Turn Timing Optimization</h4>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> AI turns previously felt sluggish during the planning phase but rushed during action execution, leading to poor gameplay pacing and reduced player engagement.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>AI Planning Speed:</strong> Reduced planning delay <span class="change-arrow">800ms → 400ms</span> per character (50% faster)
+                            </li>
+                            <li class="change-item">
+                                <strong>Planning Transitions:</strong> Reduced delay between character planning <span class="change-arrow">300ms → 200ms</span> (33% faster)
+                            </li>
+                            <li class="change-item">
+                                <strong>Action Execution Pacing:</strong> Increased delay between AI actions <span class="change-arrow">1000ms → 1500ms</span> (50% slower)
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> These changes create a more responsive AI experience where players spend less time waiting during the planning phase but have more time to observe and react to each AI action. The improved pacing enhances the tactical feel of combat while maintaining dramatic impact for AI abilities.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="new-character-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V7H1V9H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V9H21ZM19 19H5V9H19V19Z"/>
+                        </svg>
+                        New Playable Character
+                    </h3>
+                    
+                    <div class="character-changes ibuki">
+                        <div class="character-name">
+                            <span class="character-emoji">🥷</span>
+                            <strong>Infernal Ibuki - Balance Adjustments & Quest Integration</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Infernal Ibuki's damage scaling was too high for a character with utility and mobility, making her overpowered in both damage and survivability. The balance changes focus her role as a tactical ninja with moderate damage but strong utility.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Kunai Throw (Q):</strong> Physical damage scaling reduced <span class="change-arrow">150% → 100%</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>Swift Strike (E):</strong> Cooldown reduced <span class="change-arrow">8 → 6</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Smoke Bomb (R):</strong> Cooldown increased <span class="change-arrow">12 → 15</span> turns
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>New Character Quests:</strong> "Blade Master" (Use Kunai Throw 80 times) and "Smoke Specialist" (Apply Smoke Bomb debuff 30 times). Both quests reward +520 XP.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="developer-notes">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Developer Notes
+                    </h3>
+                    <p>This patch focuses primarily on balance adjustments, particularly addressing the overpowered nature of Schoolgirl Julia's healing ability. The changes aim to create more strategic decision-making around healing usage while maintaining character viability.</p>
+                    <p>The AI timing improvements should create a more enjoyable combat flow, reducing downtime during AI planning while allowing players to better appreciate each AI action. Infernal Ibuki's adjustments position her as a balanced tactical character rather than an overpowered damage dealer.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Old Changelog Modal (v0.1.1) -->
+    <div class="changelog-modal" id="old-changelog-modal">
+        <div class="changelog-content">
+            <div class="changelog-header">
+                <h1 class="changelog-title">
+                    🚀 Patch Notes
                     <span class="changelog-version">v0.1.1</span>
                 </h1>
                 <p class="changelog-subtitle">School Characters Cooldown Balancing</p>
-                <button class="changelog-close" onclick="hideChangelog()">&times;</button>
+                <button class="changelog-close" onclick="hideOldChangelog()">&times;</button>
             </div>
             
             <div class="changelog-body">
@@ -6917,17 +7670,40 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
             document.body.style.overflow = ''; // Restore scrolling
         }
 
-        // Close modal when clicking outside
+        function showOldChangelog() {
+            const modal = document.getElementById('old-changelog-modal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function hideOldChangelog() {
+            const modal = document.getElementById('old-changelog-modal');
+            modal.classList.remove('show');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Close modals when clicking outside
         document.getElementById('changelog-modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideChangelog();
             }
         });
 
-        // Close modal with Escape key
+        document.getElementById('old-changelog-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideOldChangelog();
+            }
+        });
+
+        // Close modals with Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('changelog-modal').classList.contains('show')) {
-                hideChangelog();
+            if (e.key === 'Escape') {
+                if (document.getElementById('changelog-modal').classList.contains('show')) {
+                    hideChangelog();
+                }
+                if (document.getElementById('old-changelog-modal').classList.contains('show')) {
+                    hideOldChangelog();
+                }
             }
         });
     </script>

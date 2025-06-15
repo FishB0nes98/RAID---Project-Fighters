@@ -136,6 +136,9 @@ class StoryUI {
         // Setup main event handlers
         this.setupEventHandlers();
 
+        // Set global reference for inline events
+        window.storyUI = this;
+
         console.log("[StoryUI] Initialization complete.");
     }
 
@@ -391,6 +394,10 @@ class StoryUI {
                 }
                 console.log(`[StoryUI] Deferred: Positions calculated (${positions.length}). Rendering nodes and paths...`);
 
+                // Determine story title here for special logic
+                const storyTitle = this.storyManager.currentStory?.title;
+                const isHellStory = storyTitle === "To The Hell We Go";
+
                 // Create nodes and connections using the calculated positions
                 stages.forEach((stage, index) => {
                     const pos = positions[index];
@@ -405,6 +412,7 @@ class StoryUI {
                     this.stageNodes.push({ element: nodeElement, stage: stage, position: pos });
                     
                     // Create connections between nodes
+                    // Connect nodes sequentially for all stories
                     if (index > 0) {
                         const prevPos = positions[index - 1];
                          if (prevPos && typeof prevPos.x !== 'undefined' && typeof prevPos.y !== 'undefined') {
@@ -414,6 +422,9 @@ class StoryUI {
                         }
                     }
                 });
+
+                // For "To The Hell We Go" story, we still use sequential connections
+                // but with the improved positioning layout above
                 console.log("[StoryUI] Deferred: Node and path rendering complete.");
 
                 // After rendering, re-initialize dragging in case container size changed
@@ -561,6 +572,74 @@ class StoryUI {
             // Ensure the map container is large enough
             this.mapStagesElement.style.width = `${width}px`;
             this.mapStagesElement.style.height = `${height}px`;
+        } else if (storyTitle === "To The Hell We Go" && mapContainerWidth > 0 && mapContainerHeight > 0) {
+            console.log("[StoryUI] Applying SPECIFIC hellish descent layout for 'To The Hell We Go'");
+            
+            // Create a descent into hell layout that follows the narrative progression
+            // This will create a winding path downward with branching for choices
+            
+            // Map dimensions - ensure plenty of space for the hellish journey
+            const width = Math.max(mapContainerWidth, 2800);
+            const height = Math.max(mapContainerHeight, 2200);
+            
+            // Define specific positions for each stage in the To The Hell We Go story
+            // Organized in clear tiers with proper branching and convergence
+            const hellLayout = {
+                // Tier 1: Entry to Hell
+                "The Devil's Bargain": { x: 0.50, y: 0.08 },           // Start at the gates of hell (top center)
+                
+                // Tier 2: First Battle
+                "Hell's Entrance Hall": { x: 0.50, y: 0.20 },          // Enter hell proper (below gates)
+                
+                // Tier 3: First Branch - Allies vs Sacrifices
+                "Calling for Reinforcements": { x: 0.25, y: 0.32 },    // Call for allies (left branch)
+                "Hellish Sacrifices": { x: 0.75, y: 0.32 },            // Dark choices (right branch)
+                
+                // Tier 4: Convergence at Smith Cave
+                "Smith Cave": { x: 0.50, y: 0.44 },                    // Central forge (convergence point)
+                
+                // Tier 5: Weapon Choice
+                "Molten Weapons Choice": { x: 0.50, y: 0.56 },         // Weapon selection (center)
+                
+                // Tier 6: Second Branch - Desert vs More Allies
+                "Desert in Hell": { x: 0.25, y: 0.68 },                // Desert trials (left descent)
+                "Demonic Reinforcements": { x: 0.75, y: 0.68 },        // Final summoning (right descent)
+                
+                // Tier 7: Convergence at Beast Gauntlet
+                "Infernal Beast Gauntlet": { x: 0.50, y: 0.80 },       // Beast battle (convergence point)
+                
+                // Tier 8: Final Choices and Exit
+                "Hell's Oasis": { x: 0.50, y: 0.92 },                  // Oasis choices (center)
+                "Oasis Exit": { x: 0.50, y: 1.04 },                    // Exit preparation (center)
+                
+                // Tier 9: Final Boss
+                "Hell Castle Entrance Guardians": { x: 0.50, y: 1.16 }, // Castle guardians
+                
+                // Tier 10: Final Preparation
+                "Final Preparation": { x: 0.50, y: 1.28 },               // Final choice before end
+                
+                // Tier 11: Throne Room Boss
+                "Hell Castle Throne": { x: 0.50, y: 1.40 }                // Final battle vs Grok
+            };
+             
+             stages.forEach((stage, index) => {
+                 let position = hellLayout[stage.name];
+                 
+                 if (position) {
+                     // Calculate absolute pixel values from percentages
+                     const x = position.x * width;
+                     const y = position.y * height;
+                     
+                     // No jitter for clean connections
+                     positions.push({ x, y });
+                 } else {
+                     // Fallback for any unexpected stages
+                     console.warn(`[StoryUI] No specific position defined for stage: ${stage.name}. Using fallback.`);
+                     const fallbackX = minPadding + (mapContainerWidth / 3) * (index % 3);
+                     const fallbackY = minPadding + Math.floor(index / 3) * (stageHeight + 150);
+                     positions.push({ x: fallbackX, y: fallbackY });
+                 }
+             });
         } else {
             // --- Generic layout (remains the same) ---
             console.log("[StoryUI] Applying generic layout.");
@@ -619,6 +698,14 @@ class StoryUI {
         nodeElement.className = 'stage-node';
         nodeElement.dataset.stageId = stage.id;
         nodeElement.dataset.stageIndex = stage.index;
+        
+        // Check if this is the "To The Hell We Go" story for special styling
+        const storyTitle = this.storyManager.currentStory?.title;
+        const isHellStory = storyTitle === "To The Hell We Go";
+        
+        if (isHellStory) {
+            nodeElement.classList.add('hellish-node');
+        }
         
         // Set position
         nodeElement.style.left = `${position.x}px`;
@@ -699,8 +786,16 @@ class StoryUI {
         const segment = document.createElement('div');
         segment.className = 'path-segment';
         
+        // Check if this is the "To The Hell We Go" story for special styling
+        const storyTitle = this.storyManager.currentStory?.title;
+        const isHellStory = storyTitle === "To The Hell We Go";
+        
         if (isCompleted) {
             segment.classList.add('completed');
+        }
+        
+        if (isHellStory) {
+            segment.classList.add('hellish-path');
         }
         
         // Calculate path position and dimensions
@@ -724,7 +819,21 @@ class StoryUI {
         if (isCompleted) {
             arrow.classList.add('completed');
         }
+        if (isHellStory) {
+            arrow.classList.add('hellish-arrow');
+        }
         segment.appendChild(arrow);
+        
+        // Add hellish particles effect for hell story
+        if (isHellStory) {
+            for (let i = 0; i < 3; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'hell-particle';
+                particle.style.left = `${20 + i * 30}%`;
+                particle.style.animationDelay = `${i * 0.5}s`;
+                segment.appendChild(particle);
+            }
+        }
         
         return segment;
     }
@@ -770,6 +879,10 @@ class StoryUI {
             case 'character_unlock':
                 this.showStageDetails(stage); // Show base details
                 await this.renderCharacterUnlockOffers(stage); // Render character unlock offers
+                break;
+            case 'ally_selection':
+                this.showStageDetails(stage); // Show base details - custom demonic interface is rendered inside showStageDetails
+                // Note: No additional renderAllySelection call - demonic interface handles everything
                 break;
             default:
                 console.error("Unknown stage type:", stage.type);
@@ -850,6 +963,20 @@ class StoryUI {
             this.stageRecruitContainer.classList.remove('hidden');
             console.log('[StoryUI] About to call renderCharacterUnlockOffers');
             this.renderCharacterUnlockOffers(stage); // Render character unlock offers
+        } else if (stage.type === 'ally_selection') {
+            console.log('[StoryUI] Handling ally_selection stage type');
+            this.enemyListElement.parentElement.classList.add('hidden');
+            this.rewardListElement.parentElement.classList.add('hidden');
+            this.stageRecruitContainer.classList.add('hidden'); // Hide recruit container
+            this.startStageButton.classList.remove('hidden'); // Keep start button visible
+            this.startStageButton.textContent = 'Call for Reinforcements'; // Change button text
+            this.startStageButton.disabled = false;
+            if (this.closeDetailsButton) this.closeDetailsButton.classList.remove('hidden'); // Keep close button
+            if (stageActionsContainer) stageActionsContainer.classList.remove('hidden'); // Keep actions container
+            
+            // Create a custom ally selection interface in the description area
+            this.renderDemonicAllyInterface(stage);
+            // Note: Continue to show the details panel but skip other rendering
         } else if (isCombatStage) {
             // This is a combat stage (battle, boss, or has enemies/difficulty)
             // Populate enemies and rewards for battle stages
@@ -916,6 +1043,40 @@ class StoryUI {
                     case 'none':
                         iconPrefix = '🚫';
                         break;
+                    // --- NEW: Hell story effect icons ---
+                    case 'set_magical_damage':
+                        iconPrefix = '🌋';
+                        break;
+                    case 'demon_claws_effect':
+                        iconPrefix = '👹';
+                        break;
+                    case 'hellish_pact_effect':
+                        iconPrefix = '🔥';
+                        break;
+                    // --- NEW: Sacrifice effect icons ---
+                    case 'sacrifice_hp_for_mana':
+                        iconPrefix = '🩸';
+                        break;
+                    case 'sacrifice_defense_for_power':
+                        iconPrefix = '⚔️';
+                        break;
+                    case 'sacrifice_character_for_restoration':
+                        iconPrefix = '💀';
+                        break;
+                    // --- NEW: Molten Weapons effect icons ---
+                    case 'molten_hammer_effect':
+                        iconPrefix = '🔨';
+                        break;
+                    case 'molten_scythe_effect':
+                        iconPrefix = '⚔️';
+                        break;
+                    case 'molten_spear_effect':
+                        iconPrefix = '🗡️';
+                        break;
+                    // --- END NEW ---
+                    case 'mana_restore_percent':
+                        iconPrefix = '💙';
+                        break;
                 }
             }
             choiceName.innerHTML = `${iconPrefix} ${choice.name}`;
@@ -948,12 +1109,12 @@ class StoryUI {
         if (choice.effect && (choice.effect.target === 'selected' || choice.effect.target === 'selected_living' || choice.effect.target === 'selected_dead')) {
             this.selectedChoice = choice; // Store the selected choice
             this.showCharacterSelectionModal(choice); // Show modal to pick character
-        } else if (choice.effect && choice.effect.target === 'all') {
-            // If target is 'all', apply effect directly without modal
+        } else if (choice.effect && (choice.effect.target === 'all' || choice.effect.target === 'team')) {
+            // If target is 'all' or 'team', apply effect directly without modal
             try {
-                showLoadingOverlay(`Applying effect: ${choice.name}...`); // Use placeholder
+                this.showLoadingOverlay(`Applying effect: ${choice.name}...`);
                 const hasMore = await this.storyManager.applyChoiceEffectAndAdvance(choice, null); // Pass null for targetCharacterId
-                hideLoadingOverlay(); // Use placeholder
+                this.hideLoadingOverlay();
                 if (hasMore) {
                     this.closeStageDetails();
                     this.renderPlayerTeam(); // Update team display
@@ -962,22 +1123,22 @@ class StoryUI {
                     // Story complete or error occurred
                     this.closeStageDetails();
                     if (!this.storyManager.isStoryComplete()) {
-                        showPopupMessage("Failed to apply effect.", 'error');
+                        this.showPopupMessage("Failed to apply effect.", 'error');
                     } else {
                         this.showStoryCompleteScreen();
                     }
                 }
             } catch (error) {
-                hideLoadingOverlay(); // Use placeholder
-                console.error("Error applying 'all' target effect:", error);
-                showPopupMessage(`Error applying effect: ${error.message}`, 'error');
+                this.hideLoadingOverlay();
+                console.error("Error applying 'all/team' target effect:", error);
+                this.showPopupMessage(`Error applying effect: ${error.message}`, 'error');
             }
         } else if (choice.effect && choice.effect.type === 'none') {
             // Handle 'none' effect type - advance without applying any effect
             try {
-                showLoadingOverlay(`Processing choice: ${choice.name}...`);
+                this.showLoadingOverlay(`Processing choice: ${choice.name}...`);
                 const hasMore = await this.storyManager.applyChoiceEffectAndAdvance(choice, null);
-                hideLoadingOverlay();
+                this.hideLoadingOverlay();
                 if (hasMore) {
                     this.closeStageDetails();
                     this.renderPlayerTeam(); // Update team display
@@ -986,15 +1147,15 @@ class StoryUI {
                     // Story complete or error occurred
                     this.closeStageDetails();
                     if (!this.storyManager.isStoryComplete()) {
-                        showPopupMessage("Failed to process choice.", 'error');
+                        this.showPopupMessage("Failed to process choice.", 'error');
                     } else {
                         this.showStoryCompleteScreen();
                     }
                 }
             } catch (error) {
-                hideLoadingOverlay();
+                this.hideLoadingOverlay();
                 console.error("Error processing 'none' effect choice:", error);
-                showPopupMessage(`Error processing choice: ${error.message}`, 'error');
+                this.showPopupMessage(`Error processing choice: ${error.message}`, 'error');
             }
         } else {
             // Handle other cases or choices without effects if needed
@@ -1148,6 +1309,32 @@ class StoryUI {
                         effectText = '50% Double HP / 50% Defeat';
                         // Add a neutral or warning class?
                         // effectInfo.classList.add('effect-neutral'); 
+                        break;
+                    // --- NEW: Hell story effect previews ---
+                    case 'set_magical_damage':
+                        effectText = `Set Magical Damage to ${choice.effect.amount}`;
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'demon_claws_effect':
+                        effectText = '+80 Physical Damage, 0% Dodge';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'hellish_pact_effect':
+                        effectText = '+2000 HP, -75 HP per turn';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    // --- NEW: Molten Weapons effect previews ---
+                    case 'molten_hammer_effect':
+                        effectText = '+200 Physical Damage';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'molten_scythe_effect':
+                        effectText = '+1% All Stats per Turn';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'molten_spear_effect':
+                        effectText = '+18% Dodge Chance';
+                        effectInfo.classList.add('effect-positive');
                         break;
                      // --- END NEW ---
                 }
@@ -1413,6 +1600,16 @@ class StoryUI {
      * Start the current stage
      */
     startCurrentStage() {
+        // Get the current stage data to check its type
+        const currentStage = this.storyManager.getCurrentStage();
+        
+        if (currentStage && currentStage.type === 'ally_selection') {
+            // For ally selection stages, trigger the demonic summoning process
+            this.handleDemonicSummoning();
+            return;
+        }
+        
+        // For regular battle stages, proceed as normal
         const battleURL = this.storyManager.startStageBattle();
         
         // Close the details panel
@@ -1464,6 +1661,7 @@ class StoryUI {
                 }).then(() => {
                     // Check if the story is now complete
                     if (this.storyManager.isStoryComplete()) {
+                        console.log('[StoryUI] Story completed after battle!');
                         this.showStoryCompleteScreen();
                     } else {
                         // Show victory screen for the *completed* stage
@@ -1599,6 +1797,15 @@ class StoryUI {
      * Show the story complete screen
      */
     showStoryCompleteScreen() {
+        // Dispatch story completion event for quest tracking
+        const storyId = this.storyManager.storyId;
+        if (storyId) {
+            document.dispatchEvent(new CustomEvent('storyCompleted', {
+                detail: { storyId: storyId }
+            }));
+            console.log(`[StoryUI] Dispatched story completion event for ${storyId} via showStoryCompleteScreen`);
+        }
+        
         this.storyCompleteScreenElement.classList.add('visible');
     }
 
@@ -1885,7 +2092,7 @@ class StoryUI {
         //     return;
         // }
 
-        showLoadingOverlay('Adding ally to your team...');
+        this.showLoadingOverlay('Adding ally to your team...');
 
         try {
             // Call the storyManager to handle recruitment logic
@@ -1902,14 +2109,604 @@ class StoryUI {
                 this.showStoryCompleteScreen();
             } else {
                 // Optionally, briefly show a success message or transition
-                showPopupMessage("Ally recruited!", "success", 2000);
+                this.showPopupMessage("Ally recruited!", "success", 2000);
             }
 
         } catch (error) {
             console.error('[StoryUI] Error during recruitment:', error);
-            showPopupMessage(`Error recruiting: ${error.message}`, 'error');
+            this.showPopupMessage(`Error recruiting: ${error.message}`, 'error');
         } finally {
-            hideLoadingOverlay();
+            this.hideLoadingOverlay();
+        }
+    }
+
+    /**
+     * Renders the ally selection interface for selecting from all unlocked characters.
+     * @param {Object} stage - The stage data containing ally selection parameters.
+     */
+    async renderAllySelection(stage) {
+        console.log('[StoryUI] Rendering ally selection for:', stage.name);
+        this.recruitListElement.innerHTML = '<div class="loading">Loading your unlocked champions...</div>';
+
+        try {
+            const availableAllies = await this.storyManager.getAllUnlockedCharacters();
+            this.recruitListElement.innerHTML = ''; // Clear loading
+
+            if (!availableAllies || availableAllies.length === 0) {
+                this.recruitListElement.innerHTML = `
+                    <div class="unlock-description">
+                        <h3>🎭 No Additional Allies Available</h3>
+                        <p>All your unlocked characters are already in your team, or you haven't unlocked any additional characters yet. You'll continue with your current team.</p>
+                        <button class="character-unlock-button" onclick="window.location.reload()">Continue Without Additional Ally</button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create the description section
+            const descriptionDiv = document.createElement('div');
+            descriptionDiv.className = 'unlock-description';
+            
+            const titleElement = document.createElement('h3');
+            titleElement.textContent = '🔥 Call for Reinforcements 🔥';
+            
+            const descElement = document.createElement('p');
+            descElement.textContent = stage.description_detail || 'Choose one character from all your unlocked champions to add to your team for the remainder of your journey through hell.';
+            
+            descriptionDiv.appendChild(titleElement);
+            descriptionDiv.appendChild(descElement);
+            this.recruitListElement.appendChild(descriptionDiv);
+
+            // Add ally selection cards class for styling
+            this.recruitListElement.className = 'character-grid ally-selection-cards';
+
+            // Create character selection grid
+            const characterGrid = document.createElement('div');
+            characterGrid.className = 'unlock-cards';
+
+            availableAllies.forEach(ally => {
+                const allyCard = this.createAllySelectionCard(ally);
+                characterGrid.appendChild(allyCard);
+            });
+
+            this.recruitListElement.appendChild(characterGrid);
+
+            // Make container visible
+            this.stageRecruitContainer.classList.remove('hidden');
+
+        } catch (error) {
+            console.error('[StoryUI] Error rendering ally selection:', error);
+            this.recruitListElement.innerHTML = '<p class="error-message">Error loading available allies.</p>';
+        }
+    }
+
+    /**
+     * Creates a card element for a single ally selection.
+     * @param {Object} ally - The character ally data (id, name, image, stats, tags).
+     * @returns {HTMLElement} The created card element.
+     */
+    createAllySelectionCard(ally) {
+        const card = document.createElement('div');
+        card.className = 'unlock-card ally-selection-card';
+        card.dataset.characterId = ally.id;
+
+        // Character image container
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'character-image-container';
+        
+        const img = document.createElement('img');
+        img.src = ally.image || 'images/characters/default.png';
+        img.alt = ally.name;
+        imageContainer.appendChild(img);
+        card.appendChild(imageContainer);
+
+        // Character info
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'character-info';
+
+        // Name
+        const nameElement = document.createElement('h4');
+        nameElement.textContent = ally.name;
+        infoDiv.appendChild(nameElement);
+
+        // Description
+        const descElement = document.createElement('p');
+        descElement.textContent = ally.description || 'A powerful ally ready to join your cause.';
+        infoDiv.appendChild(descElement);
+
+        // Tags
+        if (ally.tags && ally.tags.length > 0) {
+            const tagsElement = document.createElement('div');
+            tagsElement.className = 'character-tags';
+            ally.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = `tag tag-${tag.toLowerCase()}`;
+                tagSpan.textContent = tag;
+                tagsElement.appendChild(tagSpan);
+            });
+            infoDiv.appendChild(tagsElement);
+        }
+
+        // Stats display
+        if (ally.stats) {
+            const statsElement = document.createElement('div');
+            statsElement.className = 'character-stats-preview';
+            statsElement.innerHTML = `
+                <div class="stat-row">
+                    <span>❤️ HP: ${ally.stats.hp || 'N/A'}</span>
+                    <span>💙 MP: ${ally.stats.mana || 'N/A'}</span>
+                </div>
+                <div class="stat-row">
+                    <span>⚔️ ATK: ${ally.stats.physicalDamage || 'N/A'}</span>
+                    <span>🔮 MAG: ${ally.stats.magicalDamage || 'N/A'}</span>
+                </div>
+            `;
+            infoDiv.appendChild(statsElement);
+        }
+
+        card.appendChild(infoDiv);
+
+        // Selection button
+        const selectButton = document.createElement('button');
+        selectButton.className = 'character-unlock-button';
+        selectButton.textContent = 'Add to Team';
+        selectButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleAllySelection(ally.id);
+        });
+        infoDiv.appendChild(selectButton);
+
+        return card;
+    }
+
+    /**
+     * Renders a custom demonic ally interface directly in the stage description area
+     * @param {Object} stage - The ally selection stage data
+     */
+    async renderDemonicAllyInterface(stage) {
+        console.log('[StoryUI] Rendering demonic ally interface for:', stage.name);
+        
+        // Modify the stage description to include the ally interface
+        const originalDescription = stage.description;
+        this.stageDescriptionElement.innerHTML = `
+            <div class="demonic-interface">
+                <div class="original-description">
+                    ${originalDescription}
+                </div>
+                <div class="summoning-circle">
+                    <div class="circle-glow"></div>
+                    <div class="circle-inner">
+                        <div class="demon-text">🔥 DEMONIC SUMMONING CIRCLE 🔥</div>
+                        <div class="circle-status" id="circle-status">
+                            <span class="pulsing">Circle is ready for summoning...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ally-preview-area" id="ally-preview-area">
+                    <div class="preview-text">Click "Call for Reinforcements" to channel the circle's power</div>
+                </div>
+            </div>
+        `;
+
+        // Add custom styling for the demonic interface
+        this.addDemonicInterfaceStyles();
+        
+        // Store the stage data for later use
+        this.currentAllyStage = stage;
+    }
+
+    /**
+     * Adds custom CSS for the demonic ally interface
+     */
+    addDemonicInterfaceStyles() {
+        if (document.getElementById('demonic-interface-styles')) return; // Already added
+        
+        const style = document.createElement('style');
+        style.id = 'demonic-interface-styles';
+        style.textContent = `
+            .demonic-interface {
+                background: linear-gradient(135deg, rgba(255, 87, 34, 0.1), rgba(139, 0, 0, 0.2));
+                border: 2px solid #ff5722;
+                border-radius: 12px;
+                padding: 20px;
+                margin-top: 15px;
+            }
+            
+            .original-description {
+                margin-bottom: 20px;
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+            
+            .summoning-circle {
+                position: relative;
+                width: 200px;
+                height: 200px;
+                margin: 20px auto;
+                border-radius: 50%;
+                background: radial-gradient(circle, #8b0000, #ff5722, #ff6b35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: demonicPulse 3s ease-in-out infinite;
+            }
+            
+            .circle-glow {
+                position: absolute;
+                top: -10px;
+                left: -10px;
+                right: -10px;
+                bottom: -10px;
+                border-radius: 50%;
+                background: radial-gradient(circle, transparent, #ff5722);
+                animation: glowPulse 2s ease-in-out infinite alternate;
+                opacity: 0.7;
+            }
+            
+            .circle-inner {
+                text-align: center;
+                color: white;
+                z-index: 2;
+                position: relative;
+            }
+            
+            .demon-text {
+                font-weight: bold;
+                font-size: 0.9rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                margin-bottom: 10px;
+            }
+            
+            .circle-status {
+                font-size: 0.8rem;
+                opacity: 0.9;
+            }
+            
+            .pulsing {
+                animation: textPulse 2s ease-in-out infinite;
+            }
+            
+            .ally-preview-area {
+                margin-top: 20px;
+                padding: 15px;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 8px;
+                text-align: center;
+                color: #ff6b35;
+                font-weight: 600;
+            }
+            
+            @keyframes demonicPulse {
+                0%, 100% { transform: scale(1); box-shadow: 0 0 20px #ff5722; }
+                50% { transform: scale(1.05); box-shadow: 0 0 40px #ff5722; }
+            }
+            
+            @keyframes glowPulse {
+                0% { opacity: 0.5; }
+                100% { opacity: 0.9; }
+            }
+            
+            @keyframes textPulse {
+                0%, 100% { opacity: 0.7; }
+                50% { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    /**
+     * Handles the demonic ally summoning process when the button is clicked
+     */
+    async handleDemonicSummoning() {
+        if (!this.currentAllyStage) {
+            console.error('[StoryUI] No ally stage data available for summoning');
+            return;
+        }
+
+        const circleStatus = document.getElementById('circle-status');
+        const previewArea = document.getElementById('ally-preview-area');
+        
+        try {
+            // Update circle status - channeling phase
+            circleStatus.innerHTML = '<span class="pulsing">🔮 Channeling demonic energy...</span>';
+            previewArea.innerHTML = '<div class="loading">The circle pulses with otherworldly power...</div>';
+            
+            // Wait a moment for dramatic effect
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Get available allies
+            const availableAllies = await this.storyManager.getAllUnlockedCharacters();
+            
+            if (!availableAllies || availableAllies.length === 0) {
+                circleStatus.innerHTML = '<span style="color: #ff6b6b;">❌ No spirits answer the call</span>';
+                previewArea.innerHTML = `
+                    <div style="color: #ff6b6b; text-align: center;">
+                        <h4>🚫 The Void Remains Silent</h4>
+                        <p>All champions are bound to your cause, or the demonic realm offers no new allies.</p>
+                        <button class="character-unlock-button" onclick="window.storyUI.advanceWithoutAlly();">
+                            Dismiss the Circle
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Mystical summoning - randomly select one ally automatically
+            const randomAlly = availableAllies[Math.floor(Math.random() * availableAllies.length)];
+            
+            // Show summoning in progress
+            circleStatus.innerHTML = '<span style="color: #ffa500;">🌀 A presence stirs in the darkness...</span>';
+            previewArea.innerHTML = `
+                <div style="text-align: center; color: #ffa500;">
+                    <h4>✨ The Circle Responds! ✨</h4>
+                    <p>A powerful spirit materializes from the hellish void...</p>
+                    <div class="summoning-animation">🔥 ⚡ 🌟 ⚡ 🔥</div>
+                </div>
+            `;
+
+            // Wait for summoning animation
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // Reveal the summoned ally
+            circleStatus.innerHTML = '<span style="color: #90EE90;">✅ Summoning Complete!</span>';
+            previewArea.innerHTML = `
+                <div style="text-align: center; color: #90EE90;">
+                    <h3>🎉 ${randomAlly.name} has answered your call! 🎉</h3>
+                    <div style="margin: 15px 0;">
+                        <img src="${randomAlly.image || 'images/characters/default.png'}" 
+                             style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff5722; object-fit: cover;" 
+                             alt="${randomAlly.name}">
+                    </div>
+                    <p style="color: #ffcc99;">"${randomAlly.description || 'I shall aid you in this hellish realm.'}"</p>
+                    <p>The demonic circle fades as your new ally joins your cause...</p>
+                </div>
+            `;
+
+            // Add the ally automatically after the reveal
+            setTimeout(async () => {
+                try {
+                    const hasMoreStages = await this.storyManager.addSelectedAlly(randomAlly.id);
+                    
+                    // Close details and update UI
+                    setTimeout(() => {
+                        this.closeStageDetails();
+                        this.renderPlayerTeam();
+                        
+                        if (!hasMoreStages) {
+                            this.showStoryCompleteScreen();
+                        } else {
+                            this.showPopupMessage(`${randomAlly.name} has been summoned to aid your journey!`, "success", 4000);
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('[StoryUI] Error adding summoned ally:', error);
+                    circleStatus.innerHTML = '<span style="color: #ff6b6b;">💀 Binding ritual failed!</span>';
+                    previewArea.innerHTML = `<div style="color: #ff6b6b;">The ally vanishes back into the void... Error: ${error.message}</div>`;
+                }
+            }, 2000);
+
+        } catch (error) {
+            console.error('[StoryUI] Error during demonic summoning:', error);
+            circleStatus.innerHTML = '<span style="color: #ff6b6b;">💀 The ritual has failed!</span>';
+            previewArea.innerHTML = `<div style="color: #ff6b6b;">Dark energies reject your call... Error: ${error.message}</div>`;
+        }
+    }
+
+    /**
+     * Creates a compact ally card for the demonic interface
+     * @param {Object} ally - The ally data
+     * @returns {HTMLElement} The ally card element
+     */
+    createCompactAllyCard(ally) {
+        const card = document.createElement('div');
+        card.className = 'compact-ally-card';
+        card.innerHTML = `
+            <div class="ally-avatar">
+                <img src="${ally.image || 'images/characters/default.png'}" alt="${ally.name}">
+            </div>
+            <div class="ally-info">
+                <h5>${ally.name}</h5>
+                <p>${ally.description || 'A powerful champion'}</p>
+                <div class="ally-stats">
+                    ❤️${ally.stats?.hp || 'N/A'} 💙${ally.stats?.mana || 'N/A'}
+                </div>
+            </div>
+            <button class="summon-button" data-ally-id="${ally.id}">
+                🔥 Summon
+            </button>
+        `;
+
+        // Add styling for compact cards
+        if (!document.getElementById('compact-ally-styles')) {
+            const style = document.createElement('style');
+            style.id = 'compact-ally-styles';
+            style.textContent = `
+                .ally-cards-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 15px;
+                    margin-top: 15px;
+                }
+                
+                .compact-ally-card {
+                    background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(139, 0, 0, 0.3));
+                    border: 2px solid #ff5722;
+                    border-radius: 8px;
+                    padding: 15px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                }
+                
+                .compact-ally-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+                    border-color: #ff6b35;
+                }
+                
+                .ally-avatar img {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    border: 2px solid #ff5722;
+                    object-fit: cover;
+                }
+                
+                .ally-info h5 {
+                    margin: 10px 0 5px 0;
+                    color: #fff;
+                    font-size: 1rem;
+                    font-weight: 600;
+                }
+                
+                .ally-info p {
+                    margin: 0 0 8px 0;
+                    font-size: 0.8rem;
+                    color: #ffcc99;
+                    line-height: 1.3;
+                }
+                
+                .ally-stats {
+                    font-size: 0.9rem;
+                    color: #ff6b35;
+                    font-weight: 600;
+                    margin-bottom: 10px;
+                }
+                
+                .summon-button {
+                    background: linear-gradient(135deg, #ff5722, #ff6b35);
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    font-size: 0.9rem;
+                }
+                
+                .summon-button:hover {
+                    background: linear-gradient(135deg, #e64a19, #ff5722);
+                    transform: scale(1.05);
+                    box-shadow: 0 4px 12px rgba(255, 87, 34, 0.4);
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add click handler for summon button
+        const summonButton = card.querySelector('.summon-button');
+        summonButton.addEventListener('click', () => this.handleCompactAllySelection(ally.id, ally.name));
+
+        return card;
+    }
+
+    /**
+     * Handles ally selection from the compact interface
+     * @param {string} allyId - The ID of the selected ally
+     * @param {string} allyName - The name of the selected ally
+     */
+    async handleCompactAllySelection(allyId, allyName) {
+        if (!confirm(`Summon ${allyName} to join your team? They will aid you for the rest of your journey through hell.`)) {
+            return;
+        }
+
+        const circleStatus = document.getElementById('circle-status');
+        const previewArea = document.getElementById('ally-preview-area');
+
+        try {
+            circleStatus.innerHTML = '<span class="pulsing">🌀 Binding ally to your cause...</span>';
+            previewArea.innerHTML = '<div class="loading">Completing summoning ritual...</div>';
+
+            // Call the story manager to add the ally
+            const hasMoreStages = await this.storyManager.addSelectedAlly(allyId);
+
+            // Show success and close
+            circleStatus.innerHTML = '<span style="color: #90EE90;">✅ Summoning complete!</span>';
+            previewArea.innerHTML = `
+                <div style="color: #90EE90; text-align: center;">
+                    <h4>🎉 ${allyName} has joined your team! 🎉</h4>
+                    <p>The demonic circle fades as your new ally materializes...</p>
+                </div>
+            `;
+
+            // Close details after a short delay
+            setTimeout(() => {
+                this.closeStageDetails();
+                this.renderPlayerTeam(); // Update team display
+                
+                if (!hasMoreStages) {
+                    this.showStoryCompleteScreen();
+                } else {
+                    this.showPopupMessage(`${allyName} has joined your team through demonic summoning!`, "success", 3000);
+                }
+            }, 2000);
+
+        } catch (error) {
+            console.error('[StoryUI] Error during compact ally selection:', error);
+            circleStatus.innerHTML = '<span style="color: #ff6b6b;">💀 Binding failed!</span>';
+            previewArea.innerHTML = `<div style="color: #ff6b6b;">Error: ${error.message}</div>`;
+        }
+    }
+
+    /**
+     * Advances the story without selecting an ally
+     */
+    async advanceWithoutAlly() {
+        try {
+            // Advance the story without adding an ally
+            await this.storyManager.advanceToNextStage();
+            this.closeStageDetails();
+            this.updateStageNodes();
+            this.showPopupMessage("You continue your journey alone...", "info", 2000);
+        } catch (error) {
+            console.error('[StoryUI] Error advancing without ally:', error);
+            this.showPopupMessage(`Error: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Handles the selection of an ally character.
+     * @param {string} characterId - The ID of the character selected.
+     */
+    async handleAllySelection(characterId) {
+        console.log(`[StoryUI] Ally selected: ${characterId}`);
+
+        // Add confirmation for ally selection
+        const ally = await this.storyManager.getAllUnlockedCharacters().then(allies => 
+            allies.find(a => a.id === characterId)
+        );
+        
+        if (ally && !confirm(`Add ${ally.name} to your team? They will join you for the rest of your journey through hell.`)) {
+            return;
+        }
+
+        this.showLoadingOverlay('Adding ally to your team...');
+
+        try {
+            // Call the storyManager to handle ally selection logic
+            const hasMoreStages = await this.storyManager.addSelectedAlly(characterId);
+
+            // Close the details panel and update UI
+            this.closeStageDetails();
+            this.renderPlayerTeam(); // Re-render team immediately to show the new member
+
+            if (!hasMoreStages) {
+                // If ally selection was the last action, show story complete screen
+                this.showStoryCompleteScreen();
+            } else {
+                // Show success message
+                this.showPopupMessage(`${ally?.name || 'Ally'} has joined your team!`, "success", 3000);
+            }
+
+        } catch (error) {
+            console.error('[StoryUI] Error during ally selection:', error);
+            this.showPopupMessage(`Error adding ally: ${error.message}`, 'error');
+        } finally {
+            this.hideLoadingOverlay();
         }
     }
 
@@ -2046,9 +2843,16 @@ class StoryUI {
                         // Still mark the story as completed for future reference
                         await storyCompletionRef.set({
                             completedAt: firebase.database.ServerValue.TIMESTAMP,
-                            rewardClaimed: false,
+                            rewardClaimed: false, // No reward was claimed since user already owned characters
                             rewardReason: 'already_owned_all_characters'
                         });
+                        
+                        // Dispatch story completion event for quest tracking
+                        const storyId = this.storyManager.storyId;
+                        document.dispatchEvent(new CustomEvent('storyCompleted', {
+                            detail: { storyId: storyId }
+                        }));
+                        console.log(`[StoryUI] Dispatched story completion event for ${storyId}`);
                         
                         return;
                     }
@@ -2096,6 +2900,13 @@ class StoryUI {
                         rewardClaimed: false, // No reward was claimed since user already owned characters
                         rewardReason: 'already_owned_all_characters'
                     });
+                    
+                    // Dispatch story completion event for quest tracking
+                    const storyId = this.storyManager.storyId;
+                    document.dispatchEvent(new CustomEvent('storyCompleted', {
+                        detail: { storyId: storyId }
+                    }));
+                    console.log(`[StoryUI] Dispatched story completion event for ${storyId}`);
                     
                     return;
                 }
@@ -2315,6 +3126,12 @@ class StoryUI {
                     rewardCharacter: characterId
                 });
                 console.log(`[StoryUI] Marked story ${storyId} as completed with reward ${characterId}`);
+                
+                // Dispatch story completion event for quest tracking
+                document.dispatchEvent(new CustomEvent('storyCompleted', {
+                    detail: { storyId: storyId }
+                }));
+                console.log(`[StoryUI] Dispatched story completion event for ${storyId}`);
             }
 
             console.log(`[StoryUI] Character ${characterId} unlocked successfully`);

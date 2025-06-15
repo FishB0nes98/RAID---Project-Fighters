@@ -1,0 +1,55 @@
+{
+    "id": "lava_worm",
+    "name": "Lava Worm",
+    "image": "Loading Screen/Lava Worm.png",
+    "rarity": "epic",
+    "type": "beast",
+    "description": "A colossal worm that burrows through molten lava like water, its segmented body glows with the heat of a thousand forges.",
+    "stats": {
+        "physicalDamage": 250,
+        "magicalDamage": 200,
+        "armor": 14,
+        "magicalShield": 20,
+        "hp": 5991,
+        "hpPerTurn": 0,
+        "mana": 5200,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.0,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "lava_worm_acid_lava_spit",
+            "name": "Acid Lava Spit",
+            "type": "acid_lava_spit",
+            "damageType": "magical",
+            "manaCost": 70,
+            "cooldown": 4,
+            "targetType": "two_random_enemies",
+            "description": "Spits corrosive lava at two random enemies, dealing 450 magical damage and applying a melting debuff for 3 turns. The debuff deals 440 damage each turn.",
+            "icon": "Icons/abilities/acid_lava_spit.png",
+            "baseDamage": 450,
+            "debuffDamage": 440,
+            "debuffDuration": 3
+        },
+        {
+            "id": "lava_worm_burrow_strike",
+            "name": "Burrow Strike",
+            "type": "burrow_strike",
+            "damageType": "physical",
+            "manaCost": 100,
+            "cooldown": 7,
+            "targetType": "self",
+            "description": "Burrows underground for 1 turn, becoming untargetable. When emerging, strikes a random enemy for 1255 physical damage and stuns them for 1 turn.",
+            "icon": "Icons/abilities/burrow_strike.png",
+            "baseDamage": 1255,
+            "bufferDuration": 1,
+            "stunDuration": 1,
+            "doesNotEndTurn": false
+        }
+    ],
+    "tags": ["Beast", "Hell", "Lava"]
+} 

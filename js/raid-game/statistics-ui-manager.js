@@ -483,7 +483,9 @@ class StatisticsUIManager {
                             </div>
                             
                             <div class="abilities-grid">
-                                ${abilities.map(([abilityId, abilityData]) => `
+                                ${abilities.map(([abilityId, abilityData]) => {
+                                    console.log(`[StatisticsUI] Rendering ability ${abilityId}:`, abilityData);
+                                    return `
                                     <div class="ability-card">
                                         <div class="ability-card-header">
                                             <div class="ability-icon-wrapper">
@@ -553,7 +555,8 @@ class StatisticsUIManager {
                                             ` : ''}
                                         </div>
                                     </div>
-                                `).join('')}
+                                `;
+                                }).join('')}
                             </div>
                         </div>
                     `;

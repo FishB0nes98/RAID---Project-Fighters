@@ -298,14 +298,17 @@
     {
       "id": "farm_showdown",
       "path": "js/raid-game/stages/farm_showdown.json",
-      "name": "Farm Showdown",
-      "description": "The farmers have challenged you to a battle! Defeat all three farmers to prove your worth.",
-      "difficulty": 5,
+      "name": "5v5 - Farm Showdown",
+      "description": "The ultimate farmer challenge! Face all five farmers in an epic showdown. Choose your 5 strongest fighters to prove your worth against the complete farming crew. 🎁 First-time completion rewards a random character!",
+      "difficulty": 6,
       "type": "challenge",
       "backgroundImage": "images/stages/farm_field.webp",
       "backgroundMusic": "sounds/farm_bgm.mp3",
       "unlockRequirements": [],
-      "playerunlocked": false
+      "playerunlocked": true,
+      "playerCharacterRestrictions": {
+        "excluded": ["farmer_alice", "farmer_cham_cham", "farmer_nina", "farmer_raiden", "farmer_shoma"]
+      }
     },
     {
       "id": "an_angry_carrot",
@@ -409,14 +412,14 @@
       "isHidden": true
     },
     {
-      "id": "siegfried_and_supports",
-      "path": "js/raid-game/stages/siegfried_and_supports.json",
-      "name": "Siegfried and Supports",
-      "description": "Face the legendary warrior Siegfried and his powerful supporters in this epic 5v5 battle. Only the strongest teams will prevail!",
-      "difficulty": 8,
+      "id": "healing_forbidden_challenge",
+      "path": "js/raid-game/stages/healing_forbidden_challenge.json",
+      "name": "Healing Forbidden Challenge",
+      "description": "Face a quartet of formidable opponents where no healing magic can save you! Farmer Raiden, Schoolgirl Ephelt, Farmer Nina, and Schoolgirl Ayane await in this ultimate test of endurance. Choose your 3 strongest fighters wisely!",
+      "difficulty": 7,
       "type": "weekly_challenge",
-      "backgroundImage": "images/stages/burning_school_gym.jpg",
-      "backgroundMusic": "sounds/battle-epic.mp3",
+      "backgroundImage": "images/stages/burning_school_gym.png",
+      "backgroundMusic": "sounds/music/epic_battle_theme.mp3",
       "unlockRequirements": [],
       "playerunlocked": true
     },
@@ -432,6 +435,54 @@
       "path": "js/raid-game/stages/boosted_devils.json",
       "playerunlocked": false,
       "isHidden": true
+    },
+    {
+      "id": "desert_in_hell",
+      "name": "Desert in Hell",
+      "description": "The endless burning sands stretch before you, where twin demons Hotshot Diablo and Hotshot Diabla rule with deadly precision. The scorching heat sharpens everyone's reflexes to deadly perfection.",
+      "difficulty": 5,
+      "type": "story",
+      "storyTitle": "To The Hell We Go",
+      "backgroundImage": "images/stages/hell_desert.png",
+      "backgroundMusic": "sounds/music/hell_desert_theme.mp3",
+      "unlockRequirements": [],
+      "path": "js/raid-game/stages/desert_in_hell.json"
+    },
+    {
+      "id": "infernal_beast_gauntlet",
+      "name": "Infernal Beast Gauntlet",
+      "description": "In the deepest caverns of hell, five legendary beasts have gathered to test the mettle of any who dare venture into their domain. The air crackles with primal fury as these corrupted creatures prepare to unleash their hellish wrath.",
+      "difficulty": 6,
+      "type": "story",
+      "storyTitle": "To The Hell We Go",
+      "backgroundImage": "images/stages/hell_forest.png",
+      "backgroundMusic": "sounds/music/hell_beast_battle.mp3",
+      "unlockRequirements": [],
+      "path": "js/raid-game/stages/infernal_beast_gauntlet.json"
+    },
+    {
+      "id": "hell_castle_entrance_guardians",
+      "name": "Hell Castle Entrance Guardians",
+      "description": "Before the massive gates of Hell Castle stand two formidable guardians. The stone gargoyle Gargolyan and the demonic HellHorn block your path to the castle's interior. They have stood watch for millennia, and neither will yield without a fierce battle.",
+      "difficulty": 6,
+      "type": "story",
+      "storyTitle": "To The Hell We Go",
+      "backgroundImage": "images/stages/hell_castle_entrace.png",
+      "backgroundMusic": "sounds/music/hell_castle_theme.mp3",
+      "unlockRequirements": [],
+      "path": "js/raid-game/stages/hell_castle_entrance_guardians.json"
+    },
+    {
+      "id": "hell_castle_throne",
+      "name": "Hell Castle Throne",
+      "description": "The throne room of Hell Castle where Grok the Hell Lord awaits with his skeletal guards.",
+      "difficulty": 7,
+      "type": "story",
+      "storyTitle": "To The Hell We Go",
+      "backgroundImage": "images/stages/hell_castle_throne.png",
+      "backgroundMusic": "sounds/music/hell_lord_theme.mp3",
+      "unlockRequirements": [],
+            "path": "js/raid-game/stages/hell_castle_throne.json"
     }
   ]
 }

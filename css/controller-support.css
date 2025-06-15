@@ -35,15 +35,15 @@
     }
 }
 
-/* Selected element styles */
-.controller-selected {
+/* Selected element styles - only show when controller mode is active */
+body.controller-mode .controller-selected {
     box-shadow: 0 0 0 3px #00a8ff !important;
     outline: none !important;
     position: relative;
     z-index: 10;
 }
 
-.controller-selected::after {
+body.controller-mode .controller-selected::after {
     content: '';
     position: absolute;
     top: 0;
@@ -56,7 +56,7 @@
     z-index: 10;
 }
 
-.ability.controller-selected {
+body.controller-mode .ability.controller-selected {
     border-color: #00a8ff !important;
     transform: scale(1.05);
 }

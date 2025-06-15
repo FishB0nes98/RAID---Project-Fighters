@@ -1,0 +1,63 @@
+{
+    "id": "gargolyan",
+    "name": "Gargolyan",
+    "image": "Loading Screen/Gargolyan.png",
+    "rarity": "epic",
+    "type": "guardian",
+    "description": "A massive stone gargoyle guardian that protects the entrance to Hell Castle with its intimidating presence and raw strength.",
+    "stats": {
+        "physicalDamage": 181,
+        "magicalDamage": 280,
+        "armor": 30,
+        "magicalShield": 32,
+        "hp": 11500,
+        "hpPerTurn": 0,
+        "mana": 4000,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.12,
+        "critChance": 0.0,
+        "critDamage": 1.2,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "gargolyan_armor_shredding",
+            "name": "Armor Shredding",
+            "type": "custom",
+            "manaCost": 60,
+            "cooldown": 2,
+            "targetType": "all_enemies",
+            "description": "Deals 340 + (100% of Gargolyan's Dodge Chance scaling) Physical Damage to all enemies.",
+            "icon": "Icons/abilities/armor_shredding.png"
+        },
+        {
+            "id": "gargolyan_taunt",
+            "name": "Taunt",
+            "type": "custom",
+            "manaCost": 45,
+            "cooldown": 4,
+            "targetType": "self",
+            "description": "For 2 turns, all damage intended for allies is redirected to Gargolyan. Gargolyan can still dodge these attacks.",
+            "icon": "Icons/abilities/gargolyan_taunt.png"
+        },
+        {
+            "id": "gargolyan_magma_pulse",
+            "name": "Magma Pulse",
+            "type": "custom",
+            "manaCost": 80,
+            "cooldown": 5,
+            "targetType": "all_enemies",
+            "description": "Shoots 5 magma bursts at random enemies, each dealing 155 + (125% Magical Damage) as magical damage.",
+            "icon": "Icons/abilities/gargolyan_magma_pulse.png"
+        }
+    ],
+    "passive": {
+        "id": "unstoppable_passive",
+        "name": "Unstoppable",
+        "description": "Gargolyan cannot be stunned. Any stun effects applied to it are immediately negated.",
+        "icon": "Icons/passives/unstoppable.png",
+        "script": "js/raid-game/passives/unstoppable_passive.js"
+    },
+    "tags": ["Enemy", "Guardian", "Stone", "Hell"]
+} 

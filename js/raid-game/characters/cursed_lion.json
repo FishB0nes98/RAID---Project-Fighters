@@ -1,0 +1,48 @@
+{
+    "id": "cursed_lion",
+    "name": "Cursed Lion",
+    "image": "Loading Screen/Cursed Lion.png",
+    "rarity": "epic",
+    "type": "beast",
+    "description": "A majestic lion corrupted by hellish magic, its mane burns with unholy fire as it prowls the infernal plains.",
+    "stats": {
+        "physicalDamage": 340,
+        "magicalDamage": 0,
+        "armor": 15,
+        "magicalShield": 5,
+        "hp": 7900,
+        "hpPerTurn": 0,
+        "mana": 4200,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.0,
+        "critDamage": 1.8,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "infernal_roar",
+            "name": "Infernal Roar",
+            "icon": "Icons/abilities/infernal_roar.png",
+            "type": "custom",
+            "manaCost": 50,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "functionName": "cursedLionInfernalRoarEffect",
+            "description": "Unleashes a terrifying roar that silences 1 random enemy, disabling all their abilities for 1 turn."
+        },
+        {
+            "id": "stomping_eruption",
+            "name": "Stomping Eruption",
+            "icon": "Icons/abilities/stomping_eruption.png",
+            "type": "custom",
+            "manaCost": 100,
+            "cooldown": 7,
+            "targetType": "enemy",
+            "functionName": "cursedLionStompingEruptionEffect",
+            "description": "Stomps the ground creating 3-6 hellish eruptions under random enemies, each dealing 450 physical damage."
+        }
+    ],
+    "tags": ["Beast", "Hell", "Fire"]
+} 

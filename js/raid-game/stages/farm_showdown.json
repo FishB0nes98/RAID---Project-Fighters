@@ -1,8 +1,8 @@
 {
   "id": "farm_showdown",
-  "name": "Farm Showdown",
-  "description": "The farmers have challenged you to a battle! Defeat all three farmers to prove your worth.",
-  "difficulty": 5,
+  "name": "5v5 - Farm Showdown",
+  "description": "The ultimate farmer challenge! Face all five farmers in an epic showdown. Choose your 5 strongest fighters to prove your worth against the complete farming crew.",
+  "difficulty": 6,
   "objectives": {
     "winConditions": [
       { "type": "allEnemiesDefeated" }
@@ -14,14 +14,30 @@
       "name": "Farm Field",
       "description": "The battle takes place in an open field. The farmers have the home advantage!",
       "icon": "Icons/effects/farm_field.png"
+    },
+    {
+      "id": "healing_wind",
+      "name": "Healing Wind",
+      "description": "A gentle breeze carries healing energy across the battlefield.",
+      "icon": "🌬️",
+      "effect": {
+        "value": 0.01,
+        "target": "all"
+      }
     }
   ],
   "enemies": [
     {
+      "characterId": "farmer_alice"
+    },
+    {
+      "characterId": "farmer_cham_cham"
+    },
+    {
       "characterId": "farmer_nina"
     },
     {
-      "characterId": "farmer_alice"
+      "characterId": "farmer_raiden"
     },
     {
       "characterId": "farmer_shoma"
@@ -30,15 +46,20 @@
   "rewards": [
     {
       "type": "gold",
-      "value": 300
+      "value": 500
     },
     {
       "type": "xp",
-      "value": 150
+      "value": 300
     }
   ],
+  "firstTimeCompletionReward": {
+    "type": "random_character",
+    "description": "Random Character Unlock",
+    "message": "🎉 For completing the ultimate farmer challenge, you've earned the respect of a random character who wishes to join your cause!"
+  },
   "playerCharacterRestrictions": {
-    "excluded": ["farmer_nina", "farmer_alice", "farmer_shoma"]
+    "excluded": ["farmer_alice", "farmer_cham_cham", "farmer_nina", "farmer_raiden", "farmer_shoma"]
   },
   "backgroundImage": "images/stages/farm_field.webp",
   "backgroundMusic": "sounds/farm_bgm.mp3"

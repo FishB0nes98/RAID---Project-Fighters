@@ -1232,15 +1232,8 @@ const pounceAbilityEffect = (caster, target) => {
     }
     // --- End Target Impact VFX ---
 
-    // Set damage source property correctly on target
-    // This is used by the applyDamage method to determine critical hits
-    target.isDamageSource = caster;
-    
-    // Apply damage
-    const damageResult = target.applyDamage(baseDamage, 'physical');
-    
-    // Reset damage source
-    target.isDamageSource = null;
+    // Apply damage with statistics tracking
+    const damageResult = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'pounce' });
     
     let message = `${caster.name} used Pounce on ${target.name} for ${damageResult.damage} physical damage`;
     if (damageResult.isCritical) {
@@ -1250,14 +1243,16 @@ const pounceAbilityEffect = (caster, target) => {
     log(message);
     
     // Check for stun effect (only if debuffEffect exists on the ability)
-    // This will be removed by the talent
+    // This will be removed by the Hunter's Instinct talent
+    console.log(`[Pounce Stun Debug] Ability debuffEffect:`, ability?.debuffEffect);
     if (ability && ability.debuffEffect && Math.random() < ability.debuffEffect.chance) {
+        console.log(`[Pounce Stun Debug] Stun roll successful! Applying stun.`);
         stunApplied = true; // Set flag for VFX addition
         const stunDebuff = new Effect(
             'stun_debuff',
             'Stunned',
             'Icons/debuffs/stun.png',
-            ability.debuffEffect.duration || 4, // Duration of 4 turns if not specified
+            ability.debuffEffect.duration || 1, // Duration of 1 turn if not specified
             null,
             true // Is a debuff
         );
@@ -1282,7 +1277,7 @@ const pounceAbilityEffect = (caster, target) => {
         
         // Add debuff to target
         target.addDebuff(stunDebuff.clone()); // Clone before adding
-        log(`${target.name} is stunned for ${ability.debuffEffect.duration || 4} turns!`);
+        log(`${target.name} is stunned for ${ability.debuffEffect.duration || 1} turns!`);
 
         // Stun VFX is added after impact animation finishes (see setTimeout above)
     }
@@ -1421,7 +1416,7 @@ const thickFurAbilityEffect = (caster, target, options = {}) => {
             console.log(`[Thick Fur Effect] Attempting to heal for ${healAmount}`);
             // --- DEBUGGING END ---
             // Call heal method and handle the healing logic
-            caster.heal(healAmount, caster);
+            caster.heal(healAmount, caster, { abilityId: 'thick_fur_healing' });
             
             // Add healing visual effect
             const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
@@ -1615,53 +1610,55 @@ const bunnyBounceAbilityEffect = (caster, target) => {
     if (target.isAI === caster.isAI) {
         // Target is an ally
         
-        // Calculate 50% of magic shield to transfer
-        const shieldTransferAmount = Math.ceil(currentMagicShield * 0.5);
-        
-        // Create the buff
-        const magicShieldBuff = new Effect(
-            'bunny_bounce_shield_buff',
-            'Bunny Shield',
+        // Apply redirection buff instead of shield
+        const redirectBuff = new Effect(
+            'bunny_bounce_redirect_buff',
+            'Bunny Bounce',
             'Icons/abilities/bunny_bounce.webp',
-            5, // Duration of 5 turns
+            5, // Duration: 5 turns
             null,
-            false // Is a buff
-        );
-        
-        // Set stat modifiers for the buff
-        magicShieldBuff.statModifiers = [
-            { stat: 'magicalShield', value: shieldTransferAmount, operation: 'add' }
-        ];
-        
-        magicShieldBuff.setDescription(`Receives ${shieldTransferAmount} Magic Shield from ${caster.name} for 5 turns.`);
-        
-        // Add a custom remove method to display a message when the buff expires
-        magicShieldBuff.remove = function(character) {
-            addLogEntry(`${character.name}'s Bunny Shield has faded away. Magic Shield returns to normal.`);
+            false
+        ).setDescription(`All damage received is redirected to ${caster.name}.`);
+
+        // When buff is applied, flag the target for redirection
+        target.bunnyBounceRedirectToAliceId = caster.instanceId || caster.id;
+
+        // Clean up on removal
+        redirectBuff.remove = function(character) {
+            if (character.bunnyBounceRedirectToAliceId) delete character.bunnyBounceRedirectToAliceId;
+            addLogEntry(`${character.name}'s Bunny Bounce protection has faded.`);
         };
-        
-        // Add buff to target ally
-        target.addBuff(magicShieldBuff.clone()); // Clone before adding
-        
-        // --- Ally Target VFX ---
+
+        // Add buff to target
+        target.addBuff(redirectBuff.clone());
+
+        // Ally VFX showing link
         const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
-        if (targetElement) {
-            const vfxContainer = document.createElement('div');
-            vfxContainer.className = 'vfx-container bunny-bounce-ally-vfx';
-            targetElement.appendChild(vfxContainer);
+        const casterElement2 = document.getElementById(`character-${caster.instanceId || caster.id}`);
+        if (targetElement && casterElement2) {
+            const beam = document.createElement('div');
+            beam.className = 'bunny-bounce-redirect-beam';
+            document.body.appendChild(beam);
 
-            const shieldVfx = document.createElement('div');
-            shieldVfx.className = 'ally-shield-gain-vfx';
-            shieldVfx.innerHTML = `<span>+${shieldTransferAmount} MS</span>`;
-            vfxContainer.appendChild(shieldVfx);
+            const startRect = targetElement.getBoundingClientRect();
+            const endRect = casterElement2.getBoundingClientRect();
+            const sx = startRect.left + startRect.width/2;
+            const sy = startRect.top + startRect.height/2;
+            const ex = endRect.left + endRect.width/2;
+            const ey = endRect.top + endRect.height/2;
+            const dist = Math.hypot(ex - sx, ey - sy);
+            const angle = Math.atan2(ey - sy, ex - sx) * 180/Math.PI;
+            beam.style.left = sx + 'px';
+            beam.style.top = sy + 'px';
+            beam.style.width = dist + 'px';
+            beam.style.transform = `rotate(${angle}deg)`;
+            beam.style.transformOrigin = '0 50%';
 
-            playSound('sounds/shield_gain_ally.mp3', 0.6); // Example sound
-
-            setTimeout(() => vfxContainer.remove(), 1500);
+            playSound('sounds/shield_gain_ally.mp3', 0.6);
+            setTimeout(()=> beam.remove(), 1200);
         }
-        // --- End Ally Target VFX ---
 
-        log(`${caster.name} used Bunny Bounce on ${target.name}, granting ${shieldTransferAmount} Magic Shield for 5 turns!`);
+        log(`${caster.name} protects ${target.name} with Bunny Bounce! All incoming damage will be redirected to ${caster.name}.`);
     } else {
         // Target is an enemy
         
@@ -1691,13 +1688,8 @@ const bunnyBounceAbilityEffect = (caster, target) => {
         // --- End Enemy Target VFX ---
 
         // Set damage source property correctly on target for critical hit calculation
-        target.isDamageSource = caster;
-        
         // Apply damage - 600% of Alice's magic shield as physical damage
-        const result = target.applyDamage(damage, 'physical');
-        
-        // Reset damage source
-        target.isDamageSource = null;
+        const result = target.applyDamage(damage, 'physical', caster, { abilityId: 'bunny_bounce' });
         
         let message = `${caster.name} used Bunny Bounce on ${target.name} for ${result.damage} physical damage`;
         if (result.isCritical) {
@@ -1811,8 +1803,8 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
             healAmount = Math.max(Math.floor(missingHealth * 0.21), Math.floor(currentTarget.stats.maxHp * 0.02));
         }
         
-        // Apply healing
-        currentTarget.heal(healAmount, caster);
+        // Apply healing with statistics tracking
+        currentTarget.heal(healAmount, caster, { abilityId: 'carrot_power_up' });
         
         // --- Target Heal VFX ---
         const targetElement = document.getElementById(`character-${currentTarget.instanceId || currentTarget.id}`);
@@ -1893,13 +1885,19 @@ const pounceAbility = new Ability(
     pounceAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-pounceAbility.baseDescription = 'Deals 50% AD damage and has a 65% chance to stun the target for 4 turns.';
+pounceAbility.baseDescription = 'Deals 50% AD damage and has a 85% chance to stun the target for 1 turn.';
+// Set default amount property to prevent NaN issues
+pounceAbility.amount = 0.5;
 pounceAbility.generateDescription = function() {
     console.log(`[Alice] Generating description for pounce. Base: "${this.baseDescription}"`);
+    
+    // Ensure amount is set with fallback to default
+    const damageAmount = this.amount !== undefined ? this.amount : 0.5;
+    
     // Check if Hunter's Instinct talent is active
-    if (this.cooldownReductionEffect && this.amount === 2.0 && !this.debuffEffect) {
+    if (this.cooldownReductionEffect && damageAmount === 2.0 && !this.debuffEffect) {
         // Using the Hunter's Instinct talent version
-        let description = `Deals <span class="talent-effect damage">${this.amount * 100}% AD damage</span> and has a <span class="talent-effect utility">${Math.round(this.cooldownReductionEffect.chance * 100)}% chance to reduce a random Alice ability cooldown by ${this.cooldownReductionEffect.amount} turn</span>.`;
+        let description = `Deals <span class="talent-effect damage">${Math.round(damageAmount * 100)}% AD damage</span> and has a <span class="talent-effect utility">${Math.round(this.cooldownReductionEffect.chance * 100)}% chance to reduce a random Alice ability cooldown by ${this.cooldownReductionEffect.amount} turn</span>.`;
         
         // Add Agile Hunter information if applicable
         if (this.chanceToNotEndTurn) {
@@ -1912,8 +1910,8 @@ pounceAbility.generateDescription = function() {
         this.description = this.baseDescription;
         
         // If only the amount was modified but it's not the Hunter's Instinct talent
-        if (this.amount !== 0.5) {
-            this.description = this.description.replace('50%', `${this.amount * 100}%`);
+        if (damageAmount !== 0.5) {
+            this.description = this.description.replace('50%', `${Math.round(damageAmount * 100)}%`);
         }
         
         // Add Agile Hunter information if applicable even in base version
@@ -1972,7 +1970,7 @@ const bunnyBounceAbility = new Ability(
     bunnyBounceAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-bunnyBounceAbility.baseDescription = 'If used on an ally: Gives 50% of Magic Shield to that target. If used on an enemy: Deals 600% of Magic Shield as physical damage.';
+bunnyBounceAbility.baseDescription = 'If used on an ally: Redirect every damage from that target to yourself. If used on an enemy: Deals 600% of Magic Shield as physical damage.';
 bunnyBounceAbility.generateDescription = function() {
     console.log(`[Alice] Generating description for bunny_bounce. Base: "${this.baseDescription}"`);
     this.description = this.baseDescription;
@@ -2196,7 +2194,7 @@ function updateAliceAbilityDescriptions(character) {
         // Add stun effect if present
         if (pounceAbility.debuffEffect && pounceAbility.debuffEffect.chance) {
             const stunChance = Math.round(pounceAbility.debuffEffect.chance * 100);
-            const stunDuration = pounceAbility.debuffEffect.duration || 4;
+            const stunDuration = pounceAbility.debuffEffect.duration || 1;
             description += ` and has a ${stunChance}% chance to stun the target for ${stunDuration} turns.`;
         } else {
             // For Hunter's Instinct talent (no stun, but has cooldown reduction)
@@ -2351,3 +2349,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Registered showFurryGuardianVFX function globally');
     }
 });
+
+// --- Bunny Bounce now uses the Universal Damage Redirection Framework in character.js ---
+// The bunnyBounceRedirectToAliceId property is automatically checked by checkForDamageRedirection()
+// No need for a separate hook - the universal system handles it with proper armor/magic shield calculations
+
+console.log('[BunnyBounce] Using Universal Damage Redirection Framework');

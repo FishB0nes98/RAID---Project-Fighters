@@ -47,6 +47,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 1. Apply the normal buff effect (100% dodge for 3 turns)
                     originalEffect(caster, target);
                     
+                    // NEW: Attach an onRemove handler to ensure dodge chance is restored
+                    const homerunBuff = caster.buffs.find(b => b.id === 'homerun_buff');
+                    if (homerunBuff && !homerunBuff._enhancedOnRemove) {
+                        // Preserve reference so we do not attach multiple times for stacked buffs
+                        homerunBuff._enhancedOnRemove = true;
+                        // Store caster's base dodge chance at the moment of application (may already include talents / stage mods)
+                        homerunBuff._originalDodgeChance = caster.baseStats.dodgeChance;
+                        homerunBuff.onRemove = function(character) {
+                            try {
+                                // Restore dodge chance to base value and recalculate stats to apply any other active effects
+                                if (character && character.baseStats) {
+                                    character.stats.dodgeChance = character.baseStats.dodgeChance;
+                                }
+                                character.recalculateStats('homerun-buff-removed');
+                            } catch (e) {
+                                console.error('[Homerun] Error restoring dodge chance on buff removal:', e);
+                            }
+                        };
+                    }
+                    
                     // Debug: Check dodge chance after buff and verify buff was applied
                     console.log(`[Homerun Debug] ${caster.name} dodge chance AFTER buff: ${caster.stats.dodgeChance}`);
                     console.log(`[Homerun Debug] ${caster.name} current buffs:`, caster.buffs.map(b => ({ 

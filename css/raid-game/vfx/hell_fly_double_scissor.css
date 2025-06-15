@@ -1,0 +1,386 @@
+/* Hell Fly Double Scissor VFX Styles */
+
+/* Buzz Effect for Windup */
+.hell-fly-buzz-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+    animation: flyBuzz 0.6s ease-out forwards;
+}
+
+.hell-fly-buzz-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, 
+        rgba(139, 0, 139, 0.8) 0%, 
+        rgba(75, 0, 130, 0.6) 40%, 
+        rgba(25, 25, 112, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: buzzAura 0.6s ease-out forwards;
+}
+
+.hell-fly-buzz-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(139, 0, 139, 0.7) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: buzzCore 0.6s ease-out forwards;
+}
+
+@keyframes flyBuzz {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        filter: blur(2px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+        filter: blur(1px);
+    }
+}
+
+@keyframes buzzAura {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.3) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2) rotate(360deg);
+    }
+}
+
+@keyframes buzzCore {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+/* Hell Fly Preparing Animation */
+.hell-fly-preparing {
+    filter: drop-shadow(0 0 15px rgba(139, 0, 139, 0.8));
+    animation: flyPreparation 0.6s ease-out;
+}
+
+@keyframes flyPreparation {
+    0% {
+        filter: drop-shadow(0 0 15px rgba(139, 0, 139, 0.8));
+        transform: scale(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 25px rgba(75, 0, 130, 1));
+        transform: scale(1.05);
+    }
+    100% {
+        filter: drop-shadow(0 0 10px rgba(25, 25, 112, 0.6));
+        transform: scale(1);
+    }
+}
+
+/* Scissor Slash Effects */
+.hell-fly-scissor-slash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* First Strike - Diagonal slash from top-left to bottom-right */
+.hell-fly-scissor-slash.strike-1::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 4px;
+    background: linear-gradient(135deg, 
+        transparent 0%, 
+        rgba(220, 20, 60, 0.9) 20%, 
+        rgba(255, 69, 0, 0.8) 50%, 
+        rgba(220, 20, 60, 0.9) 80%, 
+        transparent 100%);
+    border-radius: 2px;
+    box-shadow: 
+        0 0 10px rgba(220, 20, 60, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: rotate(45deg);
+    animation: scissorSlash1 0.3s ease-out forwards;
+    transform-origin: left center;
+}
+
+/* Second Strike - Diagonal slash from top-right to bottom-left */
+.hell-fly-scissor-slash.strike-2::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    width: 80%;
+    height: 4px;
+    background: linear-gradient(-135deg, 
+        transparent 0%, 
+        rgba(220, 20, 60, 0.9) 20%, 
+        rgba(255, 69, 0, 0.8) 50%, 
+        rgba(220, 20, 60, 0.9) 80%, 
+        transparent 100%);
+    border-radius: 2px;
+    box-shadow: 
+        0 0 10px rgba(220, 20, 60, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: rotate(-45deg);
+    animation: scissorSlash2 0.3s ease-out forwards;
+    transform-origin: right center;
+}
+
+@keyframes scissorSlash1 {
+    0% {
+        width: 0;
+        opacity: 1;
+        box-shadow: 0 0 10px rgba(220, 20, 60, 0.6);
+    }
+    30% {
+        width: 80%;
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
+    }
+    100% {
+        width: 80%;
+        opacity: 0;
+        box-shadow: 0 0 5px rgba(220, 20, 60, 0.3);
+    }
+}
+
+@keyframes scissorSlash2 {
+    0% {
+        width: 0;
+        opacity: 1;
+        box-shadow: 0 0 10px rgba(220, 20, 60, 0.6);
+    }
+    30% {
+        width: 80%;
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
+    }
+    100% {
+        width: 80%;
+        opacity: 0;
+        box-shadow: 0 0 5px rgba(220, 20, 60, 0.3);
+    }
+}
+
+/* Target Hit Animations */
+.scissor-hit-1 {
+    animation: scissorHit1 0.5s ease-out;
+}
+
+.scissor-hit-2 {
+    animation: scissorHit2 0.5s ease-out;
+}
+
+@keyframes scissorHit1 {
+    0% { transform: translateX(0) translateY(0) rotate(0deg); }
+    25% { transform: translateX(-8px) translateY(-8px) rotate(-2deg); }
+    50% { transform: translateX(-4px) translateY(-4px) rotate(-1deg); }
+    75% { transform: translateX(2px) translateY(2px) rotate(1deg); }
+    100% { transform: translateX(0) translateY(0) rotate(0deg); }
+}
+
+@keyframes scissorHit2 {
+    0% { transform: translateX(0) translateY(0) rotate(0deg); }
+    25% { transform: translateX(8px) translateY(-8px) rotate(2deg); }
+    50% { transform: translateX(4px) translateY(-4px) rotate(1deg); }
+    75% { transform: translateX(-2px) translateY(2px) rotate(-1deg); }
+    100% { transform: translateX(0) translateY(0) rotate(0deg); }
+}
+
+/* Impact Particles */
+.scissor-impact-particle {
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, 
+        rgba(220, 20, 60, 0.9) 0%, 
+        rgba(139, 0, 0, 0.7) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: scissorParticleScatter 0.8s ease-out forwards;
+    z-index: 1002;
+}
+
+@keyframes scissorParticleScatter {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(0.2);
+    }
+}
+
+/* Finisher Glow Effect */
+.double-scissor-finisher-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1003;
+    pointer-events: none;
+    animation: finisherGlow 0.8s ease-out forwards;
+}
+
+.double-scissor-finisher-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, 
+        rgba(220, 20, 60, 0.8) 0%, 
+        rgba(255, 69, 0, 0.6) 30%, 
+        rgba(139, 0, 139, 0.4) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: finisherBlast 0.8s ease-out forwards;
+}
+
+.double-scissor-finisher-glow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(220, 20, 60, 0.6) 40%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: finisherCore 0.8s ease-out forwards;
+}
+
+@keyframes finisherGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+@keyframes finisherBlast {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+@keyframes finisherCore {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+    }
+}
+
+/* Screen Shake for Scissor Impact */
+@keyframes scissorImpactShake {
+    0% { transform: translate(0); }
+    10% { transform: translate(-4px, -3px); }
+    20% { transform: translate(-3px, 4px); }
+    30% { transform: translate(4px, 3px); }
+    40% { transform: translate(3px, -3px); }
+    50% { transform: translate(-3px, 4px); }
+    60% { transform: translate(-3px, 3px); }
+    70% { transform: translate(4px, 3px); }
+    80% { transform: translate(-3px, -3px); }
+    90% { transform: translate(3px, 4px); }
+    100% { transform: translate(0); }
+}
+
+/* Character Effects During Double Scissor */
+.character-container:has(.hell-fly-scissor-slash) {
+    filter: drop-shadow(0 0 10px rgba(220, 20, 60, 0.6));
+}
+
+/* Enhanced Character Glow During Preparation */
+.character-container:has(.hell-fly-preparing) {
+    filter: drop-shadow(0 0 20px rgba(139, 0, 139, 0.9));
+    animation: hellFlyCharacterGlow 0.6s ease-out;
+}
+
+@keyframes hellFlyCharacterGlow {
+    0% {
+        filter: drop-shadow(0 0 20px rgba(139, 0, 139, 0.9));
+    }
+    50% {
+        filter: drop-shadow(0 0 30px rgba(75, 0, 130, 1));
+    }
+    100% {
+        filter: drop-shadow(0 0 15px rgba(25, 25, 112, 0.7));
+    }
+} 

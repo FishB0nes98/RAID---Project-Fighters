@@ -1,0 +1,69 @@
+{
+  "id": "smith_lord",
+  "name": "Smith Lord",
+  "image": "Loading Screen/smith_lord.png",
+  "rarity": "epic",
+  "type": "boss",
+  "description": "The master blacksmith of hell's forges, wielding a massive enchanted hammer and commanding the fires of creation and destruction.",
+  "stats": {
+    "physicalDamage": 155,
+    "magicalDamage": 180,
+    "armor": 25,
+    "magicalShield": 20,
+    "hp": 12000,
+    "hpPerTurn": 0,
+    "mana": 2500,
+    "manaPerTurn": 0,
+    "lifesteal": 0.00,
+    "dodgeChance": 0.00,
+    "critChance": 0.0,
+    "critDamage": 0.5,
+    "healingPower": 0
+  },
+  "abilities": [
+    {
+      "id": "gear_up",
+      "name": "Gear Up",
+      "description": "Enhances all allies' armor by 10 for 4 turns. Does not affect self.",
+      "icon": "Icons/abilities/gear_up.png",
+      "manaCost": 50,
+      "cooldown": 4,
+      "targetType": "all_allies_except_self",
+      "type": "custom",
+      "functionName": "gear_up",
+      "damageType": "support"
+    },
+    {
+      "id": "molten_breath",
+      "name": "Molten Breath",
+      "description": "Unleashes a devastating molten breath that deals 400 magical damage to all enemies.",
+      "icon": "Icons/abilities/molten_breath.png",
+      "manaCost": 120,
+      "cooldown": 5,
+      "targetType": "all_enemies",
+      "type": "custom",
+      "functionName": "molten_breath",
+      "damageType": "magical"
+    },
+    {
+      "id": "weapon_smithing",
+      "name": "Weapon Smithing",
+      "description": "Forges enhanced equipment for an ally, boosting one of their random non-zero stats by 65% for 3 turns.",
+      "icon": "Icons/abilities/weapon_smithing.png",
+      "manaCost": 50,
+      "cooldown": 2,
+      "targetType": "ally",
+      "type": "custom",
+      "functionName": "weapon_smithing",
+      "damageType": "support"
+    }
+  ],
+  "passive": {
+    "id": "smith_lord_forge_mastery",
+    "name": "Forge Mastery",
+    "description": "Gains +5 armor and +5 magical shield for each buff that alive allies have.",
+    "icon": "Icons/passives/forge_mastery.png",
+    "script": "js/raid-game/passives/smith_lord_passive.js"
+  },
+  "isAI": true
+} 

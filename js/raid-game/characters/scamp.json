@@ -1,0 +1,65 @@
+{
+    "id": "scamp",
+    "name": "Scamp",
+    "image": "Loading Screen/Scamp.png",
+    "rarity": "common",
+    "type": "demon",
+    "description": "A mischievous little devil who serves as Morissa's loyal, if somewhat incompetent, helper.",
+    "stats": {
+        "physicalDamage": 50,
+        "magicalDamage": 50,
+        "armor": 4,
+        "magicalShield": 6,
+        "hp": 8000,
+        "hpPerTurn": 0,
+        "mana": 9999,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.00,
+        "critChance": 0.0,
+        "critDamage": 0.0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "sack_of_blood",
+            "name": "Sack of Blood",
+            "icon": "Icons/abilities/scamp_sack_of_blood.png",
+            "description": "Offers a bloody sacrifice to heal an ally for 666 HP.",
+            "manaCost": 66,
+            "cooldown": 3,
+            "targetType": "ally",
+            "type": "custom",
+            "functionName": "sackOfBloodEffect"
+        },
+        {
+            "id": "scamp_infernal_pact",
+            "name": "Succubus's Infernal Pact",
+            "icon": "Icons/abilities/scamp_infernal_pact.png",
+            "description": "Forms an infernal pact with an ally, doubling their combat stats for 3 turns. The little devil's greatest offering to his demonic mistress's allies.",
+            "manaCost": 150,
+            "cooldown": 7,
+            "targetType": "ally",
+            "type": "custom",
+            "functionName": "scampInfernalPactEffect"
+        },
+        {
+            "id": "demonic_powder",
+            "name": "Demonic Powder",
+            "icon": "Icons/abilities/scamp_demonic_powder.png",
+            "description": "Sprinkles mystical demonic powder on an ally, reducing ALL of their active ability cooldowns by 1 turn. The little devil's mischievous way of helping allies act faster.",
+            "manaCost": 85,
+            "cooldown": 6,
+            "targetType": "ally",
+            "type": "custom",
+            "functionName": "demonicPowderEffect"
+        }
+    ],
+    "passive": {
+        "id": "scamp_damage_redirect",
+        "name": "Sacrificial Devotion",
+        "description": "65% chance to redirect damage and negative effects from allies to Scamp instead. Redirected damage is reduced to 35% of the original amount. Creates dramatic visual effects when triggered.",
+        "icon": "Icons/passives/scamp_sacrifice.png",
+        "script": "js/raid-game/passives/scamp_passive.js"
+    }
+} 

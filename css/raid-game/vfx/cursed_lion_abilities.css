@@ -1,0 +1,1073 @@
+/* Cursed Lion Abilities VFX Styles */
+
+/* ========== Infernal Roar VFX ========== */
+
+.infernal-roar-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    z-index: 1000;
+    animation: roarWaveExpand 2s ease-out forwards;
+    text-shadow: 0 0 20px #ff4500, 0 0 40px #ff6347;
+    pointer-events: none;
+}
+
+@keyframes roarWaveExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+.roar-sound-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    border: 3px solid #ff4500;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: soundWaveRipple 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 999;
+}
+
+@keyframes soundWaveRipple {
+    0% {
+        width: 60px;
+        height: 60px;
+        opacity: 1;
+        border-width: 3px;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+.infernal-silence-effect {
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    font-size: 2em;
+    z-index: 1001;
+    animation: silencePulse 1.5s ease-in-out 3;
+    text-shadow: 0 0 10px #ff0000;
+    pointer-events: none;
+}
+
+@keyframes silencePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+/* Screen shake for roar */
+.roar-screen-shake {
+    animation: roarShake 0.6s ease-in-out;
+}
+
+@keyframes roarShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-10px); }
+    20% { transform: translateX(10px); }
+    30% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    50% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    70% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+    90% { transform: translateX(-2px); }
+}
+
+/* ========== Stomping Eruption VFX ========== */
+
+.stomp-impact {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 4em;
+    z-index: 1000;
+    animation: stompShake 1s ease-out forwards;
+    text-shadow: 0 0 20px #8b0000, 0 0 40px #ff4500;
+    pointer-events: none;
+}
+
+@keyframes stompShake {
+    0% {
+        transform: translateX(-50%) scale(0.5);
+        opacity: 1;
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-50%) scale(1) translateY(-10px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(-50%) scale(1) translateY(10px);
+    }
+    100% {
+        transform: translateX(-50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.ground-cracks {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 5em;
+    z-index: 500;
+    animation: crackSpread 2s ease-out forwards;
+    text-shadow: 0 0 30px #ff4500, 0 0 60px #8b0000;
+    pointer-events: none;
+}
+
+@keyframes crackSpread {
+    0% {
+        transform: translateX(-50%) scaleX(0.2);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-50%) scaleX(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(-50%) scaleX(2);
+        opacity: 0;
+    }
+}
+
+.eruption-warning {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5em;
+    z-index: 1001;
+    animation: warningBlink 0.8s ease-in-out 3;
+    text-shadow: 0 0 15px #ffff00, 0 0 30px #ff4500;
+    pointer-events: none;
+}
+
+@keyframes warningBlink {
+    0%, 100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: translateX(-50%) scale(1.2);
+    }
+}
+
+.hellish-eruption {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3em;
+    z-index: 1000;
+    animation: eruptionBlast 1.5s ease-out forwards;
+    text-shadow: 0 0 20px #ff4500, 0 0 40px #8b0000, 0 0 60px #ffa500;
+    pointer-events: none;
+}
+
+@keyframes eruptionBlast {
+    0% {
+        transform: translateX(-50%) translateY(50px) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 1;
+    }
+    60% {
+        transform: translateX(-50%) translateY(-20px) scale(1.3);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-40px) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.lava-particle {
+    position: absolute;
+    font-size: 1.5em;
+    z-index: 998;
+    animation: lavaParticleFloat 1.5s ease-out forwards;
+    text-shadow: 0 0 10px #ff4500;
+    pointer-events: none;
+}
+
+@keyframes lavaParticleFloat {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-60px) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-120px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.eruption-shockwave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 4px solid #ff3300;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: eruptionShockwave 1.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 998;
+}
+
+@keyframes eruptionShockwave {
+    0% {
+        width: 30px;
+        height: 30px;
+        opacity: 1;
+        border-color: #ff3300;
+        border-width: 4px;
+    }
+    50% {
+        width: 150px;
+        height: 150px;
+        opacity: 0.6;
+        border-color: #ff6600;
+        border-width: 3px;
+    }
+    100% {
+        width: 250px;
+        height: 250px;
+        opacity: 0;
+        border-color: #ffaa00;
+        border-width: 1px;
+    }
+}
+
+/* Screen shake for stomp */
+.stomp-screen-shake {
+    animation: stompShakeScreen 0.8s ease-in-out;
+}
+
+@keyframes stompShakeScreen {
+    0%, 100% { transform: translateY(0); }
+    10% { transform: translateY(-15px); }
+    20% { transform: translateY(15px); }
+    30% { transform: translateY(-12px); }
+    40% { transform: translateY(12px); }
+    50% { transform: translateY(-8px); }
+    60% { transform: translateY(8px); }
+    70% { transform: translateY(-5px); }
+    80% { transform: translateY(5px); }
+    90% { transform: translateY(-2px); }
+}
+
+/* Screen shake for eruptions */
+.eruption-screen-shake {
+    animation: eruptionShakeScreen 0.4s ease-in-out;
+}
+
+@keyframes eruptionShakeScreen {
+    0%, 100% { transform: translate(0); }
+    25% { transform: translate(-5px, -5px); }
+    50% { transform: translate(5px, 5px); }
+    75% { transform: translate(-3px, 3px); }
+}
+
+/* ========== Enhanced Character Effects ========== */
+
+/* Cursed Lion glow when using abilities */
+[data-character-id="cursed_lion"].ability-casting {
+    filter: drop-shadow(0 0 20px #ff3300) drop-shadow(0 0 40px #ff6600);
+    animation: cursedLionGlow 2s ease-in-out;
+}
+
+@keyframes cursedLionGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px #ff3300) drop-shadow(0 0 40px #ff6600);
+    }
+    50% {
+        filter: drop-shadow(0 0 40px #ff0000) drop-shadow(0 0 80px #ff3300);
+    }
+}
+
+/* Target highlighting for abilities */
+.cursed-lion-target {
+    outline: 3px solid #ff3300;
+    outline-offset: 5px;
+    animation: targetPulse 1s ease-in-out infinite;
+}
+
+@keyframes targetPulse {
+    0%, 100% {
+        outline-color: #ff3300;
+        outline-width: 3px;
+    }
+    50% {
+        outline-color: #ff6600;
+        outline-width: 5px;
+    }
+}
+
+/* Silenced character indicator - works with infernal_silence debuff */
+.character-silenced {
+    filter: drop-shadow(0 0 15px #ff0000) drop-shadow(0 0 30px #8b0000);
+    animation: silencedGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes silencedGlow {
+    0% {
+        filter: drop-shadow(0 0 15px #ff0000) drop-shadow(0 0 30px #8b0000);
+    }
+    100% {
+        filter: drop-shadow(0 0 25px #ff4500) drop-shadow(0 0 50px #ff0000);
+    }
+}
+
+.character-eruption-hit {
+    filter: drop-shadow(0 0 20px #ff4500) drop-shadow(0 0 40px #8b0000);
+    animation: eruptionHitGlow 1s ease-out forwards;
+}
+
+@keyframes eruptionHitGlow {
+    0% {
+        filter: drop-shadow(0 0 20px #ff4500) drop-shadow(0 0 40px #8b0000);
+    }
+    100% {
+        filter: none;
+    }
+}
+
+/* Visual indicator for disabled abilities */
+.ability-disabled {
+    opacity: 0.4;
+    filter: grayscale(70%);
+    pointer-events: none;
+}
+
+.ability-disabled::after {
+    content: '🚫';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em;
+    z-index: 1001;
+    text-shadow: 0 0 5px #ff0000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .infernal-roar-wave,
+    .stomp-impact,
+    .hellish-eruption {
+        font-size: 2em;
+    }
+    
+    .roar-sound-wave {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    
+    .eruption-shockwave {
+        max-width: 150px;
+        max-height: 150px;
+    }
+    
+    .lava-particle {
+        font-size: 1em;
+    }
+}
+
+/* Performance optimizations */
+.infernal-roar-wave,
+.roar-sound-wave,
+.infernal-silence-effect,
+.stomp-impact,
+.ground-cracks,
+.eruption-warning,
+.hellish-eruption,
+.lava-particle,
+.eruption-shockwave {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+/* Accessibility - Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .infernal-roar-wave,
+    .roar-sound-wave,
+    .stomp-impact,
+    .hellish-eruption,
+    .lava-particle,
+    .eruption-shockwave {
+        animation-duration: 0.5s;
+    }
+    
+    .roar-screen-shake,
+    .stomp-screen-shake,
+    .eruption-screen-shake {
+        animation: none;
+    }
+}
+
+/* Cursed Lion Abilities VFX - Detailed Particle Systems */
+
+/* === INFERNAL ROAR VFX === */
+
+/* Roar Energy Burst */
+.infernal-roar-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, 
+        #ff4500 0%, 
+        #ff6b35 30%, 
+        #ff8c42 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    z-index: 1000;
+    animation: roarBurstExpansion 2s ease-out forwards;
+    box-shadow: 
+        0 0 20px #ff4500,
+        0 0 40px #ff6b35,
+        inset 0 0 20px rgba(255, 69, 0, 0.5);
+}
+
+@keyframes roarBurstExpansion {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Fire Particles around Caster */
+.roar-fire-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 20px;
+    background: linear-gradient(to top, 
+        #ff4500 0%, 
+        #ff6b35 40%, 
+        #ffaa44 70%, 
+        #ffd700 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    transform-origin: center bottom;
+    animation: fireParticleFloat 1.5s ease-out forwards;
+    z-index: 999;
+    box-shadow: 0 0 6px #ff4500;
+}
+
+@keyframes fireParticleFloat {
+    0% {
+        transform: translate(-50%, -50%) translateY(0) scale(0.5);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) translateY(-30px) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) translateY(-60px) scale(0.2);
+        opacity: 0;
+    }
+}
+
+/* Sound Wave Ripples */
+.roar-sound-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: soundWaveExpand 2s ease-out forwards;
+    z-index: 998;
+}
+
+@keyframes soundWaveExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+        border-width: 4px;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0.6;
+        border-width: 2px;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+/* Silence Energy Field */
+.silence-energy-field {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, 
+        rgba(138, 43, 226, 0.3) 0%,
+        rgba(75, 0, 130, 0.2) 50%,
+        transparent 100%);
+    border-radius: 10px;
+    animation: silenceFieldPulse 2s ease-in-out infinite;
+    z-index: 997;
+}
+
+@keyframes silenceFieldPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
+/* Silence Disruption Particles */
+.silence-disruption-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, 
+        #8a2be2 0%, 
+        #9932cc 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform-origin: center;
+    animation: disruptionParticleOrbit 2s linear infinite;
+    z-index: 999;
+}
+
+@keyframes disruptionParticleOrbit {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) translateX(40px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) translateX(40px) rotate(-360deg);
+        opacity: 0.3;
+    }
+}
+
+/* === STOMPING ERUPTION VFX === */
+
+/* Stomp Shockwave */
+.stomp-shockwave {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    width: 100px;
+    height: 20px;
+    background: radial-gradient(ellipse, 
+        rgba(139, 69, 19, 0.8) 0%,
+        rgba(160, 82, 45, 0.6) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: shockwaveExpand 1.5s ease-out forwards;
+    z-index: 995;
+}
+
+@keyframes shockwaveExpand {
+    0% {
+        transform: translate(-50%, -50%) scaleX(0) scaleY(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scaleX(4) scaleY(2);
+        opacity: 0;
+    }
+}
+
+/* Debris Particles */
+.stomp-debris-particle {
+    position: absolute;
+    top: 70%;
+    width: 4px;
+    height: 4px;
+    background: linear-gradient(45deg, 
+        #8b4513 0%, 
+        #a0522d 50%, 
+        #daa520 100%);
+    border-radius: 2px;
+    animation: debrisParticleFloat 2s ease-out forwards;
+    z-index: 996;
+    box-shadow: 1px 1px 2px rgba(139, 69, 19, 0.5);
+}
+
+@keyframes debrisParticleFloat {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-40px) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-80px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Ground Crack Lines */
+.ground-crack-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 60px;
+    background: linear-gradient(to bottom, 
+        #8b4513 0%,
+        #654321 50%,
+        transparent 100%);
+    transform-origin: top center;
+    animation: crackLineGrow 1.5s ease-out forwards;
+    z-index: 994;
+}
+
+@keyframes crackLineGrow {
+    0% {
+        transform: translate(-50%, -50%) scaleY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scaleY(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scaleY(1.2);
+        opacity: 0;
+    }
+}
+
+/* Dust Cloud */
+.stomp-dust-cloud {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    width: 80px;
+    height: 40px;
+    background: radial-gradient(ellipse, 
+        rgba(205, 133, 63, 0.6) 0%,
+        rgba(222, 184, 135, 0.4) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: dustCloudExpand 1.8s ease-out forwards;
+    z-index: 995;
+}
+
+@keyframes dustCloudExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* === ERUPTION VFX === */
+
+/* Eruption Warning Pulse */
+.eruption-warning-pulse {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    width: 60px;
+    height: 20px;
+    background: radial-gradient(ellipse, 
+        rgba(255, 69, 0, 0.8) 0%,
+        rgba(255, 140, 0, 0.6) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: warningPulse 1s ease-in-out infinite;
+    z-index: 997;
+}
+
+@keyframes warningPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 1;
+    }
+}
+
+/* Warning Crack Lines */
+.eruption-warning-crack {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    width: 2px;
+    height: 30px;
+    background: linear-gradient(to bottom, 
+        #ff4500 0%,
+        #ff6b35 50%,
+        transparent 100%);
+    transform-origin: top center;
+    animation: warningCrackGlow 1s ease-out forwards;
+    z-index: 996;
+}
+
+@keyframes warningCrackGlow {
+    0% {
+        transform: translate(-50%, -50%) scaleY(0);
+        opacity: 1;
+        box-shadow: 0 0 4px #ff4500;
+    }
+    50% {
+        transform: translate(-50%, -50%) scaleY(1);
+        opacity: 0.8;
+        box-shadow: 0 0 8px #ff4500;
+    }
+    100% {
+        transform: translate(-50%, -50%) scaleY(0.8);
+        opacity: 0;
+        box-shadow: 0 0 2px #ff4500;
+    }
+}
+
+/* Eruption Blast Core */
+.eruption-blast-core {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, 
+        #ffff00 0%,
+        #ff8c00 25%,
+        #ff4500 50%,
+        #8b0000 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: blastCoreExplosion 1.5s ease-out forwards;
+    z-index: 1000;
+    box-shadow: 
+        0 0 20px #ff4500,
+        0 0 40px #ff8c00,
+        inset 0 0 20px rgba(255, 255, 0, 0.5);
+}
+
+@keyframes blastCoreExplosion {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Eruption Pillar */
+.eruption-pillar {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 20px;
+    height: 100px;
+    background: linear-gradient(to top, 
+        #8b0000 0%,
+        #ff4500 30%,
+        #ff8c00 60%,
+        #ffff00 90%,
+        transparent 100%);
+    border-radius: 10px 10px 50% 50%;
+    transform: translate(-50%, 0);
+    animation: eruptionPillarRise 1.2s ease-out forwards;
+    z-index: 999;
+    box-shadow: 0 0 10px #ff4500;
+}
+
+@keyframes eruptionPillarRise {
+    0% {
+        transform: translate(-50%, 0) scaleY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, 0) scaleY(1.2);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, 0) scaleY(0.8);
+        opacity: 0;
+    }
+}
+
+/* Lava Fountain Particles */
+.lava-fountain-particle {
+    position: absolute;
+    top: 60%;
+    width: 6px;
+    height: 12px;
+    background: linear-gradient(to top, 
+        #8b0000 0%,
+        #ff4500 40%,
+        #ff8c00 70%,
+        #ffff00 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: lavaParticleFountain 1s ease-out forwards;
+    z-index: 998;
+    box-shadow: 0 0 4px #ff4500;
+}
+
+@keyframes lavaParticleFountain {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-60px) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(-100px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+/* Heat Distortion Waves */
+.eruption-heat-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 30px;
+    background: linear-gradient(to right, 
+        transparent 0%,
+        rgba(255, 69, 0, 0.2) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: heatWaveDistortion 1.5s ease-out forwards;
+    z-index: 996;
+}
+
+@keyframes heatWaveDistortion {
+    0% {
+        transform: translate(-50%, -50%) scaleX(0) scaleY(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scaleX(2) scaleY(1.2);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translate(-50%, -50%) scaleX(3) scaleY(0.8);
+        opacity: 0;
+    }
+}
+
+/* Ground Fissure Glow */
+.ground-fissure-glow {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, 
+        transparent 0%,
+        #ff4500 25%,
+        #ffff00 50%,
+        #ff4500 75%,
+        transparent 100%);
+    transform: translate(-50%, -50%);
+    animation: fissureGlow 2s ease-in-out infinite;
+    z-index: 995;
+    box-shadow: 0 0 8px #ff4500;
+}
+
+@keyframes fissureGlow {
+    0%, 100% {
+        opacity: 0.6;
+        box-shadow: 0 0 8px #ff4500;
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 16px #ff4500, 0 0 24px #ff8c00;
+    }
+}
+
+/* Eruption Ember Particles */
+.eruption-ember-particle {
+    position: absolute;
+    top: 50%;
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, 
+        #ffff00 0%,
+        #ff8c00 50%,
+        #ff4500 100%);
+    border-radius: 50%;
+    animation: emberParticleFloat 1.5s ease-out forwards;
+    z-index: 997;
+    box-shadow: 0 0 3px #ff4500;
+}
+
+@keyframes emberParticleFloat {
+    0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-30px) translateX(10px) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(-60px) translateX(20px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+/* Eruption Blast Shockwave */
+.eruption-blast-shockwave {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255, 69, 0, 0.8);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: blastShockwaveExpand 1.5s ease-out forwards;
+    z-index: 994;
+}
+
+@keyframes blastShockwaveExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+        border-width: 3px;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.6;
+        border-width: 2px;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+/* === SCREEN SHAKE EFFECTS === */
+
+.roar-screen-shake {
+    animation: roarShake 0.8s ease-in-out;
+}
+
+@keyframes roarShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-3px) rotate(-0.5deg); }
+    20% { transform: translateX(3px) rotate(0.5deg); }
+    30% { transform: translateX(-2px) rotate(-0.3deg); }
+    40% { transform: translateX(2px) rotate(0.3deg); }
+    50% { transform: translateX(-1px) rotate(-0.1deg); }
+    60% { transform: translateX(1px) rotate(0.1deg); }
+    70% { transform: translateX(-0.5px); }
+    80% { transform: translateX(0.5px); }
+    90% { transform: translateX(0); }
+}
+
+.stomp-screen-shake {
+    animation: stompShake 1.2s ease-in-out;
+}
+
+@keyframes stompShake {
+    0%, 100% { transform: translateY(0); }
+    5% { transform: translateY(-4px) rotate(-0.5deg); }
+    15% { transform: translateY(4px) rotate(0.5deg); }
+    25% { transform: translateY(-3px) rotate(-0.3deg); }
+    35% { transform: translateY(3px) rotate(0.3deg); }
+    45% { transform: translateY(-2px) rotate(-0.2deg); }
+    55% { transform: translateY(2px) rotate(0.2deg); }
+    65% { transform: translateY(-1px); }
+    75% { transform: translateY(1px); }
+    85% { transform: translateY(-0.5px); }
+    95% { transform: translateY(0.5px); }
+}
+
+.eruption-screen-shake {
+    animation: eruptionShake 0.6s ease-in-out;
+}
+
+@keyframes eruptionShake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-2px, -1px) rotate(-0.3deg); }
+    20% { transform: translate(2px, 1px) rotate(0.3deg); }
+    30% { transform: translate(-1px, -2px) rotate(-0.2deg); }
+    40% { transform: translate(1px, 2px) rotate(0.2deg); }
+    50% { transform: translate(-1px, 1px) rotate(-0.1deg); }
+    60% { transform: translate(1px, -1px) rotate(0.1deg); }
+    70% { transform: translate(-0.5px, 0.5px); }
+    80% { transform: translate(0.5px, -0.5px); }
+    90% { transform: translate(0, 0); }
+} 

@@ -1,0 +1,39 @@
+{
+    "id": "deathwing",
+    "name": "Deathwing",
+    "image": "Loading Screen/Deathwing.png",
+    "rarity": "legendary",
+    "type": "beast",
+    "description": "An ancient dragon corrupted by the deepest hells, its wings spread darkness across the land as its breath burns souls to ash.",
+    "stats": {
+        "physicalDamage": 380,
+        "magicalDamage": 320,
+        "armor": 5,
+        "magicalShield": 8,
+        "hp": 6700,
+        "hpPerTurn": 0,
+        "mana": 8000,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.1,
+        "critChance": 0.2,
+        "critDamage": 1.4,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "deathwing_leech_life",
+            "name": "Leech Life",
+            "type": "leech_life",
+            "damageType": "magical",
+            "manaCost": 80,
+            "cooldown": 3,
+            "targetType": "single_enemy",
+            "description": "Deals 590 magical damage and heals self for double the damage amount. If healing would exceed max HP, creates a shield instead.",
+            "icon": "Icons/abilities/leech_life.png",
+            "baseDamage": 590,
+            "healMultiplier": 2.0
+        }
+    ],
+    "tags": ["Beast", "Hell", "Dragon", "Boss"]
+} 

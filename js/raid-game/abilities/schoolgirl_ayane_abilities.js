@@ -2,6 +2,153 @@
 
 // Assume Ability, Effect classes and addLogEntry function are available globally or imported
 
+/**
+ * Schoolgirl Ayane Statistics Enhancement
+ * Enhanced statistics tracking for all of Schoolgirl Ayane's abilities to match comprehensive tracking systems
+ */
+
+/**
+ * Global helper function to track Schoolgirl Ayane's ability usage for statistics
+ */
+function trackAyaneAbilityUsage(character, abilityId, effectType, amount = 0, isCritical = false) {
+    if (!window.statisticsManager || !character) {
+        console.warn(`[AyaneStats] StatisticsManager or character not available for tracking ${abilityId}`);
+        return;
+    }
+    
+    try {
+        window.statisticsManager.recordAbilityUsage(character, abilityId, effectType, amount, isCritical);
+        console.log(`[AyaneStats] Tracked ${abilityId} usage: ${effectType}, amount: ${amount}, crit: ${isCritical}`);
+    } catch (error) {
+        console.error(`[AyaneStats] Error tracking ability usage for ${abilityId}:`, error);
+    }
+}
+
+/**
+ * Track Butterfly Dagger statistics
+ */
+function trackButterflyDaggerStats(caster, target, damageResult, dodgeBuffApplied = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+        const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+        
+        // Track damage dealt
+        if (damageAmount > 0) {
+            window.statisticsManager.recordDamageDealt(caster, target, damageAmount, 'physical', isCritical, 'ayane_q');
+        }
+        
+        // Track ability usage
+        window.statisticsManager.recordAbilityUsage(caster, 'ayane_q', 'damage', damageAmount, isCritical);
+        
+        // Track dodge buff application if it occurred
+        if (dodgeBuffApplied) {
+            window.statisticsManager.recordAbilityUsage(caster, 'ayane_q_dodge_buff', 'buff', 50, false);
+        }
+        
+        console.log(`[AyaneStats] Tracked Butterfly Dagger: ${damageAmount} damage, crit: ${isCritical}, dodge buff: ${dodgeBuffApplied}`);
+    } catch (error) {
+        console.error('[AyaneStats] Error tracking Butterfly Dagger stats:', error);
+    }
+}
+
+/**
+ * Track Butterfly Trail statistics
+ */
+function trackButterflyTrailStats(caster, alliesBuffed, avgDamageBonus) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track utility usage for buff application
+        window.statisticsManager.recordAbilityUsage(caster, 'ayane_w', 'buff', alliesBuffed.length, false);
+        
+        // Track total damage bonus granted
+        const totalDamageBonus = alliesBuffed.length * avgDamageBonus;
+        window.statisticsManager.recordAbilityUsage(caster, 'ayane_w_damage_bonus', 'buff', totalDamageBonus, false);
+        
+        console.log(`[AyaneStats] Tracked Butterfly Trail: ${alliesBuffed.length} allies buffed, ${totalDamageBonus} total damage bonus`);
+    } catch (error) {
+        console.error('[AyaneStats] Error tracking Butterfly Trail stats:', error);
+    }
+}
+
+/**
+ * Track Quick Reflexes statistics
+ */
+function trackQuickReflexesStats(caster, dodgeBuffAmount, damageBuffAmount) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track dodge buff
+        window.statisticsManager.recordAbilityUsage(caster, 'ayane_e_dodge', 'buff', dodgeBuffAmount, false);
+        
+        // Track damage buff
+        window.statisticsManager.recordAbilityUsage(caster, 'ayane_e_damage', 'buff', damageBuffAmount, false);
+        
+        // Track combined utility usage
+        window.statisticsManager.recordAbilityUsage(caster, 'ayane_e', 'buff', dodgeBuffAmount + damageBuffAmount, false);
+        
+        console.log(`[AyaneStats] Tracked Quick Reflexes: ${dodgeBuffAmount}% dodge, ${damageBuffAmount} damage bonus`);
+    } catch (error) {
+        console.error('[AyaneStats] Error tracking Quick Reflexes stats:', error);
+    }
+}
+
+/**
+ * Track Execute Attack statistics
+ */
+function trackExecuteAttackStats(caster, target, damageResult, wasExecute = false, cooldownReset = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+        const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+        const abilityId = wasExecute ? 'ayane_r_execute' : 'ayane_r';
+        
+        // Track damage dealt
+        if (damageAmount > 0) {
+            window.statisticsManager.recordDamageDealt(caster, target, damageAmount, 'physical', isCritical, abilityId);
+        }
+        
+        // Track ability usage
+        window.statisticsManager.recordAbilityUsage(caster, abilityId, 'damage', damageAmount, isCritical);
+        
+        // Track execute threshold hit
+        if (wasExecute) {
+            window.statisticsManager.recordAbilityUsage(caster, 'ayane_r_execute_threshold', 'utility', 0, false);
+        }
+        
+        // Track cooldown reset
+        if (cooldownReset) {
+            window.statisticsManager.recordAbilityUsage(caster, 'ayane_r_reset', 'utility', 0, false);
+        }
+        
+        console.log(`[AyaneStats] Tracked Execute Attack: ${damageAmount} damage, execute: ${wasExecute}, reset: ${cooldownReset}`);
+    } catch (error) {
+        console.error('[AyaneStats] Error tracking Execute Attack stats:', error);
+    }
+}
+
+/**
+ * Track Combat Reflexes passive statistics
+ */
+function trackCombatReflexesPassiveStats(character, damageBonus) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track dodge that triggered the passive
+        window.statisticsManager.recordAbilityUsage(character, 'ayane_passive_dodge', 'utility', 1, false);
+        
+        // Track damage bonus gained
+        window.statisticsManager.recordAbilityUsage(character, 'ayane_passive_damage_bonus', 'buff', damageBonus, false);
+        
+        console.log(`[AyaneStats] Tracked Combat Reflexes passive: +${damageBonus} damage bonus from dodge`);
+    } catch (error) {
+        console.error('[AyaneStats] Error tracking Combat Reflexes passive stats:', error);
+    }
+}
+
 // --- Q: Butterfly Dagger --- 
 
 const schoolgirlAyaneButterflyDaggerEffect = (caster, target) => {
@@ -59,9 +206,9 @@ const schoolgirlAyaneButterflyDaggerEffect = (caster, target) => {
 
     // Calculate damage: 425 + 55% Physical Damage
     const baseDamage = 425 + (caster.stats.physicalDamage * 0.55);
-    target.isDamageSource = caster; // For crit calculation
-    const result = target.applyDamage(baseDamage, 'physical');
-    target.isDamageSource = null;
+    
+    // Apply damage with statistics tracking
+    const result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'ayane_q' });
 
     log(`${target.name} takes ${result.damage} physical damage.` + (result.isCritical ? ' (Critical Hit!)' : ''));
 
@@ -69,7 +216,9 @@ const schoolgirlAyaneButterflyDaggerEffect = (caster, target) => {
     caster.applyLifesteal(result.damage);
 
     // 40% chance to gain dodge chance buff
+    let dodgeBuffApplied = false;
     if (Math.random() < 0.40) {
+        dodgeBuffApplied = true;
         log(`${caster.name} gains Evasive Maneuver!`);
         const dodgeBuff = new Effect(
             'schoolgirl_ayane_q_dodge_buff',
@@ -91,6 +240,19 @@ const schoolgirlAyaneButterflyDaggerEffect = (caster, target) => {
 
         caster.addBuff(dodgeBuff.clone());
     }
+    
+    // Track statistics
+    trackButterflyDaggerStats(caster, target, result, dodgeBuffApplied);
+
+    // Dispatch ability used event for quest tracking
+    const abilityUsedEvent = new CustomEvent('abilityUsed', {
+        detail: {
+            character: caster,
+            abilityId: 'ayane_q',
+            abilityName: 'Butterfly Dagger'
+        }
+    });
+    document.dispatchEvent(abilityUsedEvent);
 
     if (target.isDead()) {
         log(`${target.name} has been defeated!`);
@@ -150,6 +312,9 @@ const schoolgirlAyaneWEffect = (caster, targets) => { // Target type is all_alli
     });
     // --- End VFX --- 
 
+    const alliesBuffed = [];
+    let totalDamageBonus = 0;
+    
     allies.forEach(ally => {
         if (!ally || ally.isDead()) return;
 
@@ -179,7 +344,25 @@ const schoolgirlAyaneWEffect = (caster, targets) => { // Target type is all_alli
 
         log(`${ally.name} is empowered by Butterfly Trail (+${physicalDamageIncrease} Phys Dmg, +${magicalDamageIncrease} Mag Dmg)!`);
         updateCharacterUI(ally);
+        
+        // Track for statistics
+        alliesBuffed.push(ally);
+        totalDamageBonus += physicalDamageIncrease + magicalDamageIncrease;
     });
+    
+    // Track statistics
+    const avgDamageBonus = alliesBuffed.length > 0 ? totalDamageBonus / alliesBuffed.length : 0;
+    trackButterflyTrailStats(caster, alliesBuffed, avgDamageBonus);
+
+    // Dispatch ability used event for quest tracking
+    const abilityUsedEvent = new CustomEvent('abilityUsed', {
+        detail: {
+            character: caster,
+            abilityId: 'ayane_w',
+            abilityName: 'Butterfly Trail'
+        }
+    });
+    document.dispatchEvent(abilityUsedEvent);
 
     updateCharacterUI(caster);
 };
@@ -223,6 +406,7 @@ const schoolgirlAyaneEEffect = (caster) => {
 
     // Calculate flat AD increase based on 250% of total AD
     const physicalDamageIncrease = Math.floor(caster.stats.physicalDamage * 2.5); // Use stats.physicalDamage which is recalculated
+    const dodgeChanceIncrease = 100; // 100% dodge chance
 
     // Create the buff effect instance
     const buff = new Effect(
@@ -249,6 +433,20 @@ const schoolgirlAyaneEEffect = (caster) => {
     caster.addBuff(buff.clone());
 
     log(`${caster.name} gains 100% dodge and +${physicalDamageIncrease} AD!`);
+    
+    // Track statistics
+    trackQuickReflexesStats(caster, dodgeChanceIncrease, physicalDamageIncrease);
+    
+    // Dispatch ability used event for quest tracking
+    const abilityUsedEvent = new CustomEvent('abilityUsed', {
+        detail: {
+            character: caster,
+            abilityId: 'ayane_e',
+            abilityName: 'Quick Reflexes'
+        }
+    });
+    document.dispatchEvent(abilityUsedEvent);
+    
     updateCharacterUI(caster);
 };
 
@@ -312,26 +510,42 @@ const schoolgirlAyaneREffect = (caster, target) => {
 
     // Calculate damage: 250% or 600% Physical Damage
     const baseDamage = caster.stats.physicalDamage * damageMultiplier;
-    target.isDamageSource = caster; // For crit calculation (though this might not crit often)
-    const result = target.applyDamage(baseDamage, 'physical');
-    target.isDamageSource = null;
+    
+    // Apply damage with statistics tracking
+    const abilityId = isExecute ? 'ayane_r_execute' : 'ayane_r';
+    const result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: abilityId });
 
     log(`${target.name} takes ${result.damage} physical damage from Execute Attack!` + (isExecute ? ' (EXECUTED!)' : ''));
 
     // Apply lifesteal if caster has any
     caster.applyLifesteal(result.damage);
 
-    // Check if target died
+    // Check if target died and track cooldown reset
+    let cooldownReset = false;
     if (target.isDead()) {
         log(`${target.name} has been defeated by Execute Attack!`);
         // Find this ability on the caster and reset cooldown
         const abilityInstance = caster.abilities.find(ab => ab.id === 'schoolgirl_ayane_r');
         if (abilityInstance) {
             abilityInstance.currentCooldown = 0;
+            cooldownReset = true;
             log(`${caster.name}'s Execute Attack cooldown has been reset!`);
             updateCharacterUI(caster); // Update UI to show reset cooldown
         }
     }
+    
+    // Track statistics
+    trackExecuteAttackStats(caster, target, result, isExecute, cooldownReset);
+
+    // Dispatch ability used event for quest tracking
+    const abilityUsedEvent = new CustomEvent('abilityUsed', {
+        detail: {
+            character: caster,
+            abilityId: 'ayane_r',
+            abilityName: 'Execute Attack'
+        }
+    });
+    document.dispatchEvent(abilityUsedEvent);
 
     updateCharacterUI(caster);
     updateCharacterUI(target);

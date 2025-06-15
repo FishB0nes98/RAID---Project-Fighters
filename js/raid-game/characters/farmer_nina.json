@@ -42,7 +42,8 @@
         {
             "id": "farmer_nina_e",
             "name": "Target Lock",
-            "type": "debuff",
+            "type": "custom",
+            "functionName": "farmer_ninaTargetLockEffect",
             "manaCost": 0,
             "cooldown": 20,
             "targetType": "enemy",

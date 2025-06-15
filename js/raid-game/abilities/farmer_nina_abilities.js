@@ -91,7 +91,7 @@
                     const critMulti = nina.stats.critDamage || 1.5;
                     const finalDamage = isCrit ? Math.floor(damagePerTarget * critMulti) : damagePerTarget;
                     
-                    const result = enemy.applyDamage(finalDamage, 'physical', nina);
+                    const result = enemy.applyDamage(finalDamage, 'physical', nina, { abilityId: 'farmer_nina_bullet_rain' });
                     totalDamage += result.damage;
                     
                     // Log damage
@@ -685,8 +685,8 @@ function applyDeadlyRetreatBuff(character) {
 // --- Ability Definitions ---
 
 // Q: Sniper Shot
-const farmer_ninaSniperShotEffect = (caster, target) => {
-    const ability = caster.abilities.find(a => a.id === 'farmer_nina_q');
+const farmer_ninaSniperShotEffect = (caster, target, abilityObj, actualManaCost, options = {}) => {
+    const ability = abilityObj || caster.abilities.find(a => a.id === 'farmer_nina_q');
     if (!ability) return; // Should not happen
 
     const baseDamage = ability.baseDamage || 400;
@@ -714,9 +714,10 @@ const farmer_ninaSniperShotEffect = (caster, target) => {
 
     // Create options object for applyDamage
     const damageOptions = {
-        bypassArmor: bypassArmor // Pass the bypass flag
+        bypassArmor: bypassArmor, // Pass the bypass flag
+        abilityId: 'farmer_nina_q' // Add ability ID for statistics tracking
     };
-
+    
     // Play sniper sound
     if (window.gameManager && typeof window.gameManager.playSound === 'function') {
         window.gameManager.playSound('sounds/sniper_shot.mp3', 0.8);
@@ -726,6 +727,26 @@ const farmer_ninaSniperShotEffect = (caster, target) => {
     const primaryResult = target.applyDamage(calculatedDamage, 'physical', caster, damageOptions);
 
     log(`${caster.name} shoots ${target.name} with Sniper Shot for ${primaryResult.damage} physical damage${primaryResult.isCritical ? " (Critical!)" : ""}.`);
+
+    // Apply crit chance buff to caster after successful shot
+    const critBuff = {
+        id: `sniper_shot_crit_buff_${Date.now()}`,
+        name: 'Sniper Focus',
+        description: 'Increases Critical Chance by 20% for 3 turns.',
+        icon: 'Icons/abilities/sniper_shot.jpeg',
+        duration: 3,
+        statModifiers: [
+            { stat: 'critChance', value: 0.20, operation: 'add' }
+        ]
+    };
+    
+    caster.addBuff(critBuff);
+    log(`${caster.name} gains Sniper Focus (+20% Crit Chance) for 3 turns!`, 'buff-applied');
+    
+    // Force stat recalculation to ensure buff takes effect immediately
+    if (typeof caster.recalculateStats === 'function') {
+        caster.recalculateStats('sniper_shot_buff');
+    }
 
     // Handle Piercing Rounds talent
     if (!primaryResult.dodged && piercingChance > 0 && Math.random() < piercingChance) {
@@ -751,7 +772,10 @@ const farmer_ninaSniperShotEffect = (caster, target) => {
                     window.gameManager.showFloatingText(`character-${pierceTarget.instanceId || pierceTarget.id}`, 'Armor Ignored!', 'debuff');
                 }
             }
-            const pierceDamageOptions = { bypassArmor: pierceBypassArmor };
+            const pierceDamageOptions = { 
+                bypassArmor: pierceBypassArmor,
+                abilityId: 'farmer_nina_q' // Add ability ID for statistics tracking
+            };
 
 
             log(`${caster.name}'s shot pierces to ${pierceTarget.name}!`, 'talent-effect');
@@ -773,7 +797,7 @@ const farmer_ninaSniperShotEffect = (caster, target) => {
 const originalfarmer_ninaQEffect = farmer_ninaSniperShotEffect;
 
 // Create wrapper function to break hiding
-const wrappedfarmer_ninaSniperShotEffect = function(caster, target) {
+const wrappedfarmer_ninaSniperShotEffect = function(caster, target, abilityObj, actualManaCost, options = {}) {
     // Break hiding if Farmer farmer_nina is using this ability
     if (caster && caster.id === 'farmer_nina') {
         const hidingBuff = caster.buffs && caster.buffs.find(b => b && b.id === 'farmer_nina_w_hiding_buff');
@@ -787,8 +811,8 @@ const wrappedfarmer_ninaSniperShotEffect = function(caster, target) {
         }
     }
     
-    // Call the original effect function
-    return originalfarmer_ninaQEffect(caster, target);
+    // Call the original effect function with all parameters
+    return originalfarmer_ninaQEffect(caster, target, abilityObj, actualManaCost, options);
 };
 
 const farmer_ninaQ = new Ability(
@@ -919,7 +943,7 @@ const farmer_ninaHidingEffect = (caster, target) => {
                         effect: () => {
                             // Heal Nina instantly
                             const healAmount = 560;
-                            caster.heal(healAmount, caster);
+                            caster.heal(healAmount, caster, { abilityId: 'farmer_nina_w' });
                             
                             log(`${caster.name} found an Apple while hiding! Healed for ${healAmount} HP.`, 'heal');
                             showFarmResourceVFX(caster, 'apple');
@@ -1024,7 +1048,7 @@ const farmer_ninaHidingEffect = (caster, target) => {
                                             const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
                                             if (randomEnemy && !randomEnemy.isDead()) {
                                                 const damageAmount = 400;
-                                                randomEnemy.applyDamage(damageAmount, 'physical', character);
+                                                randomEnemy.applyDamage(damageAmount, 'physical', character, { abilityId: 'farmer_nina_w' });
                                                 
                                                 // Visual effect on the target
                                                 showEggExplosionVFX(randomEnemy);
@@ -1101,7 +1125,7 @@ const farmer_ninaHidingEffect = (caster, target) => {
             // Heal Farmer farmer_nina at the start of her turn
             const healAmount = 350;
             const previousHealth = character.stats.currentHealth || 0;
-            character.heal(healAmount);
+            character.heal(healAmount, character, { abilityId: 'farmer_nina_w' });
             const currentHealth = character.stats.currentHealth || 0;
             const actualHealAmount = currentHealth - previousHealth;
 
@@ -1131,7 +1155,7 @@ const farmer_ninaHidingEffect = (caster, target) => {
         // --- END NEW ---
 
         // --- MODIFIED: Pass caster as source (character) and critical flag --- 
-        character.heal(healAmount, character, { isCritical: isCriticalHeal });
+        character.heal(healAmount, character, { isCritical: isCriticalHeal, abilityId: 'farmer_nina_w' });
         // --- END MODIFIED ---
         
         const currentHealth = character.stats.currentHp || 0;
@@ -1944,18 +1968,16 @@ function applyTargetLockToSingleTarget(caster, target) {
     }
 
     currentStacks++;
-    const duration = isPermanent ? -1 : 3;
+    const duration = isPermanent ? -1 : 10; // Fixed to match JSON: 10 turns
 
     console.log(`[Target Lock Apply] Caster: ${caster.name}, Target: ${target.name}, Permanent: ${isPermanent}, Stacks: ${currentStacks}, DMG Amp: ${damageAmpPercent}%, Armor Red: ${reducesArmorBy*100}%, Dodge Red: ${appliesDodgeReduction ? '8%' : 'No'}`);
 
-    // Define base stat modifiers
-    let statModifiers = [
-        { stat: 'physicalDamageTakenMultiplier', operation: 'add', value: damageAmpPercent / 100 }
-    ];
+    // Define base stat modifiers - using correct property name
+    let statModifiers = [];
 
     // Add armor reduction if Armor Breach talent is active
     if (reducesArmorBy > 0) {
-        statModifiers.push({ stat: 'armor', operation: 'add', value: -(target.stats.armor * reducesArmorBy) }); // Reduces current armor by %
+        statModifiers.push({ stat: 'armor', operation: 'multiply', value: 1 - reducesArmorBy }); // Reduces armor by percentage
         console.log(`  - Armor Breach active: Adding armor reduction modifier.`);
     }
 
@@ -1970,9 +1992,13 @@ function applyTargetLockToSingleTarget(caster, target) {
     const debuff = new Effect(
         'farmer_nina_e_target_lock',
         `Target Lock${isPermanent ? ` (x${currentStacks})` : ''}`,
-        'Icons/abilities/target_lock.webp',
+        'Icons/abilities/target_lock.jpeg',
         duration,
-        null, // No per-turn effect needed here, handled by statModifiers
+        {
+            type: 'vulnerability',
+            damageType: 'physical',
+            multiplier: 1 + (damageAmpPercent / 100)
+        },
         true // isDebuff
     );
 
@@ -1990,9 +2016,7 @@ function applyTargetLockToSingleTarget(caster, target) {
     target.addDebuff(debuff);
 
     // Play VFX
-    if (window.playTargetLockVFX) {
-        window.playTargetLockVFX(target);
-    }
+    showTargetLockVFX(target, caster);
 
     log(`${caster.name} applied Target Lock to ${target.name}.`);
 
@@ -2149,7 +2173,7 @@ const farmer_ninaPiercingShotEffect = (caster, target) => {
     target.stats.armor = 0;
     
     // Apply damage (armor is already bypassed by setting it to 0)
-    const result = target.applyDamage(baseDamage, 'physical');
+    const result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'farmer_nina_r' });
     
     // Restore original armor value
     target.stats.armor = originalArmor;
@@ -2249,6 +2273,16 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
     window.definedAbilities.farmer_nina_w = farmer_ninaW;
     window.definedAbilities.farmer_nina_e = farmer_ninaE;
     window.definedAbilities.farmer_nina_r = farmer_ninaR;
+
+    // Register ability effects with AbilityFactory if available
+    if (window.AbilityFactory && typeof window.AbilityFactory.registerAbilityEffect === 'function') {
+        window.AbilityFactory.registerAbilityEffect('farmer_ninaTargetLockEffect', farmer_ninaTargetLockEffect);
+        console.log('[Farmer Nina] Registered Target Lock effect with AbilityFactory');
+    }
+
+    // Make functions globally available
+    window.farmer_ninaTargetLockEffect = farmer_ninaTargetLockEffect;
+    window.showTargetLockVFX = showTargetLockVFX;
 }
 
 // --- Target Lock Implementation ---
@@ -2256,7 +2290,7 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
 const originalApplyDamage = Character.prototype.applyDamage;
 
 // Override with our version to implement Target Lock damage amplification
-Character.prototype.applyDamage = function(amount, type, caster) {
+Character.prototype.applyDamage = function(amount, type, caster = null, options = {}) {
     let finalAmount = amount; // Use let for mutable amount
 
     // Check if this character has the Target Lock debuff
@@ -2328,8 +2362,11 @@ Character.prototype.applyDamage = function(amount, type, caster) {
                 }, 100); // Short delay to ensure dodge VFX completes first
             }
             
-            // Show dodge VFX if GameManager is available
-            if (window.gameManager && typeof window.gameManager.showDodgeVFX === 'function') {
+            // Call the character's showEnhancedDodgeVFX method to trigger passive hooks
+            if (typeof this.showEnhancedDodgeVFX === 'function') {
+                this.showEnhancedDodgeVFX();
+            } else if (window.gameManager && typeof window.gameManager.showDodgeVFX === 'function') {
+                // Fallback to GameManager method if character method doesn't exist
                 window.gameManager.showDodgeVFX(this);
             }
             
@@ -2342,6 +2379,40 @@ Character.prototype.applyDamage = function(amount, type, caster) {
                 this.passiveHandler.applyAgileCounterforceBuff();
             }
             
+            // Check for Parry buff - redirect damage back to attacker
+            const parryBuff = this.buffs.find(buff => buff.isParryBuff);
+            console.log(`[PARRY DEBUG] ${this.name} dodged. Checking for parry buff...`);
+            console.log(`[PARRY DEBUG] Found parry buff:`, parryBuff);
+            console.log(`[PARRY DEBUG] Caster:`, caster?.name);
+            console.log(`[PARRY DEBUG] isParryRetaliation:`, options.isParryRetaliation);
+            console.log(`[PARRY DEBUG] All buffs:`, this.buffs.map(b => ({ id: b.id, isParryBuff: b.isParryBuff })));
+            
+            if (parryBuff && caster && !options.isParryRetaliation) {
+                log(`${this.name} parries the attack and redirects ${amount} damage back to ${caster.name}!`, 'system');
+                console.log(`[PARRY DEBUG] Executing parry redirection!`);
+                
+                // Show parry redirection VFX
+                if (typeof this.showParryRedirectionVFX === 'function') {
+                    this.showParryRedirectionVFX(caster);
+                }
+                
+                // Apply the original damage to the attacker (prevent infinite loops with isParryRetaliation flag)
+                setTimeout(() => {
+                    console.log(`[PARRY DEBUG] Applying redirected damage to ${caster.name}`);
+                    caster.applyDamage(amount, type, this, { 
+                        ...options, 
+                        isParryRetaliation: true,
+                        abilityId: 'parry_redirection'
+                    });
+                }, 300);
+            } else {
+                console.log(`[PARRY DEBUG] Parry redirection conditions not met:`, {
+                    hasParryBuff: !!parryBuff,
+                    hasCaster: !!caster,
+                    notRetaliation: !options.isParryRetaliation
+                });
+            }
+            
             // Return the result object without going through the original method
             return { damage: 0, isCritical: false, isDodged: true };
         }
@@ -2349,8 +2420,8 @@ Character.prototype.applyDamage = function(amount, type, caster) {
     // --- End Combat Reflexes Dodge Detection ---
 
     // Call the original method with our potentially modified damage amount
-    // IMPORTANT: Pass 'finalAmount' instead of 'amount'
-    const damageResult = originalApplyDamage.call(this, finalAmount, type, caster);
+    // IMPORTANT: Pass 'finalAmount' instead of 'amount' AND forward options parameter
+    const damageResult = originalApplyDamage.call(this, finalAmount, type, caster, options || {});
     
     // --- Implement damage to mana talent ---
     if (caster && caster.id === 'farmer_nina' && damageResult.damage > 0 && type === 'physical') {
@@ -2807,7 +2878,7 @@ function testFarmerNinaHidingBreakMechanics() {
             2, // Duration: 2 turns
             (character) => {
                 // Heal 350 HP per turn
-                const healAmount = character.heal(350);
+                const healAmount = character.heal(350, character, { abilityId: 'farmer_nina_w' });
                 const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
                 log(`${character.name} regenerates ${healAmount} HP while hiding.`);
             },
@@ -2864,7 +2935,7 @@ function testFarmerNinaHidingBreakMechanics() {
         
         // TEST 2: Check if hiding breaks when taking damage
         console.log('[TESTING] Test 2: Checking if hiding breaks when taking damage');
-        const damageResult = ninaCharacter.applyDamage(100, 'physical');
+        const damageResult = ninaCharacter.applyDamage(100, 'physical', null, { abilityId: 'test_damage' });
         console.log('[TESTING] Applied test damage:', damageResult.damage);
         
         // Check if hiding was broken
@@ -3017,19 +3088,21 @@ document.addEventListener('CharacterLoaded', function(event) {
 });
 
 // Hook into game initialization to ensure the talent is applied
-const originalGameManagerInitialize = window.GameManager.prototype.initialize;
-if (originalGameManagerInitialize) {
-    window.GameManager.prototype.initialize = async function() {
-        await originalGameManagerInitialize.call(this);
-        
-        // After initialization, check for Nina in the player characters
-        if (this.gameState && this.gameState.playerCharacters) {
-            const nina = this.gameState.playerCharacters.find(char => char.id === 'farmer_nina');
-            if (nina) {
-                initializeNinaDeadlyPrecision(nina);
+if (typeof window !== 'undefined' && window.GameManager && window.GameManager.prototype && window.GameManager.prototype.initialize) {
+    const originalGameManagerInitialize = window.GameManager.prototype.initialize;
+    if (originalGameManagerInitialize) {
+        window.GameManager.prototype.initialize = async function() {
+            await originalGameManagerInitialize.call(this);
+            
+            // After initialization, check for Nina in the player characters
+            if (this.gameState && this.gameState.playerCharacters) {
+                const nina = this.gameState.playerCharacters.find(char => char.id === 'farmer_nina');
+                if (nina) {
+                    initializeNinaDeadlyPrecision(nina);
+                }
             }
-        }
-    };
+        };
+    }
 }
 
 // Modify wrapped Sniper Shot and Piercing Shot effects to show doubled damage feedback
@@ -4189,3 +4262,327 @@ function initializeRuralResourcefulness(character) {
         hidingAbility.description = hidingAbility.generateDescription();
     }
 }
+
+/**
+ * Show Target Lock VFX - Creates reticle and targeting effects
+ */
+function showTargetLockVFX(target, caster) {
+    if (!target) return;
+    
+    const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+    if (!targetElement) return;
+
+    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+    const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+
+    // Play target lock sound
+    playSound('sounds/target_lock.mp3', 0.8);
+
+    // Create the main VFX container
+    const vfxContainer = document.createElement('div');
+    vfxContainer.className = 'target-lock-vfx';
+    targetElement.appendChild(vfxContainer);
+
+    // Create the targeting reticle
+    const reticle = document.createElement('div');
+    reticle.className = 'target-lock-reticle';
+    vfxContainer.appendChild(reticle);
+
+    // Create the lock icon
+    const lockIcon = document.createElement('div');
+    lockIcon.className = 'target-lock-icon';
+    lockIcon.innerHTML = '🎯';
+    vfxContainer.appendChild(lockIcon);
+
+    // Create floating "LOCKED" text
+    const lockText = document.createElement('div');
+    lockText.className = 'target-lock-text';
+    lockText.textContent = 'LOCKED';
+    vfxContainer.appendChild(lockText);
+
+    // Show targeting beam from caster to target (if caster is available)
+    if (caster) {
+        showTargetingBeam(caster, target);
+    }
+
+    // Apply visual indicator to target
+    targetElement.classList.add('target-locked');
+    
+    // Add data attribute for stacking/permanent effects
+    const debuff = target.debuffs?.find(d => d.id === 'farmer_nina_e_target_lock');
+    if (debuff?.stackCount) {
+        targetElement.setAttribute('data-target-lock-stacks', debuff.stackCount);
+    }
+    if (debuff?.isPermanent) {
+        targetElement.setAttribute('data-target-lock-permanent', 'true');
+    }
+
+    // Remove initial VFX after animation (but keep the indicator)
+    setTimeout(() => {
+        if (vfxContainer.parentNode) {
+            vfxContainer.remove();
+        }
+    }, 3000);
+
+    log(`🎯 ${target.name} is marked with Target Lock!`, 'debuff');
+}
+
+/**
+ * Show targeting beam from caster to target
+ */
+function showTargetingBeam(caster, target) {
+    const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+    const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+    
+    if (!casterElement || !targetElement) return;
+
+    // Create beam element
+    const beam = document.createElement('div');
+    beam.className = 'targeting-beam';
+    document.body.appendChild(beam);
+
+    // Get positions
+    const casterRect = casterElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+
+    const startX = casterRect.left + casterRect.width / 2;
+    const startY = casterRect.top + casterRect.height / 2;
+    const endX = targetRect.left + targetRect.width / 2;
+    const endY = targetRect.top + targetRect.height / 2;
+
+    // Calculate beam properties
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    // Position and style the beam
+    beam.style.position = 'fixed';
+    beam.style.left = startX + 'px';
+    beam.style.top = startY + 'px';
+    beam.style.width = distance + 'px';
+    beam.style.height = '3px';
+    beam.style.background = 'linear-gradient(to right, rgba(255, 0, 0, 0.8), rgba(255, 100, 100, 0.6), rgba(255, 0, 0, 0.8))';
+    beam.style.transformOrigin = '0 50%';
+    beam.style.transform = `rotate(${angle}deg)`;
+    beam.style.boxShadow = '0 0 8px rgba(255, 0, 0, 0.8), 0 0 16px rgba(255, 0, 0, 0.4)';
+    beam.style.zIndex = '999';
+    beam.style.pointerEvents = 'none';
+    beam.style.animation = 'targeting-beam-fade 2s ease-out forwards';
+
+    // Remove beam after animation
+    setTimeout(() => {
+        if (beam.parentNode) {
+            beam.remove();
+        }
+    }, 2000);
+}
+
+// Add CSS styles for Target Lock VFX if not already present
+(function addTargetLockStyles() {
+    if (document.getElementById('target-lock-vfx-styles')) return;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'target-lock-vfx-styles';
+    styleSheet.textContent = `
+        /* Target Lock VFX Container */
+        .target-lock-vfx {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Targeting Reticle */
+        .target-lock-reticle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, -50%);
+            border: 2px solid #ff0000;
+            border-radius: 50%;
+            animation: reticle-lock 2s ease-out forwards;
+        }
+
+        .target-lock-reticle::before,
+        .target-lock-reticle::after {
+            content: '';
+            position: absolute;
+        }
+
+        .target-lock-reticle::before {
+            top: -2px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: #ff0000;
+            transform: translateX(-50%);
+        }
+
+        .target-lock-reticle::after {
+            top: 50%;
+            left: -2px;
+            width: 20px;
+            height: 2px;
+            background: #ff0000;
+            transform: translateY(-50%);
+        }
+
+        @keyframes reticle-lock {
+            0% {
+                transform: translate(-50%, -50%) scale(2) rotate(0deg);
+                opacity: 0;
+                border-color: rgba(255, 0, 0, 0.3);
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(90deg);
+                opacity: 0.7;
+                border-color: rgba(255, 0, 0, 0.8);
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(1) rotate(180deg);
+                opacity: 1;
+                border-color: #ff0000;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(270deg);
+                opacity: 0.8;
+                border-color: #ff0000;
+            }
+        }
+
+        /* Target Lock Icon */
+        .target-lock-icon {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            font-size: 20px;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+            animation: target-lock-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes target-lock-pulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.2);
+                filter: brightness(1.5);
+            }
+        }
+
+        /* Target Lock Text */
+        .target-lock-text {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff0000;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 
+                0 0 4px rgba(0, 0, 0, 0.8),
+                0 0 8px rgba(255, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            animation: target-lock-text-fade 3s ease-out forwards;
+        }
+
+        @keyframes target-lock-text-fade {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px);
+            }
+            20% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            80% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        /* Targeting Beam */
+        @keyframes targeting-beam-fade {
+            0% {
+                opacity: 0;
+                transform: scaleY(0) rotate(var(--beam-angle, 0deg));
+            }
+            20% {
+                opacity: 1;
+                transform: scaleY(1) rotate(var(--beam-angle, 0deg));
+            }
+            80% {
+                opacity: 0.8;
+                transform: scaleY(1) rotate(var(--beam-angle, 0deg));
+            }
+            100% {
+                opacity: 0;
+                transform: scaleY(1) rotate(var(--beam-angle, 0deg));
+            }
+        }
+
+        /* Target Locked State */
+        .character.target-locked {
+            position: relative;
+        }
+
+        .character.target-locked::after {
+            content: '🎯';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 16px;
+            text-shadow: 0 0 6px rgba(255, 0, 0, 0.8);
+            animation: target-locked-indicator 2s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes target-locked-indicator {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* Stack indicators for permanent stacking Target Lock */
+        .character[data-target-lock-stacks]::after {
+            content: '🎯 x' attr(data-target-lock-stacks);
+        }
+
+        .character[data-target-lock-permanent="true"]::after {
+            color: #ff6666;
+            font-weight: bold;
+            animation: permanent-target-lock 1.5s ease-in-out infinite;
+        }
+
+        @keyframes permanent-target-lock {
+            0%, 100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.15);
+                filter: brightness(1.3);
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+})();

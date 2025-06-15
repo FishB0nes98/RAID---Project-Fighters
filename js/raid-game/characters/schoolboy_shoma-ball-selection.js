@@ -17,6 +17,9 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
             return;
         }
         
+        // Preload ball icons for smooth display
+        preloadBallIcons();
+        
         // Create the ball selection modal
         const modalContainer = document.createElement('div');
         modalContainer.className = 'ball-selection-modal';
@@ -703,15 +706,15 @@ function selectBall(shomaCharacter, ballId) {
                     const percentHpHeal = Math.floor(target.stats.maxHp * 0.02);
                     const totalHealAmount = baseHeal + percentHpHeal;
                     
-                                    // Apply healing
-                const healResult = target.heal(totalHealAmount, caster);
-                
-                // Updated log entry
-                let logMessage = `${caster.name} used Grass Ball on ${target.name}, healing for ${healResult.healAmount} HP (${baseHeal} + ${percentHpHeal} from max HP).`;
-                if (healResult.isCritical) {
-                    logMessage += " (Critical Heal!)";
-                }
-                addLogEntry(logMessage, healResult.isCritical ? 'critical heal' : 'heal');
+                    // Apply healing
+                    const healResult = target.heal(totalHealAmount, caster, { abilityId: 'ball_throw_grass' });
+                    
+                    // Updated log entry
+                    let logMessage = `${caster.name} used Grass Ball on ${target.name}, healing for ${healResult.healAmount} HP (${baseHeal} + ${percentHpHeal} from max HP).`;
+                    if (healResult.isCritical) {
+                        logMessage += " (Critical Heal!)";
+                    }
+                    addLogEntry(logMessage, healResult.isCritical ? 'critical heal' : 'heal');
                     
                     // Play Grass Ball sound
                     const playSoundGrass = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
@@ -729,14 +732,14 @@ function selectBall(shomaCharacter, ballId) {
                         grassParticles.className = 'grass-ball-particles';
                         targetElement.appendChild(grassParticles);
 
-                                                    // Critical Heal Indicator
-                            if (healResult.isCritical) {
-                                const critHealText = document.createElement('div');
-                                critHealText.className = 'crit-heal-vfx';
-                                critHealText.textContent = `CRIT HEAL!`;
-                                targetElement.appendChild(critHealText);
-                                setTimeout(() => critHealText.remove(), 1000);
-                            }
+                        // Critical Heal Indicator
+                        if (healResult.isCritical) {
+                            const critHealText = document.createElement('div');
+                            critHealText.className = 'crit-heal-vfx';
+                            critHealText.textContent = `CRIT HEAL!`;
+                            targetElement.appendChild(critHealText);
+                            setTimeout(() => critHealText.remove(), 1000);
+                        }
                         
                         // Remove VFX after animation completes
                         setTimeout(() => {
@@ -775,7 +778,7 @@ function selectBall(shomaCharacter, ballId) {
                     const totalDamage = baseDamage + percentHpDamage;
                     
                     // Apply damage as magical
-                    const result = target.applyDamage(totalDamage, 'magical', caster);
+                    const result = target.applyDamage(totalDamage, 'magical', caster, { abilityId: 'ball_throw_fire' });
                     
                     addLogEntry(`${caster.name} used Fire Ball on ${target.name} for ${result.damage} magical damage (${baseDamage} + ${percentHpDamage} from max HP).`);
                     
@@ -837,7 +840,7 @@ function selectBall(shomaCharacter, ballId) {
                     
                     // Apply some base damage
                     const damageAmount = 200;
-                    const result = target.applyDamage(damageAmount, 'physical');
+                    const result = target.applyDamage(damageAmount, 'physical', caster, { abilityId: 'ball_throw_heavy' });
                     
                     addLogEntry(`${caster.name} used Heavy Ball on ${target.name} for ${result.damage} physical damage.`);
                     
@@ -907,7 +910,7 @@ function selectBall(shomaCharacter, ballId) {
                     
                     // Apply damage to main target
                     const damage = 550;
-                    const result = mainTarget.applyDamage(damage, 'physical', caster);
+                    const result = mainTarget.applyDamage(damage, 'physical', caster, { abilityId: 'ball_throw_water' });
                     addLogEntry(`${caster.name} used Water Ball on ${mainTarget.name}, dealing ${result.damage} damage.`);
                     
                     // Play Water Ball sound
@@ -922,7 +925,7 @@ function selectBall(shomaCharacter, ballId) {
                         let splashCount = 0;
                         gameManager.gameState.aiCharacters.forEach(enemy => {
                             if (enemy !== mainTarget && !enemy.isDead()) {
-                                const splashResult = enemy.applyDamage(splashDamage, 'physical', caster);
+                                const splashResult = enemy.applyDamage(splashDamage, 'physical', caster, { abilityId: 'ball_throw_water' });
                                 addLogEntry(`Splash damage hits ${enemy.name} for ${splashResult.damage} physical damage.`);
                                 splashCount++;
                                 
@@ -965,17 +968,11 @@ function selectBall(shomaCharacter, ballId) {
                 return;
         }
         
-        // Update UI to show the selected ball icon
-        try {
-            // Find the ability in the UI and update its icon
-            const abilityElement = document.querySelector(`#character-${shomaCharacter.id} .ability[data-index="${ballThrowIndex}"] .ability-icon`);
-            if (abilityElement) {
-                abilityElement.src = ballIcon;
-                console.log(`Updated ability icon to: ${ballIcon}`);
-            }
-        } catch (uiError) {
-            console.error('Error updating ability icon in UI:', uiError);
-        }
+        // Update the ability's icon property
+        ballThrowAbility.icon = ballIcon;
+        
+        // Use the dedicated function to refresh the ability icon
+        refreshAbilityIcon(shomaCharacter, ballThrowIndex);
         
         // Log the selection
         console.log(`Schoolboy Shoma selected ${ballThrowAbility.name}`);
@@ -1002,7 +999,80 @@ function getIconForBallType(ballId) {
         case 'water_ball':
             return 'Icons/abilities/waterball.jfif';
         default:
-            return 'Icons/default-icon.jpg';
+            return 'Icons/abilities/ball_throw.jfif';
+    }
+}
+
+/**
+ * Preload all ball icons to ensure they display quickly when selected
+ */
+function preloadBallIcons() {
+    const ballTypes = ['grass_ball', 'fire_ball', 'heavy_ball', 'water_ball'];
+    ballTypes.forEach(ballType => {
+        const img = new Image();
+        img.src = getIconForBallType(ballType);
+        console.log(`Preloading ball icon: ${img.src}`);
+    });
+}
+
+/**
+ * Force refresh the ability UI for a specific character
+ * @param {Character} character - The character whose ability UI needs refreshing
+ * @param {Number} abilityIndex - The index of the ability to refresh
+ */
+function refreshAbilityIcon(character, abilityIndex) {
+    try {
+        const characterId = character.id || character.instanceId;
+        const ability = character.abilities[abilityIndex];
+        
+        if (!ability || !ability.icon) {
+            console.warn(`No ability or icon found for index ${abilityIndex}`);
+            return;
+        }
+        
+        // Find all possible icon elements and update them
+        const selectors = [
+            `#character-${characterId} .ability[data-index="${abilityIndex}"] .ability-icon`,
+            `#character-${characterId} .ability[data-ability-id="${ability.id}"] .ability-icon`,
+            `#character-${characterId} .abilities .ability:nth-child(${abilityIndex + 1}) .ability-icon`,
+            `#character-${characterId} .ability-${abilityIndex} .ability-icon`
+        ];
+        
+        let updated = false;
+        selectors.forEach(selector => {
+            try {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    if (element && element.tagName === 'IMG') {
+                        element.src = ability.icon;
+                        element.style.opacity = '0';
+                        setTimeout(() => {
+                            element.style.opacity = '1';
+                        }, 100);
+                        updated = true;
+                        console.log(`Updated icon via selector: ${selector}`);
+                    }
+                });
+            } catch (selectorError) {
+                // Silently continue to next selector
+            }
+        });
+        
+        if (!updated) {
+            console.warn(`Could not find ability icon element to update for character ${characterId}`);
+            
+            // Try a general UI refresh as last resort
+            if (window.gameManager && window.gameManager.uiManager) {
+                if (window.gameManager.uiManager.updateCharacterUI) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                } else if (window.gameManager.uiManager.updateAllCharacterUIs) {
+                    window.gameManager.uiManager.updateAllCharacterUIs();
+                }
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error refreshing ability icon:', error);
     }
 }
 

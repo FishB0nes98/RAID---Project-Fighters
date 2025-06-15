@@ -1,0 +1,18 @@
+.unstoppable-immune-text {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    pointer-events: none;
+    animation: unstoppableFloat 0.8s ease-out forwards;
+}
+
+@keyframes unstoppableFloat {
+    0% { opacity: 0; transform: translate(-50%, -10px); }
+    30% { opacity: 1; transform: translate(-50%, -25px); }
+    100% { opacity: 0; transform: translate(-50%, -40px); }
+} 

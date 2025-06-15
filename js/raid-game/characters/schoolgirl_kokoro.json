@@ -40,7 +40,7 @@
             "manaCost": 40,
             "cooldown": 9,
             "targetType": "enemy",
-            "description": "Places a debuff on the target for 6 turns, reducing their damage output by 30%.",
+            "description": "Places a debuff on the target for 6 turns, reducing their damage output by 30% and dealing 90 damage per turn.",
             "icon": "Icons/abilities/silencing_ring.jfif",
             "effects": {
                 "debuff": {
@@ -73,7 +73,7 @@
             "manaCost": 125,
             "cooldown": 16,
             "targetType": "self",
-            "description": "Gives 15% Increased armor to all allies and increase their healing power by 35% for 7 turns.",
+            "description": "Gives 15% Increased armor to all allies and increase their healing power by 35% for 7 turns. Can be enhanced with talents to grant additional magical damage and shields.",
             "icon": "Icons/abilities/protective_aura.jfif",
             "effects": {
                 "buff": {

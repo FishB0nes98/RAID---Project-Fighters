@@ -1,0 +1,289 @@
+/* Trickshot Passive VFX */
+
+/* Muzzle Flash */
+.trickshot-muzzle-flash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #ffff80 0%, #ff8c00 30%, #ff4500 60%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 20px #ffff80,
+        0 0 40px #ff8c00,
+        0 0 60px #ff4500;
+    animation: trickshotMuzzleFlash 0.3s ease-out;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+@keyframes trickshotMuzzleFlash {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+        filter: brightness(2);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+        filter: brightness(3);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+        filter: brightness(1);
+    }
+}
+
+/* Bullet Trail */
+.trickshot-bullet-trail {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 3px;
+    background: linear-gradient(to right, 
+        #ffff80 0%, 
+        #ffd700 20%, 
+        #ff8c00 40%, 
+        #ff4500 60%, 
+        transparent 100%);
+    box-shadow: 
+        0 0 6px #ffff80,
+        0 0 12px #ff8c00;
+    animation: trickshotBulletTrail 0.4s linear;
+    z-index: 999;
+    pointer-events: none;
+    border-radius: 2px;
+}
+
+@keyframes trickshotBulletTrail {
+    0% {
+        opacity: 1;
+        width: 0%;
+        filter: brightness(3);
+    }
+    20% {
+        opacity: 1;
+        filter: brightness(2);
+    }
+    100% {
+        opacity: 0;
+        filter: brightness(1);
+    }
+}
+
+/* Impact Effect */
+.trickshot-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, 
+        #ff4500 0%, 
+        #ff8c00 30%, 
+        #ffd700 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 20px #ff4500,
+        0 0 40px #ff8c00,
+        0 0 60px #ffd700;
+    animation: trickshotImpact 0.6s ease-out;
+    z-index: 1001;
+    pointer-events: none;
+}
+
+@keyframes trickshotImpact {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+        filter: brightness(3);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(2);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.3);
+        filter: brightness(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.8);
+        filter: brightness(1);
+    }
+}
+
+/* Impact Sparks */
+.trickshot-impact::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+    background: 
+        radial-gradient(2px 2px at 20px 30px, #ffff80, transparent),
+        radial-gradient(2px 2px at 40px 70px, #ff8c00, transparent),
+        radial-gradient(1px 1px at 90px 40px, #ffd700, transparent),
+        radial-gradient(1px 1px at 50px 60px, #ff4500, transparent),
+        radial-gradient(2px 2px at 80px 10px, #ffff80, transparent);
+    animation: trickshotSparks 0.5s ease-out;
+}
+
+@keyframes trickshotSparks {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2) rotate(180deg);
+    }
+}
+
+/* Character Glow when Trickshot is triggered */
+.character-container.trickshot-active {
+    animation: trickshotCharacterGlow 0.8s ease-out;
+}
+
+@keyframes trickshotCharacterGlow {
+    0% {
+        box-shadow: 0 0 0 rgba(255, 140, 0, 0);
+        filter: brightness(1);
+    }
+    20% {
+        box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
+        filter: brightness(1.3);
+    }
+    80% {
+        box-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
+        filter: brightness(1.1);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(255, 140, 0, 0);
+        filter: brightness(1);
+    }
+}
+
+/* Screen flash effect for critical trickshots */
+.trickshot-screen-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 140, 0, 0.1);
+    animation: trickshotScreenFlash 0.3s ease-out;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+@keyframes trickshotScreenFlash {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Passive indicator styling */
+.trickshot-passive-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(45deg, #ff8c00, #ffd700);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px rgba(255, 140, 0, 0.8),
+        inset 0 0 5px rgba(255, 215, 0, 0.5);
+    animation: trickshotIndicatorPulse 2s infinite;
+    z-index: 100;
+}
+
+@keyframes trickshotIndicatorPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Trickshot counter text */
+.trickshot-counter {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(45deg, #dc143c, #ff6347);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 50%;
+    min-width: 16px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 
+        0 0 8px rgba(220, 20, 60, 0.8),
+        inset 0 0 4px rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    z-index: 101;
+    animation: trickshotCounterUpdate 0.3s ease-out;
+}
+
+@keyframes trickshotCounterUpdate {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(220, 20, 60, 0.8);
+    }
+    50% {
+        transform: scale(1.3);
+        box-shadow: 0 0 12px rgba(220, 20, 60, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(220, 20, 60, 0.8);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .trickshot-muzzle-flash {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .trickshot-bullet-trail {
+        height: 2px;
+    }
+    
+    .trickshot-impact {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .trickshot-passive-indicator {
+        width: 16px;
+        height: 16px;
+    }
+} 

@@ -348,6 +348,18 @@ class TalentsPanelManager {
      * Get character portrait URL
      */
     getCharacterPortraitUrl(character) {
+        // Try to get selected skin image first
+        if (window.SkinManager && character.id) {
+            try {
+                const skinImagePath = window.SkinManager.getCharacterImagePath(character.id);
+                if (skinImagePath) {
+                    return skinImagePath;
+                }
+            } catch (error) {
+                console.warn(`[TalentsPanelManager] Error getting skin image for ${character.id}: ${error.message}`);
+            }
+        }
+        
         // Try to get portrait from character data
         if (character.portraitUrl) {
             return character.portraitUrl;
@@ -359,7 +371,7 @@ class TalentsPanelManager {
         }
         
         // Default portrait path based on character ID
-        return `images/characters/${character.id}.png`;
+        return `Loading Screen/${character.id}.png`;
     }
 
     /**

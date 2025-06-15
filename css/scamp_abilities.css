@@ -1,0 +1,788 @@
+/* Scamp Abilities: Sack of Blood VFX */
+
+/* Self-targeting blood effect */
+.scamp-blood-self-effect {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    z-index: 15;
+    pointer-events: none;
+    animation: scamp-blood-self-container 2.5s ease-out;
+}
+
+@keyframes scamp-blood-self-container {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Ally-targeting blood effect */
+.scamp-blood-ally-effect {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    z-index: 15;
+    pointer-events: none;
+    animation: scamp-blood-ally-container 2.5s ease-out;
+}
+
+@keyframes scamp-blood-ally-container {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Blood symbols for both effects */
+.scamp-blood-symbol {
+    position: absolute;
+    font-size: 18px;
+    z-index: 20;
+    pointer-events: none;
+    animation: scamp-blood-symbol-float 2.2s ease-out;
+}
+
+.scamp-blood-symbol:nth-child(1) {
+    top: -8px;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.scamp-blood-symbol:nth-child(2) {
+    top: 20%;
+    right: -8px;
+    animation-delay: 0.12s;
+}
+
+.scamp-blood-symbol:nth-child(3) {
+    bottom: 20%;
+    right: 20%;
+    animation-delay: 0.24s;
+}
+
+.scamp-blood-symbol:nth-child(4) {
+    bottom: -8px;
+    left: 20%;
+    animation-delay: 0.36s;
+}
+
+.scamp-blood-symbol:nth-child(5) {
+    top: 50%;
+    left: -12px;
+    animation-delay: 0.48s;
+}
+
+@keyframes scamp-blood-symbol-float {
+    0% {
+        opacity: 0;
+        transform: translateY(0px) scale(0.6) rotate(0deg);
+        filter: drop-shadow(0 0 0px rgba(220, 20, 60, 0));
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-6px) scale(1.1) rotate(30deg);
+        filter: drop-shadow(0 0 6px rgba(220, 20, 60, 0.8));
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-12px) scale(1) rotate(60deg);
+        filter: drop-shadow(0 0 8px rgba(139, 0, 0, 0.6));
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-25px) scale(1.2) rotate(90deg);
+        filter: drop-shadow(0 0 10px rgba(128, 0, 0, 0.4));
+    }
+}
+
+/* Blood effect text */
+.scamp-blood-text {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 25;
+    pointer-events: none;
+    animation: scamp-blood-text-pulse 2.5s ease-out;
+}
+
+/* Self-targeting text styling */
+.scamp-blood-self-effect .scamp-blood-text {
+    color: #DC143C;
+    text-shadow: 
+        0 0 5px rgba(220, 20, 60, 1),
+        0 0 10px rgba(139, 0, 0, 0.8),
+        0 0 15px rgba(128, 0, 0, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Ally-targeting text styling */
+.scamp-blood-ally-effect .scamp-blood-text {
+    color: #FF69B4;
+    text-shadow: 
+        0 0 5px rgba(255, 105, 180, 1),
+        0 0 10px rgba(255, 20, 147, 0.8),
+        0 0 15px rgba(199, 21, 133, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+@keyframes scamp-blood-text-pulse {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0px) scale(0.6);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-8px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px) scale(1.3);
+    }
+}
+
+/* Heal amount display */
+.scamp-heal-amount {
+    position: absolute;
+    top: -55px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #32CD32;
+    text-shadow: 
+        0 0 5px rgba(50, 205, 50, 1),
+        0 0 8px rgba(0, 255, 0, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+    z-index: 25;
+    pointer-events: none;
+    animation: scamp-heal-amount-rise 2.5s ease-out;
+}
+
+@keyframes scamp-heal-amount-rise {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.4);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.1);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1.2);
+    }
+}
+
+/* Enhanced character appearance during blood effect */
+.character-slot:has(.scamp-blood-self-effect) .character-image {
+    animation: scamp-blood-self-glow 2.5s ease-out;
+    filter: drop-shadow(0 0 10px rgba(220, 20, 60, 0.8));
+}
+
+.character-slot:has(.scamp-blood-ally-effect) .character-image {
+    animation: scamp-blood-ally-glow 2.5s ease-out;
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.7));
+}
+
+@keyframes scamp-blood-self-glow {
+    0% {
+        filter: drop-shadow(0 0 0px rgba(220, 20, 60, 0)) brightness(1);
+    }
+    20% {
+        filter: drop-shadow(0 0 15px rgba(220, 20, 60, 1)) brightness(1.2);
+    }
+    50% {
+        filter: drop-shadow(0 0 12px rgba(139, 0, 0, 0.8)) brightness(1.1);
+    }
+    100% {
+        filter: drop-shadow(0 0 8px rgba(128, 0, 0, 0.6)) brightness(1);
+    }
+}
+
+@keyframes scamp-blood-ally-glow {
+    0% {
+        filter: drop-shadow(0 0 0px rgba(255, 105, 180, 0)) brightness(1);
+    }
+    20% {
+        filter: drop-shadow(0 0 12px rgba(255, 105, 180, 1)) brightness(1.15);
+    }
+    50% {
+        filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.8)) brightness(1.1);
+    }
+    100% {
+        filter: drop-shadow(0 0 8px rgba(199, 21, 133, 0.6)) brightness(1);
+    }
+}
+
+/* Battle Log Entry Styling for Sack of Blood */
+.log-entry.sack-of-blood {
+    background: linear-gradient(to right, 
+        rgba(220, 20, 60, 0.4), 
+        rgba(139, 0, 0, 0.4), 
+        rgba(128, 0, 0, 0.4));
+    border-left: 4px solid #DC143C;
+    color: #FFE4E1;
+    font-weight: bold;
+    animation: scamp-blood-log-glow 2s ease-out;
+}
+
+@keyframes scamp-blood-log-glow {
+    0% {
+        background: linear-gradient(to right, 
+            rgba(220, 20, 60, 0.6), 
+            rgba(139, 0, 0, 0.6), 
+            rgba(128, 0, 0, 0.6));
+        transform: scale(1.02);
+    }
+    100% {
+        background: linear-gradient(to right, 
+            rgba(220, 20, 60, 0.4), 
+            rgba(139, 0, 0, 0.4), 
+            rgba(128, 0, 0, 0.4));
+        transform: scale(1);
+    }
+}
+
+/* Scamp Abilities: Succubus's Infernal Pact VFX */
+
+/* Main Infernal Pact Effect Container */
+.scamp-infernal-pact-effect {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    z-index: 15;
+    pointer-events: none;
+    animation: scamp-infernal-container-pulse 3s ease-out;
+}
+
+@keyframes scamp-infernal-container-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* Floating Demonic Symbols */
+.scamp-infernal-symbol {
+    position: absolute;
+    font-size: 24px;
+    z-index: 20;
+    pointer-events: none;
+    animation: scamp-infernal-symbol-float 2s ease-out;
+}
+
+.scamp-infernal-symbol:nth-child(1) {
+    top: -15px;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.scamp-infernal-symbol:nth-child(2) {
+    top: 10%;
+    right: -15px;
+    animation-delay: 0.2s;
+}
+
+.scamp-infernal-symbol:nth-child(3) {
+    bottom: 10%;
+    right: 10%;
+    animation-delay: 0.4s;
+}
+
+.scamp-infernal-symbol:nth-child(4) {
+    bottom: -15px;
+    left: 10%;
+    animation-delay: 0.6s;
+}
+
+.scamp-infernal-symbol:nth-child(5) {
+    top: 50%;
+    left: -20px;
+    animation-delay: 0.8s;
+}
+
+@keyframes scamp-infernal-symbol-float {
+    0% {
+        opacity: 0;
+        transform: translateY(0px) scale(0.5) rotate(0deg);
+        filter: drop-shadow(0 0 0px rgba(255, 69, 0, 0));
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.2) rotate(90deg);
+        filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.8));
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1) rotate(180deg);
+        filter: drop-shadow(0 0 15px rgba(139, 0, 0, 0.6));
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(1.5) rotate(270deg);
+        filter: drop-shadow(0 0 20px rgba(75, 0, 130, 0.4));
+    }
+}
+
+/* Empowerment Text */
+.scamp-infernal-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: bold;
+    color: #FF4500;
+    text-shadow: 
+        0 0 5px rgba(255, 69, 0, 1),
+        0 0 10px rgba(139, 0, 0, 0.8),
+        0 0 15px rgba(75, 0, 130, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+    z-index: 25;
+    pointer-events: none;
+    animation: scamp-infernal-text-dramatic 3s ease-out;
+}
+
+@keyframes scamp-infernal-text-dramatic {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0px) scale(0.5);
+        color: #FF4500;
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1.3);
+        color: #FF1493;
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px) scale(1.1);
+        color: #8B00FF;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px) scale(1.5);
+        color: #4B0082;
+    }
+}
+
+/* Stats Doubled Text */
+.scamp-stats-doubled {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 
+        0 0 5px rgba(255, 215, 0, 1),
+        0 0 10px rgba(255, 140, 0, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+    z-index: 25;
+    pointer-events: none;
+    animation: scamp-stats-text-glow 3s ease-out;
+}
+
+@keyframes scamp-stats-text-glow {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.3);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1.4);
+    }
+}
+
+/* Enhanced Character Appearance During Buff */
+.character-slot:has(.scamp-infernal-pact-effect) .character-image {
+    animation: scamp-infernal-empowerment 3s ease-out;
+    filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.8));
+}
+
+@keyframes scamp-infernal-empowerment {
+    0% {
+        filter: drop-shadow(0 0 0px rgba(255, 69, 0, 0)) brightness(1);
+    }
+    20% {
+        filter: drop-shadow(0 0 20px rgba(255, 69, 0, 1)) brightness(1.3);
+    }
+    50% {
+        filter: drop-shadow(0 0 25px rgba(139, 0, 0, 0.8)) brightness(1.2);
+    }
+    100% {
+        filter: drop-shadow(0 0 15px rgba(75, 0, 130, 0.6)) brightness(1.1);
+    }
+}
+
+/* Infernal Pact Buff Active State */
+.character-slot.has-infernal-pact {
+    position: relative;
+}
+
+.character-slot.has-infernal-pact::before {
+    content: '👹';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 18px;
+    z-index: 30;
+    animation: scamp-infernal-indicator 2s ease-in-out infinite;
+}
+
+.character-slot.has-infernal-pact .character-image {
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(45deg, #FF4500, #8B00FF, #FF1493, #FFD700) border-box;
+    animation: scamp-infernal-border-pulse 3s ease-in-out infinite;
+}
+
+@keyframes scamp-infernal-indicator {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+        opacity: 1;
+    }
+}
+
+@keyframes scamp-infernal-border-pulse {
+    0%, 100% {
+        background: linear-gradient(white, white) padding-box,
+                    linear-gradient(45deg, #FF4500, #8B00FF, #FF1493, #FFD700) border-box;
+    }
+    50% {
+        background: linear-gradient(white, white) padding-box,
+                    linear-gradient(45deg, #FFD700, #FF1493, #8B00FF, #FF4500) border-box;
+    }
+}
+
+/* Battle Log Entry Styling */
+.log-entry.infernal-pact {
+    background: linear-gradient(to right, 
+        rgba(255, 69, 0, 0.4), 
+        rgba(139, 0, 255, 0.4), 
+        rgba(255, 20, 147, 0.4));
+    border-left: 4px solid #FF4500;
+    color: #FFE4E1;
+    font-weight: bold;
+    animation: scamp-log-infernal-glow 2s ease-out;
+}
+
+@keyframes scamp-log-infernal-glow {
+    0% {
+        background: linear-gradient(to right, 
+            rgba(255, 69, 0, 0.6), 
+            rgba(139, 0, 255, 0.6), 
+            rgba(255, 20, 147, 0.6));
+        transform: scale(1.05);
+    }
+    100% {
+        background: linear-gradient(to right, 
+            rgba(255, 69, 0, 0.4), 
+            rgba(139, 0, 255, 0.4), 
+            rgba(255, 20, 147, 0.4));
+        transform: scale(1);
+    }
+}
+
+/* Screen Effect for Dramatic Impact */
+.scamp-infernal-screen-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, 
+        rgba(255, 69, 0, 0.1) 0%, 
+        rgba(139, 0, 0, 0.05) 50%, 
+        rgba(75, 0, 130, 0.02) 100%);
+    z-index: 5;
+    pointer-events: none;
+    animation: scamp-infernal-screen-flash 2s ease-out;
+}
+
+@keyframes scamp-infernal-screen-flash {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Scamp Abilities: Demonic Powder VFX */
+
+/* Main Demonic Powder Effect Container */
+.scamp-demonic-powder-effect {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    z-index: 15;
+    pointer-events: none;
+    animation: scamp-powder-container-shimmer 3s ease-out;
+}
+
+@keyframes scamp-powder-container-shimmer {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Floating Magical Symbols for Powder */
+.scamp-powder-symbol {
+    position: absolute;
+    font-size: 20px;
+    z-index: 20;
+    pointer-events: none;
+    animation: scamp-powder-symbol-float 2.5s ease-out;
+}
+
+.scamp-powder-symbol:nth-child(1) {
+    top: -10px;
+    left: 15%;
+    animation-delay: 0s;
+}
+
+.scamp-powder-symbol:nth-child(2) {
+    top: 15%;
+    right: -10px;
+    animation-delay: 0.15s;
+}
+
+.scamp-powder-symbol:nth-child(3) {
+    bottom: 15%;
+    right: 15%;
+    animation-delay: 0.3s;
+}
+
+.scamp-powder-symbol:nth-child(4) {
+    bottom: -10px;
+    left: 15%;
+    animation-delay: 0.45s;
+}
+
+.scamp-powder-symbol:nth-child(5) {
+    top: 50%;
+    left: -15px;
+    animation-delay: 0.6s;
+}
+
+@keyframes scamp-powder-symbol-float {
+    0% {
+        opacity: 0;
+        transform: translateY(0px) scale(0.5) rotate(0deg);
+        filter: drop-shadow(0 0 0px rgba(138, 43, 226, 0));
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-8px) scale(1.1) rotate(45deg);
+        filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.7));
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-15px) scale(1) rotate(90deg);
+        filter: drop-shadow(0 0 12px rgba(75, 0, 130, 0.5));
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-30px) scale(1.3) rotate(135deg);
+        filter: drop-shadow(0 0 15px rgba(147, 112, 219, 0.3));
+    }
+}
+
+/* Powder Effect Text */
+.scamp-powder-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #8A2BE2;
+    text-shadow: 
+        0 0 5px rgba(138, 43, 226, 1),
+        0 0 10px rgba(75, 0, 130, 0.8),
+        0 0 15px rgba(147, 112, 219, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+    z-index: 25;
+    pointer-events: none;
+    animation: scamp-powder-text-sparkle 3s ease-out;
+}
+
+@keyframes scamp-powder-text-sparkle {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0px) scale(0.5);
+        color: #8A2BE2;
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-8px) scale(1.2);
+        color: #9370DB;
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-12px) scale(1.1);
+        color: #BA55D3;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-25px) scale(1.4);
+        color: #DDA0DD;
+    }
+}
+
+/* Cooldown Reduction Text */
+.scamp-cooldown-reduction {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #00CED1;
+    text-shadow: 
+        0 0 5px rgba(0, 206, 209, 1),
+        0 0 8px rgba(64, 224, 208, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+    z-index: 25;
+    pointer-events: none;
+    animation: scamp-cooldown-text-glow 3s ease-out;
+}
+
+@keyframes scamp-cooldown-text-glow {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.3);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.1);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1.3);
+    }
+}
+
+/* Enhanced Character Appearance During Powder Effect */
+.character-slot:has(.scamp-demonic-powder-effect) .character-image {
+    animation: scamp-powder-enhancement 3s ease-out;
+    filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.7));
+}
+
+@keyframes scamp-powder-enhancement {
+    0% {
+        filter: drop-shadow(0 0 0px rgba(138, 43, 226, 0)) brightness(1);
+    }
+    20% {
+        filter: drop-shadow(0 0 15px rgba(138, 43, 226, 1)) brightness(1.2);
+    }
+    50% {
+        filter: drop-shadow(0 0 18px rgba(75, 0, 130, 0.8)) brightness(1.15);
+    }
+    100% {
+        filter: drop-shadow(0 0 12px rgba(147, 112, 219, 0.6)) brightness(1.1);
+    }
+}
+
+/* Battle Log Entry Styling for Demonic Powder */
+.log-entry.demonic-powder {
+    background: linear-gradient(to right, 
+        rgba(138, 43, 226, 0.4), 
+        rgba(75, 0, 130, 0.4), 
+        rgba(147, 112, 219, 0.4));
+    border-left: 4px solid #8A2BE2;
+    color: #E6E6FA;
+    font-weight: bold;
+    animation: scamp-powder-log-glow 2s ease-out;
+}
+
+@keyframes scamp-powder-log-glow {
+    0% {
+        background: linear-gradient(to right, 
+            rgba(138, 43, 226, 0.6), 
+            rgba(75, 0, 130, 0.6), 
+            rgba(147, 112, 219, 0.6));
+        transform: scale(1.03);
+    }
+    100% {
+        background: linear-gradient(to right, 
+            rgba(138, 43, 226, 0.4), 
+            rgba(75, 0, 130, 0.4), 
+            rgba(147, 112, 219, 0.4));
+        transform: scale(1);
+    }
+} 

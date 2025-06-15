@@ -1,42 +1,59 @@
-// Ability definition for Infernal Ibuki
+// Ability definition for Infernal Ibuki (Playable Version)
 
 class InfernalIbukiCharacter extends Character {
     constructor(id, name, image, stats) {
         super(id, name, image, stats);
-        this.kunaiStacks = 0; // Initialize passive stacks
+        this.kunaiStacks = 0; // Initialize passive stacks (max 10)
         this.createPassiveIndicator();
     }
 
-    // Override useAbility to implement the Kunai Mastery passive
+    // Override useAbility to implement the Blade Expertise passive
     useAbility(abilityIndex, target) {
         const ability = this.abilities[abilityIndex];
         if (!ability) return false;
 
-        const isKunaiToss = ability.id === 'kunai_toss';
+        const isKunaiThrow = ability.id === 'kunai_throw';
 
         // Call the original useAbility method
         const abilityUsed = super.useAbility(abilityIndex, target);
 
-        // If Kunai Toss was successfully used, apply the passive
-        if (abilityUsed && isKunaiToss) {
-            this.applyKunaiMasteryPassive();
+        // If Kunai Throw was successfully used, apply the passive
+        if (abilityUsed && isKunaiThrow) {
+            this.applyBladeExpertisePassive();
         }
 
         return abilityUsed;
     }
 
-    applyKunaiMasteryPassive() {
-        this.kunaiStacks++;
+    applyBladeExpertisePassive() {
+        if (this.kunaiStacks < 10) { // Max 10 stacks
+            this.kunaiStacks++;
+            const damageBonus = this.kunaiStacks * 2; // 2% per stack
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${this.name}'s Blade Expertise activates! Kunai damage permanently increased. (+${damageBonus}% total, ${this.kunaiStacks}/10 stacks)`, 'passive');
+
+            // Update passive indicator visual
+            this.updatePassiveIndicator();
+        }
+    }
+
+    // Handle critical hit passive effect  
+    onCriticalHit() {
+        // Reduce all ability cooldowns by 1
+        for (let i = 0; i < this.abilities.length; i++) {
+            const ability = this.abilities[i];
+            if (ability.currentCooldown > 0) {
+                ability.currentCooldown = Math.max(0, ability.currentCooldown - 1);
+            }
+        }
+        
         const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
-        log(`${this.name}'s Kunai Mastery activates! Kunai Toss damage permanently increased. (Stacks: ${this.kunaiStacks})`, 'passive');
-
-        // Update passive indicator visual
-        this.updatePassiveIndicator();
-
-        // Update UI (optional, passive stack isn't usually displayed)
-        // if (typeof updateCharacterUI === 'function') {
-        //     updateCharacterUI(this);
-        // }
+        log(`${this.name}'s Blade Expertise reduces all cooldowns by 1 turn!`, 'passive');
+        
+        // Update UI to show cooldown changes
+        if (typeof updateCharacterUI === 'function') {
+            updateCharacterUI(this);
+        }
     }
 
     // --- Passive Indicator ---
@@ -78,7 +95,7 @@ class InfernalIbukiCharacter extends Character {
         if (characterElement) {
             const indicator = characterElement.querySelector('.kunai-mastery-indicator');
             if (indicator) {
-                indicator.title = `Kunai Mastery Stacks: ${this.kunaiStacks}`;
+                indicator.title = `Blade Expertise Stacks: ${this.kunaiStacks}/10 (+${this.kunaiStacks * 2}% damage)`;
                 const indicatorText = indicator.querySelector('.indicator-text');
                  if (indicatorText) {
                      indicatorText.textContent = this.kunaiStacks;
@@ -86,6 +103,13 @@ class InfernalIbukiCharacter extends Character {
                 // Add animation/highlight
                 indicator.classList.add('stack-added');
                 setTimeout(() => indicator.classList.remove('stack-added'), 500);
+                
+                // Add max stacks visual if at 10 stacks
+                if (this.kunaiStacks >= 10) {
+                    indicator.classList.add('max-stacks');
+                } else {
+                    indicator.classList.remove('max-stacks');
+                }
             } else {
                 // If indicator wasn't created yet, try creating it now
                 this._createIndicatorElement();
@@ -96,33 +120,44 @@ class InfernalIbukiCharacter extends Character {
     // --- End Passive Indicator ---
 }
 
-// Enhance Kunai Toss Effect with better VFX
-const kunaiTossEffect = (caster, target) => {
+// Enhance Kunai Throw Effect with better VFX
+const kunaiThrowEffect = (caster, target) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
-    // Base damage components
-    const baseFixedDamage = 500;
-    const basePhysicalScaling = 2.0; // 200%
+    // Base damage components - BALANCED: 100% Physical Damage scaling
+    const baseFixedDamage = 250;
+    const basePhysicalScaling = 1.0; // Changed from 1.5 to 1.0 (100%)
 
     // Calculate base damage before passive
     let calculatedDamage = baseFixedDamage + (caster.stats.physicalDamage * basePhysicalScaling);
 
-    // Apply Kunai Mastery passive multiplier
-    // Ensure caster has kunaiStacks (check if it's an InfernalIbukiCharacter instance)
-    const passiveMultiplier = (caster.kunaiStacks !== undefined) ? (1 + (caster.kunaiStacks * 0.05)) : 1; // Use 0.05 for 5%
+    // Apply Blade Expertise passive multiplier (2% per stack, max 10 stacks = 20%)
+    const passiveMultiplier = (caster.kunaiStacks !== undefined) ? (1 + (caster.kunaiStacks * 0.02)) : 1; // Use 0.02 for 2%
     calculatedDamage *= passiveMultiplier;
 
     // Recalculate final damage, applying the passive multiplier to the total base damage
     const finalBaseDamage = (baseFixedDamage + (caster.stats.physicalDamage * basePhysicalScaling)) * passiveMultiplier;
 
     // Use the character's calculateDamage to factor in crit/defense AFTER the passive boost
-    const finalDamage = caster.calculateDamage(finalBaseDamage, 'physical');
+    const finalDamage = caster.calculateDamage(finalBaseDamage, 'physical', target);
 
-    // Apply the damage
-    target.applyDamage(finalDamage, 'physical', caster);
+    // Check for critical hit to trigger passive
+    const damageResult = target.applyDamage(finalDamage, 'physical', caster, { abilityId: 'kunai_throw' });
+    
+    // Trigger critical hit passive if it was a crit
+    if (damageResult.isCritical && typeof caster.onCriticalHit === 'function') {
+        caster.onCriticalHit();
+    }
 
-    log(`${caster.name} throws a Kunai at ${target.name}, dealing ${finalDamage} physical damage. (Passive Multiplier: ${passiveMultiplier.toFixed(2)}x)`);
+    // Track statistics
+    if (window.statisticsManager) {
+        window.statisticsManager.recordAbilityUsage(caster, 'kunai_throw', 'use', 1);
+        window.statisticsManager.recordDamageDealt(caster, target, damageResult.damage, 'physical', damageResult.isCritical, 'kunai_throw');
+    }
+
+    const stackText = caster.kunaiStacks ? ` (Passive: +${(caster.kunaiStacks * 2)}%)` : '';
+    log(`${caster.name} throws a Kunai at ${target.name}, dealing ${damageResult.damage} physical damage${stackText}${damageResult.isCritical ? ' (Critical!)' : ''}`);
 
     // Play sounds
     playSound('sounds/kunai_throw.mp3', 0.7);
@@ -214,40 +249,35 @@ function showEnhancedKunaiTossVFX(caster, target) {
 
 
 // Create Ability object
-const kunaiTossAbility = new Ability(
-    'kunai_toss',
-    'Kunai Toss',
+const kunaiThrowAbility = new Ability(
+    'kunai_throw',
+    'Kunai Throw',
     'Icons/abilities/kunai_toss.png',
-    50, // Mana cost
+    40, // Mana cost
     1,  // Cooldown
-    kunaiTossEffect
-).setDescription('Deals 500 + 200% Physical Damage to the target. Damage increases permanently each time this is used.')
+    kunaiThrowEffect
+).setDescription('Deals 250 + 150% Physical Damage to the target. Each use grants +2% damage permanently (max 10 stacks).')
  .setTargetType('enemy');
 
-// --- Shadow Step Ability ---
+// --- Shadow Veil Ability ---
 
-// Effect function for Shadow Step (applies the buff)
-const shadowStepEffect = (caster, target) => {
+// Effect function for Shadow Veil (applies the buff)
+const shadowVeilEffect = (caster, target) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
-    const buffData = {
-        id: 'shadow_step_buff',
-        name: 'Shadow Step',
-        icon: 'Icons/abilities/shadow_step.png', // Use ability icon or a specific buff icon
-        duration: 2,
-        effect: (target) => {
-            // The main effect is handled by the buff properties (isUntargetable)
-            // and the CSS class applied in addBuff
-        },
+    // Untargetable buff for 3 turns
+    const untargetableBuff = {
+        id: 'shadow_veil_untargetable',
+        name: 'Shadow Veil',
+        icon: 'Icons/abilities/shadow_step.png',
+        duration: 3,
+        effect: (target) => {},
         onApply: (target) => {
             const targetElementId = target.instanceId || target.id;
-            console.log(`[Shadow Step onApply] Trying to find element for ID: character-${targetElementId}`); // DEBUG LOG
             const targetElement = document.getElementById(`character-${targetElementId}`);
             if (targetElement) {
-                console.log(`[Shadow Step onApply] Element found! Adding class and smoke.`); // DEBUG LOG
                 targetElement.classList.add('shadow-step-active');
-                // Create smoke effect elements
                 const smokeContainer = document.createElement('div');
                 smokeContainer.className = 'shadow-step-smoke-container';
                 for (let i = 0; i < 5; i++) {
@@ -257,62 +287,88 @@ const shadowStepEffect = (caster, target) => {
                     smokeContainer.appendChild(smoke);
                 }
                 targetElement.appendChild(smokeContainer);
-            } else {
-                // ---> Add a log if the element is NOT found <--- 
-                console.error(`[Shadow Step onApply] Could not find element with ID: character-${targetElementId} for target ${target.name}`);
             }
         },
-        onRemove: (target) => { // This also needs the element
+        onRemove: (target) => {
              const targetElementId = target.instanceId || target.id;
-             console.log(`[Shadow Step onRemove] Trying to find element for ID: character-${targetElementId}`); // DEBUG LOG
              const targetElement = document.getElementById(`character-${targetElementId}`);
              if (targetElement) {
-                 console.log(`[Shadow Step onRemove] Element found! Removing class and smoke.`); // DEBUG LOG
                 targetElement.classList.remove('shadow-step-active');
                 const smokeContainer = targetElement.querySelector('.shadow-step-smoke-container');
                 if (smokeContainer) {
                     smokeContainer.remove();
                 }
-             } else {
-                 console.error(`[Shadow Step onRemove] Could not find element with ID: character-${targetElementId} for target ${target.name}`);
              }
         },
         isDebuff: false,
-        // --- Key property for untargetability ---
         isUntargetable: true,
         description: "Untargetable by abilities."
     };
 
-    const buff = new Effect(buffData.id, buffData.name, buffData.icon, buffData.duration, buffData.effect, buffData.isDebuff);
-    buff.isUntargetable = buffData.isUntargetable; // Add the custom property
-    buff.onApply = buffData.onApply;
-    buff.onRemove = buffData.onRemove;
-    buff.setDescription(buffData.description);
+    // Dodge bonus buff for 3 turns
+    const dodgeBuff = {
+        id: 'shadow_veil_dodge',
+        name: 'Shadow Reflexes',
+        icon: 'Icons/abilities/shadow_step.png',
+        duration: 3,
+        effect: (target) => {
+            target.stats.dodgeChance += 0.25; // +25% dodge
+        },
+        onApply: (target) => {
+            target.stats.dodgeChance = Math.min(0.95, target.stats.dodgeChance + 0.25); // Cap at 95%
+        },
+        onRemove: (target) => {
+            target.stats.dodgeChance = Math.max(0, target.stats.dodgeChance - 0.25);
+        },
+        isDebuff: false,
+        description: "+25% dodge chance."
+    };
 
-    caster.addBuff(buff);
+    // Apply both buffs
+    const untargetableEffect = new Effect(untargetableBuff.id, untargetableBuff.name, untargetableBuff.icon, untargetableBuff.duration, untargetableBuff.effect, untargetableBuff.isDebuff);
+    untargetableEffect.isUntargetable = untargetableBuff.isUntargetable;
+    untargetableEffect.onApply = untargetableBuff.onApply;
+    untargetableEffect.onRemove = untargetableBuff.onRemove;
+    untargetableEffect.setDescription(untargetableBuff.description);
 
-    log(`${caster.name} uses Shadow Step and vanishes into the shadows!`, 'ability');
-    playSound('sounds/shadow_step.mp3', 0.7); // Placeholder sound
+    const dodgeEffect = new Effect(dodgeBuff.id, dodgeBuff.name, dodgeBuff.icon, dodgeBuff.duration, dodgeBuff.effect, dodgeBuff.isDebuff);
+    dodgeEffect.onApply = dodgeBuff.onApply;
+    dodgeEffect.onRemove = dodgeBuff.onRemove;
+    dodgeEffect.setDescription(dodgeBuff.description);
 
-    // Update UI for caster (to show buff icon and visual effect)
+    caster.addBuff(untargetableEffect);
+    caster.addBuff(dodgeEffect);
+
+    // Track statistics
+    if (window.statisticsManager) {
+        window.statisticsManager.recordAbilityUsage(caster, 'shadow_veil', 'use', 1);
+        window.statisticsManager.recordAbilityUsage(caster, 'shadow_veil', 'buff', 2); // 2 buffs applied
+        window.statisticsManager.recordStatusEffect(caster, caster, 'buff', 'shadow_veil_untargetable', false, 'shadow_veil');
+        window.statisticsManager.recordStatusEffect(caster, caster, 'buff', 'shadow_veil_dodge', false, 'shadow_veil');
+    }
+
+    log(`${caster.name} uses Shadow Veil and becomes untargetable while gaining enhanced reflexes!`, 'ability');
+    playSound('sounds/shadow_step.mp3', 0.7);
+
+    // Update UI for caster
     if (typeof updateCharacterUI === 'function') {
         updateCharacterUI(caster);
     }
 
-    return true; // Indicate successful execution
+    return true;
 };
 
-// Create Ability object for Shadow Step
-const shadowStepAbility = new Ability(
-    'shadow_step',
-    'Shadow Step',
+// Create Ability object for Shadow Veil
+const shadowVeilAbility = new Ability(
+    'shadow_veil',
+    'Shadow Veil',
     'Icons/abilities/shadow_step.png',
-    80, // Mana cost
-    13, // Cooldown
-    shadowStepEffect
-).setDescription('Turns invisible and untargetable by abilities for 2 turns.')
+    90, // Mana cost
+    16, // Cooldown
+    shadowVeilEffect
+).setDescription('Become untargetable by enemies for 3 turns and gain +25% dodge chance for 3 turns.')
  .setTargetType('self');
-// --- End Shadow Step Ability ---
+// --- End Shadow Veil Ability ---
 
 // --- Dashing Strike Ability ---
 
@@ -436,7 +492,7 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
 
     // --- Damage Calculation ---
     const damageType = 'physical';
-    const physicalDamagePercent = 3.5; // Updated scaling: 350%
+    const physicalDamagePercent = 1.8; // Updated scaling: 180%
     const baseDamage = Math.floor((caster.stats.physicalDamage || 0) * physicalDamagePercent);
 
     // Apply critical hit check separately for each hit in the chain
@@ -448,8 +504,19 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
     }
 
     // Apply damage (uses target's defenses)
-    const damageResult = currentTarget.applyDamage(actualDamage, damageType, caster);
-    damageResult.isCritical = isCritical || damageResult.isCritical;
+    const damageResult = currentTarget.applyDamage(actualDamage, damageType, caster, { abilityId: 'swift_strike' });
+    if (isCritical) {
+        damageResult.isCritical = true;
+    }
+
+    // Track statistics
+    if (window.statisticsManager) {
+        if (chainCount === 0) {
+            // Only count as ability use on the initial hit
+            window.statisticsManager.recordAbilityUsage(caster, 'swift_strike', 'use', 1);
+        }
+        window.statisticsManager.recordDamageDealt(caster, currentTarget, damageResult.damage, 'physical', damageResult.isCritical, chainCount === 0 ? 'swift_strike' : 'swift_strike_chain');
+    }
 
     log(`${caster.name} dashes to ${currentTarget.name}, dealing ${damageResult.damage} physical damage${damageResult.isCritical ? ' (Critical!)' : ''}.`, 'info');
     playSound('sounds/dash_strike.mp3', 0.7);
@@ -476,12 +543,17 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
     await delay(150);
 
     // --- Chaining Logic with enhanced visuals ---
-    const chainChance = 0.60;
-    if (Math.random() < chainChance) {
-        // Find next target from the caster's enemies (player characters if caster is AI)
-        const potentialTargets = window.gameManager.gameState.playerCharacters.filter(
-            enemy => enemy && !enemy.isDead() && !hitTargets.includes(enemy.instanceId || enemy.id)
-        );
+    const chainChance = 0.30;
+    const maxChains = 2;
+    if (Math.random() < chainChance && chainCount < maxChains) {
+        // Find next target from the caster's enemies (opposite team)
+        const potentialTargets = caster.isAI 
+            ? window.gameManager.gameState.playerCharacters.filter(
+                enemy => enemy && !enemy.isDead() && !hitTargets.includes(enemy.instanceId || enemy.id)
+            )
+            : window.gameManager.gameState.aiCharacters.filter(
+                enemy => enemy && !enemy.isDead() && !hitTargets.includes(enemy.instanceId || enemy.id)
+            );
 
         if (potentialTargets.length > 0) {
             const nextTarget = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
@@ -610,10 +682,10 @@ async function performEnhancedIbukiDash(caster, target, duration = 400) {
 }
 
 // Main effect function called by the Ability system
-const dashingStrikeEffect = async (caster, target) => {
+const swiftStrikeEffect = async (caster, target) => {
     if (!target || target.isDead()) {
         const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
-        log(`${caster.name} tries Dashing Strike, but the target is invalid or dead.`, 'warning');
+        log(`${caster.name} tries Swift Strike, but the target is invalid or dead.`, 'warning');
         return false; // Indicate failure
     }
 
@@ -623,18 +695,391 @@ const dashingStrikeEffect = async (caster, target) => {
     return true; // Indicate successful execution (even if chain didn't continue)
 };
 
-
-// Create Ability object for Dashing Strike
-const dashingStrikeAbility = new Ability(
-    'dashing_strike',
-    'Dashing Strike',
-    'Icons/abilities/dashing_strike.webp', // Placeholder icon
-    70, // Mana cost
-    5,  // Cooldown
-    dashingStrikeEffect // Use the async wrapper
-).setDescription('Deals 200% Physical Damage to the target. 60% chance to dash to another enemy and repeat.')
+// Create Ability object for Swift Strike
+const swiftStrikeAbility = new Ability(
+    'swift_strike',
+    'Swift Strike',
+    'Icons/abilities/dashing_strike.webp',
+    85, // Mana cost
+    6,  // Cooldown - BALANCED: Reduced from 8 to 6
+    swiftStrikeEffect
+).setDescription('Deals 180% Physical Damage. 30% chance to dash to another enemy and repeat (max 2 chains).')
  .setTargetType('enemy');
-// --- End Dashing Strike Ability ---
+// --- End Swift Strike Ability ---
+
+// --- Smoke Bomb Ability ---
+
+const smokeBombEffect = (caster, target) => {
+    console.log(`[InfernalIbuki] ${caster.name} uses Smoke Bomb!`);
+    
+    const gameManager = window.gameManager;
+    const gameState = gameManager ? gameManager.gameState : null;
+
+    if (!gameState) {
+        console.error("Smoke Bomb ability error: Cannot access game state!");
+        return false;
+    }
+
+    // Get all enemy characters (proper targeting based on caster's team, like Farmer Raiden)
+    const enemies = caster.isAI ? 
+        (gameState.playerCharacters || []) : 
+        (gameState.aiCharacters || []);
+    
+    if (!enemies || enemies.length === 0) {
+        gameManager.addLogEntry(`${caster.name}'s Smoke Bomb has no targets!`, 'ability-use');
+        return false;
+    }
+
+    // Filter out dead enemies
+    const livingEnemies = enemies.filter(character => !character.isDead());
+    
+    if (livingEnemies.length === 0) {
+        gameManager.addLogEntry(`${caster.name}'s Smoke Bomb has no living targets!`, 'ability-use');
+        return false;
+    }
+    
+    // Apply debuff to all enemies (create unique instance for each)
+    livingEnemies.forEach((enemy, index) => {
+        // Create unique obscured debuff for each enemy
+        const obscuredDebuff = new Effect(
+            `obscured_debuff_${enemy.instanceId || enemy.id}_${Date.now()}_${index}`, // Unique ID
+            'Obscured',
+            'Icons/effects/smoke_cloud.png',
+            4,
+            null,
+            true // isDebuff
+        );
+        
+        obscuredDebuff.setDescription('Obscured by smoke. 20% chance to miss abilities and takes damage each turn.');
+        
+        // Add custom properties for the miss chance and DOT damage
+        obscuredDebuff.missChance = 0.20;
+        obscuredDebuff.dotDamage = {
+            fixedAmount: 55,
+            magicalDamagePercent: 0.50
+        };
+        
+        // Add onTurnStart callback for DOT damage
+        obscuredDebuff.onTurnStart = (character) => {
+            if (character.isDead()) return;
+            
+            // Calculate DOT damage: 55 + 50% of Ibuki's magical damage
+            const dotDamage = Math.floor(obscuredDebuff.dotDamage.fixedAmount + (caster.stats.magicalDamage * obscuredDebuff.dotDamage.magicalDamagePercent));
+            
+            // Apply DOT damage
+            character.applyDamage(dotDamage, 'magical', caster, { 
+                isStageEffect: true,
+                abilityId: 'smoke_bomb_dot',
+                stageModifierName: 'Obscured' 
+            });
+            
+            // Track DOT damage in statistics
+            if (window.statisticsManager) {
+                window.statisticsManager.recordDamageDealt(caster, character, dotDamage, 'magical', false, 'smoke_bomb_dot');
+            }
+            
+            gameManager.addLogEntry(
+                `${character.name} takes ${dotDamage} damage from the obscuring smoke!`,
+                'stage-effect damage'
+            );
+            
+            // Create smoke damage VFX
+            showSmokeDamageVFX(character, dotDamage);
+        };
+        
+        // Add cleanup logic when debuff is removed
+        obscuredDebuff.remove = function(character) {
+            // Check if any other characters still have the obscured debuff
+            const allCharacters = [...(gameState.playerCharacters || []), ...(gameState.aiCharacters || [])];
+            const stillObscured = allCharacters.some(char => 
+                !char.isDead() && 
+                char !== character && 
+                char.debuffs && 
+                char.debuffs.some(debuff => debuff.id.startsWith('obscured_debuff'))
+            );
+            
+            // If no one else is obscured, remove the smoke VFX
+            if (!stillObscured && window.smokeBombOverlay) {
+                gameManager.addLogEntry('The obscuring smoke begins to clear...', 'system');
+                
+                // Add fade out animation
+                window.smokeBombOverlay.style.transition = 'opacity 3s ease-out';
+                window.smokeBombOverlay.style.opacity = '0';
+                
+                // Remove after fade out
+                setTimeout(() => {
+                    if (window.smokeBombOverlay && window.smokeBombOverlay.parentNode) {
+                        window.smokeBombOverlay.remove();
+                        window.smokeBombOverlay = null;
+                    }
+                }, 3000);
+            }
+        };
+        
+        // Apply the unique debuff to this enemy
+        enemy.addDebuff(obscuredDebuff);
+        
+        // Track statistics for debuff application
+        if (window.statisticsManager) {
+            window.statisticsManager.recordStatusEffect(caster, enemy, 'debuff', 'obscured_debuff', true, 'smoke_bomb');
+        }
+        
+        gameManager.addLogEntry(
+            `${enemy.name} is obscured by smoke! (20% miss chance, ${Math.floor(55 + (caster.stats.magicalDamage * 0.5))} damage/turn)`,
+            'debuff-applied'
+        );
+    });
+    
+    // Track ability usage statistics
+    if (window.statisticsManager) {
+        window.statisticsManager.recordAbilityUsage(caster, 'smoke_bomb', 'use', 1);
+        window.statisticsManager.recordAbilityUsage(caster, 'smoke_bomb', 'debuff', livingEnemies.length);
+    }
+
+    // Track quest progress for debuff applications
+    if (window.questManager && window.questManager.initialized) {
+        window.questManager.trackDebuffApplications(caster, 'smoke_bomb', livingEnemies.length);
+    }
+
+    // Create battlefield smoke VFX on enemy side
+    createBattlefieldSmokeVFX(livingEnemies);
+
+    return true;
+};
+
+function createBattlefieldSmokeVFX(enemies) {
+    // Create smoke overlay on the enemy area (top part of the battlefield)
+    const battleContainer = document.querySelector('.battle-container') || document.querySelector('.raid-game-container');
+    if (!battleContainer) return;
+    
+    const smokeOverlay = document.createElement('div');
+    smokeOverlay.className = 'battlefield-smoke-overlay';
+    smokeOverlay.id = 'smoke-bomb-overlay'; // Add ID for tracking
+    smokeOverlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        pointer-events: none;
+        z-index: 5;
+        animation: battlefieldSmokeExpansion 3s ease-out;
+    `;
+    
+    // Create dense smoke effect similar to stage modifiers
+    for (let i = 0; i < 30; i++) {
+            const smoke = document.createElement('div');
+        smoke.className = 'battlefield-smoke-cloud';
+        const size = 40 + Math.random() * 80;
+        smoke.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            background: radial-gradient(circle, rgba(40, 40, 40, 0.8) 0%, rgba(60, 60, 60, 0.6) 40%, rgba(80, 80, 80, 0.3) 70%, transparent 100%);
+            border-radius: 50%;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            animation: battlefieldSmokeSwirl ${3 + Math.random() * 4}s ease-in-out infinite;
+            animation-delay: ${Math.random() * 2}s;
+            filter: blur(2px);
+            opacity: ${0.6 + Math.random() * 0.3};
+        `;
+        smokeOverlay.appendChild(smoke);
+    }
+    
+    // Add floating smoke particles
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'battlefield-smoke-particle';
+        const size = 8 + Math.random() * 16;
+        particle.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            background: rgba(50, 50, 50, ${0.4 + Math.random() * 0.4});
+            border-radius: 50%;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            animation: battlefieldSmokeParticleFloat ${4 + Math.random() * 3}s linear infinite;
+            animation-delay: ${Math.random() * 3}s;
+            filter: blur(1px);
+        `;
+        smokeOverlay.appendChild(particle);
+    }
+    
+    // Add enhanced CSS animations
+    if (!document.getElementById('battlefield-smoke-styles')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'battlefield-smoke-styles';
+        styleSheet.textContent = `
+            @keyframes battlefieldSmokeExpansion {
+                0% { 
+                    transform: scale(0.3) translateY(-100%); 
+                    opacity: 0; 
+                }
+                30% { 
+                    transform: scale(1.2) translateY(0%); 
+                    opacity: 0.8; 
+                }
+                100% { 
+                    transform: scale(1) translateY(0%); 
+                    opacity: 0.7; 
+                }
+            }
+            
+            @keyframes battlefieldSmokeSwirl {
+                0% { 
+                    transform: scale(0.8) rotate(0deg) translateY(0px); 
+                    opacity: 0.5; 
+                }
+                25% { 
+                    transform: scale(1.2) rotate(90deg) translateY(-20px); 
+                    opacity: 0.8; 
+                }
+                50% { 
+                    transform: scale(1) rotate(180deg) translateY(-10px); 
+                    opacity: 0.6; 
+                }
+                75% { 
+                    transform: scale(1.3) rotate(270deg) translateY(-30px); 
+                    opacity: 0.9; 
+                }
+                100% { 
+                    transform: scale(0.8) rotate(360deg) translateY(0px); 
+                    opacity: 0.5; 
+                }
+            }
+            
+            @keyframes battlefieldSmokeParticleFloat {
+                0% { 
+                    transform: translateY(0px) translateX(0px) scale(0.5); 
+                    opacity: 0.3; 
+                }
+                20% { 
+                    opacity: 0.8; 
+                }
+                80% { 
+                    opacity: 0.6; 
+                }
+                100% { 
+                    transform: translateY(-80px) translateX(${Math.random() * 40 - 20}px) scale(0.2); 
+                    opacity: 0; 
+                }
+            }
+            
+            @keyframes smokeDamageBurst {
+                0% { 
+                    transform: translate(-50%, -50%) scale(0.3); 
+                    opacity: 0; 
+                }
+                30% { 
+                    transform: translate(-50%, -50%) scale(1.1); 
+                    opacity: 0.9; 
+                }
+                100% { 
+                    transform: translate(-50%, -50%) scale(1.5); 
+                    opacity: 0; 
+                }
+            }
+            
+            @keyframes smokeDamageText {
+                0% { 
+                    transform: translateX(-50%) scale(0.8); 
+                    opacity: 0; 
+                }
+                20% { 
+                    transform: translateX(-50%) scale(1.2); 
+                    opacity: 1; 
+                }
+                100% { 
+                    transform: translateX(-50%) translateY(-30px) scale(0.9); 
+                    opacity: 0; 
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+    
+    battleContainer.appendChild(smokeOverlay);
+    
+    // Store reference for cleanup when debuffs expire
+    window.smokeBombOverlay = smokeOverlay;
+}
+
+function showSmokeDamageVFX(character, damageAmount) {
+    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!charElement) return;
+    
+    // Create smoke damage VFX
+    const smokeDamageVFX = document.createElement('div');
+    smokeDamageVFX.className = 'smoke-damage-vfx';
+    smokeDamageVFX.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 50;
+    `;
+    
+    // Create damage text
+    const damageText = document.createElement('div');
+    damageText.className = 'smoke-damage-text';
+    damageText.textContent = `-${damageAmount}`;
+    damageText.style.cssText = `
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+        font-weight: bold;
+        color: #ff6b6b;
+        text-shadow: 
+            0 0 8px rgba(80, 80, 80, 0.8),
+            2px 2px 4px rgba(0, 0, 0, 0.9);
+        animation: smokeDamageText 2s ease-out;
+        z-index: 51;
+    `;
+    
+    // Create smoke burst effect
+    const smokeBurst = document.createElement('div');
+    smokeBurst.className = 'smoke-damage-burst';
+    smokeBurst.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(80, 80, 80, 0.8) 0%, rgba(60, 60, 60, 0.5) 40%, transparent 70%);
+        border-radius: 50%;
+        animation: smokeDamageBurst 1.5s ease-out;
+        z-index: 49;
+    `;
+    
+    smokeDamageVFX.appendChild(damageText);
+    smokeDamageVFX.appendChild(smokeBurst);
+    charElement.appendChild(smokeDamageVFX);
+        
+        // Remove VFX after animation
+    setTimeout(() => {
+        if (smokeDamageVFX.parentNode) {
+            smokeDamageVFX.remove();
+    }
+    }, 2500);
+}
+
+const smokeBombAbility = new Ability(
+    'smoke_bomb',
+    'Smoke Bomb',
+    'Icons/abilities/smoke_bomb.png',
+    60, // Mana cost
+    15, // Cooldown - BALANCED: Increased from 12 to 15
+    smokeBombEffect
+).setDescription('Creates obscuring smoke on the battlefield. All enemies gain Obscured for 4 turns: 20% chance to miss abilities and take 55 + 50% Magical Damage each turn.')
+ .setTargetType('all_enemies');
+// --- End Smoke Bomb Ability ---
 
 
 // Register the custom character class and abilities
@@ -648,16 +1093,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof AbilityFactory !== 'undefined' && AbilityFactory.registerAbilities) {
         // Register all Ibuki abilities
         AbilityFactory.registerAbilities([
-            kunaiTossAbility,
-            shadowStepAbility,
-            dashingStrikeAbility // Add the new ability here
+            kunaiThrowAbility,
+            shadowVeilAbility,
+            swiftStrikeAbility,
+            smokeBombAbility
         ]);
     } else {
         console.warn("Ibuki abilities defined but AbilityFactory not found or registerAbilities method missing.");
         // Fallback
         window.definedAbilities = window.definedAbilities || {};
-        window.definedAbilities.kunai_toss = kunaiTossAbility;
-        window.definedAbilities.shadow_step = shadowStepAbility;
-        window.definedAbilities.dashing_strike = dashingStrikeAbility;
+        window.definedAbilities.kunai_throw = kunaiThrowAbility;
+        window.definedAbilities.shadow_veil = shadowVeilAbility;
+        window.definedAbilities.swift_strike = swiftStrikeAbility;
+        window.definedAbilities.smoke_bomb = smokeBombAbility;
     }
 }); 

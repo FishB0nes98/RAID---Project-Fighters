@@ -1,0 +1,504 @@
+/* Acid Lava Spit VFX Styles */
+
+/* Enhanced Acid Projectile with Particles */
+.acid-lava-projectile {
+    position: fixed;
+    height: 12px;
+    background: linear-gradient(90deg, 
+        #ff2d00 0%, 
+        #ff6b00 25%, 
+        #ffaa00 50%, 
+        #32cd32 75%, 
+        #00ff7f 100%);
+    border-radius: 6px;
+    box-shadow: 
+        0 0 15px #ff4500,
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    animation: acidProjectile 1s ease-out forwards;
+    transform-origin: left center;
+    position: relative;
+    overflow: visible;
+}
+
+.acid-lava-projectile::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(90deg, 
+        rgba(255, 45, 0, 0.6), 
+        rgba(255, 170, 0, 0.4), 
+        rgba(50, 205, 50, 0.6));
+    border-radius: 9px;
+    animation: acidAura 1s ease-out forwards;
+    z-index: -1;
+}
+
+.acid-lava-projectile::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, 
+        rgba(255, 170, 0, 0.8) 0%, 
+        rgba(50, 205, 50, 0.6) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    animation: acidTrail 1s ease-out forwards;
+}
+
+.acid-lava-projectile.shot-2 {
+    animation-delay: 0.2s;
+    filter: hue-rotate(30deg);
+}
+
+@keyframes acidProjectile {
+    0% {
+        width: 0;
+        opacity: 1;
+        box-shadow: 
+            0 0 15px #ff4500,
+            inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    }
+    20% {
+        opacity: 1;
+        box-shadow: 
+            0 0 25px #ff4500,
+            0 0 40px rgba(255, 69, 0, 0.5),
+            inset 0 2px 0 rgba(255, 255, 255, 0.4);
+    }
+    80% {
+        opacity: 0.8;
+        box-shadow: 
+            0 0 20px #32cd32,
+            0 0 35px rgba(50, 205, 50, 0.4);
+    }
+    100% {
+        opacity: 0;
+        box-shadow: 0 0 5px #32cd32;
+    }
+}
+
+@keyframes acidAura {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes acidTrail {
+    0% {
+        opacity: 0.8;
+        transform: translateY(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.3) translateX(-30px);
+    }
+}
+
+/* Enhanced Impact Effect with Multiple Layers */
+.acid-lava-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.acid-lava-impact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(255, 45, 0, 0.9) 0%, 
+        rgba(255, 170, 0, 0.7) 30%, 
+        rgba(50, 205, 50, 0.5) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: acidSplash 1.5s ease-out forwards;
+}
+
+.acid-lava-impact::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.8) 0%, 
+        rgba(255, 170, 0, 0.6) 40%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: acidCore 1.5s ease-out forwards;
+}
+
+@keyframes acidSplash {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+    }
+    20% {
+        transform: scale(1.5);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes acidCore {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Melting Debuff Application */
+.melting-debuff-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    pointer-events: none;
+    animation: meltingDebuffApplication 3s ease-out forwards;
+}
+
+.melting-debuff-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        rgba(50, 205, 50, 0.3) 0%, 
+        transparent 25%, 
+        rgba(255, 45, 0, 0.3) 50%, 
+        transparent 75%, 
+        rgba(50, 205, 50, 0.3) 100%);
+    background-size: 20px 20px;
+    animation: meltingPattern 3s ease-out forwards;
+    border-radius: 8px;
+}
+
+.melting-debuff-overlay::after {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, 
+        rgba(50, 205, 50, 0.4) 0%, 
+        rgba(255, 170, 0, 0.3) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: meltingCore 3s ease-out forwards;
+}
+
+@keyframes meltingDebuffApplication {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    25% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    75% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+@keyframes meltingPattern {
+    0% {
+        opacity: 0;
+        background-position: 0 0;
+    }
+    50% {
+        opacity: 0.6;
+        background-position: 20px 20px;
+    }
+    100% {
+        opacity: 0;
+        background-position: 40px 40px;
+    }
+}
+
+@keyframes meltingCore {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.3);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+}
+
+/* Melting Damage Trigger VFX */
+.melting-damage-trigger {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1002;
+    pointer-events: none;
+    animation: meltingDamageTrigger 2s ease-out forwards;
+}
+
+.melting-damage-trigger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(50, 205, 50, 0.6) 0%, 
+        rgba(255, 45, 0, 0.4) 50%, 
+        rgba(50, 205, 50, 0.6) 100%);
+    animation: meltingBurn 2s ease-out forwards;
+    border-radius: 8px;
+}
+
+.melting-damage-trigger::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(255, 170, 0, 0.7) 30%, 
+        rgba(50, 205, 50, 0.5) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: meltingBurnCore 2s ease-out forwards;
+}
+
+@keyframes meltingDamageTrigger {
+    0% {
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes meltingBurn {
+    0% {
+        opacity: 0;
+        transform: scale(1);
+        filter: blur(0px);
+    }
+    25% {
+        opacity: 0.8;
+        transform: scale(1.05);
+        filter: blur(1px);
+    }
+    75% {
+        opacity: 0.6;
+        transform: scale(1.02);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+        filter: blur(3px);
+    }
+}
+
+@keyframes meltingBurnCore {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+    80% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+/* Floating Damage Numbers for Melting */
+.melting-damage-number {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #32cd32;
+    text-shadow: 
+        0 0 5px #32cd32,
+        0 0 10px rgba(50, 205, 50, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    z-index: 1003;
+    pointer-events: none;
+    animation: meltingDamageFloat 2.5s ease-out forwards;
+}
+
+@keyframes meltingDamageFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1.2);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.8);
+    }
+}
+
+/* Character glow when affected by melting */
+.character-container:has(.melting-debuff-overlay) {
+    filter: drop-shadow(0 0 12px rgba(50, 205, 50, 0.6));
+    animation: meltingCharacterGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes meltingCharacterGlow {
+    0% {
+        filter: drop-shadow(0 0 12px rgba(50, 205, 50, 0.6));
+    }
+    100% {
+        filter: drop-shadow(0 0 18px rgba(255, 69, 0, 0.8));
+    }
+}
+
+/* Acid Particles */
+.acid-particles {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    pointer-events: none;
+}
+
+.acid-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #32cd32, #ff4500);
+    border-radius: 50%;
+    animation: acidParticleFloat 3s linear infinite;
+}
+
+@keyframes acidParticleFloat {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    10% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    90% {
+        opacity: 1;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) translateY(-50px);
+    }
+}
+
+/* Screen shake for acid impact */
+@keyframes acidImpactShake {
+    0% { transform: translate(0); }
+    10% { transform: translate(-2px, -1px); }
+    20% { transform: translate(-1px, 2px); }
+    30% { transform: translate(2px, 1px); }
+    40% { transform: translate(1px, -1px); }
+    50% { transform: translate(-1px, 2px); }
+    60% { transform: translate(-1px, 1px); }
+    70% { transform: translate(2px, 1px); }
+    80% { transform: translate(-1px, -1px); }
+    90% { transform: translate(1px, 2px); }
+    100% { transform: translate(0); }
+}
+
+/* Enhanced particle effects for impacts */
+.acid-particle[style*="--dx"] {
+    animation: acidImpactParticle 1s ease-out forwards !important;
+}
+
+@keyframes acidImpactParticle {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(0.3);
+    }
+} 

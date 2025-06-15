@@ -1,0 +1,45 @@
+{
+    "id": "grok_hell_lord",
+    "name": "Grok - Hell Lord",
+    "image": "Loading Screen/Grok Hell Lord.png",
+    "rarity": "legendary",
+    "type": "demon",
+    "description": "The tyrannical Hell Lord of the castle, wielding overwhelming demonic power.",
+    "stats": {
+        "physicalDamage": 300,
+        "magicalDamage": 300,
+        "armor": 25,
+        "magicalShield": 25,
+        "hp": 14500,
+        "maxHp": 14500,
+        "hpPerTurn": 0,
+        "mana": 10000,
+        "maxMana": 10000,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.15,
+        "critDamage": 1.6,
+        "speed": 0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "chaos_ball",
+            "name": "Chaos Ball",
+            "icon": "Icons/abilities/chaos_ball.png",
+            "manaCost": 55,
+            "cooldown": 0,
+            "targetType": "enemy",
+            "type": "custom",
+            "functionName": "grokChaosBallEffect",
+            "description": "Hurls a chaotic orb of demonic energy that deals 500 + 200% Magical Damage and ignores Magical Shield."
+        }
+    ],
+    "passive": {
+        "id": "grok_lords_sacrifice",
+        "name": "Lord's Sacrifice",
+        "description": "All damage and debuffs Grok would receive are redirected to a random living ally."
+    },
+    "tags": ["Demon", "Boss", "Hell"]
+} 

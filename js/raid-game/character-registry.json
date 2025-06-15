@@ -38,7 +38,8 @@
             "type": "fighter",
             "tags": ["Carry", "Physical", "Solo"],
             "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "ayane",
@@ -48,7 +49,8 @@
             "type": "assassin",
             "tags": ["Carry", "Physical", "Solo"],
             "description": "A swift assassin who uses teleportation and shadow techniques. Her Combat Reflexes passive lets her reduce ability cooldowns.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "isHidden": true
         },
         {
             "id": "farmer_nina",
@@ -176,7 +178,7 @@
             "image": "Icons/characters/Farmer Cham Cham.png",
             "rarity": "epic",
             "type": "fighter",
-            "tags": ["Carry", "Physical", "Farmer"],
+            "tags": ["Carry", "Physical", "Farmer", "Solo"],
             "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang.",
             "playerunlocked": true
         },
@@ -295,6 +297,115 @@
             "description": "A cunning little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
             "playerunlocked": false,
             "isHidden": true
+        },
+        {
+            "id": "hotshot_diablo",
+            "name": "Hotshot Diablo",
+            "image": "Icons/characters/Hotshot Diablo.png",
+            "rarity": "epic",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Gunslinger", "Hell"],
+            "description": "A fiery demonic gunslinger from the desert wastes of hell, wielding twin infernal pistols with deadly precision.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "hotshot_diabla",
+            "name": "Hotshot Diabla",
+            "image": "Icons/characters/Hotshot Diabla.png",
+            "rarity": "epic",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Magic", "Hell"],
+            "description": "A seductive demoness of the hellish desert, combining lethal beauty with scorching fire magic.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "cursed_lion",
+            "name": "Cursed Lion",
+            "image": "Loading Screen/Cursed Lion.png",
+            "rarity": "epic",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Hell", "Fire"],
+            "description": "A majestic lion corrupted by hellish magic, its mane burns with unholy fire as it prowls the infernal plains.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "hellboar",
+            "name": "Hellboar",
+            "image": "Loading Screen/Hellboar.png",
+            "rarity": "epic",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Hell", "Tank"],
+            "description": "A massive boar with tusks forged in hellfire and hide thick as molten rock. Its charge can shatter mountains.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "hell_fly",
+            "name": "Hell Fly",
+            "image": "Loading Screen/Hell Fly.png",
+            "rarity": "epic",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Hell", "Flying"],
+            "description": "A gigantic fly born from the putrid swamps of hell, its buzz alone can drive mortals mad with terror.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "lava_worm",
+            "name": "Lava Worm",
+            "image": "Loading Screen/Lava Worm.png",
+            "rarity": "epic",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Hell", "Lava"],
+            "description": "A colossal worm that burrows through molten lava like water, its segmented body glows with the heat of a thousand forges.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "deathwing",
+            "name": "Deathwing",
+            "image": "Loading Screen/Deathwing.png",
+            "rarity": "legendary",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Hell", "Dragon", "Boss"],
+            "description": "An ancient dragon corrupted by the deepest hells, its wings spread darkness across the land as its breath burns souls to ash.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "gargolyan",
+            "name": "Gargolyan",
+            "image": "Icons/characters/Gargolyan.png",
+            "rarity": "epic",
+            "type": "guardian",
+            "tags": ["Enemy", "Guardian", "Stone", "Hell"],
+            "description": "A massive stone gargoyle guardian that protects the entrance to Hell Castle with its intimidating presence and raw strength.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "hellhorn",
+            "name": "HellHorn",
+            "image": "Icons/characters/HellHorn.png",
+            "rarity": "epic",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Guardian", "Hell"],
+            "description": "A fearsome horned demon that guards the gates of Hell Castle with its burning fury and demonic strength.",
+            "playerunlocked": false,
+            "isHidden": true
+        },
+        {
+            "id": "infernal_ibuki",
+            "name": "Infernal Ibuki",
+            "image": "Loading Screen/Infernal Ibuki.png",
+            "rarity": "epic",
+            "type": "assassin",
+            "tags": ["Infernal", "Physical", "Carry"],
+            "description": "A deadly ninja from the infernal realm who specializes in stealth, mobility, and precision strikes. Her blade expertise grows stronger with each battle, and her critical hits reduce ability cooldowns.",
+            "playerunlocked": true
         }
     ]
 } 

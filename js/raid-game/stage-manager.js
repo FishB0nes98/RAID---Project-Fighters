@@ -575,6 +575,7 @@ class StageManager {
                 character.isAI = true;
                 character.instanceId = `${character.id}-${instanceCounter++}`;
                 console.log(`[StageManager] Assigned instance ID: ${character.instanceId} to ${character.name}`);
+                console.log(`[StageManager] AI character ${character.name} created WITHOUT user talents (as intended)`);
                 
                 this.gameState.aiCharacters.push(character);
                 
@@ -739,47 +740,583 @@ class StageManager {
                 
                 // Only merge saved stats if we have a saved state with stats
                 if (savedState && savedState.stats) {
+                    console.log(`[StageManager] Character ${character.name} stats BEFORE merging saved state:`, {
+                        hp: character.stats.hp,
+                        maxHp: character.stats.maxHp,
+                        baseHp: character.baseStats?.hp,
+                        baseMaxHp: character.baseStats?.maxHp
+                    });
+                    console.log(`[StageManager] Saved state stats for ${character.name}:`, savedState.stats);
+                    
                     Object.keys(savedState.stats).forEach(statKey => {
                         if (character.stats[statKey] !== undefined) {
                             character.stats[statKey] = savedState.stats[statKey];
-                            // --- NEW: Also update baseStats to preserve enhanced stats through recalculateStats ---
+                            // CRITICAL: Also update baseStats to preserve enhanced stats through recalculateStats
                             if (character.baseStats && character.baseStats[statKey] !== undefined) {
                                 character.baseStats[statKey] = savedState.stats[statKey];
-                                console.log(`[StageManager] Updated baseStats.${statKey} to ${savedState.stats[statKey]} for ${character.name}`);
+                                console.log(`[StageManager] Updated baseStats.${statKey} to ${savedState.stats[statKey]} for ${character.name} (prevents recalculateStats override)`);
                             }
-                            // --- END NEW ---
                         }
                     });
+                    
+                    // CRITICAL: Synchronize HP properties - ensure both hp and maxHp are set correctly
+                    if (savedState.stats.hp !== undefined) {
+                        // If Firebase has hp, make sure maxHp matches
+                        character.stats.maxHp = savedState.stats.hp;
+                        if (character.baseStats) {
+                            character.baseStats.maxHp = savedState.stats.hp;
+                        }
+                        console.log(`[StageManager] Synchronized maxHp with hp (${savedState.stats.hp}) for ${character.name}`);
+                    } else if (savedState.stats.maxHp !== undefined) {
+                        // If Firebase has maxHp, make sure hp matches
+                        character.stats.hp = savedState.stats.maxHp;
+                        if (character.baseStats) {
+                            character.baseStats.hp = savedState.stats.maxHp;
+                        }
+                        console.log(`[StageManager] Synchronized hp with maxHp (${savedState.stats.maxHp}) for ${character.name}`);
+                    }
+                    
+                    // Special handling for HP - check if it's missing from saved stats but character has hellEffects
+                    if (savedState.hellEffects && !savedState.stats.hp && !savedState.stats.maxHp) {
+                        console.log(`[StageManager] HP missing from saved stats but hellEffects present - will be handled in hellEffects processing`);
+                    }
+                    
+                    console.log(`[StageManager] Character ${character.name} stats AFTER merging saved state:`, {
+                        hp: character.stats.hp,
+                        maxHp: character.stats.maxHp,
+                        baseHp: character.baseStats?.hp,
+                        baseMaxHp: character.baseStats?.maxHp
+                    });
                     console.log(`Merged saved STATS into ${character.name}:`, character.stats);
+                    
+                    // Mark that Firebase stats have been loaded to prevent recalculateStats from overriding them
+                    character._firebaseStatsLoaded = true;
+                    console.log(`[StageManager] Marked ${character.name} as having Firebase stats loaded`);
                 } else {
                     console.log(`No saved stats to merge for ${character.name}, using default stats`);
                 }
 
                 // Apply saved HP/Mana from teamState if available and valid
                 if (savedState && savedState.currentHP !== undefined && savedState.currentMana !== undefined) {
-                    character.stats.currentHp = Math.max(0, Math.min(savedState.currentHP, character.stats.maxHp));
+                    // IMPORTANT: Use the higher of maxHp or hp for the limit, since Firebase stats may have updated maxHp
+                    const effectiveMaxHp = Math.max(character.stats.maxHp || 0, character.stats.hp || 0);
+                    character.stats.currentHp = Math.max(0, Math.min(savedState.currentHP, effectiveMaxHp));
                     character.stats.currentMana = Math.max(0, Math.min(savedState.currentMana, character.stats.maxMana));
-                    console.log(`Applied provided state to ${character.name}: HP=${character.stats.currentHp}, Mana=${character.stats.currentMana}`);
+                    console.log(`Applied provided state to ${character.name}: HP=${character.stats.currentHp}/${effectiveMaxHp}, Mana=${character.stats.currentMana}`);
                 } else {
                     // Default to full HP/Mana if state wasn't fully provided
-                    character.stats.currentHp = character.stats.maxHp;
-                    character.stats.currentMana = character.stats.maxMana;
+                    character.stats.currentHp = character.stats.maxHp || character.stats.hp;
+                    character.stats.currentMana = character.stats.maxMana || character.stats.mana;
                      console.log(`Initialized ${character.name} with full HP/Mana as no valid state was provided.`);
                 }
 
                 // Apply talents if TalentManager is available and talents are selected
-                if (window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function') {
+                // SAFETY CHECK: Only apply talents to player characters (not AI)
+                if (window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function' && character.isAI === false) {
                     const selectedTalents = await window.talentManager.getSelectedTalents(charId, userId);
                     // Check if selectedTalents is not null and has keys
                     if (selectedTalents && Object.keys(selectedTalents).length > 0) {
+                        console.log(`[StageManager] Stats BEFORE talent application for ${character.name}:`, {
+                            hp: character.stats.hp,
+                            maxHp: character.stats.maxHp,
+                            baseHp: character.baseStats?.hp,
+                            baseMaxHp: character.baseStats?.maxHp
+                        });
                         console.log(`[StageManager] Applying selected talents for ${character.name}:`, selectedTalents);
                         await window.talentManager.applyTalentsToCharacter(character, selectedTalents);
+                        console.log(`[StageManager] Stats AFTER talent application for ${character.name}:`, {
+                            hp: character.stats.hp,
+                            maxHp: character.stats.maxHp,
+                            baseHp: character.baseStats?.hp,
+                            baseMaxHp: character.baseStats?.maxHp
+                        });
                     } else {
                         console.log(`[StageManager] No talents selected or found for ${character.name}`);
                     }
                 } else {
                     console.warn('[StageManager] TalentManager or applyTalentsToCharacter method not available. Skipping talent application for', character.name);
                 }
+
+                // --- NEW: Apply hell effects and permanent debuffs from story choices ---
+                if (savedState) {
+                    console.log(`[StageManager] Processing saved state for ${character.name}:`, {
+                        currentHP: savedState.currentHP,
+                        currentMana: savedState.currentMana,
+                        stats: savedState.stats,
+                        hellEffects: savedState.hellEffects,
+                        permanentDebuffs: savedState.permanentDebuffs,
+                        permanentBuffs: savedState.permanentBuffs
+                    });
+                    
+                    // Restore hell effects if they exist
+                    if (savedState.hellEffects) {
+                        character.hellEffects = { ...savedState.hellEffects };
+                        console.log(`[StageManager] Restored hell effects for ${character.name}:`, character.hellEffects);
+                        
+                        // Handle demon_claws flag
+                        if (savedState.hellEffects.demon_claws === true) {
+                            console.log(`[StageManager] Applying Demon Claws effect for ${character.name}`);
+                            
+                            // Create the Demon Claws debuff that sets dodge to 0 every turn
+                            const demonClawsDebuff = new Effect(
+                                'demon_claws_curse',
+                                'Demon Claws Curse',
+                                'Icons/debuffs/curse.png',
+                                -1, // Permanent debuff
+                                null,
+                                true // isDebuff = true
+                            );
+                            
+                            demonClawsDebuff.setDescription('Cursed by demon claws, this character cannot dodge any attacks.');
+                            
+                            // Define onTurnStart function for Demon Claws
+                            demonClawsDebuff.onTurnStart = function(character) {
+                                if (character && !character.isDead()) {
+                                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                    
+                                    // Set dodge chance to 0
+                                    if (character.stats.dodgeChance > 0) {
+                                        character.stats.dodgeChance = 0;
+                                        log(`${character.name}'s dodge chance is suppressed by the Demon Claws curse!`, 'debuff');
+                                    }
+                                    
+                                    // Update UI
+                                    if (window.gameManager && window.gameManager.uiManager) {
+                                        window.gameManager.uiManager.updateCharacterUI(character);
+                                    }
+                                }
+                            };
+                            
+                            // Apply the debuff to the character
+                            character.addDebuff(demonClawsDebuff);
+                            console.log(`[StageManager] Applied Demon Claws debuff to ${character.name} (sets dodge to 0 every turn)`);
+                        }
+                        
+                        // Handle molten_scythe flag
+                        if (savedState.hellEffects.molten_scythe === true) {
+                            console.log(`[StageManager] Applying Molten Scythe effect for ${character.name}`);
+                            
+                            // Create a custom Effect for Molten Scythe
+                            const moltenScytheBuff = new Effect(
+                                'molten_scythe_growth',
+                                'Molten Scythe Growth',
+                                'Icons/rewards/Molten_Scythe.png',
+                                -1, // Permanent buff
+                                null,
+                                false // isDebuff = false
+                            );
+                            
+                            moltenScytheBuff.setDescription('The molten scythe grows stronger with each battle, increasing offensive stats by 1% per turn.');
+                            
+                            // Set the stat growth effect for the game engine
+                            moltenScytheBuff.effect = {
+                                type: 'stat_growth_per_turn',
+                                value: 0.01 // 1%
+                            };
+                            
+                            // Define onTurnStart function for Molten Scythe
+                            moltenScytheBuff.onTurnStart = function(character) {
+                                if (character && !character.isDead()) {
+                                    const growthPercent = (this.effect.value || 0.01) * 100;
+                                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                    
+                                    // Apply growth to offensive/utility stats only - exclude armor and magicalShield to prevent being OP
+                                    const statNames = ['physicalDamage', 'magicalDamage', 'speed', 'critChance', 'critMultiplier', 'dodgeChance', 'hp', 'mana'];
+                                    let statsGrown = [];
+                                    
+                                    statNames.forEach(statName => {
+                                        if (character.stats[statName] !== undefined && typeof character.stats[statName] === 'number') {
+                                            const oldValue = character.stats[statName];
+                                            const growth = Math.ceil(oldValue * this.effect.value);
+                                            
+                                            if (growth > 0) {
+                                                // Update current stats
+                                                character.stats[statName] = oldValue + growth;
+                                                
+                                                // IMPORTANT: Also update baseStats for permanent growth
+                                                if (character.baseStats && character.baseStats[statName] !== undefined) {
+                                                    character.baseStats[statName] = character.baseStats[statName] + growth;
+                                                }
+                                                
+                                                // Special handling for HP growth - both max and current HP
+                                                if (statName === 'hp') {
+                                                    // Update maxHp if it exists (some characters use maxHp instead of hp)
+                                                    if (character.stats.maxHp !== undefined) {
+                                                        character.stats.maxHp = character.stats.maxHp + growth;
+                                                        if (character.baseStats && character.baseStats.maxHp !== undefined) {
+                                                            character.baseStats.maxHp = character.baseStats.maxHp + growth;
+                                                        }
+                                                    }
+                                                    // Update current HP
+                                                    character.stats.currentHp = (character.stats.currentHp || character.stats.hp) + growth;
+                                                }
+                                                // Special handling for mana growth - both max and current mana
+                                                if (statName === 'mana') {
+                                                    // Update maxMana if it exists
+                                                    if (character.stats.maxMana !== undefined) {
+                                                        character.stats.maxMana = character.stats.maxMana + growth;
+                                                        if (character.baseStats && character.baseStats.maxMana !== undefined) {
+                                                            character.baseStats.maxMana = character.baseStats.maxMana + growth;
+                                                        }
+                                                    }
+                                                    // Update current mana
+                                                    character.stats.currentMana = (character.stats.currentMana || character.stats.mana) + growth;
+                                                }
+                                                
+                                                statsGrown.push(`${statName}: +${growth}`);
+                                            }
+                                        }
+                                    });
+                                    
+                                    if (statsGrown.length > 0) {
+                                        log(`🔥 ${character.name}'s Molten Scythe grows stronger! (+${growthPercent}%: ${statsGrown.join(', ')})`, 'buff');
+                                    }
+                                    
+                                    // Don't call recalculateStats() as it would reset the growth we just applied
+                                    // Instead, just update UI directly
+                                    if (window.gameManager && window.gameManager.uiManager) {
+                                        window.gameManager.uiManager.updateCharacterUI(character);
+                                    }
+                                }
+                            };
+                            
+                            // Apply the buff to the character
+                            character.addBuff(moltenScytheBuff);
+                            console.log(`[StageManager] Applied Molten Scythe buff to ${character.name} (1% stat growth per turn)`);
+                        }
+                        
+                        // Re-apply choice effects if needed (in case stats weren't properly saved)
+                        if (savedState.hellEffects.choiceEffect) {
+                            console.log(`[StageManager] Re-applying choice effect: ${savedState.hellEffects.choiceEffect} for ${character.name}`);
+                            
+                            switch (savedState.hellEffects.choiceEffect) {
+                                case 'set_magical_damage':
+                                    if (character.stats.magicalDamage !== 200) {
+                                        console.log(`[StageManager] Correcting magical damage for ${character.name}: ${character.stats.magicalDamage} -> 200`);
+                                        character.stats.magicalDamage = 200;
+                                        // Also update baseStats to prevent recalculateStats override
+                                        if (character.baseStats) {
+                                            character.baseStats.magicalDamage = 200;
+                                        }
+                                    }
+                                    break;
+                                case 'demon_claws_effect':
+                                    console.log(`[StageManager] Applying Demon Claws debuff for ${character.name}: dodge=${character.stats.dodgeChance}`);
+                                    
+                                    // Create the Demon Claws debuff that sets dodge to 0 every turn
+                                    const demonClawsDebuff = new Effect(
+                                        'demon_claws_curse',
+                                        'Demon Claws Curse',
+                                        'Icons/debuffs/curse.png',
+                                        -1, // Permanent debuff
+                                        null,
+                                        true // isDebuff = true
+                                    );
+                                    
+                                    demonClawsDebuff.setDescription('Cursed by demon claws, this character cannot dodge any attacks.');
+                                    
+                                    // Define onTurnStart function for Demon Claws
+                                    demonClawsDebuff.onTurnStart = function(character) {
+                                        if (character && !character.isDead()) {
+                                            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                            
+                                            // Set dodge chance to 0
+                                            if (character.stats.dodgeChance > 0) {
+                                                character.stats.dodgeChance = 0;
+                                                log(`${character.name}'s dodge chance is suppressed by the Demon Claws curse!`, 'debuff');
+                                            }
+                                            
+                                            // Update UI
+                                            if (typeof updateCharacterUI === 'function') {
+                                                updateCharacterUI(character);
+                                            }
+                                        }
+                                    };
+                                    
+                                    // Apply the debuff to the character
+                                    character.addDebuff(demonClawsDebuff);
+                                    console.log(`[StageManager] Applied Demon Claws debuff to ${character.name} (sets dodge to 0 every turn)`);
+                                    break;
+                                case 'hellish_pact_effect':
+                                    console.log(`[StageManager] Verifying Hellish Pact effects for ${character.name}: HP=${character.stats.hp}, maxHp=${character.stats.maxHp}`);
+                                    
+                                    // Check if Hellish Pact has already been applied to prevent double application
+                                    if (character._hellishPactApplied) {
+                                        console.log(`[StageManager] Hellish Pact already applied to ${character.name}, skipping reapplication`);
+                                        break;
+                                    }
+                                    
+                                    // Get the original base HP from character definition (not current stats)
+                                    // This should be the HP before any story modifications
+                                    let originalBaseHP;
+                                    
+                                    // Try to get the original HP from character registry
+                                    if (window.characterRegistry && window.characterRegistry[character.id]) {
+                                        const originalData = window.characterRegistry[character.id];
+                                        originalBaseHP = originalData.stats?.maxHp || originalData.stats?.hp;
+                                    }
+                                    
+                                    // Fallback to reasonable defaults if we can't find original data
+                                    if (!originalBaseHP) {
+                                        // Use known base values for common characters
+                                        const knownBaseHP = {
+                                            'bridget': 6920,
+                                            'renée': 7200,
+                                            'farmer_alice': 9340,
+                                            'farmer_nina': 6500,
+                                            'farmer_raiden': 8500
+                                        };
+                                        originalBaseHP = knownBaseHP[character.id] || 6500;
+                                    }
+                                    
+                                    const hellishPactBonus = 2000;
+                                    const expectedHP = originalBaseHP + hellishPactBonus;
+                                    const currentHP = character.stats.maxHp || character.stats.hp;
+                                    
+                                    console.log(`[StageManager] Hellish Pact calculation: originalBase=${originalBaseHP} + bonus=${hellishPactBonus} = expected=${expectedHP}, current=${currentHP}`);
+                                    
+                                    // Only apply if the HP boost hasn't been applied yet
+                                    if (Math.abs(currentHP - expectedHP) > 100) { // Allow some tolerance for rounding
+                                        console.log(`[StageManager] Applying Hellish Pact HP boost for ${character.name}: ${currentHP} -> ${expectedHP}`);
+                                        
+                                        // Update both hp and maxHp to ensure compatibility
+                                        if (character.stats.maxHp !== undefined) {
+                                            character.stats.maxHp = expectedHP;
+                                            if (character.baseStats && character.baseStats.maxHp !== undefined) {
+                                                character.baseStats.maxHp = expectedHP;
+                                            }
+                                            console.log(`[StageManager] Set maxHp to ${expectedHP} for ${character.name}`);
+                                        }
+                                        if (character.stats.hp !== undefined) {
+                                            character.stats.hp = expectedHP;
+                                            if (character.baseStats && character.baseStats.hp !== undefined) {
+                                                character.baseStats.hp = expectedHP;
+                                            }
+                                            console.log(`[StageManager] Set hp to ${expectedHP} for ${character.name}`);
+                                        }
+                                        
+                                        // Also update current HP to the new maximum
+                                        character.stats.currentHp = expectedHP;
+                                        console.log(`[StageManager] Set currentHp to ${expectedHP} for ${character.name}`);
+                                        
+                                        // Mark as applied to prevent future double application
+                                        character._hellishPactApplied = true;
+                                    } else {
+                                        console.log(`[StageManager] Hellish Pact HP already correct for ${character.name}: ${currentHP} ≈ ${expectedHP}`);
+                                        // Still mark as applied even if HP is already correct
+                                        character._hellishPactApplied = true;
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    
+                    // Apply permanent debuffs if they exist and are valid
+                    if (savedState.permanentDebuffs && Array.isArray(savedState.permanentDebuffs)) {
+                        console.log(`[StageManager] Found ${savedState.permanentDebuffs.length} permanent debuffs for ${character.name}:`, savedState.permanentDebuffs);
+                        
+                        savedState.permanentDebuffs.forEach(debuffData => {
+                            if (!debuffData || !debuffData.effectType) {
+                                console.warn(`[StageManager] Invalid debuff data for ${character.name}:`, debuffData);
+                                return;
+                            }
+                            
+                            // Handle special case for Demon Claws
+                            if (debuffData.effectType === 'demon_claws_curse') {
+                                // Create a custom Effect for Demon Claws
+                                const demonClawsDebuff = new Effect(
+                                    debuffData.id,
+                                    debuffData.name,
+                                    'Icons/debuffs/curse.png',
+                                    debuffData.duration, // Should be -1 for permanent
+                                    null,
+                                    true // isDebuff = true
+                                );
+                                
+                                demonClawsDebuff.setDescription(debuffData.description || 'Cursed by demon claws, this character cannot dodge any attacks.');
+                                
+                                // Define onTurnStart function for Demon Claws
+                                demonClawsDebuff.onTurnStart = function(character) {
+                                    if (character && !character.isDead()) {
+                                        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                        
+                                        // Set dodge chance to 0
+                                        if (character.stats.dodgeChance > 0) {
+                                            character.stats.dodgeChance = 0;
+                                            log(`${character.name}'s dodge chance is suppressed by the Demon Claws curse!`, 'debuff');
+                                        }
+                                        
+                                        // Update UI
+                                        if (typeof updateCharacterUI === 'function') {
+                                            updateCharacterUI(character);
+                                        }
+                                    }
+                                };
+                                
+                                // Apply the debuff to the character
+                                character.addDebuff(demonClawsDebuff);
+                                console.log(`[StageManager] Applied Demon Claws debuff to ${character.name} (sets dodge to 0 every turn)`);
+                            }
+                            // Handle special case for Hellish Pact with custom logic
+                            else if (debuffData.effectType === 'hellish_pact_dot') {
+                                // Create a custom Effect for Hellish Pact
+                                const hellishPactDebuff = new Effect(
+                                    debuffData.id,
+                                    debuffData.name,
+                                    'Icons/debuffs/curse.png',
+                                    debuffData.duration, // Should be -1 for permanent
+                                    null,
+                                    true // isDebuff = true
+                                );
+                                
+                                hellishPactDebuff.setDescription(debuffData.description);
+                                
+                                // Set the damage over time effect for the game engine
+                                hellishPactDebuff.effect = {
+                                    type: 'damage_over_time',
+                                    value: debuffData.effect.value || 75
+                                };
+                                
+                                // Define onTurnStart function for Hellish Pact
+                                hellishPactDebuff.onTurnStart = function(character) {
+                                    if (character && !character.isDead()) {
+                                        const damageAmount = this.effect.value || 75;
+                                        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                        
+                                        // Apply damage
+                                        character.stats.currentHp = Math.max(0, character.stats.currentHp - damageAmount);
+                                        
+                                        log(`${character.name} takes ${damageAmount} damage from the Hellish Pact curse!`, 'debuff');
+                                        
+                                        // Check if character died
+                                        if (character.stats.currentHp <= 0) {
+                                            log(`${character.name} succumbed to the Hellish Pact curse!`, 'death');
+                                            if (window.gameManager) {
+                                                window.gameManager.handleCharacterDeath(character);
+                                            }
+                                        }
+                                        
+                                        // Update UI
+                                        if (typeof updateCharacterUI === 'function') {
+                                            updateCharacterUI(character);
+                                        }
+                                    }
+                                };
+                                
+                                // Apply the debuff to the character
+                                character.addDebuff(hellishPactDebuff);
+                                console.log(`[StageManager] Applied Hellish Pact debuff to ${character.name} (${hellishPactDebuff.effect.value} damage per turn)`);
+                            } else {
+                                // Handle other types of permanent debuffs if needed in the future
+                                console.log(`[StageManager] Unknown permanent debuff type: ${debuffData.effectType}`);
+                            }
+                        });
+                    }
+                }
+                
+                // Apply permanent buffs from story choices
+                if (savedState && savedState.permanentBuffs && Array.isArray(savedState.permanentBuffs)) {
+                    console.log(`[StageManager] Found ${savedState.permanentBuffs.length} permanent buffs for ${character.name}:`, savedState.permanentBuffs);
+                    
+                    savedState.permanentBuffs.forEach(buffData => {
+                        console.log(`[StageManager] Processing permanent buff:`, buffData);
+                        
+                        // Handle Molten Scythe effect
+                        if (buffData.effectType === 'molten_scythe_growth') {
+                            // Create a custom Effect for Molten Scythe
+                            const moltenScytheBuff = new Effect(
+                                buffData.id,
+                                buffData.name,
+                                'Icons/rewards/Molten_Scythe.png',
+                                buffData.duration, // Should be -1 for permanent
+                                null,
+                                false // isDebuff = false
+                            );
+                            
+                            moltenScytheBuff.setDescription(buffData.description);
+                            
+                            // Set the stat growth effect for the game engine
+                            moltenScytheBuff.effect = {
+                                type: 'stat_growth_per_turn',
+                                value: buffData.effect.value || 0.01 // 1%
+                            };
+                            
+                            // Define onTurnStart function for Molten Scythe
+                            moltenScytheBuff.onTurnStart = function(character) {
+                                if (character && !character.isDead()) {
+                                    const growthPercent = (this.effect.value || 0.01) * 100;
+                                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                    
+                                    // Apply growth to offensive/utility stats only - exclude armor and magicalShield to prevent being OP
+                                    const statNames = ['physicalDamage', 'magicalDamage', 'speed', 'critChance', 'critMultiplier', 'dodgeChance', 'hp', 'mana'];
+                                    let statsGrown = [];
+                                    
+                                    statNames.forEach(statName => {
+                                        if (character.stats[statName] !== undefined && typeof character.stats[statName] === 'number') {
+                                            const oldValue = character.stats[statName];
+                                            const growth = Math.ceil(oldValue * this.effect.value);
+                                            
+                                            if (growth > 0) {
+                                                // Update current stats
+                                                character.stats[statName] = oldValue + growth;
+                                                
+                                                // IMPORTANT: Also update baseStats for permanent growth
+                                                if (character.baseStats && character.baseStats[statName] !== undefined) {
+                                                    character.baseStats[statName] = character.baseStats[statName] + growth;
+                                                }
+                                                
+                                                // Special handling for HP growth - both max and current HP
+                                                if (statName === 'hp') {
+                                                    // Update maxHp if it exists (some characters use maxHp instead of hp)
+                                                    if (character.stats.maxHp !== undefined) {
+                                                        character.stats.maxHp = character.stats.maxHp + growth;
+                                                        if (character.baseStats && character.baseStats.maxHp !== undefined) {
+                                                            character.baseStats.maxHp = character.baseStats.maxHp + growth;
+                                                        }
+                                                    }
+                                                    // Update current HP
+                                                    character.stats.currentHp = (character.stats.currentHp || character.stats.hp) + growth;
+                                                }
+                                                // Special handling for mana growth - both max and current mana
+                                                if (statName === 'mana') {
+                                                    // Update maxMana if it exists
+                                                    if (character.stats.maxMana !== undefined) {
+                                                        character.stats.maxMana = character.stats.maxMana + growth;
+                                                        if (character.baseStats && character.baseStats.maxMana !== undefined) {
+                                                            character.baseStats.maxMana = character.baseStats.maxMana + growth;
+                                                        }
+                                                    }
+                                                    // Update current mana
+                                                    character.stats.currentMana = (character.stats.currentMana || character.stats.mana) + growth;
+                                                }
+                                                
+                                                statsGrown.push(`${statName}: +${growth}`);
+                                            }
+                                        }
+                                    });
+                                    
+                                    if (statsGrown.length > 0) {
+                                        log(`🔥 ${character.name}'s Molten Scythe grows stronger! (+${growthPercent}%: ${statsGrown.join(', ')})`, 'buff');
+                                    }
+                                    
+                                    // Don't call recalculateStats() as it would reset the growth we just applied
+                                    // Instead, just update UI directly
+                                    if (window.gameManager && window.gameManager.uiManager) {
+                                        window.gameManager.uiManager.updateCharacterUI(character);
+                                    }
+                                }
+                            };
+                            
+                            // Apply the buff to the character
+                            character.addBuff(moltenScytheBuff);
+                            console.log(`[StageManager] Applied Molten Scythe buff to ${character.name} (${(moltenScytheBuff.effect.value * 100).toFixed(1)}% stat growth per turn)`);
+                        } else {
+                            // Handle other types of permanent buffs if needed in the future
+                            console.log(`[StageManager] Unknown permanent buff type: ${buffData.effectType}`);
+                        }
+                    });
+                }
+                // --- END NEW ---
 
                 // Add to player characters
                 this.gameState.playerCharacters.push(character);

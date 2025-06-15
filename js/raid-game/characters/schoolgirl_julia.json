@@ -23,8 +23,8 @@
             "name": "Healing Kick",
             "type": "aoe_damage",
             "damageType": "physical",
-            "manaCost": 60,
-            "cooldown": 1,
+            "manaCost": 80,
+            "cooldown": 2,
             "targetType": "all_enemies",
             "description": "Deals 200% Physical Damage to ALL enemies.",
             "icon": "Icons/abilities/healing_kick.png"

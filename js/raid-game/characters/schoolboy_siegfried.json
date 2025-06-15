@@ -37,9 +37,19 @@
             "name": "Lion Protection",
             "type": "buff",
             "manaCost": 65,
-            "cooldown": 10,
+            "cooldown": 6,
             "targetType": "self",
-            "description": "Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 5 turns.",
+            "buffEffect": {
+                "buffId": "lion_protection_buff",
+                "name": "Lion Protection",
+                "duration": 3,
+                "effects": {
+                    "healing": "10% missing health",
+                    "armorBonus": "50%",
+                    "magicalShieldBonus": "50%"
+                }
+            },
+            "description": "Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 3 turns.",
             "icon": "Icons/abilities/lion_protection.jfif"
         },
         {

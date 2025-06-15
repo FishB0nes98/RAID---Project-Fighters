@@ -383,11 +383,14 @@ header h1::after {
 /* Character Grid */
 .character-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
     overflow-y: auto;
+    overflow-x: auto;
     padding-right: 0.5rem;
-    max-height: 500px;
+    max-height: 650px;
+    /* Ensure minimum card size is maintained */
+    min-width: 0;
 }
 
 .character-card {
@@ -1149,10 +1152,11 @@ header h1::after {
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f0f0f0;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
 }
 
@@ -1163,6 +1167,28 @@ header h1::after {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
+}
+
+/* Character grid specific scrollbar styling */
+.character-grid::-webkit-scrollbar {
+    width: 8px;
+    height: 10px;
+}
+
+.character-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    margin: 2px;
+}
+
+.character-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.character-grid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
 }
 
 /* Responsive adjustments */
@@ -1183,8 +1209,14 @@ header h1::after {
         gap: 1rem;
     }
     
-    .stage-grid, .character-grid {
+    .stage-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    /* Character grid maintains minimum size for usability */
+    .character-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        overflow-x: auto;
     }
     
     .team-slot {
@@ -1199,8 +1231,16 @@ header h1::after {
 }
 
 @media (max-width: 480px) {
-    .stage-grid, .character-grid {
+    .stage-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    /* Character grid maintains usable minimum size even on small screens */
+    .character-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        overflow-x: auto;
+        /* Allow horizontal scrolling when cards don't fit */
+        padding-bottom: 0.5rem;
     }
     
     .action-buttons {

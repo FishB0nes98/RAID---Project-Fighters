@@ -53,7 +53,7 @@ class GameManager {
                 return false;
             } else {
                 this.enableWeeklyChallengeMode();
-                console.log('Weekly Challenge Mode ENABLED - Siegfried will be the carry!');
+                console.log('Weekly Challenge Mode ENABLED - Healing Forbidden Challenge active!');
                 return true;
             }
         };
@@ -357,6 +357,16 @@ class GameManager {
             this.stageManager = stageManager;
             await this.stageManager.initialize();
             
+            // Initialize skin manager if available
+            if (window.SkinManager) {
+                try {
+                    await window.SkinManager.initialize();
+                    console.log("[GameManager] Skin manager initialized successfully");
+                } catch (error) {
+                    console.warn("[GameManager] Error initializing skin manager:", error);
+                }
+            }
+            
             // Create UI manager - REMOVE THE DUPLICATE INITIALIZATION BELOW
             this.uiManager = new UIManager(this);
             this.uiManager.initialize(false); // Only initialize basic UI components
@@ -439,6 +449,47 @@ class GameManager {
         this.uiManager.clearBattleLog();
         this.uiManager.addLogEntry(`Battle started in ${stage.name}!`, 'system');
         this.uiManager.addLogEntry(`Player's turn`, 'player-turn');
+        
+        // --- ENHANCED: Comprehensive UI update after complete character loading ---
+        console.log('[GameManager] Starting comprehensive UI update after complete character loading...');
+        setTimeout(() => {
+            try {
+                // Update UI for all player characters with full ability refreshing
+                gameState.playerCharacters.forEach(character => {
+                    if (character) {
+                        console.log(`[GameManager] Updating UI for player character: ${character.name}`);
+                        
+                        // Update character UI
+                        if (this.uiManager && typeof this.uiManager.updateCharacterUI === 'function') {
+                            this.uiManager.updateCharacterUI(character);
+                        }
+                        
+                        // Update character abilities and descriptions immediately
+                        this.updateCharacterAbilities(character);
+                    }
+                });
+                
+                // Update UI for all AI characters with full ability refreshing
+                gameState.aiCharacters.forEach(character => {
+                    if (character) {
+                        console.log(`[GameManager] Updating UI for AI character: ${character.name}`);
+                        
+                        // Update character UI
+                        if (this.uiManager && typeof this.uiManager.updateCharacterUI === 'function') {
+                            this.uiManager.updateCharacterUI(character);
+                        }
+                        
+                        // Update character abilities and descriptions immediately
+                        this.updateCharacterAbilities(character);
+                    }
+                });
+                
+                console.log('[GameManager] ✓ All character UIs updated after complete loading');
+            } catch (error) {
+                console.error('[GameManager] Error during comprehensive UI update:', error);
+            }
+        }, 150); // Slightly longer delay to ensure all character loading is complete
+        // --- END NEW ---
         
         // Initialize volume slider
         this.initializeVolumeControl();
@@ -569,34 +620,61 @@ class GameManager {
         console.log(`[GameManager] Updating abilities for ${character.name}...`);
         
         character.abilities.forEach((ability, index) => {
-            // Update ability description if needed
-            if (typeof ability.updateDescription === 'function') {
-                try {
-                    ability.updateDescription();
-                    console.log(`[GameManager] ✓ Updated description for ${ability.name}`);
-                } catch (error) {
-                    console.error(`[GameManager] Error updating description for ${ability.name}:`, error);
+            try {
+                // Generate or regenerate ability description to ensure it's current
+                if (typeof ability.generateDescription === 'function') {
+                    try {
+                        ability.generateDescription();
+                        console.log(`[GameManager] ✓ Generated description for ${ability.name}`);
+                    } catch (error) {
+                        console.error(`[GameManager] Error generating description for ${ability.name}:`, error);
+                        // Fallback: ensure ability has some description
+                        if (!ability.description) {
+                            ability.description = ability.baseDescription || `[${ability.name}]`;
+                        }
+                    }
+                } else if (!ability.description && ability.baseDescription) {
+                    // Fallback: use base description if no generate function
+                    ability.description = ability.baseDescription;
                 }
-            }
-            
-            // Update ability icon/image if needed
-            if (typeof ability.updateIcon === 'function') {
-                try {
-                    ability.updateIcon();
-                    console.log(`[GameManager] ✓ Updated icon for ${ability.name}`);
-                } catch (error) {
-                    console.error(`[GameManager] Error updating icon for ${ability.name}:`, error);
+                
+                // Update ability description if needed
+                if (typeof ability.updateDescription === 'function') {
+                    try {
+                        ability.updateDescription();
+                        console.log(`[GameManager] ✓ Updated description for ${ability.name}`);
+                    } catch (error) {
+                        console.error(`[GameManager] Error updating description for ${ability.name}:`, error);
+                    }
                 }
-            }
-            
-            // Refresh ability tooltip data if needed
-            if (typeof ability.refreshTooltip === 'function') {
-                try {
-                    ability.refreshTooltip();
-                    console.log(`[GameManager] ✓ Refreshed tooltip for ${ability.name}`);
-                } catch (error) {
-                    console.error(`[GameManager] Error refreshing tooltip for ${ability.name}:`, error);
+                
+                // Update ability icon/image if needed
+                if (typeof ability.updateIcon === 'function') {
+                    try {
+                        ability.updateIcon();
+                        console.log(`[GameManager] ✓ Updated icon for ${ability.name}`);
+                    } catch (error) {
+                        console.error(`[GameManager] Error updating icon for ${ability.name}:`, error);
+                    }
                 }
+                
+                // Refresh ability tooltip data if needed
+                if (typeof ability.refreshTooltip === 'function') {
+                    try {
+                        ability.refreshTooltip();
+                        console.log(`[GameManager] ✓ Refreshed tooltip for ${ability.name}`);
+                    } catch (error) {
+                        console.error(`[GameManager] Error refreshing tooltip for ${ability.name}:`, error);
+                    }
+                }
+                
+                // Log ability cooldown info for debugging
+                if (ability.cooldown !== undefined && ability.currentCooldown !== undefined) {
+                    console.log(`Ability ${ability.name} has cooldown: ${ability.currentCooldown}/${ability.cooldown}`);
+                }
+                
+            } catch (error) {
+                console.error(`[GameManager] Error processing ability ${ability.name || index}:`, error);
             }
         });
 
@@ -920,6 +998,11 @@ class GameManager {
         });
         document.dispatchEvent(event);
         
+        // Update quest display for selected character
+        if (window.questUIManager && window.questUIManager.initialized) {
+            window.questUIManager.updateForCharacter(character);
+        }
+        
         // Remove battlelog entry for character selection
         
         return true;
@@ -927,8 +1010,11 @@ class GameManager {
 
     // Handle player selecting an ability
     selectAbility(character, abilityIndex) {
+        console.log(`[DEBUG] selectAbility called for ${character.name}, ability index ${abilityIndex}`);
+        
         // Make sure the character is selected
         if (this.gameState.selectedCharacter !== character || !this.isGameRunning) {
+            console.log(`[DEBUG] selectAbility rejected - wrong character or game not running`);
             return false;
         }
         
@@ -936,38 +1022,74 @@ class GameManager {
         if (character.isDead()) {
             // This check might be redundant if selectCharacter already prevents selection
             // but it adds an extra layer of safety.
+            console.log(`[DEBUG] selectAbility rejected - character is dead`);
             return false;
         }
         // --- END NEW ---
         
         const ability = character.abilities[abilityIndex];
         if (!ability) {
+            console.log(`[DEBUG] selectAbility rejected - ability not found at index ${abilityIndex}`);
             return false;
         }
         
+        console.log(`[DEBUG] selectAbility processing ability: ${ability.name}, targetType: ${ability.targetType}, requiresTarget: ${ability.requiresTarget}`);
+        
         // Check if ability is on cooldown
         if (ability.currentCooldown > 0) {
+            console.log(`[DEBUG] selectAbility rejected - ability on cooldown`);
             this.uiManager.addLogEntry(`${ability.name} is on cooldown for ${ability.currentCooldown} more turns.`);
             return false;
         }
         
         this.gameState.selectedAbility = ability;
+        console.log(`[DEBUG] Selected ability: ${ability.name} (${ability.id})`);
         
         // Update UI
         this.uiManager.highlightSelectedAbility(abilityIndex);
         
         // Show valid targets based on ability type
+        console.log(`[DEBUG] Calling showValidTargets with targetType: ${ability.targetType}`);
         this.uiManager.showValidTargets(ability.targetType);
+        
+        // Add log entry to guide the player to select their target
+        let targetingMessage = "";
+        switch(ability.targetType) {
+            case 'self':
+                targetingMessage = `${ability.name} selected. Click on yourself to cast this ability.`;
+                break;
+            case 'ally':
+                targetingMessage = `${ability.name} selected. Click on an ally to target them.`;
+                break;
+            case 'ally_or_self':
+                targetingMessage = `${ability.name} selected. Click on an ally or yourself to target them.`;
+                break;
+            case 'enemy':
+                targetingMessage = `${ability.name} selected. Click on an enemy to target them.`;
+                break;
+            case 'any':
+                targetingMessage = `${ability.name} selected. Click on any character to target them.`;
+                break;
+            case 'all_enemies':
+            case 'all_allies':
+                targetingMessage = `${ability.name} selected. Click on any valid target to cast this area effect.`;
+                break;
+            default:
+                targetingMessage = `${ability.name} selected. Click on a valid target to cast this ability.`;
+        }
+        this.uiManager.addLogEntry(targetingMessage, 'system');
+        console.log(`[DEBUG] Added targeting message: ${targetingMessage}`);
         
         // Dispatch event for tutorial progression
         const event = new CustomEvent('abilitySelected', {
             detail: { character: character, ability: ability, abilityIndex: abilityIndex }
         });
         document.dispatchEvent(event);
+        console.log(`[DEBUG] Dispatched abilitySelected event`);
         
-        // Remove battlelog entry for ability selection
-        
-        // No auto-selection of targets - this has been removed
+        // IMPORTANT: Always wait for user to click on target, even for self-targeted abilities
+        // This ensures consistent targeting behavior for all abilities
+        console.log(`[DEBUG] selectAbility completed successfully, waiting for user to select target`);
         
         return true;
     }
@@ -986,8 +1108,11 @@ class GameManager {
 
     // Handle player targeting a character with an ability
     targetCharacter(target) {
+        console.log(`[DEBUG] targetCharacter called with target: ${target ? target.name : 'null'}`);
+        
         // --- NEW: Check if target is dead ---
         if (target.isDead()) {
+            console.log(`[DEBUG] targetCharacter rejected - target is dead`);
             this.uiManager.addLogEntry("Cannot target a defeated character.");
             return false;
         }
@@ -995,15 +1120,27 @@ class GameManager {
 
         // Make sure we have a character and ability selected
         if (!this.gameState.selectedCharacter || !this.gameState.selectedAbility || !this.isGameRunning) {
+            console.log(`[DEBUG] targetCharacter rejected - missing selectedCharacter, selectedAbility, or game not running`);
             // Remove log message about selecting character and ability first
             return false;
         }
         
+        console.log(`[DEBUG] targetCharacter processing: caster=${this.gameState.selectedCharacter.name}, ability=${this.gameState.selectedAbility.name}, target=${target.name}`);
+        console.log(`[DEBUG] targetCharacter ability targetType: ${this.gameState.selectedAbility.targetType}`);
+        console.log(`[DEBUG] targetCharacter ability requiresTarget: ${this.gameState.selectedAbility.requiresTarget}`);
+        
         const caster = this.gameState.selectedCharacter;
         const ability = this.gameState.selectedAbility;
         
+        // Get target type (dynamic if available, otherwise static)
+        let targetType = ability.targetType;
+        if (typeof ability.getTargetType === 'function') {
+            targetType = ability.getTargetType();
+            console.log(`[GameManager] Using dynamic targetType: ${targetType} for ability ${ability.id}`);
+        }
+        
         // Validate targeting based on ability type
-        if (!this.validateTarget(ability.targetType, target)) {
+        if (!this.validateTarget(targetType, target)) {
             this.uiManager.addLogEntry("Invalid target for this ability.");
             return false;
         }
@@ -1046,6 +1183,15 @@ class GameManager {
             this.preventTurnEndFlag = true;
         }
         // --- END NEW ---
+        
+        // Check for temporary doesNotEndTurn flag set by talents (like Healing Efficiency)
+        const usedAbility = caster.abilities[abilityIndex];
+        if (success && usedAbility && usedAbility._tempDoesNotEndTurn) {
+            console.log(`[GameManager] Ability has _tempDoesNotEndTurn=true from talent, preventing turn end`);
+            this.preventTurnEndFlag = true;
+            // Clear the temporary flag after use
+            delete usedAbility._tempDoesNotEndTurn;
+        }
         
         // Common logic after ability use attempt
         if (success) {
@@ -1158,10 +1304,19 @@ class GameManager {
             this.addLogEntry(`${target.name} cannot be targeted right now!`, 'error');
             return false;
         }
+        
+        // --- NEW: Check for enemy forced targeting (like Shadow Wings) ---
+        const targetIsUntargetableByEnemyForcing = target.isUntargetableByEnemyForcing && target.isUntargetableByEnemyForcing();
+        if (targetIsUntargetableByEnemyForcing) {
+            console.log(`[validateTarget] Target ${target.name} is untargetable due to enemy forced targeting.`);
+            this.addLogEntry(`${target.name} cannot be targeted right now!`, 'error');
+            return false;
+        }
         // --- END NEW ---
 
         switch (targetType) {
             case 'enemy':
+            case 'single_enemy': // Support for single enemy targeting
                 return target.isAI !== selectedChar.isAI;
             case 'ally':
                 // Modified to allow self-targeting for 'ally' targeting type
@@ -1178,15 +1333,20 @@ class GameManager {
                 // Used for Farmer Alice's Bunny Bounce ability
                 return target !== selectedChar;
             case 'all_enemies':
+            case 'two_random_enemies': // Support for two random enemies
+            case 'three_random_enemies': // Support for three random enemies
+            case 'random_enemy': // Support for random enemy
                 // For AOE abilities that target all enemies
                 return target.isAI !== selectedChar.isAI;
             case 'all_allies':
+            case 'all_allies_except_self': // Support for all allies except self
                 // For AOE abilities that target all allies
                 return target.isAI === selectedChar.isAI;
             case 'all':
                 // For AOE abilities that target everyone
                 return true;
             default:
+                console.warn(`[validateTarget] Unknown target type: ${targetType}`);
                 return false;
         }
     }
@@ -1402,14 +1562,38 @@ class GameManager {
     // Plan an action for an AI character (but don't execute it yet)
     async planAIAction(aiChar) {
         // Get available abilities
-        const availableAbilities = aiChar.abilities.filter(ability =>
-            ability.currentCooldown <= 0 &&
-            aiChar.stats.currentMana >= ability.manaCost &&
-            !ability.isDisabled // Added check for disabled abilities
-        );
+        console.log(`[AI Planner Debug] ${aiChar.name} has ${aiChar.abilities?.length || 0} total abilities`);
+        
+        const availableAbilities = (aiChar.abilities || []).filter(ability => {
+            const cooldownOk = ability.currentCooldown <= 0;
+            const manaOk = aiChar.stats.currentMana >= ability.manaCost;
+            const notDisabled = !ability.isDisabled;
+            
+            if (!cooldownOk) {
+                console.log(`[AI Planner Debug] ${aiChar.name}'s ${ability.name} is on cooldown (${ability.currentCooldown})`);
+            }
+            if (!manaOk) {
+                console.log(`[AI Planner Debug] ${aiChar.name} lacks mana for ${ability.name} (${aiChar.stats.currentMana}/${ability.manaCost})`);
+            }
+            if (!notDisabled) {
+                console.log(`[AI Planner Debug] ${aiChar.name}'s ${ability.name} is disabled`);
+            }
+            
+            return cooldownOk && manaOk && notDisabled;
+        });
 
         if (availableAbilities.length === 0) {
             console.log(`[AI Planner] ${aiChar.name} has no available abilities.`);
+            if (aiChar.abilities && aiChar.abilities.length > 0) {
+                console.log(`[AI Planner Debug] ${aiChar.name} ability details:`, aiChar.abilities.map(a => ({
+                    name: a.name,
+                    cooldown: a.currentCooldown,
+                    manaCost: a.manaCost,
+                    disabled: a.isDisabled
+                })));
+            } else {
+                console.log(`[AI Planner Debug] ${aiChar.name} has no abilities array or empty abilities!`);
+            }
             return null; // No action possible
         }
 
@@ -1420,9 +1604,24 @@ class GameManager {
             return this.planInfernalRaidenAction(aiChar, availableAbilities);
         }
 
+        // Helper function to filter targetable characters considering enemy forced targeting
+        const isTargetableByCharacter = (target, caster) => {
+            if (target.isDead()) return false;
+            if (target.isUntargetable && target.isUntargetable()) return false;
+            
+            // Check if this target is untargetable due to enemy forced targeting
+            if (target.isUntargetableByEnemyForcing && target.isUntargetableByEnemyForcing()) {
+                // The target is untargetable because an enemy is forcing targeting
+                // This means we can only target allies/self for support abilities
+                return false;
+            }
+            
+            return true;
+        };
+
         // Smart ability selection: Prioritize healing if allies need it
-        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => !c.isDead() && !c.isUntargetable());
-        const allAIChars = this.gameManager.gameState.aiCharacters.filter(c => !c.isDead() && !c.isUntargetable());
+        const allPlayerChars = this.gameState.playerCharacters.filter(c => isTargetableByCharacter(c, aiChar));
+        const allAIChars = this.gameState.aiCharacters.filter(c => isTargetableByCharacter(c, aiChar));
         
         // Check if any allies need healing (below 70% HP)
         const injuredAllies = allAIChars.filter(ally => ally !== aiChar && ally.stats.currentHp < ally.stats.maxHp * 0.7);
@@ -1455,6 +1654,62 @@ class GameManager {
             selectedAbility = availableAbilities[randomIndex];
             console.log(`[AI Planner] ${aiChar.name} randomly selected: ${selectedAbility.name}`);
         }
+
+        // Try to plan the action - if it fails for healing, fallback to non-healing
+        const result = this.tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing);
+        if (result && result.error === 'No healing targets needed') {
+            // Healing was selected but no targets need it - fallback to non-healing abilities
+            console.log(`[AI Planner] ${aiChar.name} fallback: healing not needed, selecting non-healing ability`);
+            const nonHealingAbilities = availableAbilities.filter(ability => {
+                // Check if it's a healing ability
+                const isHealingAbility = (ability.name && ability.name.toLowerCase().includes('heal')) || 
+                                       (ability.description && ability.description.toLowerCase().includes('heal')) ||
+                                       (ability.type === 'heal');
+                
+                // Check if it's a buff/support ability
+                const isBuffAbility = (ability.name && (ability.name.toLowerCase().includes('buff') || 
+                                                       ability.name.toLowerCase().includes('pact') ||
+                                                       ability.name.toLowerCase().includes('blessing') ||
+                                                       ability.name.toLowerCase().includes('boost') ||
+                                                       ability.name.toLowerCase().includes('enhance') ||
+                                                       ability.name.toLowerCase().includes('empow'))) ||
+                                      (ability.description && (ability.description.toLowerCase().includes('double') ||
+                                                              ability.description.toLowerCase().includes('increase') ||
+                                                              ability.description.toLowerCase().includes('buff') ||
+                                                              ability.description.toLowerCase().includes('empower') ||
+                                                              ability.description.toLowerCase().includes('stats')));
+                
+                // Include non-healing abilities and buff abilities (even if they target allies)
+                return !isHealingAbility || isBuffAbility;
+            });
+            
+            if (nonHealingAbilities.length > 0) {
+                selectedAbility = nonHealingAbilities[Math.floor(Math.random() * nonHealingAbilities.length)];
+                console.log(`[AI Planner] ${aiChar.name} fallback selected: ${selectedAbility.name}`);
+                return this.tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing);
+            }
+        }
+        
+        return result;
+    }
+
+    // Helper method to try planning an action with a specific ability
+    tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing) {
+        
+        // Helper function to filter targetable characters considering enemy forced targeting
+        const isTargetableByCharacter = (target, caster) => {
+            if (target.isDead()) return false;
+            if (target.isUntargetable && target.isUntargetable()) return false;
+            
+            // Check if this target is untargetable due to enemy forced targeting
+            if (target.isUntargetableByEnemyForcing && target.isUntargetableByEnemyForcing()) {
+                // The target is untargetable because an enemy is forcing targeting
+                // This means we can only target allies/self for support abilities
+                return false;
+            }
+            
+            return true;
+        };
 
         let possibleTargets = [];
 
@@ -1492,6 +1747,9 @@ class GameManager {
                 ];
                 break;
             case 'all_enemies':
+            case 'two_random_enemies': // Support for two random enemies
+            case 'three_random_enemies': // Support for three random enemies
+            case 'random_enemy': // Support for random enemy
             case 'all': // Add 'all' case to target enemies
                 possibleTargets = allPlayerChars; // Target the group of enemies
                 break;
@@ -1501,6 +1759,9 @@ class GameManager {
             case 'all_allies_except_self': // Added this case for Carrot Power-up
                 possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Target the group, excluding self
                 break;
+            case 'single_enemy': // Support for single enemy targeting
+                possibleTargets = allPlayerChars; // Enemy targets
+                break;
             default:
                 console.error(` [AI Planner] Unknown target type '${selectedAbility.targetType}'`);
                 possibleTargets = []; // No valid target logic
@@ -1508,7 +1769,7 @@ class GameManager {
         }
 
         // Filter out untargetable characters again, just in case
-        possibleTargets = possibleTargets.filter(c => c && !c.isDead() && !c.isUntargetable());
+        possibleTargets = possibleTargets.filter(c => c && isTargetableByCharacter(c, aiChar));
 
         if (possibleTargets.length === 0) {
              console.log(`[AI Planner Debug] No valid targets found for ${selectedAbility.name} (type: ${selectedAbility.targetType}) after filtering.`);
@@ -1518,19 +1779,41 @@ class GameManager {
             return { ability: selectedAbility, target: null, error: 'No valid targets found' }; // Indicate no valid target
         }
 
-        // Smart target selection for healing abilities
+        // Smart target selection for healing vs buff abilities
         let selectedTarget;
         if (selectedAbility.targetType === 'ally_or_self' || selectedAbility.targetType === 'ally') {
-            // For healing abilities, prioritize the most injured ally
-            const sortedByHealth = possibleTargets.sort((a, b) => {
-                const aHealthPercent = a.stats.currentHp / a.stats.maxHp;
-                const bHealthPercent = b.stats.currentHp / b.stats.maxHp;
-                return aHealthPercent - bHealthPercent; // Lowest health first
-            });
-            selectedTarget = sortedByHealth[0];
-            console.log(`[AI Planner] Smart healing target selected: ${selectedTarget.name} (${Math.round((selectedTarget.stats.currentHp / selectedTarget.stats.maxHp) * 100)}% HP)`);
+            // Check if this is actually a healing ability
+            const isHealingAbility = (selectedAbility.name && selectedAbility.name.toLowerCase().includes('heal')) || 
+                                   (selectedAbility.description && selectedAbility.description.toLowerCase().includes('heal')) ||
+                                   (selectedAbility.type === 'heal');
+            
+            if (isHealingAbility) {
+                // For healing abilities, only target allies who actually need healing (below 95% HP)
+                const healableTargets = possibleTargets.filter(target => 
+                    target.stats.currentHp < target.stats.maxHp * 0.95
+                );
+                
+                if (healableTargets.length > 0) {
+                    // Prioritize the most injured ally among those who need healing
+                    const sortedByHealth = healableTargets.sort((a, b) => {
+                        const aHealthPercent = a.stats.currentHp / a.stats.maxHp;
+                        const bHealthPercent = b.stats.currentHp / b.stats.maxHp;
+                        return aHealthPercent - bHealthPercent; // Lowest health first
+                    });
+                    selectedTarget = sortedByHealth[0];
+                    console.log(`[AI Planner] Smart healing target selected: ${selectedTarget.name} (${Math.round((selectedTarget.stats.currentHp / selectedTarget.stats.maxHp) * 100)}% HP)`);
+                } else {
+                    // No ally needs healing, don't waste the heal
+                    console.log(`[AI Planner] No allies need healing (all above 95% HP), skipping heal ability`);
+                    return { ability: selectedAbility, target: null, error: 'No healing targets needed' };
+                }
+            } else {
+                // For buff abilities, select any ally (no HP requirement)
+                selectedTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                console.log(`[AI Planner] Random ally target selected for buff ${selectedAbility.name}: ${selectedTarget.name}`);
+            }
         } else {
-            // For non-healing abilities, select randomly
+            // For non-ally abilities, select randomly
             selectedTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
             console.log(`[AI Planner Debug] Random target selected for ${selectedAbility.name}: ${selectedTarget.name} (isAI: ${selectedTarget.isAI})`);
         }
@@ -1544,8 +1827,17 @@ class GameManager {
             selectedTarget = allPlayerChars; // Pass the array of player characters
         } else if (selectedAbility.targetType === 'all_allies_except_self') { // Handle Carrot Power-up case
             selectedTarget = allAIChars.filter(c => c.id !== aiChar.id); // Pass the filtered array
+        } else if (selectedAbility.targetType === 'two_random_enemies') {
+            // For two random enemies, pass the array and let the ability handler select random targets
+            selectedTarget = allPlayerChars; // Pass the array
+        } else if (selectedAbility.targetType === 'three_random_enemies') {
+            // For three random enemies, pass the array and let the ability handler select random targets
+            selectedTarget = allPlayerChars; // Pass the array
+        } else if (selectedAbility.targetType === 'random_enemy') {
+            // For random enemy, pass the array and let the ability handler select random target
+            selectedTarget = allPlayerChars; // Pass the array
         }
-        // For single target types (enemy, ally, ally_or_self, self, any, any_except_self), selectedTarget remains the chosen single character.
+        // For single target types (enemy, single_enemy, ally, ally_or_self, self, any, any_except_self), selectedTarget remains the chosen single character.
 
         if (selectedTarget && (!Array.isArray(selectedTarget) || selectedTarget.length > 0)) {
              const targetName = Array.isArray(selectedTarget) ? `${selectedTarget.length} targets` : selectedTarget.name;
@@ -1559,7 +1851,7 @@ class GameManager {
 
     // Special AI behavior for Infernal Raiden
     planInfernalRaidenAction(aiChar, availableAbilities) {
-        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => !c.isDead() && !c.isUntargetable());
+        const allPlayerChars = this.gameState.playerCharacters.filter(c => !c.isDead() && !c.isUntargetable());
         
         // Find Q ability (Blazing Lightning Ball)
         const blazingLightningBall = availableAbilities.find(ability => 
@@ -1896,11 +2188,8 @@ class GameManager {
                        }
                    }
 
-                   // 2. Process effects (apply buffs/debuffs, NO duration reduction)
-                   char.processEffects(false, false); // false, false -> Apply effects, don't reduce duration, don't regen yet
-
-                   // 3. Regenerate resources
-                   char.regenerateResources();
+                   // 2. Process effects (apply buffs/debuffs, NO duration reduction, WITH regeneration)
+                   char.processEffects(false, true); // false, true -> Apply effects, don't reduce duration, do regenerate
 
                    // 4. Reduce ability cooldowns
                    char.abilities.forEach(ability => ability.reduceCooldown());
@@ -2654,42 +2943,147 @@ class GameManager {
 
            const userId = user.uid;
            
-           for (const reward of rewards) {
-               try {
-                   // Check if reward should be granted based on chance
-                   const roll = Math.random();
-                   if (roll > (reward.chance || 1.0)) {
-                       console.log(`[GameManager] Reward ${reward.name || reward.id} not granted (chance: ${reward.chance}, roll: ${roll})`);
-                       continue;
-                   }
+           // Process regular rewards
+           if (rewards && rewards.length > 0) {
+               for (const reward of rewards) {
+                   try {
+                       // Check if reward should be granted based on chance
+                       const roll = Math.random();
+                       if (roll > (reward.chance || 1.0)) {
+                           console.log(`[GameManager] Reward ${reward.name || reward.id} not granted (chance: ${reward.chance}, roll: ${roll})`);
+                           continue;
+                       }
 
-                   console.log(`[GameManager] Processing reward: ${reward.name || reward.id} (type: ${reward.type})`);
+                       console.log(`[GameManager] Processing reward: ${reward.name || reward.id} (type: ${reward.type})`);
 
-                   switch (reward.type) {
-                       case 'character':
-                           await this.unlockCharacterReward(userId, reward.id, reward.name);
-                           break;
-                       case 'stage':
-                           await this.unlockStageReward(userId, reward.id, reward.name);
-                           break;
-                       case 'story':
-                           await this.unlockStoryReward(userId, reward.id, reward.name);
-                           break;
-                       case 'gold':
-                           console.log(`[GameManager] Gold rewards not yet implemented: ${reward.value}`);
-                           break;
-                       case 'experience':
-                           console.log(`[GameManager] Experience rewards not yet implemented: ${reward.value}`);
-                           break;
-                       case 'item':
-                           console.log(`[GameManager] Item rewards not yet implemented: ${reward.value}`);
-                           break;
-                       default:
-                           console.warn(`[GameManager] Unknown reward type: ${reward.type}`);
+                       switch (reward.type) {
+                           case 'character':
+                               await this.unlockCharacterReward(userId, reward.id, reward.name);
+                               break;
+                           case 'stage':
+                               await this.unlockStageReward(userId, reward.id, reward.name);
+                               break;
+                           case 'story':
+                               await this.unlockStoryReward(userId, reward.id, reward.name);
+                               break;
+                           case 'gold':
+                               console.log(`[GameManager] Gold rewards not yet implemented: ${reward.value}`);
+                               break;
+                           case 'experience':
+                               console.log(`[GameManager] Experience rewards not yet implemented: ${reward.value}`);
+                               break;
+                           case 'item':
+                               console.log(`[GameManager] Item rewards not yet implemented: ${reward.value}`);
+                               break;
+                           default:
+                               console.warn(`[GameManager] Unknown reward type: ${reward.type}`);
+                       }
+                   } catch (error) {
+                       console.error(`[GameManager] Error processing reward ${reward.name || reward.id}:`, error);
                    }
-               } catch (error) {
-                   console.error(`[GameManager] Error processing reward ${reward.name || reward.id}:`, error);
                }
+           }
+
+           // Check for first-time completion reward
+           const currentStage = this.stageManager?.currentStage;
+           if (currentStage?.firstTimeCompletionReward) {
+               await this.processFirstTimeCompletionReward(userId, currentStage);
+           }
+       }
+
+       /**
+        * Process first-time completion reward for a stage
+        */
+       async processFirstTimeCompletionReward(userId, stage) {
+           try {
+               console.log(`[GameManager] Checking first-time completion reward for stage: ${stage.id}`);
+               
+               // Check if this stage has been completed before
+               const completionRef = firebaseDatabase.ref(`users/${userId}/stageCompletions/${stage.id}`);
+               const completionSnapshot = await completionRef.once('value');
+               
+               if (completionSnapshot.exists()) {
+                   console.log(`[GameManager] Stage ${stage.id} already completed before, skipping first-time reward`);
+                   return;
+               }
+               
+               console.log(`[GameManager] First-time completion detected! Processing reward...`);
+               
+               const reward = stage.firstTimeCompletionReward;
+               
+               switch (reward.type) {
+                   case 'random_character':
+                       await this.grantRandomCharacterReward(userId, reward);
+                       break;
+                   case 'character':
+                       await this.unlockCharacterReward(userId, reward.id, reward.name);
+                       break;
+                   default:
+                       console.warn(`[GameManager] Unknown first-time completion reward type: ${reward.type}`);
+               }
+               
+               // Mark stage as completed
+               await completionRef.set({
+                   completedAt: firebaseDatabase.ServerValue.TIMESTAMP,
+                   rewardClaimed: true,
+                   rewardType: reward.type
+               });
+               
+               console.log(`[GameManager] ✅ First-time completion reward processed for stage: ${stage.id}`);
+               
+           } catch (error) {
+               console.error(`[GameManager] Error processing first-time completion reward:`, error);
+           }
+       }
+
+       /**
+        * Grant a random character reward using QuestManager's character ownership logic
+        */
+       async grantRandomCharacterReward(userId, reward) {
+           try {
+               console.log('[GameManager] Granting random character reward...');
+               
+               // Use QuestManager's character ownership checking if available
+               if (window.questManager && window.questManager.initialized) {
+                   const unownedCharacters = await window.questManager.getUnownedCharacters();
+                   
+                   // Filter out farmer characters for Farm Showdown stage
+                   const excludedFarmers = ['farmer_alice', 'farmer_cham_cham', 'farmer_nina', 'farmer_raiden', 'farmer_shoma'];
+                   const availableCharacters = unownedCharacters.filter(charId => !excludedFarmers.includes(charId));
+                   
+                   console.log(`[GameManager] Filtered characters (excluding farmers): ${availableCharacters.length} available`);
+                   console.log(`[GameManager] Available characters: ${availableCharacters.join(', ')}`);
+                   
+                   if (availableCharacters.length === 0) {
+                       console.log('[GameManager] Player owns all non-farmer characters, granting alternative reward');
+                       this.showRewardNotification('info', 'You already own all available non-farmer characters! Here are some bonus talent points instead.');
+                       // TODO: Implement talent point alternative reward
+                       return;
+                   }
+                   
+                   // Select random character from filtered list
+                   const randomCharacterId = availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
+                   console.log(`[GameManager] Selected random character: ${randomCharacterId}`);
+                   
+                   // Grant the character using QuestManager's system
+                   const granted = await window.questManager.grantCharacterReward(randomCharacterId);
+                   
+                   if (granted) {
+                       const characterName = window.questManager.getCharacterDisplayName(randomCharacterId);
+                       console.log(`[GameManager] ✅ Random character ${characterName} granted successfully!`);
+                       this.showRewardNotification('character', characterName, reward.message);
+                   } else {
+                       throw new Error('Failed to grant random character reward');
+                   }
+               } else {
+                   console.warn('[GameManager] QuestManager not available, using fallback character reward system');
+                   // Fallback to basic character unlock (you could implement a simpler version here)
+                   this.showRewardNotification('info', 'Character reward system temporarily unavailable');
+               }
+               
+           } catch (error) {
+               console.error('[GameManager] Error granting random character reward:', error);
+               throw error;
            }
        }
 
@@ -2814,13 +3208,14 @@ class GameManager {
        /**
         * Show a reward notification to the player
         */
-       showRewardNotification(rewardType, rewardName) {
+       showRewardNotification(rewardType, rewardName, customMessage = null) {
            const icons = {
                character: '🎭',
                stage: '🏟️',
                story: '📖',
                item: '🎁',
-               gold: '💰'
+               gold: '💰',
+               info: 'ℹ️'
            };
            
            const messages = {
@@ -2828,17 +3223,20 @@ class GameManager {
                stage: 'Stage Unlocked!',
                story: 'Story Unlocked!',
                item: 'Item Acquired!',
-               gold: 'Gold Earned!'
+               gold: 'Gold Earned!',
+               info: 'Information'
            };
 
            const notification = document.createElement('div');
            notification.className = 'reward-notification';
+           // Use custom message if provided, otherwise use default structure
+           const displayMessage = customMessage || `<div class="reward-title">${messages[rewardType] || 'Reward Earned!'}</div><div class="reward-name">${rewardName}</div>`;
+           
            notification.innerHTML = `
                <div class="reward-notification-content">
                    <div class="reward-icon">${icons[rewardType] || '🎁'}</div>
                    <div class="reward-text">
-                       <div class="reward-title">${messages[rewardType] || 'Reward Earned!'}</div>
-                       <div class="reward-name">${rewardName}</div>
+                       ${displayMessage}
                    </div>
                </div>
            `;
@@ -3041,7 +3439,19 @@ class GameManager {
         * Get character image path with proper naming conversion
         */
        getCharacterImagePath(characterId) {
-           // Convert character ID to proper image filename
+           // Always try skin system first (handles both basic and premium skins)
+           if (window.SkinManager) {
+               try {
+                   const skinImagePath = window.SkinManager.getCharacterImagePath(characterId);
+                   if (skinImagePath) {
+                       return skinImagePath;
+                   }
+               } catch (error) {
+                   console.warn(`[GameManager] Error getting skin image for ${characterId}: ${error.message}`);
+               }
+           }
+           
+           // Fallback to Loading Screen folder for basic skins
            const imageNameMap = {
                'farmer_nina': 'Farmer Nina',
                'farmer_raiden': 'Farmer Raiden', 
@@ -3063,7 +3473,7 @@ class GameManager {
            };
            
            const imageName = imageNameMap[characterId] || characterId;
-           return `Icons/characters/${imageName}.png`;
+           return `Loading Screen/${imageName}.png`;
        }
 
        /**
@@ -3326,6 +3736,11 @@ class GameManager {
                // --- END ADDED ---
            } else {
                 console.warn(`[handleCharacterDeath] Could not find character ${character.name} (ID: ${character.id}, InstanceID: ${character.instanceId}) in game state arrays.`);
+           }
+
+           // Trigger stage modifiers for character death
+           if (window.stageModifiersRegistry && this.stageManager) {
+               window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'characterDeath', { character: character });
            }
 
            // Check for game over after handling death
@@ -3845,8 +4260,8 @@ class GameManager {
                    // Show planning animation for this character
                    this.gameManager.uiManager.showCharacterPlanning(aiChar, true);
                    
-                   // Plan the action with delay for visualization
-                   await this.delay(800);
+                   // Plan the action with delay for visualization (faster thinking)
+                   await this.delay(400);
                    const plannedAction = await this.planAIAction(aiChar);
                    
                    // If an action was planned (not null and no error)
@@ -3876,8 +4291,8 @@ class GameManager {
                    // Hide planning animation when done
                    this.gameManager.uiManager.showCharacterPlanning(aiChar, false);
                    
-                   // Add small delay between planning for each character
-                   await this.delay(300);
+                   // Add small delay between planning for each character (faster thinking)
+                   await this.delay(200);
                }
                
                // Hide planning phase overlay
@@ -3886,7 +4301,7 @@ class GameManager {
                // Execute each planned action with delay between them
                for (const action of actions) {
                    await this.executeAction(action);
-                   await this.delay(1000); // Delay between AI actions
+                   await this.delay(1500); // Longer delay between AI actions for better pacing
                }
                
                // End AI turn
@@ -3916,24 +4331,39 @@ class GameManager {
                return this.planInfernalRaidenAction(aiChar);
            }
 
-           // Fall back to standard AI planning
-           console.log(`[AI Planner] Using standard AI for ${aiChar.name}`);
+                   // Fall back to standard AI planning
+        console.log(`[AI Planner] Using standard AI for ${aiChar.name}`);
 
-           // Get available abilities
-           const availableAbilities = aiChar.abilities.filter(ability =>
-               ability.currentCooldown <= 0 &&
-               aiChar.stats.currentMana >= ability.manaCost &&
-               !ability.isDisabled // Added check for disabled abilities
-           );
+        // Get available abilities
+        const availableAbilities = aiChar.abilities.filter(ability =>
+            ability.currentCooldown <= 0 &&
+            aiChar.stats.currentMana >= ability.manaCost &&
+            !ability.isDisabled // Added check for disabled abilities
+        );
 
-           if (availableAbilities.length === 0) {
-               console.log(`[AI Planner] ${aiChar.name} has no available abilities.`);
-               return null; // No action possible
-           }
+        if (availableAbilities.length === 0) {
+            console.log(`[AI Planner] ${aiChar.name} has no available abilities.`);
+            return null; // No action possible
+        }
 
-           // Smart ability selection: Prioritize healing if allies need it
-           const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => !c.isDead() && !c.isUntargetable());
-           const allAIChars = this.gameManager.gameState.aiCharacters.filter(c => !c.isDead() && !c.isUntargetable());
+        // Helper function to filter targetable characters considering enemy forced targeting
+        const isTargetableByCharacter = (target, caster) => {
+            if (target.isDead()) return false;
+            if (target.isUntargetable && target.isUntargetable()) return false;
+            
+            // Check if this target is untargetable due to enemy forced targeting
+            if (target.isUntargetableByEnemyForcing && target.isUntargetableByEnemyForcing()) {
+                // The target is untargetable because an enemy is forcing targeting
+                // This means we can only target allies/self for support abilities
+                return false;
+            }
+            
+            return true;
+        };
+
+        // Smart ability selection: Prioritize healing if allies need it
+        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => isTargetableByCharacter(c, aiChar));
+        const allAIChars = this.gameManager.gameState.aiCharacters.filter(c => isTargetableByCharacter(c, aiChar));
            
            // Check if any allies need healing (below 70% HP)
            const injuredAllies = allAIChars.filter(ally => ally !== aiChar && ally.stats.currentHp < ally.stats.maxHp * 0.7);
@@ -3941,12 +4371,10 @@ class GameManager {
            
            // Look for healing abilities that can target allies or self
            const healingAbilities = availableAbilities.filter(ability => 
-               ability.targetType === 'ally_or_self' || 
-               ability.targetType === 'ally' || 
-               (ability.targetType === 'self' && selfNeedsHealing) ||
-               ability.targetType === 'all_allies' ||
+               // Only classify as healing if the ability actually mentions healing in name/description or has heal type
                (ability.name && typeof ability.name === 'string' && ability.name.toLowerCase().includes('heal')) || 
-               (ability.description && typeof ability.description === 'string' && ability.description.toLowerCase().includes('heal'))
+               (ability.description && typeof ability.description === 'string' && ability.description.toLowerCase().includes('heal')) ||
+               (ability.type === 'heal')
            );
            
            let selectedAbility = null;
@@ -3967,110 +4395,63 @@ class GameManager {
                console.log(`[AI Planner] ${aiChar.name} randomly selected: ${selectedAbility.name}`);
            }
 
-           let possibleTargets = [];
-
-           // Determine possible targets based on ability type
-           switch (selectedAbility.targetType) {
-               case 'enemy':
-                   possibleTargets = allPlayerChars;
-                   break;
-               case 'ally':
-                   possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Exclude self
-                   break;
-               case 'ally_or_self':
-                   // Include all AI allies plus self - prioritize injured targets for healing
-                   const potentialHealTargets = [...allAIChars];
-                   if (injuredAllies.length > 0 || selfNeedsHealing) {
-                       // Filter to only injured targets for smarter healing
-                       const injuredTargets = potentialHealTargets.filter(ally => 
-                           ally.stats.currentHp < ally.stats.maxHp * 0.8 // Below 80% HP
-                       );
-                       possibleTargets = injuredTargets.length > 0 ? injuredTargets : potentialHealTargets;
-                   } else {
-                       possibleTargets = potentialHealTargets;
-                   }
-                   break;
-               case 'self':
-                   possibleTargets = [aiChar]; // Only self
-                   break;
-               case 'any':
-                   possibleTargets = [...allPlayerChars, ...allAIChars];
-                   break;
-               case 'any_except_self': // Added this case
-                   possibleTargets = [
-                       ...allPlayerChars, // All enemies
-                       ...allAIChars.filter(c => c.id !== aiChar.id) // All allies except self
-                   ];
-                   break;
-               case 'all_enemies':
-               case 'all': // Add 'all' case to target enemies
-                   possibleTargets = allPlayerChars; // Target the group of enemies
-                   break;
-               case 'all_allies':
-                   possibleTargets = allAIChars; // Target the group
-                   break;
-               case 'all_allies_except_self': // Added this case for Carrot Power-up
-                   possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Target the group, excluding self
-                   break;
-               default:
-                   console.error(` [AI Planner] Unknown target type '${selectedAbility.targetType}'`);
-                   possibleTargets = []; // No valid target logic
-                   break;
-           }
-
-           // Filter out untargetable characters again, just in case
-           possibleTargets = possibleTargets.filter(c => c && !c.isDead() && !c.isUntargetable());
-
-           if (possibleTargets.length === 0) {
-                console.log(`[AI Planner Debug] No valid targets found for ${selectedAbility.name} (type: ${selectedAbility.targetType}) after filtering.`);
-                console.log(`[AI Planner Debug] All Player Chars (alive, targetable): ${allPlayerChars.map(c => c.name + '(' + (c.instanceId || c.id) + ')').join(', ')}`);
-                console.log(`[AI Planner Debug] All AI Chars (alive, targetable, not self): ${allAIChars.filter(c => c.id !== aiChar.id).map(c => c.name + '(' + (c.instanceId || c.id) + ')').join(', ')}`);
-
-               return { ability: selectedAbility, target: null, error: 'No valid targets found' }; // Indicate no valid target
-           }
-
-           // Smart target selection for healing abilities
-           let selectedTarget;
-           if (selectedAbility.targetType === 'ally_or_self' || selectedAbility.targetType === 'ally') {
-               // For healing abilities, prioritize the most injured ally
-               const sortedByHealth = possibleTargets.sort((a, b) => {
-                   const aHealthPercent = a.stats.currentHp / a.stats.maxHp;
-                   const bHealthPercent = b.stats.currentHp / b.stats.maxHp;
-                   return aHealthPercent - bHealthPercent; // Lowest health first
+           // Try to plan the action - if it fails for healing, fallback to non-healing
+           const result = this.gameManager.tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing);
+           if (result && result.error === 'No healing targets needed') {
+               // Healing was selected but no targets need it - fallback to non-healing abilities
+               console.log(`[AI Planner] ${aiChar.name} fallback: healing not needed, selecting non-healing ability`);
+               const nonHealingAbilities = availableAbilities.filter(ability => {
+                   // Exclude abilities that are specifically for healing
+                   const isHealingAbility = (ability.name && ability.name.toLowerCase().includes('heal')) || 
+                                           (ability.description && ability.description.toLowerCase().includes('heal')) ||
+                                           (ability.type === 'heal');
+                   
+                   // Include buff/support abilities that target allies but aren't healing
+                   const isBuffAbility = (ability.name && (ability.name.toLowerCase().includes('buff') || 
+                                                          ability.name.toLowerCase().includes('pact') ||
+                                                          ability.name.toLowerCase().includes('blessing') ||
+                                                          ability.name.toLowerCase().includes('boost') ||
+                                                          ability.name.toLowerCase().includes('enhance') ||
+                                                          ability.name.toLowerCase().includes('powder'))) ||
+                                         (ability.description && (ability.description.toLowerCase().includes('double') ||
+                                                                 ability.description.toLowerCase().includes('increase') ||
+                                                                 ability.description.toLowerCase().includes('buff') ||
+                                                                 ability.description.toLowerCase().includes('empower') ||
+                                                                 ability.description.toLowerCase().includes('reduce') ||
+                                                                 ability.description.toLowerCase().includes('cooldown')));
+                   
+                   // Keep abilities that aren't healing, or are buff abilities targeting allies
+                   return !isHealingAbility || isBuffAbility;
                });
-               selectedTarget = sortedByHealth[0];
-               console.log(`[AI Planner] Smart healing target selected: ${selectedTarget.name} (${Math.round((selectedTarget.stats.currentHp / selectedTarget.stats.maxHp) * 100)}% HP)`);
-           } else {
-               // For non-healing abilities, select randomly
-               selectedTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-               console.log(`[AI Planner Debug] Random target selected for ${selectedAbility.name}: ${selectedTarget.name} (isAI: ${selectedTarget.isAI})`);
+               
+               if (nonHealingAbilities.length > 0) {
+                   selectedAbility = nonHealingAbilities[Math.floor(Math.random() * nonHealingAbilities.length)];
+                   console.log(`[AI Planner] ${aiChar.name} fallback selected: ${selectedAbility.name}`);
+                   return this.gameManager.tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing);
+               }
            }
-
-           // Handle AoE abilities - target the whole group
-           if (selectedAbility.targetType === 'all_enemies') {
-               selectedTarget = allPlayerChars; // Pass the array
-           } else if (selectedAbility.targetType === 'all_allies') {
-               selectedTarget = allAIChars; // Pass the array
-           } else if (selectedAbility.targetType === 'all') { // Handle the new 'all' case
-               selectedTarget = allPlayerChars; // Pass the array of player characters
-           } else if (selectedAbility.targetType === 'all_allies_except_self') { // Handle Carrot Power-up case
-               selectedTarget = allAIChars.filter(c => c.id !== aiChar.id); // Pass the filtered array
-           }
-           // For single target types (enemy, ally, ally_or_self, self, any, any_except_self), selectedTarget remains the chosen single character.
-
-           if (selectedTarget && (!Array.isArray(selectedTarget) || selectedTarget.length > 0)) {
-                const targetName = Array.isArray(selectedTarget) ? `${selectedTarget.length} targets` : selectedTarget.name;
-                console.log(`[AI Planner] Planned action: ${selectedAbility.name} on ${targetName}`);
-               return { ability: selectedAbility, target: selectedTarget };
-           } else {
-               console.log(`[AI Planner] Skipping action for ${selectedAbility.name}: No valid targets found.`);
-               return null; // Skip action if no target found
-           }
+           
+           return result;
        }
 
-       // Special AI behavior for Infernal Raiden
-       planInfernalRaidenAction(aiChar) {
-           const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => !c.isDead() && !c.isUntargetable());
+           // Helper method to try planning an action with a specific ability
+    planInfernalRaidenAction(aiChar) {
+        // Helper function to filter targetable characters considering enemy forced targeting
+        const isTargetableByCharacter = (target, caster) => {
+            if (target.isDead()) return false;
+            if (target.isUntargetable && target.isUntargetable()) return false;
+            
+            // Check if this target is untargetable due to enemy forced targeting
+            if (target.isUntargetableByEnemyForcing && target.isUntargetableByEnemyForcing()) {
+                // The target is untargetable because an enemy is forcing targeting
+                // This means we can only target allies/self for support abilities
+                return false;
+            }
+            
+            return true;
+        };
+        
+        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => isTargetableByCharacter(c, aiChar));
            
            // Get available abilities
            const availableAbilities = aiChar.abilities.filter(ability =>
@@ -4221,14 +4602,14 @@ class GameManager {
             
             if (targetType === 'self') {
                 finalTargetInfo = caster.isDead() ? null : caster;
-            } else if (targetType === 'enemy' || targetType === 'ally' || targetType === 'ally_or_self') {
+            } else if (targetType === 'enemy' || targetType === 'single_enemy' || targetType === 'ally' || targetType === 'ally_or_self') {
                 // Planned target was a single object
                 const singleTarget = targetInfo;
                 if (singleTarget && typeof singleTarget.isDead === 'function' && !singleTarget.isDead()) { // Added type check for isDead
                     finalTargetInfo = singleTarget;
                     
                     // --- NEW: Check for ability redirection (Furry Guardian talent) ---
-                    if (targetType === 'enemy' && !Array.isArray(finalTargetInfo)) {
+                    if ((targetType === 'enemy' || targetType === 'single_enemy') && !Array.isArray(finalTargetInfo)) {
                         // Only check for redirection on enemy abilities targeting a single player character
                         const redirected = this.checkForAbilityRedirection(caster, ability, finalTargetInfo);
                         if (redirected) {
@@ -4239,7 +4620,7 @@ class GameManager {
                 } else {
                     // Attempt to find a new random target if the original is dead
                     console.log(`[AI Execute] Original target ${singleTarget?.name} invalid. Retargeting for ${ability.name}...`);
-                    if (targetType === 'enemy') {
+                    if (targetType === 'enemy' || targetType === 'single_enemy') {
                         const potentialEnemies = gameState.playerCharacters.filter(p => !p.isDead());
                         if (potentialEnemies.length > 0) finalTargetInfo = potentialEnemies[Math.floor(Math.random() * potentialEnemies.length)];
                         
@@ -4271,7 +4652,7 @@ class GameManager {
                     }
                     if(finalTargetInfo) console.log(`[AI Execute] Re-targeted to ${finalTargetInfo.name}.`);
                 }
-            } else if (targetType === 'aoe_enemy' || targetType === 'all_enemies') {
+            } else if (targetType === 'aoe_enemy' || targetType === 'all_enemies' || targetType === 'two_random_enemies' || targetType === 'three_random_enemies' || targetType === 'random_enemy') {
                 // Re-fetch living enemies just before execution
                 finalTargetInfo = this.gameManager.gameState.playerCharacters.filter(p => !p.isDead());
                 console.log(`[AI Execute] Validating ${finalTargetInfo.length} living enemies for AoE.`);
@@ -4692,7 +5073,7 @@ class GameManager {
 
         // Set up event handlers for UI elements
         setupEventHandlers() {
-            // Add event listener for Zoey talent updates
+            // Add event listener for Zoey talents updates
             document.addEventListener('zoey_talents_applied', (event) => {
                 const character = event.detail.character;
                 if (character && this.gameManager.gameState) {
@@ -4705,7 +5086,34 @@ class GameManager {
             document.getElementById('player-characters-container').addEventListener('click', (e) => {
                 const charElement = this.findCharacterElement(e.target);
                 if (charElement) {
-                    // Use the unique instanceId stored in the dataset
+                    // CRITICAL FIX: Check if an ability was clicked first to prevent race condition
+                    const abilityElement = e.target.closest('.ability');
+                    if (abilityElement) {
+                        // Handle ability click - this will auto-select the character and then the ability
+                        const abilityIndex = parseInt(abilityElement.dataset.index);
+                        const instanceId = charElement.dataset.instanceId; 
+                        if (this.gameManager.gameState && this.gameManager.gameState.playerCharacters) {
+                            const character = this.gameManager.gameState.playerCharacters.find(c => c.instanceId === instanceId);
+                            
+                            if (character && !isNaN(abilityIndex) && abilityIndex >= 0) {
+                                console.log(`[DEBUG] Ability clicked: ${character.name} ability ${abilityIndex}`);
+                                
+                                // First, auto-select the character who owns this ability
+                                const characterSelected = this.gameManager.selectCharacter(character);
+                                
+                                if (characterSelected) {
+                                    // Then select the ability
+                                    this.gameManager.selectAbility(character, abilityIndex);
+                                }
+                            }
+                        } else {
+                            console.error('Game state or player characters not available');
+                        }
+                        // IMPORTANT: Return early to prevent character targeting logic from running
+                        return;
+                    }
+                    
+                    // Handle character click (only if no ability was clicked)
                     const instanceId = charElement.dataset.instanceId; 
                     // Find character by instanceId - add null check for gameState and playerCharacters
                     if (this.gameManager.gameState && this.gameManager.gameState.playerCharacters) {
@@ -4713,31 +5121,14 @@ class GameManager {
                         if (character) {
                             // Check if we're in targeting mode
                             if (this.gameManager.gameState.selectedCharacter && this.gameManager.gameState.selectedAbility) {
+                                console.log(`[DEBUG] Character clicked for targeting: ${character.name}`);
                                 // If a character and ability are already selected, this is a targeting action
                                 this.gameManager.targetCharacter(character);
                             } else {
+                                console.log(`[DEBUG] Character clicked for selection: ${character.name}`);
                                 // Otherwise it's a character selection
                                 this.gameManager.selectCharacter(character);
                             }
-                        }
-                    } else {
-                        console.error('Game state or player characters not available');
-                    }
-                }
-                
-                // Also check if an ability was clicked
-                const abilityElement = e.target.closest('.ability');
-                if (abilityElement && charElement) {
-                    const abilityIndex = parseInt(abilityElement.dataset.index);
-                    const instanceId = charElement.dataset.instanceId;
-                    
-                    // Add null check for gameState and playerCharacters
-                    if (this.gameManager.gameState && this.gameManager.gameState.playerCharacters) {
-                        const character = this.gameManager.gameState.playerCharacters.find(c => c.instanceId === instanceId);
-                        
-                        if (character && !isNaN(abilityIndex) && abilityIndex >= 0) {
-                            // Pass to the selectAbility method
-                            this.gameManager.selectAbility(character, abilityIndex);
                         }
                     } else {
                         console.error('Game state or player characters not available');
@@ -4856,17 +5247,20 @@ class GameManager {
                     return; // Prevent further processing for this key event
                 }
                 
-                // Shift+M: Reduce player characters mana to 20%
+                // Shift+M: Reduce player characters mana to 5%
                 if (e.key === 'M' && e.shiftKey) {
-                    console.log("[DEBUG] Shift+M pressed - Reducing player characters mana to 20%");
+                    console.log("[DEBUG] Shift+M pressed - Reducing player characters mana to 5%");
                     this.gameManager.gameState.playerCharacters.forEach(playerChar => {
                         if (!playerChar.isDead()) {
                             const maxMana = playerChar.stats.maxMana || playerChar.stats.mana || 0;
                             const oldMana = playerChar.stats.currentMana || 0;
-                            const newMana = Math.max(0, Math.floor(maxMana * 0.2));
+                            const newMana = Math.max(0, Math.floor(maxMana * 0.05));
                             
                             // Update the mana
                             playerChar.stats.currentMana = newMana;
+                            
+                            // Update UI immediately
+                            this.updateCharacterUI(playerChar);
                             
                             console.log(`[DEBUG] Reduced ${playerChar.name}'s mana from ${oldMana} to ${newMana} (${Math.floor(newMana/maxMana*100)}%)`);
                             
@@ -5185,7 +5579,9 @@ class GameManager {
             imageContainer.className = 'image-container';
             
             const image = document.createElement('img');
-            image.src = character.image;
+            // Use skin system for image path
+            const imageSource = this.gameManager.getCharacterImagePath(character.id) || character.image;
+            image.src = imageSource;
             image.className = 'character-image';
             image.alt = character.name;
             
@@ -5245,10 +5641,19 @@ class GameManager {
             const hpBar = document.createElement('div');
             hpBar.className = 'hp-bar';
             hpBar.style.width = `${(character.stats.currentHp / character.stats.maxHp) * 100}%`;
+            
+            // Shield bar - always create for all characters
+            const shieldBar = document.createElement('div');
+            shieldBar.className = 'shield-bar';
+            shieldBar.style.width = '0%';
+            shieldBar.style.display = 'none'; // Initially hidden
+            
             const hpText = document.createElement('div');
             hpText.className = 'bar-text';
             hpText.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}`;
+            
             hpContainer.appendChild(hpBar);
+            hpContainer.appendChild(shieldBar);
             hpContainer.appendChild(hpText);
             
             // Mana bar
@@ -5361,10 +5766,11 @@ class GameManager {
                 
                 // Update HP bar text to include shield
                 hpText.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)} (${Math.round(character.shield)} shield)`;
+                shieldBar.style.display = 'block'; // Show shield bar
             } else {
                 // Remove shield bar if no shield
                 if (shieldBar) {
-                    shieldBar.remove();
+                    shieldBar.style.display = 'none'; // Hide shield bar
                 }
                 // Reset HP bar text to normal
                 hpText.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}`;
@@ -5651,6 +6057,57 @@ class GameManager {
             }
             // --- End Primal Fury VFX ---
             
+            // Apply or remove imprisoned visual effect based on whether the character is imprisoned
+            const imprisonDebuff = character.debuffs.find(debuff => 
+                debuff && debuff.id === 'kroudin_imprison'
+            );
+            
+            if (imprisonDebuff) {
+                if (!charElement.classList.contains('imprisoned')) {
+                    charElement.classList.add('imprisoned');
+                    
+                    // Get the image container to add the prison effect
+                    const imageContainer = charElement.querySelector('.image-container');
+                    
+                    // Remove any existing prison effects first
+                    const existingPrisonEffect = imageContainer.querySelector('.prison-effect');
+                    if (existingPrisonEffect) {
+                        existingPrisonEffect.remove();
+                    }
+                    
+                    // Create prison effect (persistent chains and cage)
+                    const prisonEffect = document.createElement('div');
+                    prisonEffect.className = 'kroudin-imprison-prison';
+                    
+                    // Add spectral chains around target
+                    for (let i = 0; i < 12; i++) {
+                        const prisonChain = document.createElement('div');
+                        prisonChain.className = 'kroudin-imprison-prison-chain';
+                        prisonChain.style.setProperty('--prison-chain-index', i);
+                        prisonEffect.appendChild(prisonChain);
+                    }
+
+                    // Add dark energy cage
+                    const cage = document.createElement('div');
+                    cage.className = 'kroudin-imprison-cage';
+                    prisonEffect.appendChild(cage);
+                    
+                    // Add to the image container
+                    imageContainer.appendChild(prisonEffect);
+                }
+            } else {
+                if (charElement.classList.contains('imprisoned')) {
+                    charElement.classList.remove('imprisoned');
+                    
+                    // Remove prison effects
+                    const imageContainer = charElement.querySelector('.image-container');
+                    const prisonEffect = imageContainer.querySelector('.kroudin-imprison-prison');
+                    if (prisonEffect) {
+                        prisonEffect.remove();
+                    }
+                }
+            }
+            
             // Apply or remove stunned visual effect based on whether the character is stunned
             if (character.isStunned()) {
                 if (!charElement.classList.contains('stunned')) {
@@ -5771,20 +6228,41 @@ class GameManager {
             
             if (!selectedChar || !selectedAbility) return;
             
+            // Use dynamic targetType if available
+            if (selectedAbility && typeof selectedAbility.getTargetType === 'function') {
+                targetType = selectedAbility.getTargetType();
+                console.log(`[UI] Using dynamic targetType: ${targetType} for ability ${selectedAbility.id}`);
+            }
+            
             const isPlayerCaster = !selectedChar.isAI;
+            
+            // Helper function to check if a character element represents a valid target
+            const isValidTarget = (characterElement) => {
+                const characterId = characterElement.dataset.characterId || characterElement.id.replace('character-', '');
+                const character = this.gameManager.gameState.playerCharacters.concat(this.gameManager.gameState.aiCharacters)
+                    .find(c => (c.instanceId || c.id) === characterId);
+                
+                if (!character) return false;
+                if (character.isDead()) return false;
+                if (character.isUntargetable && character.isUntargetable()) return false;
+                if (character.isUntargetableByEnemyForcing && character.isUntargetableByEnemyForcing()) return false;
+                
+                return true;
+            };
             
             // Remove targeting message logs
             
             switch (targetType) {
                 case 'enemy':
                     if (isPlayerCaster) {
-                        aiChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        aiChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         playerChars.forEach(function(el) {
                             if (!el.classList.contains('selected')) {
@@ -5793,13 +6271,14 @@ class GameManager {
                             }
                         });
                     } else {
-                        playerChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        playerChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         aiChars.forEach(function(el) {
                             if (!el.classList.contains('selected')) {
@@ -5812,26 +6291,28 @@ class GameManager {
                     
                 case 'ally':
                     if (isPlayerCaster) {
-                        playerChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('selected') && !el.classList.contains('dead')) {
+                        playerChars.forEach((el) => {
+                            if (!el.classList.contains('selected') && isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                            } else if (!el.classList.contains('selected')) {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         aiChars.forEach(function(el) {
                             el.classList.add('invalid-target');
                             el.style.cursor = 'not-allowed';
                         });
                            } else {
-                        aiChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('selected') && !el.classList.contains('dead')) {
+                        aiChars.forEach((el) => {
+                            if (!el.classList.contains('selected') && isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                            } else if (!el.classList.contains('selected')) {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         playerChars.forEach(function(el) {
                             el.classList.add('invalid-target');
@@ -5842,26 +6323,28 @@ class GameManager {
                     
                 case 'ally_or_self':
                     if (isPlayerCaster) {
-                        playerChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        playerChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         aiChars.forEach(function(el) {
                             el.classList.add('invalid-target');
                             el.style.cursor = 'not-allowed';
                         });
                            } else {
-                        aiChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        aiChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         playerChars.forEach(function(el) {
                             el.classList.add('invalid-target');
@@ -5876,56 +6359,52 @@ class GameManager {
                         el.style.cursor = 'not-allowed';
                     });
                     const selected = document.querySelector('.character-slot.selected');
-                    // --- NEW: Check if dead ---
-                    if (selected && !selected.classList.contains('dead')) {
+                    if (selected && isValidTarget(selected)) {
                         selected.classList.add('valid-target');
                         selected.style.cursor = 'pointer';
+                    } else if (selected) {
+                        selected.classList.add('invalid-target');
+                        selected.style.cursor = 'not-allowed';
                     }
-                    // --- END NEW ---
                     break;
                     
                 case 'any':
-                    document.querySelectorAll('.character-slot').forEach(function(el) {
-                        // --- NEW: Check if dead ---
-                        if (!el.classList.contains('dead')) {
+                    document.querySelectorAll('.character-slot').forEach((el) => {
+                        if (isValidTarget(el)) {
                             el.classList.add('valid-target');
                             el.style.cursor = 'pointer';
+                        } else {
+                            el.classList.add('invalid-target');
+                            el.style.cursor = 'not-allowed';
                         }
-                        // --- END NEW ---
                     });
                     break;
                     
                 case 'any_except_self':
                     // New case for Bunny Bounce ability
-                    document.querySelectorAll('.character-slot').forEach(function(el) {
-                        // --- NEW: Check if dead ---
-                        if (!el.classList.contains('selected') && !el.classList.contains('dead')) {
+                    document.querySelectorAll('.character-slot').forEach((el) => {
+                        if (!el.classList.contains('selected') && isValidTarget(el)) {
                             el.classList.add('valid-target');
                             el.style.cursor = 'pointer';
-                        } else if (!el.classList.contains('selected')) {
-                            // If it's not selected, but dead, it's still invalid
-                            el.classList.add('invalid-target');
-                            el.style.cursor = 'not-allowed';
                         } else {
-                            // If it is selected, it's invalid for this target type
                             el.classList.add('invalid-target');
                             el.style.cursor = 'not-allowed';
                         }
-                        // --- END NEW ---
                     });
                     break;
                     
                 // For AOE abilities, we'll still need target selection to trigger the ability
                 case 'all_enemies':
                     if (isPlayerCaster) {
-                        aiChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        aiChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.classList.add('aoe-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         playerChars.forEach(function(el) {
                             if (!el.classList.contains('selected')) {
@@ -5934,14 +6413,15 @@ class GameManager {
                             }
                         });
                     } else {
-                        playerChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        playerChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.classList.add('aoe-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         aiChars.forEach(function(el) {
                             if (!el.classList.contains('selected')) {
@@ -5954,28 +6434,30 @@ class GameManager {
                     
                 case 'all_allies':
                     if (isPlayerCaster) {
-                        playerChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        playerChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.classList.add('aoe-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         aiChars.forEach(function(el) {
                             el.classList.add('invalid-target');
                             el.style.cursor = 'not-allowed';
                         });
                     } else {
-                        aiChars.forEach(function(el) {
-                            // --- NEW: Check if dead ---
-                            if (!el.classList.contains('dead')) {
+                        aiChars.forEach((el) => {
+                            if (isValidTarget(el)) {
                                 el.classList.add('valid-target');
                                 el.classList.add('aoe-target');
                                 el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
                             }
-                            // --- END NEW ---
                         });
                         playerChars.forEach(function(el) {
                             el.classList.add('invalid-target');
@@ -5985,14 +6467,15 @@ class GameManager {
                     break;
                     
                 case 'all':
-                    document.querySelectorAll('.character-slot').forEach(function(el) {
-                        // --- NEW: Check if dead ---
-                        if (!el.classList.contains('dead')) {
+                    document.querySelectorAll('.character-slot').forEach((el) => {
+                        if (isValidTarget(el)) {
                             el.classList.add('valid-target');
                             el.classList.add('aoe-target');
                             el.style.cursor = 'pointer';
+                        } else {
+                            el.classList.add('invalid-target');
+                            el.style.cursor = 'not-allowed';
                         }
-                        // --- END NEW ---
                     });
                     break;
             }

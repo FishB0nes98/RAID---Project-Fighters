@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Shop - Fighter by Fishbones</title>
+    <link rel="stylesheet" href="css/skin-shop.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+<body>
+    <div class="shop-container">
+        <!-- Header -->
+        <header class="shop-header">
+            <div class="header-content">
+                <h1 class="shop-title">
+                    <span class="title-icon">🛍️</span>
+                    Skin Shop
+                </h1>
+                <div class="fm-display">
+                    <span class="fm-icon">💰</span>
+                    <span class="fm-amount" id="fm-amount">Loading...</span>
+                    <span class="fm-label">FM</span>
+                </div>
+            </div>
+            <nav class="shop-nav">
+                <button class="nav-button active" data-category="all">All Skins</button>
+                <button class="nav-button" data-category="schoolboy">School Boys</button>
+                <button class="nav-button" data-category="schoolgirl">School Girls</button>
+                <button class="nav-button" data-category="owned">Owned</button>
+            </nav>
+            <div class="header-actions">
+                <button class="back-button" onclick="goBack()">
+                    <span>←</span> Back to Character Selection
+                </button>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div class="loading-screen" id="loading-screen">
+            <div class="loading-content">
+                <div class="loader"></div>
+                <p>Loading Skin Shop...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="shop-content" id="shop-content" style="display: none;">
+            <!-- Filter and Sort Options -->
+            <div class="shop-controls">
+                <div class="filter-controls">
+                    <select class="sort-select" id="sort-select">
+                        <option value="name">Sort by Name</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="rarity">Sort by Rarity</option>
+                    </select>
+                </div>
+                <div class="search-controls">
+                    <input type="text" class="search-input" id="search-input" placeholder="Search skins...">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+
+            <!-- Skin Grid -->
+            <div class="skins-grid" id="skins-grid">
+                <!-- Skins will be populated here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">😔</div>
+                <h3>No skins found</h3>
+                <p>Try adjusting your search or filters.</p>
+            </div>
+        </main>
+
+        <!-- Purchase Confirmation Modal -->
+        <div class="modal-overlay" id="purchase-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Purchase</h3>
+                    <button class="modal-close" onclick="closePurchaseModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="purchase-preview">
+                        <img class="preview-image" id="preview-image" src="" alt="Skin Preview">
+                        <div class="preview-info">
+                            <h4 class="preview-name" id="preview-name"></h4>
+                            <p class="preview-description" id="preview-description"></p>
+                            <div class="preview-price">
+                                <span class="price-amount" id="preview-price"></span>
+                                <span class="price-currency">FM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="purchase-warning">
+                        <p>Are you sure you want to purchase this skin?</p>
+                        <p class="balance-info">Your balance: <span id="current-balance"></span> FM</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="cancel-button" onclick="closePurchaseModal()">Cancel</button>
+                    <button class="confirm-button" id="confirm-purchase">Purchase</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="notification" id="notification" style="display: none;">
+            <div class="notification-content">
+                <span class="notification-icon" id="notification-icon"></span>
+                <span class="notification-message" id="notification-message"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/skins/skin-registry.js"></script>
+    <script src="js/skins/skin-manager.js"></script>
+    <script src="js/skins/skin-shop.js"></script>
+</body>
+</html> 

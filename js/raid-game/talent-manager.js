@@ -1,6 +1,18 @@
 /**
- * TalentManager - Handles all talent-related operations without modifying the game engine
- * Loads talent definitions from character-specific json files and applies them at runtime
+ * TalentManager handles talent definitions, storage, and application.
+ * 
+ * CRITICAL SECURITY FEATURE: AI Character Talent Prevention
+ * =========================================================
+ * This system has multiple layers of protection to ensure AI characters
+ * never receive user-selected talents:
+ * 
+ * 1. applyTalentsToCharacter() - Checks character.isAI === true and blocks
+ * 2. enhanceCharacterWithTalents() - Checks character.isAI === true and blocks  
+ * 3. CharacterFactory.applyTalents() - Checks character.isAI === true and blocks
+ * 4. StageManager.loadPlayerCharacters() - Only applies to characters with isAI === false
+ * 5. StageManager.loadAICharacters() - Never calls talent application functions
+ * 
+ * This ensures game balance by preventing AI enemies from getting player talents.
  */
 class TalentManager {
     constructor() {
@@ -291,7 +303,18 @@ class TalentManager {
      * Apply talents to a character without modifying the game engine
      */
     async applyTalentsToCharacter(character, selectedTalentIds = []) {
-        if (!character || !selectedTalentIds || !selectedTalentIds.length) {
+        // CRITICAL SAFETY CHECK: Never apply user talents to AI characters
+        if (!character) {
+            console.log("[TalentManager] No character provided for talent application");
+            return character;
+        }
+        
+        if (character.isAI === true) {
+            console.log(`[TalentManager] BLOCKED: Attempted to apply user talents to AI character ${character.name}. AI characters should not get user talents.`);
+            return character;
+        }
+        
+        if (!selectedTalentIds || !selectedTalentIds.length) {
             console.log("[TalentManager] No talents to apply or invalid character");
             return character;
         }
@@ -505,6 +528,16 @@ class TalentManager {
                     } else {
                         console.warn(`Cannot add to non-numeric ability property: ${property}`);
                     }
+                } else if (operation === 'subtract') {
+                    if (typeof ability[property] === 'number') {
+                        ability[property] -= value;
+                        // Make sure cooldown doesn't go below 0
+                        if (property === 'cooldown' && ability[property] < 0) {
+                            ability[property] = 0;
+                        }
+                    } else {
+                        console.warn(`Cannot subtract from non-numeric ability property: ${property}`);
+                    }
                 } else if (operation === 'multiply') {
                     if (typeof ability[property] === 'number') {
                         ability[property] *= value;
@@ -566,10 +599,17 @@ class TalentManager {
     updateCharacterAfterTalent(character) {
         if (!character) return;
         
-        // Recalculate stats after talent application
-        console.log(`[TalentManager] Recalculating stats for ${character.name || character.id} after talent application`);
-        if (typeof character.recalculateStats === 'function') {
-            character.recalculateStats('talent-application');
+        // Check if character has Firebase stats loaded (indicated by hellEffects or other story-specific properties)
+        const hasFirebaseStats = character.hellEffects || character._firebaseStatsLoaded;
+        
+        if (hasFirebaseStats) {
+            console.log(`[TalentManager] Skipping recalculateStats for ${character.name || character.id} - Firebase stats detected`);
+        } else {
+            // Recalculate stats after talent application only if no Firebase stats are present
+            console.log(`[TalentManager] Recalculating stats for ${character.name || character.id} after talent application`);
+            if (typeof character.recalculateStats === 'function') {
+                character.recalculateStats('talent-application');
+            }
         }
         
         // Update ability descriptions after talent application
@@ -606,6 +646,38 @@ class TalentManager {
         }
         // --- END NEW ---
         
+        // Special handling for Schoolgirl Kokoro's ability descriptions
+        if (character.id === 'schoolgirl_kokoro') {
+            console.log(`[TalentManager] Updating Schoolgirl Kokoro's ability descriptions`);
+            
+            // Update Lesser Heal description
+            const lesserHealAbility = character.abilities.find(a => a.id === 'lesser_heal');
+            if (lesserHealAbility && typeof lesserHealAbility.generateDescription === 'function') {
+                lesserHealAbility.updateCaster(character);
+                lesserHealAbility.description = lesserHealAbility.generateDescription();
+                console.log(`[TalentManager] Updated Lesser Heal description for ${character.name}`);
+            }
+            
+            // Update passive indicator tooltip
+            if (typeof character.generatePassiveDescription === 'function') {
+                character.generatePassiveDescription();
+                
+                // Update existing passive indicator tooltip if it exists
+                setTimeout(() => {
+                    const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+                    if (characterElement) {
+                        const passiveIndicator = characterElement.querySelector('.kokoro-passive');
+                        if (passiveIndicator) {
+                            const passiveDescription = character.generatePassiveDescription();
+                            const tooltipDescription = passiveDescription.replace(/<[^>]*>/g, '');
+                            passiveIndicator.title = `Healing Feedback: ${tooltipDescription}`;
+                            console.log(`[TalentManager] Updated passive indicator tooltip for ${character.name}`);
+                        }
+                    }
+                }, 100);
+            }
+        }
+        
         // Update UI if needed
         if (typeof updateCharacterUI === 'function') {
             try {
@@ -633,9 +705,40 @@ class TalentManager {
         }
         // --- END NEW ---
 
+        // Special handling for maxMana increases - give the player the extra mana immediately
+        if (effect.stat === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
+            const oldCurrentMana = character.stats.currentMana || character.stats.mana || 0;
+            const oldMaxMana = character.stats.maxMana || character.stats.mana || 0;
+            
+            console.log(`[TalentManager] Before mana modification - Current: ${oldCurrentMana}, Max: ${oldMaxMana}`);
+        }
+
         // Use the character's existing method to modify stats
         const operation = effect.operation || 'set'; // Default to set
         character.applyStatModification(effect.stat, operation, effect.value);
+        
+        // Special handling for maxMana increases - ensure current mana also increases
+        if (effect.stat === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
+            const newMaxMana = character.stats.maxMana || character.stats.mana || 0;
+            
+            if (effect.operation === 'add') {
+                // Increase current mana by the same amount we increased max mana
+                const manaIncrease = effect.value;
+                character.stats.currentMana = (character.stats.currentMana || character.stats.mana || 0) + manaIncrease;
+                console.log(`[TalentManager] Increased current mana by ${manaIncrease} due to maxMana talent`);
+            } else if (effect.operation === 'set') {
+                // For set operations, give full mana
+                character.stats.currentMana = newMaxMana;
+                console.log(`[TalentManager] Set current mana to max (${newMaxMana}) due to maxMana talent`);
+            }
+            
+            // Make sure current mana doesn't exceed max mana
+            if (character.stats.currentMana > newMaxMana) {
+                character.stats.currentMana = newMaxMana;
+            }
+            
+            console.log(`[TalentManager] After mana modification - Current: ${character.stats.currentMana}, Max: ${newMaxMana}`);
+        }
         
         console.log(`Applied stat modification to ${character.name}: ${effect.stat} ${operation} ${effect.value}`);
     }
@@ -885,6 +988,12 @@ class TalentManager {
             abilityToModify[effect.property] = effect.value;
             console.log(`[TalentManager] Applied DIRECT MODIFICATION: Set ${character.name}'s ability ${effect.abilityId} property ${effect.property} to ${effect.value}`);
             
+            // Special handling for target type changes
+            if (effect.property === 'canTargetEnemies' && effect.value === true) {
+                console.log(`[TalentManager] Enabling enemy targeting for ${character.name}'s ${effect.abilityId}`);
+                // The ability's getTargetType method will handle the dynamic change
+            }
+            
             // Special handling for Bridget's Focused Barrage talent affecting W ability
             if (character.id === 'bridget' && effect.abilityId === 'bridget_w') {
                 console.log(`[TalentManager] Special handling for Bridget's W ability modification: ${effect.property} = ${effect.value}`);
@@ -1013,6 +1122,12 @@ class TalentManager {
      */
     async enhanceCharacterWithTalents(character) {
         if (!character || !character.id) return character;
+        
+        // CRITICAL SAFETY CHECK: Never apply user talents to AI characters
+        if (character.isAI === true) {
+            console.log(`[TalentManager] BLOCKED: enhanceCharacterWithTalents called on AI character ${character.name}. AI characters should not get user talents.`);
+            return character;
+        }
         
         try {
             // Get user ID

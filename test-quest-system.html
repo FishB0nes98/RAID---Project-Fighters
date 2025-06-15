@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .test-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .debug-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .debug-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .debug-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #003d82);
+            transform: translateY(-2px);
+        }
+        
+        .debug-btn.danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+        
+        .debug-btn.danger:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+        }
+        
+        .debug-btn.success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+        
+        .debug-btn.success:hover {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+        }
+        
+        .character-selector {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .character-selector h3 {
+            margin: 0 0 10px 0;
+            color: #ffc107;
+        }
+        
+        .character-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .character-btn {
+            background: linear-gradient(135deg, #6f42c1, #563d7c);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .character-btn:hover {
+            background: linear-gradient(135deg, #563d7c, #452a5e);
+            transform: translateY(-1px);
+        }
+        
+        .character-btn.active {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #000;
+        }
+        
+        .instructions {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            color: #00ff00;
+            margin: 0 0 10px 0;
+        }
+        
+        .instructions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+        
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .status-display {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-label {
+            color: #aaa;
+        }
+        
+        .status-value {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .status-value.success {
+            color: #28a745;
+        }
+        
+        .status-value.warning {
+            color: #ffc107;
+        }
+        
+        .status-value.error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>🎯 Quest System Test Environment</h1>
+        <p>This page tests the moveable quest panel, global quest system, and character ownership checking functionality.</p>
+    </div>
+
+    <div class="instructions">
+        <h3>📋 How to Test</h3>
+        <ul>
+            <li><strong>Toggle Quest Panel:</strong> Click the "🎯 Quests" button or press SHIFT key</li>
+            <li><strong>Move Panel:</strong> Drag the panel by the ⋮⋮ handle</li>
+            <li><strong>Global Quest:</strong> Complete 5 character quests to unlock character choice</li>
+            <li><strong>Debug Commands:</strong> Use buttons below to test functionality</li>
+            <li><strong>Character Selection:</strong> Choose different characters to see their quests</li>
+        </ul>
+    </div>
+
+    <div class="character-selector">
+        <h3>Select Character</h3>
+        <div class="character-buttons">
+            <button class="character-btn" onclick="selectCharacter('schoolgirl_ayane')">Schoolgirl Ayane</button>
+            <button class="character-btn" onclick="selectCharacter('schoolgirl_julia')">Schoolgirl Julia</button>
+            <button class="character-btn" onclick="selectCharacter('schoolgirl_kokoro')">Schoolgirl Kokoro</button>
+            <button class="character-btn" onclick="selectCharacter('schoolboy_siegfried')">Schoolboy Siegfried</button>
+            <button class="character-btn" onclick="selectCharacter('zoey')">Zoey</button>
+            <button class="character-btn" onclick="selectCharacter('farmer_raiden')">Farmer Raiden</button>
+            <button class="character-btn" onclick="selectCharacter('schoolboy_shoma')">Schoolboy Shoma</button>
+            <button class="character-btn" onclick="selectCharacter('renée')">Renée</button>
+        </div>
+    </div>
+
+    <div class="debug-buttons">
+        <button class="debug-btn success" onclick="showQuestPanel()">Show Quest Panel</button>
+        <button class="debug-btn" onclick="hideQuestPanel()">Hide Quest Panel</button>
+        <button class="debug-btn" onclick="refreshQuests()">Refresh Quests</button>
+        <button class="debug-btn danger" onclick="debugCompleteQuest()">Complete Active Quest</button>
+        <button class="debug-btn" onclick="simulateCharacterOwnership()">Simulate Ownership Check</button>
+        <button class="debug-btn" onclick="testGlobalQuestProgress()">Update Global Quest</button>
+        <button class="debug-btn" onclick="showCharacterChoice()">Test Character Choice</button>
+        <button class="debug-btn" onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <div class="status-display">
+        <h3>System Status</h3>
+        <div class="status-item">
+            <span class="status-label">Quest Manager:</span>
+            <span class="status-value" id="quest-manager-status">Not Initialized</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Quest UI Manager:</span>
+            <span class="status-value" id="quest-ui-status">Not Initialized</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Active Character:</span>
+            <span class="status-value" id="active-character">None</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Visible Quests:</span>
+            <span class="status-value" id="visible-quests">0</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Global Quest Progress:</span>
+            <span class="status-value" id="global-progress">0/5</span>
+        </div>
+    </div>
+
+    <div class="console-output" id="console-output">
+        <div style="color: #0ff;">[Quest System Test] Console output will appear here...</div>
+    </div>
+
+    <!-- Mock Firebase for testing -->
+    <script>
+        // Mock Firebase for testing
+        window.firebaseDatabase = {
+            ref: function(path) {
+                return {
+                    once: function(type) {
+                        return Promise.resolve({
+                            exists: () => true,
+                            val: () => ({
+                                'schoolgirl_ayane': {},
+                                'schoolgirl_julia': {},
+                                'farmer_raiden': {}
+                            })
+                        });
+                    },
+                    set: function(value) {
+                        return Promise.resolve();
+                    }
+                };
+            }
+        };
+
+        // Mock user data
+        const mockUserData = {
+            userId: 'test_user_fishb0nes98',
+            UnlockedRAIDCharacters: {
+                'farmer_nina': { source: 'tutorial', unlockedAt: Date.now() },
+                'farmer_raiden': { source: 'tutorial', unlockedAt: Date.now() },
+                'schoolgirl_kokoro': { source: 'reward', unlockedAt: Date.now() }
+            },
+            ownedCharacters: [
+                'bridget', 'schoolboy_siegfried', 'schoolgirl_kokoro', 
+                'schoolgirl_julia', 'zoey'
+            ]
+        };
+
+        // Mock GameManager
+        window.gameManager = {
+            selectedCharacter: null
+        };
+
+        // Console logging
+        function logToConsole(message, type = 'info') {
+            const console = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#0ff',
+                'success': '#0f0', 
+                'warning': '#ff0',
+                'error': '#f00'
+            };
+            
+            const div = document.createElement('div');
+            div.style.color = colors[type] || '#0ff';
+            div.innerHTML = `[${timestamp}] ${message}`;
+            console.appendChild(div);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Test functions
+        function selectCharacter(characterId) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.character-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Update mock selected character
+            window.gameManager.selectedCharacter = {
+                id: characterId,
+                name: characterId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+            };
+            
+            updateStatus('active-character', window.gameManager.selectedCharacter.name);
+            logToConsole(`Selected character: ${window.gameManager.selectedCharacter.name}`, 'success');
+            
+            // Update quest panel if available
+            if (window.questUIManager && window.questUIManager.initialized) {
+                window.questUIManager.loadCharacterQuests(window.gameManager.selectedCharacter);
+            }
+        }
+
+        function showQuestPanel() {
+            if (window.questUIManager) {
+                window.questUIManager.showQuestPanel();
+                logToConsole('Quest panel shown', 'success');
+            } else {
+                logToConsole('Quest UI Manager not available', 'error');
+            }
+        }
+
+        function hideQuestPanel() {
+            if (window.questUIManager) {
+                window.questUIManager.hideQuestPanel();
+                logToConsole('Quest panel hidden', 'info');
+            } else {
+                logToConsole('Quest UI Manager not available', 'error');
+            }
+        }
+
+        function refreshQuests() {
+            if (window.questUIManager) {
+                window.questUIManager.refreshQuests();
+                logToConsole('Quests refreshed', 'success');
+            } else {
+                logToConsole('Quest UI Manager not available', 'error');
+            }
+        }
+
+        function debugCompleteQuest() {
+            if (window.questManager) {
+                const result = window.questManager.debugCompleteActiveQuest();
+                if (result) {
+                    logToConsole('Active quest completed successfully!', 'success');
+                } else {
+                    logToConsole('No active quest found or completion failed', 'warning');
+                }
+            } else {
+                logToConsole('Quest Manager not available', 'error');
+            }
+        }
+
+        function simulateCharacterOwnership() {
+            if (window.questManager) {
+                window.questManager.getUserOwnedCharacters().then(characters => {
+                    logToConsole(`Owned characters: ${characters.join(', ')}`, 'info');
+                });
+            } else {
+                logToConsole('Quest Manager not available', 'error');
+            }
+        }
+
+        function testGlobalQuestProgress() {
+            if (window.questManager) {
+                window.questManager.updateGlobalQuestProgress();
+                logToConsole('Global quest progress updated', 'success');
+            } else {
+                logToConsole('Quest Manager not available', 'error');
+            }
+        }
+
+        function showCharacterChoice() {
+            if (window.questManager) {
+                window.questManager.showCharacterChoiceModal().then(selected => {
+                    if (selected) {
+                        logToConsole(`Character selected: ${selected}`, 'success');
+                    } else {
+                        logToConsole('Character choice cancelled', 'warning');
+                    }
+                });
+            } else {
+                logToConsole('Quest Manager not available', 'error');
+            }
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '<div style="color: #0ff;">[Quest System Test] Console cleared...</div>';
+        }
+
+        function updateStatus(elementId, value, type = 'success') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+                element.className = `status-value ${type}`;
+            }
+        }
+
+        // Status monitoring
+        function monitorSystemStatus() {
+            // Check Quest Manager
+            if (window.questManager && window.questManager.initialized) {
+                updateStatus('quest-manager-status', 'Initialized', 'success');
+            } else if (window.questManager) {
+                updateStatus('quest-manager-status', 'Available but not initialized', 'warning');
+            } else {
+                updateStatus('quest-manager-status', 'Not Available', 'error');
+            }
+
+            // Check Quest UI Manager
+            if (window.questUIManager && window.questUIManager.initialized) {
+                updateStatus('quest-ui-status', 'Initialized', 'success');
+            } else if (window.questUIManager) {
+                updateStatus('quest-ui-status', 'Available but not initialized', 'warning');
+            } else {
+                updateStatus('quest-ui-status', 'Not Available', 'error');
+            }
+
+            // Check visible quests
+            if (window.questUIManager && window.questUIManager.questsList) {
+                const questCount = window.questUIManager.questsList.children.length;
+                updateStatus('visible-quests', questCount, questCount > 0 ? 'success' : 'warning');
+            }
+        }
+
+        // Key bindings
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Shift' && !e.ctrlKey && !e.altKey) {
+                if (window.questUIManager) {
+                    window.questUIManager.toggleQuestPanel();
+                    logToConsole('Quest panel toggled with SHIFT key', 'info');
+                }
+            }
+        });
+
+        // Initialize monitoring
+        setInterval(monitorSystemStatus, 1000);
+        
+        // Initial status check
+        setTimeout(() => {
+            logToConsole('Quest system test environment loaded', 'success');
+            logToConsole('Press SHIFT to toggle quest panel or use the buttons above', 'info');
+            monitorSystemStatus();
+        }, 500);
+    </script>
+</body>
+</html> 

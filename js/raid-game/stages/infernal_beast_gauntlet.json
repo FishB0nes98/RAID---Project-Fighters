@@ -1,0 +1,33 @@
+{
+    "id": "infernal_beast_gauntlet",
+    "name": "Infernal Beast Gauntlet",
+    "description": "In the deepest caverns of hell, five legendary beasts have gathered to test the mettle of any who dare venture into their domain. The air crackles with primal fury as these corrupted creatures prepare to unleash their hellish wrath.",
+    "difficulty": 6,
+    "type": "battle",
+    "backgroundImage": "images/stages/hell_beast_cavern.png",
+    "backgroundMusic": "sounds/music/hell_beast_battle.mp3",
+    "enemies": [
+        { "characterId": "cursed_lion" },
+        { "characterId": "hellboar" },
+        { "characterId": "hell_fly" },
+        { "characterId": "lava_worm" }
+    ],
+    "modifiers": [],
+    "objectives": {
+        "winConditions": [
+            {
+                "type": "allEnemiesDefeated"
+            }
+        ]
+    },
+    "rewards": [
+        {
+            "type": "gold",
+            "value": 800
+        },
+        {
+            "type": "xp",
+            "value": 600
+        }
+    ]
+} 

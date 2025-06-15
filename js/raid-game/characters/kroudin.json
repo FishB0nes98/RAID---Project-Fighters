@@ -1,0 +1,52 @@
+{
+    "id": "kroudin",
+    "name": "Kroudin",
+    "image": "Loading Screen/Kroudin.png",
+    "rarity": "rare",
+    "type": "undead",
+    "description": "A skeletal prison guard bound in rusted armor, still patrolling the fiery dungeons of Hell Castle.",
+    "stats": {
+        "physicalDamage": 220,
+        "magicalDamage": 0,
+        "armor": 24,
+        "magicalShield": 21,
+        "hp": 11200,
+        "maxHp": 11200,
+        "hpPerTurn": 0,
+        "mana": 2990,
+        "maxMana": 2990,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.1,
+        "critChance": 0.0,
+        "critDamage": 1.5,
+        "speed": 0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "kroudin_punishment",
+            "name": "Punishment",
+            "type": "custom",
+            "functionName": "punishmentEffect",
+            "icon": "Icons/abilities/kroudin_punishment.png",
+            "manaCost": 0,
+            "cooldown": 3,
+            "targetType": "single_enemy",
+            "description": "Deals 490 physical damage to a single target, stuns it for 1 turn and disables 2 random abilities for 3 turns."
+        },
+        {
+            "id": "kroudin_imprison",
+            "name": "Imprison",
+            "type": "custom",
+            "functionName": "imprisonEffect",
+            "icon": "Icons/abilities/kroudin_imprison.png",
+            "manaCost": 100,
+            "cooldown": 8,
+            "targetType": "single_enemy",
+            "description": "Imprisons a target for 4 turns, preventing them from acting, being targeted, healed, or receiving mana/shields."
+        }
+    ],
+    "passive": null,
+    "tags": ["Undead", "Guard", "Hell"]
+} 

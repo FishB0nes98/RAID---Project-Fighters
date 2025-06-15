@@ -1,0 +1,36 @@
+{
+    "id": "hell_castle_throne",
+    "name": "Hell Castle Throne",
+    "description": "The final chamber of Hell Castle. The skeletal guards Kroudin and Skress flank their master Grok, the Hell Lord. Defeat them to end the reign of terror.",
+    "difficulty": 7,
+    "type": "battle",
+    "enemies": [
+        { "characterId": "kroudin" },
+        { "characterId": "grok_hell_lord" },
+        { "characterId": "skress" }
+    ],
+    "modifiers": [
+        {
+            "id": "essence_transfer",
+            "name": "Essence Transfer",
+            "description": "When a character dies, their stats transfer to a random survivor, adding to the recipient's power.",
+            "icon": "💀"
+        },
+        {
+            "id": "healing_mana_flow",
+            "name": "Healing Mana Flow",
+            "description": "Healing also restores 20% of the heal amount as mana.",
+            "icon": "💧"
+        }
+    ],
+    "objectives": {
+        "winConditions": [
+            { "type": "allEnemiesDefeated" }
+        ]
+    },
+    "backgroundImage": "images/stages/hell_castle_throne.png",
+    "backgroundMusic": "sounds/music/hell_lord_theme.mp3",
+    "rewards": [
+        { "type": "experience", "amount": 1800 }
+    ]
+} 

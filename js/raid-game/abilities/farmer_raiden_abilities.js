@@ -1,5 +1,151 @@
 // Ability definition for Farmer Raiden: Lightning Orb
 
+// --- STATISTICS TRACKING FUNCTIONS ---
+
+// Global helper function for tracking Farmer Raiden ability usage
+function trackRaidenAbilityUsage(character, abilityId, effectType, amount = 0, isCritical = false) {
+    if (window.gameManager && window.gameManager.statisticsManager) {
+        try {
+            if (effectType === 'damage') {
+                window.gameManager.statisticsManager.recordDamageDealt(character, amount, isCritical, abilityId);
+            } else if (effectType === 'healing') {
+                window.gameManager.statisticsManager.recordHealingDone(character, amount, abilityId);
+            } else if (effectType === 'utility') {
+                window.gameManager.statisticsManager.recordAbilityUsage(character, abilityId, { type: 'utility', amount: amount });
+            } else if (effectType === 'passive') {
+                window.gameManager.statisticsManager.recordAbilityUsage(character, abilityId, { type: 'passive', amount: amount });
+            }
+        } catch (error) {
+            console.error('[trackRaidenAbilityUsage] Error:', error);
+        }
+    }
+}
+
+// Track Lightning Orb stats
+function trackLightningOrbStats(caster, target, damageResult, isChain = false, isStun = false) {
+    try {
+        if (window.trackRaidenAbilityUsage) {
+            const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
+                ? damageResult.damage 
+                : (typeof damageResult === 'number' ? damageResult : 0);
+            const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+            
+            if (isChain) {
+                window.trackRaidenAbilityUsage(caster, 'lightning_orb_chain', 'damage', damageAmount, isCritical);
+            } else {
+                window.trackRaidenAbilityUsage(caster, 'lightning_orb', 'damage', damageAmount, isCritical);
+            }
+            
+            if (isStun) {
+                window.trackRaidenAbilityUsage(caster, 'lightning_orb_stun', 'utility', 1);
+            }
+        }
+    } catch (error) {
+        console.error('[trackLightningOrbStats] Error:', error);
+    }
+}
+
+// Track Thunder Shield stats
+function trackThunderShieldStats(caster, isPermanent = false) {
+    try {
+        if (window.trackRaidenAbilityUsage) {
+            const abilityId = isPermanent ? 'thunder_shield_permanent' : 'thunder_shield';
+            window.trackRaidenAbilityUsage(caster, abilityId, 'utility', 1);
+        }
+    } catch (error) {
+        console.error('[trackThunderShieldStats] Error:', error);
+    }
+}
+
+// Track Electric Shock stats  
+function trackElectricShockStats(caster, target, damageResult, isHit, isForked = false, isDebuff = false) {
+    try {
+        if (window.trackRaidenAbilityUsage) {
+            if (isHit) {
+                const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
+                    ? damageResult.damage 
+                    : (typeof damageResult === 'number' ? damageResult : 0);
+                const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+                
+                const abilityId = isForked ? 'electric_shock_forked' : 'electric_shock';
+                window.trackRaidenAbilityUsage(caster, abilityId, 'damage', damageAmount, isCritical);
+            } else {
+                // Track miss
+                const abilityId = isForked ? 'electric_shock_forked_miss' : 'electric_shock_miss';
+                window.trackRaidenAbilityUsage(caster, abilityId, 'utility', 0);
+            }
+            
+            if (isDebuff) {
+                window.trackRaidenAbilityUsage(caster, 'electric_shock_debuff', 'utility', 1);
+            }
+        }
+    } catch (error) {
+        console.error('[trackElectricShockStats] Error:', error);
+    }
+}
+
+// Track Storm Circle stats
+function trackStormCircleStats(caster, target, damageResult, isHit, isRecast = false, isStun = false) {
+    try {
+        if (window.trackRaidenAbilityUsage) {
+            if (isHit) {
+                const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
+                    ? damageResult.damage 
+                    : (typeof damageResult === 'number' ? damageResult : 0);
+                const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+                
+                const abilityId = isRecast ? 'storm_circle_recast' : 'storm_circle';
+                window.trackRaidenAbilityUsage(caster, abilityId, 'damage', damageAmount, isCritical);
+            } else {
+                // Track miss
+                const abilityId = isRecast ? 'storm_circle_recast_miss' : 'storm_circle_miss';
+                window.trackRaidenAbilityUsage(caster, abilityId, 'utility', 0);
+            }
+            
+            if (isStun) {
+                window.trackRaidenAbilityUsage(caster, 'storm_circle_stun', 'utility', 1);
+            }
+        }
+    } catch (error) {
+        console.error('[trackStormCircleStats] Error:', error);
+    }
+}
+
+// Track Passive Zap stats
+function trackZapPassiveStats(caster, target, damageResult, zapType = 'normal') {
+    try {
+        if (window.trackRaidenAbilityUsage) {
+            const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
+                ? damageResult.damage 
+                : (typeof damageResult === 'number' ? damageResult : 0);
+            const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+            
+            let abilityId = 'zap_passive';
+            if (zapType === 'lifesteal') {
+                abilityId = 'zap_passive_lifesteal';
+            } else if (zapType === 'thunder_shield') {
+                abilityId = 'zap_passive_thunder_shield';
+            }
+            
+            window.trackRaidenAbilityUsage(caster, abilityId, 'passive', damageAmount, isCritical);
+        }
+    } catch (error) {
+        console.error('[trackZapPassiveStats] Error:', error);
+    }
+}
+
+// Make tracking functions globally available
+if (typeof window !== 'undefined') {
+    window.trackRaidenAbilityUsage = trackRaidenAbilityUsage;
+    window.trackLightningOrbStats = trackLightningOrbStats;
+    window.trackThunderShieldStats = trackThunderShieldStats;
+    window.trackElectricShockStats = trackElectricShockStats;  
+    window.trackStormCircleStats = trackStormCircleStats;
+    window.trackZapPassiveStats = trackZapPassiveStats;
+}
+
+// --- END STATISTICS TRACKING FUNCTIONS ---
+
 // Lightning Orb ability effect implementation
 const lightningOrbEffect = (caster, target, ability) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
@@ -23,9 +169,14 @@ const lightningOrbEffect = (caster, target, ability) => {
     const scaledMagicalDamage = Math.floor((caster.stats.magicalDamage || 0) * magicalScalingPercent);
     const totalDamage = fixedDamage + scaledMagicalDamage;
 
-    // Apply damage to target
-    const damageResult = target.applyDamage(totalDamage, 'magical', caster);
+    // Apply damage to target with statistics tracking
+    const damageResult = target.applyDamage(totalDamage, 'magical', caster, { abilityId: 'lightning_orb' });
     log(`${target.name} takes ${damageResult.damage} magical damage from Lightning Orb!`);
+
+    // Track Lightning Orb statistics
+    if (window.trackLightningOrbStats) {
+        window.trackLightningOrbStats(caster, target, damageResult, false, false);
+    }
 
     // --- Apply Stun Chance (Talent Effect) ---
     // Check if the ability has a stun chance from talent
@@ -61,6 +212,11 @@ const lightningOrbEffect = (caster, target, ability) => {
         // Add debuff to target
         target.addDebuff(stunDebuff);
         log(`${target.name} is stunned for 1 turn by Lightning Orb!`, 'system');
+        
+        // Track stun statistics
+        if (window.trackLightningOrbStats) {
+            window.trackLightningOrbStats(caster, target, damageResult, false, true);
+        }
         
         // Apply Storm Empowerment talent if active
         if (caster.stormEmpowerment && caster.passiveHandler) {
@@ -176,9 +332,14 @@ const lightningOrbEffect = (caster, target, ability) => {
             // Calculate damage for the secondary target (same formula as primary)
             const secondaryDamage = fixedDamage + scaledMagicalDamage;
             
-            // Apply damage to secondary target
-            const secondaryDamageResult = secondaryTarget.applyDamage(secondaryDamage, 'magical', caster);
+            // Apply damage to secondary target with statistics tracking
+            const secondaryDamageResult = secondaryTarget.applyDamage(secondaryDamage, 'magical', caster, { abilityId: 'lightning_orb_chain' });
             log(`${secondaryTarget.name} takes ${secondaryDamageResult.damage} magical damage from Chain Lightning!`);
+            
+            // Track Chain Lightning statistics
+            if (window.trackLightningOrbStats) {
+                window.trackLightningOrbStats(caster, secondaryTarget, secondaryDamageResult, true, false);
+            }
             
             // Apply chain lightning VFX
             const secondaryTargetElement = document.getElementById(`character-${secondaryTarget.instanceId || secondaryTarget.id}`);
@@ -278,7 +439,7 @@ lightningOrbAbility.baseDamage = 455; // Default base damage
 // Add custom description generator
 lightningOrbAbility.generateDescription = function() {
     // Base description with dynamic base damage value
-    let desc = `Deals ${this.baseDamage} + ${this.magicalScalingPercent * 100}% Magical damage to the target.`;
+    let desc = `Deals <span class="damage">${this.baseDamage} + ${this.magicalScalingPercent * 100}% Magical damage</span> to the target.`;
     
     // Add base damage talent callout if modified
     if (this.baseDamage > 455) {
@@ -416,6 +577,11 @@ const thunderShieldEffect = (caster, target, ability) => {
     // Add the shield buff to caster
     // addBuff handles calling onApply and recalculateStats
     caster.addBuff(shieldBuff);
+    
+    // Track Thunder Shield statistics
+    if (window.trackThunderShieldStats) {
+        window.trackThunderShieldStats(caster, false);
+    }
 
     // Create immediate visual effect of shield activation (burst)
     const characterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
@@ -462,7 +628,7 @@ thunderShieldAbility.disabled = false;
 
 // Add custom description generator
 thunderShieldAbility.generateDescription = function() {
-    let desc = `Places a shield on Raiden for ${this.buffDuration} turns. At end of turn, it activates Raiden's passive twice and gives 15% Magical Shield.`;
+    let desc = `Places a <span class="utility">shield</span> on Raiden for <span class="duration">${this.buffDuration} turns</span>. At end of turn, it <span class="passive">activates Raiden's passive twice</span> and gives <span class="buff">15% Magical Shield</span>.`;
     
     // Add talent callout if modified
     if (this.buffDuration > 5) {
@@ -538,12 +704,17 @@ const electricShockEffect = (caster, target, ability) => {
     
     // Function to execute a single Electric Shock cast
     const executeShock = (castNumber) => {
-        // Create a delay between each enemy being hit
-        aliveEnemies.forEach((enemy, index) => {
-            setTimeout(() => {
-                if (!enemy.isDead()) {
-                    // Apply damage to each enemy
-                    const damageResult = enemy.applyDamage(baseDamage, 'magical', caster);
+            // Create a delay between each enemy being hit
+    aliveEnemies.forEach((enemy, index) => {
+        setTimeout(() => {
+            if (!enemy.isDead()) {
+                // Roll for hit success (80% chance)
+                const hitRoll = Math.random();
+                const isHit = hitRoll < 0.8; // 80% hit chance
+                
+                if (isHit) {
+                    // Apply damage to each enemy with statistics tracking
+                    const damageResult = enemy.applyDamage(baseDamage, 'magical', caster, { abilityId: 'electric_shock' });
                     
                     // Use different message for second cast
                     if (castNumber > 1) {
@@ -552,7 +723,40 @@ const electricShockEffect = (caster, target, ability) => {
                         log(`${enemy.name} takes ${damageResult.damage} magical damage from Electric Shock!`, damageResult.isCritical ? 'critical' : 'system');
                     }
                     
-                    // Show electric shock impact effect
+                    // Track hit statistics
+                    if (window.trackElectricShockStats) {
+                        window.trackElectricShockStats(caster, enemy, damageResult, true, castNumber > 1, false);
+                    }
+                } else {
+                    // Miss
+                    if (castNumber > 1) {
+                        log(`${caster.name}'s Forked Shock misses ${enemy.name}!`, 'system');
+                    } else {
+                        log(`${caster.name}'s Electric Shock misses ${enemy.name}!`, 'system');
+                    }
+                    
+                    // Track miss statistics
+                    if (window.trackElectricShockStats) {
+                        window.trackElectricShockStats(caster, enemy, null, false, castNumber > 1, false);
+                    }
+                    
+                    // Show miss VFX for electric shock
+                    const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
+                    if (enemyElement) {
+                        // Create miss effect (different from hit effect)
+                        const missEffect = document.createElement('div');
+                        missEffect.className = 'electric-shock-miss';
+                        missEffect.textContent = 'MISS!';
+                        enemyElement.appendChild(missEffect);
+                        
+                        // Remove after animation completes
+                        setTimeout(() => missEffect.remove(), 1200);
+                    }
+                }
+                
+                // Only apply visual effects and debuffs if the attack hit
+                if (isHit) {
+                    // Show electric shock impact effect (only on hit)
                     const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
                     if (enemyElement) {
                         // Create impact effect
@@ -564,7 +768,7 @@ const electricShockEffect = (caster, target, ability) => {
                         setTimeout(() => impactEffect.remove(), 800);
                     }
                     
-                    // Check for debuff chance
+                    // Check for debuff chance (only on hit)
                     if (Math.random() < debuffChance) {
                         // Create debuff effect
                         const debuffEffect = new Effect(
@@ -708,13 +912,19 @@ const electricShockEffect = (caster, target, ability) => {
                         
                         // Apply the debuff to the enemy
                         enemy.addDebuff(debuffEffect);
+                        
+                        // Track debuff application
+                        if (window.trackElectricShockStats) {
+                            window.trackElectricShockStats(caster, enemy, null, true, castNumber > 1, true);
+                        }
                     }
                     
-                    // Update enemy UI
+                    // Update enemy UI (only if hit)
                     if (window.gameManager && window.gameManager.uiManager) {
                         window.gameManager.uiManager.updateCharacterUI(enemy);
                     }
-                }
+                } // End of "if (isHit)" block
+            }
             }, index * 200); // Slight delay between each enemy
         });
     };
@@ -796,8 +1006,8 @@ const electricShockEffect = (caster, target, ability) => {
                 currentAliveEnemies.forEach((enemy, index) => {
                     setTimeout(() => {
                         if (!enemy.isDead()) {
-                            // Apply damage
-                            const damageResult = enemy.applyDamage(fixedDamage, 'magical', caster);
+                            // Apply damage with statistics tracking
+                            const damageResult = enemy.applyDamage(fixedDamage, 'magical', caster, { abilityId: 'storm_circle' });
                             log(`${enemy.name} takes ${damageResult.damage} magical damage from Storm Circle!`, damageResult.isCritical ? 'critical' : 'system');
                             
                             // Show impact effect
@@ -848,7 +1058,7 @@ electricShockAbility.doubleCastChance = 0;
 
 // Add custom description generator
 electricShockAbility.generateDescription = function() {
-    let desc = `Deals 100% Magical damage to all enemies. Has ${Math.round(this.debuffChance * 100)}% chance to reduce Magical Shield by 15% for ${this.debuffDuration} turns on each target.`;
+    let desc = `<span class="hit-chance">80% chance</span> to deal <span class="damage">100% Magical damage</span> to each enemy. Has <span class="utility">${Math.round(this.debuffChance * 100)}% chance</span> to reduce <span class="debuff">Magical Shield by 15%</span> for <span class="duration">${this.debuffDuration} turns</span> on each hit.`;
     
     // Add talent callout if modified
     if (this.debuffChance === 1.0) {
@@ -955,24 +1165,58 @@ const stormCircleEffect = (caster, target, ability) => {
         aliveEnemies.forEach((enemy, index) => {
             setTimeout(() => {
                 if (!enemy.isDead()) {
-                    // Apply damage
-                    const damageResult = enemy.applyDamage(fixedDamage, 'magical', caster);
-                    log(`${enemy.name} takes ${damageResult.damage} magical damage from Storm Circle!`, damageResult.isCritical ? 'critical' : 'system');
+                    // Roll for hit success (80% chance)
+                    const hitRoll = Math.random();
+                    const isHit = hitRoll < 0.8; // 80% hit chance
                     
-                    // Show impact effect
-                    const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
-                    if (enemyElement) {
-                        // Create impact effect
-                        const impactEffect = document.createElement('div');
-                        impactEffect.className = 'storm-circle-impact';
-                        enemyElement.appendChild(impactEffect);
+                    if (isHit) {
+                        // Apply damage with statistics tracking
+                        const damageResult = enemy.applyDamage(fixedDamage, 'magical', caster, { abilityId: 'storm_circle' });
+                        log(`${enemy.name} takes ${damageResult.damage} magical damage from Storm Circle!`, damageResult.isCritical ? 'critical' : 'system');
                         
-                        // Remove after animation completes
-                        setTimeout(() => impactEffect.remove(), 800);
+                        // Track hit statistics
+                        if (window.trackStormCircleStats) {
+                            window.trackStormCircleStats(caster, enemy, damageResult, true, false, false);
+                        }
+                    } else {
+                        // Miss
+                        log(`${caster.name}'s Storm Circle misses ${enemy.name}!`, 'system');
+                        
+                        // Track miss statistics
+                        if (window.trackStormCircleStats) {
+                            window.trackStormCircleStats(caster, enemy, null, false, false, false);
+                        }
+                        
+                        // Show miss VFX
+                        const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
+                        if (enemyElement) {
+                            // Create miss effect
+                            const missEffect = document.createElement('div');
+                            missEffect.className = 'storm-circle-miss';
+                            missEffect.textContent = 'MISS!';
+                            enemyElement.appendChild(missEffect);
+                            
+                            // Remove after animation completes
+                            setTimeout(() => missEffect.remove(), 1200);
+                        }
                     }
                     
-                    // Apply stun effect (if enemy is still alive after damage)
-                    if (!enemy.isDead()) {
+                    // Only apply effects if the attack hit
+                    if (isHit) {
+                        // Show impact effect (only on hit)
+                        const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
+                        if (enemyElement) {
+                            // Create impact effect
+                            const impactEffect = document.createElement('div');
+                            impactEffect.className = 'storm-circle-impact';
+                            enemyElement.appendChild(impactEffect);
+                            
+                            // Remove after animation completes
+                            setTimeout(() => impactEffect.remove(), 800);
+                        }
+                        
+                        // Apply stun effect (if enemy is still alive after damage and hit)
+                        if (!enemy.isDead()) {
                         // Create the stun debuff
                         const stunDebuff = new Effect(
                             `storm_circle_stun_${enemy.instanceId || enemy.id}_${Date.now()}`, // Unique ID
@@ -1038,13 +1282,19 @@ const stormCircleEffect = (caster, target, ability) => {
                             
                             // Removal is handled by stunDebuff.remove
                         }
+                        
+                        // Track stun application
+                        if (window.trackStormCircleStats) {
+                            window.trackStormCircleStats(caster, enemy, null, true, false, true);
+                        }
                     }
                     
-                    // Update enemy UI
+                    // Update enemy UI (only if hit)
                     if (typeof updateCharacterUI === 'function') {
                         updateCharacterUI(enemy);
                     }
-                }
+                } // End of "if (isHit)" block
+            }
             }, index * 150); // Slight delay between each enemy for visual effect
         });
     }, 500);
@@ -1121,8 +1371,8 @@ const stormCircleEffect = (caster, target, ability) => {
                         currentAliveEnemies.forEach((enemy, index) => {
                             setTimeout(() => {
                                 if (!enemy.isDead()) {
-                                    // Apply damage
-                                    const damageResult = enemy.applyDamage(fixedDamage, 'magical', caster);
+                                    // Apply damage with statistics tracking  
+                                    const damageResult = enemy.applyDamage(fixedDamage, 'magical', caster, { abilityId: 'storm_circle_recast' });
                                     log(`${enemy.name} takes ${damageResult.damage} magical damage from the second Storm Circle!`, damageResult.isCritical ? 'critical' : 'system');
                                     
                                     // Show impact effect
@@ -1174,7 +1424,7 @@ stormCircleAbility.generateDescription = function() {
     // Get the current cooldown, which might be modified by talents
     const cooldown = this.cooldown || 10;
     
-    let desc = `Deals 1000 damage to all enemies and stuns them for 1 turn.`;
+    let desc = `<span class="hit-chance">80% chance</span> to deal <span class="damage">1000 damage</span> to each enemy and <span class="debuff">stun them for 2 turns</span>.`;
     
     // Add talent indicator if cooldown is reduced
     if (cooldown < 10) {

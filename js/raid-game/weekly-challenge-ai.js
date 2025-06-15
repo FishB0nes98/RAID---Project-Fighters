@@ -1,13 +1,13 @@
 /**
  * Weekly Challenge AI Manager
- * Specialized AI logic for weekly challenges where Siegfried is the carry
- * and other team members prioritize keeping him and each other alive
+ * Specialized AI logic for weekly challenges with dynamic carry detection
+ * and other team members prioritize keeping the carry and each other alive
  */
 
 class WeeklyChallengeAI {
     constructor(gameManager) {
         this.gameManager = gameManager;
-        this.carryCharacterId = 'siegfried'; // Main damage dealer
+        this.carryCharacterId = null; // Will be determined dynamically
         this.teamStrategy = {
             carryProtectionPriority: 0.8, // 80% chance to prioritize carry protection
             healThreshold: 0.6, // Heal when below 60% HP
@@ -23,8 +23,41 @@ class WeeklyChallengeAI {
      * Initialize the weekly challenge AI system
      */
     initialize() {
+        this.detectCarryCharacter();
         this.analyzeTeamComposition();
-        console.log('[Weekly Challenge AI] Initialized with Siegfried as carry');
+        console.log(`[Weekly Challenge AI] Initialized with ${this.carryCharacterId || 'no carry'} as carry`);
+    }
+
+    /**
+     * Dynamically detect the carry character based on damage potential
+     */
+    detectCarryCharacter() {
+        const gameState = this.gameManager.gameState;
+        if (!gameState || !gameState.aiCharacters) return;
+
+        let bestCarry = null;
+        let highestDamageScore = 0;
+
+        gameState.aiCharacters.forEach(character => {
+            // Calculate damage potential score
+            const physicalDamage = character.stats.physicalDamage || 0;
+            const magicalDamage = character.stats.magicalDamage || 0;
+            const critChance = character.stats.critChance || 0;
+            const critMultiplier = character.stats.critMultiplier || 1.5;
+            
+            // Score based on raw damage + crit potential
+            const damageScore = (physicalDamage + magicalDamage) * (1 + (critChance * critMultiplier));
+            
+            if (damageScore > highestDamageScore) {
+                highestDamageScore = damageScore;
+                bestCarry = character;
+            }
+        });
+
+        if (bestCarry) {
+            this.carryCharacterId = this.normalizeCharacterId(bestCarry.id);
+            console.log(`[Weekly Challenge AI] Detected ${bestCarry.name} as carry (damage score: ${Math.round(highestDamageScore)})`);
+        }
     }
 
     /**
@@ -157,7 +190,7 @@ class WeeklyChallengeAI {
     }
 
     /**
-     * Find the carry character (Siegfried)
+     * Find the carry character (dynamically detected)
      */
     findCarryCharacter() {
         const gameState = this.gameManager.gameState;
@@ -169,7 +202,7 @@ class WeeklyChallengeAI {
     }
 
     /**
-     * Plan action for carry character (Siegfried)
+     * Plan action for carry character (dynamically detected)
      */
     planCarryAction(aiChar, availableAbilities, enemies, allies) {
         console.log(`[Weekly Challenge AI] Carry ${aiChar.name} planning aggressive action`);

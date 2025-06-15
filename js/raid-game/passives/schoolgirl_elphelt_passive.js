@@ -53,6 +53,25 @@ class SchoolgirlElpheltPassive {
         this.character.addBuff(buff); // Add the new buff instance
         log(`${this.character.name} gains a stack of Defensive Stance (+${this.armorBonus} Armor, +${this.shieldBonus} Shield).`);
         
+        // === STATISTICS TRACKING ===
+        if (typeof trackDefensiveManeuversStats === 'function') {
+            trackDefensiveManeuversStats(this.character, this.armorBonus, this.shieldBonus);
+        } else if (window.statisticsManager) {
+            // Fallback tracking if global function not available
+            try {
+                // Track passive buff application
+                window.statisticsManager.recordStatusEffect(this.character, this.character, 'defensive_buff', 'defensive_maneuvers', false, 'schoolgirl_elphelt_passive');
+                
+                // Track passive usage
+                window.statisticsManager.recordAbilityUsage(this.character, 'schoolgirl_elphelt_passive', 'buff', this.armorBonus + this.shieldBonus, false);
+                
+                console.log(`[ElpheltPassiveStats] Tracked Defensive Maneuvers: +${this.armorBonus} Armor, +${this.shieldBonus} Magic Shield`);
+            } catch (error) {
+                console.error('[ElpheltPassiveStats] Error tracking Defensive Maneuvers stats:', error);
+            }
+        }
+        // === END STATISTICS TRACKING ===
+        
         // Play passive trigger VFX
         const charElement = document.getElementById(`character-${this.character.id}`);
         if (charElement) {

@@ -194,6 +194,11 @@ class ControllerManager {
             // this.showControllerIcons();
             // --- END REMOVED ---
 
+        // Apply controller-selected class to currently selected element if it exists
+        if (this.selectedElement) {
+            this.selectedElement.classList.add('controller-selected');
+        }
+
         // Initial selection
         this.selectInitialElement();
         // --- END ORIGINAL LOGIC (closing brace was missing, added below) ---
@@ -224,6 +229,11 @@ class ControllerManager {
         // --- REMOVED: Don't show hints ---
         // this.showControllerIcons();
         // --- END REMOVED ---
+
+        // Apply controller-selected class to currently selected element if it exists
+        if (this.selectedElement) {
+            this.selectedElement.classList.add('controller-selected');
+        }
 
         // Re-select the last element or initial element
         if (this.selectedElement) {
@@ -260,6 +270,11 @@ class ControllerManager {
                 document.body.classList.remove('controller-mode');
             } else {
                 console.warn("[Controller] disableControllerMode: document.body not found.");
+            }
+
+            // Remove controller-selected class from currently selected element
+            if (this.selectedElement) {
+                this.selectedElement.classList.remove('controller-selected');
             }
 
             // Don't completely clean up or reset selection when disabling temporarily
@@ -301,7 +316,10 @@ class ControllerManager {
         // Highlight the newly selected element
         this.selectedElement = element;
         if (this.selectedElement) {
-            this.selectedElement.classList.add('controller-selected');
+            // Only add controller-selected class if controller mode is active
+            if (this.isControllerMode) {
+                this.selectedElement.classList.add('controller-selected');
+            }
             
             // Position the controller cursor
             this.positionCursorAtElement(this.selectedElement);
@@ -681,30 +699,17 @@ class ControllerManager {
                             const selectionSuccess = this.gameManager.selectAbility(selectedCharacter, abilityIndex);
                             
                             if (selectionSuccess) {
-                                if (abilityToSelect.requiresTarget) {
-                                    // Enter targeting mode immediately
-                                    this.currentSection = 'targets';
-                                    
-                                    // Select the first valid target
-                                    const targets = document.querySelectorAll('.character-slot.valid-target');
-                                    if (targets.length > 0) {
-                                        this.selectElement(targets[0]);
-                                    } else {
-                                        console.warn(`[Controller] No valid targets found for ability: ${abilityToSelect.name}`);
-                                        this.currentSection = 'abilities'; // Revert section if no valid targets
-                                    }
+                                // ALL abilities now require explicit targeting for consistency
+                                // This ensures controllers behave the same as mouse users
+                                this.currentSection = 'targets';
+                                
+                                // Select the first valid target
+                                const targets = document.querySelectorAll('.character-slot.valid-target');
+                                if (targets.length > 0) {
+                                    this.selectElement(targets[0]);
                                 } else {
-                                    // For self-targeted abilities, apply immediately
-                                    const targetForSelfAbility = abilityToSelect.targetType === 'self' ? selectedCharacter : null;
-                                    const useSuccess = this.gameManager.targetCharacter(targetForSelfAbility);
-                                    
-                                    if (useSuccess) {
-                                        // After using self/no-target ability, go back to characters
-                                        this.currentSection = 'characters';
-                                        this.selectPlayerCharacter(this.currentCharacterIndex);
-                                    } else {
-                                        console.log("[Controller] Failed to use self/no-target ability.");
-                                    }
+                                    console.warn(`[Controller] No valid targets found for ability: ${abilityToSelect.name}`);
+                                    this.currentSection = 'abilities'; // Revert section if no valid targets
                                 }
                             } else {
                                 console.log("[Controller] gameManager.selectAbility returned false.");
@@ -1276,6 +1281,12 @@ class ControllerManager {
     cleanup() {
         console.log('[ControllerManager] Cleaning up controller resources');
         
+        // Remove controller-selected class from all elements
+        const selectedElements = document.querySelectorAll('.controller-selected');
+        selectedElements.forEach(element => {
+            element.classList.remove('controller-selected');
+        });
+        
         // Remove existing controller cursor from DOM
         if (this.controllerCursor && this.controllerCursor.parentNode) {
             this.controllerCursor.parentNode.removeChild(this.controllerCursor);
@@ -1289,6 +1300,11 @@ class ControllerManager {
                 cursor.parentNode.removeChild(cursor);
             }
         });
+        
+        // Remove controller mode from body
+        if (document.body) {
+            document.body.classList.remove('controller-mode');
+        }
         
         // Reset state
         this.isControllerMode = false;

@@ -50,7 +50,7 @@
         {
             "id": "renee_e",
             "name": "Mystical Whip",
-            "description": "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.",
+            "description": "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.",
             "icon": "Icons/abilities/whip_lash.webp",
             "manaCost": 100,
             "cooldown": 6,

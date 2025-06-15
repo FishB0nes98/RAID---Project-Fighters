@@ -1,0 +1,55 @@
+{
+  "id": "lava_chimp",
+  "name": "Lava Chimp",
+  "image": "Loading Screen/lava_chimp.png",
+  "rarity": "common",
+  "type": "demon",
+  "description": "A mischievous primate dwelling in the volcanic forges of hell, its fur singed by constant exposure to molten rock.",
+  "stats": {
+    "physicalDamage": 240,
+    "magicalDamage": 0,
+    "armor": 9,
+    "magicalShield": 9,
+    "hp": 6200,
+    "hpPerTurn": 0,
+    "mana": 2011,
+    "manaPerTurn": 0,
+    "lifesteal": 0,
+    "dodgeChance": 0.22,
+    "critChance": 0.05,
+    "critDamage": 1.8,
+    "healingPower": 0
+  },
+  "abilities": [
+    {
+      "id": "lava_chimp_rampage",
+      "name": "Rampage",
+      "description": "Deals 555 + 80% physical damage to the target with a 55% chance to jump to another target, dealing the same damage. Can chain infinitely.",
+      "icon": "Icons/abilities/rampage.png", 
+      "manaCost": 150,
+      "cooldown": 3,
+      "targetType": "enemy",
+      "type": "custom",
+      "functionName": "lavaChimpRampageEffect"
+    },
+    {
+      "id": "lava_chimp_burning_spear_stab",
+      "name": "Burning Spear Stab",
+      "description": "The chimp jumps onto the target with a burning spear, dealing 200% Physical Damage, stunning them for 3 turns, and nullifying their armor.",
+      "icon": "Icons/abilities/burning_spear_stab.png",
+      "manaCost": 55,
+      "cooldown": 4,
+      "targetType": "enemy",
+      "type": "custom",
+      "functionName": "lavaChimpBurningSpearStabEffect"
+    }
+  ],
+  "passive": {
+    "id": "lava_chimp_volcanic_leap",
+    "name": "Volcanic Leap",
+    "description": "When Lava Chimp dodges an attack, it immediately leaps onto a random enemy, dealing 155% physical damage with spectacular volcanic effects.",
+    "icon": "Icons/passives/volcanic_leap.png",
+    "script": "js/raid-game/passives/lava_chimp_passive.js"
+  },
+  "isAI": true
+} 

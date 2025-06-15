@@ -1,0 +1,459 @@
+{
+    "characterId": "schoolgirl_kokoro",
+    "talentTree": {
+        "healing_efficiency": {
+            "id": "healing_efficiency",
+            "name": "Healing Efficiency",
+            "description": "Lesser Heal has a <span class=\"kokoro-enhanced-heal\">23%</span> chance not to end your turn, allowing for potential follow-up actions.",
+            "icon": "Icons/talents/healing_efficiency.webp",
+            "tier": 1,
+            "root": true,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingEfficiency",
+                "value": true
+            },
+            "parents": [],
+            "children": ["healing_versatility"],
+            "position": { "x": 0, "y": -200 }
+        },
+        "protective_healing": {
+            "id": "protective_healing",
+            "name": "Protective Healing",
+            "description": "Your Lesser Heal and Circle Heal also apply a shield equal to <span class=\"kokoro-enhanced-heal\">21%</span> of your Magical Damage to the healed targets.",
+            "icon": "Icons/talents/protective_healing.webp",
+            "tier": 3,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "protectiveHealing",
+                "value": true
+            },
+            "parents": ["healing_efficiency", "enhanced_lesser_heal"],
+            "children": ["overheal_mastery"],
+            "position": { "x": -300, "y": -600 }
+        },
+        "overheal_mastery": {
+            "id": "overheal_mastery",
+            "name": "Overheal Mastery",
+            "description": "Lesser Heal can overheal allies and yourself. When healing would exceed maximum HP, the excess amount is converted into a shield that absorbs damage. Mastery over protective magic transcends normal healing limits.",
+            "icon": "Icons/talents/overheal_mastery.webp",
+            "tier": 4,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "overhealMastery",
+                "value": true
+            },
+            "parents": ["protective_healing"],
+            "children": ["shielding_aura"],
+            "position": { "x": -15, "y": -415 }
+        },
+        "shielding_aura": {
+            "id": "shielding_aura",
+            "name": "Shielding Aura",
+            "description": "Your Protective Aura now also grants a shield equal to <span class=\"kokoro-enhanced-heal\">5%</span> of each ally's maximum HP. The protective energy forms a barrier that absorbs incoming damage.",
+            "icon": "Icons/talents/shielding_aura.webp",
+            "tier": 5,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "shieldingAura",
+                "value": true
+            },
+            "parents": ["overheal_mastery"],
+            "children": ["shield_empowerment"],
+            "position": { "x": -15, "y": -580 }
+        },
+        "shield_empowerment": {
+            "id": "shield_empowerment",
+            "name": "Shield Empowerment",
+            "description": "At the start of each turn, gain Magical Damage equal to <span class=\"kokoro-enhanced-heal\">25%</span> of your current shield amount. This effect stacks and persists until your shield is depleted. The protective barrier becomes a conduit for arcane power.",
+            "icon": "Icons/talents/shield_empowerment.webp",
+            "tier": 6,
+            "root": false,
+            "cost": 2,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "shieldEmpowerment",
+                "value": true
+            },
+            "parents": ["shielding_aura"],
+            "children": [],
+            "position": { "x": 200, "y": -405 },
+            "powerful": true
+        },
+        "healing_versatility": {
+            "id": "healing_versatility",
+            "name": "Healing Versatility",
+            "description": "Lesser Heal can now target enemies, dealing damage equal to 50% of the heal amount (205 damage based on base 410 heal). Unlocks enhanced healing talents.",
+            "icon": "Icons/talents/healing_versatility.webp",
+            "tier": 2,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "lesser_heal",
+                "property": "canTargetEnemies",
+                "value": true
+            },
+            "parents": ["healing_efficiency"],
+            "children": ["enhanced_lesser_heal", "enhanced_healing_feedback"],
+            "position": { "x": 0, "y": 0 }
+        },
+        "enhanced_lesser_heal": {
+            "id": "enhanced_lesser_heal",
+            "name": "Enhanced Lesser Heal",
+            "description": "Increases Lesser Heal's base healing amount from 410 to 580 HP.",
+            "icon": "Icons/talents/enhanced_lesser_heal.webp",
+            "tier": 2,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enhancedLesserHeal",
+                "value": true
+            },
+            "parents": ["healing_versatility"],
+            "children": ["silencing_ring_mastery", "mana_expansion", "protective_healing"],
+            "position": { "x": 180, "y": 180 }
+        },
+        "enhanced_healing_feedback": {
+            "id": "enhanced_healing_feedback",
+            "name": "Enhanced Healing Feedback",
+            "description": "Your Healing Feedback passive now heals for 580 HP instead of 410 HP when using abilities.",
+            "icon": "Icons/talents/enhanced_healing_feedback.webp",
+            "tier": 2,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enhancedHealingFeedback",
+                "value": true
+            },
+            "parents": ["healing_versatility"],
+            "children": ["empathic_resonance", "shielding_feedback"],
+            "position": { "x": -180, "y": 180 }
+        },
+        "shielding_feedback": {
+            "id": "shielding_feedback",
+            "name": "Shielding Feedback",
+            "description": "Your Healing Feedback passive now also creates a shield equal to <span class=\"kokoro-enhanced-heal\">25%</span> of your Magical Damage whenever you use an ability. Protective energy flows through your being with each spell cast.",
+            "icon": "Icons/talents/shielding_feedback.webp",
+            "tier": 3,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "shieldingFeedback",
+                "value": true
+            },
+            "parents": ["enhanced_healing_feedback"],
+            "children": [],
+            "position": { "x": -320, "y": 360 }
+        },
+        "silencing_ring_mastery": {
+            "id": "silencing_ring_mastery",
+            "name": "Silencing Ring Mastery",
+            "description": "Reduces Silencing Ring's cooldown by <span class=\"kokoro-enhanced-heal\">2</span> turns (from 9 to 7 turns).",
+            "icon": "Icons/talents/critical_cooldown.webp",
+            "tier": 3,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "silencing_ring",
+                "property": "cooldown",
+                "operation": "subtract",
+                "value": 2
+            },
+            "parents": ["enhanced_lesser_heal"],
+            "children": ["focused_mind"],
+            "position": { "x": 80, "y": 360 }
+        },
+        "mana_expansion": {
+            "id": "mana_expansion",
+            "name": "Mana Expansion",
+            "description": "Increases your maximum mana by <span class=\"kokoro-enhanced-heal\">550</span> points.",
+            "icon": "Icons/talents/mana_recovery.webp",
+            "tier": 3,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "maxMana",
+                "operation": "add",
+                "value": 550
+            },
+            "parents": ["enhanced_lesser_heal"],
+            "children": ["mana_flow", "energizing_feedback"],
+            "position": { "x": 280, "y": -75 }
+        },
+        "empathic_resonance": {
+            "id": "empathic_resonance",
+            "name": "Empathic Resonance",
+            "description": "Whenever you heal an ally (not yourself), you have a <span class=\"kokoro-enhanced-heal\">20%</span> chance to gain a stacking buff that increases your healing power by <span class=\"kokoro-enhanced-heal\">3%</span> for <span class=\"kokoro-enhanced-heal\">2</span> turns.",
+            "icon": "Icons/talents/empathic_resonance.webp",
+            "tier": 3,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "empathicResonance",
+                "value": true
+            },
+            "parents": ["enhanced_healing_feedback"],
+            "children": ["focused_mind"],
+            "position": { "x": -180, "y": 360 }
+        },
+        "mana_flow": {
+            "id": "mana_flow",
+            "name": "Mana Flow",
+            "description": "Increases your mana regeneration by <span class=\"kokoro-enhanced-heal\">10</span> points per turn, allowing for more frequent ability usage.",
+            "icon": "Icons/talents/mana_flow.webp",
+            "tier": 4,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "manaPerTurn",
+                "operation": "add",
+                "value": 10
+            },
+            "parents": ["mana_expansion"],
+            "children": ["mana_infusion"],
+            "position": { "x": 355, "y": 100 }
+        },
+        "energizing_feedback": {
+            "id": "energizing_feedback",
+            "name": "Energizing Feedback",
+            "description": "Your Healing Feedback has a <span class=\"kokoro-enhanced-heal\">15%</span> chance to also restore <span class=\"kokoro-enhanced-heal\">105</span> mana when triggered.",
+            "icon": "Icons/talents/energizing_feedback.webp",
+            "tier": 4,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "energizingFeedback",
+                "value": true
+            },
+            "parents": ["mana_expansion"],
+            "children": ["empowered_protection"],
+            "position": { "x": 100, "y": 100 }
+        },
+        "empowered_protection": {
+            "id": "empowered_protection",
+            "name": "Empowered Protection",
+            "description": "Your Protective Aura now also increases allies' magical damage by <span class=\"kokoro-enhanced-heal\">17%</span>. Protective energy enhances offensive capabilities.",
+            "icon": "Icons/talents/empowered_protection.webp",
+            "tier": 5,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "empoweredProtection",
+                "value": true
+            },
+            "parents": ["energizing_feedback"],
+            "children": ["magical_amplification"],
+            "position": { "x": 100, "y": 250 }
+        },
+        "focused_mind": {
+            "id": "focused_mind",
+            "name": "Focused Mind",
+            "description": "Increases your critical strike chance by <span class=\"kokoro-enhanced-heal\">10%</span>. The harmony between empathy and mastery sharpens your focus.",
+            "icon": "Icons/talents/focused_mind.webp",
+            "tier": 4,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "operation": "add",
+                "value": 0.10
+            },
+            "parents": ["empathic_resonance", "silencing_ring_mastery"],
+            "children": ["empowered_silencing", "cooldown_mastery"],
+            "position": { "x": -50, "y": 540 }
+        },
+        "empowered_silencing": {
+            "id": "empowered_silencing",
+            "name": "Empowered Silencing",
+            "description": "Your Silencing Ring deals <span class=\"kokoro-enhanced-heal\">+155%</span> more damage per turn (<span class=\"kokoro-enhanced-heal\">230</span> total damage per turn instead of 90).",
+            "icon": "Icons/talents/empowered_silencing.webp",
+            "tier": 5,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "empoweredSilencing",
+                "value": true
+            },
+            "parents": ["focused_mind"],
+            "children": ["mana_disruption", "magical_amplification"],
+            "position": { "x": -100, "y": 625}
+        },
+        "mana_disruption": {
+            "id": "mana_disruption",
+            "name": "Mana Disruption",
+            "description": "Silencing Ring now <span class=\"kokoro-enhanced-heal\">doubles</span> the target's ability mana costs for the debuff duration. Disrupted energy flows make casting extremely taxing.",
+            "icon": "Icons/talents/mana_disruption.webp",
+            "tier": 6,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "manaDisruption",
+                "value": true
+            },
+            "parents": ["empowered_silencing"],
+            "children": [],
+            "position": { "x": -200, "y": 775 }
+        },
+        "magical_amplification": {
+            "id": "magical_amplification",
+            "name": "Magical Amplification",
+            "description": "Lesser Heal's magical damage against enemies now scales with <span class=\"kokoro-enhanced-heal\">100%</span> of your Magical Damage instead of <span class=\"kokoro-enhanced-heal\">50%</span>. Mastery over both protection and destruction enhances your offensive capabilities.",
+            "icon": "Icons/talents/magical_amplification.webp",
+            "tier": 6,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "magicalAmplification",
+                "value": true
+            },
+            "parents": ["empowered_silencing", "empowered_protection"],
+            "children": ["empathic_conversion"],
+            "position": { "x": 120, "y": 400 }
+        },
+        "empathic_conversion": {
+            "id": "empathic_conversion",
+            "name": "Empathic Conversion",
+            "description": "When you damage an enemy with Lesser Heal, <span class=\"kokoro-enhanced-heal\">100%</span> of the damage dealt is converted into healing for the ally with the lowest current HP (including yourself). Pain becomes compassion.",
+            "icon": "Icons/talents/empathic_conversion.webp",
+            "tier": 7,
+            "root": false,
+            "cost": 2,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "empathicConversion",
+                "value": true
+            },
+            "parents": ["magical_amplification"],
+            "children": [],
+            "position": { "x": 120, "y": 550 },
+            "powerful": true
+        },
+        "cooldown_mastery": {
+            "id": "cooldown_mastery",
+            "name": "Cooldown Mastery",
+            "description": "Lesser Heal has a <span class=\"kokoro-enhanced-heal\">100%</span> chance to reduce one of your active ability cooldowns by <span class=\"kokoro-enhanced-heal\">1</span> turn.",
+            "icon": "Icons/talents/cooldown_mastery.webp",
+            "tier": 5,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "cooldownMastery",
+                "value": true
+            },
+            "parents": ["focused_mind"],
+            "children": ["circle_heal_mastery"],
+            "position": { "x": -100, "y": 800 }
+        },
+        "circle_heal_mastery": {
+            "id": "circle_heal_mastery",
+            "name": "Circle Heal Mastery",
+            "description": "Reduces Circle Heal's cooldown by <span class=\"kokoro-enhanced-heal\">1</span> turn (from 8 to 7 turns). Mastery over healing flows allows for quicker group restoration.",
+            "icon": "Icons/talents/circle_heal_mastery.webp",
+            "tier": 6,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "circle_heal",
+                "property": "cooldown",
+                "operation": "subtract",
+                "value": 1
+            },
+            "parents": ["cooldown_mastery"],
+            "children": ["transcendent_healing"],
+            "position": { "x": -100, "y": 950 }
+        },
+        "transcendent_healing": {
+            "id": "transcendent_healing",
+            "name": "Transcendent Healing",
+            "description": "Circle Heal now scales with <span class=\"kokoro-enhanced-heal\">200%</span> of Magical Damage instead of 150%. Your healing transcends mortal limitations.",
+            "icon": "Icons/talents/transcendent_healing.webp",
+            "tier": 7,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "transcendentHealing",
+                "value": true
+            },
+            "parents": ["circle_heal_mastery"],
+            "children": ["divine_resonance"],
+            "position": { "x": -100, "y": 1100 }
+        },
+        "divine_resonance": {
+            "id": "divine_resonance",
+            "name": "Divine Resonance",
+            "description": "Circle Heal has a <span class=\"kokoro-enhanced-heal\">40%</span> chance to resonate with divine energy, triggering a second time immediately. The resonance of transcendent healing echoes through all allies.",
+            "icon": "Icons/talents/divine_resonance.webp",
+            "tier": 8,
+            "root": false,
+            "cost": 2,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "divineResonance",
+                "value": true
+            },
+            "parents": ["transcendent_healing"],
+            "children": [],
+            "position": { "x": -100, "y": 1280 },
+            "powerful": true
+        },
+        "mana_infusion": {
+            "id": "mana_infusion",
+            "name": "Mana Infusion",
+            "description": "Your heals also restore <span class=\"kokoro-enhanced-heal\">10%</span> of the heal amount as mana for the healed characters. Healing energy flows into magical reserves.",
+            "icon": "Icons/talents/mana_infusion.webp",
+            "tier": 5,
+            "root": false,
+            "cost": 1,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "manaInfusion",
+                "value": true
+            },
+            "parents": ["mana_flow"],
+            "children": ["mystic_barrier"],
+            "position": { "x": 450, "y": 125 }
+        },
+        "mystic_barrier": {
+            "id": "mystic_barrier",
+            "name": "Mystic Barrier",
+            "description": "At the start of battle and every <span class=\"kokoro-enhanced-heal\">10th</span> turn, you gain a shield equal to <span class=\"kokoro-enhanced-heal\">25%</span> of your current mana. This protective barrier persists until destroyed, growing stronger as your magical reserves increase.",
+            "icon": "Icons/talents/mystic_barrier.webp",
+            "tier": 6,
+            "root": false,
+            "cost": 2,
+            "effect": {
+                "type": "modify_character_property",
+                "property": "mysticBarrier",
+                "value": true
+            },
+            "parents": ["mana_infusion"],
+            "children": [],
+            "position": { "x": 450, "y": -25 },
+            "powerful": true
+        }
+    }
+} 

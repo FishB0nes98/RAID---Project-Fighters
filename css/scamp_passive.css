@@ -1,0 +1,469 @@
+/* Scamp Passive: Sacrificial Devotion VFX */
+
+/* Sacrificial Aura - subtle red glow around Scamp */
+.scamp-sacrificial-aura {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: radial-gradient(circle, rgba(139, 0, 0, 0.3) 0%, rgba(139, 0, 0, 0.1) 50%, rgba(139, 0, 0, 0) 80%);
+    border-radius: 10px;
+    z-index: 1;
+    pointer-events: none;
+    animation: scamp-aura-pulse 3s ease-in-out infinite;
+}
+
+@keyframes scamp-aura-pulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+/* Redirection Beam - energy transfer from target to Scamp */
+.scamp-redirection-beam {
+    position: fixed;
+    height: 6px;
+    background: linear-gradient(to right, 
+        rgba(255, 69, 0, 0.9) 0%, 
+        rgba(255, 140, 0, 0.8) 25%, 
+        rgba(220, 20, 60, 0.9) 50%,
+        rgba(139, 0, 0, 1) 75%,
+        rgba(75, 0, 130, 0.8) 100%);
+    border-radius: 3px;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 
+        0 0 10px rgba(255, 69, 0, 0.8),
+        0 0 20px rgba(220, 20, 60, 0.6),
+        0 0 30px rgba(139, 0, 0, 0.4);
+    animation: scamp-beam-flow 0.8s ease-out;
+}
+
+@keyframes scamp-beam-flow {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* Protection Glow - shows on the protected ally */
+.scamp-protection-glow {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle, rgba(0, 255, 127, 0.4) 0%, rgba(0, 255, 127, 0.2) 60%, rgba(0, 255, 127, 0) 100%);
+    border-radius: 15px;
+    z-index: 5;
+    pointer-events: none;
+    animation: scamp-protection-pulse 1.5s ease-out;
+}
+
+@keyframes scamp-protection-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Sacrifice Effect - dark energy around Scamp when taking damage */
+.scamp-sacrifice-effect {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(75, 0, 130, 0.6) 0%, rgba(75, 0, 130, 0) 40%),
+        radial-gradient(circle at 70% 70%, rgba(139, 0, 0, 0.6) 0%, rgba(139, 0, 0, 0) 40%),
+        radial-gradient(circle at 50% 50%, rgba(25, 25, 112, 0.4) 0%, rgba(25, 25, 112, 0) 60%);
+    border-radius: 20px;
+    z-index: 10;
+    pointer-events: none;
+    animation: scamp-sacrifice-burst 2s ease-out;
+}
+
+@keyframes scamp-sacrifice-burst {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2) rotate(90deg);
+    }
+    60% {
+        opacity: 0.8;
+        transform: scale(1.1) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5) rotate(270deg);
+    }
+}
+
+/* Sacrifice Damage Text - special styling for redirected damage */
+.scamp-sacrifice-damage {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #8B0000;
+    text-shadow: 
+        0 0 5px rgba(139, 0, 0, 0.8),
+        0 0 10px rgba(139, 0, 0, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    z-index: 20;
+    pointer-events: none;
+    animation: scamp-damage-float 2s ease-out;
+}
+
+@keyframes scamp-damage-float {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px) scale(1.1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.9);
+    }
+}
+
+/* Devotion Pulse - intense pulse when sacrifice triggers */
+.scamp-devotion-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(139, 0, 0, 0.8) 0%, rgba(139, 0, 0, 0.4) 40%, rgba(139, 0, 0, 0) 70%);
+    border: 2px solid rgba(139, 0, 0, 0.9);
+    border-radius: 50%;
+    z-index: 15;
+    pointer-events: none;
+    animation: scamp-devotion-expand 2s ease-out;
+}
+
+@keyframes scamp-devotion-expand {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+        border-width: 3px;
+    }
+    30% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.2);
+        border-width: 2px;
+    }
+    70% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(2);
+        border-width: 1px;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(3);
+        border-width: 0px;
+    }
+}
+
+/* Battle Log Styling for Scamp Sacrifice */
+.log-entry.scamp-sacrifice {
+    background: linear-gradient(to right, rgba(139, 0, 0, 0.2), rgba(75, 0, 130, 0.2));
+    border-left: 4px solid #8B0000;
+    color: #FFE4E1;
+    font-weight: bold;
+    animation: scamp-log-highlight 3s ease-out;
+}
+
+@keyframes scamp-log-highlight {
+    0% {
+        background: linear-gradient(to right, rgba(139, 0, 0, 0.4), rgba(75, 0, 130, 0.4));
+        transform: scale(1.02);
+    }
+    100% {
+        background: linear-gradient(to right, rgba(139, 0, 0, 0.2), rgba(75, 0, 130, 0.2));
+        transform: scale(1);
+    }
+}
+
+/* Special effects for when Scamp is about to sacrifice */
+.character-slot.scamp-ready-to-sacrifice {
+    position: relative;
+}
+
+.character-slot.scamp-ready-to-sacrifice::before {
+    content: '💀';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 20px;
+    z-index: 25;
+    animation: scamp-skull-float 2s ease-in-out infinite;
+}
+
+@keyframes scamp-skull-float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(-5px) rotate(5deg);
+        opacity: 1;
+    }
+}
+
+/* Enhanced VFX for critical redirections */
+.scamp-critical-sacrifice {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 25% 25%, rgba(255, 0, 0, 0.3) 0%, rgba(255, 0, 0, 0) 50%),
+        radial-gradient(circle at 75% 75%, rgba(139, 0, 0, 0.3) 0%, rgba(139, 0, 0, 0) 50%),
+        linear-gradient(45deg, rgba(75, 0, 130, 0.2) 0%, rgba(25, 25, 112, 0.2) 100%);
+    z-index: 12;
+    pointer-events: none;
+    animation: scamp-critical-flash 1.5s ease-out;
+}
+
+@keyframes scamp-critical-flash {
+    0% {
+        opacity: 0;
+        filter: brightness(1);
+    }
+    25% {
+        opacity: 1;
+        filter: brightness(1.5);
+    }
+    75% {
+        opacity: 0.7;
+        filter: brightness(1.2);
+    }
+    100% {
+        opacity: 0;
+        filter: brightness(1);
+    }
+}
+
+/* Damage Reduction Animation */
+@keyframes scamp-float-up {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px) scale(0.9);
+    }
+}
+
+/* Debuff Redirection VFX */
+@keyframes scamp-debuff-beam-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        box-shadow: 0 0 12px #8b00ff;
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 20px #8b00ff, 0 0 30px #ff1493;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+        box-shadow: 0 0 8px #8b00ff;
+    }
+}
+
+@keyframes scamp-debuff-protection-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes scamp-curse-absorb {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    70% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+@keyframes scamp-curse-float {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0px);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+@keyframes scamp-curse-orbit-0 {
+    0% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(0deg) translateX(30px);
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(360deg) translateX(30px);
+    }
+}
+
+@keyframes scamp-curse-orbit-1 {
+    0% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(90deg) translateX(30px);
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(450deg) translateX(30px);
+    }
+}
+
+@keyframes scamp-curse-orbit-2 {
+    0% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(180deg) translateX(30px);
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(540deg) translateX(30px);
+    }
+}
+
+@keyframes scamp-curse-orbit-3 {
+    0% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(270deg) translateX(30px);
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(630deg) translateX(30px);
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .scamp-redirection-beam {
+        height: 4px;
+    }
+    
+    .scamp-sacrifice-damage {
+        font-size: 14px;
+    }
+    
+    .scamp-devotion-pulse {
+        width: 30px;
+        height: 30px;
+    }
+} 

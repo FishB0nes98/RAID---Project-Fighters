@@ -1,0 +1,923 @@
+/* Smith Lord Gear Up Ability VFX */
+
+/* Casting VFX */
+.gear-up-casting-vfx {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    z-index: 1000;
+    animation: gearUpCasting 1.5s ease-in-out;
+    text-shadow: 0 0 20px #FFD700, 0 0 40px #FFA500;
+    pointer-events: none;
+}
+
+@keyframes gearUpCasting {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5) rotate(-45deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2) rotate(0deg);
+        text-shadow: 0 0 30px #FFD700, 0 0 60px #FFA500, 0 0 90px #FF4500;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1) rotate(45deg);
+    }
+}
+
+/* Forge Sparks */
+.gear-up-spark {
+    position: absolute;
+    font-size: 1.5rem;
+    z-index: 999;
+    animation: gearUpSpark 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes gearUpSpark {
+    0% {
+        opacity: 1;
+        transform: scale(0.3);
+        text-shadow: 0 0 10px #FFD700;
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1);
+        text-shadow: 0 0 20px #FFD700, 0 0 30px #FFA500;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+        text-shadow: 0 0 5px #FFD700;
+    }
+}
+
+/* Enhancement VFX */
+.gear-up-enhancement-vfx {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    z-index: 1000;
+    animation: gearUpEnhancement 2s ease-in-out;
+    text-shadow: 0 0 20px #4169E1, 0 0 40px #1E90FF;
+    pointer-events: none;
+}
+
+@keyframes gearUpEnhancement {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.3);
+        text-shadow: 0 0 30px #4169E1, 0 0 60px #1E90FF, 0 0 90px #00BFFF;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1) translateY(-30px);
+    }
+}
+
+/* Armor Particles */
+.gear-up-armor-particle {
+    position: absolute;
+    font-size: 1.2rem;
+    z-index: 998;
+    animation: gearUpArmorParticle 2s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes gearUpArmorParticle {
+    0% {
+        opacity: 1;
+        transform: scale(0.5) rotate(0deg);
+        text-shadow: 0 0 10px #4169E1;
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.1) rotate(180deg);
+        text-shadow: 0 0 20px #4169E1, 0 0 30px #1E90FF;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.7) rotate(360deg) translateY(-40px);
+        text-shadow: 0 0 5px #4169E1;
+    }
+}
+
+/* ===============================
+   MOLTEN BREATH VFX STYLES
+   =============================== */
+
+/* Main Molten Breath Container */
+.molten-breath-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1500;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Massive Fire Breath Beam */
+.molten-breath-beam {
+    position: absolute;
+    top: 30%;
+    left: 60%;
+    width: 300%;
+    height: 40%;
+    background: linear-gradient(90deg, 
+        rgba(255, 69, 0, 0.9) 0%,
+        rgba(255, 140, 0, 0.8) 25%,
+        rgba(255, 215, 0, 0.7) 50%,
+        rgba(220, 20, 60, 0.6) 75%,
+        rgba(139, 0, 0, 0.3) 100%
+    );
+    border-radius: 50% 30% 50% 30%;
+    transform: translateX(-50%) translateY(-50%) rotate(-15deg);
+    animation: moltenBreathBeam 2s ease-out forwards;
+    box-shadow: 
+        0 0 50px rgba(255, 69, 0, 0.8),
+        0 0 100px rgba(255, 140, 0, 0.6),
+        0 0 150px rgba(255, 215, 0, 0.4);
+}
+
+@keyframes moltenBreathBeam {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%) rotate(-15deg) scaleX(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-50%) rotate(-15deg) scaleX(1.2);
+    }
+    70% {
+        opacity: 0.9;
+        transform: translateX(-50%) translateY(-50%) rotate(-15deg) scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%) rotate(-15deg) scaleX(0.8);
+    }
+}
+
+/* Molten Particles */
+.molten-breath-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #FF4500, #FF6347, #DC143C);
+    border-radius: 50%;
+    animation: moltenParticle linear forwards;
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.8);
+}
+
+@keyframes moltenParticle {
+    0% {
+        opacity: 1;
+        transform: scale(0.3) translateX(0) translateY(0);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) translateX(var(--random-x, 100px)) translateY(var(--random-y, -50px));
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateX(var(--random-x, 200px)) translateY(var(--random-y, -100px));
+    }
+}
+
+/* Screen-wide Fire Overlay */
+.molten-breath-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, 
+        rgba(255, 69, 0, 0.3) 0%,
+        rgba(255, 140, 0, 0.2) 30%,
+        rgba(255, 215, 0, 0.1) 60%,
+        transparent 100%
+    );
+    z-index: 1400;
+    pointer-events: none;
+    animation: moltenScreenOverlay 2.5s ease-out forwards;
+}
+
+@keyframes moltenScreenOverlay {
+    0% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Heat Wave Distortion */
+.molten-breath-heat-wave {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(45deg,
+        transparent 48%,
+        rgba(255, 69, 0, 0.1) 49%,
+        rgba(255, 140, 0, 0.1) 50%,
+        rgba(255, 69, 0, 0.1) 51%,
+        transparent 52%
+    );
+    background-size: 20px 20px;
+    z-index: 1450;
+    pointer-events: none;
+    animation: heatWaveDistortion 2s ease-in-out forwards;
+}
+
+@keyframes heatWaveDistortion {
+    0% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    25% {
+        opacity: 0.8;
+        transform: translateX(10px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-10px);
+    }
+    75% {
+        opacity: 0.8;
+        transform: translateX(5px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+}
+
+/* Screen Shake Effect */
+.molten-breath-shake {
+    animation: moltenBreathShake 2s ease-in-out;
+}
+
+@keyframes moltenBreathShake {
+    0%, 100% { transform: translate(0); }
+    10% { transform: translate(-5px, -2px) rotate(-1deg); }
+    20% { transform: translate(5px, 2px) rotate(1deg); }
+    30% { transform: translate(-3px, 0) rotate(0deg); }
+    40% { transform: translate(3px, -1px) rotate(1deg); }
+    50% { transform: translate(-2px, 2px) rotate(-1deg); }
+    60% { transform: translate(2px, -2px) rotate(0deg); }
+    70% { transform: translate(-1px, 1px) rotate(-1deg); }
+    80% { transform: translate(1px, -1px) rotate(1deg); }
+    90% { transform: translate(0, 1px) rotate(0deg); }
+}
+
+/* Individual Fire Damage VFX */
+.molten-breath-damage-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(255, 69, 0, 0.8) 0%,
+        rgba(255, 140, 0, 0.6) 30%,
+        rgba(220, 20, 60, 0.4) 60%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    z-index: 1300;
+    pointer-events: none;
+    animation: moltenDamageImpact 1.5s ease-out forwards;
+    box-shadow: 
+        0 0 30px rgba(255, 69, 0, 0.9),
+        0 0 60px rgba(255, 140, 0, 0.7),
+        inset 0 0 20px rgba(220, 20, 60, 0.5);
+}
+
+@keyframes moltenDamageImpact {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Burning Particles for Damage */
+.molten-breath-burn-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #FF4500, #DC143C);
+    border-radius: 50%;
+    z-index: 1250;
+    pointer-events: none;
+    animation: burnParticleRise 1.5s ease-out forwards;
+    box-shadow: 0 0 8px rgba(255, 69, 0, 0.9);
+}
+
+@keyframes burnParticleRise {
+    0% {
+        opacity: 1;
+        transform: scale(0.5) translateY(0);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) translateY(-30px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.3) translateY(-60px);
+    }
+}
+
+/* Ability Disable VFX with Molten Theme */
+.molten-breath-disable-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1350;
+    pointer-events: none;
+    animation: moltenDisableEffect 2s ease-out forwards;
+}
+
+@keyframes moltenDisableEffect {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Disable Icon */
+.molten-breath-disable-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    z-index: 1360;
+    animation: moltenDisableIcon 2s ease-out forwards;
+    text-shadow: 
+        0 0 20px rgba(255, 69, 0, 0.9),
+        0 0 40px rgba(220, 20, 60, 0.7);
+    filter: hue-rotate(15deg) brightness(1.2);
+}
+
+@keyframes moltenDisableIcon {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(-180deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.3) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1) rotate(180deg);
+    }
+}
+
+/* Molten Disable Chains */
+.molten-disable-chain {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 4px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 69, 0, 0.8) 20%,
+        rgba(220, 20, 60, 0.9) 50%,
+        rgba(255, 69, 0, 0.8) 80%,
+        transparent 100%
+    );
+    transform-origin: left center;
+    animation: moltenChainForge 2s ease-out forwards;
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.8);
+}
+
+@keyframes moltenChainForge {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scaleX(0);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scaleX(1.2);
+    }
+    80% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scaleX(0.8);
+    }
+}
+
+/* ===============================
+   WEAPON SMITHING VFX STYLES
+   =============================== */
+
+/* Weapon Smithing Casting VFX */
+.weapon-smithing-casting-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+    animation: weaponSmithingCasting 2s ease-in-out;
+}
+
+@keyframes weaponSmithingCasting {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Forge Flame Effect */
+.weapon-smithing-forge-flame {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse at center,
+        rgba(255, 69, 0, 0.9) 0%,
+        rgba(255, 140, 0, 0.7) 30%,
+        rgba(255, 215, 0, 0.5) 60%,
+        rgba(255, 69, 0, 0.3) 80%,
+        transparent 100%
+    );
+    transform: translateX(-50%) translateY(-50%);
+    border-radius: 50%;
+    animation: forgeFlameFlicker 1.5s ease-in-out infinite;
+    box-shadow: 
+        0 0 40px rgba(255, 69, 0, 0.6),
+        0 0 80px rgba(255, 140, 0, 0.4),
+        inset 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes forgeFlameFlicker {
+    0%, 100% {
+        transform: translateX(-50%) translateY(-50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateX(-50%) translateY(-50%) scale(1.15);
+        opacity: 1;
+    }
+}
+
+/* Weapon Smithing Sparks */
+.weapon-smithing-spark {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #FFD700, #FFA500, #FF4500);
+    border-radius: 50%;
+    animation: weaponSmithingSpark ease-out forwards;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes weaponSmithingSpark {
+    0% {
+        opacity: 1;
+        transform: scale(0.5);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.5);
+        box-shadow: 0 0 25px rgba(255, 165, 0, 0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-60px);
+        box-shadow: 0 0 10px rgba(255, 69, 0, 0.4);
+    }
+}
+
+/* Metal Glow Effects */
+.weapon-smithing-metal-glow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle, #C0C0C0, #A9A9A9, #696969);
+    border-radius: 50%;
+    animation: metalGlowPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.7);
+}
+
+@keyframes metalGlowPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(0.8);
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Weapon Smithing Enhancement VFX */
+.weapon-smithing-enhancement-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+    animation: weaponEnhancement 2.5s ease-in-out;
+}
+
+@keyframes weaponEnhancement {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Weapon Glow Based on Stat Type */
+.weapon-smithing-weapon-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 80%;
+    transform: translateX(-50%) translateY(-50%);
+    border-radius: 50%;
+    animation: weaponGlowPulse 2s ease-in-out;
+}
+
+/* Damage Enhancement (Red/Orange) */
+.weapon-smithing-weapon-glow.damage-enhancement {
+    background: radial-gradient(ellipse at center,
+        rgba(255, 69, 0, 0.7) 0%,
+        rgba(255, 140, 0, 0.5) 40%,
+        rgba(220, 20, 60, 0.3) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 50px rgba(255, 69, 0, 0.6),
+        0 0 100px rgba(255, 140, 0, 0.4);
+}
+
+/* Defense Enhancement (Blue/Silver) */
+.weapon-smithing-weapon-glow.defense-enhancement {
+    background: radial-gradient(ellipse at center,
+        rgba(70, 130, 180, 0.7) 0%,
+        rgba(135, 206, 235, 0.5) 40%,
+        rgba(192, 192, 192, 0.3) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 50px rgba(70, 130, 180, 0.6),
+        0 0 100px rgba(135, 206, 235, 0.4);
+}
+
+/* Precision Enhancement (Purple/Gold) */
+.weapon-smithing-weapon-glow.precision-enhancement {
+    background: radial-gradient(ellipse at center,
+        rgba(147, 112, 219, 0.7) 0%,
+        rgba(255, 215, 0, 0.5) 40%,
+        rgba(186, 85, 211, 0.3) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 50px rgba(147, 112, 219, 0.6),
+        0 0 100px rgba(255, 215, 0, 0.4);
+}
+
+/* General Enhancement (Green/White) */
+.weapon-smithing-weapon-glow.general-enhancement {
+    background: radial-gradient(ellipse at center,
+        rgba(34, 139, 34, 0.7) 0%,
+        rgba(144, 238, 144, 0.5) 40%,
+        rgba(255, 255, 255, 0.3) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 50px rgba(34, 139, 34, 0.6),
+        0 0 100px rgba(144, 238, 144, 0.4);
+}
+
+@keyframes weaponGlowPulse {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%) scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%) scale(1);
+    }
+}
+
+/* Enhancement Particles */
+.weapon-smithing-enhancement-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #FFD700, #FFFF00, #FFA500);
+    border-radius: 50%;
+    animation: enhancementParticleFloat ease-out forwards;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes enhancementParticleFloat {
+    0% {
+        opacity: 1;
+        transform: scale(0.3) translateY(0);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) translateY(-30px);
+        box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-80px);
+        box-shadow: 0 0 8px rgba(255, 165, 0, 0.4);
+    }
+}
+
+/* Stat Boost Indicator */
+.weapon-smithing-stat-indicator {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+    color: #000;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1001;
+    animation: statIndicatorFloat 2.5s ease-out;
+    box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.6),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    border: 2px solid #FFD700;
+}
+
+@keyframes statIndicatorFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.1) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1) translateY(-20px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.9) translateY(-40px);
+    }
+}
+
+/* ===============================
+   FORGE MASTERY PASSIVE VFX STYLES
+   =============================== */
+
+/* Forge Mastery Passive VFX */
+.forge-mastery-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+    animation: forgeMasteryActivation 2.5s ease-in-out;
+}
+
+@keyframes forgeMasteryActivation {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Armor Enhancement Glow */
+.forge-mastery-armor-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    height: 90%;
+    transform: translateX(-50%) translateY(-50%);
+    background: radial-gradient(ellipse at center,
+        rgba(192, 192, 192, 0.6) 0%,
+        rgba(255, 215, 0, 0.4) 30%,
+        rgba(70, 130, 180, 0.3) 60%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    animation: armorGlowPulse 2s ease-in-out;
+    box-shadow: 
+        0 0 40px rgba(192, 192, 192, 0.5),
+        0 0 80px rgba(70, 130, 180, 0.3);
+}
+
+@keyframes armorGlowPulse {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%) scale(0.7);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-50%) scale(1.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50%) scale(1);
+    }
+}
+
+/* Forge Mastery Stat Indicator */
+.forge-mastery-stat-indicator {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #C0C0C0, #4682B4, #FFD700);
+    color: #000;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1001;
+    animation: forgeMasteryStatFloat 2.5s ease-out;
+    box-shadow: 
+        0 0 15px rgba(192, 192, 192, 0.6),
+        inset 0 0 8px rgba(255, 255, 255, 0.3);
+    border: 2px solid #4682B4;
+}
+
+@keyframes forgeMasteryStatFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.7) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.1) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1) translateY(-15px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8) translateY(-30px);
+    }
+}
+
+/* Forge Mastery Sparks */
+.forge-mastery-spark {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: radial-gradient(circle, #FFD700, #C0C0C0, #4682B4);
+    border-radius: 50%;
+    animation: forgeMasterySpark ease-out forwards;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes forgeMasterySpark {
+    0% {
+        opacity: 1;
+        transform: scale(0.4);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.5);
+        box-shadow: 0 0 25px rgba(192, 192, 192, 0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.6) translateY(-70px);
+        box-shadow: 0 0 10px rgba(70, 130, 180, 0.4);
+    }
+}
+
+/* Forge Mastery Passive Indicator */
+.forge-mastery-passive-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: linear-gradient(135deg, #4682B4, #C0C0C0);
+    color: #FFD700;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1100;
+    border: 1px solid #FFD700;
+    box-shadow: 0 0 8px rgba(70, 130, 180, 0.6);
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.forge-mastery-passive-indicator.active {
+    opacity: 1;
+    animation: forgeMasteryIndicatorPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes forgeMasteryIndicatorPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(70, 130, 180, 0.6);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+    }
+}
+
+.forge-mastery-passive-indicator:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 1);
+} 

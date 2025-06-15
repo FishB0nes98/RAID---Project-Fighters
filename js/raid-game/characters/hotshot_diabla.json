@@ -1,0 +1,58 @@
+{
+    "id": "hotshot_diabla",
+    "name": "Hotshot Diabla",
+    "image": "Loading Screen/Hotshot Diabla.png",
+    "rarity": "epic",
+    "type": "demon",
+    "description": "A seductive demoness of the hellish desert, combining lethal beauty with scorching fire magic.",
+    "stats": {
+        "physicalDamage": 215,
+        "magicalDamage": 0,
+        "armor": 12,
+        "magicalShield": 12,
+        "hp": 13900,
+        "hpPerTurn": 0,
+        "mana": 5555,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.05,
+        "critChance": 0.5,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "hotshot_diabla_dual_shot",
+            "name": "Dual Shot",
+            "type": "dual_shot",
+            "damageType": "physical",
+            "manaCost": 40,
+            "cooldown": 1,
+            "targetType": "all_enemies",
+            "description": "Deals 614 damage to two random targets (can be the same). If any shot crits, 50% chance to fire again infinitely.",
+            "icon": "Icons/abilities/dual_shot.png",
+            "baseDamage": 614,
+            "chainOnCrit": true,
+            "chainChance": 0.5
+        },
+        {
+            "id": "hotshot_diabla_armor_piercer",
+            "name": "Armor Piercer",
+            "type": "armor_piercer",
+            "manaCost": 60,
+            "cooldown": 8,
+            "targetType": "self",
+            "description": "For 3 turns, your critical strikes permanently reduce target's armor by 2% (stacking).",
+            "icon": "Icons/abilities/armor_piercer.png",
+            "buffDuration": 3
+        }
+    ],
+    "passive": {
+        "id": "hotshot_diabla_trickshot",
+        "name": "Trickshot",
+        "description": "Whenever you deal damage, you have 12% chance to fire a bullet that deals 100% Physical damage to a random enemy. This ignores armor.",
+        "icon": "Icons/passives/trickshot.png",
+        "script": "js/raid-game/passives/hotshot_diabla_passive.js"
+    },
+    "tags": ["Demon", "Magic", "Hell"]
+} 

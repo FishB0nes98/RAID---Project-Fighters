@@ -18,6 +18,175 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
     console.warn("AbilityFactory not found. Schoolboy Siegfried abilities might not load correctly.");
 }
 
+/**
+ * Schoolboy Siegfried Statistics Enhancement
+ * Enhanced statistics tracking for all of Siegfried's abilities to match comprehensive tracking systems
+ */
+
+/**
+ * Global helper function to track Siegfried's ability usage for statistics
+ */
+function trackSiegfriedAbilityUsage(character, abilityId, effectType, amount = 0, isCritical = false) {
+    if (!window.statisticsManager || !character) {
+        console.warn(`[SiegfriedStats] StatisticsManager or character not available for tracking ${abilityId}`);
+        return;
+    }
+    
+    try {
+        window.statisticsManager.recordAbilityUsage(character, abilityId, effectType, amount, isCritical);
+        console.log(`[SiegfriedStats] Tracked ${effectType} ability usage: ${abilityId} by ${character.name}`);
+    } catch (error) {
+        console.error(`[SiegfriedStats] Error tracking ability usage for ${abilityId}:`, error);
+    }
+}
+
+/**
+ * Enhanced Sword Slash (Q) statistics tracking
+ */
+window.trackSwordSlashStats = function(caster, target, damageResult) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track damage dealt with proper ability ID
+        window.statisticsManager.recordDamageDealt(
+            caster, 
+            target, 
+            damageResult.damage, 
+            'physical', 
+            damageResult.isCritical,
+            'schoolboy_siegfried_q'
+        );
+        
+        // Track ability usage
+        trackSiegfriedAbilityUsage(caster, 'schoolboy_siegfried_q', 'damage', damageResult.damage, damageResult.isCritical);
+        
+        console.log(`[SiegfriedStats] Sword Slash damage tracked: ${damageResult.damage} to ${target.name}`);
+    } catch (error) {
+        console.error(`[SiegfriedStats] Error tracking Sword Slash stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Lion Protection (W) statistics tracking
+ */
+window.trackLionProtectionStats = function(caster, healAmount) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track healing done if any healing occurred
+        if (healAmount > 0) {
+            window.statisticsManager.recordHealingDone(
+                caster,
+                caster, // Self-heal
+                healAmount,
+                false, // Not critical
+                'schoolboy_siegfried_w'
+            );
+        }
+        
+        // Track utility ability usage for the buff application
+        trackSiegfriedAbilityUsage(caster, 'schoolboy_siegfried_w', 'utility', 0, false);
+        
+        console.log(`[SiegfriedStats] Lion Protection tracked: ${healAmount} HP restored + defensive buff applied to ${caster.name}`);
+    } catch (error) {
+        console.error(`[SiegfriedStats] Error tracking Lion Protection stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Sword Blessing (E) statistics tracking
+ */
+window.trackSwordBlessingStats = function(caster) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track utility ability usage for buff application
+        trackSiegfriedAbilityUsage(caster, 'schoolboy_siegfried_e', 'utility', 0, false);
+        
+        console.log(`[SiegfriedStats] Sword Blessing utility usage tracked for ${caster.name}`);
+    } catch (error) {
+        console.error(`[SiegfriedStats] Error tracking Sword Blessing stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Judgement (R) statistics tracking
+ */
+window.trackJudgementStats = function(caster, target, damageResult, casterHealAmount, allyHealAmount = 0, ally = null) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track damage dealt
+        window.statisticsManager.recordDamageDealt(
+            caster,
+            target,
+            damageResult.damage,
+            'physical',
+            damageResult.isCritical,
+            'schoolboy_siegfried_r'
+        );
+        
+        // Track healing done to caster
+        if (casterHealAmount > 0) {
+            window.statisticsManager.recordHealingDone(
+                caster,
+                caster,
+                casterHealAmount,
+                false, // Not critical
+                'schoolboy_siegfried_r_self_heal'
+            );
+        }
+        
+        // Track healing done to ally
+        if (allyHealAmount > 0 && ally) {
+            window.statisticsManager.recordHealingDone(
+                caster,
+                ally,
+                allyHealAmount,
+                false, // Not critical
+                'schoolboy_siegfried_r_ally_heal'
+            );
+        }
+        
+        // Track primary ability usage
+        trackSiegfriedAbilityUsage(caster, 'schoolboy_siegfried_r', 'damage', damageResult.damage, damageResult.isCritical);
+        
+        console.log(`[SiegfriedStats] Judgement tracked: ${damageResult.damage} damage to ${target.name}, ${casterHealAmount} self-heal, ${allyHealAmount} ally heal`);
+    } catch (error) {
+        console.error(`[SiegfriedStats] Error tracking Judgement stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Buff Connoisseur Passive statistics tracking
+ */
+window.trackBuffConnoisseurStats = function(character, buffCount, bonusDamage) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track passive ability usage when it triggers (provides bonus damage)
+        if (bonusDamage > 0) {
+            trackSiegfriedAbilityUsage(character, 'buff_connoisseur_passive', 'passive_trigger', bonusDamage, false);
+            
+            // Record as a passive event
+            window.statisticsManager.recordTurnEvent({
+                type: 'passive_trigger',
+                caster: character.name,
+                casterId: character.instanceId || character.id,
+                passiveName: 'Buff Connoisseur',
+                passiveId: 'buff_connoisseur_passive',
+                buffCount: buffCount,
+                bonusDamage: bonusDamage,
+                turn: window.statisticsManager.currentTurn || 0
+            });
+        }
+        
+        console.log(`[SiegfriedStats] Buff Connoisseur passive tracked: ${buffCount} buffs providing ${bonusDamage} bonus damage`);
+    } catch (error) {
+        console.error(`[SiegfriedStats] Error tracking Buff Connoisseur stats:`, error);
+    }
+};
+
 // --- Enhanced Passive Display ---
 // Function to enhance and animate Siegfried's passive display
 const enhanceSiegfriedPassiveDisplay = (character) => {
@@ -252,8 +421,13 @@ const schoolboySiegfriedLionProtectionEffect = (caster) => {
     const missingHp = caster.stats.maxHp - caster.stats.currentHp;
     const healAmount = Math.floor(missingHp * 0.10);
     if (healAmount > 0) {
-        const healResult = caster.heal(healAmount, caster);
+        const healResult = caster.heal(healAmount, caster, { abilityId: 'schoolboy_siegfried_w' });
         log(`${caster.name} heals for ${healResult.healAmount} (10% of missing health).`);
+
+        // Track healing statistics
+        if (window.trackLionProtectionStats) {
+            window.trackLionProtectionStats(caster, healResult.healAmount);
+        }
 
         // Add healing VFX
         const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
@@ -271,7 +445,7 @@ const schoolboySiegfriedLionProtectionEffect = (caster) => {
         'schoolboy_siegfried_w_buff',
         'Lion Protection',
         'Icons/abilities/lion_protection.jfif', 
-        5, // Duration: 5 turns
+        3, // Duration: 3 turns
         (character) => {
             // No ongoing effect, stats applied/reverted via statModifiers and remove function
         },
@@ -325,7 +499,13 @@ const schoolboySiegfriedLionProtectionEffect = (caster) => {
     };
 
     // Apply the buff to the caster
-    caster.addBuff(lionProtectionBuff.clone()); 
+    caster.addBuff(lionProtectionBuff.clone());
+
+    // Track buff application statistics (called after buff is applied)
+    if (window.trackLionProtectionStats && healAmount === 0) {
+        // If no healing occurred, still track the utility usage
+        window.trackLionProtectionStats(caster, 0);
+    }
 
     // --- Enhanced Lion Protection VFX --- 
     const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
@@ -372,9 +552,9 @@ const schoolboySiegfriedW = new Ability(
     'Lion Protection',
     'Icons/abilities/lion_protection.jfif',
     65, // Mana cost
-    10,  // Cooldown
+    6,  // Cooldown
     schoolboySiegfriedLionProtectionEffect
-).setDescription('Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 5 turns.')
+).setDescription('Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 3 turns.')
  .setTargetType('self');
 
 // Q: Sword Slash with VFX
@@ -407,7 +587,12 @@ const schoolboySiegfriedSwordSlashEffect = (caster, target) => {
     const baseDamage = caster.stats.physicalDamage;
 
     // Apply damage
-    const result = target.applyDamage(baseDamage, 'physical', caster);
+    const result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'schoolboy_siegfried_q' });
+    
+    // Track damage statistics
+    if (window.trackSwordSlashStats) {
+        window.trackSwordSlashStats(caster, target, result);
+    }
     
     // Log the damage
     log(`${target.name} takes ${result.damage} physical damage from Sword Slash!${result.isCritical ? ' (Critical Hit!)' : ''}`);
@@ -514,6 +699,11 @@ const siegfriedSwordBlessingEffect = (caster, target) => {
     // Apply damage buff to the caster
     caster.addBuff(damageBuff.clone());
     log(`${caster.name} gains Blessed Strength!`);
+
+    // Track utility statistics
+    if (window.trackSwordBlessingStats) {
+        window.trackSwordBlessingStats(caster);
+    }
 
     // Play sound
     playSound('sounds/siegfrieda3.mp3', 0.8); // Siegfried's voice line for E
@@ -627,7 +817,7 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
     // --- REFACTORED: Use applyDamage ---
     // Pass caster as the third argument to correctly handle crits/lifesteal source
     // applyDamage now handles the actual damage calculation (incl. crit) and standard VFX
-    const result = target.applyDamage(baseDamage, 'physical', caster);
+    const result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'schoolboy_siegfried_r' });
     // --- END REFACTOR ---
 
     // Remove armor restore logic
@@ -649,7 +839,7 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
         const healAmount = result.damage; // Heal based on actual damage dealt
 
         // Heal caster
-        const casterHealResult = caster.heal(healAmount, caster);
+        const casterHealResult = caster.heal(healAmount, caster, { abilityId: 'schoolboy_siegfried_r_self_heal' });
         log(`${caster.name} is healed by Judgement for ${casterHealResult.healAmount} HP.`);
         // Add caster heal VFX
         if (casterElement) {
@@ -675,7 +865,7 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
 
         // Heal random ally if found
         if (randomAlly) {
-            const allyHealResult = randomAlly.heal(healAmount, caster);
+            const allyHealResult = randomAlly.heal(healAmount, caster, { abilityId: 'schoolboy_siegfried_r_ally_heal' });
             // --- NEW: Use ally instanceId if available ---
             const allyName = randomAlly.name || (randomAlly.instanceId || randomAlly.id);
             log(`${allyName} is healed by Judgement for ${allyHealResult.healAmount} HP.`);
@@ -693,6 +883,12 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
             }
         } else {
             log("No other living allies found to receive Judgement's heal.");
+        }
+
+        // Track comprehensive statistics for Judgement ability
+        if (window.trackJudgementStats) {
+            const allyHealAmount = randomAlly ? allyHealResult.healAmount : 0;
+            window.trackJudgementStats(caster, target, result, casterHealResult.healAmount, allyHealAmount, randomAlly);
         }
     }
 

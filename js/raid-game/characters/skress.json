@@ -1,0 +1,50 @@
+{
+    "id": "skress",
+    "name": "Skress",
+    "image": "Loading Screen/Skress.png",
+    "rarity": "rare",
+    "type": "undead",
+    "description": "A skeletal demon warrior infused with dark flames.",
+    "stats": {
+        "physicalDamage": 291,
+        "magicalDamage": 110,
+        "armor": 20,
+        "magicalShield": 20,
+        "hp": 11900,
+        "maxHp": 11900,
+        "hpPerTurn": 0,
+        "mana": 3000,
+        "maxMana": 3000,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.1,
+        "critChance": 0.15,
+        "critDamage": 2,
+        "speed": 0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "dual_sword_strike",
+            "name": "Dual Sword Strike",
+            "icon": "Icons/abilities/skress_dual_sword_strike.png",
+            "description": "Strike with both swords, dealing 500 + 115% Physical damage twice. If the target has any debuff, this ability deals double damage.",
+            "manaCost": 120,
+            "cooldown": 3,
+            "targetType": "enemy",
+            "type": "dual_sword_strike"
+        },
+        {
+            "id": "parry",
+            "name": "Parry",
+            "icon": "Icons/abilities/skress_parry.png",
+            "description": "Gains 60% Dodge chance for 3 turns. When dodging an attack, redirects the original damage back to the attacker.",
+            "manaCost": 80,
+            "cooldown": 5,
+            "targetType": "self",
+            "type": "parry"
+        }
+    ],
+    "passive": null,
+    "tags": ["Undead", "Warrior", "Hell"]
+} 

@@ -93,7 +93,7 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
 
     // Apply damage to all targets and calculate total damage
     enemies.forEach(enemy => {
-        const result = enemy.applyDamage(damageAmount, damageType, caster);
+        const result = enemy.applyDamage(damageAmount, damageType, caster, { abilityId: 'schoolgirl_julia_q' });
         totalDamageDealt += result.damage; // Accumulate damage dealt
 
         let message = `${enemy.name} takes ${result.damage} ${damageType} damage from Healing Kick`;
@@ -107,8 +107,8 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
         }
     });
 
-    // Calculate heal amount (65% of total damage dealt)
-    const healAmount = Math.floor(totalDamageDealt * 0.65);
+    // Calculate heal amount (40% of total damage dealt)
+    const healAmount = Math.floor(totalDamageDealt * 0.40);
 
     if (healAmount > 0) {
         // Determine which team to heal based on caster
@@ -129,7 +129,7 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
 
         // Apply heal to all alive allies (including the caster)
         alliesToHeal.forEach(ally => {
-            const healResult = ally.heal(healAmount, caster);
+            const healResult = ally.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_q' });
             const actualHeal = healResult.healAmount; // Extract healAmount from result object
             log(`${ally.name} is healed for ${actualHeal}.`);
             
@@ -166,10 +166,10 @@ const schoolgirl_julia_q = new Ability(
     'schoolgirl_julia_q',
     'Healing Kick',
     'Icons/abilities/healing_kick.jfif', // Placeholder icon
-    60, // Mana cost
-    1,  // Cooldown (Changed from 2)
+    80, // Mana cost
+    2,  // Cooldown
     schoolgirlJuliaHealingKickEffect
-).setDescription('Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 65% of the total damage dealt.');
+).setDescription('Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 40% of the total damage dealt.');
 
 // --- Ability Factory Integration ---
 // Ensure AbilityFactory exists and has the registration method
@@ -235,7 +235,7 @@ const schoolgirlJuliaSproutPlantingEffect = (caster, target) => {
         const baseHeal = 1250;
         const healAmount = Math.floor(baseHeal * (1 + (caster.stats.healingPower || 0)));
 
-        const healResult = buffedCharacter.heal(healAmount, caster);
+        const healResult = buffedCharacter.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_w' });
         const actualHeal = healResult.healAmount; // Extract healAmount from result object
         log(`${buffedCharacter.name} is healed for ${actualHeal} HP.`);
 
@@ -481,7 +481,7 @@ const schoolgirlJuliaPushbackEffect = (caster, target) => {
     const damageAmount = Math.floor(caster.stats.physicalDamage * 1.5);
 
     // Apply damage
-    const result = target.applyDamage(damageAmount, 'physical', caster);
+    const result = target.applyDamage(damageAmount, 'physical', caster, { abilityId: 'schoolgirl_julia_e' });
 
     let message = `${target.name} takes ${result.damage} physical damage`;
     if (result.isCritical) {
@@ -609,7 +609,7 @@ const schoolgirlJuliaSpiritsStrengthEffect = (caster, target) => { // Target par
 
     // Apply heal to all alive allies (including the caster if they are alive)
     alliesToHeal.forEach(ally => {
-        const healResult = ally.heal(healAmount, caster);
+        const healResult = ally.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_r' });
         const actualHeal = healResult.healAmount; // Extract healAmount from result object
         totalHealed += actualHeal;
         log(`${ally.name} is healed for ${actualHeal} by Spirits Strength.`);

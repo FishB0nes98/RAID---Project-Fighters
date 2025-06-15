@@ -1,5 +1,259 @@
 // Ability definitions for Schoolgirl Elphelt
 
+// === STATISTICS TRACKING FUNCTIONS ===
+
+/**
+ * Global tracking function for Schoolgirl Elphelt's abilities
+ */
+function trackElpheltAbilityUsage(caster, abilityId, effectType, amount, isCritical) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        window.statisticsManager.recordAbilityUsage(caster, abilityId, effectType, amount, isCritical);
+        console.log(`[ElpheltStats] Tracked ${abilityId}: ${effectType} for ${amount} ${isCritical ? '(Critical)' : ''}`);
+    } catch (error) {
+        console.error(`[ElpheltStats] Error tracking ${abilityId}:`, error);
+    }
+}
+
+/**
+ * Track Love Bullet statistics
+ */
+function trackLoveBulletStats(caster, target, damageResult, wasStun = false, wasCharm = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+        const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+        
+        // Track damage dealt
+        window.statisticsManager.recordDamageDealt(caster, target, damageAmount, 'physical', isCritical, 'love_bullet');
+        
+        // Track ability usage
+        trackElpheltAbilityUsage(caster, 'love_bullet', 'damage', damageAmount, isCritical);
+        
+        // Track stun application if it occurred
+        if (wasStun) {
+            window.statisticsManager.recordStatusEffect(caster, target, 'stun', 'love_bullet_stun', true, 'love_bullet');
+            trackElpheltAbilityUsage(caster, 'love_bullet_stun', 'debuff', 1, false);
+        }
+        
+        // Track charm application if it occurred
+        if (wasCharm) {
+            window.statisticsManager.recordStatusEffect(caster, target, 'charm', 'love_bullet_charm', true, 'love_bullet');
+            trackElpheltAbilityUsage(caster, 'love_bullet_charm', 'debuff', 1, false);
+        }
+        
+        console.log(`[ElpheltStats] Tracked Love Bullet: ${damageAmount} damage to ${target.name}, stun: ${wasStun}, charm: ${wasCharm}`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Love Bullet stats:', error);
+    }
+}
+
+/**
+ * Track Flower Bomb statistics
+ */
+function trackFlowerBombStats(caster, target, abilityDisabled) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track debuff application
+        window.statisticsManager.recordStatusEffect(caster, target, 'ability_disable', 'flower_bomb_disable', true, 'schoolgirl_elphelt_w');
+        
+        // Track ability usage
+        trackElpheltAbilityUsage(caster, 'schoolgirl_elphelt_w', 'debuff', 1, false);
+        
+        console.log(`[ElpheltStats] Tracked Flower Bomb: disabled ability on ${target.name}`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Flower Bomb stats:', error);
+    }
+}
+
+/**
+ * Track Affection statistics
+ */
+function trackAffectionStats(caster, target) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track buff application to caster (damage reduction)
+        window.statisticsManager.recordStatusEffect(caster, caster, 'damage_reduction', 'affection_buff', false, 'schoolgirl_elphelt_e');
+        
+        // Track debuff application to target (infatuation)
+        window.statisticsManager.recordStatusEffect(caster, target, 'infatuation', 'affection_debuff', true, 'schoolgirl_elphelt_e');
+        
+        // Track ability usage
+        trackElpheltAbilityUsage(caster, 'schoolgirl_elphelt_e', 'buff', 1, false);
+        
+        console.log(`[ElpheltStats] Tracked Affection: applied to ${target.name}`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Affection stats:', error);
+    }
+}
+
+/**
+ * Track Piercing Bullet statistics
+ */
+function trackPiercingBulletStats(caster, target, damageResult, isInitialHit = true, chainCount = 0) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        const damageAmount = typeof damageResult === 'object' ? damageResult.damage : damageResult;
+        const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+        
+        // Determine ability ID based on whether it's initial hit or chain
+        const abilityId = isInitialHit ? 'schoolgirl_elphelt_r' : 'schoolgirl_elphelt_r_chain';
+        
+        // Track damage dealt
+        window.statisticsManager.recordDamageDealt(caster, target, damageAmount, 'physical', isCritical, abilityId);
+        
+        // Track ability usage (only for initial hit to avoid double counting)
+        if (isInitialHit) {
+            trackElpheltAbilityUsage(caster, 'schoolgirl_elphelt_r', 'damage', damageAmount, isCritical);
+        } else {
+            // Track chain hit separately
+            trackElpheltAbilityUsage(caster, 'schoolgirl_elphelt_r_chain', 'damage', damageAmount, isCritical);
+        }
+        
+        console.log(`[ElpheltStats] Tracked Piercing Bullet: ${damageAmount} damage to ${target.name} (${isInitialHit ? 'initial' : 'chain'} hit)`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Piercing Bullet stats:', error);
+    }
+}
+
+/**
+ * Track Defensive Maneuvers passive statistics
+ */
+function trackDefensiveManeuversStats(character, armorGain, shieldGain) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track passive buff application
+        window.statisticsManager.recordStatusEffect(character, character, 'defensive_buff', 'defensive_maneuvers', false, 'schoolgirl_elphelt_passive');
+        
+        // Track passive usage
+        trackElpheltAbilityUsage(character, 'schoolgirl_elphelt_passive', 'buff', armorGain + shieldGain, false);
+        
+        console.log(`[ElpheltStats] Tracked Defensive Maneuvers: +${armorGain} Armor, +${shieldGain} Magic Shield`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Defensive Maneuvers stats:', error);
+    }
+}
+
+/**
+ * Track Cute Pose statistics
+ */
+function trackCutePoseStats(caster, targetCount, buffValue) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track buff application
+        window.statisticsManager.recordStatusEffect(caster, caster, 'dodge_buff', 'cute_pose_buff', false, 'cute_pose');
+        
+        // Track ability usage
+        trackElpheltAbilityUsage(caster, 'cute_pose', 'buff', buffValue, false);
+        
+        console.log(`[ElpheltStats] Tracked Cute Pose: +${buffValue} dodge chance`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Cute Pose stats:', error);
+    }
+}
+
+/**
+ * Track Sweet Serenade statistics
+ */
+function trackSweetSerenadeStats(caster, targets, healAmounts, charmCount = 0) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track healing for each target
+        targets.forEach((target, index) => {
+            const healAmount = healAmounts[index] || 0;
+            if (healAmount > 0) {
+                window.statisticsManager.recordHealingDone(caster, target, healAmount, false, 'sweet_serenade');
+            }
+        });
+        
+        // Track ability usage
+        const totalHealing = healAmounts.reduce((sum, amount) => sum + amount, 0);
+        trackElpheltAbilityUsage(caster, 'sweet_serenade', 'healing', totalHealing, false);
+        
+        // Track charm effects
+        if (charmCount > 0) {
+            trackElpheltAbilityUsage(caster, 'sweet_serenade_charm', 'debuff', charmCount, false);
+        }
+        
+        console.log(`[ElpheltStats] Tracked Sweet Serenade: ${targets.length} targets, ${totalHealing} total healing, ${charmCount} charms`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Sweet Serenade stats:', error);
+    }
+}
+
+/**
+ * Track Heart Storm statistics
+ */
+function trackHeartStormStats(caster, targets, damageAmounts, healAmount = 0, stunCount = 0, charmCount = 0) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track damage for each target
+        targets.forEach((target, index) => {
+            const damageAmount = damageAmounts[index] || 0;
+            if (damageAmount > 0) {
+                const isCritical = false; // Heart Storm doesn't crit typically
+                window.statisticsManager.recordDamageDealt(caster, target, damageAmount, 'magical', isCritical, 'heart_storm');
+            }
+        });
+        
+        // Track healing for self
+        if (healAmount > 0) {
+            window.statisticsManager.recordHealingDone(caster, caster, healAmount, false, 'heart_storm_heal');
+            trackElpheltAbilityUsage(caster, 'heart_storm_heal', 'healing', healAmount, false);
+        }
+        
+        // Track ability usage
+        const totalDamage = damageAmounts.reduce((sum, amount) => sum + amount, 0);
+        trackElpheltAbilityUsage(caster, 'heart_storm', 'damage', totalDamage, false);
+        
+        // Track status effects
+        if (stunCount > 0) {
+            trackElpheltAbilityUsage(caster, 'heart_storm_stun', 'debuff', stunCount, false);
+        }
+        
+        if (charmCount > 0) {
+            trackElpheltAbilityUsage(caster, 'heart_storm_charm', 'debuff', charmCount, false);
+        }
+        
+        console.log(`[ElpheltStats] Tracked Heart Storm: ${targets.length} targets, ${totalDamage} total damage, ${healAmount} self heal, ${stunCount} stuns, ${charmCount} charms`);
+    } catch (error) {
+        console.error('[ElpheltStats] Error tracking Heart Storm stats:', error);
+    }
+}
+
+/**
+ * Track Elphelt's passive abilities statistics
+ */
+function trackElpheltPassiveStats(character, passiveType, amount, details = {}) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        switch (passiveType) {
+            case 'defensive_stance':
+                trackElpheltAbilityUsage(character, 'elphelt_passive_defensive_stance', 'buff', amount, false);
+                break;
+            case 'dodge_bonus':
+                trackElpheltAbilityUsage(character, 'elphelt_passive_dodge_bonus', 'utility', amount, false);
+                break;
+        }
+        
+        console.log(`[ElpheltStats] Tracked Elphelt passive (${passiveType}): ${amount}`);
+    } catch (error) {
+        console.error(`[ElpheltStats] Error tracking Elphelt passive (${passiveType}):`, error);
+    }
+}
+
+// === ABILITY IMPLEMENTATIONS ===
+
 // --- Q: Love Bullet ---
 const schoolgirlElpheltLoveBulletEffect = (caster, target) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
@@ -129,13 +383,16 @@ const schoolgirlElpheltLoveBulletEffect = (caster, target) => {
     const totalDamage = 300 + scalingDamage;
 
     target.isDamageSource = caster;
-    const result = target.applyDamage(totalDamage, 'physical');
+    const result = target.applyDamage(totalDamage, 'physical', caster, { abilityId: 'love_bullet' });
     target.isDamageSource = null;
 
     log(`${target.name} takes ${result.damage} physical damage from Love Bullet.`);
     if (result.isCritical) {
         log("Critical Hit!");
     }
+
+    // Track statistics
+    trackLoveBulletStats(caster, target, result);
 
     // Apply lifesteal if any
     caster.applyLifesteal(result.damage);
@@ -261,6 +518,9 @@ const flowerBombEffect = (caster, target) => {
     // Apply the debuff to the target
     target.addDebuff(disableDebuff.clone()); // Clone to ensure unique instances
     
+    // Track statistics
+    trackFlowerBombStats(caster, target, abilityToDisable.name);
+    
     // Update UI for both characters
     updateCharacterUI(caster);
     updateCharacterUI(target);
@@ -363,6 +623,9 @@ const schoolgirlElpheltAffectionEffect = (caster, target) => {
     caster.addBuff(affectionBuff.clone()); // Use clone for unique instances
     target.addDebuff(affectionDebuff.clone());
 
+    // Track statistics
+    trackAffectionStats(caster, target);
+
     // Update UI for both characters
     updateCharacterUI(caster);
     updateCharacterUI(target);
@@ -454,7 +717,7 @@ const schoolgirlElpheltPiercingBulletEffect = async (caster, initialTarget) => {
     // Calculate initial damage: 350% Physical Damage
     const initialDamage = Math.floor(caster.stats.physicalDamage * 3.5);
     initialTarget.isDamageSource = caster; // For crit/lifesteal calculation
-    const initialResult = initialTarget.applyDamage(initialDamage, 'physical', caster);
+    const initialResult = initialTarget.applyDamage(initialDamage, 'physical', caster, { abilityId: 'heart_storm' });
     initialTarget.isDamageSource = null;
 
     log(`${initialTarget.name} takes ${initialResult.damage} physical damage.`);
@@ -462,10 +725,14 @@ const schoolgirlElpheltPiercingBulletEffect = async (caster, initialTarget) => {
     caster.applyLifesteal(initialResult.damage); // Apply lifesteal for the initial hit
      if (initialTarget.isDead()) log(`${initialTarget.name} was defeated by the initial hit!`);
 
+    // Track initial hit statistics
+    trackPiercingBulletStats(caster, initialTarget, initialResult, true, 0);
+
     // --- Piercing Chain Logic ---
     let currentDamage = initialDamage;
     let currentTarget = initialTarget;
     const hitTargets = [initialTarget.id]; // Keep track of targets hit in this chain
+    let chainCount = 0;
 
     while (Math.random() < 0.5) { // 50% chance to pierce
         if (currentTarget.isDead()) {
@@ -482,6 +749,7 @@ const schoolgirlElpheltPiercingBulletEffect = async (caster, initialTarget) => {
         // Select a random target from the valid ones
         const nextTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
         hitTargets.push(nextTarget.id);
+        chainCount++;
 
         // Reduce damage by 50% for the pierce
         currentDamage = Math.floor(currentDamage * 0.5);
@@ -520,7 +788,7 @@ const schoolgirlElpheltPiercingBulletEffect = async (caster, initialTarget) => {
         
         // Apply pierce damage
         nextTarget.isDamageSource = caster;
-        const pierceResult = nextTarget.applyDamage(currentDamage, 'physical', caster);
+        const pierceResult = nextTarget.applyDamage(currentDamage, 'physical', caster, { abilityId: 'heart_storm_pierce' });
         nextTarget.isDamageSource = null;
 
         log(`${nextTarget.name} takes ${pierceResult.damage} piercing damage.`);
@@ -528,6 +796,8 @@ const schoolgirlElpheltPiercingBulletEffect = async (caster, initialTarget) => {
         caster.applyLifesteal(pierceResult.damage); // Apply lifesteal for the pierce hit
         if (nextTarget.isDead()) log(`${nextTarget.name} was defeated by the pierce!`);
 
+        // Track chain hit statistics
+        trackPiercingBulletStats(caster, nextTarget, pierceResult, false, chainCount);
 
         // Update current target for the next potential pierce
         currentTarget = nextTarget;

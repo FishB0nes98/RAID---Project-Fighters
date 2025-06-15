@@ -329,7 +329,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateHeader() {
         if (characterData) {
             elements.characterName.textContent = characterData.name || 'Character';
-            elements.characterImage.src = characterData.image || 'images/characters/default.png';
+            // Use skin system for character image
+            const imagePath = window.SkinManager ? 
+                window.SkinManager.getCharacterImagePath(characterId) || characterData.image : 
+                characterData.image;
+            elements.characterImage.src = imagePath || 'Loading Screen/default.png';
             elements.characterImage.alt = characterData.name || 'Character';
         }
     }

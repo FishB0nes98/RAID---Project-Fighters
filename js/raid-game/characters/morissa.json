@@ -1,0 +1,75 @@
+{
+    "id": "morissa",
+    "name": "Morissa",
+    "image": "Loading Screen/Morissa.png",
+    "rarity": "rare",
+    "type": "demon",
+    "description": "A seductive succubus who rules over lesser demons with her dark charm and magical prowess.",
+    "stats": {
+        "physicalDamage": 310,
+        "magicalDamage": 210,
+        "armor": 8,
+        "magicalShield": 17,
+        "hp": 8150,
+        "hpPerTurn": 0,
+        "mana": 4000,
+        "manaPerTurn": 0,
+        "lifesteal": 0.1,
+        "dodgeChance": 0.04,
+        "critChance": 0.00,
+        "critDamage": 1.6,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "soul_siphon",
+            "name": "Soul Siphon",
+            "type": "custom",
+            "manaCost": 45,
+            "cooldown": 3,
+            "targetType": "enemy",
+            "description": "Drains the target's life force, dealing 355 + 100% Magical Damage and healing Morissa for the same amount.",
+            "icon": "Icons/abilities/soul_siphon.png",
+            "functionName": "soulSiphonEffect"
+        },
+        {
+            "id": "shadow_wings",
+            "name": "Shadow Wings",
+            "type": "custom",
+            "manaCost": 80,
+            "cooldown": 8,
+            "targetType": "self",
+            "description": "Takes flight with demonic wings, gaining 100% dodge chance for 2 turns. Forces all enemies to target only her. When landing, deals 666 + 66% Physical Damage to ALL enemies.",
+            "icon": "Icons/abilities/shadow_wings.png",
+            "functionName": "shadowWingsEffect"
+        },
+        {
+            "id": "kiss_of_death",
+            "name": "Kiss of Death",
+            "type": "custom",
+            "manaCost": 60,
+            "cooldown": 6,
+            "targetType": "enemy",
+            "description": "A seductive kiss that applies a deadly curse, dealing increasing damage each turn: 100 → 200 → 400 → 800 damage over 4 turns.",
+            "icon": "Icons/abilities/kiss_of_death.png",
+            "functionName": "kissOfDeathEffect"
+        },
+        {
+            "id": "temptations_embrace",
+            "name": "Temptation's Embrace",
+            "type": "custom",
+            "manaCost": 0,
+            "cooldown": 7,
+            "targetType": "all_enemies",
+            "description": "Morissa's ultimate seduction drains the very essence from all enemies. Steals 8% of current HP and Mana from ALL enemies and absorbs it into herself.",
+            "icon": "Icons/abilities/temptations_embrace.png",
+            "functionName": "temptationsEmbraceEffect"
+        }
+    ],
+    "passive": {
+        "id": "demonic_empathy",
+        "name": "Demonic Empathy",
+        "description": "Whenever Morissa heals, she shares 150% of that healing with a random ally (excluding herself). Her demonic nature amplifies the healing power for others.",
+        "icon": "Icons/passives/demonic_empathy.png"
+    }
+} 

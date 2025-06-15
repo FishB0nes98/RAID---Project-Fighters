@@ -1,0 +1,388 @@
+/* Dual Shot and Armor Piercer VFX Animations */
+
+/* Muzzle Flash Effects */
+.dual-shot-muzzle-flash {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #ffaa00 0%, #ff6600 30%, #ff0000 70%, transparent 100%);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: muzzleFlashAnimation 0.3s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.dual-shot-muzzle-flash.shot-1 {
+    animation-delay: 0s;
+    transform: translate(-70%, -50%); /* Left side for first shot */
+}
+
+.dual-shot-muzzle-flash.shot-2 {
+    animation-delay: 0.3s;
+    transform: translate(-30%, -50%); /* Right side for second shot */
+}
+
+.dual-shot-muzzle-flash.chain-shot {
+    background: radial-gradient(circle, #00aaff 0%, #0066ff 30%, #0000ff 70%, transparent 100%);
+    box-shadow: 0 0 20px #0066ff;
+}
+
+@keyframes muzzleFlashAnimation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Bullet Trail Effects */
+.dual-shot-bullet-trail {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(90deg, #ffaa00 0%, #ff6600 50%, #ff0000 100%);
+    transform-origin: left center;
+    animation: bulletTrailAnimation 0.4s ease-out;
+    pointer-events: none;
+    z-index: 999;
+    box-shadow: 0 0 8px #ff6600;
+}
+
+.dual-shot-bullet-trail.shot-1 {
+    animation-delay: 0s;
+}
+
+.dual-shot-bullet-trail.shot-2 {
+    animation-delay: 0.3s;
+}
+
+.dual-shot-bullet-trail.chain-shot {
+    background: linear-gradient(90deg, #00aaff 0%, #0066ff 50%, #0000ff 100%);
+    box-shadow: 0 0 12px #0066ff;
+    height: 6px;
+}
+
+@keyframes bulletTrailAnimation {
+    0% {
+        width: 0;
+        opacity: 1;
+    }
+    70% {
+        width: 100%;
+        opacity: 1;
+    }
+    100% {
+        width: 100%;
+        opacity: 0;
+    }
+}
+
+/* Impact Effects */
+.dual-shot-impact {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #ffaa00 0%, #ff6600 20%, #ff0000 40%, #aa0000 60%, transparent 100%);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: impactAnimation 0.6s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.dual-shot-impact.shot-1 {
+    animation-delay: 0.4s;
+}
+
+.dual-shot-impact.shot-2 {
+    animation-delay: 0.7s;
+}
+
+.dual-shot-impact.chain-shot {
+    background: radial-gradient(circle, #00aaff 0%, #0066ff 20%, #0000ff 40%, #000066 60%, transparent 100%);
+    box-shadow: 0 0 30px #0066ff;
+}
+
+@keyframes impactAnimation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.9;
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* Additional particles for enhanced effect */
+.dual-shot-muzzle-flash::before {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, transparent 30%, #ffaa0033 50%, transparent 70%);
+    border-radius: 50%;
+    top: -10%;
+    left: -10%;
+    animation: muzzleGlowAnimation 0.3s ease-out;
+}
+
+.dual-shot-muzzle-flash.chain-shot::before {
+    background: radial-gradient(circle, transparent 30%, #0066ff33 50%, transparent 70%);
+}
+
+@keyframes muzzleGlowAnimation {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Screen shake effect for powerful shots */
+.dual-shot-screen-shake {
+    animation: dualShotShake 0.3s ease-in-out;
+}
+
+@keyframes dualShotShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-2px); }
+    20% { transform: translateX(2px); }
+    30% { transform: translateX(-2px); }
+    40% { transform: translateX(2px); }
+    50% { transform: translateX(-1px); }
+    60% { transform: translateX(1px); }
+    70% { transform: translateX(-1px); }
+    80% { transform: translateX(1px); }
+    90% { transform: translateX(-0.5px); }
+}
+
+/* Floating damage numbers enhancement for dual shot */
+.damage-number.dual-shot {
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: dualShotDamageFloat 1.5s ease-out forwards;
+}
+
+.damage-number.dual-shot.shot-1 {
+    margin-left: -20px;
+}
+
+.damage-number.dual-shot.shot-2 {
+    margin-left: 20px;
+    animation-delay: 0.3s;
+}
+
+@keyframes dualShotDamageFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.8);
+    }
+}
+
+/* ==================== ARMOR PIERCER VFX ==================== */
+
+/* Armor Piercer Active State */
+.armor-piercer-active {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+    animation: armorPiercerGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes armorPiercerGlow {
+    0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+    100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+}
+
+/* Armor Piercer Buff Indicator */
+.armor-piercer-indicator {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5em;
+    z-index: 1001;
+    animation: armorPiercerFloat 2s ease-in-out;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes armorPiercerFloat {
+    0% { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.5);
+    }
+    20% { 
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.2);
+    }
+    80% { 
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px) scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(-25px) scale(0.8);
+    }
+}
+
+/* Armor Weakened State */
+.armor-weakened {
+    border: 2px solid rgba(255, 100, 100, 0.6) !important;
+    animation: armorWeakenedPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes armorWeakenedPulse {
+    0%, 100% { border-color: rgba(255, 100, 100, 0.6); }
+    50% { border-color: rgba(255, 100, 100, 1); }
+}
+
+/* Armor Reduction Debuff Indicator */
+.armor-reduction-indicator {
+    position: absolute;
+    top: -30px;
+    right: -10px;
+    font-size: 1.2em;
+    z-index: 1001;
+    animation: armorReductionFloat 2s ease-in-out;
+    text-shadow: 0 0 8px rgba(255, 100, 100, 0.8);
+}
+
+@keyframes armorReductionFloat {
+    0% { 
+        opacity: 0;
+        transform: translateY(15px) scale(0.5);
+    }
+    20% { 
+        opacity: 1;
+        transform: translateY(-5px) scale(1.1);
+    }
+    80% { 
+        opacity: 1;
+        transform: translateY(-10px) scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+}
+
+/* Armor Break VFX */
+.armor-break-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.armor-break-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(45deg, #ffaa00, #ff6600);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: armorBreakParticle 1.5s ease-out forwards;
+}
+
+@keyframes armorBreakParticle {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) 
+                   translateX(calc(cos(var(--particle-angle)) * 40px))
+                   translateY(calc(sin(var(--particle-angle)) * 40px))
+                   scale(0.3);
+    }
+}
+
+/* Armor break impact effect */
+.armor-break-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(255, 170, 0, 0.8) 0%, rgba(255, 102, 0, 0.6) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: armorBreakImpact 0.5s ease-out;
+}
+
+@keyframes armorBreakImpact {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+/* Armor break shockwave */
+.armor-break-vfx::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(255, 170, 0, 0.6);
+    border-radius: 50%;
+    animation: armorBreakShockwave 1s ease-out;
+}
+
+@keyframes armorBreakShockwave {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2.5);
+    }
+} 

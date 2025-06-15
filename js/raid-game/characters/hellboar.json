@@ -1,0 +1,39 @@
+{
+    "id": "hellboar",
+    "name": "Hellboar",
+    "image": "Loading Screen/Hellboar.png",
+    "rarity": "epic",
+    "type": "beast",
+    "description": "A massive boar with tusks forged in hellfire and hide thick as molten rock. Its charge can shatter mountains.",
+    "stats": {
+        "physicalDamage": 290,
+        "magicalDamage": 0,
+        "armor": 10,
+        "magicalShield": 0,
+        "hp": 6552,
+        "hpPerTurn": 0,
+        "mana": 3800,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.03,
+        "critChance": 0.1,
+        "critDamage": 2.0,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "hellboar_charge",
+            "name": "Charge",
+            "type": "charge",
+            "damageType": "physical",
+            "manaCost": 20,
+            "cooldown": 1,
+            "targetType": "single_enemy",
+            "description": "Charges onto an enemy, dealing 500 physical damage and stunning them for 1 turn.",
+            "icon": "Icons/abilities/charge.png",
+            "baseDamage": 500,
+            "stunDuration": 1
+        }
+    ],
+    "tags": ["Beast", "Hell", "Tank"]
+} 

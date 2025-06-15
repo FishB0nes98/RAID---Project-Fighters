@@ -1,0 +1,27 @@
+{
+    "id": "hell_castle_entrance_guardians",
+    "name": "Hell Castle Entrance Guardians",
+    "description": "Before the massive gates of Hell Castle stand two formidable guardians. The stone gargoyle Gargolyan and the demonic HellHorn block your path to the castle's interior. They have stood watch for millennia, and neither will yield without a fierce battle.",
+    "difficulty": 6,
+    "type": "battle",
+    "enemies": [
+        { "characterId": "gargolyan" },
+        { "characterId": "hellhorn" }
+    ],
+    "modifiers": [
+        {
+            "id": "aggressive_protection",
+            "name": "Aggressive Protection",
+            "description": "The castle guardians inspire fierce combat! When a character dodges, they gain +30% dodge chance for 3 turns. When someone deals damage, they gain +100 magical damage and +80 physical damage for 3 turns (stacking).",
+            "icon": "🛡️"
+        }
+    ],
+    "backgroundImage": "images/stages/hell_castle_entrace.png",
+    "backgroundMusic": "sounds/music/hell_castle_theme.mp3",
+    "rewards": [
+        {
+            "type": "experience",
+            "amount": 1400
+        }
+    ]
+} 

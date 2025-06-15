@@ -45,7 +45,7 @@
             "manaCost": 100,
             "cooldown": 8,
             "targetType": "all_enemies",
-            "description": "Deals 100% Magical damage to all enemies. Has 15% chance to reduce Magical Shield by 15% for 4 turns on each target.",
+            "description": "80% chance to deal 100% Magical damage to each enemy. Has 15% chance to reduce Magical Shield by 15% for 4 turns on each hit.",
             "icon": "Icons/abilities/electric_shock.webp"
         },
         {
@@ -55,7 +55,7 @@
             "manaCost": 100,
             "cooldown": 10,
             "targetType": "all_enemies",
-            "description": "Deals 1000 damage to all enemies and stuns them for 1 turn.",
+            "description": "80% chance to deal 1000 damage to each enemy and stun them for 1 turn.",
             "icon": "Icons/abilities/storm_circle.webp"
         }
     ],

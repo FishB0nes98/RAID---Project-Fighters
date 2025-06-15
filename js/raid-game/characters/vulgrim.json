@@ -1,0 +1,59 @@
+{
+  "id": "vulgrim",
+  "name": "Vulgrim",
+  "image": "Loading Screen/Vulgrim.png",
+  "rarity": "rare",
+  "type": "demon",
+  "description": "A cunning demon merchant who deals in souls and dark magic. His presence corrupts the battlefield with vile energies.",
+  "stats": {
+    "physicalDamage": 200,
+    "magicalDamage": 0,
+    "armor": 10,
+    "magicalShield": 8,
+    "hp": 8904,
+    "hpPerTurn": 0,
+    "mana": 2900,
+    "manaPerTurn": 0,
+    "lifesteal": 0.15,
+    "dodgeChance": 0.00,
+    "critChance": 0.13,
+    "critDamage": 1.9,
+    "healingPower": 0
+  },
+  "abilities": [
+    {
+      "id": "scythe_swing",
+      "name": "Scythe Swing",
+      "type": "custom",
+      "functionName": "scythe_swing",
+      "manaCost": 80,
+      "cooldown": 2,
+      "targetType": "enemy",
+      "description": "Deals 170% physical damage to main target and 105% physical damage to all other enemies.",
+      "icon": "Icons/abilities/scythe_swing.png"
+    },
+    {
+      "id": "fearful_howl",
+      "name": "Fearful Howl",
+      "type": "custom",
+      "functionName": "fearful_howl",
+      "manaCost": 80,
+      "cooldown": 6,
+      "targetType": "self",
+      "description": "Reduces damage dealt by all enemies by 15% for 3 turns.",
+      "icon": "Icons/abilities/fearful_howl.png"
+    },
+    {
+      "id": "death_dash",
+      "name": "Death Dash",
+      "type": "custom",
+      "functionName": "death_dash",
+      "manaCost": 90,
+      "cooldown": 7,
+      "targetType": "enemy",
+      "description": "Deals 220% physical damage + 320 to the target and places Death Mark on them for 4 turns. If marked target takes 1000+ damage, Death Mark detonates for 2000 additional damage.",
+      "icon": "Icons/abilities/death_dash.png"
+    }
+  ],
+  "isAI": true
+} 

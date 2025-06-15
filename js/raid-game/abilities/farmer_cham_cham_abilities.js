@@ -186,7 +186,8 @@ const farmerScratchEffect = (caster, target) => {
     // --- Check for Armor Piercing Claws talent ---
     const bypassArmor = scratchAbility?.bypassesArmor || false;
     const options = {
-        bypassArmor: bypassArmor
+        bypassArmor: bypassArmor,
+        abilityId: 'farmer_scratch' // Add ability ID for statistics tracking
     };
 
     // If we're bypassing armor, show a VFX to indicate this
@@ -353,8 +354,8 @@ const farmerScratchEffect = (caster, target) => {
                 }, 1000);
             }
             
-            // Trigger a second damage instance
-            const secondDamage = target.applyDamage(calculatedDamage, damageType, caster);
+            // Trigger a second damage instance with the same options
+            const secondDamage = target.applyDamage(calculatedDamage, damageType, caster, options);
             if (secondDamage.isCritical) {
                 log(`${caster.name}'s second Scratch critically hits ${target.name} for ${secondDamage.damage} damage!`, 'critical');
             } else {
@@ -955,7 +956,7 @@ const farmerBoomerangEffect = (caster, target) => {
                 // First hit
                 if (!target.isDead()) {
                     // Apply damage
-                    const damageResult = target.applyDamage(totalDamagePerHit, 'physical', caster);
+                    const damageResult = target.applyDamage(totalDamagePerHit, 'physical', caster, { abilityId: 'farmer_boomerang' });
                     
                     // Log hit
                     if (damageResult.isCritical) {
@@ -993,7 +994,7 @@ const farmerBoomerangEffect = (caster, target) => {
                 setTimeout(() => {
                     if (!target.isDead()) {
                             // Apply second hit damage
-                            const secondDamageResult = target.applyDamage(totalDamagePerHit, 'physical', caster);
+                            const secondDamageResult = target.applyDamage(totalDamagePerHit, 'physical', caster, { abilityId: 'farmer_boomerang' });
                             
                             // Log second hit
                             if (secondDamageResult.isCritical) {
@@ -1028,7 +1029,7 @@ const farmerBoomerangEffect = (caster, target) => {
                                 const executeExtraHit = () => {
                                     if (hitCount < totalHits && !target.isDead()) {
                                         // Apply damage for extra hit
-                                        const extraHitResult = target.applyDamage(totalDamagePerHit, 'physical', caster);
+                                        const extraHitResult = target.applyDamage(totalDamagePerHit, 'physical', caster, { abilityId: 'farmer_boomerang' });
                                         
                                         // Log extra hit
                                         if (extraHitResult.isCritical) {
@@ -1368,7 +1369,7 @@ const farmerFeralStrikeEffect = (caster, target) => {
         }
         
         // Apply damage to target
-        const damageResult = target.applyDamage(finalDamage, 'physical', caster);
+        const damageResult = target.applyDamage(finalDamage, 'physical', caster, { abilityId: 'farmer_feral_strike' });
         
         // Log the strike
         log(`Strike ${strikeNumber}: ${target.name} takes ${damageResult.damage} ${isCritical ? 'CRITICAL ' : ''}physical damage!`);
@@ -1471,7 +1472,7 @@ const farmerFeralStrikeEffect = (caster, target) => {
             }
             
             // Apply damage
-            const damageResult = target.applyDamage(finalDamage, 'physical', caster);
+            const damageResult = target.applyDamage(finalDamage, 'physical', caster, { abilityId: 'farmer_feral_strike' });
             totalDamage += damageResult.damage;
             
             // Apply lifesteal if character has it

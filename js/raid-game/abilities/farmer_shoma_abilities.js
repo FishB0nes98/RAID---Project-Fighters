@@ -2542,7 +2542,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalApplyDamage = Character.prototype.applyDamage;
         
         // Override the applyDamage method to handle outgoing damage modifiers
-        Character.prototype.applyDamage = function(amount, type, caster) {
+        Character.prototype.applyDamage = function(amount, type, caster = null, options = {}) {
             let modifiedAmount = amount;
             
             // Check if this character has outgoingDamageModifier from debuffs
@@ -2557,8 +2557,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Call the original method with the modified amount and caster
-            return originalApplyDamage.call(this, modifiedAmount, type, caster);
+            // Call the original method with the modified amount, caster, and options
+            return originalApplyDamage.call(this, modifiedAmount, type, caster, options);
         };
         
         // Mark the prototype as modified to avoid double patching

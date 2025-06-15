@@ -21,6 +21,9 @@ class ZoeyPassive {
         
         // Track pending marks to apply after damage
         this.pendingMarkTargets = new Set();
+        
+        // Initialize cooldown flag for Agile Counterforce to prevent spam
+        this.agileCounterforceCooldown = false;
     }
     
     initialize(character) {
@@ -347,9 +350,10 @@ class ZoeyPassive {
         
         console.log(`[Zoey Passive] Confirmed dodge event for ${this.character.name}`);
         
-        // CRITICAL FIX: Always apply Agile Counterforce buff for Zoey
-        // This bypasses potential talent detection issues
-        this.applyAgileCounterforceBuff();
+        // FIXED: Only apply if Agile Counterforce talent is enabled and not on cooldown
+        if (this.character.enableAgileCounterforce && !this.agileCounterforceCooldown) {
+            this.applyAgileCounterforceBuff();
+        }
     }
     
     onDamageDealt(event) {
@@ -522,42 +526,78 @@ class ZoeyPassive {
     // Apply the Agile Counterforce buff (from talent)
     applyAgileCounterforceBuff() {
         try {
-            // Calculate 10% of Zoey's current magical damage
-            const magicalDamage = this.character.stats.magicalDamage || 0;
-            const buffValue = magicalDamage * 0.1;
+            // Set cooldown to prevent multiple triggers for the same dodge
+            this.agileCounterforceCooldown = true;
+            setTimeout(() => {
+                this.agileCounterforceCooldown = false;
+            }, 500); // 500ms cooldown
             
-            console.log(`[Zoey Passive] Applying Agile Counterforce buff: +${buffValue} magical damage from base ${magicalDamage}`);
+            // FIXED: Calculate 10% of Zoey's BASE magical damage, not current
+            const baseMagicalDamage = this.character.baseStats?.magicalDamage || this.character.stats.magicalDamage || 0;
+            const buffValue = Math.round(baseMagicalDamage * 0.1);
             
-            // Create a buff with a unique ID to ensure it stacks properly
-            const buffId = `agile_counterforce_buff_${Date.now()}`;
-            const buff = {
-                id: buffId,
-                name: 'Agile Counterforce',
-                description: `Increases Magical Damage by ${Math.round(buffValue)} for 4 turns. This effect can stack.`,
-                icon: 'Icons/talents/agile_counterforce.webp',
-                duration: 4,
-                statModifiers: [{
-                    stat: 'magicalDamage',
-                    value: buffValue,
-                    operation: 'add'
-                }]
-            };
+            console.log(`[Zoey Passive] Applying Agile Counterforce buff: +${buffValue} magical damage from base ${baseMagicalDamage}`);
             
-            // Apply the buff to the character
-            if (this.character && this.character.addBuff) {
-                console.log(`[Zoey Passive] Adding Agile Counterforce buff to ${this.character.name}`);
-                this.character.addBuff(buff);
+            // FIXED: Use consistent buff ID so they stack properly instead of creating infinite unique IDs
+            const buffId = 'agile_counterforce_buff';
+            
+            // Check if buff already exists
+            const existingBuff = this.character.buffs.find(b => b.id === buffId);
+            if (existingBuff) {
+                // Refresh duration and potentially stack effect
+                existingBuff.duration = 4;
                 
-                // Show VFX
-                this.showAgileCounterforceVFX();
+                // Increase stack count (cap at 10 stacks for balance)
+                const currentStacks = existingBuff.stacks || 1;
+                const newStacks = Math.min(currentStacks + 1, 10);
+                existingBuff.stacks = newStacks;
                 
-                // Add log entry
+                // Update the stat modifier value
+                existingBuff.statModifiers[0].value = buffValue * newStacks;
+                existingBuff.description = `Increases Magical Damage by ${buffValue * newStacks} (${newStacks} stacks) for 4 turns.`;
+                
+                // Force recalculation
+                this.character.recalculateStats('agile-counterforce-refresh');
+                
+                console.log(`[Zoey Passive] Refreshed Agile Counterforce buff - now ${newStacks} stacks`);
+                
+                // Add log entry for stack increase
                 if (window.gameManager) {
-                    window.gameManager.addLogEntry(`Zoey's dodge grants her Agile Counterforce, increasing her Magical Damage by ${Math.round(buffValue)}!`, 'zoey talent-effect');
+                    window.gameManager.addLogEntry(`Zoey's Agile Counterforce grows stronger! (${newStacks} stacks)`, 'zoey talent-effect');
                 }
             } else {
-                console.error(`[Zoey Passive] Failed to add Agile Counterforce buff: character or addBuff method not available`);
+                // Create new buff
+                const buff = {
+                    id: buffId,
+                    name: 'Agile Counterforce',
+                    description: `Increases Magical Damage by ${buffValue} for 4 turns. This effect can stack.`,
+                    icon: 'Icons/talents/agile_counterforce.webp',
+                    duration: 4,
+                    stacks: 1,
+                    statModifiers: [{
+                        stat: 'magicalDamage',
+                        value: buffValue,
+                        operation: 'add'
+                    }]
+                };
+                
+                // Apply the buff to the character
+                if (this.character && this.character.addBuff) {
+                    console.log(`[Zoey Passive] Adding new Agile Counterforce buff to ${this.character.name}`);
+                    this.character.addBuff(buff);
+                    
+                    // Add log entry
+                    if (window.gameManager) {
+                        window.gameManager.addLogEntry(`Zoey's dodge grants her Agile Counterforce, increasing her Magical Damage by ${buffValue}!`, 'zoey talent-effect');
+                    }
+                } else {
+                    console.error(`[Zoey Passive] Failed to add Agile Counterforce buff: character or addBuff method not available`);
+                }
             }
+            
+            // Show VFX
+            this.showAgileCounterforceVFX();
+            
         } catch (error) {
             console.error(`[Zoey Passive] Error in applyAgileCounterforceBuff:`, error);
         }
@@ -1405,14 +1445,17 @@ class ZoeyPassive {
     }
 
     /**
-     * Called when the character successfully dodges an attack.
-     * This hooks into Character.applyDamage's onDodge invocation.
+     * Handle dodge events for Zoey's talents
      */
     onDodge(dodgingCharacter, attacker) {
         // Only apply when Zoey dodges
         if (dodgingCharacter === this.character) {
             console.log(`[Zoey Passive] onDodge detected for ${this.character.name}`);
-            this.applyAgileCounterforceBuff();
+            
+            // FIXED: Only apply if Agile Counterforce talent is enabled and not on cooldown
+            if (this.character.enableAgileCounterforce && !this.agileCounterforceCooldown) {
+                this.applyAgileCounterforceBuff();
+            }
         }
     }
 

@@ -585,4 +585,65 @@
     25% { transform: translateX(-2px); }
     50% { transform: translateX(2px); }
     75% { transform: translateX(-2px); }
+}
+
+/* Smoke Bomb VFX */
+.smoke-bomb-cloud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.smoke-bomb-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, rgba(40, 40, 40, 0.8) 0%, rgba(80, 80, 80, 0.6) 50%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(20px);
+    animation: smoke-bomb-expand 2s ease-out forwards;
+    animation-delay: var(--delay);
+}
+
+@keyframes smoke-bomb-expand {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(20px) scale(0.3);
+    }
+    20% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(50px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(80px) scale(1.8);
+    }
+}
+
+/* Enhanced Kunai Mastery indicator for max stacks visual */
+.kunai-mastery-indicator.max-stacks {
+    background: radial-gradient(circle, #ffaa00 0%, #ff6600 70%);
+    box-shadow: 0 0 12px rgba(255, 170, 0, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.8);
+    animation: max-stacks-pulse 2s infinite alternate;
+}
+
+@keyframes max-stacks-pulse {
+    from { 
+        box-shadow: 0 0 12px rgba(255, 170, 0, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.8);
+        transform: scale(1);
+    }
+    to { 
+        box-shadow: 0 0 20px rgba(255, 170, 0, 1), inset 0 0 10px rgba(255, 255, 255, 0.9);
+        transform: scale(1.1);
+    }
 } 

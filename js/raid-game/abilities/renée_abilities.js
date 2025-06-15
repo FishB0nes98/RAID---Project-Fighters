@@ -81,10 +81,17 @@ function executeWolfClawStrike(caster, target, abilityInstance, isDoubleClawSeco
         finalDamage: totalDamage
     });
     
-    // Apply damage to target
-    const damageResult = target.applyDamage(totalDamage, 'physical', caster);
+    // Apply damage to target with statistics tracking
+    const damageResult = target.applyDamage(totalDamage, 'physical', caster, {
+        abilityId: 'renee_q'
+    });
     
     console.log('[WolfClawStrike] Damage applied:', damageResult);
+    
+    // Track statistics for Wolf Claw Strike
+    if (window.trackWolfClawStrikeStats) {
+        window.trackWolfClawStrikeStats(caster, target, damageResult, isDoubleClawSecondHit);
+    }
     
     // Apply Primal Healing if talent is enabled
     if (abilityInstance.enablePrimalHealing && !isDoubleClawSecondHit) {
@@ -95,8 +102,15 @@ function executeWolfClawStrike(caster, target, abilityInstance, isDoubleClawSeco
                 caster.heal(healAmount, caster, {
                     source: "Primal Healing",
                     showVFX: true,
-                    primalHealing: true
+                    primalHealing: true,
+                    abilityId: 'renee_q_primal_healing'
                 });
+                
+                // Track Primal Healing statistics
+                if (window.trackPrimalHealingStats) {
+                    window.trackPrimalHealingStats(caster, healAmount);
+                }
+                
                 showPrimalHealingVFX(caster, healAmount);
                 logFunction(`${caster.name}'s Primal Healing restores ${healAmount} HP!`, 'heal talent-effect renee');
             }, 300);
@@ -510,6 +524,12 @@ function executeLupineVeil(caster, abilityInstance) {
         }
     };
     caster.addBuff(stealthBuff);
+    
+    // Track Lupine Veil statistics
+    if (window.trackLupineVeilStats) {
+        window.trackLupineVeilStats(caster);
+    }
+    
     if (log) log(`${caster.name} slips into the shadows with Lupine Veil!`, 'renee');
     // Play sound
     if (gameManager && typeof gameManager.playSound === 'function') {
@@ -522,7 +542,7 @@ function executeLupineVeil(caster, abilityInstance) {
 /**
  * Renée's Mystical Whip (E) ability
  * Deals 490 + 50% Physical damage with 50% chance to stun for 1 turn.
- * Critical hits deal 1400 + 100% Physical damage instead.
+ * Critical hits deal 1000 + 100% Physical damage instead.
  */
 const reneeMysticalWhipEffect = function(caster, targetOrTargets, abilityInstance, actualManaCost, options = {}) {
     console.log('[MysticalWhip] Effect called with parameters:', { caster: caster?.name, targets: Array.isArray(targetOrTargets) ? targetOrTargets.map(t => t?.name) : targetOrTargets?.name });
@@ -541,7 +561,7 @@ const reneeMysticalWhipEffect = function(caster, targetOrTargets, abilityInstanc
     // Early initialization phase - set baseDescription directly
     if (abilityInstance && !abilityInstance.baseDescription) {
         console.log('[MysticalWhip] Setting baseDescription during effect call');
-        abilityInstance.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.';
+        abilityInstance.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.';
         
         // Also set up generateDescription method if it doesn't exist
         if (typeof abilityInstance.generateDescription !== 'function') {
@@ -628,7 +648,7 @@ function executeMysticalWhip(caster, target, abilityInstance, isRelentlessSecond
     
     // Calculate base damage
     const normalBaseDamage = 490;
-    const criticalBaseDamage = 1400;
+    const criticalBaseDamage = 1000;
     const physicalDamage = caster.stats.physicalDamage || 0;
     
     // Determine if this is a critical hit
@@ -645,7 +665,7 @@ function executeMysticalWhip(caster, target, abilityInstance, isRelentlessSecond
     
     if (Math.random() < (caster.stats.critChance || 0)) {
         isCritical = true;
-        // Critical hit: 1400 + 100% Physical damage
+        // Critical hit: 1000 + 100% Physical damage
         // FIXED: Don't apply critical damage multiplier, just use the special formula
         damage = criticalBaseDamage + Math.floor(physicalDamage * 1.0);
         
@@ -672,8 +692,10 @@ function executeMysticalWhip(caster, target, abilityInstance, isRelentlessSecond
     // Determine the damage type - use the ability's damageType property if set (via Mystical Convergence talent)
     const damageType = abilityInstance.damageType || 'physical';
     
-    // Apply damage to the target
-    const damageResult = target.applyDamage(damage, damageType, caster);
+    // Apply damage to the target with statistics tracking
+    const damageResult = target.applyDamage(damage, damageType, caster, {
+        abilityId: 'renee_e'
+    });
     
     // Log damage dealt
     let message = `${target.name} takes ${damageResult.damage} ${damageType} damage from ${caster.name}'s Mystical Whip`;
@@ -684,6 +706,15 @@ function executeMysticalWhip(caster, target, abilityInstance, isRelentlessSecond
         message += " (Relentless Whip)";
     }
     log(message, 'renee');
+    
+    // Track Mystical Whip statistics
+    if (window.trackMysticalWhipStats) {
+        window.trackMysticalWhipStats(caster, target, damageResult, {
+            isChainTarget: false,
+            isSecondHit: isRelentlessSecondHit,
+            damageType: damageType
+        });
+    }
     
     // Predator's Momentum: On crit, apply 3-turn +20% crit chance buff
     if (caster.enablePredatorsMomentum && isCritical) {
@@ -789,9 +820,11 @@ function executeMysticalWhip(caster, target, abilityInstance, isRelentlessSecond
                     
                     // Apply a delay to make the attack sequence look nicer
                     setTimeout(() => {
-                        // Apply same damage calculation to secondary target
+                        // Apply same damage calculation to secondary target with statistics tracking
                         // We'll reuse the critical hit status from the primary attack
-                        const chainDamageResult = secondaryTarget.applyDamage(damage, 'physical', caster);
+                        const chainDamageResult = secondaryTarget.applyDamage(damage, 'physical', caster, {
+                            abilityId: 'renee_e_chain'
+                        });
                         
                         // Log damage dealt to secondary target
                         let chainMessage = `${secondaryTarget.name} takes ${chainDamageResult.damage} physical damage from ${caster.name}'s Chain Whip`;
@@ -802,6 +835,15 @@ function executeMysticalWhip(caster, target, abilityInstance, isRelentlessSecond
                             chainMessage += " (Relentless Whip)";
                         }
                         log(chainMessage, 'renee');
+                        
+                        // Track Chain Whip statistics
+                        if (window.trackMysticalWhipStats) {
+                            window.trackMysticalWhipStats(caster, secondaryTarget, chainDamageResult, {
+                                isChainTarget: true,
+                                isSecondHit: isRelentlessSecondHit,
+                                damageType: 'physical'
+                            });
+                        }
                         
                         // Apply Essence Drain to secondary target if enabled
                         if (abilityInstance.enableManaDrain && secondaryTarget.stats && secondaryTarget.stats.currentMana !== undefined) {
@@ -1630,6 +1672,11 @@ function executeLunarCurse(caster, abilityInstance) {
     // Apply the buff to Renée
     caster.addBuff(lunarCurseBuff);
     
+    // Track Lunar Curse statistics
+    if (window.trackLunarCurseStats) {
+        window.trackLunarCurseStats(caster);
+    }
+    
     // Log the effect
     log(`${caster.name} activates Lunar Curse! For 5 turns, her attacks will mark enemies with a curse that doubles damage and stuns when it expires.`, 'renee');
     
@@ -2022,7 +2069,7 @@ function initializeHook() {
                                     ability.baseDescription = 'Renée becomes untargetable and enters stealth for up to 3 turns. While stealthed, her critical chance is 100%. Using any other ability or letting the effect expire breaks stealth. Does not end your turn.';
                                     break;
                                 case 'renee_e':
-                                    ability.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.';
+                                    ability.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.';
                                     break;
                                 case 'renee_r':
                                     ability.baseDescription = 'Renée places a moon-powered buff on herself for 5 turns. While active, enemies damaged by her are marked with a debuff for 2 turns. When this debuff expires, the enemy is stunned for 1 turn and takes double damage from all sources while the debuff is active.';
@@ -2286,7 +2333,7 @@ window.getReneeAbilityGenerateDescription = function(abilityId) {
             };
         case 'renee_e':
             return function() {
-                let desc = this.baseDescription || "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.";
+                let desc = this.baseDescription || "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.";
                 let talentEffects = '';
                 if (this.enableManaDrain) {
                     talentEffects += `\n<span class="talent-effect resource">⚡ Essence Drain: Steals 50 mana from the target and restores it to Renée.</span>`;
@@ -2380,7 +2427,7 @@ const addGenerateDescriptionMethods = () => {
                         }
                         if (!desc) {
                             // Fallback if baseDescription is still not found
-                            desc = "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.";
+                            desc = "Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.";
                             console.error(`[Renee E GenerateDesc] CRITICAL: Ability ${this.id} had no usable baseDescription. Using default. This might indicate an issue in AbilityFactory or ability JSON.`);
                         }
 
@@ -2493,7 +2540,7 @@ if (typeof window !== 'undefined') {
                                 ability.baseDescription = 'Renée becomes untargetable and enters stealth for up to 3 turns. While stealthed, her critical chance is 100%. Using any other ability or letting the effect expire breaks stealth. Does not end your turn.';
                                 break;
                             case 'renee_e':
-                                ability.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.';
+                                ability.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.';
                                 break;
                             case 'renee_r':
                                 ability.baseDescription = 'Renée places a moon-powered buff on herself for 5 turns. While active, enemies damaged by her are marked with a debuff for 2 turns. When this debuff expires, the enemy is stunned for 1 turn and takes double damage from all sources while the debuff is active.';
@@ -2533,7 +2580,7 @@ if (typeof window !== 'undefined') {
                             this.baseDescription = 'Renée becomes untargetable and enters stealth for up to 3 turns. While stealthed, her critical chance is 100%. Using any other ability or letting the effect expire breaks stealth. Does not end your turn.';
                             break;
                         case 'renee_e':
-                            this.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1400 + 100% Physical damage instead.';
+                            this.baseDescription = 'Renée strikes with a glowing whip, dealing 490 + 50% Physical damage with a 50% chance to stun for 1 turn. Critical hits deal 1000 + 100% Physical damage instead.';
                             break;
                         case 'renee_r':
                             this.baseDescription = 'Renée places a moon-powered buff on herself for 5 turns. While active, enemies damaged by her are marked with a debuff for 2 turns. When this debuff expires, the enemy is stunned for 1 turn and takes double damage from all sources while the debuff is active.';

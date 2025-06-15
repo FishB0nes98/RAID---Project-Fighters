@@ -561,4 +561,81 @@
 .stage-effect.mana-restore {
     color: #1E90FF;
     font-style: italic;
+}
+
+/* Desert Heat VFX */
+.desert-heat-vfx {
+    background: linear-gradient(135deg, 
+        rgba(255, 140, 0, 0.1) 0%, 
+        rgba(255, 69, 0, 0.15) 30%, 
+        rgba(255, 215, 0, 0.1) 60%, 
+        rgba(205, 133, 63, 0.05) 100%);
+}
+
+@keyframes desertHeatShimmer {
+    0% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        filter: hue-rotate(10deg) brightness(1.1);
+    }
+    100% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg) brightness(1);
+    }
+}
+
+@keyframes sandDrift {
+    0% {
+        transform: translateX(-10px) translateY(10px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(calc(100vw + 20px)) translateY(-10px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes heatWaveFlow {
+    0% {
+        transform: translateX(-100%) skewX(-10deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) skewX(10deg);
+        opacity: 0;
+    }
+}
+
+@keyframes floatingCactus {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translateY(-5px) rotate(2deg);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 0.7;
+    }
+    75% {
+        transform: translateY(-5px) rotate(-2deg);
+        opacity: 0.6;
+    }
 } 

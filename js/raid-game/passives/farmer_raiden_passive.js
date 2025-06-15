@@ -375,6 +375,11 @@ class FarmerRaidenPassive {
         // Add buff to character (this will automatically apply statModifiers)
         character.addBuff(empowermentBuff);
         
+        // Track Storm Empowerment passive
+        if (window.trackZapPassiveStats) {
+            window.trackZapPassiveStats(character, character, this.stormEmpowermentAmount, 'storm_empowerment');
+        }
+        
         // Show buff VFX
         this.showStormEmpowermentVFX(character);
     }
@@ -454,6 +459,11 @@ class FarmerRaidenPassive {
                 // Increase magical damage
                 character.baseStats.magicalDamage += this.magicalDamageGrowthAmount;
                 character.recalculateStats('raiden-power-growth');
+                
+                // Track power growth passive
+                if (window.trackZapPassiveStats) {
+                    window.trackZapPassiveStats(character, character, this.magicalDamageGrowthAmount, 'power_growth');
+                }
                 
                 // Log the effect
                 log(`${character.name}'s Empowering Thunder activates! Magical Damage increased by ${this.magicalDamageGrowthAmount}!`, 'system-update');
@@ -744,38 +754,68 @@ class FarmerRaidenPassive {
         }, 2000);
     }
 
-    // Custom damage application that bypasses magical shield
+    /**
+     * Apply zap damage to a target
+     */
     applyZapDamage(caster, target, amount) {
-        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+        console.log(`[FarmerRaidenPassive] Applying zap damage: ${amount} to ${target.name}`);
         
-        // Check for dodge
-        if (Math.random() < (target.stats.dodgeChance || 0)) {
-            log(`${target.name} dodges ${caster.name}'s Zap!`, 'system');
-            // Show dodge VFX if available
-            if (typeof target.showDodgeVFX === 'function') {
-                target.showDodgeVFX();
+        try {
+            // Apply the damage
+            const damageResult = target.applyDamage(amount, 'magical', caster, {
+                source: 'Zap Passive',
+                ignoresMagicalShield: true,
+                abilityId: 'zap_passive'
+            });
+            
+            // Track passive zap damage
+            if (window.trackZapPassiveStats) {
+                window.trackZapPassiveStats(caster, target, damageResult, 'normal');
             }
-            return { damage: 0, isDodged: true };
+            
+            // Show VFX
+            this.showZapVFX(caster, target);
+            
+            // Update UI
+            if (window.gameManager && window.gameManager.uiManager) {
+                window.gameManager.uiManager.updateCharacterUI(target);
+            }
+            
+            // Show battle log message
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(
+                    `${target.name} is zapped for ${damageResult.damage} magical damage!`, 
+                    'passive'
+                );
+            }
+            
+            // Check for lifesteal talent
+            if (caster.zapLifesteal) {
+                const healAmount = Math.ceil(amount * 0.15); // 15% lifesteal
+                const actualHeal = caster.heal(healAmount, null, { abilityId: 'zap_passive_lifesteal' });
+                
+                // Track lifesteal healing
+                if (window.trackZapPassiveStats) {
+                    window.trackZapPassiveStats(caster, caster, actualHeal, 'lifesteal');
+                }
+                
+                this.showZapLifestealVFX(caster, actualHeal);
+                
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(
+                        `${caster.name} heals for ${actualHeal} health from Zap lifesteal!`, 
+                        'passive'
+                    );
+                }
+            }
+            
+            console.log(`[FarmerRaidenPassive] Successfully applied zap damage: ${damageResult.damage}`);
+            return damageResult;
+            
+        } catch (error) {
+            console.error('[FarmerRaidenPassive] Error applying zap damage:', error);
+            return { damage: 0, isCritical: false };
         }
-
-        // Calculate damage (bypassing magical shield)
-        let finalDamage = amount;
-        
-        // Check for critical hit
-        const isCritical = Math.random() < (caster.stats.critChance || 0);
-        if (isCritical) {
-            finalDamage = Math.floor(finalDamage * (caster.stats.critDamage || 1.5));
-            log(`${caster.name}'s Zap critically strikes ${target.name}!`, 'critical');
-        }
-
-        // Log the damage attempt (applyDamage will log the final result)
-        log(`${caster.name}'s Zap targets ${target.name} for ${finalDamage} magical damage (ignoring shield)${isCritical ? ' (Critical)' : ''}!`, isCritical ? 'critical' : 'passive');
-
-        // Apply damage with bypass option
-        const damageResult = target.applyDamage(finalDamage, 'magical', caster, { bypassMagicalShield: true });
-
-        // Return the result from applyDamage, which includes actual damage dealt
-        return { damage: damageResult.damage, isCritical: isCritical, dodged: false }; // Pass crit status
     }
 
     // Show visual effects for Zap passive

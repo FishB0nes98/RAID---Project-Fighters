@@ -105,6 +105,17 @@ class StatisticsManager {
             casterStats.criticalDamage += damage;
             // Also track that the target was critically hit
             targetStats.timesCritted++;
+            
+            // Dispatch critical strike event for quest tracking
+            const criticalStrikeEvent = new CustomEvent('criticalStrike', {
+                detail: {
+                    character: caster,
+                    target: target,
+                    damage: damage,
+                    abilityId: abilityId
+                }
+            });
+            document.dispatchEvent(criticalStrikeEvent);
         }
         
         // Update target (damage receiver) stats
@@ -116,9 +127,27 @@ class StatisticsManager {
             targetStats.magicalDamageTaken += damage;
         }
         
+        // Dispatch damage taken event for quest tracking
+        const damageTakenEvent = new CustomEvent('damageTaken', {
+            detail: {
+                character: target,
+                damage: damage,
+                damageType: damageType,
+                caster: caster,
+                abilityId: abilityId
+            }
+        });
+        document.dispatchEvent(damageTakenEvent);
+        
         // Track ability-specific damage
         if (abilityId) {
+            console.log(`[StatisticsManager] About to record damage for ability ${abilityId}: ${damage} damage`);
             this.recordAbilityUsage(caster, abilityId, 'damage', damage, isCritical);
+        }
+        
+        // Track quest progress for damage
+        if (window.questManager && window.questManager.initialized) {
+            window.questManager.trackDamage(caster, damage, abilityId);
         }
         
         // Update match totals
@@ -172,6 +201,11 @@ class StatisticsManager {
             this.recordAbilityUsage(healer, abilityId, 'healing', healing, isCritical);
         }
         
+        // Track quest progress for healing
+        if (window.questManager && window.questManager.initialized) {
+            window.questManager.trackHealing(healer, healing, abilityId);
+        }
+        
         // Update match totals
         this.matchStats.totalHealingDone += healing;
         
@@ -213,6 +247,16 @@ class StatisticsManager {
         const dodgerStats = this.initializeCharacter(dodger);
         dodgerStats.timesDodged++;
         
+        // Dispatch dodge event for quest tracking
+        const dodgeEvent = new CustomEvent('dodge', {
+            detail: {
+                character: dodger,
+                attacker: attacker,
+                abilityId: abilityId
+            }
+        });
+        document.dispatchEvent(dodgeEvent);
+        
         this.recordTurnEvent({
             type: 'dodge',
             dodger: dodger.name,
@@ -231,10 +275,9 @@ class StatisticsManager {
             return;
         }
         
-        console.log(`[StatisticsManager] Recording ability usage: ${character.name} used ${abilityId} (${effectType})`);
+        console.log(`[StatisticsManager] Recording ability usage: ${character.name} used ${abilityId} (${effectType}) amount: ${amount}`);
         
         const characterStats = this.initializeCharacter(character);
-        characterStats.abilitiesUsed++;
         
         // Track per-ability statistics
         if (!characterStats.abilityBreakdown.has(abilityId)) {
@@ -253,20 +296,38 @@ class StatisticsManager {
         }
         
         const abilityData = characterStats.abilityBreakdown.get(abilityId);
-        abilityData.timesUsed++;
+        
+        // Only increment timesUsed for 'use' effectType to avoid double counting
+        if (effectType === 'use') {
+            abilityData.timesUsed++;
+            characterStats.abilitiesUsed++;
+            
+            // Track quest progress for ability usage
+            if (window.questManager && window.questManager.initialized) {
+                window.questManager.trackAbilityUsage(character, abilityId);
+            }
+        }
         
         if (effectType === 'damage') {
             abilityData.totalDamage += amount;
-            abilityData.averageDamage = abilityData.totalDamage / abilityData.timesUsed;
+            // Recalculate average only if we have usage count
+            if (abilityData.timesUsed > 0) {
+                abilityData.averageDamage = abilityData.totalDamage / abilityData.timesUsed;
+            }
         } else if (effectType === 'healing') {
             abilityData.totalHealing += amount;
-            abilityData.averageHealing = abilityData.totalHealing / abilityData.timesUsed;
+            // Recalculate average only if we have usage count
+            if (abilityData.timesUsed > 0) {
+                abilityData.averageHealing = abilityData.totalHealing / abilityData.timesUsed;
+            }
         } else if (effectType === 'buff') {
             abilityData.buffsApplied++;
         } else if (effectType === 'debuff') {
             abilityData.debuffsApplied++;
-        } else if (effectType === 'use') {
-            // Basic usage tracking without specific amount
+            // NEW: Track quest progress when a debuff is applied by an ability (e.g., Zoey R disable)
+            if (window.questManager && window.questManager.initialized) {
+                window.questManager.trackAbilityUsage(character, abilityId);
+            }
         }
         
         if (isCritical) {
@@ -302,14 +363,24 @@ class StatisticsManager {
         }
         
         const globalAbilityData = this.abilityStats.get(abilityId);
-        globalAbilityData.timesUsed++;
+        
+        // Only increment global timesUsed for 'use' effectType to avoid double counting
+        if (effectType === 'use') {
+            globalAbilityData.timesUsed++;
+        }
         
         if (effectType === 'damage') {
             globalAbilityData.totalDamage += amount;
-            globalAbilityData.averageDamage = globalAbilityData.totalDamage / globalAbilityData.timesUsed;
+            // Recalculate average only if we have usage count
+            if (globalAbilityData.timesUsed > 0) {
+                globalAbilityData.averageDamage = globalAbilityData.totalDamage / globalAbilityData.timesUsed;
+            }
         } else if (effectType === 'healing') {
             globalAbilityData.totalHealing += amount;
-            globalAbilityData.averageHealing = globalAbilityData.totalHealing / globalAbilityData.timesUsed;
+            // Recalculate average only if we have usage count
+            if (globalAbilityData.timesUsed > 0) {
+                globalAbilityData.averageHealing = globalAbilityData.totalHealing / globalAbilityData.timesUsed;
+            }
         } else if (effectType === 'buff') {
             globalAbilityData.buffsApplied++;
         } else if (effectType === 'debuff') {

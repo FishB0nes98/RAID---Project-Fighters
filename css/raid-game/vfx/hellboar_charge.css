@@ -1,0 +1,334 @@
+/* Hellboar Charge VFX Styles */
+
+.hellboar-charge-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+    animation: chargeWindup 0.6s ease-out forwards;
+}
+
+.hellboar-charge-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, 
+        rgba(255, 69, 0, 0.8) 0%, 
+        rgba(255, 140, 0, 0.6) 40%, 
+        rgba(139, 69, 19, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: chargeAura 0.6s ease-out forwards;
+}
+
+.hellboar-charge-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(255, 140, 0, 0.7) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: chargeCore 0.6s ease-out forwards;
+}
+
+@keyframes chargeWindup {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+@keyframes chargeAura {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+@keyframes chargeCore {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+/* Charge Trail Effect */
+.hellboar-charge-trail {
+    position: fixed;
+    height: 15px;
+    background: linear-gradient(90deg, 
+        rgba(255, 69, 0, 0.9) 0%, 
+        rgba(255, 140, 0, 0.8) 30%, 
+        rgba(139, 69, 19, 0.6) 60%, 
+        rgba(101, 67, 33, 0.4) 80%, 
+        transparent 100%);
+    border-radius: 8px;
+    box-shadow: 
+        0 0 20px rgba(255, 69, 0, 0.6),
+        inset 0 3px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    animation: chargeTrail 0.8s ease-out forwards;
+    transform-origin: left center;
+    overflow: visible;
+}
+
+.hellboar-charge-trail::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(90deg, 
+        rgba(255, 69, 0, 0.4), 
+        rgba(139, 69, 19, 0.3), 
+        transparent);
+    border-radius: 13px;
+    animation: chargeTrailAura 0.8s ease-out forwards;
+    z-index: -1;
+}
+
+.hellboar-charge-trail::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    width: 25px;
+    height: 25px;
+    background: radial-gradient(circle, 
+        rgba(255, 140, 0, 0.8) 0%, 
+        rgba(139, 69, 19, 0.6) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    animation: chargeTrailSpark 0.8s ease-out forwards;
+}
+
+@keyframes chargeTrail {
+    0% {
+        width: 0;
+        opacity: 1;
+        box-shadow: 
+            0 0 20px rgba(255, 69, 0, 0.6),
+            inset 0 3px 0 rgba(255, 255, 255, 0.3);
+    }
+    30% {
+        opacity: 1;
+        box-shadow: 
+            0 0 30px rgba(255, 69, 0, 0.8),
+            0 0 50px rgba(255, 140, 0, 0.5),
+            inset 0 3px 0 rgba(255, 255, 255, 0.4);
+    }
+    100% {
+        opacity: 0;
+        box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+    }
+}
+
+@keyframes chargeTrailAura {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes chargeTrailSpark {
+    0% {
+        opacity: 0.8;
+        transform: translateY(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.3) translateX(-20px);
+    }
+}
+
+/* Charge Impact Effect */
+.hellboar-charge-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.hellboar-charge-impact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(255, 69, 0, 0.9) 0%, 
+        rgba(255, 140, 0, 0.7) 25%, 
+        rgba(139, 69, 19, 0.5) 50%, 
+        rgba(101, 67, 33, 0.3) 75%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: chargeImpactBlast 1.5s ease-out forwards;
+}
+
+.hellboar-charge-impact::after {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(255, 140, 0, 0.6) 40%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: chargeImpactCore 1.5s ease-out forwards;
+}
+
+@keyframes chargeImpactBlast {
+    0% {
+        transform: scale(0.2);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.8);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.4);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+@keyframes chargeImpactCore {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    40% {
+        transform: scale(1.4);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+}
+
+/* Charge Impact Particles */
+.charge-impact-particle {
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, 
+        rgba(139, 69, 19, 0.9) 0%, 
+        rgba(101, 67, 33, 0.7) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: chargeParticleScatter 1.2s ease-out forwards;
+}
+
+@keyframes chargeParticleScatter {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(0.2);
+    }
+}
+
+/* Screen shake for charge impact */
+@keyframes chargeImpactShake {
+    0% { transform: translate(0); }
+    5% { transform: translate(-3px, -2px); }
+    10% { transform: translate(-2px, 3px); }
+    15% { transform: translate(3px, 2px); }
+    20% { transform: translate(2px, -2px); }
+    25% { transform: translate(-2px, 3px); }
+    30% { transform: translate(-2px, 2px); }
+    35% { transform: translate(3px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    45% { transform: translate(2px, 3px); }
+    50% { transform: translate(-3px, -1px); }
+    55% { transform: translate(1px, 2px); }
+    60% { transform: translate(-2px, 1px); }
+    65% { transform: translate(2px, -1px); }
+    70% { transform: translate(-1px, 2px); }
+    75% { transform: translate(1px, -1px); }
+    80% { transform: translate(-1px, 1px); }
+    85% { transform: translate(1px, 1px); }
+    90% { transform: translate(-1px, -1px); }
+    95% { transform: translate(1px, 1px); }
+    100% { transform: translate(0); }
+}
+
+/* Character effects when charging */
+.character-container:has(.hellboar-charge-effect) {
+    filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.8));
+    animation: chargeCharacterGlow 0.6s ease-out;
+}
+
+@keyframes chargeCharacterGlow {
+    0% {
+        filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.8));
+    }
+    50% {
+        filter: drop-shadow(0 0 25px rgba(255, 140, 0, 1));
+    }
+    100% {
+        filter: drop-shadow(0 0 10px rgba(139, 69, 19, 0.6));
+    }
+} 

@@ -1,0 +1,38 @@
+{
+    "id": "hell_fly",
+    "name": "Hell Fly",
+    "image": "Loading Screen/Hell Fly.png",
+    "rarity": "epic",
+    "type": "beast",
+    "description": "A gigantic fly born from the putrid swamps of hell, its buzz alone can drive mortals mad with terror.",
+    "stats": {
+        "physicalDamage": 185,
+        "magicalDamage": 150,
+        "armor": 0,
+        "magicalShield": 0,
+        "hp": 5555,
+        "hpPerTurn": 0,
+        "mana": 6500,
+        "manaPerTurn": 0,
+        "lifesteal": 0,
+        "dodgeChance": 0.27,
+        "critChance": 0.25,
+        "critDamage": 1.5,
+        "healingPower": 0
+    },
+    "abilities": [
+        {
+            "id": "hell_fly_double_scissor",
+            "name": "Double Scissor",
+            "type": "double_scissor",
+            "damageType": "physical",
+            "manaCost": 25,
+            "cooldown": 1,
+            "targetType": "single_enemy",
+            "description": "Strikes the target twice with razor-sharp claws, dealing 450 physical damage per hit.",
+            "icon": "Icons/abilities/double_scissor.png",
+            "baseDamage": 450
+        }
+    ],
+    "tags": ["Beast", "Hell", "Flying"]
+} 

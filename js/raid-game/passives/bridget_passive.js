@@ -282,6 +282,32 @@ class BridgetPassiveHandler {
                     if (this.hasClamProtectionAura && target.id !== this.character.id) {
                         this.applyClamProtectionBuff(target);
                     }
+
+                    /* --- Statistics Tracking for Bridget Passive --- */
+                    if (window.statisticsManager) {
+                        try {
+                            // Record the healing done under a dedicated passive ability ID
+                            window.statisticsManager.recordHealingDone(
+                                this.character,
+                                target,
+                                actualHealAmount,
+                                healResult.isCritical || false,
+                                'bridget_passive_heal'
+                            );
+
+                            // Also register a passive trigger usage for aggregate stats
+                            window.statisticsManager.recordAbilityUsage(
+                                this.character,
+                                'bridget_passive',
+                                'passive_trigger',
+                                actualHealAmount,
+                                false
+                            );
+                        } catch (err) {
+                            console.error('[BridgetPassive Stats] Error while recording passive heal:', err);
+                        }
+                    }
+                    /* --- End Statistics Tracking --- */
                 }
             }
         });

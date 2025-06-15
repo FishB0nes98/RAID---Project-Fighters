@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Selector - Fighter by Fishbones</title>
+    <link rel="stylesheet" href="css/skin-selector.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+<body>
+    <div class="selector-container">
+        <!-- Header -->
+        <header class="selector-header">
+            <div class="header-content">
+                <h1 class="selector-title">
+                    <span class="title-icon">👕</span>
+                    Skin Selector
+                </h1>
+                <p class="subtitle">Choose your character skins</p>
+            </div>
+            <div class="header-actions">
+                <button class="shop-button" onclick="goToShop()">
+                    <span>🛍️</span> Visit Shop
+                </button>
+                <button class="back-button" onclick="goBack()">
+                    <span>←</span> Back to Character Selection
+                </button>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div class="loading-screen" id="loading-screen">
+            <div class="loading-content">
+                <div class="loader"></div>
+                <p>Loading Character Skins...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="selector-content" id="selector-content" style="display: none;">
+            <!-- Characters Grid -->
+            <div class="characters-grid" id="characters-grid">
+                <!-- Characters will be populated here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-icon">😔</div>
+                <h3>No characters with skins found</h3>
+                <p>Visit the skin shop to purchase skins for your characters!</p>
+                <button class="shop-button" onclick="goToShop()">Visit Shop</button>
+            </div>
+        </main>
+
+        <!-- Character Skin Modal -->
+        <div class="modal-overlay" id="skin-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-character-name">Character Skins</h3>
+                    <button class="modal-close" onclick="closeSkinModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="skin-options" id="skin-options">
+                        <!-- Skin options will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="cancel-button" onclick="closeSkinModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="notification" id="notification" style="display: none;">
+            <div class="notification-content">
+                <span class="notification-icon" id="notification-icon"></span>
+                <span class="notification-message" id="notification-message"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/skins/skin-registry.js"></script>
+    <script src="js/skins/skin-manager.js"></script>
+    <script src="js/skins/skin-selector.js"></script>
+</body>
+</html> 

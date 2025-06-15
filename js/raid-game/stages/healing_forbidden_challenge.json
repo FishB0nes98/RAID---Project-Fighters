@@ -1,0 +1,90 @@
+{
+  "id": "healing_forbidden_challenge",
+  "name": "Healing Forbidden Challenge",
+  "description": "Face a quartet of formidable opponents where no healing magic can save you! Farmer Raiden, Schoolgirl Ephelt, Farmer Nina, and Schoolgirl Ayane await in this ultimate test of endurance. Choose your 3 strongest fighters wisely!",
+  "difficulty": 7,
+  "type": "weekly_challenge",
+  "backgroundImage": "images/stages/burning_school_gym.png",
+  "backgroundMusic": "sounds/music/epic_battle_theme.mp3",
+  "enemies": [
+    {
+      "characterId": "farmer_raiden",
+      "level": 6,
+      "modifications": {
+        "hpMultiplier": 1.3,
+        "damageMultiplier": 1.2,
+        "speedMultiplier": 1.1
+      }
+    },
+    {
+      "characterId": "schoolgirl_elphelt",
+      "level": 6,
+      "modifications": {
+        "hpMultiplier": 1.2,
+        "damageMultiplier": 1.3,
+        "speedMultiplier": 1.0
+      }
+    },
+    {
+      "characterId": "farmer_nina",
+      "level": 6,
+      "modifications": {
+        "hpMultiplier": 1.4,
+        "damageMultiplier": 1.1,
+        "speedMultiplier": 0.9
+      }
+    },
+    {
+      "characterId": "schoolgirl_ayane",
+      "level": 6,
+      "modifications": {
+        "hpMultiplier": 1.1,
+        "damageMultiplier": 1.2,
+        "speedMultiplier": 1.3
+      }
+    }
+  ],
+  "playerRequirements": {
+    "minPlayers": 3,
+    "maxPlayers": 3,
+    "requiredTypes": ["any"]
+  },
+  "modifiers": [
+    {
+      "id": "healing_disabled"
+    }
+  ],
+  "stageEffects": [
+    {
+      "id": "healing_disabled"
+    }
+  ],
+  "objectives": {
+    "winConditions": [
+      {
+        "type": "allEnemiesDefeated"
+      }
+    ],
+    "turnLimit": 25
+  },
+  "rewards": [
+    {
+      "type": "gold",
+      "value": 500,
+      "chance": 1.0
+    },
+    {
+      "type": "xp",
+      "value": 300,
+      "chance": 1.0
+    },
+    {
+      "type": "character",
+      "value": "zoey",
+      "chance": 1.0
+    }
+  ],
+  "unlockRequirements": [],
+  "playerunlocked": true,
+  "isHidden": false
+} 

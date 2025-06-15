@@ -1181,7 +1181,54 @@ body {
 .choice-item.effect-pocket_of_weed_effect { border-left: 3px solid #7b1fa2; } /* Deep purple for mixed effect */
 .choice-item.effect-pocket_of_weed_effect:hover { box-shadow: 0 12px 20px rgba(123, 31, 162, 0.2); }
 .choice-item.effect-pocket_of_weed_effect::before { background: linear-gradient(90deg, #7b1fa2, var(--primary)); }
-/* --- END NEW --- */
+
+/* --- NEW: Hell story effect styles --- */
+.choice-item.effect-set_magical_damage { border-left: 3px solid #ff5722; } /* Deep orange/red for hell effect */
+.choice-item.effect-set_magical_damage:hover { box-shadow: 0 12px 20px rgba(255, 87, 34, 0.2); }
+.choice-item.effect-set_magical_damage::before { background: linear-gradient(90deg, #ff5722, var(--primary)); }
+
+.choice-item.effect-demon_claws_effect { border-left: 3px solid #8e24aa; } /* Purple for demonic effect */
+.choice-item.effect-demon_claws_effect:hover { box-shadow: 0 12px 20px rgba(142, 36, 170, 0.2); }
+.choice-item.effect-demon_claws_effect::before { background: linear-gradient(90deg, #8e24aa, var(--primary)); }
+
+.choice-item.effect-hellish_pact_effect { border-left: 3px solid #d32f2f; } /* Dark red for curse */
+.choice-item.effect-hellish_pact_effect:hover { box-shadow: 0 12px 20px rgba(211, 47, 47, 0.2); }
+.choice-item.effect-hellish_pact_effect::before { background: linear-gradient(90deg, #d32f2f, var(--primary)); }
+
+/* --- NEW: Sacrifice effect styles --- */
+.choice-item.effect-sacrifice_hp_for_mana { border-left: 3px solid #8b0000; } /* Dark red for blood sacrifice */
+.choice-item.effect-sacrifice_hp_for_mana:hover { box-shadow: 0 12px 20px rgba(139, 0, 0, 0.2); }
+.choice-item.effect-sacrifice_hp_for_mana::before { background: linear-gradient(90deg, #8b0000, var(--primary)); }
+
+.choice-item.effect-sacrifice_defense_for_power { border-left: 3px solid #ff6b35; } /* Orange-red for power sacrifice */
+.choice-item.effect-sacrifice_defense_for_power:hover { box-shadow: 0 12px 20px rgba(255, 107, 53, 0.2); }
+.choice-item.effect-sacrifice_defense_for_power::before { background: linear-gradient(90deg, #ff6b35, var(--primary)); }
+
+.choice-item.effect-sacrifice_character_for_restoration { border-left: 3px solid #1a1a1a; } /* Black for ultimate sacrifice */
+.choice-item.effect-sacrifice_character_for_restoration:hover { box-shadow: 0 12px 20px rgba(26, 26, 26, 0.2); }
+.choice-item.effect-sacrifice_character_for_restoration::before { background: linear-gradient(90deg, #1a1a1a, var(--primary)); }
+
+/* Molten Weapons Effects */
+.choice-item.effect-molten_hammer_effect { border-left: 3px solid #cd853f; } /* Golden brown for molten hammer */
+.choice-item.effect-molten_hammer_effect:hover { box-shadow: 0 12px 20px rgba(205, 133, 63, 0.2); }
+.choice-item.effect-molten_hammer_effect::before { background: linear-gradient(90deg, #cd853f, var(--primary)); }
+
+.choice-item.effect-molten_scythe_effect { border-left: 3px solid #9400d3; } /* Dark violet for molten scythe */
+.choice-item.effect-molten_scythe_effect:hover { box-shadow: 0 12px 20px rgba(148, 0, 211, 0.2); }
+.choice-item.effect-molten_scythe_effect::before { background: linear-gradient(90deg, #9400d3, var(--primary)); }
+
+.choice-item.effect-molten_spear_effect { border-left: 3px solid #00ced1; } /* Dark turquoise for molten spear */
+.choice-item.effect-molten_spear_effect:hover { box-shadow: 0 12px 20px rgba(0, 206, 209, 0.2); }
+.choice-item.effect-molten_spear_effect::before { background: linear-gradient(90deg, #00ced1, var(--primary)); }
+
+/* Final Preparation effects */
+.choice-item.effect-summon_random_ally { border-left: 3px solid #9c27b0; } /* Purple for summoning magic */
+.choice-item.effect-summon_random_ally:hover { box-shadow: 0 12px 20px rgba(156, 39, 176, 0.2); }
+.choice-item.effect-summon_random_ally::before { background: linear-gradient(90deg, #9c27b0, var(--primary)); }
+
+.choice-item.effect-heal_and_mana_restore_all_full { border-left: 3px solid #4caf50; } /* Green for restoration */
+.choice-item.effect-heal_and_mana_restore_all_full:hover { box-shadow: 0 12px 20px rgba(76, 175, 80, 0.2); }
+.choice-item.effect-heal_and_mana_restore_all_full::before { background: linear-gradient(90deg, #4caf50, var(--primary)); }
 
 /* Styles for Character Selection Modal Cards */
 .character-select-card .stat-bar {
@@ -1578,4 +1625,229 @@ body {
 .stage-node.choice .stage-title::before {
     content: "🤔 ";
     margin-right: 0.5rem;
+}
+
+/* Ally Selection Styling */
+.stage-node.ally_selection {
+    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    border: 2px solid #e65100;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+}
+
+.stage-node.ally_selection:hover {
+    background: linear-gradient(135deg, #e65100, #ff6b35) !important;
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.6);
+    transform: translateY(-8px) scale(1.05);
+}
+
+.stage-node.ally_selection .stage-title::before {
+    content: "🔥 ";
+    margin-right: 0.5rem;
+}
+
+.stage-node.ally_selection .stage-difficulty {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Ally selection cards styling */
+.ally-selection-cards .unlock-card {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(247, 147, 30, 0.1));
+    border: 2px solid rgba(255, 107, 53, 0.3);
+    transition: all 0.3s ease;
+}
+
+.ally-selection-cards .unlock-card:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(247, 147, 30, 0.2));
+    border-color: #ff6b35;
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    transform: translateY(-5px);
+}
+
+.ally-selection-cards .character-unlock-button {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    border: none;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.ally-selection-cards .character-unlock-button:hover {
+    background: linear-gradient(135deg, #e65100, #ff6b35);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    transform: translateY(-2px);
+}
+
+.character-stats-preview {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.character-stats-preview .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.character-stats-preview .stat-row span {
+    font-weight: 600;
+}
+
+/* Hellish path effects for "To The Hell We Go" story */
+.path-segment.hellish-path {
+    background: linear-gradient(90deg, 
+        rgba(139, 0, 0, 0.4) 0%, 
+        rgba(255, 69, 0, 0.6) 25%,
+        rgba(255, 140, 0, 0.8) 50%,
+        rgba(255, 69, 0, 0.6) 75%,
+        rgba(139, 0, 0, 0.4) 100%
+    );
+    box-shadow: 0 0 12px rgba(255, 69, 0, 0.4);
+    height: 4px;
+    animation: hellFire 3s infinite alternate;
+}
+
+.path-segment.hellish-path.completed {
+    background: linear-gradient(90deg, 
+        rgba(255, 69, 0, 0.6) 0%, 
+        rgba(255, 140, 0, 0.9) 25%,
+        rgba(255, 215, 0, 1) 50%,
+        rgba(255, 140, 0, 0.9) 75%,
+        rgba(255, 69, 0, 0.6) 100%
+    );
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.6), 0 0 40px rgba(255, 69, 0, 0.3);
+}
+
+.path-arrow.hellish-arrow {
+    border-left-color: rgba(255, 69, 0, 0.8);
+    filter: drop-shadow(0 0 4px rgba(255, 69, 0, 0.6));
+}
+
+.path-arrow.hellish-arrow.completed {
+    border-left-color: rgba(255, 140, 0, 1);
+    filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.8));
+}
+
+.hell-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, #ff4500, #ff8c00);
+    border-radius: 50%;
+    top: -1px;
+    animation: hellParticle 2s infinite linear;
+    opacity: 0;
+}
+
+@keyframes hellFire {
+    0% { 
+        box-shadow: 0 0 12px rgba(255, 69, 0, 0.4);
+        filter: brightness(1);
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
+        filter: brightness(1.2);
+    }
+    100% { 
+        box-shadow: 0 0 16px rgba(255, 69, 0, 0.5);
+        filter: brightness(1.1);
+    }
+}
+
+@keyframes hellParticle {
+    0% { 
+        opacity: 0;
+        transform: translateY(0px) scale(0.5);
+    }
+    20% { 
+        opacity: 1;
+        transform: translateY(-2px) scale(1);
+    }
+    80% { 
+        opacity: 0.8;
+        transform: translateY(-8px) scale(0.8);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateY(-12px) scale(0.3);
+    }
+}
+
+/* Hellish node effects for "To The Hell We Go" story */
+.stage-node.hellish-node {
+    background: linear-gradient(135deg, 
+        rgba(139, 0, 0, 0.8), 
+        rgba(255, 69, 0, 0.3),
+        rgba(139, 0, 0, 0.8)
+    );
+    border: 2px solid rgba(255, 69, 0, 0.6);
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3), 
+                inset 0 2px 4px rgba(255, 69, 0, 0.2);
+}
+
+.stage-node.hellish-node:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(139, 0, 0, 0.4),
+                0 0 20px rgba(255, 69, 0, 0.3),
+                inset 0 2px 4px rgba(255, 69, 0, 0.3);
+    border-color: rgba(255, 140, 0, 0.8);
+}
+
+.stage-node.hellish-node.completed {
+    background: linear-gradient(135deg, 
+        rgba(255, 69, 0, 0.8), 
+        rgba(255, 140, 0, 0.4),
+        rgba(255, 69, 0, 0.8)
+    );
+    border-color: rgba(255, 140, 0, 0.8);
+    box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4),
+                0 0 25px rgba(255, 140, 0, 0.2),
+                inset 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.stage-node.hellish-node.active {
+    background: linear-gradient(135deg, 
+        rgba(255, 140, 0, 0.9), 
+        rgba(255, 215, 0, 0.4),
+        rgba(255, 140, 0, 0.9)
+    );
+    border-color: rgba(255, 215, 0, 0.9);
+    box-shadow: 0 0 25px rgba(255, 140, 0, 0.5),
+                0 0 50px rgba(255, 215, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    animation: hellGlow 2s infinite alternate;
+}
+
+.stage-node.hellish-node.locked {
+    background: linear-gradient(135deg, 
+        rgba(60, 60, 60, 0.8), 
+        rgba(100, 100, 100, 0.3),
+        rgba(60, 60, 60, 0.8)
+    );
+    border-color: rgba(100, 100, 100, 0.4);
+    filter: grayscale(80%);
+}
+
+@keyframes hellGlow {
+    0% { 
+        box-shadow: 0 0 25px rgba(255, 140, 0, 0.5),
+                    0 0 50px rgba(255, 215, 0, 0.3),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+    100% { 
+        box-shadow: 0 0 35px rgba(255, 140, 0, 0.8),
+                    0 0 70px rgba(255, 215, 0, 0.5),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    }
 }

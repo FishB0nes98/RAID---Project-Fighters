@@ -107,14 +107,16 @@ class SchoolgirlJuliaPassiveHandler {
 
         const damageGain = 5; // Fixed +5 Physical Damage per heal
         if (damageGain > 0) {
-            // Store original damage before modification
-            const originalDamage = caster.stats.physicalDamage;
-            
-            // Apply the damage gain
-            caster.stats.physicalDamage += damageGain;
+            // Only track the damage gain - don't modify stats directly
+            // The bonus will be applied automatically in recalculateStats()
             this.damageGained += damageGain;
             
             console.log(`Julia's Healing Empowerment triggered: +${damageGain} Physical Damage (Total: +${this.damageGained})`);
+            
+            // Trigger stat recalculation to apply the bonus
+            if (caster.recalculateStats) {
+                caster.recalculateStats('julia_passive_heal');
+            }
             
             // Update passive indicator
             this.updatePassiveIndicator();

@@ -1,6 +1,211 @@
 // Bridget Abilities and Passive Implementation
 
 /**
+ * Bridget Statistics Enhancement
+ * Enhanced statistics tracking for all of Bridget's abilities to match comprehensive tracking systems
+ */
+
+/**
+ * Global helper function to track Bridget's ability usage for statistics
+ */
+function trackBridgetAbilityUsage(character, abilityId, effectType, amount = 0, isCritical = false) {
+    if (!window.statisticsManager || !character) {
+        console.warn(`[BridgetStats] StatisticsManager or character not available for tracking ${abilityId}`);
+        return;
+    }
+    
+    try {
+        window.statisticsManager.recordAbilityUsage(character, abilityId, effectType, amount, isCritical);
+        console.log(`[BridgetStats] Tracked ${effectType} ability usage: ${abilityId} by ${character.name}`);
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking ability usage for ${abilityId}:`, error);
+    }
+}
+
+/**
+ * Enhanced Ribbon Wave Rush (Q) statistics tracking
+ */
+window.trackRibbonWaveRushStats = function(caster, target, damageResult) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track damage dealt with proper ability ID
+        window.statisticsManager.recordDamageDealt(
+            caster, 
+            target, 
+            damageResult.damage, 
+            'magical', 
+            damageResult.isCritical,
+            'bridget_q'
+        );
+        
+        console.log(`[BridgetStats] Ribbon Wave Rush damage tracked: ${damageResult.damage} to ${target.name}`);
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking Ribbon Wave Rush stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Bubble Beam Barrage (W) statistics tracking
+ */
+window.trackBubbleBeamStats = function(caster, target, result, isHealing = false, beamType = 'standard') {
+    if (!window.statisticsManager) return;
+    
+    try {
+        let abilityId = 'bridget_w';
+        if (beamType === 'enhanced') {
+            abilityId = 'bridget_w_enhanced';
+        }
+        
+        if (isHealing) {
+            // Track healing done with healing beam suffix
+            window.statisticsManager.recordHealingDone(
+                caster,
+                target,
+                result.healAmount,
+                result.isCritical,
+                abilityId + '_heal'
+            );
+            console.log(`[BridgetStats] Bubble Beam healing tracked: ${result.healAmount} to ${target.name}`);
+        } else {
+            // Track damage dealt
+            window.statisticsManager.recordDamageDealt(
+                caster,
+                target,
+                result.damage,
+                'magical',
+                result.isCritical,
+                abilityId
+            );
+            console.log(`[BridgetStats] Bubble Beam damage tracked: ${result.damage} to ${target.name}`);
+        }
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking Bubble Beam stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Arcane Bubble Shield (E) statistics tracking
+ */
+window.trackArcaneShieldStats = function(caster) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track utility ability usage for buff application
+        trackBridgetAbilityUsage(caster, 'bridget_e', 'utility', 0, false);
+        
+        console.log(`[BridgetStats] Arcane Bubble Shield utility usage tracked for ${caster.name}`);
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking Arcane Shield stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Bubble Arsenal projectile statistics tracking
+ */
+window.trackBubbleArsenalStats = function(caster, target, result, isHealing = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        if (isHealing) {
+            // Track healing done
+            window.statisticsManager.recordHealingDone(
+                caster,
+                target,
+                result.healAmount,
+                result.isCritical,
+                'bridget_e_arsenal_heal'
+            );
+            console.log(`[BridgetStats] Bubble Arsenal healing tracked: ${result.healAmount} to ${target.name}`);
+        } else {
+            // Track damage dealt
+            window.statisticsManager.recordDamageDealt(
+                caster,
+                target,
+                result.damage,
+                'magical',
+                result.isCritical,
+                'bridget_e_arsenal_damage'
+            );
+            console.log(`[BridgetStats] Bubble Arsenal damage tracked: ${result.damage} to ${target.name}`);
+        }
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking Bubble Arsenal stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Wave Crush (R) statistics tracking
+ */
+window.trackWaveCrushStats = function(caster, target, result, isHealing = false) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        if (isHealing) {
+            // Track healing done
+            window.statisticsManager.recordHealingDone(
+                caster,
+                target,
+                result.healAmount,
+                result.isCritical,
+                'bridget_r_heal'
+            );
+            console.log(`[BridgetStats] Wave Crush healing tracked: ${result.healAmount} to ${target.name}`);
+        } else {
+            // Track damage dealt
+            window.statisticsManager.recordDamageDealt(
+                caster,
+                target,
+                result.damage,
+                'magical',
+                result.isCritical,
+                'bridget_r'
+            );
+            console.log(`[BridgetStats] Wave Crush damage tracked: ${result.damage} to ${target.name}`);
+        }
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking Wave Crush stats:`, error);
+    }
+};
+
+/**
+ * Enhanced Passive Healing statistics tracking
+ */
+window.trackBridgetPassiveStats = function(character, healAmount, triggeringDamage) {
+    if (!window.statisticsManager) return;
+    
+    try {
+        // Track healing done from passive
+        window.statisticsManager.recordHealingDone(
+            character,
+            character, // Self-heal
+            healAmount,
+            false, // Not critical
+            'bridget_passive_healing'
+        );
+        
+        // Track passive ability usage
+        trackBridgetAbilityUsage(character, 'bridget_passive', 'passive_trigger', triggeringDamage, false);
+        
+        // Record as a passive event
+        window.statisticsManager.recordTurnEvent({
+            type: 'passive_trigger',
+            caster: character.name,
+            casterId: character.instanceId || character.id,
+            passiveName: 'Echoing Bubble',
+            passiveId: 'bridget_passive',
+            triggeringDamage: triggeringDamage,
+            healAmount: healAmount,
+            turn: window.statisticsManager.currentTurn || 0
+        });
+        
+        console.log(`[BridgetStats] Passive healing tracked: ${healAmount} HP from ${triggeringDamage} damage for ${character.name}`);
+    } catch (error) {
+        console.error(`[BridgetStats] Error tracking passive stats:`, error);
+    }
+};
+
+/**
  * Bridget's Ribbon Wave Rush (Q) ability
  * Summons a waterfall that hits two random enemies
  */
@@ -60,6 +265,11 @@ let bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
     
     log(`${caster.name} unleashes Ribbon Wave Rush on ${targetCount} enemies!`);
     
+    // Track ability usage
+    if (window.trackBridgetAbilityUsage) {
+        trackBridgetAbilityUsage(caster, 'bridget_q', 'use', 0, false);
+    }
+    
     // Play water cascade sound if available
     if (gameManager && typeof gameManager.playSound === 'function') {
         gameManager.playSound('sounds/water_cascade.mp3', 0.7);
@@ -95,7 +305,12 @@ let bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
             damage = Math.floor(damage);
             
             // Apply damage to the target
-            const damageResult = target.applyDamage(damage, 'magical', caster);
+            const damageResult = target.applyDamage(damage, 'magical', caster, { abilityId: 'bridget_q' });
+            
+            // Track damage statistics
+            if (window.trackRibbonWaveRushStats) {
+                window.trackRibbonWaveRushStats(caster, target, damageResult);
+            }
             
             // Show water impact VFX
             showWaterImpactVFX(target, isCritical);
@@ -362,10 +577,15 @@ function applyBridgetPassiveHealing(caster, totalDamage) {
     targetsToHeal.forEach(target => {
         if (target && !target.isDead()) {
             // Apply the base passive heal (e.g., 42% of damage dealt)
-            const healResult = target.heal(healFromDamage, caster); // Pass caster
+            const healResult = target.heal(healFromDamage, caster, { abilityId: 'bridget_passive_healing' }); // Pass caster
             const actualHeal = healResult.healAmount;
 
             if (actualHeal > 0) {
+                // Track passive healing statistics
+                if (window.trackBridgetPassiveStats) {
+                    window.trackBridgetPassiveStats(caster, target, healResult, totalDamage);
+                }
+                
                 showPassiveHealingVFX(target, actualHeal); // Show VFX on the healed target
                 const targetName = target.id === caster.id ? "herself" : target.name;
                 log(`${caster.name}'s Flowing Essence passively heals ${targetName} for ${actualHeal} HP.`, 'heal');
@@ -415,8 +635,13 @@ function triggerBridgetEchoingBubble(target, caster) {
     log(`[Echoing Bubbles] talent proc'd! ${caster.name} launches a healing bubble at ${target.name}.`, 'talent-effect');
 
     if (target && !target.isDead() && totalHealAmount > 0) {
-        const healResult = target.heal(totalHealAmount, caster);
+        const healResult = target.heal(totalHealAmount, caster, { abilityId: 'bridget_echoing_bubble' });
          if (healResult.healAmount > 0) {
+            // Track Echoing Bubble talent statistics
+            if (window.trackEchoingBubbleStats) {
+                window.trackEchoingBubbleStats(caster, target, healResult);
+            }
+            
             log(`${caster.name}'s Echoing Bubble heals ${target.name} for ${healResult.healAmount} HP.`, 'heal');
          }
          // Update UI for the target of the echoing bubble
@@ -803,6 +1028,12 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
         log(`${caster.name} unleashes Bubble Beam Barrage, firing ${beamCount} beams!`);
     }
     
+    // Track ability usage
+    if (window.trackBridgetAbilityUsage) {
+        const beamType = caster.enhancedBubbleBarrage ? 'enhanced' : 'standard';
+        trackBridgetAbilityUsage(caster, beamType === 'enhanced' ? 'bridget_w_enhanced' : 'bridget_w', 'use', beamCount, false);
+    }
+    
     // Play bubble beam sound if available
     if (gameManager && typeof gameManager.playSound === 'function') {
         gameManager.playSound('sounds/water_cascade.mp3', 0.7); // Reuse water sound or use a bubble sound if available
@@ -869,9 +1100,16 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
             console.log(`[Bubble Healing - Ally Heal Calc] Caster MD: ${caster.stats.magicalDamage}, Initial Heal: ${initialHealAmount}`);
             
             if (initialHealAmount > 0) {
-                const healResult = currentTarget.heal(initialHealAmount, caster);
+                const healResult = currentTarget.heal(initialHealAmount, caster, { abilityId: 'bridget_w_heal' });
                 log(`${caster.name}'s Bubble Beam heals ${currentTarget.name} for ${healResult.healAmount} HP.${healResult.isCritical ? " (Critical Heal!)" : ""}`, 'heal');
                 console.log(`[Bubble Healing - Ally Heal Result] Target: ${currentTarget.name}, Healed for: ${healResult.healAmount}, Crit: ${healResult.isCritical}, Caster HealingPower for context: ${caster.stats.healingPower}`);
+                
+                // Track healing statistics
+                if (window.trackBubbleBeamStats) {
+                    const beamType = caster.enhancedBubbleBarrage ? 'enhanced' : 'standard';
+                    window.trackBubbleBeamStats(caster, currentTarget, healResult, true, beamType);
+                }
+                
                 // Create a healing projectile VFX for allies
                 createBubbleBeamProjectile(caster, currentTarget, beamIndex, healResult.isCritical, true /* isHealingBeam */);
             } else {
@@ -892,9 +1130,15 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
             // Apply damage with a slight delay to sync with projectile animation
             setTimeout(() => {
                 if (currentTarget && !currentTarget.isDead()) {
-                    const damageResult = currentTarget.applyDamage(damage, 'magical', caster);
+                    const damageResult = currentTarget.applyDamage(damage, 'magical', caster, { abilityId: 'bridget_w' });
                     log(`${caster.name}'s Bubble Beam hits ${currentTarget.name} for ${damageResult.damage} magical damage.${isCritical ? " (Critical Hit!)" : ""}`);
                     totalDamage += damageResult.damage; // Accumulate damage for passive
+                    
+                    // Track damage statistics
+                    if (window.trackBubbleBeamStats) {
+                        const beamType = caster.enhancedBubbleBarrage ? 'enhanced' : 'standard';
+                        window.trackBubbleBeamStats(caster, currentTarget, damageResult, false, beamType);
+                    }
     
                     // Check for death & passive after damage is applied
                     if (currentTarget.isDead()) {
@@ -1026,6 +1270,11 @@ const bridgetArcaneBubbleShieldEffect = (caster) => {
     
     log(`${caster.name} casts Arcane Bubble Shield, surrounding herself with protective water magic!`);
     
+    // Track ability usage
+    if (window.trackArcaneShieldStats) {
+        window.trackArcaneShieldStats(caster);
+    }
+    
     // Play water shield sound if available
     if (gameManager && typeof gameManager.playSound === 'function') {
         gameManager.playSound('sounds/water_shield.mp3', 0.7);
@@ -1146,8 +1395,13 @@ const bridgetArcaneBubbleShieldEffect = (caster) => {
             const magicalDamage = character.stats.magicalDamage || 0;
             const healAmount = Math.floor(baseheal + (magicalDamage * 0.60));
             
-            const healResult = target.heal(healAmount, character);
+            const healResult = target.heal(healAmount, character, { abilityId: 'bridget_e_arsenal_heal' });
             log(`A magic bubble from ${character.name}'s Bubble Arsenal heals ${target.name} for ${healResult.healAmount} HP!`);
+            
+            // Track healing statistics
+            if (window.trackBubbleArsenalStats) {
+                window.trackBubbleArsenalStats(character, target, healResult, true);
+            }
             
             // Show heal VFX on target
             showBubbleHealVFX(target, healResult.healAmount);
@@ -1177,7 +1431,12 @@ const bridgetArcaneBubbleShieldEffect = (caster) => {
             }
             
             // Apply damage
-            const damageResult = target.applyDamage(damage, 'magical', character);
+            const damageResult = target.applyDamage(damage, 'magical', character, { abilityId: 'bridget_e_arsenal_damage' });
+            
+            // Track damage statistics
+            if (window.trackBubbleArsenalStats) {
+                window.trackBubbleArsenalStats(character, target, damageResult, false);
+            }
             
             // Check if critical hit occurred and dispatch event
             if (damageResult.isCritical) {
@@ -1588,6 +1847,11 @@ const bridgetWaveCrushEffect = (caster) => {
     const log = gameManager ? gameManager.addLogEntry.bind(gameManager) : console.log;
 
     log(`${caster.name} channels immense power and unleashes Wave Crush!`);
+    
+    // Track ability usage
+    if (window.trackBridgetAbilityUsage) {
+        trackBridgetAbilityUsage(caster, 'bridget_r', 'use', 0, false);
+    }
 
     // Play ultimate sound effect
     if (gameManager && typeof gameManager.playSound === 'function') {
@@ -1608,8 +1872,13 @@ const bridgetWaveCrushEffect = (caster) => {
                 if (enemy.isDead()) return;
 
                 const damage = 700; // Fixed damage
-                const damageResult = enemy.applyDamage(damage, 'magical', caster);
+                const damageResult = enemy.applyDamage(damage, 'magical', caster, { abilityId: 'bridget_r' });
                 totalDamageDealt += damageResult.damage;
+
+                // Track damage statistics
+                if (window.trackWaveCrushStats) {
+                    window.trackWaveCrushStats(caster, enemy, damageResult, false);
+                }
 
                 showWaveCrushImpactVFX(enemy, damageResult.isCritical); // Pass critical status
                 log(`${enemy.name} takes ${damageResult.damage} magical damage from Wave Crush${damageResult.isCritical ? ' (Critical Hit!)' : ''}.`);
@@ -1645,7 +1914,12 @@ const bridgetWaveCrushEffect = (caster) => {
                 if (ally.isDead()) return;
 
                 const healAmount = 500; // Fixed heal
-                const healResult = ally.heal(healAmount, caster); // Bridget is the source of healing
+                const healResult = ally.heal(healAmount, caster, { abilityId: 'bridget_r_heal' }); // Bridget is the source of healing
+
+                // Track healing statistics
+                if (window.trackWaveCrushStats) {
+                    window.trackWaveCrushStats(caster, ally, healResult, true);
+                }
 
                 showWaveCrushHealVFX(ally, healResult.isCritical); // Pass critical status
                 log(`${ally.name} is healed for ${healResult.healAmount} HP by the Wave Crush${healResult.isCritical ? ' (Critical Heal!)' : ''}.`);
@@ -4265,7 +4539,7 @@ function triggerResonantCascade(caster, targets) {
 // Add this hook to each ability effect to ensure Resonant Cascade triggers
 
 // Add to Ribbon Wave Rush effect
-const originalRibbonWaveRushEffect = bridgetRibbonWaveRushEffect;
+let originalRibbonWaveRushEffect = bridgetRibbonWaveRushEffect;
 bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
     const result = originalRibbonWaveRushEffect(caster, targets, abilityInstance);
     
@@ -4280,7 +4554,7 @@ bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
 };
 
 // Add to Bubble Beam Barrage effect
-const originalBubbleBeamBarrageEffect = bridgetBubbleBeamBarrageEffect;
+let originalBubbleBeamBarrageEffect = bridgetBubbleBeamBarrageEffect;
 bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
     const result = originalBubbleBeamBarrageEffect(caster, targets, abilityInstance);
     
@@ -4295,7 +4569,7 @@ bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
 };
 
 // Add to Arcane Bubble Shield effect
-const originalArcaneBubbleShieldEffect = bridgetArcaneBubbleShieldEffect;
+let originalArcaneBubbleShieldEffect = bridgetArcaneBubbleShieldEffect;
 bridgetArcaneBubbleShieldEffect = (caster) => {
     const result = originalArcaneBubbleShieldEffect(caster);
     
@@ -4318,7 +4592,7 @@ bridgetArcaneBubbleShieldEffect = (caster) => {
 };
 
 // Add to Wave Crush effect 
-const originalWaveCrushEffect = bridgetWaveCrushEffect;
+let originalWaveCrushEffect = bridgetWaveCrushEffect;
 bridgetWaveCrushEffect = (caster) => {
     const result = originalWaveCrushEffect(caster);
     

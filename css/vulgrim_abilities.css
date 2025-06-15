@@ -1,0 +1,895 @@
+/* Vulgrim Scythe Swing VFX */
+
+/* Main Target Scythe Slash */
+.scythe-swing-primary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+    pointer-events: none;
+    background: linear-gradient(
+        45deg, 
+        transparent 30%, 
+        rgba(139, 0, 0, 0.9) 45%, 
+        rgba(255, 255, 255, 0.8) 50%, 
+        rgba(139, 0, 0, 0.9) 55%, 
+        transparent 70%
+    );
+    animation: scytheSlashPrimary 0.6s ease-out forwards;
+}
+
+/* Cleave Target Scythe Slash */
+.scythe-swing-cleave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 94;
+    pointer-events: none;
+    background: linear-gradient(
+        135deg, 
+        transparent 35%, 
+        rgba(139, 0, 0, 0.6) 47%, 
+        rgba(255, 255, 255, 0.5) 50%, 
+        rgba(139, 0, 0, 0.6) 53%, 
+        transparent 65%
+    );
+    animation: scytheSlashCleave 0.5s ease-out forwards;
+}
+
+/* Dark Energy Effect */
+.scythe-dark-energy {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 93;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center, 
+        rgba(75, 0, 130, 0.4) 0%, 
+        rgba(139, 0, 0, 0.3) 40%, 
+        rgba(0, 0, 0, 0.2) 70%, 
+        transparent 100%
+    );
+    animation: darkEnergyPulse 0.8s ease-out forwards;
+}
+
+/* Blood Splatter Effect (Main Target Only) */
+.scythe-blood-splatter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 96;
+    pointer-events: none;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(139, 0, 0, 0.8) 0%, rgba(139, 0, 0, 0) 8%),
+        radial-gradient(circle at 70% 20%, rgba(160, 0, 0, 0.7) 0%, rgba(160, 0, 0, 0) 6%),
+        radial-gradient(circle at 80% 60%, rgba(139, 0, 0, 0.9) 0%, rgba(139, 0, 0, 0) 7%),
+        radial-gradient(circle at 30% 70%, rgba(180, 0, 0, 0.6) 0%, rgba(180, 0, 0, 0) 5%),
+        radial-gradient(circle at 60% 80%, rgba(139, 0, 0, 0.8) 0%, rgba(139, 0, 0, 0) 9%);
+    animation: bloodSplatterFade 1.0s ease-out forwards;
+}
+
+/* Demonic Aura */
+.scythe-demonic-aura {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    right: -10%;
+    bottom: -10%;
+    z-index: 92;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center, 
+        rgba(139, 0, 0, 0.3) 0%, 
+        rgba(75, 0, 130, 0.2) 50%, 
+        rgba(0, 0, 0, 0.4) 80%, 
+        transparent 100%
+    );
+    border-radius: 50%;
+    animation: demonicAuraPulse 1.2s ease-in-out forwards;
+}
+
+/* Animations */
+@keyframes scytheSlashPrimary {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-45deg);
+        background-position: -100% 0;
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1) rotate(-45deg);
+        background-position: 0% 0;
+    }
+    60% {
+        opacity: 0.9;
+        transform: scale(1.2) rotate(-45deg);
+        background-position: 50% 0;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5) rotate(-45deg);
+        background-position: 100% 0;
+    }
+}
+
+@keyframes scytheSlashCleave {
+    0% {
+        opacity: 0;
+        transform: scale(0.7) rotate(135deg);
+        background-position: -100% 0;
+    }
+    40% {
+        opacity: 0.8;
+        transform: scale(1.0) rotate(135deg);
+        background-position: 50% 0;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3) rotate(135deg);
+        background-position: 100% 0;
+    }
+}
+
+@keyframes darkEnergyPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        background-size: 50% 50%;
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+        background-size: 100% 100%;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.4);
+        background-size: 150% 150%;
+    }
+}
+
+@keyframes bloodSplatterFade {
+    0% {
+        opacity: 0;
+        background-size: 
+            3% 3%, 
+            2% 2%, 
+            4% 4%, 
+            2.5% 2.5%, 
+            3.5% 3.5%;
+    }
+    30% {
+        opacity: 0.9;
+        background-size: 
+            8% 8%, 
+            6% 6%, 
+            9% 9%, 
+            7% 7%, 
+            8.5% 8.5%;
+    }
+    100% {
+        opacity: 0;
+        background-size: 
+            15% 15%, 
+            12% 12%, 
+            16% 16%, 
+            13% 13%, 
+            14% 14%;
+    }
+}
+
+@keyframes demonicAuraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+        background-size: 80% 80%;
+    }
+    25% {
+        opacity: 0.4;
+        transform: scale(0.9);
+        background-size: 100% 100%;
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+        background-size: 110% 110%;
+    }
+    75% {
+        opacity: 0.3;
+        transform: scale(1.0);
+        background-size: 100% 100%;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+        background-size: 120% 120%;
+    }
+}
+
+/* Screen shake effect for powerful strikes */
+@keyframes scytheScreenShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-2px) translateY(1px); }
+    20% { transform: translateX(2px) translateY(-1px); }
+    30% { transform: translateX(-1px) translateY(2px); }
+    40% { transform: translateX(1px) translateY(-2px); }
+    50% { transform: translateX(-2px) translateY(1px); }
+    60% { transform: translateX(2px) translateY(-1px); }
+    70% { transform: translateX(-1px) translateY(2px); }
+    80% { transform: translateX(1px) translateY(-2px); }
+    90% { transform: translateX(-1px) translateY(1px); }
+}
+
+/* Additional demonic particle effects */
+.scythe-demonic-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 91;
+    pointer-events: none;
+    background-image: 
+        radial-gradient(circle at 15% 25%, rgba(139, 0, 0, 0.6) 0%, rgba(139, 0, 0, 0) 3%),
+        radial-gradient(circle at 85% 35%, rgba(75, 0, 130, 0.5) 0%, rgba(75, 0, 130, 0) 2%),
+        radial-gradient(circle at 25% 75%, rgba(139, 0, 0, 0.7) 0%, rgba(139, 0, 0, 0) 2.5%),
+        radial-gradient(circle at 75% 85%, rgba(75, 0, 130, 0.4) 0%, rgba(75, 0, 130, 0) 2%),
+        radial-gradient(circle at 45% 15%, rgba(139, 0, 0, 0.5) 0%, rgba(139, 0, 0, 0) 3%),
+        radial-gradient(circle at 65% 65%, rgba(75, 0, 130, 0.6) 0%, rgba(75, 0, 130, 0) 2.5%);
+    animation: demonicParticleFloat 1.5s ease-out forwards;
+}
+
+@keyframes demonicParticleFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0px);
+        background-size: 
+            1% 1%, 1% 1%, 1% 1%, 
+            1% 1%, 1% 1%, 1% 1%;
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(-10px);
+        background-size: 
+            3% 3%, 2% 2%, 2.5% 2.5%, 
+            2% 2%, 3% 3%, 2.5% 2.5%;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-30px);
+        background-size: 
+            5% 5%, 4% 4%, 4.5% 4.5%, 
+            4% 4%, 5% 5%, 4.5% 4.5%;
+    }
+}
+
+/* ======================================= */
+/* FEARFUL HOWL VFX */
+/* ======================================= */
+
+/* Screen-wide overlay for Fearful Howl */
+.fearful-howl-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(60, 0, 60, 0.2) 0%,
+        rgba(40, 0, 40, 0.4) 50%,
+        rgba(0, 0, 0, 0.6) 100%
+    );
+    animation: fearfulHowlScreenPulse 2.5s ease-out forwards;
+}
+
+/* Sound waves emanating from center */
+.fearful-howl-sound-wave {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: 3px solid rgba(139, 0, 139, 0.7);
+    border-radius: 50%;
+    z-index: 998;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: fearfulHowlSoundWave 2s ease-out forwards;
+}
+
+/* Dark energy particles floating across screen */
+.fearful-howl-dark-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(
+        circle,
+        rgba(139, 0, 139, 0.9) 0%,
+        rgba(75, 0, 130, 0.7) 50%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    z-index: 997;
+    pointer-events: none;
+    animation: fearfulHowlParticleFloat 3s ease-out forwards;
+}
+
+/* Individual target shudder effect */
+.fearful-howl-target-shudder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+    pointer-events: none;
+    animation: fearfulHowlTargetShudder 2s ease-out forwards;
+}
+
+/* Dark aura around intimidated targets */
+.fearful-howl-target-aura {
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    right: -20%;
+    bottom: -20%;
+    z-index: 94;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(75, 0, 130, 0.3) 0%,
+        rgba(139, 0, 139, 0.2) 50%,
+        rgba(60, 0, 60, 0.1) 80%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    animation: fearfulHowlTargetAura 2s ease-out forwards;
+}
+
+/* Fear symbol above targets */
+.fearful-howl-fear-symbol {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 96;
+    pointer-events: none;
+    font-size: 24px;
+    opacity: 0;
+    animation: fearfulHowlFearSymbol 2s ease-out forwards;
+}
+
+/* Persistent fear indicator (during debuff duration) */
+.fearful-howl-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    z-index: 91;
+    pointer-events: none;
+    background: radial-gradient(
+        circle,
+        rgba(75, 0, 130, 0.8) 0%,
+        rgba(139, 0, 139, 0.6) 50%,
+        rgba(60, 0, 60, 0.4) 100%
+    );
+    border-radius: 50%;
+    border: 2px solid rgba(139, 0, 139, 0.7);
+    animation: fearfulHowlIndicatorPulse 2s ease-in-out infinite;
+}
+
+/* Fearful Howl Animations */
+@keyframes fearfulHowlScreenPulse {
+    0% {
+        opacity: 0;
+        background-size: 50% 50%;
+    }
+    30% {
+        opacity: 0.8;
+        background-size: 100% 100%;
+    }
+    70% {
+        opacity: 0.6;
+        background-size: 120% 120%;
+    }
+    100% {
+        opacity: 0;
+        background-size: 150% 150%;
+    }
+}
+
+@keyframes fearfulHowlSoundWave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.8;
+        border-width: 3px;
+    }
+    50% {
+        opacity: 0.6;
+        border-width: 2px;
+    }
+    100% {
+        width: 800px;
+        height: 800px;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+@keyframes fearfulHowlParticleFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+    }
+    20% {
+        opacity: 0.8;
+        transform: translateY(-20px) scale(1);
+    }
+    80% {
+        opacity: 0.4;
+        transform: translateY(-80px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-120px) scale(0.8);
+    }
+}
+
+@keyframes fearfulHowlTargetShudder {
+    0%, 100% { transform: translateX(0); }
+    5% { transform: translateX(-2px) translateY(-1px); }
+    10% { transform: translateX(2px) translateY(1px); }
+    15% { transform: translateX(-1px) translateY(-2px); }
+    20% { transform: translateX(1px) translateY(2px); }
+    25% { transform: translateX(-2px) translateY(-1px); }
+    30% { transform: translateX(2px) translateY(1px); }
+    35% { transform: translateX(-1px) translateY(-1px); }
+    40% { transform: translateX(1px) translateY(1px); }
+    45% { transform: translateX(-1px) translateY(0px); }
+    50% { transform: translateX(1px) translateY(0px); }
+    55% { transform: translateX(0px) translateY(-1px); }
+    60% { transform: translateX(0px) translateY(1px); }
+    65% { transform: translateX(-1px) translateY(0px); }
+    70% { transform: translateX(1px) translateY(0px); }
+    75% { transform: translateX(0px) translateY(0px); }
+}
+
+@keyframes fearfulHowlTargetAura {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+        background-size: 80% 80%;
+    }
+    30% {
+        opacity: 0.6;
+        transform: scale(1.0);
+        background-size: 100% 100%;
+    }
+    70% {
+        opacity: 0.4;
+        transform: scale(1.1);
+        background-size: 110% 110%;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+        background-size: 130% 130%;
+    }
+}
+
+@keyframes fearfulHowlFearSymbol {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1.2);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translateX(-50%) translateY(-20px) scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.8);
+    }
+}
+
+@keyframes fearfulHowlIndicatorPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1.0);
+        box-shadow: 0 0 5px rgba(139, 0, 139, 0.5);
+    }
+    50% {
+        opacity: 1.0;
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(139, 0, 139, 0.8);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .fearful-howl-fear-symbol {
+        font-size: 20px;
+    }
+    
+    .fearful-howl-indicator {
+        width: 8px;
+        height: 8px;
+        font-size: 6px;
+    }
+    
+    .fearful-howl-sound-wave {
+        border-width: 2px;
+    }
+}
+
+/* Death Dash Ability VFX */
+.death-dash-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(128, 0, 128, 0.8), transparent);
+    border-radius: 50%;
+    animation: deathDashTrail 0.8s ease-out;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.death-dash-strike {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #8B00FF, #4B0082, transparent);
+    transform: translate(-50%, -50%) rotate(45deg);
+    animation: deathDashStrike 0.6s ease-out;
+    pointer-events: none;
+    z-index: 11;
+    box-shadow: 0 0 20px #8B00FF;
+}
+
+.death-dash-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(139, 0, 255, 0.9), rgba(75, 0, 130, 0.7), transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: deathDashExplosion 0.8s ease-out;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.death-dash-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(180deg, #8B00FF, #4B0082);
+    transform-origin: 50% 0%;
+    animation: deathDashParticle 1.2s ease-out;
+    pointer-events: none;
+    z-index: 9;
+}
+
+/* Death Mark Debuff VFX */
+.death-mark-indicator {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 0, 255, 0.3);
+    border: 2px solid #8B00FF;
+    border-radius: 50%;
+    animation: deathMarkIndicatorPulse 2s infinite;
+    pointer-events: none;
+    z-index: 15;
+    box-shadow: 0 0 10px rgba(139, 0, 255, 0.5);
+}
+
+.death-mark-symbol {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 36px;
+    animation: deathMarkSymbolAppear 2s ease-out;
+    pointer-events: none;
+    z-index: 13;
+    text-shadow: 0 0 10px #8B00FF;
+}
+
+.death-mark-binding {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid #8B00FF;
+    border-radius: 50%;
+    animation: deathMarkBinding 2s ease-out;
+    pointer-events: none;
+    z-index: 12;
+    box-shadow: inset 0 0 20px rgba(139, 0, 255, 0.5);
+}
+
+.death-mark-aura {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: calc(100% + 20px);
+    height: calc(100% + 20px);
+    background: radial-gradient(circle, transparent 60%, rgba(139, 0, 255, 0.3));
+    border-radius: 50%;
+    animation: deathMarkAura 2s ease-out;
+    pointer-events: none;
+    z-index: 11;
+}
+
+/* Death Mark Detonation VFX */
+.death-mark-detonation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(139, 0, 255, 1), rgba(75, 0, 130, 0.8), transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: deathMarkDetonation 1.5s ease-out;
+    pointer-events: none;
+    z-index: 20;
+    box-shadow: 0 0 50px #8B00FF;
+}
+
+.death-mark-skull-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 60px;
+    transform: translate(-50%, -50%);
+    animation: deathMarkSkullExplosion 1.5s ease-out;
+    pointer-events: none;
+    z-index: 21;
+    text-shadow: 0 0 20px #8B00FF;
+}
+
+.death-mark-soul-shard {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 30px;
+    background: linear-gradient(180deg, #8B00FF, #FFFFFF);
+    transform-origin: 50% 0%;
+    animation: deathMarkSoulShard 1.8s ease-out;
+    pointer-events: none;
+    z-index: 19;
+}
+
+/* Animations for Death Dash */
+@keyframes deathDashTrail {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.5) translateX(-100px);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1) translateX(0);
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(1.2) translateX(100px);
+    }
+}
+
+@keyframes deathDashStrike {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+    }
+    50% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+    }
+}
+
+@keyframes deathDashExplosion {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0);
+    }
+    30% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+@keyframes deathDashParticle {
+    0% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -200%) scale(0.3);
+    }
+}
+
+/* Animations for Death Mark */
+@keyframes deathMarkIndicatorPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 0 10px rgba(139, 0, 255, 0.5);
+    }
+    50% { 
+        transform: scale(1.2); 
+        box-shadow: 0 0 20px rgba(139, 0, 255, 0.8);
+    }
+}
+
+@keyframes deathMarkSymbolAppear {
+    0% { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-50px) scale(0);
+    }
+    50% { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(-30px) scale(1.2);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-10px) scale(0.8);
+    }
+}
+
+@keyframes deathMarkBinding {
+    0% { 
+        opacity: 0; 
+        transform: scale(0) rotate(0deg);
+        border-width: 0px;
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.1) rotate(180deg);
+        border-width: 3px;
+    }
+    100% { 
+        opacity: 0.7; 
+        transform: scale(1) rotate(360deg);
+        border-width: 2px;
+    }
+}
+
+@keyframes deathMarkAura {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.8);
+    }
+    50% { 
+        opacity: 0.6; 
+        transform: scale(1.2);
+    }
+    100% { 
+        opacity: 0.3; 
+        transform: scale(1);
+    }
+}
+
+/* Animations for Death Mark Detonation */
+@keyframes deathMarkDetonation {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0);
+    }
+    20% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(3);
+    }
+}
+
+@keyframes deathMarkSkullExplosion {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    }
+    30% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.3) rotate(360deg);
+    }
+}
+
+@keyframes deathMarkSoulShard {
+    0% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) translateY(-150px) scale(0.2);
+    }
+}
+
+@keyframes deathMarkScreenShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-2px); }
+    20% { transform: translateX(2px); }
+    30% { transform: translateX(-3px); }
+    40% { transform: translateX(3px); }
+    50% { transform: translateX(-2px); }
+    60% { transform: translateX(2px); }
+    70% { transform: translateX(-1px); }
+    80% { transform: translateX(1px); }
+    90% { transform: translateX(-1px); }
+}
+
+/* Mobile Responsiveness for Death Dash/Mark */
+@media (max-width: 768px) {
+    .death-mark-symbol {
+        font-size: 24px;
+    }
+    
+    .death-mark-skull-explosion {
+        font-size: 40px;
+    }
+    
+    .death-mark-indicator {
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+    }
+    
+    .death-dash-explosion {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .death-mark-detonation {
+        width: 150px;
+        height: 150px;
+    }
+} 

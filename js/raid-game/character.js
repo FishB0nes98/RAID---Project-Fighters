@@ -373,10 +373,85 @@ class Character {
         const preservedCurrentHp = this.stats.currentHp;
         const preservedCurrentMana = this.stats.currentMana;
         
-        // Reset stats to base values
-        Object.keys(this.baseStats).forEach(stat => {
-            this.stats[stat] = this.baseStats[stat];
-        });
+        // Store stage modifier values BEFORE resetting stats
+        const preservedStageValues = {};
+        if (this.originalCritChance !== undefined) {
+            preservedStageValues.critChance = this.stats.critChance;
+            preservedStageValues.originalCritChance = this.originalCritChance;
+            console.log(`[RecalcStats] Preserving desert heat crit chance: ${preservedStageValues.critChance} (original: ${preservedStageValues.originalCritChance})`);
+        }
+        if (this.originalDodgeChance !== undefined) {
+            preservedStageValues.dodgeChance = this.stats.dodgeChance;
+            preservedStageValues.originalDodgeChance = this.originalDodgeChance;
+            console.log(`[RecalcStats] Preserving small space dodge chance: ${preservedStageValues.dodgeChance} (original: ${preservedStageValues.originalDodgeChance})`);
+        }
+        if (this.originalHpPerTurn !== undefined) {
+            preservedStageValues.hpPerTurn = this.stats.hpPerTurn;
+            preservedStageValues.originalHpPerTurn = this.originalHpPerTurn;
+            console.log(`[RecalcStats] Preserving desert heat HP regen: ${preservedStageValues.hpPerTurn} (original: ${preservedStageValues.originalHpPerTurn})`);
+        }
+        if (this.originalManaPerTurn !== undefined) {
+            preservedStageValues.manaPerTurn = this.stats.manaPerTurn;
+            preservedStageValues.originalManaPerTurn = this.originalManaPerTurn;
+            console.log(`[RecalcStats] Preserving desert heat mana regen: ${preservedStageValues.manaPerTurn} (original: ${preservedStageValues.originalManaPerTurn})`);
+        }
+        
+        // Check if character has Firebase stats that should be preserved during base stat reset
+        const hasFirebaseStats = this.hellEffects || this._firebaseStatsLoaded;
+        
+        if (hasFirebaseStats) {
+            console.log(`[RecalcStats] Preserving Firebase stats for ${this.name} - skipping base stat reset as baseStats already contains modified values`);
+            // For Firebase characters, don't reset ANY stats since baseStats should already contain the modified values
+            // Only apply stage modifier preservation logic
+            Object.keys(this.baseStats).forEach(stat => {
+                // Only skip the reset for stage modifiers, but preserve all other Firebase stats
+                    if (stat === 'critChance' && preservedStageValues.critChance !== undefined) {
+                        console.log(`[RecalcStats] Skipping critChance reset due to active stage modifier`);
+                } else if (stat === 'dodgeChance' && preservedStageValues.dodgeChance !== undefined) {
+                    console.log(`[RecalcStats] Skipping dodgeChance reset due to active stage modifier`);
+                    } else {
+                    // For Firebase characters, baseStats already contains the modified values, so we can safely copy them
+                        this.stats[stat] = this.baseStats[stat];
+                    console.log(`[RecalcStats] Applied Firebase baseStats.${stat} = ${this.baseStats[stat]} to ${this.name}`);
+                }
+            });
+        } else {
+            // Normal reset for non-Firebase characters
+            Object.keys(this.baseStats).forEach(stat => {
+                // Skip critChance and dodgeChance reset if stage modifiers are active
+                if (stat === 'critChance' && preservedStageValues.critChance !== undefined) {
+                    console.log(`[RecalcStats] Skipping critChance reset due to active stage modifier`);
+                } else if (stat === 'dodgeChance' && preservedStageValues.dodgeChance !== undefined) {
+                    console.log(`[RecalcStats] Skipping dodgeChance reset due to active stage modifier`);
+                } else {
+                    this.stats[stat] = this.baseStats[stat];
+                }
+            });
+        }
+        
+        // Restore stage modifier values AFTER base stat reset
+        if (preservedStageValues.critChance !== undefined) {
+            this.stats.critChance = preservedStageValues.critChance;
+            this.originalCritChance = preservedStageValues.originalCritChance;
+            console.log(`[RecalcStats] Restored desert heat crit chance: ${this.stats.critChance}`);
+        }
+        if (preservedStageValues.dodgeChance !== undefined) {
+            this.stats.dodgeChance = preservedStageValues.dodgeChance;
+            this.originalDodgeChance = preservedStageValues.originalDodgeChance;
+            console.log(`[RecalcStats] Restored small space dodge chance: ${this.stats.dodgeChance}`);
+        }
+        if (preservedStageValues.hpPerTurn !== undefined) {
+            this.stats.hpPerTurn = preservedStageValues.hpPerTurn;
+            this.originalHpPerTurn = preservedStageValues.originalHpPerTurn;
+            console.log(`[RecalcStats] Restored desert heat HP regen: ${this.stats.hpPerTurn}`);
+        }
+        if (preservedStageValues.manaPerTurn !== undefined) {
+            this.stats.manaPerTurn = preservedStageValues.manaPerTurn;
+            this.originalManaPerTurn = preservedStageValues.originalManaPerTurn;
+            console.log(`[RecalcStats] Restored desert heat mana regen: ${this.stats.manaPerTurn}`);
+        }
+        
+        // Continue with the rest of the recalculation process...
         
         // Apply stage modifications if they exist
         if (this.stageModifications) {
@@ -507,11 +582,32 @@ class Character {
                         if (stacks > 1) {
                             console.log(`[Recalc Per Stack] ${this.name}: Effect ${effect.name || effect.id} applying stat ${stat} (Stacks: ${stacks}, Value per stack: ${modifierValue}, Total: ${totalModifier})`);
                         }
+                        
+                        // Special debug logging for aggressive protection buffs
+                        if (effect._isAggressiveProtectionBuff) {
+                            console.log(`%c[AGGRESSIVE PROTECTION DEBUG] ${this.name} - ${effect.name}`, 'color: red; font-weight: bold;');
+                            console.log(`%c  Stat: ${stat}, ModifierValue: ${modifierValue}, Stacks: ${stacks}, TotalModifier: ${totalModifier}`, 'color: red;');
+                            console.log(`%c  Current ${stat}: ${this.stats[stat]}, About to ${operation} ${totalModifier}`, 'color: red;');
+                            
+                            // Skip if this modifier has already been applied
+                            if (modifier._isApplied) {
+                                console.log(`%c  Skipping already applied modifier for ${stat}`, 'color: red;');
+                                return;
+                            }
+                            
+                            // Mark as applied after processing
+                            modifier._isApplied = true;
+                        }
 
                         // Apply based on operation
                         switch (operation) {
                             case 'add':
+                                const oldValue = this.stats[stat];
                                 this.stats[stat] += totalModifier;
+                                // Special debug logging for aggressive protection buffs
+                                if (effect._isAggressiveProtectionBuff) {
+                                    console.log(`%c  AFTER ADD: ${stat} changed from ${oldValue} to ${this.stats[stat]} (added ${totalModifier})`, 'color: green; font-weight: bold;');
+                                }
                                 break;
                             case 'multiply': // Example for future use
                                 // Be cautious with multiplicative stacking order
@@ -526,6 +622,9 @@ class Character {
                             case 'set': 
                                 // Set operation - use the highest value if multiple set operations exist
                                 const currentValue = this.stats[stat];
+                                if (stat === 'dodgeChance') {
+                                    console.log(`[Recalc DEBUG - DodgeChance] Processing ${stat} from ${effect.name || effect.id}: current=${currentValue}, base=${this.baseStats[stat]}, new=${totalModifier}`);
+                                }
                                 if (totalModifier > currentValue || currentValue === this.baseStats[stat]) {
                                     this.stats[stat] = totalModifier;
                                     console.log(`[Recalc ${operation}] Set ${stat} to ${totalModifier} (was ${currentValue}) from effect ${effect.name || effect.id}`);
@@ -631,7 +730,20 @@ class Character {
                 const originalPhysicalDamage = this.stats.physicalDamage;
                 this.stats.physicalDamage += passiveBonus;
                 console.log(`[RecalcStats - Siegfried Passive] Applied +${passiveBonus} Physical Damage for ${buffCount} buffs. Total: ${this.stats.physicalDamage}`);
+                
+                // Track passive statistics when buff count changes
+                if (window.trackBuffConnoisseurStats) {
+                    window.trackBuffConnoisseurStats(this, buffCount, passiveBonus);
+                }
             }
+        }
+        // <<< END NEW >>>
+
+        // <<< NEW: Apply Julia's Passive Bonus >>>
+        if (this.id === 'schoolgirl_julia' && this.passiveHandler && this.passiveHandler.damageGained > 0) {
+            const passiveBonus = this.passiveHandler.damageGained; // Total damage gained from healing
+            this.stats.physicalDamage += passiveBonus;
+            console.log(`[RecalcStats - Julia Passive] Applied +${passiveBonus} Physical Damage from healing empowerment. Total: ${this.stats.physicalDamage}`);
         }
         // <<< END NEW >>>
     }
@@ -690,6 +802,15 @@ class Character {
              log(`${this.name} is stunned and cannot use ${ability.name}.`);
              return false;
          }
+         
+         // Check for Imprison debuff
+         const imprisonDebuff = this.debuffs.find(d => d.effects && d.effects.cantAct === true);
+         if (imprisonDebuff) {
+             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+             log(`${this.name} is imprisoned and cannot use ${ability.name}.`);
+             return false;
+         }
+
         // --- END PRE-CHECKS ---
 
         // --- Check for Ability Disable Debuff ---
@@ -739,6 +860,77 @@ class Character {
                     // Return false to indicate the ability failed - do NOT execute the ability effect
                     return false;
                 }
+            }
+        }
+
+        // --- NEW: Check for Obscured debuff ---
+        const obscuredDebuff = this.debuffs.find(debuff => 
+            debuff && debuff.id && debuff.id.startsWith('obscured_debuff') && debuff.missChance
+        );
+        if (obscuredDebuff) {
+            // Check for miss chance (20% by default)
+            const missChance = obscuredDebuff.missChance || 0.20;
+            if (Math.random() < missChance) {
+                // Consume mana since the attempt was made
+                if (!skipManaCheck) {
+                    this.stats.currentMana -= actualManaCost;
+                    
+                    // Trigger mana animation for wasted casting
+                    if (actualManaCost > 0 && window.gameManager && window.gameManager.uiManager) {
+                        window.gameManager.uiManager.triggerManaAnimation(this, 'drain', actualManaCost);
+                    }
+                }
+                
+                // Put ability on cooldown
+                ability.currentCooldown = ability.cooldown;
+                
+                // Show miss VFX using the same system as stage modifier
+                if (window.stageModifiersRegistry) {
+                    window.stageModifiersRegistry.createSmokeCloudMissVFX(this);
+                } else {
+                    // Fallback VFX if stage modifiers registry is not available
+                    const characterElement = document.getElementById(`character-${this.instanceId || this.id}`);
+                    if (characterElement) {
+                        const missEffect = document.createElement('div');
+                        missEffect.className = 'obscured-miss-effect';
+                        missEffect.textContent = 'OBSCURED!';
+                        missEffect.style.cssText = `
+                            position: absolute;
+                            top: 20%;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: #999;
+                            text-shadow: 
+                                0 0 8px rgba(80, 80, 80, 0.8),
+                                2px 2px 4px rgba(0, 0, 0, 0.9);
+                            animation: missBounce 1.5s ease-out forwards;
+                            z-index: 100;
+                            pointer-events: none;
+                        `;
+                        characterElement.appendChild(missEffect);
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            if (missEffect.parentNode) {
+                                missEffect.remove();
+                            }
+                        }, 1500);
+                    }
+                }
+                
+                // Add to battle log
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+                log(`${this.name}'s ${ability.name} is obscured by smoke and misses completely!`, 'miss');
+                
+                // Update UI to show cooldown and mana loss
+                if (window.updateCharacterUI) {
+                    window.updateCharacterUI(this);
+                }
+                
+                // Return false to indicate the ability failed - do NOT execute the ability effect
+                return false;
             }
         }
         // --- END Smoke Cloud Check ---
@@ -846,6 +1038,17 @@ class Character {
 
     // Apply damage, now accepts caster as an argument
     applyDamage(amount, type, caster = null, options = {}) { // Added options object
+        console.log(`[DEBUG applyDamage] Called with parameters:`, { amount, type, caster: caster?.name, options });
+        console.log(`[DEBUG applyDamage] Raw options object:`, options);
+        console.log(`[DEBUG applyDamage] Options keys:`, Object.keys(options));
+        console.log(`[DEBUG applyDamage] options.abilityId:`, options.abilityId);
+        
+        // Early return for non-positive damage
+        if (amount <= 0) {
+            console.log(`[Character ${this.name}] Invalid damage: ${amount}`);
+            return { damage: 0, isCritical: false, isDodged: false };
+        }
+        
         // If character is dead, no damage to apply
         if (this.isDead()) {
             console.log(`${this.name} is already dead, damage ignored.`);
@@ -870,9 +1073,18 @@ class Character {
             }
             return { damage: 0, isCritical: false, isDodged: true };
         }
+
+        // *** UNIVERSAL DAMAGE REDIRECTION CHECK ***
+        const redirectionResult = this.checkForDamageRedirection(amount, type, caster, options);
+        if (redirectionResult) {
+            console.log(`[Damage Redirection] ${this.name}'s damage redirected via ${redirectionResult.type}`);
+            return redirectionResult.result;
+        }
         
         // Destructure options
-        const { isChainReaction = false, isRetaliation = false, bypassMagicalShield = false, bypassArmor = false } = options;
+        const { isChainReaction = false, isRetaliation = false, bypassMagicalShield = false, bypassArmor = false, abilityId } = options;
+        
+        console.log(`[DEBUG Destructure] Extracted from options:`, { isChainReaction, isRetaliation, bypassMagicalShield, bypassArmor, abilityId });
 
         // Store original amount for logging
         const originalAmount = amount;
@@ -931,15 +1143,60 @@ class Character {
                 console.error(`[DODGE EVENT ERROR] Failed to dispatch dodge event:`, error);
             }
             
-            // Trigger the dodge handler in passive for Nimble Strikes talent
-            if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
-                this.passiveHandler.onDodge(this, caster);
+                    // Trigger the dodge handler in passive for Nimble Strikes talent
+        if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
+            this.passiveHandler.onDodge(this, caster);
+        }
+        
+        // <<< NEW: Apply Schoolgirl Ayane's Combat Reflexes Passive >>>
+        if (this.id === 'schoolgirl_ayane') {
+            const damageBonus = 200; // +200 Physical Damage
+            const buffDuration = 5; // 5 turns
+            
+            // Create Combat Reflexes buff
+            if (window.Effect) {
+                const combatReflexesBuff = new window.Effect(
+                    'combat_reflexes_damage',
+                    'Combat Reflexes',
+                    'Icons/buffs/combat_reflexes.png',
+                    buffDuration,
+                    null,
+                    false
+                ).setDescription(`+${damageBonus} Physical Damage from dodging an attack`);
+                
+                combatReflexesBuff.apply = function(character) {
+                    character.stats.physicalDamage += damageBonus;
+                };
+                
+                combatReflexesBuff.remove = function(character) {
+                    character.stats.physicalDamage -= damageBonus;
+                };
+                
+                this.addBuff(combatReflexesBuff);
+                
+                if (window.gameManager) {
+                    window.gameManager.addLogEntry(`${this.name}'s Combat Reflexes activates! +${damageBonus} Physical Damage for ${buffDuration} turns!`, 'ayane');
+                }
+                
+                // Track passive statistics
+                if (window.trackCombatReflexesPassiveStats) {
+                    window.trackCombatReflexesPassiveStats(this, damageBonus);
+                }
+                
+                console.log(`[Combat Reflexes] Applied +${damageBonus} Physical Damage buff to ${this.name} for ${buffDuration} turns`);
             }
+        }
+        // <<< END NEW >>>
             
             // Check if this is Zoey for custom VFX
             if (this.id === 'zoey' && typeof window.showZoeyDodgeVFX === 'function') {
                 window.showZoeyDodgeVFX(this);
             } else {
+                // Debug check for Lava Chimp passive hook integrity
+                if (this.id === 'lava_chimp' && this.passiveHandler && typeof this.passiveHandler.checkHookIntegrity === 'function') {
+                    this.passiveHandler.checkHookIntegrity();
+                }
+                
                 // Use enhanced dodge VFX for other characters
                 this.showEnhancedDodgeVFX();
             }
@@ -977,6 +1234,39 @@ class Character {
                 if (window.gameManager) {
                     window.gameManager.addLogEntry(`Agile Counterforce grants +${buffVal} Magical Damage!`, 'zoey talent-effect');
                 }
+            }
+            
+            // Check for Parry buff - redirect damage back to attacker
+            const parryBuff = this.buffs.find(buff => buff.isParryBuff);
+            console.log(`[PARRY DEBUG] ${this.name} dodged. Checking for parry buff...`);
+            console.log(`[PARRY DEBUG] Found parry buff:`, parryBuff);
+            console.log(`[PARRY DEBUG] Caster:`, caster?.name);
+            console.log(`[PARRY DEBUG] isParryRetaliation:`, options.isParryRetaliation);
+            console.log(`[PARRY DEBUG] All buffs:`, this.buffs.map(b => ({ id: b.id, isParryBuff: b.isParryBuff })));
+            
+            if (parryBuff && caster && !options.isParryRetaliation) {
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`${this.name} parries the attack and redirects ${amount} damage back to ${caster.name}!`, 'system');
+                console.log(`[PARRY DEBUG] Executing parry redirection!`);
+                
+                // Show parry redirection VFX
+                this.showParryRedirectionVFX(caster);
+                
+                // Apply the original damage to the attacker (prevent infinite loops with isParryRetaliation flag)
+                setTimeout(() => {
+                    console.log(`[PARRY DEBUG] Applying redirected damage to ${caster.name}`);
+                    caster.applyDamage(amount, type, this, { 
+                        ...options, 
+                        isParryRetaliation: true,
+                        abilityId: 'parry_redirection'
+                    });
+                }, 300);
+            } else {
+                console.log(`[PARRY DEBUG] Parry redirection conditions not met:`, {
+                    hasParryBuff: !!parryBuff,
+                    hasCaster: !!caster,
+                    notRetaliation: !options.isParryRetaliation
+                });
             }
             
             return { damage: 0, isCritical: false, isDodged: true };
@@ -1042,6 +1332,21 @@ class Character {
                  }
                  if (this.id === 'farmer_shoma') {
                     playSound('sounds/fshoma_ouch.mp3', 0.7); // Crit taken sound
+                 }
+                 
+                 // Dispatch critical hit event for ability systems like Armor Piercer
+                 try {
+                     const criticalHitEvent = new CustomEvent('criticalHit', {
+                         detail: {
+                             source: critSource,
+                             target: this,
+                             damage: damage,
+                             type: type
+                         }
+                     });
+                     document.dispatchEvent(criticalHitEvent);
+                 } catch (error) {
+                     console.error('[Critical Hit Event] Error dispatching event:', error);
                  }
                  
                  // --- NEW: Check for Critical Reflexes talent ---
@@ -1139,9 +1444,18 @@ class Character {
         if (type === 'physical') {
             // <<< Check bypassArmor >>>
             if (!bypassArmor) {
-                // Convert armor to percentage-based reduction (capped at 80%)
+                // Apply armor as direct percentage reduction (capped at 80%)
                 const damageReduction = Math.min(0.8, this.stats.armor / 100);
+                const damageBeforeArmor = damageAfterMods;
                 damageAfterMods = Math.max(1, Math.floor(damageAfterMods * (1 - damageReduction)));
+                
+                // Debug log for armor calculation
+                console.log(`[Armor Debug] ${this.name}: ${damageBeforeArmor} physical damage, ${this.stats.armor} armor (${(damageReduction * 100).toFixed(1)}% reduction) -> ${damageAfterMods} damage`);
+                
+                // Add battle log entry if significant reduction
+                if (damageReduction > 0.05 && window.gameManager) { // Only log if 5%+ reduction
+                    window.gameManager.addLogEntry(`${this.name}'s armor reduces physical damage by ${(damageReduction * 100).toFixed(0)}% (${damageBeforeArmor} → ${damageAfterMods})`, 'armor-reduction');
+                }
             } else {
                  const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
                  log(`(${caster ? caster.name : 'Source'}'s Peck) bypassed ${this.name}'s armor!`, 'passive'); 
@@ -1150,9 +1464,18 @@ class Character {
             // If bypassMagicalShield is true, skip the reduction logic entirely.
             // The damageAfterMods value will remain unchanged from before this check.
             if (!bypassMagicalShield) { 
-                // Convert magical shield to percentage-based reduction (capped at 80%)
+                // Apply magical shield as direct percentage reduction (capped at 80%)
                 const damageReduction = Math.min(0.8, this.stats.magicalShield / 100);
+                const damageBeforeShield = damageAfterMods;
                 damageAfterMods = Math.max(1, Math.floor(damageAfterMods * (1 - damageReduction)));
+                
+                // Debug log for magical shield calculation
+                console.log(`[Magical Shield Debug] ${this.name}: ${damageBeforeShield} magical damage, ${this.stats.magicalShield} magical shield (${(damageReduction * 100).toFixed(1)}% reduction) -> ${damageAfterMods} damage`);
+                
+                // Add battle log entry if significant reduction
+                if (damageReduction > 0.05 && window.gameManager) { // Only log if 5%+ reduction
+                    window.gameManager.addLogEntry(`${this.name}'s magical shield reduces magical damage by ${(damageReduction * 100).toFixed(0)}% (${damageBeforeShield} → ${damageAfterMods})`, 'shield-reduction');
+                }
             } else {
                 // Log that shield was bypassed (no damage modification needed here)
                 const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
@@ -1171,6 +1494,8 @@ class Character {
             log(`${this.name} is Hooked and takes ${Math.round((hookedDebuff.increasesDamageTaken - 1) * 100)}% increased damage! (${Math.round(originalDamage)} -> ${Math.round(damageAfterMods)})`, 'debuff-effect');
         }
         // --- END NEW ---
+
+
 
         // --- NEW: Fire Shield Check ---
         const fireShieldBuff = this.buffs.find(b => b.id === 'fire_shield_buff');
@@ -1256,7 +1581,8 @@ class Character {
 
         // --- STATISTICS TRACKING: Record damage dealt and taken ---
         if (window.statisticsManager && actualDamageTaken > 0) {
-            window.statisticsManager.recordDamageDealt(caster, this, actualDamageTaken, type, isCritical, options.abilityId);
+            console.log(`[Debug] About to call recordDamageDealt. options:`, options, `abilityId:`, abilityId);
+            window.statisticsManager.recordDamageDealt(caster, this, actualDamageTaken, type, isCritical, abilityId);
         }
         if (window.statisticsManager && totalDamageAbsorbed > 0) {
             window.statisticsManager.recordShieldAbsorption(this, totalDamageAbsorbed);
@@ -1296,6 +1622,11 @@ class Character {
         
         // Always update UI, even if damage is 0 (e.g., for dodge text)
         updateCharacterUI(this);
+        
+        // Update shield display if shield was affected
+        if (originalShield !== this.shield) {
+            this.updateShieldDisplay();
+        }
         
         // --- NEW: Apply Fire Shield Retaliation (after HP update) ---
         if (retaliationDamage > 0 && caster && !caster.isDead() && didRetaliate) {
@@ -1671,6 +2002,20 @@ class Character {
             finalDamage = finalDamage * (1 - reduction);
         }
         // --- END NEW ---
+
+        // --- NEW: Apply Enchanted Weapon Bonus (for AI characters only) ---
+        if (this.enchantedWeaponBonus && this.isAI && type === 'physical') {
+            const originalDamage = finalDamage;
+            finalDamage = Math.floor(finalDamage * (1 + this.enchantedWeaponBonus));
+            
+            console.log(`[Enchanted Weapon] ${this.name} deals enhanced physical damage: ${originalDamage} → ${finalDamage} (+${Math.round(this.enchantedWeaponBonus * 100)}%)`);
+            
+            // Add log entry for enhanced damage
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`${this.name}'s enchanted weapon deals +${Math.round(this.enchantedWeaponBonus * 100)}% physical damage!`, 'stage-effect enemy-enchant');
+            }
+        }
+        // --- END NEW ---
         
         // Ensure damage is at least 1 (or 0 if desired)
         finalDamage = Math.max(1, Math.floor(finalDamage)); 
@@ -1682,6 +2027,21 @@ class Character {
     // --- MODIFIED: Added options parameter and caster parameter ---
     heal(amount, caster = null, options = {}) {
     // --- END MODIFICATION ---
+        // Check for Healing Disabled stage modifier - blocks all healing
+        if (this.stageModifiers && this.stageModifiers.healingDisabled) {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`🚫💚 ${this.name} cannot be healed due to the healing curse!`, 'stage-effect healing-blocked');
+            return { healAmount: 0, isCritical: false };
+        }
+        
+        // Check for Imprison debuff - blocks all healing
+        const imprisonDebuff = this.debuffs.find(d => d.effects && d.effects.cantHeal === true);
+        if (imprisonDebuff) {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${this.name} is imprisoned and cannot be healed.`);
+            return { healAmount: 0, isCritical: false };
+        }
+        
         let baseHealAmount = amount;
         let isCritical = false;
 
@@ -1757,8 +2117,8 @@ class Character {
 
         // --- STATISTICS TRACKING: Record healing done ---
         if (window.statisticsManager && actualHealAmount > 0) {
-            const healType = options.healType || 'direct';
-            window.statisticsManager.recordHealingDone(caster, this, actualHealAmount, isCritical, options.abilityId, healType);
+            const healType = options?.healType || 'direct';
+            window.statisticsManager.recordHealingDone(caster, this, actualHealAmount, isCritical, options?.abilityId, healType);
         }
         // --- END STATISTICS TRACKING ---
 
@@ -1771,6 +2131,57 @@ class Character {
             }
         }
         // --- END NEW ---
+        
+        // --- NEW: Mana Infusion Talent ---
+        // Check for Mana Infusion talent - restore mana equal to 10% of heal amount
+        if (caster && caster.manaInfusion && actualHealAmount > 0 && !options.isPassiveHealing) {
+            console.log(`[Mana Infusion] Triggered! Caster: ${caster.name}, Target: ${this.name}, Heal Amount: ${actualHealAmount}`);
+            const manaRestoreAmount = Math.ceil(actualHealAmount * 0.1);
+            console.log(`[Mana Infusion] Calculated mana restore: ${manaRestoreAmount}`);
+            
+            // Get current and max mana - prioritize currentMana property
+            const oldMana = this.stats.currentMana !== undefined ? this.stats.currentMana : (this.stats.mana || 0);
+            const maxMana = this.stats.maxMana !== undefined ? this.stats.maxMana : (this.stats.mana || 0);
+            console.log(`[Mana Infusion] Target: ${this.name}, Current mana: ${oldMana}/${maxMana}`);
+            console.log(`[Mana Infusion] Target character stats:`, this.stats);
+            
+            // Restore mana using the correct property
+            let newMana = oldMana;
+            if (this.stats.currentMana !== undefined) {
+                this.stats.currentMana = Math.min(oldMana + manaRestoreAmount, maxMana);
+                newMana = this.stats.currentMana;
+            } else if (this.stats.mana !== undefined) {
+                this.stats.mana = Math.min(oldMana + manaRestoreAmount, maxMana);
+                newMana = this.stats.mana;
+            } else {
+                console.error(`[Mana Infusion] Could not find mana property on character ${this.name}`);
+                console.error(`[Mana Infusion] Available properties:`, Object.keys(this.stats));
+                // Don't return here, continue with healing
+            }
+            
+            const actualManaRestored = newMana - oldMana;
+            
+            console.log(`[Mana Infusion] Mana after restoration: ${newMana}/${maxMana}, restored: ${actualManaRestored}`);
+            
+            if (actualManaRestored > 0) {
+                // Log the mana infusion
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`Mana Infusion: ${this.name} gains ${actualManaRestored} mana from healing!`, 'passive');
+                
+                // Show VFX for mana infusion (check if character has this method)
+                if (typeof this.showManaInfusionVFX === 'function') {
+                    this.showManaInfusionVFX(actualManaRestored);
+                }
+                
+                // Update UI for mana change
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.triggerManaAnimation(this, 'restore', actualManaRestored);
+                }
+            } else {
+                console.log(`[Mana Infusion] No mana restored - already at max or calculation error`);
+            }
+        }
+        // --- END NEW: Mana Infusion Talent ---
         
         // --- MODIFIED: Check options before playing VFX and add critical class --- 
         if (!options.suppressDefaultVFX) {
@@ -1888,6 +2299,24 @@ class Character {
         }
         // --- END NEW ---
         
+        // --- Healing Mana Flow bonus ---
+        if (actualHealAmount > 0 && this.stageModifiers && this.stageModifiers.healManaBonus) {
+            const manaGain = Math.floor(actualHealAmount * this.stageModifiers.healManaBonus);
+            if (manaGain > 0 && this.stats.currentMana !== undefined && this.stats.maxMana !== undefined) {
+                const previousMana = this.stats.currentMana;
+                this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + manaGain);
+                const restored = this.stats.currentMana - previousMana;
+                if (restored > 0) {
+                    if (window.gameManager && window.gameManager.addLogEntry) {
+                        window.gameManager.addLogEntry(`${this.name} restores ${restored} mana from revitalising energies!`, 'stage-effect mana-restore');
+                    }
+                    if (window.gameManager && window.gameManager.uiManager) {
+                        window.gameManager.uiManager.triggerManaAnimation(this, 'heal', restored);
+                    }
+                }
+            }
+        }
+        // --- END Healing Mana Flow ---
         updateCharacterUI(this); // Add UI update call here
         
         return { healAmount: Math.floor(actualHealAmount), isCritical: isCritical }; // Return object
@@ -1974,16 +2403,27 @@ class Character {
         }
 
         if (manaRegenPercent > 0) {
-            const manaToRegen = Math.floor(this.stats.maxMana * manaRegenPercent);
-            if (manaToRegen > 0) {
-                const oldMana = this.stats.currentMana;
-                this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + manaToRegen);
-                regeneratedManaFromTalent = this.stats.currentMana - oldMana;
-                if (regeneratedManaFromTalent > 0) {
-                    talentRegenLog += `${talentRegenLog ? ' and' : ''} ${regeneratedManaFromTalent} Mana`;
-                    // Add simple VFX for Mana regen
-                    // this.showRegenVFX(regeneratedManaFromTalent, 'mana');
+            // Check if mana restoration is blocked by Imprison debuff
+            const imprisonDebuff = this.debuffs.find(debuff => 
+                debuff && debuff.effects && debuff.effects.cantRestoreMana
+            );
+            
+            if (!imprisonDebuff) {
+                const manaToRegen = Math.floor(this.stats.maxMana * manaRegenPercent);
+                if (manaToRegen > 0) {
+                    const oldMana = this.stats.currentMana;
+                    this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + manaToRegen);
+                    regeneratedManaFromTalent = this.stats.currentMana - oldMana;
+                    if (regeneratedManaFromTalent > 0) {
+                        talentRegenLog += `${talentRegenLog ? ' and' : ''} ${regeneratedManaFromTalent} Mana`;
+                        // Add simple VFX for Mana regen
+                        // this.showRegenVFX(regeneratedManaFromTalent, 'mana');
+                    }
                 }
+            } else {
+                // Log that talent mana restoration was blocked
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`${this.name}'s talent mana regeneration is blocked by imprisonment!`, 'debuff');
             }
         }
 
@@ -2036,8 +2476,21 @@ class Character {
             }
         }
         
-        // Normal mana regeneration for all characters
-        this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + this.stats.manaPerTurn);
+        // Check if mana restoration is blocked by Imprison debuff
+        const imprisonDebuff = this.debuffs.find(debuff => 
+            debuff && debuff.effects && debuff.effects.cantRestoreMana
+        );
+        
+        // Normal mana regeneration for all characters (unless blocked by Imprison)
+        if (!imprisonDebuff) {
+            this.stats.currentMana = Math.min(this.stats.maxMana, this.stats.currentMana + this.stats.manaPerTurn);
+        } else {
+            // Log that mana restoration was blocked
+            if (this.stats.manaPerTurn > 0) {
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`${this.name}'s mana restoration is blocked by imprisonment!`, 'debuff');
+            }
+        }
         
         updateCharacterUI(this);
     }
@@ -2563,6 +3016,14 @@ class Character {
                      console.error(`Error executing onApply for debuff ${debuff.id} on ${this.name}:`, e);
                 }
             }
+            
+            // Add visual feedback for silence debuff
+            if (debuff.id === 'infernal_silence') {
+                const characterElement = document.querySelector(`[data-character-id="${this.id}"]`);
+                if (characterElement) {
+                    characterElement.classList.add('character-silenced');
+                }
+            }
 
             console.log(`Added debuff: ${debuff.name} to ${this.name}`);
             
@@ -2640,6 +3101,14 @@ class Character {
                     debuff.remove(this);
                 } catch (error) {
                     console.error(`Error executing remove function for debuff ${debuff.name}:`, error);
+                }
+            }
+            
+            // Remove visual feedback for silence debuff
+            if (debuff.id === 'infernal_silence') {
+                const characterElement = document.querySelector(`[data-character-id="${this.id}"]`);
+                if (characterElement) {
+                    characterElement.classList.remove('character-silenced');
                 }
             }
 
@@ -2802,12 +3271,15 @@ class Character {
                     // Directly apply damage without triggering on-hit effects
                     this.stats.currentHp = Math.max(0, this.stats.currentHp - dotDamage);
                     
-                    // Show VFX for DoT damage (e.g., bleeding VFX)
+                    // Show VFX for DoT damage
                     if (debuff.id === 'bleeding_wounds' && window.HoundPassive) {
                         const passiveHandler = new window.HoundPassive(); // TODO: Consider getting instance from character if available
                         passiveHandler.showBleedDamageVFX(this, dotDamage);
+                    } else if (debuff.id === 'melting_debuff') {
+                        // Show enhanced melting damage VFX
+                        this.showMeltingDamageVFX(dotDamage);
                     } else {
-                        // Generic DoT VFX?
+                        // Generic DoT VFX
                     }
 
                     if (this.stats.currentHp === 0) {
@@ -2942,9 +3414,62 @@ class Character {
 
     // --- NEW: Check if character is untargetable by abilities due to buffs ---
     isUntargetable() {
-        // Check both buffs and debuffs arrays
+        // Check both buffs and debuffs arrays for standard untargetable effects
         const allEffects = [...this.buffs, ...this.debuffs];
-        return allEffects.some(effect => effect.isUntargetable === true);
+        if (allEffects.some(effect => effect.isUntargetable === true)) {
+            return true;
+        }
+        
+        // Check for Imprison debuff specifically
+        if (allEffects.some(effect => effect.effects && effect.effects.isUntargetable === true)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // Check if this character is untargetable due to enemy forced targeting (like enemy Shadow Wings)
+    isUntargetableByEnemyForcing() {
+        // Check if an enemy character is forcing targeting (like Shadow Wings)
+        const forcingCharacter = this.getForcingTargetingCharacter();
+        if (forcingCharacter && forcingCharacter.instanceId !== this.instanceId) {
+            // Only make this character untargetable if the forcing character is an enemy
+            if (this.isEnemy(forcingCharacter)) {
+                return true; // This character is untargetable because an enemy is forcing targeting
+            }
+        }
+        
+        return false;
+    }
+    
+    // Helper method to find character with forcesTargeting buff
+    getForcingTargetingCharacter() {
+        if (!window.gameManager || !window.gameManager.gameState) {
+            return null;
+        }
+        
+        const allCharacters = [
+            ...window.gameManager.gameState.playerCharacters,
+            ...window.gameManager.gameState.aiCharacters
+        ];
+        
+        return allCharacters.find(char => 
+            !char.isDead() && 
+            char.buffs.some(buff => buff.forcesTargeting === true)
+        );
+    }
+    
+    // Helper method to check if another character is an enemy
+    isEnemy(otherCharacter) {
+        if (!window.gameManager || !window.gameManager.gameState) {
+            return false;
+        }
+        
+        // Characters are enemies if they're on different teams
+        const myTeam = this.isAI ? 'ai' : 'player';
+        const theirTeam = otherCharacter.isAI ? 'ai' : 'player';
+        
+        return myTeam !== theirTeam;
     }
     // --- END NEW ---
 
@@ -3046,6 +3571,62 @@ class Character {
                 } else if (newShield < oldShield && oldShield > 0) {
                     window.gameManager.addLogEntry(`${this.name}'s Mystic Barrier decreases to ${newShield} shield.`, 'zoey talent-effect');
                 }
+            }
+            
+            // Update shield display when shield changes
+            this.updateShieldDisplay();
+        }
+    }
+    
+    // Global shield display update method for all characters
+    updateShieldDisplay() {
+        const elementId = this.instanceId || this.id;
+        const charElement = document.getElementById(`character-${elementId}`);
+        if (!charElement) return;
+        
+        const shieldBar = charElement.querySelector('.shield-bar');
+        const hpText = charElement.querySelector('.bar-text');
+        
+        if (!shieldBar || !hpText) return;
+        
+        if (this.shield > 0) {
+            // Show shield bar and calculate width based on max HP
+            const shieldPercentage = Math.min(100, (this.shield / this.stats.maxHp) * 100);
+            shieldBar.style.width = `${shieldPercentage}%`;
+            shieldBar.style.display = 'block';
+            
+            // Update HP text to include shield information
+            hpText.textContent = `${Math.round(this.stats.currentHp)} / ${Math.round(this.stats.maxHp)} (${Math.round(this.shield)} shield)`;
+        } else {
+            // Hide shield bar and reset HP text
+            shieldBar.style.display = 'none';
+            hpText.textContent = `${Math.round(this.stats.currentHp)} / ${Math.round(this.stats.maxHp)}`;
+        }
+    }
+
+    // Helper method to add shields with automatic display update
+    addShield(amount) {
+        if (amount > 0) {
+            this.shield = (this.shield || 0) + amount;
+            this.updateShieldDisplay();
+            
+            // Log shield gain
+            if (window.gameManager) {
+                window.gameManager.addLogEntry(`${this.name} gains ${amount} shield!`, 'buff');
+            }
+        }
+    }
+
+    // Helper method to remove shields with automatic display update
+    removeShield(amount) {
+        if (amount > 0 && this.shield > 0) {
+            const removedAmount = Math.min(this.shield, amount);
+            this.shield = Math.max(0, this.shield - amount);
+            this.updateShieldDisplay();
+            
+            // Log shield loss if significant
+            if (removedAmount > 0 && window.gameManager) {
+                window.gameManager.addLogEntry(`${this.name} loses ${removedAmount} shield.`, 'system');
             }
         }
     }
@@ -3159,6 +3740,131 @@ class Character {
             }, 200);
         }
     }
+
+    // Show VFX when melting debuff deals damage
+    showMeltingDamageVFX(damageAmount) {
+        try {
+            const characterElement = document.getElementById(`character-${this.instanceId || this.id}`);
+            if (!characterElement) return;
+            
+            // Create melting damage trigger effect
+            const meltingTrigger = document.createElement('div');
+            meltingTrigger.className = 'melting-damage-trigger';
+            characterElement.appendChild(meltingTrigger);
+            
+            // Create floating damage number
+            const damageNumber = document.createElement('div');
+            damageNumber.className = 'melting-damage-number';
+            damageNumber.textContent = `-${damageAmount}`;
+            characterElement.appendChild(damageNumber);
+            
+            // Create acid particles around the character
+            this.createAcidParticles(characterElement);
+            
+            // Remove effects after animation completes
+            setTimeout(() => {
+                if (meltingTrigger.parentNode) meltingTrigger.remove();
+                if (damageNumber.parentNode) damageNumber.remove();
+            }, 2500);
+            
+        } catch (error) {
+            console.error('[Melting Damage VFX] Error:', error);
+        }
+    }
+
+    // Create acid particles around character
+    createAcidParticles(characterElement) {
+        try {
+            const particleContainer = document.createElement('div');
+            particleContainer.className = 'acid-particles';
+            characterElement.appendChild(particleContainer);
+            
+            // Create multiple particles
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'acid-particle';
+                
+                // Random positioning around the character
+                const angle = (i / 8) * 2 * Math.PI;
+                const radius = 30 + Math.random() * 20;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                particle.style.left = `${50 + (x / 100)}%`;
+                particle.style.top = `${50 + (y / 100)}%`;
+                particle.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                particleContainer.appendChild(particle);
+            }
+            
+            // Remove particles after animation
+            setTimeout(() => {
+                if (particleContainer.parentNode) particleContainer.remove();
+            }, 3000);
+            
+        } catch (error) {
+            console.error('[Acid Particles] Error:', error);
+        }
+    }
+
+    /**
+     * Universal Damage Redirection Framework
+     * Integrates with the game's natural armor/magic shield calculations
+     */
+    checkForDamageRedirection(amount, type, caster, options = {}) {
+        // Skip if this is already a redirected attack to prevent infinite loops
+        if (options.isRedirectedDamage) {
+            return null;
+        }
+
+        // Check for various redirection systems
+        const redirections = [];
+
+        // 1. Check for Scamp's Sacrificial Devotion
+        if (window.scampPassiveInstance && window.scampPassiveInstance.character && !window.scampPassiveInstance.character.isDead()) {
+            const scampResult = window.scampPassiveInstance.checkAndRedirectDamage(this, amount, type, caster, options);
+            if (scampResult && scampResult.redirected) {
+                redirections.push({
+                    type: 'scamp_sacrifice',
+                    result: scampResult
+                });
+            }
+        }
+
+        // 2. Check for Bunny Bounce redirection to Alice
+        if (this.bunnyBounceRedirectToAliceId && !options.isBunnyBounceRedirection) {
+            let alice = null;
+            if (window.gameManager && window.gameManager.gameState) {
+                const allChars = [...window.gameManager.gameState.playerCharacters, ...window.gameManager.gameState.aiCharacters];
+                alice = allChars.find(c => (c.instanceId || c.id) === this.bunnyBounceRedirectToAliceId);
+            }
+            if (alice && !alice.isDead()) {
+                // Apply full damage to Alice with natural armor/magic shield reduction
+                const redirectOptions = { ...options, isBunnyBounceRedirection: true, isRedirectedDamage: true };
+                const result = alice.applyDamage(amount, type, caster, redirectOptions);
+                
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                if (result.damage < amount) {
+                    const defenseReduction = amount - result.damage;
+                    log(`${alice.name} absorbs ${amount} damage redirected from ${this.name}! Alice's defenses reduce it to ${result.damage} (saved ${defenseReduction})`, 'system');
+                } else {
+                    log(`${alice.name} absorbs ${result.damage} damage redirected from ${this.name} due to Bunny Bounce!`, 'system');
+                }
+                
+                redirections.push({
+                    type: 'bunny_bounce',
+                    result: result,
+                    redirector: alice
+                });
+            }
+        }
+
+        // 3. Add more redirection systems here as needed
+        // Example: Shadow Guardian, Protective Aura, etc.
+
+        // Return the first successful redirection (priority order matters)
+        return redirections.length > 0 ? redirections[0] : null;
+    }
 }
 
 // Ability class definition
@@ -3184,7 +3890,7 @@ class Ability {
         this.description = ''; // Will be generated
         this.baseDescription = ''; // Template for description - IMPORTANT
         this.targetType = 'enemy'; // Default target type ('enemy', 'ally', 'self', 'any', 'aoe_enemy', 'aoe_ally')
-        this.requiresTarget = !['aoe_enemy', 'aoe_ally', 'self'].includes(this.targetType); // Default based on initial type
+        this.requiresTarget = true; // ALL abilities require explicit targeting for consistent user experience
         this.baseDamage = 0; // Add baseDamage property if not present
         this.healAmount = 0; // Add healAmount property if not present
         this.stunChance = 0; // Add stunChance property if not present
@@ -3331,7 +4037,9 @@ class Ability {
      */
     setTargetType(targetType) {
         this.targetType = targetType;
-        this.requiresTarget = !['aoe_enemy', 'aoe_ally', 'self'].includes(this.targetType); // Update based on new target type
+        // ALL abilities now require explicit targeting for consistent user experience
+        // This ensures users always have to click to confirm their target choice
+        this.requiresTarget = true;
         return this;
     }
 }
@@ -3592,16 +4300,25 @@ const CharacterFactory = {
 
                 if (PassiveHandlerClass) {
                     try {
-                        character.passiveHandler = new PassiveHandlerClass(character);
-                        console.log(`[CharFactory] Instantiated passive handler ${PassiveHandlerClass.name} for ${character.name}`);
-                        if (character.passiveHandler && typeof character.passiveHandler.initialize === 'function') {
-                            console.log(`[CharFactory] Initializing passive handler ${character.passiveHandler.constructor.name} for ${character.name}.`);
-                            character.passiveHandler.initialize(character);
+                        // Handle both class-based and object-based passive handlers
+                        if (typeof PassiveHandlerClass === 'function' && PassiveHandlerClass.prototype) {
+                            // Traditional class-based handler
+                            character.passiveHandler = new PassiveHandlerClass(character);
+                            console.log(`[CharFactory] Instantiated passive handler ${PassiveHandlerClass.name} for ${character.name}`);
+                            if (character.passiveHandler && typeof character.passiveHandler.initialize === 'function') {
+                                console.log(`[CharFactory] Initializing passive handler ${character.passiveHandler.constructor.name} for ${character.name}.`);
+                                character.passiveHandler.initialize(character);
+                            }
+                        } else if (typeof PassiveHandlerClass === 'object' && PassiveHandlerClass.onApply) {
+                            // Object-based handler (like morissaDemonicEmpathyPassive)
+                            console.log(`[CharFactory] Applying object-based passive handler for ${character.name}`);
+                            character.passiveHandler = PassiveHandlerClass;
+                            PassiveHandlerClass.onApply(character);
                         } else {
                             console.log(`[CharFactory] No passive handler or initialize method found for ${character.name}.`);
                         }
                     } catch (error) {
-                        console.error(`[CharFactory] Error instantiating or initializing passive handler ${PassiveHandlerClass.name}:`, error);
+                        console.error(`[CharFactory] Error instantiating or initializing passive handler:`, error);
                     }
                 } else {
                     console.warn(`[CharFactory] No passive handler class found for ${passiveId}`);
@@ -3662,6 +4379,12 @@ const CharacterFactory = {
 
     // --- NEW: Apply Talents Logic ---
     applyTalents(character, talentDefinitions, selectedTalentIds) {
+        // CRITICAL SAFETY CHECK: Never apply user talents to AI characters
+        if (character.isAI === true) {
+            console.log(`[CharFactory] BLOCKED: applyTalents called on AI character ${character.name}. AI characters should not get user talents.`);
+            return;
+        }
+        
         selectedTalentIds.forEach(talentId => {
             const talent = talentDefinitions[talentId];
             if (!talent) {
@@ -3797,6 +4520,8 @@ const CharacterFactory = {
 
     // Helper for handling hardcoded passive classes if PassiveFactory fails
     checkHardcodedPassives(passiveId) {
+        console.log(`[CharacterFactory] checkHardcodedPassives called with passiveId: ${passiveId}`);
+        console.log(`[CharacterFactory] Available LavaChimpPassive in window:`, typeof window.LavaChimpPassive !== 'undefined');
         if (passiveId === 'schoolboy_siegfried_passive' && typeof SchoolboySiegfriedPassive !== 'undefined') {
             return SchoolboySiegfriedPassive;
         } else if (passiveId === 'schoolgirl_julia_passive' && typeof SchoolgirlJuliaPassive !== 'undefined') {
@@ -3827,6 +4552,34 @@ const CharacterFactory = {
             return FarmerFangPassive;
         }
         // --- END FARMER FANG PASSIVE ---
+        // --- ADD SCAMP PASSIVE ---
+        else if (passiveId === 'scamp_damage_redirect' && typeof ScampPassive !== 'undefined') {
+            return ScampPassive;
+        }
+        // --- END SCAMP PASSIVE ---
+        // --- ADD MORISSA PASSIVE ---
+        else if (passiveId === 'demonic_empathy' && typeof morissaDemonicEmpathyPassive !== 'undefined') {
+            return morissaDemonicEmpathyPassive;
+        }
+        // --- END MORISSA PASSIVE ---
+        // --- ADD LAVA CHIMP PASSIVE ---
+        else if (passiveId === 'lava_chimp_volcanic_leap' && typeof LavaChimpPassive !== 'undefined') {
+            console.log('[CharacterFactory] Found LavaChimpPassive class for passive:', passiveId);
+            return LavaChimpPassive;
+        }
+        // --- END LAVA CHIMP PASSIVE ---
+        // --- ADD SMITH LORD PASSIVE ---
+        else if (passiveId === 'smith_lord_forge_mastery' && typeof SmithLordPassive !== 'undefined') {
+            console.log('[CharacterFactory] Found SmithLordPassive class for passive:', passiveId);
+            return SmithLordPassive;
+        }
+        // --- END SMITH LORD PASSIVE ---
+        // --- ADD GROK HELL LORD PASSIVE ---
+        else if (passiveId === 'grok_lords_sacrifice' && typeof GrokHellLordPassive !== 'undefined') {
+            console.log('[CharacterFactory] Found GrokHellLordPassive class for passive:', passiveId);
+            return GrokHellLordPassive;
+        }
+        // --- END GROK HELL LORD PASSIVE ---
         // --- END RENEE PASSIVE ---
         // --- END NEW ---
         // Add other hardcoded checks here if necessary
@@ -3941,28 +4694,49 @@ const AbilityFactory = {
 
         // Add passive if it exists
         if (charData.passive) {
+            console.log(`[AbilityFactory] Processing passive for ${character.name}:`, charData.passive);
             character.passive = charData.passive; // Store passive definition
 
             // Attempt to dynamically load and initialize the passive handler
             try {
                 const passiveClassName = this.getPassiveClassName(charData.id); // e.g., InfernalAstarothPassive
+                console.log(`[AbilityFactory] Looking for passive class: ${passiveClassName} for character ${character.name}`);
+                console.log(`[AbilityFactory] window[${passiveClassName}] exists:`, typeof window[passiveClassName] !== 'undefined');
+                console.log(`[AbilityFactory] LavaChimpPassive exists in window:`, typeof window.LavaChimpPassive !== 'undefined');
+                
                 const PassiveHandlerClass = window[passiveClassName]; // Access class from global scope
                 if (PassiveHandlerClass && typeof PassiveHandlerClass === 'function') {
                     character.passiveHandler = new PassiveHandlerClass();
-                    console.log(`Attached ${passiveClassName} handler to ${character.name}`);
+                    console.log(`[AbilityFactory] Attached ${passiveClassName} handler to ${character.name}`);
                      // Initialize the passive handler (if it has an initialize method)
                      if (typeof character.passiveHandler.initialize === 'function') {
-                         console.log(`Initializing passive handler for ${character.name}`);
+                         console.log(`[AbilityFactory] Initializing passive handler for ${character.name}`);
                          character.passiveHandler.initialize(character); // Pass character instance
                      } else {
-                          console.warn(`Passive handler ${passiveClassName} for ${character.name} does not have an initialize method.`);
+                          console.warn(`[AbilityFactory] Passive handler ${passiveClassName} for ${character.name} does not have an initialize method.`);
                      }
                 } else {
-                     console.warn(`Passive handler class '${passiveClassName}' not found for ${character.name}`);
+                     console.warn(`[AbilityFactory] Passive handler class '${passiveClassName}' not found for ${character.name}`);
+                     
+                     // Try the hardcoded passives system as fallback
+                     console.log(`[AbilityFactory] Trying hardcoded passives for passive ID: ${charData.passive.id}`);
+                     const HardcodedPassiveClass = CharacterFactory.checkHardcodedPassives(charData.passive.id);
+                     if (HardcodedPassiveClass) {
+                         console.log(`[AbilityFactory] Found hardcoded passive class for ${charData.passive.id}`);
+                         character.passiveHandler = new HardcodedPassiveClass();
+                         if (typeof character.passiveHandler.initialize === 'function') {
+                             console.log(`[AbilityFactory] Initializing hardcoded passive handler for ${character.name}`);
+                             character.passiveHandler.initialize(character);
+                         }
+                     } else {
+                         console.warn(`[AbilityFactory] No hardcoded passive found for ID: ${charData.passive.id}`);
+                     }
                 }
             } catch (error) {
-                console.error(`Error attaching passive handler for ${character.name}:`, error);
+                console.error(`[AbilityFactory] Error attaching passive handler for ${character.name}:`, error);
             }
+        } else {
+            console.log(`[AbilityFactory] No passive defined for ${character.name}`);
         }
 
         // Assign base stats for reference
@@ -3971,6 +4745,15 @@ const AbilityFactory = {
         // Initialize current HP/Mana
         character.stats.currentHp = character.stats.maxHp;
         character.stats.currentMana = character.stats.maxMana;
+
+        // Dispatch character creation event for passive auto-initialization
+        try {
+            document.dispatchEvent(new CustomEvent('character:created', {
+                detail: { character: character }
+            }));
+        } catch (error) {
+            console.warn('Could not dispatch character:created event:', error);
+        }
 
         return character;
     },
@@ -4112,6 +4895,12 @@ const AbilityFactory = {
                 if (prop === 'doesNotEndTurn') {
                     console.log(`[AbilityFactory Debug] Copying ${prop} for ${abilityData.id}: ${abilityData[prop]} -> ${ability[prop]}`);
                 }
+                // IMPORTANT: When targetType is copied from JSON, ensure requiresTarget is set correctly
+                if (prop === 'targetType') {
+                    // ALL abilities require explicit targeting for consistent user experience
+                    ability.requiresTarget = true;
+                    console.log(`[AbilityFactory] Set requiresTarget=true for ability ${abilityData.id} with targetType ${abilityData[prop]}`);
+                }
             }
         }
 
@@ -4225,7 +5014,15 @@ const AbilityFactory = {
             'aoe_damage': this.createAoEDamageEffect,
             'aoe_heal': this.createAoEHealEffect,
             'lifesteal': this.createLifestealEffect,
-            'summon': this.createSummonEffect, 
+            'leech_life': this.createLeechLifeEffect,
+            'acid_lava_spit': this.createAcidLavaSpitEffect,
+            'charge': this.createChargeEffect,
+            'summon': this.createSummonEffect,
+            'double_scissor': this.createDoubleScissorEffect,
+            'dual_shot': this.createDualShotEffect,
+            'armor_piercer': this.createArmorPiercerEffect,
+            'dual_sword_strike': this.createDualSwordStrikeEffect,
+            'parry': this.createParryEffect,
         };
 
         const effectCreator = effectImplementations[abilityData.type];
@@ -4288,8 +5085,18 @@ const AbilityFactory = {
             }
             // --- End Talent Modifiers --- 
 
-            // Apply the final calculated damage
-            const result = target.applyDamage(finalDamageAmount, damageType, caster, options);
+            // Apply the final calculated damage with abilityId for statistics tracking
+            const damageOptions = {
+                ...options,
+                abilityId: abilityData.id
+            };
+            const result = target.applyDamage(finalDamageAmount, damageType, caster, damageOptions);
+
+            // Check if the attack was dodged
+            if (result.isDodged) {
+                log(`${target.name} dodged ${caster.name}'s ${abilityData.name || abilityData.id} completely!`);
+                return; // Exit early - no damage, no debuffs, nothing
+            }
 
             let message = `${caster.name} used ${abilityData.name || abilityData.id} on ${target.name}, dealing ${result.damage} ${damageType} damage.`;
             if (result.isCritical) {
@@ -4297,7 +5104,7 @@ const AbilityFactory = {
             }
             log(message);
             
-            // Handle debuffs if defined
+            // Handle debuffs if defined - only if attack wasn't dodged
             if (abilityData.debuffEffect) {
                  if (!abilityData.debuffEffect.chance || Math.random() < abilityData.debuffEffect.chance) {
                      // Clone the effect definition to avoid modifying the original
@@ -4542,6 +5349,7 @@ const AbilityFactory = {
                         operation: 'set' // Set to the exact value (100% = 1.0)
                     });
                     console.log(`[CreateBuffEffect] Converted dodgeChance effect (${buffDetails.effects.dodgeChance}) to stat modifier for ${buffDetails.name || abilityData.name}`);
+                    console.log(`[CreateBuffEffect DEBUG] Final buff.statModifiers:`, JSON.stringify(buff.statModifiers));
                 }
                 
                 // Can add more effect-to-statModifier conversions here if needed
@@ -4698,7 +5506,7 @@ const AbilityFactory = {
                 
                 // Apply Debuff from AoE effect (e.g., Infernal Birdie's stun)
                 // Use the abilityData directly passed into createAoEDamageEffect
-                if (!result.dodged && abilityData.stun && typeof abilityData.stun === 'object') {
+                if (!result.isDodged && abilityData.stun && typeof abilityData.stun === 'object') {
                     const stunChance = abilityData.stun.chance || 0;
                     if (Math.random() < stunChance) {
                         const stunDuration = abilityData.stun.duration || 1;
@@ -4945,6 +5753,510 @@ const AbilityFactory = {
         };
     },
 
+    createLeechLifeEffect(abilityData) {
+        return (caster, targetOrTargets) => {
+            // This effect type expects a single target
+            if (Array.isArray(targetOrTargets)) {
+                console.warn(`[AbilityFactory] Leech Life effect (${abilityData.name}) received an array, expects single target. Using first.`);
+                targetOrTargets = targetOrTargets[0];
+            }
+            const target = targetOrTargets;
+            if (!target || typeof target.applyDamage !== 'function') {
+                console.error(`[AbilityFactory] Invalid target for leech life effect (${abilityData.name}):`, target);
+                return;
+            }
+
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            const damageType = abilityData.damageType || 'magical';
+            const baseDamage = abilityData.baseDamage || 590;
+            const healMultiplier = abilityData.healMultiplier || 2.0;
+            
+            // Apply damage to target using baseDamage (fixed damage)
+            const damageResult = target.applyDamage(baseDamage, damageType, caster, { abilityId: abilityData.id });
+            
+            // Log damage dealt
+            let damageMessage = `${caster.name} uses ${abilityData.name} on ${target.name}, dealing ${damageResult.damage} ${damageType} damage`;
+            if (damageResult.isCritical) {
+                damageMessage += " (Critical Hit!)";
+            }
+            log(damageMessage);
+            
+            // Calculate heal amount based on damage dealt (not base damage)
+            const healAmount = Math.floor(damageResult.damage * healMultiplier);
+            
+            if (healAmount > 0) {
+                // Check if healing would exceed max HP
+                const currentHp = caster.stats.currentHp;
+                const maxHp = caster.stats.maxHp;
+                const missingHp = maxHp - currentHp;
+                
+                if (healAmount <= missingHp) {
+                    // Normal healing - will not exceed max HP
+                    const healResult = caster.heal(healAmount, caster);
+                    log(`${caster.name} heals for ${healResult.healAmount} HP from Leech Life`);
+                } else {
+                    // Heal to max HP and create shield for the excess
+                    if (missingHp > 0) {
+                        // Heal to max first
+                        const healResult = caster.heal(missingHp, caster);
+                        log(`${caster.name} heals for ${healResult.healAmount} HP from Leech Life`);
+                    }
+                    
+                    // Check if shield application is blocked by Imprison debuff
+                    const imprisonDebuff = caster.debuffs.find(debuff => 
+                        debuff && debuff.effects && debuff.effects.cantReceiveShields
+                    );
+                    
+                    if (!imprisonDebuff) {
+                        // Create shield for the excess amount
+                        const excessHeal = healAmount - missingHp;
+                        caster.shield = (caster.shield || 0) + excessHeal;
+                        log(`${caster.name} gains ${excessHeal} shield from excess Leech Life healing!`);
+                    } else {
+                        // Log that shield was blocked
+                        log(`${caster.name}'s shield gain is blocked by imprisonment!`, 'debuff');
+                    }
+                    
+                    // Trigger shield gained animation
+                    if (window.gameManager && window.gameManager.uiManager) {
+                        window.gameManager.uiManager.triggerShieldAnimation(caster, 'gained');
+                    }
+                }
+                
+                // Update character UI
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(caster);
+                }
+            }
+
+            // Check if target died
+            if (target.isDead()) {
+                log(`${target.name} has been defeated!`);
+                if (window.gameManager) {
+                    window.gameManager.handleCharacterDeath(target);
+                }
+            }
+
+            // Update target UI
+            if (window.gameManager && window.gameManager.uiManager) {
+                window.gameManager.uiManager.updateCharacterUI(target);
+            }
+        };
+    },
+
+    createAcidLavaSpitEffect(abilityData) {
+        return async (caster, targetOrTargets, abilityInstance) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            // Get all valid targets (opponents that are alive)
+            const gameManager = window.gameManager;
+            if (!gameManager) {
+                console.error('[Acid Lava Spit] Game manager not found');
+                return false;
+            }
+            
+            const allTargets = gameManager.getOpponents(caster).filter(target => !target.isDead());
+            if (allTargets.length === 0) {
+                log(`${caster.name}'s Acid Lava Spit has no valid targets!`, 'error');
+                return false;
+            }
+            
+            // Select two random targets (can be the same)
+            const target1 = allTargets[Math.floor(Math.random() * allTargets.length)];
+            const target2 = allTargets[Math.floor(Math.random() * allTargets.length)];
+            const targets = [target1, target2];
+            
+            const baseDamage = abilityData.baseDamage || 450;
+            const debuffDamage = abilityData.debuffDamage || 440;
+            const debuffDuration = abilityData.debuffDuration || 3;
+            
+            log(`${caster.name} spits corrosive lava at two targets!`, 'ability');
+            
+            // Apply damage and debuff to each target
+            for (let i = 0; i < 2; i++) {
+                const currentTarget = targets[i];
+                const shotNumber = i + 1;
+                
+                // Apply magical damage
+                const damageResult = currentTarget.applyDamage(baseDamage, 'magical', caster, {
+                    abilityId: abilityData.id
+                });
+                
+                // Log damage
+                const targetName = currentTarget.name;
+                const sameTarget = target1 === target2 ? ' (same target)' : '';
+                log(`Acid spit ${shotNumber} hits ${targetName}${sameTarget} for ${damageResult.damage} magical damage${damageResult.isCritical ? ' (Critical!)' : ''}`, 
+                    damageResult.isCritical ? 'critical' : 'damage');
+                
+                // Apply melting debuff
+                const meltingDebuff = new Effect(
+                    'melting_debuff',
+                    'Melting',
+                    'Icons/abilities/acid_lava_spit.png',
+                    debuffDuration,
+                    {
+                        type: 'damage_over_time',
+                        value: debuffDamage
+                    },
+                    true // isDebuff
+                );
+                
+                meltingDebuff.setDescription(`Takes ${debuffDamage} damage per turn from corrosive acid.`);
+                
+                // Add visual effect for melting debuff
+                meltingDebuff.onApply = (character) => {
+                    this.showMeltingDebuffVFX(character);
+                };
+                
+                currentTarget.applyDebuff(meltingDebuff);
+                log(`${targetName} is affected by Melting for ${debuffDuration} turns!`, 'debuff');
+                
+                // Show acid spit VFX
+                this.showAcidLavaSpitVFX(caster, currentTarget, shotNumber);
+                
+                // Small delay between shots for visual clarity
+                if (i === 0) {
+                    await this.delay(400);
+                }
+            }
+            
+            return true;
+        };
+    },
+
+    showAcidLavaSpitVFX(caster, target, shotNumber) {
+        try {
+            const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+            const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+            
+            if (!casterElement || !targetElement) return;
+            
+            // Create acid projectile with enhanced visuals
+            const acidProjectile = document.createElement('div');
+            acidProjectile.className = `acid-lava-projectile shot-${shotNumber}`;
+            
+            // Calculate trajectory
+            const casterRect = casterElement.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            
+            const startX = casterRect.left + casterRect.width / 2;
+            const startY = casterRect.top + casterRect.height / 2;
+            const endX = targetRect.left + targetRect.width / 2;
+            const endY = targetRect.top + targetRect.height / 2;
+            
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            
+            // Position acid projectile
+            acidProjectile.style.left = `${startX}px`;
+            acidProjectile.style.top = `${startY}px`;
+            acidProjectile.style.width = `${distance}px`;
+            acidProjectile.style.transform = `rotate(${angle}deg)`;
+            
+            document.body.appendChild(acidProjectile);
+            
+            // Create enhanced impact effect on target with screen shake
+            setTimeout(() => {
+                const impactEffect = document.createElement('div');
+                impactEffect.className = `acid-lava-impact shot-${shotNumber}`;
+                targetElement.appendChild(impactEffect);
+                
+                // Add screen shake for impact
+                this.addAcidImpactScreenShake();
+                
+                // Create impact particles
+                this.createImpactParticles(targetElement, shotNumber);
+                
+                // Cleanup impact effect
+                setTimeout(() => {
+                    if (impactEffect.parentNode) impactEffect.remove();
+                }, 1500);
+            }, 800);
+            
+            // Cleanup projectile
+            setTimeout(() => {
+                if (acidProjectile.parentNode) acidProjectile.remove();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('[Acid Lava Spit VFX] Error creating visual effects:', error);
+        }
+    },
+
+    createImpactParticles(targetElement, shotNumber) {
+        try {
+            // Create multiple impact particles
+            for (let i = 0; i < 6; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'acid-particle';
+                particle.style.position = 'absolute';
+                particle.style.top = '50%';
+                particle.style.left = '50%';
+                
+                // Random direction for each particle
+                const angle = (i / 6) * 2 * Math.PI + (Math.random() - 0.5);
+                const velocity = 20 + Math.random() * 15;
+                const x = Math.cos(angle) * velocity;
+                const y = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--dx', `${x}px`);
+                particle.style.setProperty('--dy', `${y}px`);
+                particle.style.animationDelay = `${Math.random() * 0.2}s`;
+                
+                targetElement.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) particle.remove();
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('[Impact Particles] Error:', error);
+        }
+    },
+
+    addAcidImpactScreenShake() {
+        try {
+            const battleContainer = document.querySelector('.battle-container');
+            if (battleContainer) {
+                battleContainer.style.animation = 'acidImpactShake 0.3s ease-out';
+                setTimeout(() => {
+                    battleContainer.style.animation = '';
+                }, 300);
+            }
+        } catch (error) {
+            console.error('[Acid Impact Shake] Error:', error);
+        }
+    },
+
+    showMeltingDebuffVFX(character) {
+        try {
+            const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+            if (!characterElement) return;
+            
+            // Create enhanced melting effect overlay
+            const meltingOverlay = document.createElement('div');
+            meltingOverlay.className = 'melting-debuff-overlay';
+            characterElement.appendChild(meltingOverlay);
+            
+            // Create initial melting particles
+            this.createMeltingApplicationParticles(characterElement);
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (meltingOverlay.parentNode) meltingOverlay.remove();
+            }, 3000);
+            
+        } catch (error) {
+            console.error('[Melting Debuff VFX] Error:', error);
+        }
+    },
+
+    createMeltingApplicationParticles(characterElement) {
+        try {
+            // Create swirling particles when melting is first applied
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'acid-particle';
+                particle.style.position = 'absolute';
+                
+                // Create circular motion around character
+                const angle = (i / 10) * 2 * Math.PI;
+                const radius = 25;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                particle.style.left = `${50 + (x / 100)}%`;
+                particle.style.top = `${50 + (y / 100)}%`;
+                particle.style.animationDelay = `${i * 0.1}s`;
+                particle.style.animationDuration = '2s';
+                
+                characterElement.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) particle.remove();
+                }, 2000 + (i * 100));
+            }
+        } catch (error) {
+            console.error('[Melting Application Particles] Error:', error);
+        }
+    },
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    },
+
+    createChargeEffect(abilityData) {
+        return async (caster, target, abilityInstance) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!target || target.isDead()) {
+                log(`${caster.name}'s Charge has no valid target!`, 'error');
+                return false;
+            }
+            
+            const baseDamage = abilityData.baseDamage || 500;
+            const stunDuration = abilityData.stunDuration || 1;
+            
+            log(`${caster.name} charges at ${target.name}!`, 'ability');
+            
+            // Show charge VFX
+            this.showChargeVFX(caster, target);
+            
+            // Small delay for visual impact
+            await this.delay(600);
+            
+            // Apply physical damage
+            const damageResult = target.applyDamage(baseDamage, 'physical', caster, {
+                abilityId: abilityData.id
+            });
+            
+            // Check if the attack was dodged
+            if (damageResult.isDodged) {
+                log(`${target.name} dodged ${caster.name}'s charge completely!`);
+                return false; // Exit early - no damage, no stun
+            }
+            
+            // Log damage
+            log(`${caster.name}'s charge hits ${target.name} for ${damageResult.damage} physical damage${damageResult.isCritical ? ' (Critical!)' : ''}!`, 
+                damageResult.isCritical ? 'critical' : 'damage');
+            
+            // Apply stun debuff - only if attack wasn't dodged
+            const stunDebuff = new Effect(
+                'stun_debuff',
+                'Stunned',
+                'Icons/debuffs/stun.png',
+                stunDuration,
+                null, // No ongoing effect function needed
+                true // isDebuff
+            );
+            
+            // Set stun effect properties (this is the key part!)
+            stunDebuff.effects = { cantAct: true };
+            stunDebuff.setDescription(`Cannot act for ${stunDuration} turn${stunDuration > 1 ? 's' : ''}.`);
+            
+            // Add visual effect for stun debuff
+            stunDebuff.onApply = (character) => {
+                character.showStunVFX();
+            };
+            
+            target.addDebuff(stunDebuff);
+            log(`${target.name} is stunned for ${stunDuration} turn${stunDuration > 1 ? 's' : ''}!`, 'debuff');
+            
+            return true;
+        };
+    },
+
+    showChargeVFX(caster, target) {
+        try {
+            const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+            const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+            
+            if (!casterElement || !targetElement) return;
+            
+            // Create charge effect on caster
+            const chargeEffect = document.createElement('div');
+            chargeEffect.className = 'hellboar-charge-effect';
+            casterElement.appendChild(chargeEffect);
+            
+            // Calculate charge trajectory
+            const casterRect = casterElement.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            
+            const startX = casterRect.left + casterRect.width / 2;
+            const startY = casterRect.top + casterRect.height / 2;
+            const endX = targetRect.left + targetRect.width / 2;
+            const endY = targetRect.top + targetRect.height / 2;
+            
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            
+            // Create charge trail
+            const chargeTrail = document.createElement('div');
+            chargeTrail.className = 'hellboar-charge-trail';
+            chargeTrail.style.left = `${startX}px`;
+            chargeTrail.style.top = `${startY}px`;
+            chargeTrail.style.width = `${distance}px`;
+            chargeTrail.style.transform = `rotate(${angle}deg)`;
+            
+            document.body.appendChild(chargeTrail);
+            
+            // Create impact effect on target
+            setTimeout(() => {
+                const impactEffect = document.createElement('div');
+                impactEffect.className = 'hellboar-charge-impact';
+                targetElement.appendChild(impactEffect);
+                
+                // Add screen shake for impact
+                this.addChargeImpactScreenShake();
+                
+                // Create dust particles
+                this.createChargeImpactParticles(targetElement);
+                
+                // Cleanup impact effect
+                setTimeout(() => {
+                    if (impactEffect.parentNode) impactEffect.remove();
+                }, 1500);
+            }, 500);
+            
+            // Cleanup charge effects
+            setTimeout(() => {
+                if (chargeEffect.parentNode) chargeEffect.remove();
+                if (chargeTrail.parentNode) chargeTrail.remove();
+            }, 800);
+            
+        } catch (error) {
+            console.error('[Hellboar Charge VFX] Error creating visual effects:', error);
+        }
+    },
+
+    createChargeImpactParticles(targetElement) {
+        try {
+            // Create dust and debris particles
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'charge-impact-particle';
+                particle.style.position = 'absolute';
+                particle.style.top = '50%';
+                particle.style.left = '50%';
+                
+                // Random direction for each particle
+                const angle = (i / 8) * 2 * Math.PI + (Math.random() - 0.5);
+                const velocity = 25 + Math.random() * 20;
+                const x = Math.cos(angle) * velocity;
+                const y = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--dx', `${x}px`);
+                particle.style.setProperty('--dy', `${y}px`);
+                particle.style.animationDelay = `${Math.random() * 0.1}s`;
+                
+                targetElement.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) particle.remove();
+                }, 1200);
+            }
+        } catch (error) {
+            console.error('[Charge Impact Particles] Error:', error);
+        }
+    },
+
+    addChargeImpactScreenShake() {
+        try {
+            const battleContainer = document.querySelector('.battle-container');
+            if (battleContainer) {
+                battleContainer.style.animation = 'chargeImpactShake 0.4s ease-out';
+                setTimeout(() => {
+                    battleContainer.style.animation = '';
+                }, 400);
+            }
+        } catch (error) {
+            console.error('[Charge Impact Shake] Error:', error);
+        }
+    },
+
     // <<< ADDED SUMMON EFFECT METHOD START >>>
     createSummonEffect(abilityData) {
         return (caster, target) => { // Target might be null or self depending on how it's called
@@ -5034,6 +6346,671 @@ const AbilityFactory = {
             })();
         };
     }, // <<< ADDED COMMA HERE
+
+    // Create Double Scissor Effect for Hell Fly
+    createDoubleScissorEffect(abilityData) {
+        return async (caster, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!target || target.isDead()) {
+                log(`${caster.name}'s scissor claws snap at empty air!`, 'warning');
+                return false;
+            }
+
+            const baseDamage = abilityData.baseDamage || 450;
+            
+            log(`${caster.name} buzzes menacingly and prepares to strike with razor-sharp claws!`, 'ability');
+            
+            // Use the Hell Fly abilities if available
+            if (window.HellFlyAbilities) {
+                try {
+                    return await window.HellFlyAbilities.hellFlyDoubleScissorEffect(caster, target);
+                } catch (error) {
+                    console.error('[Double Scissor] Error with custom implementation:', error);
+                    // Fall back to basic implementation
+                }
+            }
+            
+            // Fallback basic implementation
+            let totalDamage = 0;
+            
+            // First hit
+            if (!target.isDead()) {
+                const firstResult = target.applyDamage(baseDamage, 'physical', caster, {
+                    abilityId: abilityData.id,
+                    strikeNumber: 1
+                });
+                totalDamage += firstResult.damage;
+                log(`${target.name} is slashed by the first scissor for ${firstResult.damage} damage${firstResult.isCritical ? ' (Critical!)' : ''}!`);
+                
+                if (caster.stats.lifesteal > 0) {
+                    caster.applyLifesteal(firstResult.damage);
+                }
+            }
+            
+            // Short delay
+            await this.delay(400);
+            
+            // Second hit
+            if (!target.isDead()) {
+                const secondResult = target.applyDamage(baseDamage, 'physical', caster, {
+                    abilityId: abilityData.id,
+                    strikeNumber: 2
+                });
+                totalDamage += secondResult.damage;
+                log(`${target.name} is slashed by the second scissor for ${secondResult.damage} damage${secondResult.isCritical ? ' (Critical!)' : ''}!`);
+                
+                if (caster.stats.lifesteal > 0) {
+                    caster.applyLifesteal(secondResult.damage);
+                }
+            }
+            
+            if (totalDamage > 0) {
+                log(`Total damage dealt: ${totalDamage}`, 'system');
+            }
+            
+            if (target.isDead()) {
+                log(`${target.name} has been sliced to pieces!`);
+            }
+            
+            return true;
+        };
+    },
+
+    createDualShotEffect(abilityData) {
+        // Check if the dual shot effect is registered
+        if (this.registeredEffects['dual_shot'] || 
+            this.registeredEffects[abilityData.id] || 
+            this.registeredEffects['hotshotDualShotEffect']) {
+            
+            const effect = this.registeredEffects['dual_shot'] || 
+                          this.registeredEffects[abilityData.id] || 
+                          this.registeredEffects['hotshotDualShotEffect'];
+            
+            return (caster, targetOrTargets) => {
+                return effect(caster, targetOrTargets, abilityData);
+            };
+        }
+        
+        // Fallback implementation if custom effect not found
+        console.warn(`[AbilityFactory] Dual shot effect not registered for ${abilityData.id}, using fallback`);
+        return (caster, targetOrTargets) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            const baseDamage = abilityData.baseDamage || 278;
+            const gameManager = window.gameManager;
+            
+            if (!gameManager || !gameManager.gameState) {
+                console.error('[Dual Shot Fallback] Game manager not found');
+                return false;
+            }
+
+            const allTargets = gameManager.getOpponents(caster).filter(target => !target.isDead());
+            if (allTargets.length === 0) {
+                log(`${caster.name} fires Dual Shot into empty air - no targets available!`, 'system');
+                return false;
+            }
+
+            log(`${caster.name} fires a Dual Shot!`, 'ability');
+            
+            // Select two random targets (can be the same)
+            const target1 = allTargets[Math.floor(Math.random() * allTargets.length)];
+            const target2 = allTargets[Math.floor(Math.random() * allTargets.length)];
+            
+            const targets = [target1, target2];
+            let anyShotCrit = false;
+            
+            // Fire both shots
+            for (let i = 0; i < 2; i++) {
+                const currentTarget = targets[i];
+                const shotNumber = i + 1;
+                
+                const damageResult = currentTarget.applyDamage(baseDamage, 'physical', caster, {
+                    abilityId: abilityData.id
+                });
+                
+                if (damageResult.isCritical) {
+                    anyShotCrit = true;
+                }
+                
+                const targetName = currentTarget.name;
+                const sameTarget = target1 === target2 ? ' (same target)' : '';
+                log(`Shot ${shotNumber} hits ${targetName}${sameTarget} for ${damageResult.damage} damage${damageResult.isCritical ? ' (Critical!)' : ''}`, 
+                    damageResult.isCritical ? 'critical' : 'damage');
+            }
+            
+            // Check for chain reaction if any shot crit
+            if (anyShotCrit && abilityData.chainOnCrit && abilityData.chainChance) {
+                if (Math.random() < abilityData.chainChance) {
+                    log(`${caster.name}'s critical shots trigger another Dual Shot!`, 'chain-effect');
+                    // Note: Recursive chaining would need async handling in the real implementation
+                }
+            }
+            
+            return true;
+        };
+    },
+
+    createArmorPiercerEffect(abilityData) {
+        // Check if the armor piercer effect is registered
+        if (this.registeredEffects['armor_piercer'] || 
+            this.registeredEffects[abilityData.id] || 
+            this.registeredEffects['hotshotArmorPiercerEffect']) {
+            
+            const effect = this.registeredEffects['armor_piercer'] || 
+                          this.registeredEffects[abilityData.id] || 
+                          this.registeredEffects['hotshotArmorPiercerEffect'];
+            
+            return (caster, targetOrTargets) => {
+                return effect(caster, targetOrTargets, abilityData);
+            };
+        }
+        
+        // Fallback implementation if custom effect not found
+        console.warn(`[AbilityFactory] Armor piercer effect not registered for ${abilityData.id}, using fallback`);
+        return (caster, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${caster.name} activates Armor Piercer!`, 'ability');
+            
+            // Simple fallback - just create a basic buff
+            const armorPiercerBuff = new Effect(
+                'armor_piercer_buff',
+                'Armor Piercer',
+                'Icons/abilities/armor_piercer.png',
+                abilityData.buffDuration || 3,
+                null,
+                false
+            );
+            
+            armorPiercerBuff.setDescription('Critical strikes permanently reduce target armor by 2% (stacking).');
+            caster.addBuff(armorPiercerBuff);
+            log(`${caster.name}'s Armor Piercer activated for ${armorPiercerBuff.duration} turns!`, 'buff-applied');
+            
+            return true;
+        };
+    },
+
+    // Create Dual Sword Strike Effect for Skress
+    createDualSwordStrikeEffect(abilityData) {
+        return async (caster, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!target || target.isDead()) {
+                log(`${caster.name}'s dual swords slash through empty air!`, 'warning');
+                return false;
+            }
+
+            const baseDamage = 500;
+            const physicalDamageMultiplier = 1.15; // 115% of physical damage
+            
+            // Check if target has any debuffs for double damage
+            const hasDebuff = target.debuffs && target.debuffs.length > 0;
+            const damageMultiplier = hasDebuff ? 2 : 1;
+            
+            log(`${caster.name} raises both skeletal swords and prepares to strike with deadly precision!`, 'ability');
+            
+            if (hasDebuff) {
+                log(`${target.name} is weakened by debuffs - the strikes will be devastating!`, 'system');
+            }
+            
+            // Show preparation VFX
+            this.showDualSwordPrepVFX(caster, hasDebuff);
+            
+            let totalDamage = 0;
+            
+            // Calculate the damage for each strike
+            const strikeBaseDamage = baseDamage + Math.floor(caster.stats.physicalDamage * physicalDamageMultiplier);
+            const finalStrikeDamage = Math.floor(strikeBaseDamage * damageMultiplier);
+            
+            // First sword strike
+            if (!target.isDead()) {
+                this.showDualSwordStrikeVFX(caster, target, 1, hasDebuff);
+                
+                const firstResult = target.applyDamage(finalStrikeDamage, 'physical', caster, {
+                    abilityId: abilityData.id,
+                    strikeNumber: 1
+                });
+                totalDamage += firstResult.damage;
+                
+                const debuffText = hasDebuff ? ' (Enhanced by debuffs!)' : '';
+                log(`${target.name} is struck by the first skeletal sword for ${firstResult.damage} damage${firstResult.isCritical ? ' (Critical!)' : ''}${debuffText}!`);
+                
+                if (caster.stats.lifesteal > 0) {
+                    caster.applyLifesteal(firstResult.damage);
+                }
+            }
+            
+            // Short delay between strikes
+            await this.delay(500);
+            
+            // Second sword strike
+            if (!target.isDead()) {
+                this.showDualSwordStrikeVFX(caster, target, 2, hasDebuff);
+                
+                const secondResult = target.applyDamage(finalStrikeDamage, 'physical', caster, {
+                    abilityId: abilityData.id,
+                    strikeNumber: 2
+                });
+                totalDamage += secondResult.damage;
+                
+                const debuffText = hasDebuff ? ' (Enhanced by debuffs!)' : '';
+                log(`${target.name} is struck by the second skeletal sword for ${secondResult.damage} damage${secondResult.isCritical ? ' (Critical!)' : ''}${debuffText}!`);
+                
+                if (caster.stats.lifesteal > 0) {
+                    caster.applyLifesteal(secondResult.damage);
+                }
+            }
+            
+            if (totalDamage > 0) {
+                const enhancementText = hasDebuff ? ' (Double damage from debuffs!)' : '';
+                log(`Total damage dealt: ${totalDamage}${enhancementText}`, 'system');
+            }
+            
+            if (target.isDead()) {
+                log(`${target.name} has been cut down by the dual skeletal blades!`);
+            }
+            
+            return true;
+        };
+    },
+
+    // VFX for Dual Sword Strike preparation
+    showDualSwordPrepVFX(caster, hasDebuff) {
+        // Try to find the main battle character element (not talents panel)
+        let casterElement = document.querySelector(`.character-slot[data-character-id="${caster.id}"]:not(.talents-character)`);
+        if (!casterElement) {
+            casterElement = document.querySelector(`#character-${caster.instanceId || caster.id}`);
+        }
+        if (!casterElement) {
+            casterElement = document.querySelector(`#character-${caster.id}-ai-1`);
+        }
+        if (!casterElement) {
+            // Fallback to any element with the character ID
+            casterElement = document.querySelector(`[data-character-id="${caster.id}"]`);
+        }
+        if (!casterElement) {
+            console.warn(`[Dual Sword VFX] Could not find caster element for ${caster.name} (${caster.id})`);
+            return;
+        }
+
+
+
+        // Caster glow effect
+        const glowColor = hasDebuff ? '#ff4444' : '#888888'; // Red glow if target has debuffs
+        casterElement.style.filter = `drop-shadow(0 0 15px ${glowColor}) brightness(1.2)`;
+        
+        // Sword raising animation
+        casterElement.style.transform = 'scale(1.1) translateY(-5px)';
+        casterElement.style.transition = 'all 0.3s ease-out';
+        
+        // Create floating sword particles
+        this.createDualSwordParticles(casterElement, hasDebuff);
+        
+        // Reset after animation
+        setTimeout(() => {
+            casterElement.style.filter = '';
+            casterElement.style.transform = '';
+            casterElement.style.transition = '';
+        }, 800);
+    },
+
+    // VFX for individual sword strikes
+    showDualSwordStrikeVFX(caster, target, strikeNumber, hasDebuff) {
+        // Try to find the main battle character element (not talents panel)
+        let targetElement = document.querySelector(`.character-slot[data-character-id="${target.id}"]:not(.talents-character)`);
+        if (!targetElement) {
+            targetElement = document.querySelector(`#character-${target.instanceId || target.id}`);
+        }
+        if (!targetElement) {
+            targetElement = document.querySelector(`#character-${target.id}-player-1`);
+        }
+        if (!targetElement) {
+            // Fallback to any element with the character ID
+            targetElement = document.querySelector(`[data-character-id="${target.id}"]`);
+        }
+        if (!targetElement) {
+            console.warn(`[Dual Sword VFX] Could not find target element for ${target.name} (${target.id})`);
+            return;
+        }
+
+
+
+        // Slash effect
+        this.createSlashEffect(targetElement, strikeNumber, hasDebuff);
+        
+        // Screen shake for impact
+        this.addDualSwordScreenShake(strikeNumber);
+        
+        // Target impact effect
+        const impactColor = hasDebuff ? '#ff6666' : '#cccccc';
+        targetElement.style.filter = `brightness(1.5) drop-shadow(0 0 10px ${impactColor})`;
+        targetElement.style.transform = strikeNumber === 1 ? 'translateX(-8px)' : 'translateX(8px)';
+        
+        setTimeout(() => {
+            targetElement.style.filter = '';
+            targetElement.style.transform = '';
+        }, 300);
+    },
+
+    // Create floating sword particles around caster
+    createDualSwordParticles(casterElement, hasDebuff) {
+        const particleCount = 8;
+        const particleColor = hasDebuff ? '#ff4444' : '#888888';
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: absolute;
+                width: 4px;
+                height: 20px;
+                background: linear-gradient(45deg, ${particleColor}, #ffffff);
+                border-radius: 2px;
+                pointer-events: none;
+                z-index: 1000;
+                opacity: 0.8;
+                transform-origin: center;
+            `;
+            
+            const angle = (i / particleCount) * 360;
+            const radius = 40;
+            const x = Math.cos(angle * Math.PI / 180) * radius;
+            const y = Math.sin(angle * Math.PI / 180) * radius;
+            
+            particle.style.left = `calc(50% + ${x}px)`;
+            particle.style.top = `calc(50% + ${y}px)`;
+            particle.style.transform = `rotate(${angle + 45}deg)`;
+            
+            casterElement.appendChild(particle);
+            
+            // Animate particle
+            particle.animate([
+                { opacity: 0.8, transform: `rotate(${angle + 45}deg) scale(1)` },
+                { opacity: 0, transform: `rotate(${angle + 90}deg) scale(0.5)` }
+            ], {
+                duration: 800,
+                easing: 'ease-out'
+            });
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 800);
+        }
+    },
+
+    // Create slash effect on target
+    createSlashEffect(targetElement, strikeNumber, hasDebuff) {
+        const slash = document.createElement('div');
+        const slashColor = hasDebuff ? '#ff4444' : '#cccccc';
+        const slashDirection = strikeNumber === 1 ? '45deg' : '-45deg';
+        
+        slash.style.cssText = `
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, ${slashColor}, transparent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(${slashDirection});
+            pointer-events: none;
+            z-index: 1001;
+            box-shadow: 0 0 10px ${slashColor};
+        `;
+        
+        targetElement.appendChild(slash);
+        
+        // Animate slash
+        slash.animate([
+            { opacity: 0, transform: `translate(-50%, -50%) rotate(${slashDirection}) scaleX(0)` },
+            { opacity: 1, transform: `translate(-50%, -50%) rotate(${slashDirection}) scaleX(1)` },
+            { opacity: 0, transform: `translate(-50%, -50%) rotate(${slashDirection}) scaleX(1.2)` }
+        ], {
+            duration: 400,
+            easing: 'ease-out'
+        });
+        
+        // Remove slash after animation
+        setTimeout(() => {
+            if (slash.parentNode) {
+                slash.parentNode.removeChild(slash);
+            }
+        }, 400);
+    },
+
+    // Screen shake for sword strikes
+    addDualSwordScreenShake(strikeNumber) {
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+        
+        const shakeClass = strikeNumber === 1 ? 'dual-sword-shake-1' : 'dual-sword-shake-2';
+        battleContainer.classList.add(shakeClass);
+        
+        setTimeout(() => {
+            battleContainer.classList.remove(shakeClass);
+        }, 300);
+    },
+
+    // Create Parry Effect for Skress
+    createParryEffect(abilityData) {
+        return (caster, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            // Create parry buff
+            const parryBuff = new Effect(
+                'parry',
+                'Parry',
+                '🛡️',
+                3,
+                {
+                    onApply: (character) => {
+                        log(`${character.name} enters a defensive parry stance, gaining 60% dodge chance!`, 'system');
+                    },
+                    onRemove: (character) => {
+                        log(`${character.name}'s parry stance ends.`, 'system');
+                    },
+                    onTurnStart: (character) => {
+                        // Parry buff persists, no additional effects needed per turn
+                    }
+                },
+                false // This is a buff, not a debuff
+            );
+            
+            // Add stat modifiers for the dodge chance increase
+            parryBuff.statModifiers = [
+                {
+                    stat: 'dodgeChance',
+                    value: 0.6,
+                    operation: 'add'
+                }
+            ];
+            
+            parryBuff.setDescription('Increased dodge chance by 60%. When dodging, redirects damage back to attacker.');
+            parryBuff.isParryBuff = true; // Mark this as a parry buff for damage redirection
+            
+            target.addBuff(parryBuff);
+            this.showParryVFX(caster);
+            
+            log(`${caster.name} prepares to parry incoming attacks with skeletal precision!`, 'system');
+        };
+    },
+
+    // VFX for Parry ability
+    showParryVFX(caster) {
+        // Try to find the main battle character element
+        let casterElement = document.querySelector(`.character-slot[data-character-id="${caster.id}"]:not(.talents-character)`);
+        if (!casterElement) {
+            casterElement = document.querySelector(`#character-${caster.instanceId || caster.id}`);
+        }
+        if (!casterElement) {
+            casterElement = document.querySelector(`#character-${caster.id}-ai-1`);
+        }
+        if (!casterElement) {
+            casterElement = document.querySelector(`[data-character-id="${caster.id}"]`);
+        }
+        if (!casterElement) {
+            console.warn(`[Parry VFX] Could not find caster element for ${caster.name} (${caster.id})`);
+            return;
+        }
+
+        // Defensive glow effect
+        casterElement.style.filter = 'drop-shadow(0 0 20px #4444ff) brightness(1.3)';
+        casterElement.style.transform = 'scale(1.05)';
+        casterElement.style.transition = 'all 0.4s ease-out';
+        
+        // Create defensive shield particles
+        this.createParryShieldParticles(casterElement);
+        
+        // Reset after animation
+        setTimeout(() => {
+            casterElement.style.filter = '';
+            casterElement.style.transform = '';
+            casterElement.style.transition = '';
+        }, 1000);
+    },
+
+    // Create defensive shield particles around caster
+    createParryShieldParticles(casterElement) {
+        const particleCount = 12;
+        const shieldColor = '#4444ff';
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: radial-gradient(circle, ${shieldColor}, transparent);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                opacity: 0.9;
+            `;
+            
+            const angle = (i / particleCount) * 360;
+            const radius = 50;
+            const x = Math.cos(angle * Math.PI / 180) * radius;
+            const y = Math.sin(angle * Math.PI / 180) * radius;
+            
+            particle.style.left = `calc(50% + ${x}px)`;
+            particle.style.top = `calc(50% + ${y}px)`;
+            
+            casterElement.appendChild(particle);
+            
+            // Animate particle in a defensive circle
+            particle.animate([
+                { 
+                    opacity: 0.9, 
+                    transform: `translate(-50%, -50%) scale(1)`,
+                    left: `calc(50% + ${x}px)`,
+                    top: `calc(50% + ${y}px)`
+                },
+                { 
+                    opacity: 0.5, 
+                    transform: `translate(-50%, -50%) scale(1.5)`,
+                    left: `calc(50% + ${x * 1.2}px)`,
+                    top: `calc(50% + ${y * 1.2}px)`
+                },
+                { 
+                    opacity: 0, 
+                    transform: `translate(-50%, -50%) scale(0.5)`,
+                    left: `calc(50% + ${x * 0.8}px)`,
+                    top: `calc(50% + ${y * 0.8}px)`
+                }
+            ], {
+                duration: 1000,
+                easing: 'ease-out'
+            });
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 1000);
+        }
+    },
+
+    // VFX for Parry damage redirection
+    showParryRedirectionVFX(attacker) {
+        // Find both character elements
+        let defenderElement = document.querySelector(`.character-slot[data-character-id="${this.id}"]:not(.talents-character)`);
+        if (!defenderElement) {
+            defenderElement = document.querySelector(`#character-${this.instanceId || this.id}`);
+        }
+        if (!defenderElement) {
+            defenderElement = document.querySelector(`[data-character-id="${this.id}"]`);
+        }
+
+        let attackerElement = document.querySelector(`.character-slot[data-character-id="${attacker.id}"]:not(.talents-character)`);
+        if (!attackerElement) {
+            attackerElement = document.querySelector(`#character-${attacker.instanceId || attacker.id}`);
+        }
+        if (!attackerElement) {
+            attackerElement = document.querySelector(`[data-character-id="${attacker.id}"]`);
+        }
+
+        if (!defenderElement || !attackerElement) {
+            console.warn(`[Parry Redirection VFX] Could not find character elements`);
+            return;
+        }
+
+        // Create energy beam from defender to attacker
+        const beam = document.createElement('div');
+        beam.style.cssText = `
+            position: fixed;
+            height: 4px;
+            background: linear-gradient(90deg, #4444ff, #ff4444, #4444ff);
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 2000;
+            opacity: 0.9;
+            box-shadow: 0 0 10px #4444ff;
+        `;
+
+        // Calculate positions
+        const defenderRect = defenderElement.getBoundingClientRect();
+        const attackerRect = attackerElement.getBoundingClientRect();
+        
+        const startX = defenderRect.left + defenderRect.width / 2;
+        const startY = defenderRect.top + defenderRect.height / 2;
+        const endX = attackerRect.left + attackerRect.width / 2;
+        const endY = attackerRect.top + attackerRect.height / 2;
+        
+        const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+        
+        beam.style.left = `${startX}px`;
+        beam.style.top = `${startY}px`;
+        beam.style.width = `${distance}px`;
+        beam.style.transform = `rotate(${angle}deg)`;
+        beam.style.transformOrigin = '0 50%';
+        
+        document.body.appendChild(beam);
+        
+        // Animate beam
+        beam.animate([
+            { opacity: 0, transform: `rotate(${angle}deg) scaleX(0)` },
+            { opacity: 0.9, transform: `rotate(${angle}deg) scaleX(1)` },
+            { opacity: 0, transform: `rotate(${angle}deg) scaleX(1)` }
+        ], {
+            duration: 600,
+            easing: 'ease-out'
+        });
+        
+        // Flash effect on attacker
+        attackerElement.style.filter = 'brightness(1.5) drop-shadow(0 0 15px #ff4444)';
+        setTimeout(() => {
+            attackerElement.style.filter = '';
+        }, 400);
+        
+        // Remove beam after animation
+        setTimeout(() => {
+            if (beam.parentNode) {
+                document.body.removeChild(beam);
+            }
+        }, 600);
+    },
 
     // <<< MOVED THIS METHOD INSIDE >>>
     // Method to register custom effect functions by name

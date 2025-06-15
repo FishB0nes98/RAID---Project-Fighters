@@ -397,6 +397,8 @@ class StoryManager {
                 unlockableCharacters: stage.unlockableCharacters || null,
                 tutorialReward: stage.tutorialReward || false,
                 firstTimeCompletionReward: stage.firstTimeCompletionReward || false,
+                maxSelections: stage.maxSelections || 1, // For ally_selection stages
+                description_detail: stage.description_detail || null, // For ally_selection stages
                 index: index,
                 // A stage is completed if its index is less than the current active index.
                 isCompleted: index < this.storyProgress.currentStageIndex, 
@@ -450,6 +452,8 @@ class StoryManager {
             unlockableCharacters: stage.unlockableCharacters || null,
             tutorialReward: stage.tutorialReward || false,
             firstTimeCompletionReward: stage.firstTimeCompletionReward || false,
+            maxSelections: stage.maxSelections || 1, // For ally_selection stages
+            description_detail: stage.description_detail || null, // For ally_selection stages
             index: currentStageIndex,
             // Use storyProgress to determine completion status accurately
             isCompleted: currentStageIndex < this.storyProgress.completedStages, 
@@ -548,11 +552,17 @@ class StoryManager {
                  const newStats = { ...savedState.stats };
                  const newCurrentHP = Math.max(0, Math.min(teamMember.currentHP, newStats.hp));
                  const newCurrentMana = Math.max(0, Math.min(teamMember.currentMana, newStats.mana));
+                 // Also restore hell effects and permanent debuffs if they exist
+                 const hellEffects = savedState.hellEffects ? { ...savedState.hellEffects } : undefined;
+                 const permanentDebuffs = savedState.permanentDebuffs ? [...savedState.permanentDebuffs] : undefined;
+                 
                  return {
                      ...teamMember,
                      stats: newStats, // Apply the saved stats object
                      currentHP: newCurrentHP,
-                     currentMana: newCurrentMana
+                     currentMana: newCurrentMana,
+                     hellEffects: hellEffects,
+                     permanentDebuffs: permanentDebuffs
                  };
             } else {
                  // If no saved stats for this member, keep their base stats
@@ -704,7 +714,10 @@ class StoryManager {
                  currentHP: member.currentHP, 
                  currentMana: member.currentMana,
                  // Include the full stats object to persist modifications
-                 stats: { ...member.stats } 
+                 stats: { ...member.stats },
+                 // Also preserve hell effects and permanent debuffs
+                 hellEffects: member.hellEffects ? { ...member.hellEffects } : undefined,
+                 permanentDebuffs: member.permanentDebuffs ? [...member.permanentDebuffs] : undefined
              };
              return acc;
          }, {});
@@ -1043,14 +1056,34 @@ class StoryManager {
 
         const progressRef = firebaseDatabase.ref(`users/${this.userId}/storyProgress/${this.storyId}`);
         try {
-            // Ensure lastTeamState is saved as an object { charId: { currentHP, currentMana, stats } }
+            // Ensure lastTeamState is saved as an object { charId: { currentHP, currentMana, stats, hellEffects, permanentDebuffs } }
             const teamStateToSave = this.playerTeam.reduce((acc, member) => {
-                acc[member.id] = {
+                const memberState = {
                     currentHP: member.currentHP,
                     currentMana: member.currentMana,
                     // Include the full stats object to persist modifications
                     stats: { ...member.stats }
                 };
+                
+                // Only include hell effects if they exist (Firebase doesn't allow undefined)
+                if (member.hellEffects && Object.keys(member.hellEffects).length > 0) {
+                    memberState.hellEffects = { ...member.hellEffects };
+                }
+                
+                // Only include permanent debuffs if they exist (Firebase doesn't allow undefined)  
+                if (member.permanentDebuffs && member.permanentDebuffs.length > 0) {
+                    memberState.permanentDebuffs = [...member.permanentDebuffs];
+                }
+                
+                // Debug logging for save
+                console.log(`[StoryManager] Saving ${member.id}:`, {
+                    currentHP: memberState.currentHP,
+                    maxHP: memberState.stats.hp,
+                    hellEffects: memberState.hellEffects || 'none',
+                    permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0
+                });
+                
+                acc[member.id] = memberState;
                 return acc;
             }, {}) || null;
 
@@ -1137,7 +1170,61 @@ class StoryManager {
                             console.warn(`Mana restore amount '${effect.amount}' not implemented for target 'all'.`);
                         }
                         break;
+                    case 'mana_restore_percent':
+                        this.playerTeam.forEach(member => {
+                            if (member.currentHP > 0) { // Only affect living characters
+                                const maxMana = member.stats?.mana ?? 0;
+                                const restoreAmount = Math.floor(maxMana * (effect.amount_percent / 100));
+                                member.currentMana = Math.min(maxMana, (member.currentMana || 0) + restoreAmount);
+                                console.log(`Restored ${member.id}'s Mana by ${restoreAmount} (${effect.amount_percent}% of max). New Mana: ${member.currentMana}/${maxMana}`);
+                                changesMade = true;
+                            }
+                        });
+                        break;
+                    // --- NEW: Sacrifice effects for 'all' target ---
+                    case 'sacrifice_hp_for_mana':
+                        this.playerTeam.forEach(member => {
+                            if (member.currentHP > 0) { // Only affect living characters
+                                const hpLoss = Math.floor(member.currentHP * (effect.hp_percent / 100));
+                                member.currentHP = Math.max(1, member.currentHP - hpLoss); // Don't let HP go to 0
+                                member.currentMana = member.stats?.mana ?? 0; // Restore mana to full
+                                console.log(`Sacrifice for Mana: ${member.id} lost ${hpLoss} HP (${effect.hp_percent}%) and restored mana to full (${member.currentMana})`);
+                                changesMade = true;
+                            }
+                        });
+                        break;
+                    case 'sacrifice_defense_for_power':
+                        this.playerTeam.forEach(member => {
+                            if (member.currentHP > 0) { // Only affect living characters
+                                // Reduce defenses
+                                member.stats.armor = Math.max(0, (member.stats.armor || 0) - effect.defense_reduction);
+                                member.stats.magicalShield = Math.max(0, (member.stats.magicalShield || 0) - effect.defense_reduction);
+                                // Boost damage
+                                member.stats.physicalDamage = (member.stats.physicalDamage || 0) + effect.damage_boost;
+                                member.stats.magicalDamage = (member.stats.magicalDamage || 0) + effect.damage_boost;
+                                console.log(`Sacrifice for Power: ${member.id} lost ${effect.defense_reduction} armor/shield, gained ${effect.damage_boost} damage`);
+                                changesMade = true;
+                            }
+                        });
+                        break;
+                    // --- END NEW ---
                     // Add other 'all' target effects here if needed
+                    case 'heal_and_mana_restore_all_full':
+                        this.playerTeam.forEach(member => {
+                            if (member.currentHP > 0) { // Only affect living characters
+                                const maxHP = member.stats?.hp ?? 1;
+                                const maxMana = member.stats?.mana ?? 0;
+                                member.currentHP = maxHP;
+                                member.currentMana = maxMana;
+                                console.log(`Fully restored ${member.id}: HP ${member.currentHP}/${maxHP}, Mana ${member.currentMana}/${maxMana}`);
+                                changesMade = true;
+                            }
+                        });
+                        // Show popup notification
+                        if (window.storyUI && window.storyUI.showPopupMessage) {
+                            window.storyUI.showPopupMessage('✨ All team members have been fully restored! HP and Mana are at maximum.', 'success', 4000);
+                        }
+                        break;
                     default:
                         console.warn(`Unknown effect type for target 'all': ${effect.type}`);
                         break;
@@ -1148,6 +1235,39 @@ class StoryManager {
                      // For now, we still advance the stage.
                 }
             } 
+            // --- Handle effects targeting the team (summon ally) ---
+            else if (effect.target === 'team') {
+                console.log(`Applying effect to team.`);
+                switch (effect.type) {
+                    case 'summon_random_ally':
+                        // Get available allies
+                        const availableAllies = await this.getAllUnlockedCharacters();
+                        
+                        if (!availableAllies || availableAllies.length === 0) {
+                            console.log('No allies available for summoning');
+                            // Show popup notification
+                            if (window.storyUI && window.storyUI.showPopupMessage) {
+                                window.storyUI.showPopupMessage('🚫 No allies available for summoning. All champions are already in your team.', 'warning', 4000);
+                            }
+                        } else {
+                            // Randomly select an ally
+                            const randomAlly = availableAllies[Math.floor(Math.random() * availableAllies.length)];
+                            
+                            // Add the ally to the team
+                            await this.addSelectedAlly(randomAlly.id);
+                            
+                            console.log(`Summoned random ally: ${randomAlly.name || randomAlly.id}`);
+                            // Show popup notification
+                            if (window.storyUI && window.storyUI.showPopupMessage) {
+                                window.storyUI.showPopupMessage(`🔥 ${randomAlly.name || randomAlly.id} has been summoned to aid your journey!`, 'success', 4000);
+                            }
+                        }
+                        break;
+                    default:
+                        console.warn(`Unknown effect type for target 'team': ${effect.type}`);
+                        break;
+                }
+            }
             // --- Handle effects targeting a selected character ---
             else if (effect.target === 'selected' || effect.target === 'selected_living' || effect.target === 'selected_dead') {
                 if (!targetCharacterId) {
@@ -1179,10 +1299,52 @@ class StoryManager {
                             if (effect.amount === 'full') {
                                 character.currentHP = character.stats.hp; // Heal to max HP based on current stats.hp
                                 console.log(`Healed ${character.id} to full HP: ${character.currentHP}`);
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`❤️ ${character.name || character.id} has been fully healed! (${character.currentHP}/${character.stats.hp})`, 'success', 3000);
+                                }
                             } else {
                                 const maxHP = character.stats?.hp ?? character.currentHP ?? 0;
                                 character.currentHP = Math.min(maxHP, (character.currentHP || 0) + effect.amount);
                                 console.log(`Healed ${character.id} by ${effect.amount}, new HP: ${character.currentHP}`);
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`❤️ ${character.name || character.id} recovered ${effect.amount} HP! (${character.currentHP}/${maxHP})`, 'success', 3000);
+                                }
+                            }
+                            break;
+                        case 'mana_restore':
+                            if (effect.amount === 'full') {
+                                const maxMana = character.stats?.mana ?? 0;
+                                character.currentMana = maxMana;
+                                console.log(`Restored ${character.id}'s Mana to full: ${character.currentMana}`);
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`💙 ${character.name || character.id}'s mana has been restored to full! (${character.currentMana}/${maxMana})`, 'success', 3000);
+                                }
+                            } else {
+                                // Handle specific amount mana restore
+                                const restoreAmount = effect.amount || 0;
+                                const maxMana = character.stats?.mana ?? character.currentMana ?? 0;
+                                character.currentMana = Math.min(maxMana, (character.currentMana || 0) + restoreAmount);
+                                console.log(`Restored ${character.id}'s Mana by ${restoreAmount}, new Mana: ${character.currentMana}`);
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`💙 ${character.name || character.id} recovered ${restoreAmount} mana! (${character.currentMana}/${maxMana})`, 'success', 3000);
+                                }
+                            }
+                            break;
+                        case 'mana_restore_percent':
+                            if (character.stats) {
+                                const maxMana = character.stats.mana ?? character.currentMana ?? 0;
+                                const restoreAmount = Math.floor(maxMana * (effect.amount_percent / 100));
+                                character.currentMana = Math.min(maxMana, (character.currentMana || 0) + restoreAmount);
+                                console.log(`Restored ${character.id}'s Mana by ${restoreAmount} (${effect.amount_percent}% of max). New Mana: ${character.currentMana}/${maxMana}`);
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`💙 ${character.name || character.id} recovered ${restoreAmount} mana! (${character.currentMana}/${maxMana})`, 'success', 3000);
+                                }
+                            } else {
+                                console.warn(`Cannot apply mana_restore_percent: Stats object missing for ${character.id}`);
                             }
                             break;
                         case 'stat_boost':
@@ -1201,6 +1363,12 @@ class StoryManager {
                                 const boostAmount = effect.amount;
                                 character.stats[statName] = (character.stats[statName] || 0) + boostAmount;
                                 console.log(`Boosted ${character.id}'s ${statName} (from effect stat: ${effect.stat}) by ${boostAmount} to ${character.stats[statName]}`);
+                                
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    const displayStat = effect.stat === 'hpRegen' ? 'HP regeneration' : statName;
+                                    window.storyUI.showPopupMessage(`⚡ ${character.name || character.id}'s ${displayStat} increased by ${boostAmount}! (Now: ${character.stats[statName]})`, 'success', 3000);
+                                }
                                 
                                 // Adjust current HP/Mana if max was boosted
                                 if (statName === 'hp') { // Use the potentially remapped statName here
@@ -1258,6 +1426,17 @@ class StoryManager {
                                 const newStatValue = Math.round(baseValue * boostMultiplier);
                                 console.log(`[DEBUG] Boosting ${stat}: Base=${baseValue}, New=${newStatValue}`);
                                 character.stats[stat] = newStatValue; // Update live stat
+                                
+                                // Special handling for HP - also update maxHp for raid game compatibility
+                                if (stat === 'hp') {
+                                    character.stats.maxHp = newStatValue;
+                                    console.log(`[DEBUG] Also set maxHp to ${newStatValue} for raid game compatibility`);
+                                }
+                                // Special handling for mana - also update maxMana for raid game compatibility
+                                if (stat === 'mana') {
+                                    character.stats.maxMana = newStatValue;
+                                    console.log(`[DEBUG] Also set maxMana to ${newStatValue} for raid game compatibility`);
+                                }
                             });
                             // --- End Apply Boost --- 
 
@@ -1293,7 +1472,8 @@ class StoryManager {
                                 const oldMaxHp = character.stats.hp;
                                 const newMaxHp = oldMaxHp * 2;
                                 character.stats.hp = newMaxHp;
-                                character.currentHP = newMaxHp; 
+                                character.stats.maxHp = newMaxHp; // Also set maxHp for raid game compatibility
+                                character.currentHP = newMaxHp; // For story system compatibility
                                 console.log(`Risky Medicine worked! ${character.id}'s Max HP doubled to ${newMaxHp} and fully healed.`);
                             }
                             break;
@@ -1393,6 +1573,166 @@ class StoryManager {
                                 console.warn(`Cannot apply potions: Stats object missing for ${character.id}`);
                             }
                             break;
+                        // --- NEW: Hell story effects ---
+                        case 'set_magical_damage':
+                            if (character.stats) {
+                                character.stats.magicalDamage = effect.amount;
+                                console.log(`Lava Sample: Set ${character.id}'s magical damage to exactly ${effect.amount}.`);
+                                
+                                // Mark this character as having received this effect for Firebase tracking
+                                if (!character.hellEffects) character.hellEffects = {};
+                                character.hellEffects.lava_sample = true;
+                                character.hellEffects.choiceId = choice.name; // Track which choice was made
+                                character.hellEffects.choiceEffect = 'set_magical_damage'; // Track effect type
+                            } else {
+                                console.warn(`Cannot apply Lava Sample: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'demon_claws_effect':
+                            if (character.stats) {
+                                // Increase physical damage by 80
+                                character.stats.physicalDamage = (character.stats.physicalDamage || 0) + 80;
+                                // Set dodge chance to 0
+                                character.stats.dodgeChance = 0;
+                                console.log(`Demon Claws: Increased ${character.id}'s physical damage by 80 and set dodge chance to 0. New Phys Dmg: ${character.stats.physicalDamage}`);
+                                
+                                // Mark this character as having received this effect for Firebase tracking
+                                if (!character.hellEffects) character.hellEffects = {};
+                                character.hellEffects.demon_claws = true;
+                                character.hellEffects.choiceId = choice.name; // Track which choice was made
+                                character.hellEffects.choiceEffect = 'demon_claws_effect'; // Track effect type
+                            } else {
+                                console.warn(`Cannot apply Demon Claws: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'hellish_pact_effect':
+                            if (character.stats) {
+                                // Increase HP by 2000
+                                const oldMaxHp = character.stats.hp;
+                                const oldCurrentHp = character.currentHP || character.stats.hp;
+                                
+                                character.stats.hp = oldMaxHp + 2000;
+                                character.stats.maxHp = oldMaxHp + 2000; // Also set maxHp for raid game compatibility
+                                character.currentHP = oldCurrentHp + 2000;
+                                
+                                console.log(`Hellish Pact: Increased ${character.id}'s Max HP by 2000 (${oldMaxHp} -> ${character.stats.hp}), Current HP by 2000 (${oldCurrentHp} -> ${character.currentHP})`);
+                                
+                                // Mark this character as having received this effect for Firebase tracking
+                                if (!character.hellEffects) character.hellEffects = {};
+                                character.hellEffects.hellish_pact = true;
+                                character.hellEffects.choiceId = choice.name; // Track which choice was made
+                                character.hellEffects.choiceEffect = 'hellish_pact_effect'; // Track effect type
+                                
+                                // Mark as applied to prevent double application in stage manager
+                                character._hellishPactApplied = true;
+                                
+                                // Apply the hellish pact debuff that will be processed during battles
+                                // We'll store this in the character's permanent effects
+                                if (!character.permanentDebuffs) character.permanentDebuffs = [];
+                                
+                                // Create the hellish pact debuff (without function serialization)
+                                const hellishPactDebuff = {
+                                    id: 'hellish_pact_curse',
+                                    name: 'Hellish Pact Curse',
+                                    description: 'Takes 75 damage at the start of each turn due to a dark pact.',
+                                    duration: -1, // Permanent
+                                    effect: {
+                                        type: 'damage_over_time',
+                                        value: 75
+                                    },
+                                    // Store effect type instead of function for serialization
+                                    effectType: 'hellish_pact_dot'
+                                };
+                                
+                                // Add to permanent debuffs that will be applied when character enters battle
+                                character.permanentDebuffs.push(hellishPactDebuff);
+                                console.log(`Hellish Pact: Added permanent debuff to ${character.id}. Debuffs count: ${character.permanentDebuffs.length}`);
+                            } else {
+                                console.warn(`Cannot apply Hellish Pact: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        // --- NEW: Molten Weapons Effects ---
+                        case 'molten_hammer_effect':
+                            if (character.stats) {
+                                // Increase physical damage by 200
+                                character.stats.physicalDamage = (character.stats.physicalDamage || 0) + 200;
+                                console.log(`Molten Hammer: Increased ${character.id}'s physical damage by 200. New Phys Dmg: ${character.stats.physicalDamage}`);
+                                
+                                // Mark this character as having received this effect for Firebase tracking
+                                if (!character.hellEffects) character.hellEffects = {};
+                                character.hellEffects.molten_hammer = true;
+                                character.hellEffects.choiceId = choice.name;
+                                character.hellEffects.choiceEffect = 'molten_hammer_effect';
+                            } else {
+                                console.warn(`Cannot apply Molten Hammer: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'molten_scythe_effect':
+                            if (character.stats) {
+                                console.log(`Molten Scythe: Applied growing power effect to ${character.id}. All stats will increase by 1% each turn.`);
+                                
+                                // Mark this character as having received this effect for Firebase tracking
+                                if (!character.hellEffects) character.hellEffects = {};
+                                character.hellEffects.molten_scythe = true;
+                                character.hellEffects.choiceId = choice.name;
+                                character.hellEffects.choiceEffect = 'molten_scythe_effect';
+                                
+                                // Apply the molten scythe buff that will be processed during battles
+                                if (!character.permanentBuffs) character.permanentBuffs = [];
+                                
+                                // Create the molten scythe buff
+                                const moltenScytheBuff = {
+                                    id: 'molten_scythe_growth',
+                                    name: 'Molten Scythe Power',
+                                    description: 'All stats increase by 1% each turn due to the cursed scythe.',
+                                    duration: -1, // Permanent
+                                    effect: {
+                                        type: 'stat_growth_per_turn',
+                                        value: 0.01 // 1%
+                                    },
+                                    effectType: 'molten_scythe_growth'
+                                };
+                                
+                                character.permanentBuffs.push(moltenScytheBuff);
+                                console.log(`Molten Scythe: Added permanent buff to ${character.id}. Buffs count: ${character.permanentBuffs.length}`);
+                            } else {
+                                console.warn(`Cannot apply Molten Scythe: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        case 'molten_spear_effect':
+                            if (character.stats) {
+                                // Increase dodge chance by 18%
+                                character.stats.dodgeChance = (character.stats.dodgeChance || 0) + 18;
+                                console.log(`Molten Spear: Increased ${character.id}'s dodge chance by 18%. New Dodge Chance: ${character.stats.dodgeChance}%`);
+                                
+                                // Mark this character as having received this effect for Firebase tracking
+                                if (!character.hellEffects) character.hellEffects = {};
+                                character.hellEffects.molten_spear = true;
+                                character.hellEffects.choiceId = choice.name;
+                                character.hellEffects.choiceEffect = 'molten_spear_effect';
+                            } else {
+                                console.warn(`Cannot apply Molten Spear: Stats object missing for ${character.id}`);
+                            }
+                            break;
+                        // --- END NEW ---
+                        
+                        // --- NEW: Sacrifice for Life effect ---
+                        case 'sacrifice_character_for_restoration':
+                            // Kill the selected character
+                            character.currentHP = 0;
+                            console.log(`Sacrifice for Life: ${character.id} was sacrificed`);
+                            
+                            // Restore all other living characters to full HP and mana
+                            this.playerTeam.forEach(member => {
+                                if (member.id !== character.id && member.currentHP > 0) {
+                                    member.currentHP = member.stats?.hp ?? member.currentHP;
+                                    member.currentMana = member.stats?.mana ?? member.currentMana;
+                                    console.log(`Sacrifice for Life: Restored ${member.id} to full HP (${member.currentHP}) and mana (${member.currentMana})`);
+                                }
+                            });
+                            break;
+                        // --- END NEW ---
+                        
                         case 'none':
                             console.log(`No effect applied to ${character.id} - choice declined.`);
                             break;
@@ -1413,13 +1753,39 @@ class StoryManager {
 
             // --- Common Logic after applying effect (or skipping) ---
             
-            // Update lastTeamState for saving (reflects changes from effects)
+                            // Update lastTeamState for saving (reflects changes from effects)
             this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
-                 acc[member.id] = { 
+                const memberState = { 
                      currentHP: member.currentHP, 
                      currentMana: member.currentMana,
-                     stats: { ...member.stats } 
+                     stats: { ...member.stats }
                  };
+                 
+                 // Only include hell effects if they exist (Firebase doesn't allow undefined)
+                 if (member.hellEffects && Object.keys(member.hellEffects).length > 0) {
+                     memberState.hellEffects = { ...member.hellEffects };
+                 }
+                 
+                 // Only include permanent debuffs if they exist (Firebase doesn't allow undefined)
+                 if (member.permanentDebuffs && member.permanentDebuffs.length > 0) {
+                     memberState.permanentDebuffs = [...member.permanentDebuffs];
+                 }
+                 
+                 // Only include permanent buffs if they exist (Firebase doesn't allow undefined)
+                 if (member.permanentBuffs && member.permanentBuffs.length > 0) {
+                     memberState.permanentBuffs = [...member.permanentBuffs];
+                 }
+                 
+                 // Debug logging for each character
+                 console.log(`[StoryManager] Saving state for ${member.id}:`, {
+                     currentHP: memberState.currentHP,
+                     maxHP: memberState.stats.hp,
+                     hellEffects: memberState.hellEffects || 'none',
+                     permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0,
+                     permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0
+                 });
+                 
+                 acc[member.id] = memberState;
                  return acc;
             }, {});
 
@@ -1481,6 +1847,189 @@ class StoryManager {
 
     getTotalStages() {
         return this.currentStory ? this.currentStory.stages.length : 0;
+    }
+
+    /**
+     * Gets a list of all unlocked characters for ally selection.
+     * @returns {Promise<Array<Object>>} - A promise that resolves with an array of unlocked character objects.
+     */
+    async getAllUnlockedCharacters() {
+        console.log('[StoryManager] Getting all unlocked characters for ally selection');
+        
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                throw new Error('User not authenticated');
+            }
+
+            // Ensure character registry is loaded
+            await this.loadCharacterRegistry();
+            if (Object.keys(this.characterRegistry).length === 0) {
+                throw new Error("Character registry is empty.");
+            }
+
+            // Get current team IDs to filter out
+            const currentTeamIds = new Set(this.playerTeam.map(c => c.id));
+            console.log('[StoryManager] Current team IDs:', Array.from(currentTeamIds));
+
+            // Fetch from both Firebase folders
+            const [unlockedSnapshot, ownedSnapshot] = await Promise.all([
+                firebase.database().ref(`users/${user.uid}/UnlockedRAIDCharacters`).once('value'),
+                firebase.database().ref(`users/${user.uid}/ownedCharacters`).once('value')
+            ]);
+
+            let ownedCharacterIds = [];
+            
+            // Add the 3 free starter characters that everyone has
+            const freeStarterCharacters = ['farmer_cham_cham', 'schoolboy_shoma', 'renée'];
+            ownedCharacterIds = [...ownedCharacterIds, ...freeStarterCharacters];
+            console.log('[StoryManager] Added free starter characters:', freeStarterCharacters);
+            
+            // Get from UnlockedRAIDCharacters
+            if (unlockedSnapshot.exists()) {
+                const unlockedData = unlockedSnapshot.val();
+                ownedCharacterIds = [...ownedCharacterIds, ...Object.keys(unlockedData)];
+                console.log('[StoryManager] Characters from UnlockedRAIDCharacters:', Object.keys(unlockedData));
+            }
+            
+            // Get from ownedCharacters
+            if (ownedSnapshot.exists()) {
+                const ownedData = ownedSnapshot.val();
+                if (Array.isArray(ownedData)) {
+                    ownedCharacterIds = [...ownedCharacterIds, ...ownedData];
+                } else if (typeof ownedData === 'object') {
+                    ownedCharacterIds = [...ownedCharacterIds, ...Object.keys(ownedData)];
+                }
+                console.log('[StoryManager] Characters from ownedCharacters:', ownedData);
+            }
+
+            // Remove duplicates and filter out current team members
+            ownedCharacterIds = [...new Set(ownedCharacterIds)].filter(id => !currentTeamIds.has(id));
+            console.log('[StoryManager] Available character IDs (excluding team):', ownedCharacterIds);
+
+            // Filter to only include characters that exist in the registry
+            const availableCharacters = ownedCharacterIds.filter(id => {
+                const exists = this.characterRegistry[id] !== undefined;
+                if (!exists) {
+                    console.warn(`[StoryManager] Character ${id} not found in registry, excluding`);
+                }
+                return exists;
+            });
+
+            console.log('[StoryManager] Final available characters:', availableCharacters);
+
+            // Randomly shuffle and select only 3 characters for the ally selection
+            const shuffledCharacters = availableCharacters.sort(() => 0.5 - Math.random());
+            const selectedCharacters = shuffledCharacters.slice(0, 3); // Limit to 3 characters
+            
+            console.log('[StoryManager] Selected 3 random characters for ally selection:', selectedCharacters);
+
+            // Load full data for the selected characters
+            const characterDataPromises = selectedCharacters.map(async (id) => {
+                const registryEntry = this.characterRegistry[id];
+                const baseStats = await this.getBaseStats(id);
+                return {
+                    id: id,
+                    name: registryEntry?.name || id,
+                    image: registryEntry?.image || 'images/characters/default.png',
+                    avatarImage: registryEntry?.image || 'images/characters/default.png',
+                    description: registryEntry?.description || 'No description available',
+                    tags: registryEntry?.tags || [],
+                    stats: baseStats
+                };
+            });
+
+            const characterDetails = await Promise.all(characterDataPromises);
+            console.log('[StoryManager] Returning 3 unlocked character details:', characterDetails);
+            return characterDetails;
+
+        } catch (error) {
+            console.error("[StoryManager] Error getting unlocked characters:", error);
+            return [];
+        }
+    }
+
+    /**
+     * Adds a selected ally to the team.
+     * @param {string} characterId - The ID of the character to add.
+     * @returns {Promise<boolean>} - True if there are more stages, false if the story is complete.
+     */
+    async addSelectedAlly(characterId) {
+        console.log(`[StoryManager] Adding selected ally: ${characterId}`);
+        
+        try {
+            // Ensure character registry is loaded
+            await this.loadCharacterRegistry();
+            
+            const registryEntry = this.characterRegistry[characterId];
+            if (!registryEntry) {
+                throw new Error(`Character ${characterId} not found in registry`);
+            }
+
+            // Load the character's base stats
+            const baseStats = await this.getBaseStats(characterId);
+
+            // Create the new team member with full stats
+            const newMember = {
+                id: characterId,
+                name: registryEntry.name,
+                image: registryEntry.image,
+                currentHP: baseStats.hp,
+                currentMana: baseStats.mana,
+                stats: { ...baseStats }
+            };
+
+            console.log(`[StoryManager] Created new ally member:`, newMember);
+
+            // Add to player team
+            this.playerTeam.push(newMember);
+            console.log(`[StoryManager] Team after adding ally:`, this.playerTeam.map(m => ({ id: m.id, name: m.name })));
+
+            // Update lastTeamState for saving
+            this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
+                const memberState = { 
+                    currentHP: member.currentHP, 
+                    currentMana: member.currentMana,
+                    stats: { ...member.stats }
+                };
+                
+                // Include hell effects if they exist
+                if (member.hellEffects && Object.keys(member.hellEffects).length > 0) {
+                    memberState.hellEffects = { ...member.hellEffects };
+                }
+                
+                // Include permanent debuffs if they exist
+                if (member.permanentDebuffs && member.permanentDebuffs.length > 0) {
+                    memberState.permanentDebuffs = [...member.permanentDebuffs];
+                }
+                
+                acc[member.id] = memberState;
+                return acc;
+            }, {});
+
+            // Advance to next stage
+            this.storyProgress.currentStageIndex++;
+            this.storyProgress.completedStages = Math.max(this.storyProgress.completedStages, this.storyProgress.currentStageIndex);
+
+            // Save progress
+            await this.saveStoryProgress();
+            console.log(`[StoryManager] Ally selection completed. Saved progress for stage ${this.storyProgress.currentStageIndex}`);
+
+            const hasMoreStages = this.storyProgress.currentStageIndex < this.getTotalStages();
+
+            // Trigger event handler
+            if (this.onStageCompleted) {
+                const completedStageId = this.getStageId(this.storyProgress.currentStageIndex - 1);
+                this.onStageCompleted(completedStageId, [], hasMoreStages);
+            }
+
+            console.log(`[StoryManager] Ally selection successful. More stages: ${hasMoreStages}`);
+            return hasMoreStages;
+
+        } catch (error) {
+            console.error(`[StoryManager] Error adding selected ally ${characterId}:`, error);
+            throw error;
+        }
     }
 
     /**

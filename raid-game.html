@@ -3,7 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Graphics Acceleration and Performance Optimizations -->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    
     <title>Roguelike Raid Battle</title>
+    
+    <!-- Hardware Acceleration CSS -->
+    <style>
+        /* Enable GPU acceleration for the entire page */
+        html {
+            -webkit-transform: translateZ(0);
+            -moz-transform: translateZ(0);
+            -ms-transform: translateZ(0);
+            -o-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            /* Force hardware acceleration */
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            
+            /* Performance optimizations */
+            contain: layout style paint;
+            will-change: auto;
+        }
+        
+        /* Optimize animations and transitions */
+        * {
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+        }
+        
+        /* Character containers - GPU acceleration */
+        .characters-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            contain: layout style paint;
+        }
+        
+        /* Character slots - GPU acceleration */
+        .character-slot {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+            contain: layout style paint;
+        }
+        
+        /* Abilities - GPU acceleration */
+        .ability {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Battle log - GPU acceleration */
+        .battle-log-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            contain: layout style paint;
+        }
+        
+        /* Stage background - GPU acceleration */
+        .stage-background {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+            contain: strict;
+        }
+        
+        /* Panels - GPU acceleration */
+        .talents-panel,
+        .statistics-panel,
+        .quests-panel {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            contain: layout style paint;
+        }
+        
+        /* VFX and animations - GPU acceleration */
+        [class*="vfx"],
+        [class*="animation"],
+        [class*="particle"] {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Progress bars - GPU acceleration */
+        .progress-bar,
+        .hp-bar,
+        .mana-bar,
+        .shield-bar {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, width;
+        }
+        
+        /* Tooltips - GPU acceleration */
+        .tooltip {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Notifications - GPU acceleration */
+        .quest-completion-notification,
+        .quest-progress-notification {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Game over screen - GPU acceleration */
+        .game-over-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, opacity;
+            contain: layout style paint;
+        }
+        
+        /* Loading screen - GPU acceleration */
+        .loading-screen {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, opacity;
+            contain: strict;
+        }
+        
+        /* Optimize image rendering */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            transform: translate3d(0, 0, 0);
+        }
+        
+        /* Optimize scrolling */
+        .battle-log {
+            -webkit-overflow-scrolling: touch;
+            contain: size layout style paint;
+        }
+        
+        /* Stage modifiers - GPU acceleration */
+        .stage-modifiers-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, opacity;
+            contain: layout style paint;
+        }
+    </style>
+    
     <link rel="stylesheet" href="css/raid-game.css">
     <link rel="stylesheet" href="css/statistics.css">
     <link rel="stylesheet" href="css/farmer_cham_cham.css">
@@ -46,6 +201,24 @@
     <link rel="stylesheet" href="css/zoey.css">
     <link rel="stylesheet" href="css/xp-rewards.css">
     <link rel="stylesheet" href="css/stage-modifiers.css">
+    <link rel="stylesheet" href="css/scamp_passive.css">
+    <link rel="stylesheet" href="css/scamp_abilities.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/lava_chimp_passive.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/smith_lord_abilities.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/dual-shot-vfx.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/trickshot-vfx.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/acid_lava_spit.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/hellboar_charge.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/cursed_lion_abilities.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/hell_fly_double_scissor.css">
+    <link rel="stylesheet" href="css/vulgrim_abilities.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/armor_shredding.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/gargolyan_taunt.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/gargolyan_magma_pulse.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/hellhorn_tackle.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/hellhorn_stomp.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/unstoppable_passive.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/kroudin_punishment.css">
     
     <!-- Quest Completion Styles -->
     <style>
@@ -408,9 +581,32 @@
         </div>
         
         <!-- Volume Control -->
-        <div class="volume-control">
+        <div class="volume-control" id="volume-control">
             <span class="volume-icon" id="volume-icon">🔊</span>
             <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70">
+        </div>
+
+        <!-- Quest Panel Toggle Button -->
+        <button class="quest-panel-toggle" id="quest-panel-toggle" title="Toggle Quest Panel (SHIFT key)">
+            🎯 Quests
+        </button>
+
+        <!-- Quests Panel -->
+        <div class="quests-panel" id="quests-panel" style="display: none;">
+            <div class="quests-panel-header">
+                <!-- Drag handle and close button will be added by JavaScript -->
+                <h3>🎯 Character Quests</h3>
+                <button class="toggle-quests-button" id="toggle-quests-button">▼</button>
+            </div>
+            <div class="quests-panel-content" id="quests-panel-content">
+                <div class="quests-loading" id="quests-loading">
+                    <p>Loading quests...</p>
+                </div>
+                <div class="quests-list" id="quests-list"></div>
+                <div class="quests-empty" id="quests-empty" style="display: none;">
+                    <p>No active quests for selected character</p>
+                </div>
+            </div>
         </div>
         
         <!-- AI Section (Top) -->
@@ -497,9 +693,14 @@
     <script src="js/raid-game/character-xp-manager.js"></script>
     <script src="js/raid-game/ability-modifier.js"></script>
     <script src="js/raid-game/talent-manager.js"></script>
+    
+    <!-- Skin System Scripts -->
+    <script src="js/skins/skin-registry.js"></script>
+    <script src="js/skins/skin-manager.js"></script>
     <script src="js/raid-game/passive-factory.js"></script>
     <script src="js/raid-game/statistics-manager.js"></script>
     <script src="js/raid-game/quest-manager.js"></script>
+    <script src="js/raid-game/quest-ui-manager.js"></script>
 
     <!-- ALL Passive Ability Scripts (Load AFTER PassiveFactory, BEFORE Managers) -->
     <script src="js/raid-game/passives/schoolboy_siegfried_passive.js"></script>
@@ -526,6 +727,13 @@
     <script src="js/raid-game/passives/renée_passive.js"></script>
     <script src="js/raid-game/passives/zoey_passive.js"></script>
     <script src="js/raid-game/passives/little_devil_passive.js"></script>
+    <script src="js/raid-game/passives/scamp_passive.js"></script>
+    <script src="js/raid-game/passives/grok_hell_lord_passive.js"></script>
+    <script src="js/raid-game/passives/lava_chimp_passive.js"></script>
+    <script src="js/raid-game/passives/smith_lord_passive.js"></script>
+    <script src="js/raid-game/passives/hotshot_diablo_passive.js"></script>
+    <script src="js/raid-game/passives/hotshot_diabla_passive.js"></script>
+    <script src="js/raid-game/passives/unstoppable_passive.js"></script>
     <!-- Add other passive scripts here -->
 
     <!-- Factories -->
@@ -546,6 +754,7 @@
     <!-- Character/Ability Specific Scripts (Load AFTER core classes/managers) -->
     <script src="js/raid-game/characters/schoolboy_shoma-ball-selection.js"></script>
     <script src="js/raid-game/abilities/schoolboy_shoma-homerun.js"></script>
+    <script src="js/raid-game/abilities/schoolboy_shoma_abilities.js"></script>
     <script src="js/raid-game/abilities/cham_cham_abilities.js"></script>
     <script src="js/raid-game/abilities/farmer_cham_cham_abilities.js"></script>
     <script src="js/raid-game/abilities/ayane_abilities.js"></script>
@@ -578,8 +787,22 @@
     <script src="js/raid-game/abilities/target_dummy_abilities.js"></script>
     <script src="js/raid-game/abilities/bridget_abilities.js"></script>
     <script src="js/raid-game/abilities/renée_abilities.js"></script>
+    <script src="js/raid-game/abilities/renee_abilities_stats.js"></script>
     <script src="js/raid-game/abilities/zoey_abilities.js"></script>
     <script src="js/raid-game/abilities/little_devil_abilities.js"></script>
+    <script src="js/raid-game/abilities/morissa_abilities.js"></script>
+    <script src="js/raid-game/abilities/scamp_abilities.js"></script>
+    <script src="js/raid-game/abilities/lava_chimp_abilities.js"></script>
+    <script src="js/raid-game/abilities/smith_lord_abilities.js"></script>
+    <script src="js/raid-game/abilities/vulgrim_abilities.js"></script>
+    <script src="js/raid-game/abilities/cursed_lion_abilities.js"></script>
+    <script src="js/raid-game/abilities/lava_worm_abilities.js"></script>
+    <script src="js/raid-game/abilities/hotshot_dual_shot_abilities.js"></script>
+    <script src="js/raid-game/abilities/hell_fly_abilities.js"></script>
+    <script src="js/raid-game/abilities/gargolyan_abilities.js"></script>
+    <script src="js/raid-game/abilities/hellhorn_abilities.js"></script>
+    <script src="js/raid-game/abilities/kroudin_abilities.js"></script>
+    <script src="js/raid-game/abilities/grok_hell_lord_abilities.js"></script>
 
     <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
@@ -1139,8 +1362,84 @@
             });
         }
 
+        // Setup page unload confirmation
+        let gameHasStarted = false;
+        let userHasInteracted = false;
+        
+        function setupPageUnloadConfirmation() {
+            // Track user interaction (required by modern browsers for beforeunload)
+            document.addEventListener('click', () => {
+                userHasInteracted = true;
+            }, { once: false });
+            
+            document.addEventListener('keydown', () => {
+                userHasInteracted = true;
+            }, { once: false });
+            
+            // Track when game actually starts
+            window.addEventListener('gameStarted', () => {
+                gameHasStarted = true;
+                console.log('Game started - unload protection enabled');
+            });
+            
+            // Setup beforeunload listener
+            window.addEventListener('beforeunload', (event) => {
+                // Show confirmation if game has started and user has interacted
+                if (gameHasStarted && userHasInteracted) {
+                    // Check if game is still active (not ended)
+                    const gameStillActive = window.gameManager && 
+                                          window.gameManager.gameState && 
+                                          !window.gameManager.gameState.gameEnded;
+                    
+                    if (gameStillActive) {
+                        // Modern browsers ignore custom messages and show their own
+                        // But we still need to set returnValue and preventDefault
+                        event.preventDefault();
+                        event.returnValue = ''; // Empty string is sufficient for modern browsers
+                        return ''; // Fallback for older browsers
+                    }
+                }
+            });
+            
+            console.log('Page unload confirmation system initialized');
+        }
+
+        // Performance optimizations
+        function enableGraphicsAcceleration() {
+            // Enable hardware acceleration for supported browsers
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(() => {
+                    // Force GPU layer creation for better performance
+                    document.body.style.transform = 'translate3d(0, 0, 0)';
+                });
+            }
+            
+            // Optimize animations to use RAF
+            if ('requestAnimationFrame' in window) {
+                const originalSetTimeout = window.setTimeout;
+                window.setTimeout = function(callback, delay) {
+                    if (delay < 17) { // Less than one frame (60fps)
+                        return window.requestAnimationFrame(callback);
+                    }
+                    return originalSetTimeout(callback, delay);
+                };
+            }
+            
+            // Preload critical CSS for better performance
+            const criticalElements = document.querySelectorAll('.character-slot, .ability, .battle-log-container');
+            criticalElements.forEach(el => {
+                el.style.willChange = 'transform, opacity';
+                el.style.transform = 'translate3d(0, 0, 0)';
+            });
+            
+            console.log('Graphics acceleration enabled');
+        }
+
         // Initialize and start the game when page loads
         document.addEventListener('DOMContentLoaded', () => {
+            // Enable graphics acceleration first
+            enableGraphicsAcceleration();
+            
             // Get the loading element immediately after DOM is ready
             const loadingTextElement = document.getElementById('loading-text');
             if (!loadingTextElement) {
@@ -1225,6 +1524,7 @@
                         }
                     }
                     
+
                     // Add other debug keys here if needed
                 });
                 console.log("Debug key listeners initialized. Press Shift+Q to test quest progress.");
@@ -1244,6 +1544,7 @@
                         setupGameOverScreen();
                         setupBattleLog();
                         setupTalentsPanel();
+                        setupPageUnloadConfirmation();
                         
                         // Initialize Debug Keys
                         setupDebugKeys();
@@ -1266,12 +1567,19 @@
                         }
                         window.gameManager = new GameManager(); // Create instance
                         await window.gameManager.initialize(); // Initialize managers
-
+                        
                         // Get stageId (might be from URL for story mode, or default)
                         const urlParams = new URLSearchParams(window.location.search);
                         let stageId = urlParams.get('stage') || 'target_dummy_test'; // Default to target dummy test
                         const storyId = urlParams.get('storyId');
                         const stageIndex = urlParams.get('stageIndex');
+                        const isWeeklyChallenge = urlParams.get('weekly') === 'true';
+                        
+                        // Enable weekly challenge mode if detected
+                        if (isWeeklyChallenge) {
+                            window.gameManager.enableWeeklyChallengeMode();
+                            console.log('[RAID-GAME] Weekly Challenge Mode enabled for stage:', stageId);
+                        }
                         
                         // Check for data from character selector in localStorage
                         const savedGameData = localStorage.getItem('raid_game_data');
@@ -1300,6 +1608,9 @@
                         // If not, it uses the stageId determined here.
                         console.log(`Attempting to start game. Story context: ${storyId ? storyId + '['+stageIndex+']' : 'None'}, Stage ID: ${stageId}`);
                         await window.gameManager.startGame(stageId); // Call the async startGame
+                        
+                        // Dispatch gameStarted event for unload protection
+                        window.dispatchEvent(new CustomEvent('gameStarted'));
 
                         // Initialize the talents panel if the talents panel manager is available
                         if (window.talentsPanelManager) {

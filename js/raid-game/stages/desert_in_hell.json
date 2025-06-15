@@ -1,0 +1,33 @@
+{
+    "id": "desert_in_hell",
+    "name": "Desert in Hell",
+    "description": "The endless burning sands stretch before you, where twin demons Hotshot Diablo and Hotshot Diabla rule with deadly precision. The scorching heat sharpens everyone's reflexes to deadly perfection.",
+    "difficulty": 5,
+    "type": "battle",
+    "enemies": [
+        { "characterId": "hotshot_diablo" },
+        { "characterId": "hotshot_diabla" }
+    ],
+    "modifiers": [
+        {
+            "id": "desert_heat",
+            "name": "Desert Heat",
+            "description": "The scorching desert heat heightens all reflexes! All characters have their critical strike chance set to 50%.",
+            "icon": "🌵",
+            "effect": {
+                "type": "stat_override",
+                "stat": "critChance",
+                "value": 0.5,
+                "target": "all"
+            }
+        }
+    ],
+    "backgroundImage": "images/stages/hell_desert.png",
+    "backgroundMusic": "sounds/music/hell_desert_theme.mp3",
+    "rewards": [
+        {
+            "type": "experience",
+            "amount": 1200
+        }
+    ]
+} 

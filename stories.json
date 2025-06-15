@@ -587,5 +587,349 @@
         "firstTimeCompletionReward": true
       }
     ]
+  },
+  {
+    "id": "to_the_hell_we_go",
+    "title": "To The Hell We Go",
+    "description": "Venture into the depths of hell itself and make dark pacts for power.",
+    "playerunlocked": true,
+    "requirements": {
+      "tags": [],
+      "teamSize": { "min": 2, "max": 2 }
+    },
+    "stages": [
+      {
+        "name": "The Devil's Bargain",
+        "description": "At the gates of hell, a demon offers you power at a price. Each choice will permanently alter one of your companions. Choose wisely, for there is no going back.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Lava Sample",
+            "description": "Infuse a character with molten lava essence, setting their magical damage to exactly 200.",
+            "effect": { 
+              "type": "set_magical_damage", 
+              "target": "selected", 
+              "amount": 200 
+            }
+          },
+          {
+            "name": "Demon Claws",
+            "description": "Graft demonic claws onto a character, increasing their physical damage by 80 but making them unable to dodge.",
+            "effect": { 
+              "type": "demon_claws_effect", 
+              "target": "selected" 
+            }
+          },
+          {
+            "name": "Hellish Pact",
+            "description": "Form a dark pact that increases a character's HP by 2000 but curses them to take 75 damage each turn.",
+            "effect": { 
+              "type": "hellish_pact_effect", 
+              "target": "selected" 
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hell's Entrance Hall",
+        "description": "As you descend into hell proper, you encounter Morissa the succubus lounging on a throne of bones, flanked by her bumbling helper Scamp. She eyes you with predatory interest, while Scamp fumbles with his pitchfork behind her.",
+        "difficulty": 4,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "scamp" },
+          { "characterId": "morissa" }
+        ],
+        "backgroundImage": "images/stages/hell_stage1.png",
+        "backgroundMusic": "sounds/music/hell_entrance_theme.mp3"
+      },
+      {
+        "name": "Calling for Reinforcements",
+        "description": "After your first battle in hell, you realize you'll need more allies to survive the depths ahead. Using a hellish communication crystal, you can call upon some of your unlocked champions to join your cause. Choose one additional ally to strengthen your team for the trials ahead.",
+        "type": "ally_selection",
+        "maxSelections": 1,
+        "description_detail": "Select one character from 3 randomly chosen champions from your collection to add to your team. This ally will join you for the remainder of your journey through hell."
+      },
+      {
+      "name": "Hellish Sacrifices",
+      "description": "Deeper in hell, a malevolent entity offers you three dark choices. Each sacrifice grants power, but at a terrible cost to your team. The decision you make here will affect all your companions.",
+      "type": "choice",
+      "choices": [
+        {
+          "name": "Sacrifice for Mana",
+          "description": "ALL your characters lose 15% of their current HP to restore mana to full. The price of power is blood.",
+          "effect": { 
+            "type": "sacrifice_hp_for_mana", 
+            "target": "all",
+            "hp_percent": 15
+          }
+        },
+        {
+          "name": "Sacrifice for Power",
+          "description": "Your armor and magical shield is decremented by 5 (all characters) to increase your Magical Damage and Physical Damage by 100.",
+          "effect": { 
+            "type": "sacrifice_defense_for_power", 
+            "target": "all",
+            "defense_reduction": 5,
+            "damage_boost": 100
+          }
+        },
+        {
+          "name": "Sacrifice for Life",
+          "description": "Sacrifice a selected character to restore your remaining characters to full HP and Full mana. The ultimate price for the ultimate reward.",
+          "effect": { 
+            "type": "sacrifice_character_for_restoration", 
+            "target": "selected"
+          }
+        }
+      ]
+    },
+      {
+        "name": "Smith Cave",
+        "description": "Deep in the volcanic chambers of hell, you discover the forge of the Smith Lord. The air crackles with demonic magic as enchanted weapons amplify the strength of all who dwell here. A lava chimp screeches from the shadows while the vile Vulgrim lurks nearby, all under the watchful eye of the Smith Lord himself.",
+        "difficulty": 4,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "lava_chimp" },
+          { "characterId": "smith_lord" },
+          { "characterId": "vulgrim" }
+        ],
+        "modifiers": [
+          {
+            "id": "enchanted_weapon",
+            "name": "Enchanted Weapon",
+            "description": "The forge's demonic magic enchants all weapons! Enemy characters gain +15% physical damage every 5th turn (turns 5, 10, 15, etc.).",
+            "icon": "⚔️",
+            "effect": {
+              "type": "turn_milestone_buff",
+              "milestone": 5,
+              "target": "enemies",
+              "stat": "physicalDamage",
+              "value": 0.15,
+              "isPercent": true,
+              "stacks": true
+            }
+          }
+        ],
+        "backgroundImage": "images/stages/hell_cave.png",
+        "backgroundMusic": "sounds/music/hell_forge_theme.mp3"
+      },
+      {
+        "name": "Molten Weapons Choice",
+        "description": "After defeating the Smith Lord, you discover three legendary molten weapons forged in the depths of hell itself. Each weapon pulses with infernal power, and you can only choose one to enhance your strongest champion. The weapon's power will permanently bond with the selected character.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Molten Hammer",
+            "description": "A massive hammer forged from the core of a hellish volcano. Its weight and power will significantly increase the physical damage of the chosen character by 200.",
+            "effect": { 
+              "type": "molten_hammer_effect", 
+              "target": "selected",
+              "image": "Icons/rewards/Molten_Hammer.png"
+            }
+          },
+          {
+            "name": "Molten Scythe",
+            "description": "A cursed scythe that feeds on hellish energy, growing stronger with each battle. It will increase all stats of the chosen character by 1% every turn, creating an ever-growing power.",
+            "effect": { 
+              "type": "molten_scythe_effect", 
+              "target": "selected",
+              "image": "Icons/rewards/Molten_Scythe.png"
+            }
+          },
+          {
+            "name": "Molten Spear",
+            "description": "A swift spear infused with the agility of hellish winds. It will enhance the chosen character's dodging abilities, increasing their dodge chance by 18%.",
+            "effect": { 
+              "type": "molten_spear_effect", 
+              "target": "selected",
+              "image": "Icons/rewards/Molten_Spear.png"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Desert in Hell",
+        "description": "Venturing deeper into hell's domain, you arrive at the endless burning desert where the twin demons Hotshot Diablo and Hotshot Diabla have made their lair. The scorching heat of this hellish wasteland heightens everyone's reflexes to deadly perfection, making every strike a potential critical blow.",
+        "difficulty": 5,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "hotshot_diablo" },
+          { "characterId": "hotshot_diabla" }
+        ],
+        "modifiers": [
+          {
+            "id": "desert_heat",
+            "name": "Desert Heat",
+            "description": "The scorching desert heat heightens all reflexes! All characters have their critical strike chance set to 50%.",
+            "icon": "🌵",
+            "effect": {
+              "type": "stat_override",
+              "stat": "critChance",
+              "value": 0.5,
+              "target": "all"
+            }
+          }
+        ],
+        "backgroundImage": "images/stages/hell_desert.png",
+        "backgroundMusic": "sounds/music/hell_desert_theme.mp3"
+      },
+      {
+        "name": "Demonic Reinforcements",
+        "description": "After surviving the scorching desert trials, you discover an ancient hellish summoning circle. The demonic magic within allows you to call forth additional champions to aid in your journey deeper into hell's domain. The circle pulses with dark energy, offering you the power to recruit one more ally.",
+        "type": "ally_selection",
+        "maxSelections": 1,
+        "description_detail": "The hellish summoning circle allows you to call upon one additional champion from your collection. Choose wisely, as the trials ahead will test your expanded team to their limits."
+      },
+      {
+        "name": "Infernal Beast Gauntlet",
+        "description": "In the deepest caverns of hell, four legendary beasts have gathered to test the mettle of any who dare venture into their domain. The ancient Cursed Lion prowls alongside the massive Hellboar, while the Hell Fly buzzes overhead. The colossal Lava Worm emerges from molten pools, ready to challenge any who dare approach. The air crackles with primal fury as these corrupted creatures prepare to unleash their hellish wrath.",
+        "difficulty": 6,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "cursed_lion" },
+          { "characterId": "hellboar" },
+          { "characterId": "hell_fly" },
+          { "characterId": "lava_worm" }
+        ],
+        "modifiers": [
+          {
+            "id": "pack_healing",
+            "name": "Pack Healing",
+            "description": "When an enemy dies, all remaining enemies heal to full HP. The bond between these beasts runs deep.",
+            "icon": "🩺"
+          }
+        ],
+        "backgroundImage": "images/stages/hell_forest.png",
+        "backgroundMusic": "sounds/music/hell_beast_battle.mp3"
+      },
+      {
+        "name": "Hell's Oasis",
+        "description": "After surviving the brutal gauntlet of infernal beasts, you discover a hidden oasis deep in hell's most treacherous depths. Ancient hellish magic has created three pools of power, each offering different forms of restoration to those who have proven their worth against the legendary creatures. The pools shimmer with otherworldly energy, beckoning to your battle-weary team.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Pool of Infernal Mana",
+            "description": "A bubbling pool of blue hellfire that completely restores a character's magical energy to its maximum capacity.",
+            "effect": { 
+              "type": "mana_restore", 
+              "target": "selected", 
+              "amount": "full" 
+            }
+          },
+          {
+            "name": "Pool of Vitality",
+            "description": "A crimson pool that pulses with life force, fully healing a character's wounds and restoring them to perfect health.",
+            "effect": { 
+              "type": "heal", 
+              "target": "selected", 
+              "amount": "full" 
+            }
+          },
+          {
+            "name": "Pool of Demonic Protection",
+            "description": "A shimmering pool of molten metal that permanently enhances a character's defensive capabilities, increasing their armor and magical resistance by 8%.",
+            "effect": { 
+              "type": "stat_boost_percent", 
+              "target": "selected", 
+              "stat": ["armor", "magicalShield"], 
+              "amount": 8 
+            }
+          }
+        ]
+      },
+      {
+        "name": "Oasis Exit",
+        "description": "Refreshed by one last drink from the oasis, your team feels a surge of arcane energy before pressing onward.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Take One Last Drink",
+            "description": "Restore 25% of maximum mana to all characters in your team.",
+            "effect": { "type": "mana_restore_percent", "target": "all", "amount_percent": 25 }
+          }
+        ]
+      },
+      {
+        "name": "Hell Castle Entrance Guardians",
+        "description": "Your journey through hell has led you to the imposing gates of Hell Castle itself. Before the massive obsidian doors stand two ancient guardians who have protected this threshold for millennia. The stone gargoyle Gargolyan, with eyes that burn like embers, and the fearsome demon HellHorn, whose horns pierce the very air with their malevolent presence. Neither will yield without proving your worth in combat.",
+        "difficulty": 6,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "gargolyan" },
+          { "characterId": "hellhorn" }
+        ],
+        "modifiers": [
+          {
+            "id": "aggressive_protection",
+            "name": "Aggressive Protection",
+            "description": "The castle guardians inspire fierce combat! When a character dodges, they gain +30% dodge chance for 3 turns. When someone deals damage, they gain +100 magical damage and +80 physical damage for 3 turns (stacking).",
+            "icon": "🛡️"
+          }
+          
+        ],
+        "objectives": {
+          "winConditions": [
+            { "type": "allEnemiesDefeated" }
+          ]
+        },
+        "backgroundImage": "images/stages/hell_castle_entrace.png",
+        "backgroundMusic": "sounds/music/hell_castle_theme.mp3"
+      },
+      {
+        "name": "Final Preparation",
+        "description": "Having defeated the castle guardians, you stand before the final threshold of Hell Castle. Ancient demonic magic swirls around you, offering one last chance to prepare for the ultimate confrontation ahead. The very air crackles with power as two mystical options present themselves to strengthen your resolve.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Summon Hellish Ally",
+            "description": "Channel the chaotic energies of hell to randomly summon a powerful ally from your collection to join your final assault.",
+            "effect": { 
+              "type": "summon_random_ally", 
+              "target": "team"
+            }
+          },
+          {
+            "name": "Infernal Restoration",
+            "description": "Draw upon the castle's ancient power to completely restore all your team members to full health and mana, preparing them for the trials ahead.",
+            "effect": { 
+              "type": "heal_and_mana_restore_all_full", 
+              "target": "all"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hell Castle Throne",
+        "description": "You enter the throne room of Hell Castle. The skeletal guards Kroudin and Skress stand beside Grok, the Hell Lord himself. Only by defeating them all can you escape the depths of hell.",
+        "difficulty": 7,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "kroudin" },
+          { "characterId": "grok_hell_lord" },
+          { "characterId": "skress" }
+        ],
+        "modifiers": [
+          {
+            "id": "essence_transfer",
+            "name": "Essence Transfer",
+            "description": "When a character dies, their stats transfer to a random survivor, adding to the recipient's power.",
+            "icon": "💀"
+          },
+          {
+            "id": "healing_mana_flow",
+            "name": "Healing Mana Flow",
+            "description": "Healing also restores 20% of the heal amount as mana.",
+            "icon": "💧"
+          }
+        ],
+        "objectives": {
+          "winConditions": [
+            { "type": "allEnemiesDefeated" }
+          ]
+        },
+        "backgroundImage": "images/stages/hell_castle_throne.png",
+        "backgroundMusic": "sounds/music/hell_lord_theme.mp3"
+      }
+    ]
   }
 ] 
