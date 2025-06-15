@@ -8,7 +8,8 @@
             "type": "fighter",
             "tags": ["Student", "Physical", "Support"],
             "description": "A talented high school baseball player who uses his bat and physical prowess in combat.",
-            "playerunlocked": true
+            "playerunlocked": true,
+            "ingameimage": "Loading Screen/Schoolboy Shoma.png"
         },
         {
             "id": "test_boss",
@@ -18,7 +19,8 @@
             "type": "boss",
             "description": "A powerful boss created for testing new characters and abilities.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Test Boss.png"
         },
         {
             "id": "shao_kahn_boss",
@@ -28,7 +30,8 @@
             "type": "boss",
             "description": "The Emperor of Outworld, a powerful warrior with unrivaled strength. His hammer strikes fear into the hearts of his enemies.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Shao Kahn.png"
         },
         {
             "id": "cham_cham",
@@ -39,7 +42,8 @@
             "tags": ["Carry", "Physical", "Solo"],
             "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Cham Cham.png"
         },
         {
             "id": "ayane",
@@ -50,7 +54,8 @@
             "tags": ["Carry", "Physical", "Solo"],
             "description": "A swift assassin who uses teleportation and shadow techniques. Her Combat Reflexes passive lets her reduce ability cooldowns.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Ayane.png"
         },
         {
             "id": "farmer_nina",
@@ -60,7 +65,8 @@
             "type": "assassin",
             "tags": ["Carry", "Physical", "Farmer"],
             "description": "A precision sniper with enhanced buff capabilities. Her Amplified Buffs passive doubles the power of all buffs applied to her.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Farmer Nina.png"
         },
         {
             "id": "farmer_raiden",
@@ -70,7 +76,8 @@
             "type": "mage",
             "tags": ["Carry", "Magical", "Farmer"],
             "description": "A powerful farmer who harnesses the power of lightning. His Thunder Mastery passive allows him to deal bonus magical damage and gain magical shield when using lightning abilities.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Farmer Raiden.png"
         },
         {
             "id": "atlantean_kagome",
@@ -80,7 +87,8 @@
             "type": "mage",
             "tags": ["Magical", "Atlantean"],
             "description": "A mystical archer from Atlantis whose arrows are imbued with ancient magic. Her Atlantean Blessing passive converts missing mana into healing.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Atlantean Kagome.png"
         },
         {
             "id": "farmer_alice",
@@ -90,7 +98,8 @@
             "type": "tank",
             "tags": ["Tank", "Support", "Farmer", "Physical"],
             "description": "A bulky tank with magical resistance. Her Magical Resistance passive allows her to gain permanent Magic Shield when taking magical damage.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Farmer Alice.png"
         },
         {
             "id": "farmer_shoma",
@@ -100,7 +109,8 @@
             "type": "fighter",
             "tags": ["Tank", "Support", "Farmer"],
             "description": "A farm-raised baseball prodigy with extraordinary critical hit chance. His Farming Experience passive increases his already high crit chance after turn 20.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Farmer Shoma.png"
         },
         {
             "id": "schoolgirl_kokoro",
@@ -110,7 +120,8 @@
             "type": "support",
             "tags": ["Support", "Student"],
             "description": "A healer who specializes in restorative abilities. Her Healing Feedback passive lets her recover health whenever she uses any ability.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Schoolgirl Kokoro.png"
         },
         {
             "id": "schoolboy_siegfried",
@@ -120,7 +131,8 @@
             "type": "fighter",
             "tags": ["Student", "Physical", "Carry"],
             "description": "A determined schoolboy warrior who grows stronger with every boon. His passive grants bonus Physical Damage per active buff.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Schoolboy Siegfried.png"
         },
         {
             "id": "schoolgirl_julia",
@@ -130,7 +142,8 @@
             "type": "fighter",
             "tags": ["Student", "Physical", "Support"],
             "description": "A energetic fighter who grows stronger whenever she heals or is healed. Her passive grants permanent Physical Damage on healing.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Schoolgirl Julia.png"
         },
         {
             "id": "schoolgirl_ayane",
@@ -140,7 +153,8 @@
             "type": "assassin",
             "tags": ["Carry", "Physical", "Student"],
             "description": "A swift assassin who uses agility and daggers. Her Combat Reflexes passive boosts her damage after dodging.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Schoolgirl Ayane.png"
         },
         {
             "id": "schoolgirl_elphelt",
@@ -150,7 +164,8 @@
             "type": "fighter",
             "tags": ["Tank", "Hybrid", "Student"],
             "description": "A cheerful shooter who bolsters her defenses when using abilities.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Schoolgirl Elphelt.png"
         },
         {
             "id": "blazing_elemental",
@@ -160,7 +175,8 @@
             "type": "mage",
             "description": "A fiery being that unleashes explosive power, harming foes and healing allies.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Blazing Elemental.png"
         },
         {
             "id": "infernal_birdie",
@@ -170,7 +186,8 @@
             "type": "fighter",
             "description": "A relentless warrior wielding enchanted chains, capable of striking multiple foes and stunning them.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Infernal Birdie.png"
         },
         {
             "id": "farmer_cham_cham",
@@ -180,7 +197,8 @@
             "type": "fighter",
             "tags": ["Carry", "Physical", "Farmer", "Solo"],
             "description": "A wild fighter who grows stronger with each attack, wielding a deadly boomerang.",
-            "playerunlocked": true
+            "playerunlocked": true,
+            "ingameimage": "Loading Screen/Farmer Cham Cham.png"
         },
         {
             "id": "angry_bull",
@@ -189,7 +207,8 @@
             "tags": ["Enemy", "Beast"],
             "description": "A furious bull, mutated by dark influences.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Angry Bull.png"
         },
         {
             "id": "monster_apple",
@@ -198,7 +217,8 @@
             "tags": ["Enemy", "Plant", "Mutated"],
             "description": "A grotesque, oversized apple with a hunger for flesh.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Monster Apple.png"
         },
         {
             "id": "healthy_apple",
@@ -207,7 +227,8 @@
             "tags": ["Enemy", "Plant", "Support"],
             "description": "A vibrant apple that seems to radiate restorative energy.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Healthy Apple.png"
         },
         {
             "id": "angry_apple",
@@ -216,7 +237,8 @@
             "tags": ["Enemy", "Plant", "Aggressive"],
             "description": "This apple looks furious and ready to attack.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Angry Apple.png"
         },
         {
             "id": "leafy_apple",
@@ -225,7 +247,8 @@
             "tags": ["Enemy", "Plant", "Magic"],
             "description": "An apple covered in leaves, pulsing with natural magic.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Leafy Apple.png"
         },
         {
             "id": "rotten_apple",
@@ -234,7 +257,8 @@
             "tags": ["Enemy", "Plant", "Debuff"],
             "description": "A decaying apple spreading blight.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Rotten Apple.png"
         },
         {
             "id": "farmer_fang",
@@ -244,7 +268,8 @@
             "rarity": "Epic",
             "path": "js/raid-game/characters/farmer_fang.json",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Farmer FANG.png"
         },
         {
             "id": "bridget",
@@ -254,7 +279,8 @@
             "type": "support",
             "tags": ["Magical", "Support", "Carry", "Mew Mew"],
             "description": "A water-themed magical girl with powerful healing abilities. Her attacks create beautiful aquatic displays that both damage enemies and nurture allies.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Bridget.png"
         },
         {
             "id": "renée",
@@ -264,7 +290,8 @@
             "type": "fighter",
             "tags": ["Carry", "Physical", "Mew Mew", "Solo"],
             "description": "A Tokyo Mew Mew character who channels a mystical wolf spirit. Her swift claw attacks and spiritual connection make her a formidable fighter.",
-            "playerunlocked": true
+            "playerunlocked": true,
+            "ingameimage": "Loading Screen/Renée.png"
         },
         {
             "id": "zoey",
@@ -274,7 +301,8 @@
             "type": "mage",
             "tags": ["Mew Mew", "Magical"],
             "description": "A Tokyo Mew Mew character infused with wildcat DNA. As the leader of the Mew Mews, she wields the power of the Strawberry Bell to cast devastating magical attacks.",
-            "playerunlocked": false
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Zoey.png"
         },
         {
             "id": "little_devil",
@@ -285,7 +313,8 @@
             "tags": ["Enemy", "Demon", "Tutorial"],
             "description": "A mischievous little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Little Devil.png"
         },
         {
             "id": "little_devil_female",
@@ -296,7 +325,8 @@
             "tags": ["Enemy", "Demon", "Tutorial"],
             "description": "A cunning little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Little Devil Female.png"
         },
         {
             "id": "hotshot_diablo",
@@ -307,7 +337,8 @@
             "tags": ["Enemy", "Demon", "Gunslinger", "Hell"],
             "description": "A fiery demonic gunslinger from the desert wastes of hell, wielding twin infernal pistols with deadly precision.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Hotshot Diablo.png"
         },
         {
             "id": "hotshot_diabla",
@@ -318,7 +349,8 @@
             "tags": ["Enemy", "Demon", "Magic", "Hell"],
             "description": "A seductive demoness of the hellish desert, combining lethal beauty with scorching fire magic.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Hotshot Diabla.png"
         },
         {
             "id": "cursed_lion",
@@ -329,7 +361,8 @@
             "tags": ["Enemy", "Beast", "Hell", "Fire"],
             "description": "A majestic lion corrupted by hellish magic, its mane burns with unholy fire as it prowls the infernal plains.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Cursed Lion.png"
         },
         {
             "id": "hellboar",
@@ -340,7 +373,8 @@
             "tags": ["Enemy", "Beast", "Hell", "Tank"],
             "description": "A massive boar with tusks forged in hellfire and hide thick as molten rock. Its charge can shatter mountains.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Hellboar.png"
         },
         {
             "id": "hell_fly",
@@ -351,7 +385,8 @@
             "tags": ["Enemy", "Beast", "Hell", "Flying"],
             "description": "A gigantic fly born from the putrid swamps of hell, its buzz alone can drive mortals mad with terror.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Hell Fly.png"
         },
         {
             "id": "lava_worm",
@@ -362,7 +397,8 @@
             "tags": ["Enemy", "Beast", "Hell", "Lava"],
             "description": "A colossal worm that burrows through molten lava like water, its segmented body glows with the heat of a thousand forges.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Lava Worm.png"
         },
         {
             "id": "deathwing",
@@ -373,7 +409,8 @@
             "tags": ["Enemy", "Beast", "Hell", "Dragon", "Boss"],
             "description": "An ancient dragon corrupted by the deepest hells, its wings spread darkness across the land as its breath burns souls to ash.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Deathwing.png"
         },
         {
             "id": "gargolyan",
@@ -384,7 +421,8 @@
             "tags": ["Enemy", "Guardian", "Stone", "Hell"],
             "description": "A massive stone gargoyle guardian that protects the entrance to Hell Castle with its intimidating presence and raw strength.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Gargolyan.png"
         },
         {
             "id": "hellhorn",
@@ -395,7 +433,8 @@
             "tags": ["Enemy", "Demon", "Guardian", "Hell"],
             "description": "A fearsome horned demon that guards the gates of Hell Castle with its burning fury and demonic strength.",
             "playerunlocked": false,
-            "isHidden": true
+            "isHidden": true,
+            "ingameimage": "Loading Screen/HellHorn.png"
         },
         {
             "id": "infernal_ibuki",
@@ -405,7 +444,236 @@
             "type": "assassin",
             "tags": ["Infernal", "Physical", "Carry"],
             "description": "A deadly ninja from the infernal realm who specializes in stealth, mobility, and precision strikes. Her blade expertise grows stronger with each battle, and her critical hits reduce ability cooldowns.",
-            "playerunlocked": true
+            "playerunlocked": true,
+            "ingameimage": "Loading Screen/Infernal Ibuki.png"
+        },
+        {
+            "id": "morissa",
+            "name": "Morissa",
+            "image": "Loading Screen/Morissa.png",
+            "rarity": "rare",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Succubus", "Hell"],
+            "description": "A seductive succubus who rules over lesser demons with her dark charm and magical prowess.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Morissa.png"
+        },
+        {
+            "id": "scamp",
+            "name": "Scamp",
+            "image": "Loading Screen/Scamp.png",
+            "rarity": "rare",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Support", "Hell"],
+            "description": "A mischievous little devil who serves as Morissa's loyal, if somewhat incompetent, helper.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Scamp.png"
+        },
+        {
+            "id": "angry_carrot",
+            "name": "Angry Carrot",
+            "image": "images/characters/apples/angry_carrot_avatar.png",
+            "rarity": "rare",
+            "type": "plant",
+            "tags": ["Enemy", "Plant", "Support"],
+            "description": "A temperamental carrot that can go dormant to heal itself but becomes stunned in the process.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Angry Carrot.png"
+        },
+        {
+            "id": "angry_chicken",
+            "name": "Angry Chicken",
+            "image": "images/characters/angry_chicken_avatar.png",
+            "rarity": "rare",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Physical"],
+            "description": "A furious chicken that gains dodge chance over time and delivers powerful double stabs.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Angry Chicken.png"
+        },
+        {
+            "id": "angry_pig",
+            "name": "Angry Pig",
+            "image": "images/characters/angry_pig_avatar.png",
+            "rarity": "rare",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Tank"],
+            "description": "A defensive pig that heals itself for a portion of damage received.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Angry Pig.png"
+        },
+        {
+            "id": "crazy_farmer",
+            "name": "Crazy Farmer",
+            "image": "Loading Screen/Crazy Farmer.png",
+            "rarity": "epic",
+            "type": "fighter",
+            "tags": ["Enemy", "Farmer", "Support"],
+            "description": "An unhinged farmer who can boost his stats at great cost and shares healing with allies through his Healing Pact passive.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Crazy Farmer.png"
+        },
+        {
+            "id": "crow",
+            "name": "Crow",
+            "image": "Loading Screen/Crow.png",
+            "rarity": "common",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Flying"],
+            "description": "A simple but dangerous bird that deals consistent armor-ignoring damage.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Crow.png"
+        },
+        {
+            "id": "grok_hell_lord",
+            "name": "Grok - Hell Lord",
+            "image": "Loading Screen/Grok Hell Lord.png",
+            "rarity": "legendary",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Boss", "Hell"],
+            "description": "The tyrannical Hell Lord of the castle, wielding overwhelming demonic power.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Grok Hell Lord.png"
+        },
+        {
+            "id": "hound",
+            "name": "Hound",
+            "image": "Loading Screen/Hound.png",
+            "rarity": "rare",
+            "type": "beast",
+            "tags": ["Enemy", "Beast", "Physical"],
+            "description": "A vicious dog that applies bleeding wounds with all attacks and can enter bloodthirsty states.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Hound.png"
+        },
+        {
+            "id": "infernal_astaroth",
+            "name": "Infernal Astaroth",
+            "image": "Loading Screen/Infernal Astaroth.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "tags": ["Enemy", "Demon", "Boss", "Fire"],
+            "description": "A demonic entity engulfed in perpetual flames, commanding the power of the inferno.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Infernal Astaroth.png"
+        },
+        {
+            "id": "infernal_ibuki_boss",
+            "name": "Infernal Ibuki (Boss)",
+            "image": "Loading Screen/Infernal Ibuki.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "tags": ["Enemy", "Boss", "Infernal", "Physical"],
+            "description": "A boss version of the deadly ninja from the infernal realm with enhanced abilities and stats.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Infernal Ibuki.png"
+        },
+        {
+            "id": "infernal_raiden",
+            "name": "Infernal Raiden",
+            "image": "Loading Screen/Infernal Raiden.png",
+            "rarity": "legendary",
+            "type": "mage",
+            "tags": ["Enemy", "Infernal", "Magical", "Lightning"],
+            "description": "A lightning god corrupted by infernal powers, wielding devastating electrical attacks.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Infernal Raiden.png"
+        },
+        {
+            "id": "infernal_scorpion",
+            "name": "Infernal Scorpion",
+            "image": "Loading Screen/Infernal Scorpion.png",
+            "rarity": "epic",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Scorpion", "Melee"],
+            "description": "A terrifying demonic scorpion forged in the depths of the underworld. Its chain hook spells doom for its victims.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Infernal Scorpion.png"
+        },
+        {
+            "id": "kroudin",
+            "name": "Kroudin",
+            "image": "Loading Screen/Kroudin.png",
+            "rarity": "rare",
+            "type": "undead",
+            "tags": ["Enemy", "Undead", "Guard", "Hell"],
+            "description": "A skeletal prison guard bound in rusted armor, still patrolling the fiery dungeons of Hell Castle.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Kroudin.png"
+        },
+        {
+            "id": "lava_chimp",
+            "name": "Lava Chimp",
+            "image": "Loading Screen/lava_chimp.png",
+            "rarity": "common",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Beast"],
+            "description": "A mischievous primate dwelling in the volcanic forges of hell, its fur singed by constant exposure to molten rock.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/lava_chimp.png"
+        },
+        {
+            "id": "scarecrow",
+            "name": "Scarecrow",
+            "image": "Loading Screen/Scarecrow.png",
+            "rarity": "epic",
+            "type": "construct",
+            "tags": ["Enemy", "Construct", "Support"],
+            "description": "A magical construct that instills fear in enemies and provides healing support to allies.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Scarecrow.png"
+        },
+        {
+            "id": "skress",
+            "name": "Skress",
+            "image": "Loading Screen/Skress.png",
+            "rarity": "rare",
+            "type": "undead",
+            "tags": ["Enemy", "Undead", "Warrior", "Hell"],
+            "description": "A skeletal demon warrior infused with dark flames.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Skress.png"
+        },
+        {
+            "id": "smith_lord",
+            "name": "Smith Lord",
+            "image": "Loading Screen/smith_lord.png",
+            "rarity": "epic",
+            "type": "boss",
+            "tags": ["Enemy", "Boss", "Blacksmith", "Support"],
+            "description": "The master blacksmith of hell's forges, wielding a massive enchanted hammer and commanding the fires of creation and destruction.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/smith_lord.png"
+        },
+        {
+            "id": "vulgrim",
+            "name": "Vulgrim",
+            "image": "Loading Screen/Vulgrim.png",
+            "rarity": "rare",
+            "type": "demon",
+            "tags": ["Enemy", "Demon", "Merchant"],
+            "description": "A cunning demon merchant who deals in souls and dark magic. His presence corrupts the battlefield with vile energies.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Vulgrim.png"
         }
     ]
 } 

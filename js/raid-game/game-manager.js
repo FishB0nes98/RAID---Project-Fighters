@@ -340,6 +340,10 @@ class GameManager {
     // Initialize the game manager
     async initialize() {
         try {
+            // Load character registry first
+            await this.loadCharacterRegistry();
+            console.log('[GameManager] Character registry loaded');
+            
             // Initialize character XP manager
             this.characterXPManager = new CharacterXPManager();
             await this.characterXPManager.initialize();
@@ -3436,6 +3440,39 @@ class GameManager {
        }
 
        /**
+        * Load character registry data
+        */
+       async loadCharacterRegistry() {
+           if (this.characterRegistry) {
+               return this.characterRegistry;
+           }
+           
+           try {
+               const response = await fetch('js/raid-game/character-registry.json');
+               if (!response.ok) {
+                   throw new Error(`Failed to load character registry: ${response.status}`);
+               }
+               const data = await response.json();
+               this.characterRegistry = data;
+               return data;
+           } catch (error) {
+               console.error('[GameManager] Error loading character registry:', error);
+               return null;
+           }
+       }
+
+       /**
+        * Get character image path from registry (synchronous with cached data)
+        */
+       getCharacterImageFromRegistry(characterId) {
+           if (this.characterRegistry && this.characterRegistry.characters) {
+               const character = this.characterRegistry.characters.find(char => char.id === characterId);
+               return character ? character.ingameimage : null;
+           }
+           return null;
+       }
+
+       /**
         * Get character image path with proper naming conversion
         */
        getCharacterImagePath(characterId) {
@@ -3451,29 +3488,20 @@ class GameManager {
                }
            }
            
-           // Fallback to Loading Screen folder for basic skins
-           const imageNameMap = {
-               'farmer_nina': 'Farmer Nina',
-               'farmer_raiden': 'Farmer Raiden', 
-               'farmer_alice': 'Farmer Alice',
-               'farmer_shoma': 'Farmer Shoma',
-               'farmer_cham_cham': 'Farmer Cham Cham',
-               'atlantean_kagome': 'Atlantean Kagome',
-               'schoolboy_shoma': 'Schoolboy Shoma',
-               'schoolboy_siegfried': 'Schoolboy Siegfried',
-               'schoolgirl_julia': 'Schoolgirl Julia',
-               'schoolgirl_ayane': 'Schoolgirl Ayane',
-               'schoolgirl_elphelt': 'Schoolgirl Elphelt',
-               'schoolgirl_kokoro': 'Schoolgirl Kokoro',
-               'cham_cham': 'Cham Cham',
-               'ayane': 'Ayane',
-               'bridget': 'Bridget',
-               'renée': 'Renée',
-               'zoey': 'Zoey'
-           };
-           
-           const imageName = imageNameMap[characterId] || characterId;
-           return `Loading%20Screen/${encodeURIComponent(imageName)}.png`;
+           // Fallback to Loading Screen folder for ALL character images
+           const characterImagePath = this.getCharacterImageFromRegistry(characterId);
+           if (characterImagePath) {
+               // Use URL encoding for the path from registry
+               return characterImagePath.replace(/ /g, '%20');
+           } else {
+               // If character not found in registry, try to derive name from characterId
+               // Convert character_id format to Character Name format
+               const characterName = characterId
+                   .split('_')
+                   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                   .join(' ');
+               return `Loading%20Screen/${encodeURIComponent(characterName)}.png`;
+           }
        }
 
        /**

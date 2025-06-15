@@ -104,7 +104,7 @@ class SkinManager {
         return this.selectedSkins[characterId] || null;
     }
 
-    // Get the image path for a character (considering skin selection)
+    // Get the image path for a character (only returns skin path if skin is selected and owned)
     getCharacterImagePath(characterId) {
         const selectedSkin = this.getSelectedSkin(characterId);
         if (selectedSkin && this.ownsSkin(selectedSkin)) {
@@ -114,29 +114,8 @@ class SkinManager {
             }
         }
 
-        // Fall back to default character image from Loading Screen folder
-        const imageNameMap = {
-            'farmer_nina': 'Farmer Nina',
-            'farmer_raiden': 'Farmer Raiden', 
-            'farmer_alice': 'Farmer Alice',
-            'farmer_shoma': 'Farmer Shoma',
-            'farmer_cham_cham': 'Farmer Cham Cham',
-            'atlantean_kagome': 'Atlantean Kagome',
-            'schoolboy_shoma': 'Schoolboy Shoma',
-            'schoolboy_siegfried': 'Schoolboy Siegfried',
-            'schoolgirl_julia': 'Schoolgirl Julia',
-            'schoolgirl_ayane': 'Schoolgirl Ayane',
-            'schoolgirl_elphelt': 'Schoolgirl Elphelt',
-            'schoolgirl_kokoro': 'Schoolgirl Kokoro',
-            'cham_cham': 'Cham Cham',
-            'ayane': 'Ayane',
-            'bridget': 'Bridget',
-            'renée': 'Renée',
-            'zoey': 'Zoey'
-        };
-        
-        const imageName = imageNameMap[characterId] || characterId;
-        return `Loading%20Screen/${encodeURIComponent(imageName)}.png`;
+        // Return null if no skin is selected - let the game engine handle default images
+        return null;
     }
 
     // Purchase a skin
