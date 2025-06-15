@@ -371,7 +371,7 @@ class TalentsPanelManager {
         }
         
         // Default portrait path based on character ID
-        return `Loading Screen/${character.id}.png`;
+        return `Loading%20Screen/${encodeURIComponent(character.id)}.png`;
     }
 
     /**

@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const imagePath = window.SkinManager ? 
                 window.SkinManager.getCharacterImagePath(characterId) || characterData.image : 
                 characterData.image;
-            elements.characterImage.src = imagePath || 'Loading Screen/default.png';
+            elements.characterImage.src = imagePath || 'Loading%20Screen/default.png';
             elements.characterImage.alt = characterData.name || 'Character';
         }
     }

@@ -122,7 +122,7 @@ class SkinSelector {
         };
         
         const imageName = imageNameMap[characterId] || characterId;
-        return `Loading Screen/${imageName}.png`;
+        return `Loading%20Screen/${encodeURIComponent(imageName)}.png`;
     }
 
     // Display characters in the grid

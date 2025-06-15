@@ -136,7 +136,7 @@ class SkinManager {
         };
         
         const imageName = imageNameMap[characterId] || characterId;
-        return `Loading Screen/${imageName}.png`;
+        return `Loading%20Screen/${encodeURIComponent(imageName)}.png`;
     }
 
     // Purchase a skin
