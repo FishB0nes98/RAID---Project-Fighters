@@ -604,8 +604,8 @@ const farmerLeapEffect = (caster, target) => { // Target is not used but kept fo
         null, // Effect logic handled by Character.recalculateStats
         false // Is not a debuff
     ).setDescription('Increased agility grants 50% dodge chance.');
-    // Special property for dodge calculation in Character.recalculateStats
-    dodgeBuff.effects = { dodgeChance: 0.5 };
+    // Use statModifiers for proper stat modification
+    dodgeBuff.statModifiers = [{ stat: 'dodgeChance', value: 0.5, operation: 'add' }];
     caster.addBuff(dodgeBuff.clone()); // Apply a clone to avoid mutation issues
     log(`${caster.name} gains 50% Dodge Chance for ${buffDuration} turns.`);
 
