@@ -3,7 +3,7 @@
 class InfernalIbukiCharacter extends Character {
     constructor(id, name, image, stats) {
         super(id, name, image, stats);
-        this.kunaiStacks = 0; // Initialize passive stacks (max 10)
+        this.kunaiStacks = 0; // Initialize passive stacks (max 15)
         this.createPassiveIndicator();
     }
 
@@ -26,11 +26,11 @@ class InfernalIbukiCharacter extends Character {
     }
 
     applyBladeExpertisePassive() {
-        if (this.kunaiStacks < 10) { // Max 10 stacks
+        if (this.kunaiStacks < 15) { // Max 15 stacks
             this.kunaiStacks++;
-            const damageBonus = this.kunaiStacks * 2; // 2% per stack
+            const damageBonus = this.kunaiStacks * 10; // 10% per stack
             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
-            log(`${this.name}'s Blade Expertise activates! Kunai damage permanently increased. (+${damageBonus}% total, ${this.kunaiStacks}/10 stacks)`, 'passive');
+            log(`${this.name}'s Blade Expertise activates! Kunai damage permanently increased. (+${damageBonus}% total, ${this.kunaiStacks}/15 stacks)`, 'passive');
 
             // Update passive indicator visual
             this.updatePassiveIndicator();
@@ -95,7 +95,7 @@ class InfernalIbukiCharacter extends Character {
         if (characterElement) {
             const indicator = characterElement.querySelector('.kunai-mastery-indicator');
             if (indicator) {
-                indicator.title = `Blade Expertise Stacks: ${this.kunaiStacks}/10 (+${this.kunaiStacks * 2}% damage)`;
+                indicator.title = `Blade Expertise Stacks: ${this.kunaiStacks}/15 (+${this.kunaiStacks * 10}% damage)`;
                 const indicatorText = indicator.querySelector('.indicator-text');
                  if (indicatorText) {
                      indicatorText.textContent = this.kunaiStacks;
@@ -104,8 +104,8 @@ class InfernalIbukiCharacter extends Character {
                 indicator.classList.add('stack-added');
                 setTimeout(() => indicator.classList.remove('stack-added'), 500);
                 
-                // Add max stacks visual if at 10 stacks
-                if (this.kunaiStacks >= 10) {
+                // Add max stacks visual if at 15 stacks
+                if (this.kunaiStacks >= 15) {
                     indicator.classList.add('max-stacks');
                 } else {
                     indicator.classList.remove('max-stacks');
@@ -132,8 +132,8 @@ const kunaiThrowEffect = (caster, target) => {
     // Calculate base damage before passive
     let calculatedDamage = baseFixedDamage + (caster.stats.physicalDamage * basePhysicalScaling);
 
-    // Apply Blade Expertise passive multiplier (2% per stack, max 10 stacks = 20%)
-    const passiveMultiplier = (caster.kunaiStacks !== undefined) ? (1 + (caster.kunaiStacks * 0.02)) : 1; // Use 0.02 for 2%
+    // Apply Blade Expertise passive multiplier (10% per stack, max 15 stacks = 150%)
+    const passiveMultiplier = (caster.kunaiStacks !== undefined) ? (1 + (caster.kunaiStacks * 0.10)) : 1; // Use 0.10 for 10%
     calculatedDamage *= passiveMultiplier;
 
     // Recalculate final damage, applying the passive multiplier to the total base damage
@@ -156,7 +156,7 @@ const kunaiThrowEffect = (caster, target) => {
         window.statisticsManager.recordDamageDealt(caster, target, damageResult.damage, 'physical', damageResult.isCritical, 'kunai_throw');
     }
 
-    const stackText = caster.kunaiStacks ? ` (Passive: +${(caster.kunaiStacks * 2)}%)` : '';
+    const stackText = caster.kunaiStacks ? ` (Passive: +${(caster.kunaiStacks * 10)}%)` : '';
     log(`${caster.name} throws a Kunai at ${target.name}, dealing ${damageResult.damage} physical damage${stackText}${damageResult.isCritical ? ' (Critical!)' : ''}`);
 
     // Play sounds
@@ -256,7 +256,7 @@ const kunaiThrowAbility = new Ability(
     40, // Mana cost
     1,  // Cooldown
     kunaiThrowEffect
-).setDescription('Deals 250 + 150% Physical Damage to the target. Each use grants +2% damage permanently (max 10 stacks).')
+).setDescription('Deals 250 + 100% Physical Damage to the target. Each use grants +10% damage permanently (max 15 stacks).')
  .setTargetType('enemy');
 
 // --- Shadow Veil Ability ---
@@ -364,7 +364,7 @@ const shadowVeilAbility = new Ability(
     'Shadow Veil',
     'Icons/abilities/shadow_step.png',
     90, // Mana cost
-    16, // Cooldown
+    11, // Cooldown
     shadowVeilEffect
 ).setDescription('Become untargetable by enemies for 3 turns and gain +25% dodge chance for 3 turns.')
  .setTargetType('self');
@@ -543,7 +543,7 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
     await delay(150);
 
     // --- Chaining Logic with enhanced visuals ---
-    const chainChance = 0.30;
+    const chainChance = 0.45;
     const maxChains = 2;
     if (Math.random() < chainChance && chainCount < maxChains) {
         // Find next target from the caster's enemies (opposite team)
@@ -703,7 +703,7 @@ const swiftStrikeAbility = new Ability(
     85, // Mana cost
     6,  // Cooldown - BALANCED: Reduced from 8 to 6
     swiftStrikeEffect
-).setDescription('Deals 180% Physical Damage. 30% chance to dash to another enemy and repeat (max 2 chains).')
+).setDescription('Deals 180% Physical Damage. 45% chance to dash to another enemy and repeat (max 2 chains).')
  .setTargetType('enemy');
 // --- End Swift Strike Ability ---
 

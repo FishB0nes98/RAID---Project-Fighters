@@ -27,7 +27,7 @@
             "manaCost": 40,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals <span class='damage-text'>250 + 100%</span> Physical Damage to the target. Each use grants <span class='utility-text'>+2%</span> damage permanently (max 10 stacks).",
+            "description": "Deals <span class='damage-text'>250 + 100%</span> Physical Damage to the target. Each use grants <span class='utility-text'>+10%</span> damage permanently (max 15 stacks).",
             "icon": "Icons/abilities/kunai_toss.png",
             "sound": "sounds/kunai_toss.mp3",
             "effects": {
@@ -42,7 +42,7 @@
             "name": "Shadow Veil",
             "type": "buff",
             "manaCost": 90,
-            "cooldown": 16,
+            "cooldown": 11,
             "targetType": "self",
             "description": "Become untargetable by enemies for <span class='utility-text'>3 turns</span> and gain <span class='utility-text'>+25% dodge chance</span> for 3 turns.",
             "icon": "Icons/abilities/shadow_step_placeholder.png",
@@ -64,7 +64,7 @@
             "manaCost": 85,
             "cooldown": 6,
             "targetType": "enemy",
-            "description": "Deals <span class='damage-text'>180%</span> Physical Damage. <span class='utility-text'>30%</span> chance to dash to another enemy and repeat (max 2 chains).",
+            "description": "Deals <span class='damage-text'>180%</span> Physical Damage. <span class='utility-text'>45%</span> chance to dash to another enemy and repeat (max 2 chains).",
             "icon": "Icons/abilities/dashing_strike.png",
             "sound": "sounds/dash.mp3",
             "effects": {
@@ -72,7 +72,7 @@
                     "physicalDamagePercent": 1.8
                 },
                 "chaining": {
-                    "chance": 0.30,
+                    "chance": 0.45,
                     "maxChains": 2
                 }
             }
@@ -105,7 +105,7 @@
     "passive": {
         "id": "blade_expertise",
         "name": "Blade Expertise",
-        "description": "Kunai Throw grants +2% damage permanently when used (max 10 stacks). Critical hits reduce all ability cooldowns by 1 turn.",
+        "description": "Kunai Throw grants +10% damage permanently when used (max 15 stacks). Critical hits reduce all ability cooldowns by 1 turn.",
         "icon": "images/icons/passive_kunai_mastery_placeholder.png"
     }
 } 

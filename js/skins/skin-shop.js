@@ -2,7 +2,7 @@
 class SkinShop {
     constructor() {
         this.currentCategory = 'all';
-        this.currentSort = 'name';
+        this.currentSort = 'release';
         this.searchQuery = '';
         this.allSkins = [];
         this.filteredSkins = [];
@@ -122,6 +122,9 @@ class SkinShop {
         // Apply sorting
         filtered.sort((a, b) => {
             switch (this.currentSort) {
+                case 'release':
+                    // Preserve order from registry (no sorting - keeps original order)
+                    return 0;
                 case 'name':
                     return a.name.localeCompare(b.name);
                 case 'price-low':

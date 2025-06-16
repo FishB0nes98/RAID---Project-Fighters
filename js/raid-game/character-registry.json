@@ -208,7 +208,7 @@
             "description": "A furious bull, mutated by dark influences.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Angry Bull.png"
+            "ingameimage": "Loading Screen/Angry Bull.jpeg"
         },
         {
             "id": "monster_apple",
@@ -218,7 +218,7 @@
             "description": "A grotesque, oversized apple with a hunger for flesh.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Monster Apple.png"
+            "ingameimage": "Loading Screen/Monster Apple.webp"
         },
         {
             "id": "healthy_apple",
@@ -228,7 +228,7 @@
             "description": "A vibrant apple that seems to radiate restorative energy.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Healthy Apple.png"
+            "ingameimage": "Loading Screen/Healthy Apple.webp"
         },
         {
             "id": "angry_apple",
@@ -238,7 +238,7 @@
             "description": "This apple looks furious and ready to attack.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Angry Apple.png"
+            "ingameimage": "Loading Screen/Angry Apple.webp"
         },
         {
             "id": "leafy_apple",
@@ -248,7 +248,7 @@
             "description": "An apple covered in leaves, pulsing with natural magic.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Leafy Apple.png"
+            "ingameimage": "Loading Screen/Leafy Apple.webp"
         },
         {
             "id": "rotten_apple",
@@ -258,7 +258,7 @@
             "description": "A decaying apple spreading blight.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Rotten Apple.png"
+            "ingameimage": "Loading Screen/Rotten Apple.webp"
         },
         {
             "id": "farmer_fang",
@@ -481,7 +481,7 @@
             "description": "A temperamental carrot that can go dormant to heal itself but becomes stunned in the process.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Angry Carrot.png"
+            "ingameimage": "Loading Screen/Angry Carrot.jpeg"
         },
         {
             "id": "angry_chicken",
@@ -493,19 +493,19 @@
             "description": "A furious chicken that gains dodge chance over time and delivers powerful double stabs.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Angry Chicken.png"
+            "ingameimage": "Loading Screen/Angry Chicken.jpeg"
         },
         {
             "id": "angry_pig",
             "name": "Angry Pig",
-            "image": "images/characters/angry_pig_avatar.png",
+            "image": "images/characters/angry_pig_avatar.jpeg",
             "rarity": "rare",
             "type": "beast",
             "tags": ["Enemy", "Beast", "Tank"],
             "description": "A defensive pig that heals itself for a portion of damage received.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Angry Pig.png"
+            "ingameimage": "Loading Screen/Angry Pig.jpeg"
         },
         {
             "id": "crazy_farmer",
@@ -517,7 +517,7 @@
             "description": "An unhinged farmer who can boost his stats at great cost and shares healing with allies through his Healing Pact passive.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Crazy Farmer.png"
+            "ingameimage": "Loading Screen/Crazy Farmer.jpeg"
         },
         {
             "id": "crow",
@@ -529,7 +529,7 @@
             "description": "A simple but dangerous bird that deals consistent armor-ignoring damage.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Crow.png"
+            "ingameimage": "Loading Screen/Crow.webp"
         },
         {
             "id": "grok_hell_lord",
@@ -553,7 +553,7 @@
             "description": "A vicious dog that applies bleeding wounds with all attacks and can enter bloodthirsty states.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Hound.png"
+            "ingameimage": "Loading Screen/Hound.jpeg"
         },
         {
             "id": "infernal_astaroth",
@@ -674,6 +674,30 @@
             "playerunlocked": false,
             "isHidden": true,
             "ingameimage": "Loading Screen/Vulgrim.png"
+        },
+        {
+            "id": "shadowfin",
+            "name": "Shadowfin",
+            "image": "Loading Screen/Shadowfin.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "tags": ["Enemy", "Boss", "Atlantean", "Shadow"],
+            "description": "A mysterious shadow entity from the depths of Atlantis, wielding dark aquatic powers to dominate the ocean realm.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Shadowfin.png"
+        },
+        {
+            "id": "piranha",
+            "name": "Piranha",
+            "image": "Loading Screen/Piranha.png",
+            "rarity": "rare",
+            "type": "beast",
+            "tags": ["Enemy", "Atlantean", "Beast", "Aquatic"],
+            "description": "A vicious aquatic predator from the corrupted waters of Atlantis, known for its razor-sharp teeth and pack hunting tactics.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Piranha.png"
         }
     ]
 } 

@@ -728,6 +728,7 @@
     <script src="js/raid-game/passives/zoey_passive.js"></script>
     <script src="js/raid-game/passives/little_devil_passive.js"></script>
     <script src="js/raid-game/passives/scamp_passive.js"></script>
+    <script src="js/raid-game/passives/piranha_passive.js"></script>
     <script src="js/raid-game/passives/grok_hell_lord_passive.js"></script>
     <script src="js/raid-game/passives/lava_chimp_passive.js"></script>
     <script src="js/raid-game/passives/smith_lord_passive.js"></script>
@@ -1448,88 +1449,7 @@
                 return;
             }
 
-            // --- Setup Debug Listener --- 
-            function setupDebugKeys() {
-                document.addEventListener('keydown', (event) => {
-                    // Numpad 1: Toggle Farmer Raiden's HP for lowHealthDodge test
-                    if (event.key === 'Numpad1') {
-                        if (!window.gameManager || !window.gameManager.gameState) return;
-                        
-                        const raiden = window.gameManager.gameState.playerCharacters.find(c => c.id === 'farmer_raiden');
-                        
-                        if (raiden && raiden.lowHealthDodge) {
-                            const currentHpPercent = raiden.stats.currentHp / raiden.stats.maxHp;
-                            let targetHp;
-                            let logMessage;
-                            
-                            if (currentHpPercent >= 0.5) {
-                                // Set HP to 40% to activate
-                                targetHp = Math.floor(raiden.stats.maxHp * 0.4);
-                                logMessage = "Debug: Set Raiden HP to 40% to activate Lightning Evasion.";
-                            } else {
-                                // Set HP to 60% to deactivate
-                                targetHp = Math.floor(raiden.stats.maxHp * 0.6);
-                                logMessage = "Debug: Set Raiden HP to 60% to deactivate Lightning Evasion.";
-                            }
-                            
-                            raiden.stats.currentHp = targetHp;
-                            console.log(logMessage);
-                            
-                            // Manually trigger the check in the passive handler
-                            if (raiden.passiveHandler && typeof raiden.passiveHandler.applyLowHealthDodge === 'function') {
-                                raiden.passiveHandler.applyLowHealthDodge(raiden);
-                            } else {
-                                console.warn("Could not find applyLowHealthDodge on Raiden's passive handler.");
-                            }
-                            
-                            // Update UI
-                            if (window.gameManager.uiManager) {
-                                window.gameManager.uiManager.updateCharacterUI(raiden);
-                            }
-                        } else {
-                            console.log("Debug (Numpad1): Farmer Raiden not found or doesn't have Lightning Evasion talent.");
-                        }
-                    }
-                    
-                    // Shift+R: Test Renée's Bloodthirsty Resilience talent
-                    if (event.key === 'R' && event.shiftKey) {
-                        if (!window.gameManager || !window.gameManager.gameState) return;
-                        
-                        const renee = window.gameManager.gameState.playerCharacters.find(c => c.id === 'renée');
-                        
-                        if (renee) {
-                            // Deal critical damage to Renée
-                            const damageAmount = 1000; // Fixed amount for testing
-                            window.gameManager.applyDamage(damageAmount, 'physical', null, { 
-                                isCritical: true,
-                                target: renee,
-                                source: { name: 'Debug Test' }
-                            });
-                            
-                            console.log(`Debug: Dealt ${damageAmount} critical damage to Renée to test Bloodthirsty Resilience.`);
-                        } else {
-                            console.log("Debug (Shift+R): Renée not found in player team.");
-                        }
-                    }
-                    
-                    // Shift+Q: Test quest progress manually
-                    if (event.key === 'Q' && event.shiftKey) {
-                        if (window.questManager && window.questManager.initialized) {
-                            console.log('Debug: Manually updating quest progress...');
-                            window.questManager.updateQuestProgress('turnsPlayed', 5);
-                            window.questManager.updateQuestProgress('totalDamageDealt', 1000);
-                            console.log('Debug: Added 5 turns and 1000 damage to quest progress');
-                        } else {
-                            console.log('Debug: Quest manager not available');
-                        }
-                    }
-                    
 
-                    // Add other debug keys here if needed
-                });
-                console.log("Debug key listeners initialized. Press Shift+Q to test quest progress.");
-            }
-            // --- End Debug Listener Setup ---
 
             // --- Wait for Firebase Auth State --- 
             firebaseAuth.onAuthStateChanged(async (user) => {
@@ -1545,9 +1465,7 @@
                         setupBattleLog();
                         setupTalentsPanel();
                         setupPageUnloadConfirmation();
-                        
-                        // Initialize Debug Keys
-                        setupDebugKeys();
+
 
                         // Initialize the talent manager if available
                         if (window.talentManager) {

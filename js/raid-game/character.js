@@ -4580,6 +4580,12 @@ const CharacterFactory = {
             return GrokHellLordPassive;
         }
         // --- END GROK HELL LORD PASSIVE ---
+        // --- ADD PIRANHA PASSIVE ---
+        else if (passiveId === 'piranha_passive' && typeof PiranhaPassive !== 'undefined') {
+            console.log('[CharacterFactory] Found PiranhaPassive class for passive:', passiveId);
+            return PiranhaPassive;
+        }
+        // --- END PIRANHA PASSIVE ---
         // --- END RENEE PASSIVE ---
         // --- END NEW ---
         // Add other hardcoded checks here if necessary

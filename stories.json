@@ -930,6 +930,38 @@
         "backgroundImage": "images/stages/hell_castle_throne.png",
         "backgroundMusic": "sounds/music/hell_lord_theme.mp3"
       }
+      
+    ]
+  },
+  {
+    "id": "saving_atlantis",
+    "title": "Saving Atlantis",
+    "description": "The ancient underwater kingdom of Atlantis is under attack by dark forces. Only champions with Atlantean heritage can venture into the depths to save the realm.",
+    "playerunlocked": true,
+    "requirements": {
+      "tags": ["Atlantean"],
+      "teamSize": { "min": 1, "max": 3 }
+    },
+    "stages": [
+      {
+        "name": "The Deep Waters",
+        "description": "As you descend into the darkened depths of Atlantis, you encounter Shadowfin, a mysterious shadow entity that has been corrupting the waters. Three vicious piranhas circle around it, ready to defend their dark master.",
+        "difficulty": 5,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "shadowfin" },
+          { "characterId": "piranha" },
+          { "characterId": "piranha" },
+          { "characterId": "piranha" }
+        ],
+        "objectives": {
+          "winConditions": [
+            { "type": "enemyDefeated", "targetId": "shadowfin" }
+          ]
+        },
+        "backgroundImage": "images/stages/stage1_background.jpeg",
+        "backgroundMusic": "sounds/music/atlantis_depths.mp3"
+      }
     ]
   }
 ] 

@@ -5,17 +5,17 @@
     "stats": {
         "physicalDamage": 150,
         "magicalDamage": 220,
-        "armor": 40,
-        "magicalShield": 50,
-        "hp": 8500,
-        "hpPerTurn": 45,
-        "mana": 2440,
-        "manaPerTurn": 40,
+        "armor": 7,
+        "magicalShield": 11,
+        "hp": 6888,
+        "hpPerTurn": 0,
+        "mana": 2805,
+        "manaPerTurn": 0,
         "lifesteal": 0,
-        "dodgeChance": 0.05,
+        "dodgeChance": 0.01,
         "critChance": 0.08,
         "critDamage": 1.5,
-        "healingPower": 0.10
+        "healingPower": 0.0
     },
     "abilities": [
         {

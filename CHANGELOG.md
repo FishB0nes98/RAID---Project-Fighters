@@ -1,5 +1,24 @@
 # Project Fighters - Changelog
 
+## Patch 0.2.1 - Infernal Ibuki Hotfix Buffs
+*Released: [Current Date]*
+
+### Character Balance Changes
+
+#### 🥷 Infernal Ibuki - Power Enhancement
+**Rationale**: Infernal Ibuki was underperforming compared to other carry characters. These buffs significantly enhance her damage scaling and utility to make her more competitive.
+
+**Changes:**
+- **Blade Expertise Passive**: Damage bonus per stack increased from **+2% → +10%** per stack
+- **Blade Expertise Passive**: Maximum stacks increased from **10 → 15** stacks  
+- **Total Passive Potential**: Now provides up to **+150% damage** at max stacks (was +20%)
+- **Swift Strike (E)**: Chain chance increased from **30% → 45%**
+- **Shadow Veil (W)**: Cooldown reduced from **16 → 11** turns
+
+**Impact**: These changes transform Infernal Ibuki into a legitimate late-game damage dealer. The massively increased passive scaling rewards consistent Kunai Throw usage, while the improved Swift Strike chaining and reduced Shadow Veil cooldown provide better combat flow and survivability. At max stacks, she becomes one of the highest damage dealers in the game.
+
+---
+
 ## Patch 0.2 - Schoolgirl Julia Balance Adjustments
 *Released: [Current Date]*
 

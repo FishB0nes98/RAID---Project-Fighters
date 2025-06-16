@@ -1,0 +1,23 @@
+{
+    "id": "shadowfin",
+    "name": "Shadowfin",
+    "image": "Loading Screen/Shadowfin.png",
+    "stats": {
+        "physicalDamage": 305,
+        "magicalDamage": 0,
+        "armor": 14,
+        "magicalShield": 20,
+        "hp": 12200,
+        "hpPerTurn": 0,
+        "mana": 3500,
+        "manaPerTurn": 0,
+        "lifesteal": 0.00,
+        "dodgeChance": 0.02,
+        "critChance": 0.09,
+        "critDamage": 1.5,
+        "healingPower": 0.00
+    },
+    "abilities": [
+    ],
+    "tags": ["Enemy", "Boss", "Atlantean", "Shadow"]
+} 
