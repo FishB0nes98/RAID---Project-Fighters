@@ -1,0 +1,28 @@
+{
+    "id": "reptilian_assassin",
+    "name": "Reptilian Assassin",
+    "image": "Loading Screen/Reptilian Assassin.png",
+    "rarity": "rare",
+    "type": "rogue",
+    "tags": ["Enemy", "Atlantean", "Assassin", "Reptile"],
+    "description": "A cold-blooded killer with scales hardened by the ocean depths.",
+    "playerunlocked": false,
+    "isHidden": true,
+    "ingameimage": "Loading Screen/Reptilian Assassin.png",
+    "stats": {
+        "hp": 2750,
+        "mana": 180,
+        "physicalDamage": 280,
+        "magicalDamage": 70,
+        "armor": 11,
+        "magicalShield": 5,
+        "speed": 115,
+        "critChance": 0.22,
+        "critMultiplier": 1.7,
+        "dodgeChance": 0.12,
+        "hpPerTurn": 0,
+        "manaPerTurn": 18
+    },
+    "abilities": [],
+    "passives": []
+} 

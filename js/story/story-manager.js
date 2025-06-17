@@ -902,6 +902,41 @@ class StoryManager {
         this.storyProgress.currentStageIndex++;
         this.storyProgress.completedStages = Math.max(this.storyProgress.completedStages, this.storyProgress.currentStageIndex); // Record highest reached
 
+        // === Post-battle recovery: restore 10% of missing HP and Mana to every living team member ===
+        if (Array.isArray(this.playerTeam) && this.playerTeam.length > 0) {
+            this.playerTeam.forEach(member => {
+                if (!member || !member.stats) return;
+
+                // --- HP restoration ---
+                const maxHp = member.stats.hp ?? member.currentHP ?? 0;
+                if (maxHp > 0 && member.currentHP > 0) { // Only heal living members
+                    const missingHp = Math.max(0, maxHp - member.currentHP);
+                    const healAmount = Math.floor(missingHp * 0.10); // 10% of missing
+                    member.currentHP = Math.min(maxHp, member.currentHP + healAmount);
+                }
+
+                // --- Mana restoration ---
+                const maxMana = member.stats.mana ?? member.currentMana ?? 0;
+                if (maxMana > 0) {
+                    const missingMana = Math.max(0, maxMana - (member.currentMana || 0));
+                    const restoreAmount = Math.floor(missingMana * 0.10); // 10% of missing
+                    member.currentMana = Math.min(maxMana, (member.currentMana || 0) + restoreAmount);
+                }
+            });
+
+            // Update storyProgress.lastTeamState to reflect the recovery before saving
+            this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
+                acc[member.id] = {
+                    currentHP: member.currentHP,
+                    currentMana: member.currentMana,
+                    stats: { ...member.stats }
+                };
+                return acc;
+            }, {});
+
+            console.log('[StoryManager] Applied 10% missing HP/Mana recovery to team after stage victory.');
+        }
+
         // Rewards handling needs review - where do rewards come from?
         // Let's assume rewards are passed or fetched elsewhere.
 

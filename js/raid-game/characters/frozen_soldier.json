@@ -23,6 +23,20 @@
         "hpPerTurn": 0,
         "manaPerTurn": 15
     },
-    "abilities": [],
+    "abilities": [
+        {
+            "id": "ice_strike",
+            "name": "Ice Strike",
+            "type": "lifesteal",
+            "damageType": "physical",
+            "amount": 1,
+            "lifestealPercent": 0.4,
+            "manaCost": 20,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Strikes the target with icy force, dealing <span class='damage-value'>100% Physical Damage</span> and heals Frozen Soldier for <span class='heal-value'>40% of damage dealt</span>.",
+            "icon": "Icons/abilities/ice_strike.png"
+        }
+    ],
     "passives": []
 } 

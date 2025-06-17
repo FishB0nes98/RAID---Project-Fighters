@@ -1,0 +1,28 @@
+{
+    "id": "shadow_assassin_female",
+    "name": "Shadow Assassin Female",
+    "image": "Loading Screen/Shadow Assassin Female.png",
+    "rarity": "rare",
+    "type": "rogue",
+    "tags": ["Enemy", "Atlantean", "Assassin", "Shadow"],
+    "description": "A swift and silent killer who strikes from the darkness of Atlantis's ruins.",
+    "playerunlocked": false,
+    "isHidden": true,
+    "ingameimage": "Loading Screen/Shadow Assassin Female.png",
+    "stats": {
+        "hp": 2450,
+        "mana": 200,
+        "physicalDamage": 255,
+        "magicalDamage": 90,
+        "armor": 9,
+        "magicalShield": 7,
+        "speed": 125,
+        "critChance": 0.27,
+        "critMultiplier": 1.6,
+        "dodgeChance": 0.17,
+        "hpPerTurn": 0,
+        "manaPerTurn": 20
+    },
+    "abilities": [],
+    "passives": []
+} 

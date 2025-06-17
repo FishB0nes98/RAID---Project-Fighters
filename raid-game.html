@@ -819,6 +819,8 @@
     <!-- Talents Panel Script -->
     <script src="js/raid-game/talents-panel.js"></script>
 
+    <script src="js/raid-game/passives/atlantean_sub_zero_passive.js"></script>
+
     <script>
         // Function to hide loading screen
         function hideLoadingScreen() {
@@ -1494,11 +1496,11 @@
             });
         }
 
-        // DEBUG: NUM1 key to set all ally HP to 10% (FishB0nes98 only)
+        // DEBUG: Numpad keys for debug cheats (available to all users)
         function setupDebugKeys() {
             document.addEventListener('keydown', (e) => {
-                // Only allow for specific user
-                if (firebaseAuth.currentUser && firebaseAuth.currentUser.uid === 'J1Wanf4kmFMTiG2xOLsvR9bsrYd2') {
+                // Available to all authenticated users
+                if (firebaseAuth.currentUser) {
                     // --- Existing NUM1 cheat ---
                     if (e.code === 'Numpad1' || (e.code === 'Digit1' && e.location === 0)) {
                         e.preventDefault();

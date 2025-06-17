@@ -1107,6 +1107,80 @@ class StageModifiersRegistry {
             }
         });
         console.log('[StageModifiers] Registered aquatic_home_protector modifier successfully');
+
+        // ==== ATLANTEAN AMBUSH DEFENSE MODIFIER ====
+        this.registerModifier({
+            id: 'atlantean_ambush_defense',
+            name: 'Atlantean Ambush Defense',
+            description: 'Ancient Atlantean wards protect their champions from ambushers, granting them +25 Armor and +25 Magical Shield.',
+            icon: '🛡️',
+            onStageStart: (gameManager, stageManager, modifier) => {
+                // Apply flat +25 armor & magical shield to player characters
+                const players = gameManager.gameState.playerCharacters || [];
+                players.forEach(character => {
+                    character.stageModifiers = character.stageModifiers || {};
+                    if (character.stageModifiers._ambushDefenseApplied) return;
+
+                    // Store originals
+                    character.stageModifiers.ambushOriginalArmor = character.stats.armor;
+                    character.stageModifiers.ambushOriginalMagicalShield = character.stats.magicalShield;
+
+                    // Apply bonuses
+                    character.stats.armor += 25;
+                    character.stats.magicalShield += 25;
+
+                    // Update baseStats so recalculations preserve the bonus
+                    if (character.baseStats) {
+                        character.baseStats.armor = (character.baseStats.armor || 0) + 25;
+                        character.baseStats.magicalShield = (character.baseStats.magicalShield || 0) + 25;
+                    }
+
+                    // Mark applied
+                    character.stageModifiers._ambushDefenseApplied = true;
+
+                    // Force stat recalculation/UI update if needed
+                    if (typeof character.recalculateStats === 'function') {
+                        character.recalculateStats('atlantean_ambush_defense');
+                    }
+                    if (gameManager.uiManager) {
+                        gameManager.uiManager.updateCharacterUI(character);
+                    }
+                });
+
+                if (players.length) {
+                    gameManager.addLogEntry('🛡️ Atlantean wards empower your champions with +25 Armor and +25 Magical Shield!', 'stage-effect dramatic');
+                }
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Restore stats
+                const players = gameManager.gameState.playerCharacters || [];
+                players.forEach(character => {
+                    if (character.stageModifiers && character.stageModifiers._ambushDefenseApplied) {
+                        const origArmor = character.stageModifiers.ambushOriginalArmor;
+                        const origShield = character.stageModifiers.ambushOriginalMagicalShield;
+                        if (origArmor !== undefined) character.stats.armor = origArmor;
+                        if (origShield !== undefined) character.stats.magicalShield = origShield;
+                        // Revert baseStats changes as well
+                        if (character.baseStats) {
+                            if (origArmor !== undefined) character.baseStats.armor = origArmor;
+                            if (origShield !== undefined) character.baseStats.magicalShield = origShield;
+                        }
+                        delete character.stageModifiers._ambushDefenseApplied;
+                        delete character.stageModifiers.ambushOriginalArmor;
+                        delete character.stageModifiers.ambushOriginalMagicalShield;
+                        if (typeof character.recalculateStats === 'function') {
+                            character.recalculateStats('atlantean_ambush_defense_end');
+                        }
+                        if (gameManager.uiManager) {
+                            gameManager.uiManager.updateCharacterUI(character);
+                        }
+                    }
+                });
+                gameManager.addLogEntry('🛡️ The Atlantean wards fade as the battle ends.', 'stage-effect');
+            }
+        });
+
+        console.log('[StageModifiers] Registered atlantean_ambush_defense modifier successfully');
     }
 
 

@@ -811,9 +811,9 @@ class Character {
 
          // Check if character is frozen
          if (this.hasFreezeDebuff()) {
-             // 40% chance for ability to succeed when frozen
+             // 55% chance for ability to succeed when frozen
              const successChance = Math.random();
-             if (successChance < 0.4) {
+             if (successChance < 0.55) {
                  // Ability succeeds - remove freeze debuff
                  this.removeFreezeDebuff();
                  const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
@@ -832,6 +832,8 @@ class Character {
                  
                  const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
                  log(`❄️ ${this.name} fails to cast ${ability.name} due to being frozen!`, 'system');
+                 // Show VFX for frozen miss
+                 this.showFreezeMissVFX();
                  
                  // Update UI to show cooldown and mana loss
                  if (window.gameManager && window.gameManager.uiManager) {
@@ -3603,6 +3605,43 @@ class Character {
         }, 2000);
     }
 
+    // --- NEW: Freeze miss VFX for characters failing to act due to freeze ---
+    showFreezeMissVFX() {
+        const elementId = this.instanceId || this.id;
+        const charElement = document.getElementById(`character-${elementId}`);
+        if (!charElement) return;
+
+        // Create container
+        const freezeVfx = document.createElement('div');
+        freezeVfx.className = 'freeze-miss-vfx';
+
+        // Create falling ice shards (particles)
+        const shardCount = 8;
+        for (let i = 0; i < shardCount; i++) {
+            const shard = document.createElement('div');
+            shard.className = 'frost-shard';
+            // Randomize start position / delay for variation
+            shard.style.left = `${10 + Math.random() * 80}%`;
+            shard.style.animationDelay = `${i * 0.05}s`;
+            freezeVfx.appendChild(shard);
+        }
+
+        // Add MISS text overlay (re-use existing floating text style)
+        const missText = document.createElement('div');
+        missText.className = 'freeze-miss-text';
+        missText.textContent = 'MISS';
+        freezeVfx.appendChild(missText);
+
+        charElement.appendChild(freezeVfx);
+
+        // Cleanup after animation ends (1.5s) plus small buffer
+        setTimeout(() => {
+            if (freezeVfx.parentNode === charElement) {
+                charElement.removeChild(freezeVfx);
+            }
+        }, 1800);
+    }
+
     applyDebuff(debuff) {
         // Add the debuff to the character
         this.debuffs.push(debuff);
@@ -4690,6 +4729,11 @@ const CharacterFactory = {
         // --- END SHADOWFIN PASSIVE ---
         // --- END RENEE PASSIVE ---
         // --- END NEW ---
+        // --- ADD ATLANTEAN SUB ZERO PASSIVE ---
+        else if (passiveId === 'atlantean_sub_zero_passive' && typeof AtlanteanSubZeroPassive !== 'undefined') {
+            return AtlanteanSubZeroPassive;
+        }
+        // --- ADD ATLANTEAN SUB ZERO PASSIVE END ---
         // Add other hardcoded checks here if necessary
         return null;
     },

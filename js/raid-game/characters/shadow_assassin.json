@@ -1,0 +1,28 @@
+{
+    "id": "shadow_assassin",
+    "name": "Shadow Assassin",
+    "image": "Loading Screen/Shadow Assassin.png",
+    "rarity": "rare",
+    "type": "rogue",
+    "tags": ["Enemy", "Atlantean", "Assassin", "Shadow"],
+    "description": "A deadly assassin emerging from the darkest trenches of Atlantis.",
+    "playerunlocked": false,
+    "isHidden": true,
+    "ingameimage": "Loading Screen/Shadow Assassin.png",
+    "stats": {
+        "hp": 2600,
+        "mana": 200,
+        "physicalDamage": 270,
+        "magicalDamage": 80,
+        "armor": 10,
+        "magicalShield": 6,
+        "speed": 120,
+        "critChance": 0.25,
+        "critMultiplier": 1.6,
+        "dodgeChance": 0.15,
+        "hpPerTurn": 0,
+        "manaPerTurn": 20
+    },
+    "abilities": [],
+    "passives": []
+} 

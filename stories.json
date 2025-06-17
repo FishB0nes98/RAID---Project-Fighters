@@ -1005,6 +1005,15 @@
         { "characterId": "frozen_soldier" }
       ],
 
+      "modifiers": [
+        {
+          "id": "atlantean_ambush_defense",
+          "name": "Atlantean Ambush Defense",
+          "description": "Ancient Atlantean wards protect their champions from ambushers, granting them +25 Armor and +25 Magical Shield.",
+          "icon": "🛡️"
+        }
+      ],
+
       "objectives": {
         "winConditions": [
           { "type": "allEnemiesDefeated" }
@@ -1012,6 +1021,41 @@
       },
       "backgroundImage": "images/stages/stage2_ice.png",
       "backgroundMusic": "sounds/music/frozen_depths.mp3"
+    },
+    {
+      "name": "Alliance with Sub Zero",
+      "description": "Impressed by your valor, Atlantean Sub Zero pledges his icy might to your cause.",
+      "type": "recruit",
+      "recruitCount": 1,
+      "specificCharacters": ["atlantean_sub_zero_playable"],
+      "choices": []
+    },
+    {
+      "name": "Ambush of the Shadow Assassins",
+      "description": "While traversing a narrow Atlantean trench, your champions are ambushed by a deadly cadre of assassins lurking in the shadows of the deep.",
+      "difficulty": 6,
+      "type": "battle",
+      "enemies": [
+        { "characterId": "shadow_assassin" },
+        { "characterId": "shadow_assassin_female" },
+        { "characterId": "reptilian_assassin" },
+        { "characterId": "octopus_assassin" }
+      ],
+      "modifiers": [
+        {
+          "id": "shadow_ambush",
+          "name": "Shadow Ambush",
+          "description": "The assassins move with uncanny speed on their first strike, gaining +50% Speed during the first turn of battle.",
+          "icon": "🗡️"
+        }
+      ],
+      "objectives": {
+        "winConditions": [
+          { "type": "allEnemiesDefeated" }
+        ]
+      },
+      "backgroundImage": "images/stages/atlantis_ambush.png",
+      "backgroundMusic": "sounds/music/assassin_attack.mp3"
     }
   ]
 }

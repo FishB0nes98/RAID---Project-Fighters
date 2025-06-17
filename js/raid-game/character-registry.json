@@ -722,6 +722,65 @@
             "playerunlocked": false,
             "isHidden": true,
             "ingameimage": "Loading Screen/Atlantean Sub Zero.png"
+        },
+        {
+            "id": "atlantean_sub_zero_playable",
+            "name": "Atlantean Sub Zero",
+            "image": "Icons/characters/Atlantean Sub Zero.png",
+            "rarity": "legendary",
+            "type": "warrior",
+            "tags": ["Atlantean", "Magical"],
+            "description": "A legendary ice warrior from the Lin Kuei clan who now fights alongside the heroes of Atlantis.",
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Atlantean Sub Zero.png"
+        },
+        {
+            "id": "octopus_assassin",
+            "name": "Octopus Assassin",
+            "image": "Loading Screen/Octopus Assassin.png",
+            "rarity": "epic",
+            "type": "rogue",
+            "tags": ["Enemy", "Atlantean", "Assassin", "Cephalopod"],
+            "description": "A multi-armed shadow lurking in the deep, striking with swift tentacle blades.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Octopus Assassin.png"
+        },
+        {
+            "id": "reptilian_assassin",
+            "name": "Reptilian Assassin",
+            "image": "Loading Screen/Reptilian Assassin.png",
+            "rarity": "rare",
+            "type": "rogue",
+            "tags": ["Enemy", "Atlantean", "Assassin", "Reptile"],
+            "description": "A cold-blooded killer with scales hardened by the ocean depths.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Reptilian Assassin.png"
+        },
+        {
+            "id": "shadow_assassin",
+            "name": "Shadow Assassin",
+            "image": "Loading Screen/Shadow Assassin.png",
+            "rarity": "rare",
+            "type": "rogue",
+            "tags": ["Enemy", "Atlantean", "Assassin", "Shadow"],
+            "description": "A deadly assassin emerging from the darkest trenches of Atlantis.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Shadow Assassin.png"
+        },
+        {
+            "id": "shadow_assassin_female",
+            "name": "Shadow Assassin Female",
+            "image": "Loading Screen/Shadow Assassin Female.png",
+            "rarity": "rare",
+            "type": "rogue",
+            "tags": ["Enemy", "Atlantean", "Assassin", "Shadow"],
+            "description": "A swift and silent killer who strikes from the darkness of Atlantis's ruins.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Shadow Assassin Female.png"
         }
     ]
 } 

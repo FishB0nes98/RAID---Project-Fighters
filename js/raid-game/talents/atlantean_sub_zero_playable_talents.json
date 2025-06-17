@@ -1,0 +1,21 @@
+{
+    "id": "atlantean_sub_zero_playable",
+    "name": "Atlantean Sub Zero",
+    "description": "Mastery over ice grants Sub Zero unique opportunities in combat.",
+    "talentPoints": 10,
+    "talentTree": {
+        "frozen_opportunity": {
+            "id": "frozen_opportunity",
+            "name": "Frozen Opportunity",
+            "description": "Ice Sword Strike has a 25% chance to NOT end Sub Zero's turn, allowing an immediate follow-up action.",
+            "icon": "Icons/talents/frozen_opportunity.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableIceSwordFollowUp",
+                "value": true
+            },
+            "parents": [],
+            "children": []
+        }
+    }
+} 

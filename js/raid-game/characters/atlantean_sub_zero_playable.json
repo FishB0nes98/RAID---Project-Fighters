@@ -1,13 +1,13 @@
 {
-    "id": "atlantean_sub_zero",
+    "id": "atlantean_sub_zero_playable",
     "name": "Atlantean Sub Zero",
     "image": "Loading Screen/Atlantean Sub Zero.png",
     "rarity": "legendary",
     "type": "warrior",
-    "tags": ["Enemy", "Magical"],
-    "description": "The legendary Lin Kuei assassin, master of ice and cold. His frozen powers can chill enemies to the bone.",
+    "tags": ["Atlantean", "Lin Kuei", "Ice", "Ninja"],
+    "description": "The legendary Lin Kuei assassin, master of ice and cold. His frozen powers can chill enemies to the bone. Now he fights alongside you to protect Atlantis.",
     "playerunlocked": false,
-    "isHidden": true,
+    "isHidden": false,
     "ingameimage": "Loading Screen/Atlantean Sub Zero.png",
     "stats": {
         "hp": 7291,
@@ -43,7 +43,32 @@
             "targetType": "all_allies",
             "description": "Raises an icy barrier granting all allies a shield equal to <span class='shield-value'>300% of their Magical Shield</span> for <span class='duration-value'>2 turns</span>. Attackers hitting the barrier have a <span class='critical-value'>20% chance</span> to be <span class='debuff-value'>FROZEN</span> for <span class='duration-value'>2 turns</span>.",
             "type": "ice_wall"
+        },
+        {
+            "id": "ice_blast",
+            "name": "Ice Blast",
+            "icon": "Icons/abilities/ice_blast.png",
+            "manaCost": 100,
+            "cooldown": 6,
+            "targetType": "all_enemies",
+            "description": "Unleashes a chilling explosion dealing <span class='damage-value'>325</span> magical damage to all enemies. Deals an additional <span class='damage-value'>100% Magical Damage</span> for each <span class='debuff-value'>debuff</span> the target has.",
+            "type": "ice_blast"
+        },
+        {
+            "id": "ice_sword_strike",
+            "name": "Ice Sword Strike",
+            "icon": "Icons/abilities/ice_sword_strike.png",
+            "manaCost": 50,
+            "cooldown": 8,
+            "targetType": "enemy",
+            "description": "Strikes an enemy with an ice sword dealing <span class='damage-value'>100% Physical Damage</span>. Has a <span class='debuff-value'>100% chance</span> to <span class='debuff-value'>FREEZE</span> the target for <span class='duration-value'>5 turns</span>.",
+            "type": "ice_sword_strike"
         }
     ],
-    "passives": []
+    "passive": {
+        "id": "atlantean_sub_zero_passive",
+        "name": "Frozen Aura",
+        "description": "When Atlantean Sub Zero is damaged, the attacker has an 8% chance to be frozen for 2 turns.",
+        "icon": "Icons/passives/frozen_aura.png"
+    }
 } 

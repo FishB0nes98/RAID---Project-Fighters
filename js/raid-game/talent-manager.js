@@ -823,6 +823,16 @@ class TalentManager {
                     }
                 }
                 console.log(`[TalentManager] Applied Bell Mastery talent to ${character.name} - Strawberry Bell Burst now hits ALL ENEMIES`);
+            } else if (property === 'enableIceSwordFollowUp') {
+                const iceSwordAbility = character.abilities && character.abilities.find(a => a.id === 'ice_sword_strike');
+                if (iceSwordAbility && typeof window.updateIceSwordStrikeDescription === 'function') {
+                    // Attach generateDescription that calls helper
+                    iceSwordAbility.generateDescription = function() {
+                        return window.updateIceSwordStrikeDescription(iceSwordAbility, character);
+                    };
+                    iceSwordAbility.description = iceSwordAbility.generateDescription();
+                    console.log('[TalentManager] Updated Ice Sword Strike description via updateIceSwordStrikeDescription');
+                }
             }
             
             // Trigger UI update if description was changed

@@ -1,0 +1,28 @@
+{
+    "id": "octopus_assassin",
+    "name": "Octopus Assassin",
+    "image": "Loading Screen/Octopus Assassin.png",
+    "rarity": "epic",
+    "type": "rogue",
+    "tags": ["Enemy", "Atlantean", "Assassin", "Cephalopod"],
+    "description": "A multi-armed shadow lurking in the deep, striking with swift tentacle blades.",
+    "playerunlocked": false,
+    "isHidden": true,
+    "ingameimage": "Loading Screen/Octopus Assassin.png",
+    "stats": {
+        "hp": 3000,
+        "mana": 220,
+        "physicalDamage": 295,
+        "magicalDamage": 100,
+        "armor": 9,
+        "magicalShield": 8,
+        "speed": 118,
+        "critChance": 0.24,
+        "critMultiplier": 1.7,
+        "dodgeChance": 0.14,
+        "hpPerTurn": 0,
+        "manaPerTurn": 22
+    },
+    "abilities": [],
+    "passives": []
+} 

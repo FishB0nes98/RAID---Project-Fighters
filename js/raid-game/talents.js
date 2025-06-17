@@ -289,6 +289,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 500);
             
             hideLoading();
+
+            // === ADMIN CHEAT: Grant temporary talent points ===
+            // Expose a global helper for devs/admins to grant extra points that ONLY
+            // exist for this browser session (not written to Firebase).
+            window.grantTempTalentPoints = function(points = 10) {
+                availableTalentPoints += points;
+                maxTalentPoints += points; // keep totals coherent for UI
+                updateTalentPointsDisplay();
+                showNotification(`🛠️ Granted ${points} temporary talent points (session-only)`, 'system-update');
+                console.log(`[AdminCheat] Granted ${points} temp talent points – not persisted.`);
+            };
+
+            // Quick keyboard shortcut: Ctrl + Shift + T to grant 10 temp points
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.code === 'KeyT') {
+                    window.grantTempTalentPoints(10);
+                }
+            });
+            // === End ADMIN CHEAT ===
         } catch (error) {
             console.error('Initialization error:', error);
             showLoading(`Error: ${error.message}`, true);

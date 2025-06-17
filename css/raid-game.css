@@ -5770,4 +5770,113 @@ img {
     font-weight: 600;
     margin: 5px;
 }
+
+/* Freeze Miss Visual Effects */
+.freeze-miss-vfx {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    pointer-events: none;
+    z-index: 6;
+}
+
+.frost-shard {
+    position: absolute;
+    top: 20px;
+    width: 6px;
+    height: 12px;
+    background: linear-gradient(to bottom, rgba(200, 240, 255, 0.9), rgba(150, 210, 255, 0.3));
+    transform-origin: center;
+    border-radius: 2px;
+    animation: frostShardFall 1.4s ease-out forwards;
+    filter: drop-shadow(0 0 4px rgba(150, 220, 255, 0.8));
+}
+
+.freeze-miss-text {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #b3e5ff;
+    text-shadow: 0 0 6px rgba(180, 230, 255, 0.9);
+    opacity: 0;
+    animation: freezeMissText 1.2s ease-out forwards;
+}
+
+@keyframes frostShardFall {
+    0% { transform: translateY(-10px) scale(1) rotate(0deg); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(60px) scale(0.3) rotate(90deg); opacity: 0; }
+}
+
+@keyframes freezeMissText {
+    0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -40px) scale(1.1); opacity: 0; }
+}
+
+/* === Ice Wall Ability VFX === */
+.ice-wall-barrier {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 24px;
+    pointer-events: none;
+    transform: translateY(-50%) scaleY(0.1);
+    background: radial-gradient(circle, rgba(200,240,255,0.95) 0%, rgba(0,160,255,0.9) 40%, rgba(0,120,200,0.85) 70%, rgba(0,90,150,0) 100%);
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.9), 0 0 40px rgba(0, 180, 255, 0.7);
+    border-top: 2px solid rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.9);
+    animation: iceWallRise 0.5s ease-out forwards;
+    z-index: 500; /* Above characters */
+}
+
+@keyframes iceWallRise {
+    from {transform: translateY(-50%) scaleY(0.05); opacity: 0;}
+    to {transform: translateY(-50%) scaleY(1); opacity: 1;}
+}
+
+/* fade-out handled inline via opacity transition */
+  
+/* Ice Blast flash VFX */
+.ice-blast-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(180, 225, 255, 0.75) 0%, rgba(180, 225, 255, 0.4) 40%, rgba(180, 225, 255, 0) 70%);
+    pointer-events: none;
+    animation: iceBlastFlash 0.6s ease-out forwards;
+    z-index: 998;
+}
+
+@keyframes iceBlastFlash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+  
+/* === Ice Sword Follow-Up VFX (Atlantean Sub Zero talent) === */
+.ice-sword-followup-vfx {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: #66ccff;
+    text-shadow: 0 0 6px #a8eaff, 0 0 10px #ffffff;
+    pointer-events: none;
+    animation: iceSwordFollowUpFloat 1s ease-out forwards;
+    font-weight: bold;
+    z-index: 5;
+}
+
+@keyframes iceSwordFollowUpFloat {
+    0%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -30px) scale(1.3); }
+}
   
