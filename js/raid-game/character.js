@@ -777,6 +777,12 @@ class Character {
                 // log(`${this.name}'s ${ability.name} costs 0 mana due to rain!`);
             }
         }
+
+        // --- NEW: Check for Atlantean Mana Efficiency blessing ---
+        if (this.atlanteanBlessings && this.atlanteanBlessings.mana_efficiency && !this.isAI) {
+            actualManaCost = Math.ceil(actualManaCost * 0.5); // 50% mana cost reduction
+            console.log(`[Atlantean Blessing] ${this.name}'s ${ability.name} mana cost reduced from ${ability.manaCost} to ${actualManaCost}`);
+        }
         // --- END NEW ---
 
         // --- PRE-CHECKS (Modified for mana cost) ---
@@ -801,6 +807,44 @@ class Character {
              const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
              log(`${this.name} is stunned and cannot use ${ability.name}.`);
              return false;
+         }
+
+         // Check if character is frozen
+         if (this.hasFreezeDebuff()) {
+             // 40% chance for ability to succeed when frozen
+             const successChance = Math.random();
+             if (successChance < 0.4) {
+                 // Ability succeeds - remove freeze debuff
+                 this.removeFreezeDebuff();
+                 const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+                 log(`❄️ ${this.name} breaks free from the freeze!`, 'system');
+             } else {
+                 // Ability fails - consume mana and put on cooldown but don't execute
+                 if (!skipManaCheck) {
+                     this.stats.currentMana = Math.max(0, this.stats.currentMana - actualManaCost);
+                     
+                     // Trigger mana animation for wasted casting
+                     if (actualManaCost > 0 && window.gameManager && window.gameManager.uiManager) {
+                         window.gameManager.uiManager.triggerManaAnimation(this, 'drain', actualManaCost);
+                     }
+                 }
+                 ability.currentCooldown = ability.cooldown;
+                 
+                 const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+                 log(`❄️ ${this.name} fails to cast ${ability.name} due to being frozen!`, 'system');
+                 
+                 // Update UI to show cooldown and mana loss
+                 if (window.gameManager && window.gameManager.uiManager) {
+                     window.gameManager.uiManager.updateCharacterUI(this);
+                 }
+                 // Clear any previous ability result to avoid misinterpreting flags in GameManager
+                 if (typeof window !== 'undefined') {
+                     window.abilityLastResult = {};
+                 }
+                 // Even though the ability failed, the character attempted to act.
+                 // Return true so the GameManager marks the character as having acted.
+                 return true;
+             }
          }
          
          // Check for Imprison debuff
@@ -1008,7 +1052,16 @@ class Character {
                 console.log(`[PredatorFocus Apply] ${ability.name} cooldown set to ${ability.currentCooldown} (reduced by talent).`);
             } else if (!abilityResult.resetCooldown) {
                 // Apply normal cooldown (unless resetCooldown was true)
-                ability.currentCooldown = ability.cooldown;
+                let finalCooldown = ability.cooldown;
+                
+                // --- NEW: Check for Atlantean Swiftness blessing on Q ability ---
+                if (this.atlanteanBlessings && this.atlanteanBlessings.swiftness && index === 0 && !this.isAI) {
+                    finalCooldown = Math.max(0, finalCooldown - 1); // Reduce Q ability cooldown by 1
+                    console.log(`[Atlantean Blessing] ${this.name}'s Q ability cooldown reduced from ${ability.cooldown} to ${finalCooldown}`);
+                }
+                // --- END NEW ---
+                
+                ability.currentCooldown = finalCooldown;
             }
             // If resetCooldown was true, currentCooldown remains 0 (handled in Ability.use)
             // --- END NEW --- 
@@ -2433,42 +2486,40 @@ class Character {
         }
         // --- END NEW --- 
 
-        // Apply Atlantean Kagome passive: heals HP equal to missing mana
+        // Apply Atlantean Kagome passive: heals HP equal to 15% of missing mana
         if (this.id === 'atlantean_kagome' && this.passive && this.passive.id === 'atlantean_kagome_passive') {
             const missingMana = this.stats.maxMana - this.stats.currentMana;
             if (missingMana > 0) {
-                // Calculate heal amount with healing power modifier
-                const healAmount = missingMana * (1 + this.stats.healingPower);
+                // Calculate heal amount: 15% of missing mana with healing power modifier
+                const baseHealAmount = missingMana * 0.15; // 15% instead of 100%
+                const healAmount = baseHealAmount * (1 + this.stats.healingPower);
                 
-                // Apply the healing
-                const previousHp = this.stats.currentHp;
-                this.stats.currentHp = Math.min(this.stats.maxHp, this.stats.currentHp + healAmount);
-                const actualHealAmount = this.stats.currentHp - previousHp;
+                // Apply the healing using the proper heal method for statistics tracking
+                const actualHealAmount = this.heal(healAmount, this, { abilityId: 'atlantean_kagome_passive' });
                 
                 // Log the passive effect
                 const logFunction = window.gameManager ? 
                     window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-                logFunction(`${this.name}'s Atlantean Blessing healed for ${Math.round(actualHealAmount)} HP from missing mana!`);
+                logFunction(`${this.name}'s Atlantean Blessing healed for ${Math.round(actualHealAmount)} HP (15% of missing mana)!`);
                 
                 // Add a visual effect for healing from missing mana
-                const charElement = document.getElementById(`character-${this.id}`);
+                const charElement = document.getElementById(`character-${this.instanceId || this.id}`);
                 if (charElement) {
                     // Create healing VFX
                     const healVfx = document.createElement('div');
-                    healVfx.className = 'heal-vfx';
+                    healVfx.className = 'heal-vfx atlantean-passive-heal';
                     healVfx.textContent = `+${Math.round(actualHealAmount)} HP`;
+                    healVfx.style.color = '#4fb3d9';
+                    healVfx.style.textShadow = '0 0 10px #4fb3d9';
                     charElement.appendChild(healVfx);
                     
-                    // Removed glow effect
-                    
-                    // Create heal particles
+                    // Create heal particles with atlantean theme
                     const healParticles = document.createElement('div');
-                    healParticles.className = 'heal-particles';
+                    healParticles.className = 'heal-particles atlantean-particles';
                     charElement.appendChild(healParticles);
                     
                     // Remove the VFX elements after animation completes
                     setTimeout(() => {
-                        // Removed heal-animation class removal
                         const vfxElements = charElement.querySelectorAll('.heal-vfx, .heal-particles');
                         vfxElements.forEach(el => el.remove());
                     }, 1000);
@@ -3060,6 +3111,14 @@ class Character {
                 }
             }
             // --- END MODIFIED ---
+            
+            // If removing an untargetable buff, update visual indicator
+            if (buffToRemove && buffToRemove.id === 'untargetable') {
+                const characterElement = document.getElementById(`character-${this.instanceId || this.id}`);
+                if (characterElement && !this.isUntargetable()) {
+                    characterElement.removeAttribute('data-untargetable');
+                }
+            }
 
             // Remove the buff from the array AFTER calling onRemove
             this.buffs.splice(index, 1);
@@ -3104,11 +3163,18 @@ class Character {
                 }
             }
             
-            // Remove visual feedback for silence debuff
+            // Remove visual feedback for specific debuffs
             if (debuff.id === 'infernal_silence') {
                 const characterElement = document.querySelector(`[data-character-id="${this.id}"]`);
                 if (characterElement) {
                     characterElement.classList.remove('character-silenced');
+                }
+            }
+            
+            // Remove freeze visual effects
+            if (debuff.id === 'freeze') {
+                if (window.AtlanteanSubZeroAbilities) {
+                    window.AtlanteanSubZeroAbilities.removeFreezeIndicator(this, false); // melt on expire
                 }
             }
 
@@ -3470,6 +3536,33 @@ class Character {
         const theirTeam = otherCharacter.isAI ? 'ai' : 'player';
         
         return myTeam !== theirTeam;
+    }
+
+    // Freeze debuff helper methods
+    hasFreezeDebuff() {
+        return this.debuffs.some(debuff => debuff.id === 'freeze');
+    }
+
+    removeFreezeDebuff() {
+        const freezeIndex = this.debuffs.findIndex(debuff => debuff.id === 'freeze');
+        if (freezeIndex !== -1) {
+            const freezeDebuff = this.debuffs[freezeIndex];
+            this.debuffs.splice(freezeIndex, 1);
+            
+            // Remove freeze visual effects
+            if (window.AtlanteanSubZeroAbilities) {
+                window.AtlanteanSubZeroAbilities.removeFreezeIndicator(this, true); // scatter when broken mid-turn
+            }
+            
+            // Update UI
+            if (window.gameManager && window.gameManager.uiManager) {
+                window.gameManager.uiManager.updateCharacterUI(this);
+            }
+            
+            console.log(`${this.name} is no longer frozen`);
+            return true;
+        }
+        return false;
     }
     // --- END NEW ---
 
@@ -4586,6 +4679,15 @@ const CharacterFactory = {
             return PiranhaPassive;
         }
         // --- END PIRANHA PASSIVE ---
+        // --- ADD SHADOWFIN PASSIVE ---
+        else if (passiveId === 'shadowfin_passive' && typeof ShadowfinPassive !== 'undefined') {
+            console.log('[CharacterFactory] Found ShadowfinPassive class for passive:', passiveId);
+            return ShadowfinPassive;
+        }
+        else if (passiveId === 'shadowfin_passive') {
+            console.log('[CharacterFactory] ShadowfinPassive class not found. typeof ShadowfinPassive:', typeof ShadowfinPassive);
+        }
+        // --- END SHADOWFIN PASSIVE ---
         // --- END RENEE PASSIVE ---
         // --- END NEW ---
         // Add other hardcoded checks here if necessary
@@ -4654,6 +4756,15 @@ const AbilityFactory = {
         }
         this.registeredEffects[effectName] = effectFunction;
         console.log(`[AbilityFactory @ character.js] Registered custom effect: '${effectName}'`);
+    },
+
+    createIceBallEffect(abilityData) {
+        if (window.AtlanteanSubZeroAbilities) {
+            return window.AtlanteanSubZeroAbilities.createIceBallEffect(abilityData);
+        } else {
+            console.error('AtlanteanSubZeroAbilities not found');
+            return function() { console.log('Ice Ball effect not available'); };
+        }
     },
     // <<< END NEW >>>
 
@@ -4977,6 +5088,11 @@ const AbilityFactory = {
                  const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
                  log(`${abilityData.name} cannot be used directly (Placeholder).`);
             };
+        }
+
+        // Check for ice ball specifically
+        if (abilityData.id === 'ice_ball') {
+            return this.createIceBallEffect(abilityData);
         }
 
         // --- NEW: Check for registered custom effect FIRST --- 

@@ -1316,6 +1316,38 @@ class StageManager {
                         }
                     });
                 }
+                
+                // --- NEW: Apply atlantean blessings from saved state ---
+                if (savedState && savedState.atlanteanBlessings) {
+                    character.atlanteanBlessings = { ...savedState.atlanteanBlessings };
+                    console.log(`[StageManager] Restored atlantean blessings for ${character.name}:`, character.atlanteanBlessings);
+                    
+                    // Apply lifesteal blessing if present
+                    if (savedState.atlanteanBlessings.lifesteal_blessing) {
+                        // Check if the blessing hasn't been applied yet (base character should have 0 lifesteal)
+                        const baseLifesteal = character.constructor.BASE_STATS?.lifesteal || 0;
+                        const expectedLifesteal = baseLifesteal + 0.1; // Base + 10% blessing
+                        
+                        if (Math.abs(character.stats.lifesteal - expectedLifesteal) > 0.01) { // Allow small floating point differences
+                            character.stats.lifesteal = expectedLifesteal;
+                            // Also update baseStats to preserve through recalculation
+                            if (character.baseStats) {
+                                character.baseStats.lifesteal = expectedLifesteal;
+                            }
+                            console.log(`[StageManager] Applied Atlantean Lifesteal Blessing to ${character.name}: +10% lifesteal (total: ${(expectedLifesteal * 100).toFixed(1)}%)`);
+                        }
+                    }
+                    
+                    // Mana efficiency and swiftness blessings are applied at ability usage time,
+                    // so we just need to mark them as present
+                    if (savedState.atlanteanBlessings.mana_efficiency) {
+                        console.log(`[StageManager] ${character.name} has Atlantean Mana Efficiency blessing (50% mana cost reduction)`);
+                    }
+                    
+                    if (savedState.atlanteanBlessings.swiftness) {
+                        console.log(`[StageManager] ${character.name} has Atlantean Swiftness blessing (-1 turn Q cooldown)`);
+                    }
+                }
                 // --- END NEW ---
 
                 // Add to player characters

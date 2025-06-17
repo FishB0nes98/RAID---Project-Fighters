@@ -483,6 +483,17 @@
       "backgroundMusic": "sounds/music/hell_lord_theme.mp3",
       "unlockRequirements": [],
             "path": "js/raid-game/stages/hell_castle_throne.json"
+    },
+    {
+      "id": "frozen_underground_ruins",
+      "name": "Frozen Underground Ruins",
+      "description": "Ancient ruins buried beneath layers of ice, where fallen warriors still guard their frozen domain.",
+      "difficulty": 6,
+      "type": "story",
+      "backgroundImage": "images/stages/frozen_ruins.png",
+      "backgroundMusic": "sounds/music/frozen_theme.mp3",
+      "unlockRequirements": [],
+      "path": "js/raid-game/stages/frozen_underground_ruins.json"
     }
   ]
 }

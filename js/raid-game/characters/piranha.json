@@ -7,7 +7,7 @@
         "magicalDamage": 0,
         "armor": 5,
         "magicalShield": 0,
-        "hp": 6500,
+        "hp": 2800,
         "hpPerTurn": 0,
         "mana": 1800,
         "manaPerTurn": 0,
@@ -23,18 +23,18 @@
             "name": "Piranha Bite",
             "type": "damage",
             "damageType": "physical",
-            "damage": 425,
+            "fixedDamage": 425,
             "targetType": "enemy",
             "manaCost": 45,
-            "cooldown": 3,
+            "cooldown": 1,
             "description": "Deals 425 physical damage to the target.",
-            "icon": "Icons/abilities/piranha_bite.png"
+            "icon": "Icons/abilities/bite.png"
         }
     ],
     "passive": {
         "id": "piranha_passive",
         "name": "Bloodthirsty Healing",
-        "description": "Your attacks heal the highest Max HP target for 50% of your damage dealt.",
+        "description": "Your attacks heal the highest Max HP ally for 50% of your damage dealt.",
         "icon": "Icons/passives/bloodthirsty_healing.png"
     },
     "tags": ["Enemy", "Atlantean", "Beast", "Aquatic"]

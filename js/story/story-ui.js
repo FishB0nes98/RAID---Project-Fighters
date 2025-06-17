@@ -1074,6 +1074,17 @@ class StoryUI {
                         iconPrefix = '🗡️';
                         break;
                     // --- END NEW ---
+                    // --- NEW: Atlantean Blessing effect icons ---
+                    case 'atlantean_lifesteal_blessing':
+                        iconPrefix = '🌊';
+                        break;
+                    case 'atlantean_mana_efficiency':
+                        iconPrefix = '💧';
+                        break;
+                    case 'atlantean_swiftness':
+                        iconPrefix = '⚡';
+                        break;
+                    // --- END NEW ---
                     case 'mana_restore_percent':
                         iconPrefix = '💙';
                         break;
@@ -1336,7 +1347,21 @@ class StoryUI {
                         effectText = '+18% Dodge Chance';
                         effectInfo.classList.add('effect-positive');
                         break;
-                     // --- END NEW ---
+                    // --- END NEW ---
+                    // --- NEW: Atlantean Blessing effect previews ---
+                    case 'atlantean_lifesteal_blessing':
+                        effectText = '+10% Lifesteal';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'atlantean_mana_efficiency':
+                        effectText = '50% Mana Cost Reduction';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'atlantean_swiftness':
+                        effectText = 'Q Ability -1 Turn Cooldown';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    // --- END NEW ---
                 }
                 effectInfo.textContent = effectText;
             }

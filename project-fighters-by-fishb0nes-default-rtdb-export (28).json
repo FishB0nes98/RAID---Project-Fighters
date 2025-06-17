@@ -2839,6 +2839,583 @@
       "Pajama Party Shoma": 25
     }
   },
+  "questDefinitions": {
+    "alice_magic_damage_taken": {
+      "characterId": "farmer_alice",
+      "createdAt": 1749936570227,
+      "description": "Take 30,000 magical damage",
+      "icon": "🛡️",
+      "id": "alice_magic_damage_taken",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "amount": 30000
+      },
+      "title": "Magic Resistance",
+      "type": "damage_taken_magical",
+      "updatedAt": 1749936570227
+    },
+    "ayane_butterfly_dagger_25": {
+      "characterId": "schoolgirl_ayane",
+      "createdAt": 1750163912460,
+      "description": "Use Butterfly Dagger 25 times",
+      "icon": "🦋",
+      "id": "ayane_butterfly_dagger_25",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "ayane_q",
+        "count": 25
+      },
+      "title": "Butterfly Master",
+      "type": "ability_usage"
+    },
+    "ayane_dodge_master": {
+      "characterId": "schoolgirl_ayane",
+      "createdAt": 1749936558771,
+      "description": "Dodge 30 attacks",
+      "icon": "🌪️",
+      "id": "ayane_dodge_master",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "count": 30
+      },
+      "title": "Evasion Master",
+      "type": "dodge_count",
+      "updatedAt": 1749936558771
+    },
+    "bridget_any_abilities_125": {
+      "characterId": "bridget",
+      "createdAt": 1749972891747,
+      "description": "Use abilities 125 times",
+      "icon": "💧",
+      "id": "bridget_any_abilities_125",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "any",
+        "count": 125
+      },
+      "title": "Bubble Veteran",
+      "type": "ability_usage",
+      "updatedAt": 1749972891747
+    },
+    "bridget_healing_master": {
+      "characterId": "bridget",
+      "createdAt": 1749936921398,
+      "description": "Heal 100,000 HP with any abilities",
+      "icon": "💧",
+      "id": "bridget_healing_master",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "amount": 100000
+      },
+      "title": "Healing Master",
+      "type": "healing_total",
+      "updatedAt": 1749936921398
+    },
+    "cham_cham_feral_strike_damage": {
+      "characterId": "farmer_cham_cham",
+      "createdAt": 1749936926111,
+      "description": "Deal 42,500 damage with Feral Strike",
+      "icon": "🐾",
+      "id": "cham_cham_feral_strike_damage",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "farmer_feral_strike",
+        "amount": 42500
+      },
+      "title": "Feral Striker",
+      "type": "ability_damage",
+      "updatedAt": 1749936926111
+    },
+    "complete_5_character_quests": {
+      "createdAt": 1749937531547,
+      "description": "Complete 5 character quests",
+      "icon": "🏆",
+      "id": "complete_5_character_quests",
+      "isActive": true,
+      "rewards": {
+        "characterChoice": true
+      },
+      "target": {
+        "count": 5
+      },
+      "title": "Quest Master",
+      "type": "global"
+    },
+    "complete_to_the_hell_we_go_story": {
+      "createdAt": 1749989874819,
+      "description": "Complete the \"To The Hell We Go\" story",
+      "icon": "🔥",
+      "id": "complete_to_the_hell_we_go_story",
+      "isActive": true,
+      "rewards": {
+        "randomCharacter": true
+      },
+      "subType": "story_completion",
+      "target": {
+        "storyId": "to_the_hell_we_go"
+      },
+      "title": "Hell Conqueror",
+      "type": "global"
+    },
+    "elphelt_damage_total": {
+      "characterId": "schoolgirl_elphelt",
+      "createdAt": 1749936565720,
+      "description": "Deal 38,250 damage with any abilities",
+      "icon": "💥",
+      "id": "elphelt_damage_total",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "amount": 38250
+      },
+      "title": "Damage Dealer",
+      "type": "damage_total",
+      "updatedAt": 1749936565720
+    },
+    "elphelt_flower_bomb_disable_30": {
+      "characterId": "schoolgirl_elphelt",
+      "createdAt": 1749973240092,
+      "description": "Disable 30 abilities with Flower Bomb",
+      "icon": "🌸",
+      "id": "elphelt_flower_bomb_disable_30",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "schoolgirl_elphelt_w",
+        "count": 30
+      },
+      "title": "Bomb Squad",
+      "type": "ability_usage",
+      "updatedAt": 1749973240124
+    },
+    "farmer_alice_carrot_power_up_25": {
+      "characterId": "farmer_alice",
+      "createdAt": 1749973240092,
+      "description": "Use Carrot Power Up 25 times",
+      "icon": "🥕",
+      "id": "farmer_alice_carrot_power_up_25",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "carrot_power_up",
+        "count": 25
+      },
+      "title": "Vegetable Virtuoso",
+      "type": "ability_usage",
+      "updatedAt": 1749973240155
+    },
+    "farmer_cham_cham_boomerang_90000": {
+      "characterId": "farmer_cham_cham",
+      "createdAt": 1749972891747,
+      "description": "Deal 90 000 damage with Farmer Boomerang",
+      "icon": "🌀",
+      "id": "farmer_cham_cham_boomerang_90000",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "farmer_boomerang",
+        "amount": 90000
+      },
+      "title": "Boomerang Master",
+      "type": "ability_damage",
+      "updatedAt": 1749972891776
+    },
+    "farmer_nina_sniper_crit_30": {
+      "characterId": "farmer_nina",
+      "createdAt": 1749972891747,
+      "description": "Score 30 critical strikes with Sniper Shot",
+      "icon": "🎯",
+      "id": "farmer_nina_sniper_crit_30",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "farmer_nina_q",
+        "count": 30
+      },
+      "title": "Sharpshooter",
+      "type": "critical_strikes",
+      "updatedAt": 1749972891805
+    },
+    "farmer_raiden_storm_circle_100000": {
+      "characterId": "farmer_raiden",
+      "createdAt": 1749972891747,
+      "description": "Deal 100 000 damage with Storm Circle",
+      "icon": "⚡",
+      "id": "farmer_raiden_storm_circle_100000",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "storm_circle",
+        "amount": 100000
+      },
+      "title": "Storm Lord",
+      "type": "ability_damage",
+      "updatedAt": 1749972891840
+    },
+    "farmer_shoma_cottage_run_heal_79000": {
+      "characterId": "farmer_shoma",
+      "createdAt": 1749972891747,
+      "description": "Heal 79 000 HP with Cottage Run",
+      "icon": "🍎",
+      "id": "farmer_shoma_cottage_run_heal_79000",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "farmer_shoma_r",
+        "amount": 79000
+      },
+      "title": "Country Medic",
+      "type": "ability_healing",
+      "updatedAt": 1749972891869
+    },
+    "global_total_damage_125k": {
+      "createdAt": 1749973625450,
+      "description": "Deal 125,000 total damage with any characters",
+      "icon": "💥",
+      "id": "global_total_damage_125k",
+      "isActive": true,
+      "rewards": {
+        "randomCharacter": true
+      },
+      "target": {
+        "amount": 125000
+      },
+      "title": "World Breaker",
+      "type": "global_damage_total"
+    },
+    "infernal_ibuki_kunai_master": {
+      "characterId": "infernal_ibuki",
+      "createdAt": 1749989611282,
+      "description": "Use Kunai Throw 80 times",
+      "icon": "🥷",
+      "id": "infernal_ibuki_kunai_master",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "kunai_throw",
+        "count": 80
+      },
+      "title": "Blade Master",
+      "type": "ability_usage",
+      "updatedAt": 1749989611282
+    },
+    "infernal_ibuki_smoke_specialist": {
+      "characterId": "infernal_ibuki",
+      "createdAt": 1749989611312,
+      "description": "Apply Smoke Bomb debuff to enemies 30 times",
+      "icon": "💨",
+      "id": "infernal_ibuki_smoke_specialist",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "smoke_bomb",
+        "count": 30
+      },
+      "title": "Smoke Specialist",
+      "type": "debuff_applications",
+      "updatedAt": 1749989611312
+    },
+    "julia_healing_total": {
+      "characterId": "schoolgirl_julia",
+      "createdAt": 1749935548517,
+      "description": "Heal 55,950 HP with your abilities",
+      "icon": "🌿",
+      "id": "julia_healing_total",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "amount": 55950
+      },
+      "title": "Master Healer",
+      "type": "healing_total"
+    },
+    "julia_spirits_strength_heal_225000": {
+      "characterId": "schoolgirl_julia",
+      "createdAt": 1749972891747,
+      "description": "Heal 225 000 HP with Spirits Strength",
+      "icon": "🌿",
+      "id": "julia_spirits_strength_heal_225000",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "schoolgirl_julia_r",
+        "amount": 225000
+      },
+      "title": "Spirit’s Blessing",
+      "type": "ability_healing",
+      "updatedAt": 1749972891983
+    },
+    "kokoro_lesser_heal_80": {
+      "characterId": "schoolgirl_kokoro",
+      "createdAt": 1749972891747,
+      "description": "Use Lesser Heal 80 times",
+      "icon": "✨",
+      "id": "kokoro_lesser_heal_80",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "lesser_heal",
+        "count": 80
+      },
+      "title": "Nurturing Light",
+      "type": "ability_usage",
+      "updatedAt": 1749972892012
+    },
+    "kokoro_silencing_ring_damage": {
+      "characterId": "schoolgirl_kokoro",
+      "createdAt": 1749935548517,
+      "description": "Deal 5,000 damage with Silencing Ring DoT",
+      "icon": "💍",
+      "id": "kokoro_silencing_ring_damage",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "silencing_ring_dot",
+        "amount": 5000
+      },
+      "title": "Silent Striker",
+      "type": "ability_damage"
+    },
+    "nina_piercing_shot_usage": {
+      "characterId": "farmer_nina",
+      "createdAt": 1749937093934,
+      "description": "Use Piercing Shot 15 times",
+      "icon": "🏹",
+      "id": "nina_piercing_shot_usage",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "farmer_nina_r",
+        "count": 15
+      },
+      "title": "Piercing Expert",
+      "type": "ability_usage",
+      "updatedAt": 1749937093934
+    },
+    "raiden_electric_shock_damage": {
+      "characterId": "farmer_raiden",
+      "createdAt": 1749936107557,
+      "description": "Deal 19,800 damage with Electric Shock",
+      "icon": "⚡",
+      "id": "raiden_electric_shock_damage",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "electric_shock",
+        "amount": 19800
+      },
+      "title": "Shock Specialist",
+      "type": "ability_damage",
+      "updatedAt": 1749936107557
+    },
+    "renee_critical_master": {
+      "characterId": "renée",
+      "createdAt": 1749936158268,
+      "description": "Land 25 critical strikes with any ability",
+      "icon": "💥",
+      "id": "renee_critical_master",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "count": 25
+      },
+      "title": "Critical Strike Master",
+      "type": "critical_strikes",
+      "updatedAt": 1749936158268
+    },
+    "renee_lupine_veil_35": {
+      "characterId": "renée",
+      "createdAt": 1749972891747,
+      "description": "Use Lupine Veil 35 times",
+      "icon": "🐺",
+      "id": "renee_lupine_veil_35",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "renee_w",
+        "count": 35
+      },
+      "title": "Shadow Dancer",
+      "type": "ability_usage",
+      "updatedAt": 1749972891897
+    },
+    "schoolboy_shoma_waterball_85000": {
+      "characterId": "schoolboy_shoma",
+      "createdAt": 1749972891747,
+      "description": "Deal 85 000 damage with Water Ball",
+      "icon": "💦",
+      "id": "schoolboy_shoma_waterball_85000",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "ball_throw_water",
+        "amount": 85000
+      },
+      "title": "Wave Pitcher",
+      "type": "ability_damage",
+      "updatedAt": 1749972891926
+    },
+    "shoma_apple_healing": {
+      "characterId": "farmer_shoma",
+      "createdAt": 1749936574943,
+      "description": "Heal 20,000 HP with Apple Throw",
+      "icon": "🍎",
+      "id": "shoma_apple_healing",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "apple_throw",
+        "amount": 20000
+      },
+      "title": "Apple Healer",
+      "type": "ability_healing",
+      "updatedAt": 1749936574943
+    },
+    "shoma_boink_master": {
+      "characterId": "schoolboy_shoma",
+      "createdAt": 1749936102161,
+      "description": "Use Boink 40 times",
+      "icon": "🏀",
+      "id": "shoma_boink_master",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "boink",
+        "count": 40
+      },
+      "title": "Boink Expert",
+      "type": "ability_usage",
+      "updatedAt": 1749936102161
+    },
+    "siegfried_lion_protection_heal_21000": {
+      "characterId": "schoolboy_siegfried",
+      "createdAt": 1749972891747,
+      "description": "Heal 21 000 HP with Lion Protection",
+      "icon": "🦁",
+      "id": "siegfried_lion_protection_heal_21000",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "schoolboy_siegfried_w",
+        "amount": 21000
+      },
+      "title": "Guardian’s Heart",
+      "type": "ability_healing",
+      "updatedAt": 1749972891954
+    },
+    "siegfried_total_damage": {
+      "characterId": "schoolboy_siegfried",
+      "createdAt": 1749935548517,
+      "description": "Deal 85,000 total damage",
+      "icon": "⚔️",
+      "id": "siegfried_total_damage",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "amount": 85000
+      },
+      "title": "Damage Dealer",
+      "type": "damage_total"
+    },
+    "zoey_r_disable_25": {
+      "characterId": "zoey",
+      "createdAt": 1749973240092,
+      "description": "Disable 25 abilities with Glowing Light Arc",
+      "icon": "🔒",
+      "id": "zoey_r_disable_25",
+      "isActive": true,
+      "rewards": {
+        "xp": 1610
+      },
+      "target": {
+        "abilityId": "zoey_r_disable",
+        "count": 25
+      },
+      "title": "Light-Breaker",
+      "type": "ability_usage",
+      "updatedAt": 1749973240092
+    },
+    "zoey_strawberry_bell_damage": {
+      "characterId": "zoey",
+      "createdAt": 1749936115712,
+      "description": "Deal 42,500 damage with Strawberry Bell Burst",
+      "icon": "🔔",
+      "id": "zoey_strawberry_bell_damage",
+      "isActive": true,
+      "rewards": {
+        "xp": 520
+      },
+      "target": {
+        "abilityId": "zoey_q",
+        "amount": 42500
+      },
+      "title": "Bell Master",
+      "type": "ability_damage",
+      "updatedAt": 1749936115712
+    }
+  },
   "quests": {
     "001": {
       "description": "Play 200 turns in battle",
@@ -3643,7 +4220,7 @@
         "DoubleLootboxBundle": 1
       },
       "CM": 9640,
-      "FM": 94700,
+      "FM": 76400,
       "FavoriteMusic": {
         "animal_instinct": true,
         "infernos_rise": true,
@@ -3733,6 +4310,56 @@
         "001": true,
         "heal_100k": true
       },
+      "RAIDSkin": {
+        "bridget_2": {
+          "price": 1500,
+          "purchasedAt": 1750079769728
+        },
+        "farmer_alice_summer": {
+          "price": 1500,
+          "purchasedAt": 1750079792073
+        },
+        "farmer_cham_cham_dark": {
+          "price": 1500,
+          "purchasedAt": 1750079796356
+        },
+        "farmer_nina_nature": {
+          "price": 1500,
+          "purchasedAt": 1750079794548
+        },
+        "farmer_shoma_red": {
+          "price": 1800,
+          "purchasedAt": 1750079745477
+        },
+        "infernal_ibuki_blue_fire": {
+          "price": 1500,
+          "purchasedAt": 1750079765964
+        },
+        "red_schoolboy_shoma": {
+          "price": 1500,
+          "purchasedAt": 1750011533903
+        },
+        "red_schoolgirl_ayane": {
+          "price": 1500,
+          "purchasedAt": 1750011557166
+        },
+        "red_schoolgirl_elphelt": {
+          "price": 1500,
+          "purchasedAt": 1750011558933
+        },
+        "red_schoolgirl_julia": {
+          "price": 1500,
+          "purchasedAt": 1750011562952
+        },
+        "red_schoolgirl_kokoro": {
+          "price": 1500,
+          "purchasedAt": 1750011561659
+        },
+        "renee_2": {
+          "price": 1500,
+          "purchasedAt": 1750079784173
+        }
+      },
       "Raid": {
         "Stage1": 1
       },
@@ -3798,13 +4425,26 @@
         "tokyo_lili_cry": 1
       },
       "UnlockedRAIDCharacters": {
+        "farmer_alice": {
+          "source": "quest_reward",
+          "unlockedAt": 1749974311316
+        },
         "farmer_nina": {
-          "source": "first_time_completion_reward",
-          "unlockedAt": 1749297792993
+          "source": "quest_reward",
+          "unlockedAt": 1749973910067
         },
         "farmer_raiden": {
-          "source": "tutorial_reward",
-          "unlockedAt": 1749227919559
+          "source": "quest_reward",
+          "unlockedAt": 1750008436134
+        },
+        "farmer_shoma": true,
+        "schoolgirl_ayane": {
+          "source": "quest_reward",
+          "unlockedAt": 1750008604079
+        },
+        "schoolgirl_elphelt": {
+          "source": "quest_reward",
+          "unlockedAt": 1750010103371
         },
         "schoolgirl_kokoro": {
           "source": "first_time_completion_reward",
@@ -3840,6 +4480,32 @@
             ],
             "timestamp": 1749384734222,
             "turns": 9,
+            "victory": false
+          },
+          "-OSmsUnyZrsGCJZHNnz6": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolboy_shoma",
+              "schoolboy_siegfried",
+              "farmer_alice",
+              "renée",
+              "bridget"
+            ],
+            "timestamp": 1749979102498,
+            "turns": 1,
+            "victory": false
+          },
+          "-OSmsUnz10tz8pzXEabx": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolboy_shoma",
+              "schoolboy_siegfried",
+              "farmer_alice",
+              "renée",
+              "bridget"
+            ],
+            "timestamp": 1749979102499,
+            "turns": 1,
             "victory": false
           }
         },
@@ -3913,6 +4579,115 @@
             ],
             "timestamp": 1749213678716,
             "turns": 2,
+            "victory": false
+          },
+          "-OSoikEbixw00yZJKNN9": {
+            "survivors": 5,
+            "teamComposition": [
+              "infernal_ibuki",
+              "renée",
+              "bridget",
+              "schoolgirl_ayane",
+              "schoolgirl_kokoro"
+            ],
+            "timestamp": 1750010102792,
+            "turns": 1,
+            "victory": true
+          },
+          "-OSoikEemH-_zrhWIjTA": {
+            "survivors": 5,
+            "teamComposition": [
+              "infernal_ibuki",
+              "renée",
+              "bridget",
+              "schoolgirl_ayane",
+              "schoolgirl_kokoro"
+            ],
+            "timestamp": 1750010102795,
+            "turns": 1,
+            "victory": true
+          },
+          "-OSoikEll6fmz-uMjOCG": {
+            "survivors": 5,
+            "teamComposition": [
+              "infernal_ibuki",
+              "renée",
+              "bridget",
+              "schoolgirl_ayane",
+              "schoolgirl_kokoro"
+            ],
+            "timestamp": 1750010102796,
+            "turns": 1,
+            "victory": true
+          },
+          "-OSoikEmI66H4ASPiByl": {
+            "survivors": 5,
+            "teamComposition": [
+              "infernal_ibuki",
+              "renée",
+              "bridget",
+              "schoolgirl_ayane",
+              "schoolgirl_kokoro"
+            ],
+            "timestamp": 1750010102798,
+            "turns": 1,
+            "victory": true
+          }
+        },
+        "healing_forbidden_challenge": {
+          "-OSjhXlD8rWUfcnmpVyJ": {
+            "survivors": 3,
+            "teamComposition": [
+              "renée",
+              "farmer_nina",
+              "farmer_raiden"
+            ],
+            "timestamp": 1749925899372,
+            "turns": 2,
+            "victory": true
+          },
+          "-OSjhXlG-mN6XAwRrX7s": {
+            "survivors": 3,
+            "teamComposition": [
+              "renée",
+              "farmer_nina",
+              "farmer_raiden"
+            ],
+            "timestamp": 1749925899375,
+            "turns": 2,
+            "victory": true
+          },
+          "-OSmr73NnOGgRMLp4TsJ": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolboy_shoma",
+              "renée",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1749978743091,
+            "turns": 26,
+            "victory": false
+          },
+          "-OSmr73OQ1lqpDaxAGSN": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolboy_shoma",
+              "renée",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1749978743093,
+            "turns": 26,
+            "victory": false
+          },
+          "-OSmr8DLzQWsF5PycQ2r": {
+            "survivors": 0,
+            "teamComposition": [
+              "schoolboy_shoma",
+              "renée",
+              "farmer_cham_cham"
+            ],
+            "timestamp": 1749978747825,
+            "turns": 27,
             "victory": false
           }
         },
@@ -4158,6 +4933,60 @@
             ],
             "timestamp": 1749246860703,
             "turns": 6,
+            "victory": true
+          },
+          "-OSkU3J41__7cKBp15GN": {
+            "survivors": 1,
+            "teamComposition": [
+              "zoey"
+            ],
+            "timestamp": 1749938881891,
+            "turns": 2,
+            "victory": true
+          },
+          "-OSkU3JAp_Av-8jqMg2Y": {
+            "survivors": 1,
+            "teamComposition": [
+              "zoey"
+            ],
+            "timestamp": 1749938881892,
+            "turns": 2,
+            "victory": true
+          },
+          "-OSkU3eEepqL2hWNODQn": {
+            "survivors": 1,
+            "teamComposition": [
+              "zoey"
+            ],
+            "timestamp": 1749938883259,
+            "turns": 3,
+            "victory": true
+          },
+          "-OSkUoEctMTHyJLeJeq-": {
+            "survivors": 1,
+            "teamComposition": [
+              "zoey"
+            ],
+            "timestamp": 1749939078148,
+            "turns": 2,
+            "victory": true
+          },
+          "-OSkUoEh5W-IYBwKC5kK": {
+            "survivors": 1,
+            "teamComposition": [
+              "zoey"
+            ],
+            "timestamp": 1749939078154,
+            "turns": 2,
+            "victory": true
+          },
+          "-OSkUoc1hVK8ptta9yk-": {
+            "survivors": 1,
+            "teamComposition": [
+              "zoey"
+            ],
+            "timestamp": 1749939079712,
+            "turns": 3,
             "victory": true
           }
         },
@@ -4430,51 +5259,90 @@
         "Shinnok Warlock"
       ],
       "characterTalentPoints": {
-        "bridget": 1,
+        "bridget": 4,
         "farmer_alice": 1,
-        "farmer_cham_cham": 4,
-        "farmer_nina": 3,
-        "farmer_raiden": 3,
-        "farmer_shoma": 4,
-        "renée": 3,
-        "schoolboy_shoma": 5,
+        "farmer_cham_cham": 5,
+        "farmer_nina": 5,
+        "farmer_raiden": 4,
+        "farmer_shoma": 5,
+        "infernal_ibuki": 1,
+        "renée": 6,
+        "schoolboy_shoma": 6,
         "schoolboy_siegfried": 5,
-        "schoolgirl_ayane": 2,
-        "schoolgirl_elphelt": 2,
+        "schoolgirl_ayane": 3,
+        "schoolgirl_elphelt": 3,
         "schoolgirl_julia": 5,
-        "schoolgirl_kokoro": 4
+        "schoolgirl_kokoro": 7,
+        "zoey": 1
       },
       "characterTalents": {
         "bridget": {
-          "healing_affinity": true
+          "healing_affinity": true,
+          "healing_tsunami": true,
+          "surging_tides": true,
+          "tidal_precision": true
+        },
+        "farmer_alice": {
+          "talent_alice_1": true
         },
         "farmer_cham_cham": {
           "talent_cham_cham_1": true,
           "talent_cham_cham_2": true,
           "talent_cham_cham_5": true,
-          "talent_cham_cham_7": true
+          "talent_cham_cham_6": true,
+          "talent_cham_cham_8": true
         },
         "farmer_nina": {
           "aoe_target_lock": true,
+          "critical_dodge": true,
           "deadly_precision": true,
+          "enhanced_ammunition": true,
           "piercing_rounds": true
         },
         "farmer_raiden": {
           "talent_raiden_1": true,
           "talent_raiden_2": true,
-          "talent_raiden_8": true
+          "talent_raiden_3": true,
+          "talent_raiden_4": true
+        },
+        "farmer_shoma": {
+          "talent_shoma_1": true,
+          "talent_shoma_12": true,
+          "talent_shoma_2": true,
+          "talent_shoma_4": true,
+          "talent_shoma_5": true
         },
         "renée": {
           "dual_spirit_awakening": true,
+          "lunar_cascade": true,
+          "moonlit_reflexes": true,
           "mystical_convergence": true,
+          "opportunistic_spirit": true,
           "talent_renee_root": true
+        },
+        "schoolgirl_kokoro": {
+          "cooldown_mastery": true,
+          "empowered_silencing": true,
+          "enhanced_lesser_heal": true,
+          "focused_mind": true,
+          "healing_efficiency": true,
+          "healing_versatility": true,
+          "silencing_ring_mastery": true
+        },
+        "zoey": {
+          "talent_zoey_root": true
         }
       },
       "characterXP": {
+        "atlantean_kagome": {
+          "experience": 963,
+          "lastUpdated": 1750105948256,
+          "level": 1
+        },
         "bridget": {
-          "experience": 1676,
-          "lastUpdated": 1749252601068,
-          "level": 2
+          "experience": 9416,
+          "lastUpdated": 1750010102986,
+          "level": 5
         },
         "farmer_alice": {
           "experience": 1834,
@@ -4482,59 +5350,69 @@
           "level": 2
         },
         "farmer_cham_cham": {
-          "experience": 7241,
-          "lastUpdated": 1749504982402,
-          "level": 5
-        },
-        "farmer_nina": {
-          "experience": 5907,
-          "lastUpdated": 1749487299807,
-          "level": 4
-        },
-        "farmer_raiden": {
-          "experience": 6557,
-          "lastUpdated": 1749425023244,
-          "level": 4
-        },
-        "farmer_shoma": {
-          "experience": 7333,
-          "lastUpdated": 1749297097201,
-          "level": 5
-        },
-        "renée": {
-          "experience": 6878,
-          "lastUpdated": 1749713879034,
-          "level": 4
-        },
-        "schoolboy_shoma": {
-          "experience": 10364,
-          "lastUpdated": 1749504982574,
+          "experience": 13234,
+          "lastUpdated": 1750096885722,
           "level": 6
         },
+        "farmer_nina": {
+          "experience": 8856,
+          "lastUpdated": 1750096885802,
+          "level": 5
+        },
+        "farmer_raiden": {
+          "experience": 8666,
+          "lastUpdated": 1750096885875,
+          "level": 5
+        },
+        "farmer_shoma": {
+          "experience": 11123,
+          "lastUpdated": 1750096885936,
+          "level": 6
+        },
+        "infernal_ibuki": {
+          "experience": 1536,
+          "lastUpdated": 1750010102855,
+          "level": 2
+        },
+        "renée": {
+          "experience": 17201,
+          "lastUpdated": 1750010102918,
+          "level": 7
+        },
+        "schoolboy_shoma": {
+          "experience": 16402,
+          "lastUpdated": 1750006169582,
+          "level": 7
+        },
         "schoolboy_siegfried": {
-          "experience": 10336,
-          "lastUpdated": 1749384067612,
+          "experience": 12290,
+          "lastUpdated": 1749920439602,
           "level": 6
         },
         "schoolgirl_ayane": {
-          "experience": 1953,
-          "lastUpdated": 1749316184218,
-          "level": 2
-        },
-        "schoolgirl_elphelt": {
-          "experience": 3348,
-          "lastUpdated": 1749384067720,
+          "experience": 3578,
+          "lastUpdated": 1750010103052,
           "level": 3
         },
+        "schoolgirl_elphelt": {
+          "experience": 4958,
+          "lastUpdated": 1750012963195,
+          "level": 4
+        },
         "schoolgirl_julia": {
-          "experience": 11564,
-          "lastUpdated": 1749713879217,
+          "experience": 13832,
+          "lastUpdated": 1749990135754,
           "level": 6
         },
         "schoolgirl_kokoro": {
-          "experience": 9348,
-          "lastUpdated": 1749386545306,
-          "level": 5
+          "experience": 18161,
+          "lastUpdated": 1750010103121,
+          "level": 7
+        },
+        "zoey": {
+          "experience": 1237,
+          "lastUpdated": 1749939338256,
+          "level": 2
         }
       },
       "characters": {
@@ -4788,18 +5666,36 @@
         }
       },
       "coins": 500,
-      "currentStageSelection": {
-        "id": "random_battle_2v2",
-        "name": "Random Battle (2v2)"
+      "completedQuests": {
+        "bridget_any_abilities_125": true,
+        "bridget_healing_master": true,
+        "cham_cham_feral_strike_damage": true,
+        "complete_5_character_quests": true,
+        "complete_to_the_hell_we_go_story": true,
+        "elphelt_flower_bomb_disable_30": true,
+        "global_total_damage_125k": true,
+        "infernal_ibuki_kunai_master": true,
+        "infernal_ibuki_smoke_specialist": true,
+        "kokoro_lesser_heal_80": true,
+        "kokoro_silencing_ring_damage": true,
+        "nina_piercing_shot_usage": true,
+        "raiden_electric_shock_damage": true,
+        "renee_critical_master": true,
+        "renee_lupine_veil_35": true,
+        "shoma_boink_master": true,
+        "zoey_strawberry_bell_damage": true
       },
-      "currentStorySelection": "to_the_hell_we_go",
+      "currentStageSelection": {
+        "id": "farm_showdown",
+        "name": "5v5 - Farm Showdown"
+      },
+      "currentStorySelection": "saving_atlantis",
       "currentTeamSelection": [
-        "renée",
-        "schoolgirl_julia"
+        "atlantean_kagome"
       ],
       "currentWeeklyChallengeSelection": {
-        "id": "siegfried_and_supports",
-        "name": "Siegfried and Supports"
+        "id": "healing_forbidden_challenge",
+        "name": "Healing Forbidden Challenge"
       },
       "dailyRewards": {
         "lastClaimed": "2025-04-13T19:49:24.797Z",
@@ -6867,11 +7763,50 @@
         "bridget",
         "schoolboy_siegfried",
         "schoolgirl_kokoro",
-        "schoolgirl_julia"
+        "schoolgirl_julia",
+        "zoey",
+        "farmer_shoma",
+        "farmer_nina",
+        "farmer_alice",
+        "farmer_raiden",
+        "schoolgirl_ayane",
+        "schoolgirl_elphelt"
       ],
       "profileColor": "#bc4715",
       "profileSticker": "shoma_mocking",
       "questPoints": 1460,
+      "questProgress": {
+        "alice_magic_damage_taken": 13642,
+        "ayane_butterfly_dagger_25": 12,
+        "ayane_dodge_master": 2,
+        "bridget_any_abilities_125": 125,
+        "bridget_healing_master": 100000,
+        "cham_cham_feral_strike_damage": 42500,
+        "complete_to_the_hell_we_go_story": 1,
+        "elphelt_damage_total": 32522,
+        "elphelt_flower_bomb_disable_30": 30,
+        "farmer_alice_carrot_power_up_25": 16,
+        "farmer_cham_cham_boomerang_90000": 47376,
+        "farmer_nina_sniper_crit_30": 14,
+        "farmer_raiden_storm_circle_100000": 11660,
+        "global_total_damage_125k": 27595,
+        "infernal_ibuki_kunai_master": 80,
+        "infernal_ibuki_smoke_specialist": 30,
+        "julia_healing_total": 22617,
+        "julia_spirits_strength_heal_225000": 3174,
+        "kokoro_lesser_heal_80": 80,
+        "kokoro_silencing_ring_damage": 5000,
+        "nina_piercing_shot_usage": 15,
+        "raiden_electric_shock_damage": 19800,
+        "renee_critical_master": 25,
+        "renee_lupine_veil_35": 35,
+        "schoolboy_shoma_waterball_85000": 13358,
+        "shoma_boink_master": 40,
+        "siegfried_lion_protection_heal_21000": 3806,
+        "siegfried_total_damage": 8171,
+        "zoey_r_disable_25": 7,
+        "zoey_strawberry_bell_damage": 42500
+      },
       "quests": {
         "blossom_devotee": {
           "champion": "Talim",
@@ -7135,12 +8070,22 @@
       "ranked lose": 103,
       "ranked win": 114,
       "rankedWins": 6,
-      "selectedSkins": [
-        null,
-        "Summertime Shoma",
-        "Lunar Festival Lili",
-        "Spectral Reaper Ayane"
-      ],
+      "selectedSkins": {
+        "1": "Summertime Shoma",
+        "2": "Lunar Festival Lili",
+        "3": "Spectral Reaper Ayane",
+        "bridget": "bridget_2",
+        "farmer_alice": "farmer_alice_summer",
+        "farmer_cham_cham": "farmer_cham_cham_dark",
+        "farmer_nina": "farmer_nina_nature",
+        "farmer_shoma": "farmer_shoma_red",
+        "infernal_ibuki": "infernal_ibuki_blue_fire",
+        "renée": "renee_2",
+        "schoolboy_shoma": "red_schoolboy_shoma",
+        "schoolgirl_ayane": "red_schoolgirl_ayane",
+        "schoolgirl_elphelt": "red_schoolgirl_elphelt",
+        "schoolgirl_kokoro": "red_schoolgirl_kokoro"
+      },
       "skins": {
         "Akuma": 1,
         "Alice": 1,
@@ -7334,55 +8279,13 @@
         }
       },
       "storyProgress": {
-        "to_the_hell_we_go": {
-          "completedStages": 10,
-          "currentStageIndex": 10,
+        "blazing_school_day": {
+          "completedStages": 7,
+          "currentStageIndex": 7,
           "lastTeamState": {
-            "farmer_cham_cham": {
-              "currentHP": 8286,
-              "currentMana": 1665,
-              "stats": {
-                "armor": 12,
-                "critChance": 0.1,
-                "critDamage": 1.6,
-                "dodgeChance": 0,
-                "healingPower": 0,
-                "hp": 8400,
-                "hpPerTurn": 0,
-                "lifesteal": 0,
-                "magicalDamage": 0,
-                "magicalShield": 8,
-                "mana": 2715,
-                "manaPerTurn": 0,
-                "physicalDamage": 205
-              }
-            },
-            "renée": {
-              "currentHP": 3559,
-              "currentMana": 2400,
-              "hellEffects": {
-                "choiceEffect": "molten_hammer_effect",
-                "choiceId": "Molten Hammer",
-                "molten_hammer": true
-              },
-              "stats": {
-                "armor": 12,
-                "critChance": 0.1,
-                "critDamage": 1.8,
-                "healingPower": 0,
-                "hp": 7200,
-                "hpPerTurn": 0,
-                "lifesteal": 0,
-                "magicalDamage": 100,
-                "magicalShield": 9,
-                "mana": 2400,
-                "manaPerTurn": 0,
-                "physicalDamage": 440
-              }
-            },
             "schoolboy_shoma": {
-              "currentHP": 6761,
-              "currentMana": 1345,
+              "currentHP": 8965,
+              "currentMana": 3005,
               "stats": {
                 "armor": 11,
                 "critChance": 0,
@@ -7399,9 +8302,116 @@
                 "physicalDamage": 210
               }
             },
+            "schoolboy_siegfried": {
+              "currentHP": 17580,
+              "currentMana": 1155,
+              "stats": {
+                "armor": 8,
+                "critChance": 0,
+                "critDamage": 1.6,
+                "dodgeChance": 0.05,
+                "healingPower": 0,
+                "hp": 17580,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 10,
+                "magicalShield": 8,
+                "mana": 2010,
+                "manaPerTurn": 0,
+                "physicalDamage": 300
+              }
+            },
+            "schoolgirl_ayane": {
+              "currentHP": 7800,
+              "currentMana": 1850,
+              "stats": {
+                "armor": 10,
+                "critChance": 0,
+                "critDamage": 1.5,
+                "dodgeChance": 0.05,
+                "healingPower": 0,
+                "hp": 7800,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 40,
+                "magicalShield": 5,
+                "mana": 1900,
+                "manaPerTurn": 0,
+                "physicalDamage": 250
+              }
+            },
+            "schoolgirl_kokoro": {
+              "currentHP": 6500,
+              "currentMana": 1785,
+              "stats": {
+                "armor": 6,
+                "critChance": 0,
+                "critDamage": 1.5,
+                "dodgeChance": 0.05,
+                "healingPower": 0,
+                "hp": 6500,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 150,
+                "magicalShield": 7,
+                "mana": 3000,
+                "manaPerTurn": 0,
+                "physicalDamage": 30
+              }
+            }
+          }
+        },
+        "saving_atlantis": {
+          "completedStages": 1,
+          "currentStageIndex": 1,
+          "lastTeamState": {
+            "atlantean_kagome": {
+              "currentHP": 6888,
+              "currentMana": 2705,
+              "stats": {
+                "armor": 7,
+                "critChance": 0.08,
+                "critDamage": 1.5,
+                "dodgeChance": 0.01,
+                "healingPower": 0,
+                "hp": 6888,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 220,
+                "magicalShield": 11,
+                "mana": 2805,
+                "manaPerTurn": 0,
+                "physicalDamage": 150
+              }
+            }
+          }
+        },
+        "to_the_hell_we_go": {
+          "completedStages": 1,
+          "currentStageIndex": 1,
+          "lastTeamState": {
+            "farmer_raiden": {
+              "currentHP": 7490,
+              "currentMana": 2200,
+              "stats": {
+                "armor": 10,
+                "critChance": 0,
+                "critDamage": 2,
+                "dodgeChance": 0,
+                "healingPower": 0,
+                "hp": 7490,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 240,
+                "magicalShield": 15,
+                "mana": 2200,
+                "manaPerTurn": 0,
+                "physicalDamage": 56
+              }
+            },
             "schoolgirl_julia": {
-              "currentHP": 1095,
-              "currentMana": 865,
+              "currentHP": 7952,
+              "currentMana": 2900,
               "hellEffects": {
                 "choiceEffect": "set_magical_damage",
                 "choiceId": "Lava Sample",
@@ -8059,15 +9069,41 @@
     "URnbYaSooUaxjUCVyPm05vaB7N13": {
       "BattlePassExp": 76,
       "CM": 22373,
-      "FM": 1100,
+      "FM": 1102111,
       "Icons": {
         "santa_kuma": 1,
         "snowman": 1,
         "winter_lili": 1
       },
       "RAIDQUEST": {
-        "001": 82,
-        "heal_100k": 148267
+        "001": 158,
+        "heal_100k": 468100
+      },
+      "RAIDSkin": {
+        "red_schoolboy_shoma": {
+          "price": 1500,
+          "purchasedAt": 1750020182448
+        },
+        "red_schoolboy_siegfried": {
+          "price": 1500,
+          "purchasedAt": 1750020183617
+        },
+        "red_schoolgirl_ayane": {
+          "price": 1500,
+          "purchasedAt": 1750020184864
+        },
+        "red_schoolgirl_elphelt": {
+          "price": 1500,
+          "purchasedAt": 1750020186720
+        },
+        "red_schoolgirl_julia": {
+          "price": 1500,
+          "purchasedAt": 1750020180432
+        },
+        "red_schoolgirl_kokoro": {
+          "price": 1500,
+          "purchasedAt": 1750020178232
+        }
       },
       "RaidInventory": {
         "active_modifiers": {
@@ -8099,6 +9135,20 @@
         "Santa Claus": 1,
         "Snowflake": 1
       },
+      "UnlockedRAIDCharacters": {
+        "bridget": {
+          "source": "quest_reward",
+          "unlockedAt": 1750024184535
+        },
+        "farmer_shoma": {
+          "source": "quest_reward",
+          "unlockedAt": 1750024165549
+        },
+        "schoolgirl_ayane": {
+          "source": "quest_reward",
+          "unlockedAt": 1750021519526
+        }
+      },
       "advent2024": {
         "day1": true,
         "day10": true,
@@ -8123,26 +9173,80 @@
         "day9": true
       },
       "background": "Cyber City Event",
+      "characterTalentPoints": {
+        "farmer_cham_cham": 4,
+        "farmer_raiden": 3,
+        "renée": 3,
+        "schoolboy_siegfried": 2,
+        "schoolgirl_ayane": 1,
+        "schoolgirl_julia": 2,
+        "schoolgirl_kokoro": 5
+      },
+      "characterTalents": {
+        "farmer_cham_cham": {
+          "talent_cham_cham_1": true,
+          "talent_cham_cham_2": true,
+          "talent_cham_cham_3": true,
+          "talent_cham_cham_5": true
+        },
+        "farmer_raiden": {
+          "talent_raiden_1": true,
+          "talent_raiden_23": true,
+          "talent_raiden_3": true
+        },
+        "renée": {
+          "instinctive_veil": true,
+          "relentless_whip": true,
+          "talent_renee_root": true
+        },
+        "schoolgirl_kokoro": {
+          "enhanced_healing_feedback": true,
+          "enhanced_lesser_heal": true,
+          "healing_efficiency": true,
+          "healing_versatility": true,
+          "protective_healing": true
+        }
+      },
       "characterXP": {
+        "farmer_cham_cham": {
+          "experience": 4902,
+          "lastUpdated": 1750023533641,
+          "level": 4
+        },
+        "farmer_raiden": {
+          "experience": 6238,
+          "lastUpdated": 1750023533765,
+          "level": 4
+        },
         "farmer_shoma": {
           "experience": 409,
           "lastUpdated": 1749400735139,
           "level": 1
         },
         "renée": {
-          "experience": 765,
-          "lastUpdated": 1749400735204,
-          "level": 1
+          "experience": 5745,
+          "lastUpdated": 1750023533827,
+          "level": 4
         },
         "schoolboy_siegfried": {
-          "experience": 403,
-          "lastUpdated": 1749402617176,
-          "level": 1
+          "experience": 3898,
+          "lastUpdated": 1749836373026,
+          "level": 3
+        },
+        "schoolgirl_ayane": {
+          "experience": 1899,
+          "lastUpdated": 1749836373089,
+          "level": 2
+        },
+        "schoolgirl_julia": {
+          "experience": 2845,
+          "lastUpdated": 1749836373214,
+          "level": 3
         },
         "schoolgirl_kokoro": {
-          "experience": 404,
-          "lastUpdated": 1749402617111,
-          "level": 1
+          "experience": 11098,
+          "lastUpdated": 1750023533888,
+          "level": 6
         }
       },
       "characters": {
@@ -8157,10 +9261,17 @@
           "xp": 202
         }
       },
-      "currentStorySelection": "blazing_school_day",
+      "completedQuests": {
+        "complete_to_the_hell_we_go_story": true,
+        "global_total_damage_125k": true,
+        "kokoro_lesser_heal_80": true,
+        "kokoro_silencing_ring_damage": true,
+        "renee_lupine_veil_35": true
+      },
+      "currentStorySelection": "to_the_hell_we_go",
       "currentTeamSelection": [
         "schoolgirl_kokoro",
-        "schoolboy_siegfried"
+        "farmer_raiden"
       ],
       "email": "bbalu15@freemail.hu",
       "icon": "Yugo.png",
@@ -8170,18 +9281,39 @@
       "ownedCharacters": [
         "farmer_raiden",
         "schoolboy_siegfried",
-        "schoolgirl_kokoro"
+        "schoolgirl_kokoro",
+        "schoolgirl_ayane",
+        "farmer_shoma"
       ],
       "profileColor": "#9d2a2a",
       "profileSticker": "elf_shizumaru",
+      "questProgress": {
+        "cham_cham_feral_strike_damage": 17810,
+        "complete_to_the_hell_we_go_story": 1,
+        "farmer_cham_cham_boomerang_90000": 16914,
+        "farmer_raiden_storm_circle_100000": 12540,
+        "global_total_damage_125k": 125000,
+        "infernal_ibuki_kunai_master": 57,
+        "infernal_ibuki_smoke_specialist": 14,
+        "kokoro_lesser_heal_80": 80,
+        "kokoro_silencing_ring_damage": 5000,
+        "raiden_electric_shock_damage": 2934,
+        "renee_critical_master": 20,
+        "renee_lupine_veil_35": 35
+      },
       "ranked lose": 1,
       "ranked win": 1,
-      "selectedSkins": [
-        null,
-        "Jade Yugo",
-        "Neon Core Angel",
-        "Rockstar Akuma"
-      ],
+      "selectedSkins": {
+        "1": "Jade Yugo",
+        "2": "Neon Core Angel",
+        "3": "Rockstar Akuma",
+        "schoolboy_shoma": "red_schoolboy_shoma",
+        "schoolboy_siegfried": "red_schoolboy_siegfried",
+        "schoolgirl_ayane": "red_schoolgirl_ayane",
+        "schoolgirl_elphelt": "red_schoolgirl_elphelt",
+        "schoolgirl_julia": "red_schoolgirl_julia",
+        "schoolgirl_kokoro": "red_schoolgirl_kokoro"
+      },
       "skins": {
         "Akuma": 1,
         "Alice": 1,
@@ -8227,52 +9359,6 @@
         "Winter Festival Lili": 1,
         "Witch Julia Scarlet": 1,
         "Yugo": 1
-      },
-      "storyProgress": {
-        "blazing_school_day": {
-          "completedStages": 2,
-          "currentStageIndex": 2,
-          "lastTeamState": {
-            "schoolboy_siegfried": {
-              "currentHP": 8273,
-              "currentMana": 1005,
-              "stats": {
-                "armor": 8,
-                "critChance": 0,
-                "critDamage": 1.6,
-                "dodgeChance": 0.05,
-                "healingPower": 0,
-                "hp": 8790,
-                "hpPerTurn": 0,
-                "lifesteal": 0,
-                "magicalDamage": 10,
-                "magicalShield": 8,
-                "mana": 2010,
-                "manaPerTurn": 0,
-                "physicalDamage": 300
-              }
-            },
-            "schoolgirl_kokoro": {
-              "currentHP": 6323,
-              "currentMana": 1370,
-              "stats": {
-                "armor": 6,
-                "critChance": 0,
-                "critDamage": 1.5,
-                "dodgeChance": 0.05,
-                "healingPower": 0,
-                "hp": 6500,
-                "hpPerTurn": 0,
-                "lifesteal": 0,
-                "magicalDamage": 150,
-                "magicalShield": 7,
-                "mana": 3000,
-                "manaPerTurn": 0,
-                "physicalDamage": 30
-              }
-            }
-          }
-        }
       },
       "username": "R3MMUS"
     },
@@ -8874,6 +9960,12 @@
         "Shizumaru_Lmao": 1,
         "Shoma_Surprised": 1
       },
+      "UnlockedRAIDCharacters": {
+        "schoolboy_siegfried": {
+          "source": "quest_reward",
+          "unlockedAt": 1750014928245
+        }
+      },
       "advent2024": {
         "day22": true
       },
@@ -8881,8 +9973,18 @@
       "beginnerEgg": true,
       "characterXP": {
         "farmer_cham_cham": {
-          "experience": 147,
-          "lastUpdated": 1749388553857,
+          "experience": 956,
+          "lastUpdated": 1750014572296,
+          "level": 1
+        },
+        "farmer_nina": {
+          "experience": 105,
+          "lastUpdated": 1750014974169,
+          "level": 1
+        },
+        "farmer_shoma": {
+          "experience": 405,
+          "lastUpdated": 1750014572353,
           "level": 1
         }
       },
@@ -8905,13 +10007,17 @@
           "win": 1
         }
       },
+      "completedQuests": {
+        "global_total_damage_125k": true
+      },
       "currentStageSelection": {
         "id": "5v5_blazing_school_day",
         "name": "5v5 - Blazing School Day"
       },
-      "currentStorySelection": "tutorial_first_steps",
+      "currentStorySelection": "corruption_at_the_farmland",
       "currentTeamSelection": [
-        "farmer_cham_cham"
+        "farmer_nina",
+        "farmer_alice"
       ],
       "defeated_trainers": {
         "camper_casey": {
@@ -9109,7 +10215,23 @@
           "uniqueId": "monster_1748183779139_wnfnray5"
         }
       },
+      "ownedCharacters": [
+        "farmer_nina",
+        "schoolboy_siegfried"
+      ],
       "profileColor": "#22582b",
+      "questProgress": {
+        "cham_cham_feral_strike_damage": 11816,
+        "farmer_alice_carrot_power_up_25": 4,
+        "farmer_cham_cham_boomerang_90000": 16561,
+        "farmer_nina_sniper_crit_30": 17,
+        "farmer_raiden_storm_circle_100000": 890,
+        "global_total_damage_125k": 125000,
+        "nina_piercing_shot_usage": 12,
+        "raiden_electric_shock_damage": 204,
+        "siegfried_lion_protection_heal_21000": 1962,
+        "siegfried_total_damage": 16818
+      },
       "quests": {
         "crisisInTheKingdom": {
           "claimed": false,
@@ -9177,6 +10299,52 @@
         "Summertime Shoma": 1,
         "Talim": 1,
         "Yugo": 1
+      },
+      "storyProgress": {
+        "corruption_at_the_farmland": {
+          "completedStages": 2,
+          "currentStageIndex": 2,
+          "lastTeamState": {
+            "farmer_alice": {
+              "currentHP": 9340,
+              "currentMana": 2570,
+              "stats": {
+                "armor": 12,
+                "critChance": 0,
+                "critDamage": 1.5,
+                "dodgeChance": 0.05,
+                "healingPower": 0,
+                "hp": 9340,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 0,
+                "magicalShield": 20,
+                "mana": 2570,
+                "manaPerTurn": 0,
+                "physicalDamage": 120
+              }
+            },
+            "farmer_nina": {
+              "currentHP": 3314,
+              "currentMana": 1060,
+              "stats": {
+                "armor": 10,
+                "critChance": 0.1,
+                "critDamage": 1.7,
+                "dodgeChance": 0.03,
+                "healingPower": 0,
+                "hp": 6980,
+                "hpPerTurn": 0,
+                "lifesteal": 0,
+                "magicalDamage": 0,
+                "magicalShield": 6,
+                "mana": 1800,
+                "manaPerTurn": 0,
+                "physicalDamage": 220
+              }
+            }
+          }
+        }
       },
       "username": "Micsiboy XBOX"
     }

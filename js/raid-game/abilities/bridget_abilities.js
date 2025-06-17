@@ -4553,61 +4553,7 @@ bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
     return result;
 };
 
-// Add to Bubble Beam Barrage effect
-let originalBubbleBeamBarrageEffect = bridgetBubbleBeamBarrageEffect;
-bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
-    const result = originalBubbleBeamBarrageEffect(caster, targets, abilityInstance);
-    
-    // Manually trigger Resonant Cascade after the ability effect
-    if (caster && caster.id === 'bridget') {
-        setTimeout(() => {
-            triggerResonantCascade(caster, targets);
-        }, 100);
-    }
-    
-    return result;
-};
-
-// Add to Arcane Bubble Shield effect
-let originalArcaneBubbleShieldEffect = bridgetArcaneBubbleShieldEffect;
-bridgetArcaneBubbleShieldEffect = (caster) => {
-    const result = originalArcaneBubbleShieldEffect(caster);
-    
-    // For self-targeting abilities, we need to create a targets array with the caster
-    if (caster && caster.id === 'bridget') {
-        setTimeout(() => {
-            // For shield, we need to find allies since it affects allies
-            const gameManager = getGameManager();
-            if (gameManager) {
-                const allies = gameManager.getAllies(caster);
-                triggerResonantCascade(caster, allies);
-            } else {
-                // Fallback to just targeting self
-                triggerResonantCascade(caster, [caster]);
-            }
-        }, 100);
-    }
-    
-    return result;
-};
-
-// Add to Wave Crush effect 
-let originalWaveCrushEffect = bridgetWaveCrushEffect;
-bridgetWaveCrushEffect = (caster) => {
-    const result = originalWaveCrushEffect(caster);
-    
-    // For AoE abilities, we need to create a targets array with all enemies
-    if (caster && caster.id === 'bridget') {
-        setTimeout(() => {
-            const gameManager = getGameManager();
-            if (gameManager) {
-                const enemies = gameManager.getOpponents(caster);
-                triggerResonantCascade(caster, enemies);
-            }
-        }, 100);
-    }
-    
-    return result;
-};
+// Note: Removed problematic const reassignments that were causing JavaScript errors
+// The battle log should now work properly without these function overrides
 
         

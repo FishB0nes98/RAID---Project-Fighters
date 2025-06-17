@@ -7,7 +7,7 @@
         "magicalDamage": 0,
         "armor": 14,
         "magicalShield": 20,
-        "hp": 12200,
+        "hp": 4900,
         "hpPerTurn": 0,
         "mana": 3500,
         "manaPerTurn": 0,
@@ -18,6 +18,34 @@
         "healingPower": 0.00
     },
     "abilities": [
+        {
+            "id": "trident_stab",
+            "name": "Trident Stab",
+            "type": "custom",
+            "effect": "trident_stab",
+            "targetType": "enemy",
+            "manaCost": 60,
+            "cooldown": 1,
+            "description": "Deals 420 + 80% physical damage to the target.",
+            "icon": "Icons/abilities/abyssal_empowerment.png"
+        },
+        {
+            "id": "swift_swim",
+            "name": "Swift Swim",
+            "type": "custom",
+            "effect": "swift_swim",
+            "targetType": "self",
+            "manaCost": 80,
+            "cooldown": 4,
+            "description": "Gains Untargetable for 2 turns (can still take damage or effects).",
+            "icon": "Icons/abilities/swift_swim.png"
+        }
     ],
+    "passive": {
+        "id": "shadowfin_passive",
+        "name": "Shadow Evasion",
+        "description": "When healed, gains stacking 5% dodge chance for 4 turns.",
+        "icon": "Icons/passives/shadow_evasion.png"
+    },
     "tags": ["Enemy", "Boss", "Atlantean", "Shadow"]
 } 

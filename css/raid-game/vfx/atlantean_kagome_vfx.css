@@ -1,0 +1,524 @@
+/* ===== ATLANTEAN KAGOME VFX STYLES ===== */
+
+/* === Q ABILITY - GOLDEN ARROW === */
+
+/* Bow pull-back effect for caster */
+.kagome-bow-animation {
+    transform: scale(1.1) rotate(-5deg);
+    filter: brightness(1.3) drop-shadow(0 0 15px gold);
+}
+
+/* Golden arrow projectile */
+.golden-arrow-projectile {
+    position: absolute;
+    width: 60px;
+    height: 8px;
+    background: linear-gradient(90deg, 
+        #ffd700 0%, 
+        #ffed4e 30%, 
+        #fff8dc  50%, 
+        #ffed4e 70%, 
+        #ffd700 100%);
+    border-radius: 4px;
+    box-shadow: 
+        0 0 20px #ffd700,
+        0 0 40px rgba(255, 215, 0, 0.8),
+        inset 0 2px 0 rgba(255, 255, 255, 0.6);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.golden-arrow-projectile:before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: -4px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 16px solid #ffd700;
+    filter: drop-shadow(0 0 8px #ffd700);
+}
+
+.golden-arrow-projectile:after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 1px;
+    width: 12px;
+    height: 6px;
+    background: linear-gradient(45deg, #ff6b35, #ff8c42);
+    clip-path: polygon(0 0, 70% 50%, 0 100%);
+}
+
+/* Golden arrow hit effect */
+.golden-arrow-hit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(2);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.8;
+}
+
+.golden-arrow-hit:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.9) 0%,
+        rgba(255, 237, 78, 0.7) 30%,
+        rgba(255, 248, 220, 0.4) 60%,
+        transparent 100%);
+    border-radius: 50%;
+}
+
+.golden-arrow-hit:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    width: 40px;
+    height: 40px;
+    background: #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 50px #ffd700, 0 0 80px rgba(255, 215, 0, 0.5);
+}
+
+/* === W ABILITY - SCATTER GOLDEN ARROWS === */
+
+/* Arrow rain effect */
+.kagome-arrow-rain {
+    position: absolute;
+    width: 100%;
+    height: 300px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 998;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+.kagome-arrow-rain:before,
+.kagome-arrow-rain:after {
+    display: none !important;
+}
+
+/* Individual arrow hit on enemies */
+.kagome-arrow-hit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.2);
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.8;
+}
+
+.kagome-arrow-hit:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle,
+        rgba(255, 215, 0, 0.8) 0%,
+        rgba(255, 237, 78, 0.6) 40%,
+        transparent 100%);
+    border-radius: 50%;
+}
+
+/* Magical damage buff VFX */
+.magical-damage-buff-vfx {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.magical-damage-buff-vfx span {
+    display: inline-block;
+    color: #ffd700;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 10px #ffd700,
+        0 0 20px rgba(255, 215, 0, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(0 0 8px #ffd700);
+}
+
+/* === E ABILITY - SPIRITWALK === */
+
+/* Spirit portal overlay */
+.kagome-spirit-portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center,
+        rgba(138, 43, 226, 0.3) 0%,
+        rgba(75, 0, 130, 0.2) 30%,
+        rgba(25, 25, 112, 0.1) 60%,
+        transparent 100%);
+    pointer-events: none;
+    z-index: 997;
+    backdrop-filter: blur(2px);
+}
+
+.kagome-spirit-portal:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    width: 300px;
+    height: 300px;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(138, 43, 226, 0.4),
+        rgba(75, 0, 130, 0.6),
+        rgba(138, 43, 226, 0.4),
+        transparent
+    );
+    border-radius: 50%;
+    filter: blur(3px);
+}
+
+/* Character transformation during spiritwalk */
+.kagome-spiritwalk-animation {
+    filter: brightness(1.5) contrast(1.2) hue-rotate(270deg) drop-shadow(0 0 20px #8a2be2);
+    transform: scale(1.1);
+    border: 3px solid rgba(138, 43, 226, 0.8);
+    border-radius: 10px;
+}
+
+.kagome-spiritwalk-animation:before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(45deg, 
+        rgba(138, 43, 226, 0.3),
+        rgba(75, 0, 130, 0.3),
+        rgba(138, 43, 226, 0.3));
+    border-radius: 15px;
+    z-index: -1;
+}
+
+/* Spirit walk VFX around character */
+.kagome-spiritwalk-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+    z-index: 998;
+}
+
+.kagome-spiritwalk-vfx:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(138, 43, 226, 0.6),
+        transparent,
+        rgba(75, 0, 130, 0.4),
+        transparent
+    );
+    border-radius: 50%;
+    filter: blur(2px);
+}
+
+.kagome-spiritwalk-vfx:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle,
+        rgba(138, 43, 226, 0.8) 0%,
+        rgba(75, 0, 130, 0.4) 50%,
+        transparent 100%);
+    border-radius: 50%;
+}
+
+/* === R ABILITY - SPIRIT SCREAM === */
+
+/* Main spirit scream effect */
+.kagome-spirit-scream {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(3);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.9;
+}
+
+.kagome-spirit-scream:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle,
+        rgba(138, 43, 226, 0.8) 0%,
+        rgba(75, 0, 130, 0.6) 30%,
+        rgba(25, 25, 112, 0.4) 60%,
+        transparent 100%);
+    border-radius: 50%;
+    filter: blur(5px);
+}
+
+.kagome-spirit-scream:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    width: 120px;
+    height: 120px;
+    background: conic-gradient(
+        from 0deg,
+        #8a2be2,
+        #4b0082,
+        #191970,
+        #8a2be2
+    );
+    border-radius: 50%;
+    box-shadow: 
+        0 0 50px rgba(138, 43, 226, 0.8),
+        inset 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+/* Spirit glow on caster */
+.kagome-spirit-glow {
+    filter: brightness(1.4) drop-shadow(0 0 30px #8a2be2);
+    transform: scale(1.15);
+    border: 2px solid rgba(138, 43, 226, 0.9);
+    border-radius: 8px;
+}
+
+.kagome-spirit-glow:before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    background: radial-gradient(circle,
+        rgba(138, 43, 226, 0.4) 0%,
+        rgba(75, 0, 130, 0.3) 50%,
+        transparent 100%);
+    border-radius: 15px;
+    z-index: -1;
+}
+
+/* Buff dispel effect on enemies */
+.kagome-buff-dispel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 998;
+    opacity: 0.8;
+}
+
+.kagome-buff-dispel:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(255, 105, 180, 0.8),
+        transparent,
+        rgba(255, 20, 147, 0.6),
+        transparent
+    );
+    border-radius: 50%;
+    filter: blur(2px);
+}
+
+.kagome-buff-dispel:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle,
+        rgba(255, 105, 180, 0.9) 0%,
+        rgba(255, 20, 147, 0.5) 70%,
+        transparent 100%);
+    border-radius: 50%;
+}
+
+/* Scream impact on individual enemies */
+.kagome-scream-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.3);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 997;
+    opacity: 0.9;
+}
+
+.kagome-scream-impact:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle,
+        rgba(138, 43, 226, 0.8) 0%,
+        rgba(75, 0, 130, 0.5) 50%,
+        transparent 100%);
+    border-radius: 50%;
+}
+
+.kagome-scream-impact:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: #8a2be2;
+    border-radius: 50%;
+    box-shadow: 0 0 25px #8a2be2;
+}
+
+/* Screen shake effect */
+.kagome-screen-shake {
+    transform: translate(2px, 1px) rotate(0.5deg);
+}
+
+/* Floating damage/heal text */
+.kagome-floating-text {
+    position: absolute;
+    font-size: 18px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 1001;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    transform: translateY(-20px);
+    opacity: 0.9;
+}
+
+/* === NEW PARTICLE ENHANCEMENTS (2025-06) === */
+
+/* Golden Arrow trailing spark */
+.golden-arrow-spark {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #ffe27d 0%, #ffcd00 40%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.8);
+    animation: kagomeSparkFade 0.8s linear forwards;
+    z-index: 999;
+}
+
+@keyframes kagomeSparkFade {
+    0%   { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+    50%  { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0;   transform: translate(-50%, -50%) scale(0.4); }
+}
+
+/* Golden Arrow impact sparks */
+.golden-arrow-impact-spark {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #ffe27d 0%, #ff9e00 60%, transparent 80%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1);
+    animation: kagomeImpactSpark 0.6s ease-out forwards;
+    z-index: 1000;
+}
+
+@keyframes kagomeImpactSpark {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.6); }
+    80%  { opacity: 0.7; transform: translate(-50%, -50%) scale(1.4); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.1); }
+}
+
+/* Scatter Golden Arrows – individual falling arrows */
+.kagome-arrow-rain-arrow {
+    position: absolute;
+    top: -60px;
+    width: 40px;
+    height: 6px;
+    background: linear-gradient(90deg, #ffd700 0%, #fff8dc 50%, #ffd700 100%);
+    border-radius: 3px;
+    transform: rotate(35deg);
+    pointer-events: none;
+    z-index: 998;
+    animation: kagomeArrowRainFall 0.9s linear forwards;
+}
+
+.kagome-arrow-rain-arrow::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 12px solid #ffd700;
+}
+
+@keyframes kagomeArrowRainFall {
+    0%   { transform: translateY(0) rotate(35deg); opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(350px) rotate(35deg); opacity: 0; }
+} 

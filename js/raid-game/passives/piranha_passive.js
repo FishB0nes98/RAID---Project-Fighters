@@ -2,45 +2,85 @@ class PiranhaPassive {
     constructor() {
         this.id = 'piranha_passive';
         this.name = 'Bloodthirsty Healing';
-        this.description = 'Your attacks heal the highest Max HP target for 50% of your damage dealt.';
+        this.description = 'Your attacks heal the highest Max HP ally for 50% of your damage dealt.';
         this.isActive = true;
     }
 
-    initialize() {
-        // Hook into the damage application system
+    initialize(character = null) {
+        console.log('[Piranha Passive] Initializing Piranha passive...', character ? `for ${character.name}` : 'globally');
+        
+        // If called per-character, just mark that this character has the passive
+        if (character) {
+            character.hasPiranhaPassive = true;
+            console.log('[Piranha Passive] Marked character as having piranha passive:', character.name);
+        }
+        
+        // Hook into the damage application system (only needs to be done once globally)
         this.hookDamageApplication();
+        console.log('[Piranha Passive] Piranha passive initialized successfully');
     }
 
     hookDamageApplication() {
         // Store original applyDamage method if not already hooked
         if (!Character.prototype._piranhaPassiveHooked) {
+            console.log('[Piranha Passive] Hooking into applyDamage method...');
             const originalApplyDamage = Character.prototype.applyDamage;
             
             Character.prototype.applyDamage = function(amount, type, caster = null, options = {}) {
                 // Call original damage application first
                 const result = originalApplyDamage.call(this, amount, type, caster, options);
                 
+                // Debug log for all damage applications
+                if (caster) {
+                    console.log('[Piranha Passive] Damage application - Caster:', caster.name || caster.id, 'ID:', caster.id, 'DamageDealt:', result.damageDealt || result.damage, 'Options:', options);
+                }
+                
                 // Check if damage was dealt by a piranha and if it wasn't redirected
-                if (caster && caster.id === 'piranha' && !options.isPiranhaHealing && result.damageDealt > 0) {
-                    window.piranhaPassiveInstance?.triggerBloodthirstyHealing(caster, result.damageDealt);
+                const damageAmount = result.damageDealt || result.damage || 0;
+                if (caster && caster.id === 'piranha' && !options.isPiranhaHealing && damageAmount > 0) {
+                    console.log('[Piranha Passive] Triggering bloodthirsty healing - damage dealt:', damageAmount);
+                    window.piranhaPassiveInstance?.triggerBloodthirstyHealing(caster, damageAmount);
+                } else if (caster && caster.id === 'piranha') {
+                    console.log('[Piranha Passive] Piranha attack detected but not triggering passive - damageDealt:', damageAmount, 'options:', options);
                 }
                 
                 return result;
             };
             
             Character.prototype._piranhaPassiveHooked = true;
+            console.log('[Piranha Passive] Successfully hooked applyDamage method');
+        } else {
+            console.log('[Piranha Passive] applyDamage method already hooked');
         }
     }
 
     triggerBloodthirstyHealing(piranha, damageDealt) {
+        console.log('[Piranha Passive] triggerBloodthirstyHealing called with damage:', damageDealt, 'piranha:', piranha.name || piranha.id);
         try {
-            // Find the character with the highest Max HP
-            const allCharacters = [...(window.gameManager?.playerCharacters || []), ...(window.gameManager?.aiCharacters || [])];
+            // Find ALLIES only (same team as piranha)
+            const gameState = window.gameManager?.gameState;
             
-            if (allCharacters.length === 0) return;
+            // Determine piranha's team and get allies
+            let allies = [];
+            if (gameState?.aiCharacters?.includes(piranha)) {
+                // Piranha is AI, so allies are other AI characters
+                allies = gameState.aiCharacters.filter(char => char.id !== piranha.id && !char.isDead());
+                console.log('[Piranha Passive] Piranha is AI character, targeting AI allies');
+            } else if (gameState?.playerCharacters?.includes(piranha)) {
+                // Piranha is player character, so allies are other player characters
+                allies = gameState.playerCharacters.filter(char => char.id !== piranha.id && !char.isDead());
+                console.log('[Piranha Passive] Piranha is player character, targeting player allies');
+            }
             
-            // Find character with highest max HP
-            const highestHpTarget = allCharacters.reduce((prev, current) => {
+            console.log('[Piranha Passive] Found allies for healing:', allies.map(c => `${c.name || c.id} (maxHp: ${c.stats.maxHp || c.stats.hp})`));
+            
+            if (allies.length === 0) {
+                console.log('[Piranha Passive] No allies found for healing');
+                return;
+            }
+            
+            // Find ally with highest max HP
+            const highestHpTarget = allies.reduce((prev, current) => {
                 const prevMaxHp = prev.stats.maxHp || prev.stats.hp;
                 const currentMaxHp = current.stats.maxHp || current.stats.hp;
                 return currentMaxHp > prevMaxHp ? current : prev;
@@ -73,10 +113,13 @@ class PiranhaPassive {
 
     showBloodthirstyHealingVFX(piranha, target, healAmount) {
         try {
-            const piranhaElement = document.querySelector(`[data-character-id="${piranha.id}"]`);
-            const targetElement = document.querySelector(`[data-character-id="${target.id}"]`);
+            const piranhaElement = document.getElementById(`character-${piranha.id}`) || document.querySelector(`[data-character-id="${piranha.id}"]`);
+            const targetElement = document.getElementById(`character-${target.id}`) || document.querySelector(`[data-character-id="${target.id}"]`);
             
-            if (!piranhaElement || !targetElement) return;
+            if (!piranhaElement || !targetElement) {
+                console.log('[Piranha Passive] Could not find character elements for VFX', { piranhaElement, targetElement });
+                return;
+            }
             
             // Create blood energy beam from piranha to target
             this.createBloodEnergyBeam(piranhaElement, targetElement);
@@ -191,6 +234,9 @@ class PiranhaPassive {
 
 // Create global instance
 window.piranhaPassiveInstance = new PiranhaPassive();
+
+// Also make the class available globally for the character factory
+window.PiranhaPassive = PiranhaPassive;
 
 // CSS for VFX
 if (!document.getElementById('piranha-passive-styles')) {

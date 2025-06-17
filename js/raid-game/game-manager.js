@@ -105,6 +105,11 @@ class GameManager {
         this.playerProgressData = null; // Store player progress data
         this.questManager = null; // Will be initialized when available
         
+        // Debug cheat code system
+        this.debugKeySequence = '';
+        this.debugKeyTimeout = null;
+        this.initializeDebugCheatCodes();
+        
         // Add debug function to window for testing HP bar calculations
         window.debugHPBars = () => {
             console.log('=== HP BAR DEBUG TEST ===');
@@ -139,6 +144,97 @@ class GameManager {
         };
         
         console.log('GameManager initialized. Use window.debugHPBars() in browser console to test HP calculations');
+    }
+    
+    // Test battle log functionality
+    testBattleLog() {
+        console.log('[GameManager] Testing battle log functionality...');
+        this.addLogEntry('🎮 Game Manager Initialized', 'system');
+        this.addLogEntry('🔥 Battle log is working correctly!', 'system');
+        console.log('[GameManager] Battle log test completed');
+    }
+
+    /**
+     * Initialize debug cheat code system
+     */
+    initializeDebugCheatCodes() {
+        // Listen for keydown events to capture cheat codes
+        document.addEventListener('keydown', (event) => {
+            // Ignore if user is typing in an input field
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            // Add the pressed key to the sequence
+            this.debugKeySequence += event.key.toLowerCase();
+            
+            // Clear timeout if it exists
+            if (this.debugKeyTimeout) {
+                clearTimeout(this.debugKeyTimeout);
+            }
+            
+            // Set new timeout to clear sequence after 2 seconds
+            this.debugKeyTimeout = setTimeout(() => {
+                this.debugKeySequence = '';
+            }, 2000);
+            
+            // Check for "uhm" cheat code
+            if (this.debugKeySequence.includes('uhm')) {
+                this.activateEnemyLowHPCheat();
+                this.debugKeySequence = ''; // Clear sequence after activation
+                if (this.debugKeyTimeout) {
+                    clearTimeout(this.debugKeyTimeout);
+                }
+            }
+            
+            // Keep sequence length reasonable (prevent memory issues)
+            if (this.debugKeySequence.length > 10) {
+                this.debugKeySequence = this.debugKeySequence.slice(-5);
+            }
+        });
+        
+        console.log('[GameManager] Debug cheat codes initialized. Type "uhm" quickly to activate enemy low HP cheat.');
+    }
+
+    /**
+     * Cheat code: Set all enemy HP to 1%
+     */
+    activateEnemyLowHPCheat() {
+        if (!this.gameState || !this.gameState.aiCharacters) {
+            console.warn('[Debug] No AI characters found. Game may not be started yet.');
+            return;
+        }
+        
+        let enemiesAffected = 0;
+        
+        // Set all AI characters' HP to 1% of their max HP
+        this.gameState.aiCharacters.forEach(enemy => {
+            if (!enemy.isDead()) {
+                const onePercent = Math.max(1, Math.floor(enemy.stats.maxHp * 0.01));
+                enemy.stats.currentHp = onePercent;
+                enemiesAffected++;
+                
+                // Update UI to reflect the HP change
+                if (this.uiManager) {
+                    this.uiManager.updateCharacterUI(enemy);
+                }
+            }
+        });
+        
+        // Add visual feedback
+        if (this.uiManager) {
+            this.uiManager.addLogEntry(
+                `🔧 DEBUG CHEAT: Set ${enemiesAffected} enemies to 1% HP!`, 
+                'system'
+            );
+        }
+        
+        // Add screen shake for dramatic effect
+        if (this.uiManager) {
+            this.uiManager.addScreenShake();
+        }
+        
+        console.log(`[Debug] Enemy low HP cheat activated! ${enemiesAffected} enemies affected.`);
     }
 
     /**
@@ -451,8 +547,11 @@ class GameManager {
         this.uiManager.updateTurnCounter(gameState.turn);
         this.uiManager.updatePhase(gameState.phase);
         this.uiManager.clearBattleLog();
-        this.uiManager.addLogEntry(`Battle started in ${stage.name}!`, 'system');
-        this.uiManager.addLogEntry(`Player's turn`, 'player-turn');
+                    // Test the battle log
+            this.testBattleLog();
+            
+            this.uiManager.addLogEntry(`Battle started in ${stage.name}!`, 'system');
+            this.uiManager.addLogEntry(`Player's turn`, 'player-turn');
         
         // --- ENHANCED: Comprehensive UI update after complete character loading ---
         console.log('[GameManager] Starting comprehensive UI update after complete character loading...');
@@ -2438,6 +2537,13 @@ class GameManager {
                        // --- DEBUG LOGGING ---
                        console.error('[GameManager] Error saving battle result, but still showing Game Over screen.', error);
                        // --- DEBUG LOGGING END ---
+                       
+                       // Show a brief notification about the save failure
+                       if (error.message && error.message.includes('sendRequest')) {
+                           console.warn('[GameManager] Firebase connection issue detected. Battle progress may not be saved.');
+                           // You could show a toast notification here if you have a notification system
+                       }
+                       
                        // Still show the game over screen even if saving failed, pass context
                        this.uiManager.showGameOverScreen(isVictory, { storyId, returnUrl }); 
                        // this.clearBattleLog(); 
@@ -2454,7 +2560,21 @@ class GameManager {
 
        // Add a log entry
        addLogEntry(message, className = '') {
+           console.log(`[GameManager] Adding log entry: ${message} (class: ${className})`); // Debug log
+           
+           // Use the global addBattleLogMessage function if available
+           if (window.addBattleLogMessage) {
+               window.addBattleLogMessage(message, className);
+               return;
+           }
+           
+           // Fallback implementation
            const logElement = document.getElementById('battle-log');
+           if (!logElement) {
+               console.warn('[GameManager] Battle log element not found! Message:', message);
+               return;
+           }
+           
            const entry = document.createElement('div');
            entry.className = `log-entry ${className}`;
            
@@ -2494,6 +2614,8 @@ class GameManager {
                    }, 500);
                }
            }
+           
+           console.log(`[GameManager] Log entry added successfully`); // Debug log
        }
 
        // Clear battle log
@@ -2736,10 +2858,46 @@ class GameManager {
             // --- DEBUG LOGGING ---
             console.log(`[GameManager] saveBattleResultToFirebase called. Victory: ${isVictory}`);
             // --- DEBUG LOGGING END ---
+           
+           // Check if Firebase is properly initialized and try to reinitialize if needed
+           if (!firebaseDatabase) {
+               console.error('[GameManager] Firebase database not initialized. Attempting to reinitialize...');
+               try {
+                   // Try to reinitialize Firebase
+                   if (window.firebase && window.firebase.database) {
+                       firebaseDatabase = window.firebase.database();
+                       console.log('[GameManager] Firebase database reinitialized successfully.');
+                   } else {
+                       console.error('[GameManager] Cannot reinitialize Firebase database. Firebase not available.');
+                       return false;
+                   }
+               } catch (error) {
+                   console.error('[GameManager] Error reinitializing Firebase database:', error);
+                   return false;
+               }
+           }
+           
+           if (!firebaseAuth || !firebaseAuth.currentUser) {
+               console.error('[GameManager] Firebase auth not initialized or user not authenticated.');
+               try {
+                   // Try to get auth from window
+                   if (window.auth && window.auth.currentUser) {
+                       firebaseAuth = window.auth;
+                       console.log('[GameManager] Firebase auth recovered from window.');
+                   } else {
+                       console.error('[GameManager] Cannot save battle result - user not authenticated.');
+                       return false;
+                   }
+               } catch (error) {
+                   console.error('[GameManager] Error recovering Firebase auth:', error);
+                   return false;
+               }
+           }
+           
            const userId = getCurrentUserId();
            if (!userId) {
                console.log('[GameManager] User not logged in. Cannot save battle result.');
-               return;
+               return false;
            }
 
            const urlParams = new URLSearchParams(window.location.search);
@@ -2768,14 +2926,39 @@ class GameManager {
                     if (isVictory) {
                          finalTeamState = this.gameState.playerCharacters
                             .filter(char => !char.isDead()) // Only include survivors
-                            .map(char => ({
-                                id: char.id,
-                                currentHP: char.stats.currentHp,
-                                currentMana: char.stats.currentMana,
-                                // --- IMPORTANT: Include stats to persist modifications ---
-                                stats: { ...char.stats } 
-                                // --- END IMPORTANT ---
-                            }));
+                            .map(char => {
+                                const charState = {
+                                    id: char.id,
+                                    currentHP: char.stats.currentHp,
+                                    currentMana: char.stats.currentMana,
+                                    // --- IMPORTANT: Include stats to persist modifications ---
+                                    stats: { ...char.stats } 
+                                    // --- END IMPORTANT ---
+                                };
+                                
+                                // --- NEW: Include atlantean blessings if they exist ---
+                                if (char.atlanteanBlessings && Object.keys(char.atlanteanBlessings).length > 0) {
+                                    charState.atlanteanBlessings = { ...char.atlanteanBlessings };
+                                }
+                                // --- END NEW ---
+                                
+                                // Include hell effects if they exist (Firebase doesn't allow undefined)
+                                if (char.hellEffects && Object.keys(char.hellEffects).length > 0) {
+                                    charState.hellEffects = { ...char.hellEffects };
+                                }
+                                
+                                // Include permanent debuffs if they exist
+                                if (char.permanentDebuffs && char.permanentDebuffs.length > 0) {
+                                    charState.permanentDebuffs = [...char.permanentDebuffs];
+                                }
+                                
+                                // Include permanent buffs if they exist
+                                if (char.permanentBuffs && char.permanentBuffs.length > 0) {
+                                    charState.permanentBuffs = [...char.permanentBuffs];
+                                }
+                                
+                                return charState;
+                            });
                           // --- DEBUG LOGGING ---
                           console.log('[GameManager] Final Team State (Victory):', JSON.stringify(finalTeamState));
                           // --- DEBUG LOGGING END ---
@@ -2801,7 +2984,15 @@ class GameManager {
                     try {
                          // --- DEBUG LOGGING ---
                          console.log(`[GameManager] Attempting to set data at path: ${resultPath}`);
+                         console.log(`[GameManager] Firebase database status:`, firebaseDatabase ? 'initialized' : 'null');
+                         console.log(`[GameManager] Firebase auth status:`, firebaseAuth?.currentUser ? 'authenticated' : 'not authenticated');
                          // --- DEBUG LOGGING END ---
+                         
+                         // Double-check Firebase is still valid before the operation
+                         if (!firebaseDatabase) {
+                             throw new Error('Firebase database became null during operation');
+                         }
+                         
                         await firebaseDatabase.ref(resultPath).set(battleResult);
                         console.log(`[GameManager] Battle result for story ${storyId}, stage ${stageIndex} saved to Firebase.`);
                         
@@ -2839,6 +3030,11 @@ class GameManager {
                     console.log(`[GameManager] Saving standalone battle result for stage: ${stageId}`);
                     
                     try {
+                        // Double-check Firebase is still valid before the operation
+                        if (!firebaseDatabase) {
+                            throw new Error('Firebase database became null during standalone battle save operation');
+                        }
+                        
                         // Path for standalone battle results
                         const resultsPath = `users/${userId}/battleResults/${stageId}`;
                         
@@ -2856,6 +3052,8 @@ class GameManager {
                             survivors: survivors,
                             teamComposition: teamComposition
                         };
+                        
+                        console.log(`[GameManager] Saving standalone battle data:`, battleData);
                         
                         // Save the battle result
                         await firebaseDatabase.ref(resultsPath).push(battleData);
@@ -5329,7 +5527,20 @@ class GameManager {
                     if (ability.manaCost > 0) {
                         const manaCostDiv = document.createElement('div');
                         manaCostDiv.className = 'ability-cost';
-                        manaCostDiv.textContent = ability.manaCost;
+                        
+                        // Calculate actual mana cost considering atlantean blessing
+                        let actualManaCost = ability.manaCost;
+                        if (character.atlanteanBlessings && character.atlanteanBlessings.mana_efficiency && !character.isAI) {
+                            actualManaCost = Math.ceil(ability.manaCost * 0.5); // 50% reduction
+                        }
+                        
+                        // Show reduced cost if different from base cost
+                        if (actualManaCost !== ability.manaCost) {
+                            manaCostDiv.innerHTML = `<span style="color: #ffffff; font-weight: bold;">${actualManaCost}</span>`;
+                        } else {
+                            manaCostDiv.textContent = ability.manaCost;
+                        }
+                        
                         abilityElement.appendChild(manaCostDiv);
                     }
                     
@@ -6382,7 +6593,29 @@ class GameManager {
 
         // Add log entry
         addLogEntry(message, className = '') {
+            console.log(`[UIManager] Adding log entry: ${message} (class: ${className})`); // Debug log
+            
+            // Use the global addBattleLogMessage function if available
+            if (window.addBattleLogMessage) {
+                window.addBattleLogMessage(message, className);
+                return;
+            }
+            
+            // Use the GameManager's addLogEntry to avoid duplication
+            if (this.gameManager && this.gameManager.addLogEntry) {
+                this.gameManager.addLogEntry(message, className);
+                return;
+            }
+            
+            // Fallback implementation if neither is available
+            console.warn('[UIManager] No battle log method available, using direct fallback');
+            
             const logElement = document.getElementById('battle-log');
+            if (!logElement) {
+                console.warn('[UIManager] Battle log element not found! Message:', message);
+                return;
+            }
+            
             const entry = document.createElement('div');
             entry.className = `log-entry ${className}`;
             
@@ -6695,7 +6928,20 @@ class GameManager {
                 
                 if (ability.manaCost !== undefined) {
                     const manaCost = document.createElement('span');
-                    manaCost.textContent = `Mana: ${ability.manaCost}`;
+                    
+                    // Calculate actual mana cost considering atlantean blessing
+                    let actualManaCost = ability.manaCost;
+                    if (character.atlanteanBlessings && character.atlanteanBlessings.mana_efficiency && !character.isAI) {
+                        actualManaCost = Math.ceil(ability.manaCost * 0.5); // 50% reduction
+                    }
+                    
+                    // Show reduced cost if different from base cost
+                    if (actualManaCost !== ability.manaCost) {
+                        manaCost.innerHTML = `Mana: <span style="text-decoration: line-through; color: #888;">${ability.manaCost}</span> <span style="color: #3498db; font-weight: bold;">${actualManaCost}</span>`;
+                    } else {
+                        manaCost.textContent = `Mana: ${ability.manaCost}`;
+                    }
+                    
                     manaCost.classList.add('ability-mana-cost');
                     abilityDetails.appendChild(manaCost);
                 }
@@ -6704,7 +6950,13 @@ class GameManager {
                     const cooldown = document.createElement('span');
                     // Read CURRENT cooldown from the instance
                     const currentCooldown = ability.currentCooldown || 0;
-                    const maxCooldown = ability.cooldown || 0; // Base cooldown
+                    let maxCooldown = ability.cooldown || 0; // Base cooldown
+                    
+                    // --- NEW: Apply Atlantean Swiftness blessing to displayed cooldown ---
+                    if (character.atlanteanBlessings && character.atlanteanBlessings.swiftness && index === 0 && !character.isAI) {
+                        maxCooldown = Math.max(0, maxCooldown - 1); // Reduce Q ability cooldown by 1 for display
+                    }
+                    // --- END NEW ---
                     
                     cooldown.textContent = maxCooldown > 0 ? `Cooldown: ${maxCooldown} turn${maxCooldown !== 1 ? 's' : ''}` : 'No cooldown';
                     cooldown.classList.add('ability-cooldown-info');

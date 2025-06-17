@@ -1,0 +1,42 @@
+{
+    "id": "frozen_underground_ruins",
+    "name": "Frozen Underground Ruins",
+    "description": "Ancient ruins buried beneath layers of ice, where fallen warriors still guard their frozen domain.",
+    "difficulty": 6,
+    "type": "story",
+    "backgroundImage": "images/stages/frozen_ruins.png",
+    "backgroundMusic": "sounds/music/frozen_theme.mp3",
+    "enemies": [
+        {
+            "characterId": "frozen_soldier",
+            "level": 1,
+            "position": 0
+        },
+        {
+            "characterId": "frozen_soldier", 
+            "level": 1,
+            "position": 1
+        },
+        {
+            "characterId": "sub_zero",
+            "level": 1,
+            "position": 2
+        },
+        {
+            "characterId": "frozen_soldier",
+            "level": 1,
+            "position": 3
+        },
+        {
+            "characterId": "frozen_soldier",
+            "level": 1,
+            "position": 4
+        }
+    ],
+    "rewards": {
+        "xp": 300,
+        "gold": 150
+    },
+    "unlockRequirements": [],
+    "stageEffects": []
+} 

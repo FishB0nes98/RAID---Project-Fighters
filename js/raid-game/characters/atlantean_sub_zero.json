@@ -1,0 +1,39 @@
+{
+    "id": "atlantean_sub_zero",
+    "name": "Atlantean Sub Zero",
+    "image": "Loading Screen/Atlantean Sub Zero.png",
+    "rarity": "legendary",
+    "type": "warrior",
+    "tags": ["Enemy", "Lin Kuei", "Ice", "Ninja"],
+    "description": "The legendary Lin Kuei assassin, master of ice and cold. His frozen powers can chill enemies to the bone.",
+    "playerunlocked": false,
+    "isHidden": true,
+    "ingameimage": "Loading Screen/Atlantean Sub Zero.png",
+    "stats": {
+        "hp": 7291,
+        "mana": 3510,
+        "physicalDamage": 240,
+        "magicalDamage": 320,
+        "armor": 8,
+        "magicalShield": 10,
+        "speed": 110,
+        "critChance": 0.03,
+        "critMultiplier": 1.8,
+        "dodgeChance": 0.03,
+        "hpPerTurn": 0,
+        "manaPerTurn": 0
+    },
+    "abilities": [
+        {
+            "id": "ice_ball",
+            "name": "Ice Ball",
+            "icon": "Icons/abilities/ice_ball.png",
+            "manaCost": 55,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "description": "Hurls a freezing ice ball that deals <span class='damage-value'>395 + 125% Magical Damage</span> as magical damage. Has a <span class='critical-value'>25% chance</span> to <span class='debuff-value'>FREEZE</span> the target for <span class='duration-value'>3 turns</span>.",
+            "type": "ice_ball"
+        }
+    ],
+    "passives": []
+} 

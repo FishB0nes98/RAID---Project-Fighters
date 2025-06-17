@@ -945,7 +945,7 @@
     "stages": [
       {
         "name": "The Deep Waters",
-        "description": "As you descend into the darkened depths of Atlantis, you encounter Shadowfin, a mysterious shadow entity that has been corrupting the waters. Three vicious piranhas circle around it, ready to defend their dark master.",
+        "description": "As you descend into the darkened depths of Atlantis, you encounter Shadowfin, a mysterious shadow entity that has been corrupting the waters. Three vicious piranhas circle around it, ready to defend their dark master. The protective waters of your homeland surge with healing energy, restoring your strength each turn.",
         "difficulty": 5,
         "type": "battle",
         "enemies": [
@@ -954,14 +954,65 @@
           { "characterId": "piranha" },
           { "characterId": "piranha" }
         ],
+        "modifiers": [
+          {
+            "id": "aquatic_home_protector",
+            "name": "Aquatic Home Protector",
+            "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
+            "icon": "🌊"
+          }
+        ],
         "objectives": {
           "winConditions": [
             { "type": "enemyDefeated", "targetId": "shadowfin" }
           ]
         },
-        "backgroundImage": "images/stages/stage1_background.jpeg",
-        "backgroundMusic": "sounds/music/atlantis_depths.mp3"
-      }
-    ]
-  }
+              "backgroundImage": "images/stages/stage1_background.jpeg",
+      "backgroundMusic": "sounds/music/atlantis_depths.mp3"
+    },
+    {
+      "name": "Atlantean Blessings",
+      "description": "Having defeated the dark forces in the deep waters, the ancient spirits of Atlantis appear before you, offering their blessings to aid in your quest to save the realm. Each blessing will enhance your entire team's capabilities for the remainder of your journey.",
+      "type": "choice",
+      "choices": [
+        {
+          "name": "Blessing of the Depths",
+          "description": "The spirits grant your team the blessing of the ocean's vitality. All team members gain 10% Lifesteal, allowing them to recover health with every attack.",
+          "effect": { "type": "atlantean_lifesteal_blessing", "target": "all" }
+        },
+        {
+          "name": "Blessing of the Tides",
+          "description": "The flowing tides reduce the strain of using abilities. All team members' abilities cost 50% less mana to cast.",
+          "effect": { "type": "atlantean_mana_efficiency", "target": "all" }
+        },
+        {
+          "name": "Blessing of the Currents",
+          "description": "The swift currents of Atlantis enhance your reflexes. All team members' Q abilities have their cooldown reduced by 1 turn.",
+          "effect": { "type": "atlantean_swiftness", "target": "all" }
+        }
+      ]
+    },
+    {
+      "name": "Frozen Underground Ruins",
+      "description": "Following ancient maps discovered in the depths, you venture into the frozen underground ruins that were once part of ancient Atlantis before the great ice age. These crystalline caverns hold the remnants of a lost civilization, guarded by frozen soldiers who still patrol the halls and the legendary ice master Sub Zero. The bitter cold preserves their forms, but their duty remains eternal.",
+      "difficulty": 6,
+      "type": "battle",
+      "enemies": [
+        { "characterId": "frozen_soldier" },
+        { "characterId": "frozen_soldier" },
+        { "characterId": "atlantean_sub_zero" },
+        { "characterId": "frozen_soldier" },
+        { "characterId": "frozen_soldier" }
+      ],
+
+      "objectives": {
+        "winConditions": [
+          { "type": "allEnemiesDefeated" }
+        ]
+      },
+      "backgroundImage": "images/stages/stage2_ice.png",
+      "backgroundMusic": "sounds/music/frozen_depths.mp3"
+    }
+  ]
+}
 ] 

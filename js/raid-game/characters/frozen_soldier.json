@@ -1,0 +1,28 @@
+{
+    "id": "frozen_soldier",
+    "name": "Frozen Soldier",
+    "image": "Loading Screen/Frozen Soldier.png",
+    "rarity": "rare",
+    "type": "warrior",
+    "tags": ["Enemy", "Undead", "Ice", "Warrior"],
+    "description": "A fallen warrior trapped in eternal ice, still bound by duty to guard the frozen ruins.",
+    "playerunlocked": false,
+    "isHidden": true,
+    "ingameimage": "Loading Screen/Frozen Soldier.png",
+    "stats": {
+        "hp": 2800,
+        "mana": 80,
+        "physicalDamage": 220,
+        "magicalDamage": 50,
+        "armor": 12,
+        "magicalShield": 8,
+        "speed": 85,
+        "critChance": 0.10,
+        "critMultiplier": 1.5,
+        "dodgeChance": 0.08,
+        "hpPerTurn": 0,
+        "manaPerTurn": 15
+    },
+    "abilities": [],
+    "passives": []
+} 

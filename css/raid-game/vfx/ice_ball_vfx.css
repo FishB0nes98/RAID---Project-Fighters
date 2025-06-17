@@ -1,0 +1,366 @@
+/* Atlantean Sub Zero VFX - Ice Ball and Freeze Effects */
+
+/* Ice Ball Projectile */
+.ice-ball-projectile {
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff, #87ceeb, #4682b4, #191970);
+    box-shadow: 
+        0 0 20px rgba(135, 206, 235, 0.8),
+        0 0 40px rgba(70, 130, 180, 0.6),
+        inset 0 0 15px rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: iceBallSpin 0.8s linear;
+    pointer-events: none;
+}
+
+.ice-ball-projectile::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(135, 206, 235, 0.3),
+        transparent,
+        rgba(173, 216, 230, 0.4),
+        transparent
+    );
+    animation: iceBallAura 0.8s linear infinite;
+}
+
+.ice-ball-projectile::after {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    animation: iceBallGlint 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes iceBallSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes iceBallAura {
+    0% { transform: rotate(0deg); opacity: 0.6; }
+    100% { transform: rotate(360deg); opacity: 0.3; }
+}
+
+@keyframes iceBallGlint {
+    0% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Ice Impact Particles */
+.ice-impact-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(45deg, #ffffff, #87ceeb);
+    border-radius: 50%;
+    transform-origin: center;
+    animation: iceImpactExplosion 1s ease-out forwards;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.ice-impact-particle::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.5), transparent);
+}
+
+@keyframes iceImpactExplosion {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance)) scale(0.3);
+        opacity: 0;
+    }
+}
+
+/* Ice Impact Screen Shake */
+.battle-container.ice-impact-shake {
+    animation: iceImpactShake 0.3s ease-in-out;
+}
+
+@keyframes iceImpactShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-3px) translateY(1px); }
+    20% { transform: translateX(3px) translateY(-1px); }
+    30% { transform: translateX(-2px) translateY(2px); }
+    40% { transform: translateX(2px) translateY(-2px); }
+    50% { transform: translateX(-1px) translateY(1px); }
+    60% { transform: translateX(1px) translateY(-1px); }
+    70% { transform: translateX(-1px) translateY(0px); }
+    80% { transform: translateX(1px) translateY(0px); }
+    90% { transform: translateX(0px) translateY(-1px); }
+}
+
+/* Freeze Overlay */
+.freeze-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(173, 216, 230, 0.3),
+        rgba(135, 206, 235, 0.4),
+        rgba(176, 224, 230, 0.3)
+    );
+    border-radius: 10px;
+    border: 2px solid rgba(135, 206, 235, 0.6);
+    box-shadow: 
+        0 0 20px rgba(173, 216, 230, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+    animation: freezeOverlayPulse 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.freeze-overlay::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: conic-gradient(
+        from 0deg,
+        rgba(135, 206, 235, 0.4),
+        transparent,
+        rgba(173, 216, 230, 0.3),
+        transparent,
+        rgba(135, 206, 235, 0.4)
+    );
+    border-radius: 12px;
+    /* Spin removed per feedback */
+    /* animation: freezeAuraRotate 4s linear infinite; */
+    z-index: -1;
+}
+
+@keyframes freezeOverlayPulse {
+    0%, 100% { 
+        opacity: 0.7; 
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% { 
+        opacity: 0.9; 
+        transform: scale(1.02);
+        filter: brightness(1.1);
+    }
+}
+
+/* Ice Crystals */
+.ice-crystal {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(45deg, #ffffff, #87ceeb, #add8e6);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    animation: iceCrystalForm 0.8s ease-out forwards, iceCrystalFloat 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.ice-crystal:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+.ice-crystal:nth-child(2) { top: 15%; right: 25%; animation-delay: 0.1s; }
+.ice-crystal:nth-child(3) { top: 30%; left: 10%; animation-delay: 0.2s; }
+.ice-crystal:nth-child(4) { top: 40%; right: 15%; animation-delay: 0.3s; }
+.ice-crystal:nth-child(5) { bottom: 35%; left: 25%; animation-delay: 0.4s; }
+.ice-crystal:nth-child(6) { bottom: 25%; right: 20%; animation-delay: 0.5s; }
+.ice-crystal:nth-child(7) { bottom: 15%; left: 15%; animation-delay: 0.6s; }
+.ice-crystal:nth-child(8) { bottom: 10%; right: 30%; animation-delay: 0.7s; }
+
+.ice-crystal::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+@keyframes iceCrystalForm {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+        opacity: 1;
+    }
+}
+
+@keyframes iceCrystalFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-3px) rotate(120deg);
+    }
+    66% {
+        transform: translateY(3px) rotate(240deg);
+    }
+}
+
+/* Freeze Indicator */
+.freeze-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff, #87ceeb, #4682b4);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    z-index: 15;
+    box-shadow: 
+        0 0 15px rgba(135, 206, 235, 0.8),
+        0 0 25px rgba(173, 216, 230, 0.6);
+    animation: freezeIndicatorPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.freeze-indicator::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        rgba(135, 206, 235, 0.3),
+        transparent,
+        rgba(173, 216, 230, 0.4),
+        transparent
+    );
+    /* Spin removed per feedback */
+    /* animation: freezeIndicatorAura 2s linear infinite; */
+    z-index: -1;
+}
+
+@keyframes freezeIndicatorPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 
+            0 0 15px rgba(135, 206, 235, 0.8),
+            0 0 25px rgba(173, 216, 230, 0.6);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 
+            0 0 20px rgba(135, 206, 235, 1),
+            0 0 35px rgba(173, 216, 230, 0.8);
+    }
+}
+
+/* Character Image Freeze Effect */
+.character-slot:has(.freeze-indicator) .character-image {
+    filter: brightness(0.8) saturate(0.6) hue-rotate(200deg);
+    animation: characterFreezeShimmer 3s ease-in-out infinite;
+}
+
+@keyframes characterFreezeShimmer {
+    0%, 100% {
+        filter: brightness(0.8) saturate(0.6) hue-rotate(200deg);
+    }
+    50% {
+        filter: brightness(0.9) saturate(0.7) hue-rotate(210deg);
+    }
+}
+
+/* Freeze Fail Flash */
+.freeze-fail-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    background: rgba(135, 206, 235, 0.6);
+    pointer-events: none;
+    animation: freezeFailFlash 0.6s ease-out forwards;
+    z-index: 20;
+}
+
+@keyframes freezeFailFlash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Character shake when freeze interrupts ability */
+.freeze-fail-shake {
+    animation: freezeFailShake 0.25s ease-in-out 0s 2;
+}
+
+@keyframes freezeFailShake {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-3px, 2px); }
+    50%  { transform: translate(3px, -2px); }
+    75%  { transform: translate(-2px, 1px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* Freeze Melt fade */
+.freeze-overlay.freeze-melt {
+    animation: freezeMeltFade 1.2s forwards;
+}
+
+@keyframes freezeMeltFade {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; transform: scale(0.9); }
+}
+
+/* Scatter particles */
+.freeze-scatter-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(45deg, #ffffff, #add8e6, #87ceeb);
+    border-radius: 2px;
+    transform-origin: center;
+    animation: freezeScatter 0.7s ease-out forwards;
+    pointer-events: none;
+    z-index: 20;
+}
+
+@keyframes freezeScatter {
+    0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(360deg); opacity: 0; }
+} 

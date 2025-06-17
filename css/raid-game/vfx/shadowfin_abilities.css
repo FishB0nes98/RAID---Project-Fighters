@@ -1,0 +1,187 @@
+/* Shadowfin Abilities VFX */
+
+/* Trident attack animation for caster */
+.trident-attack {
+    transform: translateX(10px) scale(1.1);
+    transition: transform 0.3s ease-out;
+}
+
+/* Trident projectile animation */
+@keyframes tridentProjectileFly {
+    0% {
+        transform: rotate(var(--angle, 0deg)) scaleX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(var(--angle, 0deg)) scaleX(1) translateX(var(--distance, 100px));
+        opacity: 0.8;
+    }
+}
+
+/* Impact flash animation */
+@keyframes tridentImpactFlash {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Floating damage number animation */
+@keyframes tridentDamageFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scale(1);
+    }
+}
+
+/* Trident projectile styling */
+.trident-projectile {
+    filter: drop-shadow(0 0 6px rgba(74,144,226,0.8));
+}
+
+/* Impact effect styling */
+.trident-impact {
+    filter: blur(1px);
+}
+
+/* Damage number styling */
+.trident-damage-number {
+    font-family: 'Arial', sans-serif;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Swift Swim Active Animation */
+.swift-swim-active {
+    animation: swiftSwimFloat 2s ease-in-out;
+    filter: brightness(1.2) drop-shadow(0 0 15px rgba(74, 144, 226, 0.8));
+}
+
+@keyframes swiftSwimFloat {
+    0%, 100% {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+    25% {
+        transform: translateY(-8px);
+        opacity: 0.9;
+    }
+    50% {
+        transform: translateY(-12px);
+        opacity: 0.8;
+    }
+    75% {
+        transform: translateY(-8px);
+        opacity: 0.9;
+    }
+}
+
+/* Water Ripple Animation */
+@keyframes waterRippleExpand {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 0.8;
+        border-width: 3px;
+    }
+    50% {
+        width: 60px;
+        height: 60px;
+        opacity: 0.6;
+        border-width: 2px;
+    }
+    100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+/* Swimming Particle Animation */
+@keyframes swimmingParticleFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0px) scale(1);
+    }
+    25% {
+        opacity: 0.8;
+        transform: translateY(-15px) scale(1.2);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translateY(-25px) scale(0.9);
+    }
+    75% {
+        opacity: 0.4;
+        transform: translateY(-35px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8);
+    }
+}
+
+/* Swimming particle variants for different movement patterns */
+.swimming-particle:nth-child(odd) {
+    animation-duration: 1.8s;
+    animation-timing-function: ease-out;
+}
+
+.swimming-particle:nth-child(even) {
+    animation-duration: 2.2s;
+    animation-timing-function: ease-in-out;
+}
+
+/* Additional ripple effect for continuous swimming */
+.water-ripple:nth-child(2n) {
+    border-color: rgba(123, 179, 240, 0.4);
+    animation-delay: 0.3s;
+}
+
+.water-ripple:nth-child(3n) {
+    border-color: rgba(74, 144, 226, 0.3);
+    animation-delay: 0.6s;
+}
+
+/* Untargetable status indicator */
+.character[data-untargetable="true"] {
+    position: relative;
+}
+
+.character[data-untargetable="true"]::after {
+    content: "🌊";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 16px;
+    z-index: 20;
+    animation: untargetableGlow 2s ease-in-out infinite;
+}
+
+@keyframes untargetableGlow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+} 

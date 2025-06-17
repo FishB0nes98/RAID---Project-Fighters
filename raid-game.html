@@ -145,12 +145,6 @@
             transform: translate3d(0, 0, 0);
         }
         
-        /* Optimize scrolling */
-        .battle-log {
-            -webkit-overflow-scrolling: touch;
-            contain: size layout style paint;
-        }
-        
         /* Stage modifiers - GPU acceleration */
         .stage-modifiers-container {
             transform: translate3d(0, 0, 0);
@@ -166,6 +160,8 @@
     <link rel="stylesheet" href="css/ayane-abilities.css">
     <link rel="stylesheet" href="styles/farmer_nina.css">
     <link rel="stylesheet" href="css/atlantean_kagome_abilities.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/atlantean_kagome_vfx.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/shadowfin_abilities.css">
     <link rel="stylesheet" href="css/farmer_alice_abilities.css">
     <link rel="stylesheet" href="css/farmer_shoma_abilities.css">
     <link rel="stylesheet" href="css/schoolgirl_kokoro_abilities.css">
@@ -203,11 +199,14 @@
     <link rel="stylesheet" href="css/stage-modifiers.css">
     <link rel="stylesheet" href="css/scamp_passive.css">
     <link rel="stylesheet" href="css/scamp_abilities.css">
+    <link rel="stylesheet" href="css/raid-game/passives/shadowfin_passive.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/shadowfin_abilities.css">
     <link rel="stylesheet" href="css/raid-game/vfx/lava_chimp_passive.css">
     <link rel="stylesheet" href="css/raid-game/vfx/smith_lord_abilities.css">
     <link rel="stylesheet" href="css/raid-game/vfx/dual-shot-vfx.css">
     <link rel="stylesheet" href="css/raid-game/vfx/trickshot-vfx.css">
     <link rel="stylesheet" href="css/raid-game/vfx/acid_lava_spit.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/ice_ball_vfx.css">
     <link rel="stylesheet" href="css/raid-game/vfx/hellboar_charge.css">
     <link rel="stylesheet" href="css/raid-game/vfx/cursed_lion_abilities.css">
     <link rel="stylesheet" href="css/raid-game/vfx/hell_fly_double_scissor.css">
@@ -219,6 +218,7 @@
     <link rel="stylesheet" href="css/raid-game/vfx/hellhorn_stomp.css">
     <link rel="stylesheet" href="css/raid-game/vfx/unstoppable_passive.css">
     <link rel="stylesheet" href="css/raid-game/vfx/kroudin_punishment.css">
+    <link rel="stylesheet" href="css/raid-game/passives/atlantean_kagome_passive.css">
     
     <!-- Quest Completion Styles -->
     <style>
@@ -729,6 +729,7 @@
     <script src="js/raid-game/passives/little_devil_passive.js"></script>
     <script src="js/raid-game/passives/scamp_passive.js"></script>
     <script src="js/raid-game/passives/piranha_passive.js"></script>
+    <script src="js/raid-game/passives/shadowfin_passive.js"></script>
     <script src="js/raid-game/passives/grok_hell_lord_passive.js"></script>
     <script src="js/raid-game/passives/lava_chimp_passive.js"></script>
     <script src="js/raid-game/passives/smith_lord_passive.js"></script>
@@ -761,6 +762,8 @@
     <script src="js/raid-game/abilities/ayane_abilities.js"></script>
     <script src="js/raid-game/abilities/farmer_nina_abilities.js"></script>
     <script src="js/raid-game/abilities/atlantean_kagome_abilities.js"></script>
+    <script src="js/raid-game/abilities/atlantean_sub_zero_abilities.js"></script>
+    <script src="js/raid-game/abilities/shadowfin_abilities.js"></script>
     <script src="js/raid-game/abilities/farmer_alice_abilities.js"></script>
     <script src="js/raid-game/abilities/farmer_shoma_abilities.js"></script>
     <script src="js/raid-game/abilities/schoolgirl_kokoro_abilities.js"></script>
@@ -1078,6 +1081,8 @@
 
         // Setup battle log controls
         function setupBattleLog() {
+            console.log('[setupBattleLog] Initializing battle log...');
+            
             const battleLogContainer = document.getElementById('battle-log-container');
             const battleLogHeader = document.getElementById('battle-log-header');
             const dragHandle = document.getElementById('battle-log-drag-handle');
@@ -1085,6 +1090,33 @@
             const clearLogButton = document.getElementById('clear-log-button');
             const closeLogButton = document.getElementById('close-log-button');
             const showLogButton = document.getElementById('show-log-button');
+            
+            if (!battleLogContainer) {
+                console.error('[setupBattleLog] Battle log container not found!');
+                return;
+            }
+            
+            console.log('[setupBattleLog] Battle log elements found, setting up...');
+            
+            // FORCE BATTLE LOG TO BE VISIBLE - Reset any hidden state
+            battleLogContainer.style.display = 'flex';
+            battleLogContainer.style.visibility = 'visible';
+            battleLogContainer.style.opacity = '1';
+            battleLogContainer.style.zIndex = '1000';
+            battleLogContainer.style.position = 'fixed';
+            battleLogContainer.style.right = '20px';
+            battleLogContainer.style.bottom = '20px';
+            battleLogContainer.style.left = 'auto';
+            battleLogContainer.style.top = 'auto';
+            battleLogContainer.style.width = '350px';
+            battleLogContainer.style.height = '300px';
+            
+            // Ensure show button is hidden when battle log is visible
+            if (showLogButton) {
+                showLogButton.style.display = 'none';
+            }
+            
+            console.log('[setupBattleLog] Battle log forced visible at bottom-right');
             
             // Dragging functionality
             let isDragging = false;
@@ -1094,22 +1126,6 @@
             let initialY = 0;
             let xOffset = 0;
             let yOffset = 0;
-            
-            // Load saved position or use default
-            const savedPosition = localStorage.getItem('battleLogPosition');
-            if (savedPosition) {
-                const position = JSON.parse(savedPosition);
-                xOffset = position.x;
-                yOffset = position.y;
-                setTranslate(xOffset, yOffset, battleLogContainer);
-            } else {
-                // Get initial position from CSS
-                const computedStyle = window.getComputedStyle(battleLogContainer);
-                const right = parseInt(computedStyle.right);
-                const bottom = parseInt(computedStyle.bottom);
-                xOffset = window.innerWidth - right - battleLogContainer.offsetWidth;
-                yOffset = window.innerHeight - bottom - battleLogContainer.offsetHeight;
-            }
             
             function setTranslate(xPos, yPos, el) {
                 el.style.position = 'fixed';
@@ -1175,77 +1191,192 @@
             }
             
             // Add event listeners for dragging
-            dragHandle.addEventListener('mousedown', dragStart);
+            if (dragHandle) {
+                dragHandle.addEventListener('mousedown', dragStart);
+                dragHandle.style.cursor = 'grab';
+            }
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', dragEnd);
             
             // Touch events for mobile
-            dragHandle.addEventListener('touchstart', dragStart);
+            if (dragHandle) {
+                dragHandle.addEventListener('touchstart', dragStart);
+            }
             document.addEventListener('touchmove', drag);
             document.addEventListener('touchend', dragEnd);
             
-            // Set initial cursor style
-            dragHandle.style.cursor = 'grab';
-            
-            // Load saved visibility state
-            const savedVisibility = localStorage.getItem('battleLogVisible');
-            if (savedVisibility === 'false') {
-                battleLogContainer.style.display = 'none';
-                showLogButton.style.display = 'block';
+            // Button functionality
+            if (clearLogButton) {
+                clearLogButton.addEventListener('click', () => {
+                    const battleLog = document.getElementById('battle-log');
+                    if (battleLog) {
+                        battleLog.innerHTML = '';
+                        console.log('[setupBattleLog] Battle log cleared');
+                        // Add a cleared message
+                        addBattleLogMessage('📋 Battle log cleared', 'system');
+                    }
+                });
             }
             
-            // Toggle battle log size
-            toggleLogButton.addEventListener('click', () => {
-                battleLogContainer.classList.toggle('collapsed');
-                // Update button text based on state
-                toggleLogButton.textContent = battleLogContainer.classList.contains('collapsed') ? '⬆' : '⬍';
-            });
-            
-            // Clear battle log
-            clearLogButton.addEventListener('click', () => {
-                const battleLog = document.getElementById('battle-log');
-                if (battleLog) {
-                    battleLog.innerHTML = '';
-                    // Add system message
-                    const clearMsg = document.createElement('div');
-                    clearMsg.className = 'log-entry system';
-                    clearMsg.textContent = 'Battle log cleared';
-                    battleLog.appendChild(clearMsg);
-                }
-            });
-            
-            // Close battle log
-            closeLogButton.addEventListener('click', () => {
-                battleLogContainer.style.display = 'none';
-                showLogButton.style.display = 'block';
-                localStorage.setItem('battleLogVisible', 'false');
-            });
-            
-            // Show battle log
-            showLogButton.addEventListener('click', () => {
-                battleLogContainer.style.display = 'flex';
-                showLogButton.style.display = 'none';
-                localStorage.setItem('battleLogVisible', 'true');
-            });
-            
-            // Keyboard shortcut to toggle battle log (Ctrl+L or Cmd+L)
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-                    e.preventDefault();
-                    
-                    if (battleLogContainer.style.display === 'none') {
-                        // Show battle log
-                        battleLogContainer.style.display = 'flex';
-                        showLogButton.style.display = 'none';
-                        localStorage.setItem('battleLogVisible', 'true');
+            if (toggleLogButton) {
+                toggleLogButton.addEventListener('click', () => {
+                    const isCollapsed = battleLogContainer.classList.contains('collapsed');
+                    if (isCollapsed) {
+                        battleLogContainer.classList.remove('collapsed');
+                        battleLogContainer.style.height = '300px';
+                        toggleLogButton.textContent = '⬍';
+                        toggleLogButton.title = 'Collapse log';
+                        console.log('[setupBattleLog] Battle log expanded');
                     } else {
-                        // Hide battle log
-                        battleLogContainer.style.display = 'none';
+                        battleLogContainer.classList.add('collapsed');
+                        battleLogContainer.style.height = '180px';
+                        toggleLogButton.textContent = '⬌';
+                        toggleLogButton.title = 'Expand log';
+                        console.log('[setupBattleLog] Battle log collapsed');
+                    }
+                });
+            }
+            
+            if (closeLogButton) {
+                closeLogButton.addEventListener('click', () => {
+                    battleLogContainer.style.display = 'none';
+                    if (showLogButton) {
                         showLogButton.style.display = 'block';
-                        localStorage.setItem('battleLogVisible', 'false');
+                    }
+                    localStorage.setItem('battleLogVisible', 'false');
+                    console.log('[setupBattleLog] Battle log hidden');
+                });
+            }
+            
+            if (showLogButton) {
+                showLogButton.addEventListener('click', () => {
+                    battleLogContainer.style.display = 'flex';
+                    showLogButton.style.display = 'none';
+                    localStorage.setItem('battleLogVisible', 'true');
+                    console.log('[setupBattleLog] Battle log shown');
+                });
+            }
+            
+            // Global function to add battle log messages (available throughout the game)
+            window.addBattleLogMessage = function(message, className = '') {
+                console.log(`[addBattleLogMessage] Adding: ${message} (class: ${className})`);
+                
+                const battleLog = document.getElementById('battle-log');
+                if (!battleLog) {
+                    console.error('[addBattleLogMessage] Battle log element not found!');
+                    return;
+                }
+                
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${className}`;
+                
+                // Create message text element
+                const messageText = document.createElement('span');
+                messageText.className = 'log-message';
+                messageText.textContent = message;
+                entry.appendChild(messageText);
+                
+                // Add timestamp
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const timestamp = `${hours}:${minutes}:${seconds}`;
+                
+                const timestampElement = document.createElement('span');
+                timestampElement.className = 'battle-log-timestamp';
+                timestampElement.textContent = timestamp;
+                entry.appendChild(timestampElement);
+                
+                battleLog.appendChild(entry);
+                
+                // Auto-scroll to bottom
+                const contentElement = document.querySelector('.battle-log-content');
+                if (contentElement) {
+                    contentElement.scrollTop = contentElement.scrollHeight;
+                }
+                
+                // Flash the header for important messages
+                if (className === 'critical' || className === 'system') {
+                    const headerElement = document.querySelector('.battle-log-header');
+                    if (headerElement) {
+                        headerElement.classList.add('flash');
+                        setTimeout(() => {
+                            headerElement.classList.remove('flash');
+                        }, 500);
+                    }
+                }
+                
+                console.log(`[addBattleLogMessage] Message added successfully`);
+            };
+            
+            // Add debug function to reset battle log position
+            window.resetBattleLogPosition = () => {
+                console.log('[DEBUG] Resetting battle log position...');
+                localStorage.removeItem('battleLogPosition');
+                localStorage.removeItem('battleLogVisible');
+                battleLogContainer.style.position = 'fixed';
+                battleLogContainer.style.right = '20px';
+                battleLogContainer.style.bottom = '20px';
+                battleLogContainer.style.left = 'auto';
+                battleLogContainer.style.top = 'auto';
+                battleLogContainer.style.display = 'flex';
+                battleLogContainer.style.visibility = 'visible';
+                battleLogContainer.style.opacity = '1';
+                battleLogContainer.style.width = '350px';
+                battleLogContainer.style.height = '300px';
+                if (showLogButton) {
+                    showLogButton.style.display = 'none';
+                }
+                console.log('[DEBUG] Battle log position reset to default');
+                addBattleLogMessage('🔧 Battle log position reset!', 'system');
+            };
+            
+            // Add debug function to test battle log
+            window.testBattleLog = () => {
+                console.log('[DEBUG] Testing battle log...');
+                addBattleLogMessage('🧪 Test message 1: Normal message', '');
+                addBattleLogMessage('⚠️ Test message 2: Critical message', 'critical');
+                addBattleLogMessage('🛡️ Test message 3: System message', 'system');
+                addBattleLogMessage('❤️ Test message 4: Heal message', 'heal');
+                addBattleLogMessage('🏆 Test message 5: Player turn', 'player-turn');
+                addBattleLogMessage('👹 Test message 6: Enemy turn', 'enemy-turn');
+                console.log('[DEBUG] Test messages added');
+            };
+            
+            // Add keyboard shortcut for battle log visibility (Ctrl+L)
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'l') {
+                    e.preventDefault();
+                    const isVisible = battleLogContainer.style.display !== 'none';
+                    if (isVisible) {
+                        battleLogContainer.style.display = 'none';
+                        if (showLogButton) {
+                            showLogButton.style.display = 'block';
+                        }
+                        console.log('[setupBattleLog] Battle log hidden via Ctrl+L');
+                    } else {
+                        battleLogContainer.style.display = 'flex';
+                        if (showLogButton) {
+                            showLogButton.style.display = 'none';
+                        }
+                        console.log('[setupBattleLog] Battle log shown via Ctrl+L');
                     }
                 }
             });
+            
+            // Add comprehensive test messages immediately
+            setTimeout(() => {
+                console.log('[setupBattleLog] Adding initial test messages...');
+                addBattleLogMessage('⚔️ Battle Log Initialized - Ready for Battle!', 'system');
+                addBattleLogMessage('📍 Battle log is working properly', 'system');
+                addBattleLogMessage('⌨️ Press Ctrl+L to toggle battle log visibility', 'system');
+                addBattleLogMessage('🔧 Type testBattleLog() in console to test messages', 'system');
+                addBattleLogMessage('🔄 Type resetBattleLogPosition() to reset position', 'system');
+                console.log('[setupBattleLog] Initial test messages added');
+            }, 100);
+            
+            console.log('[setupBattleLog] Battle log setup complete!');
         }
 
         // Setup talents panel controls
@@ -1363,6 +1494,182 @@
             });
         }
 
+        // DEBUG: NUM1 key to set all ally HP to 10% (FishB0nes98 only)
+        function setupDebugKeys() {
+            document.addEventListener('keydown', (e) => {
+                // Only allow for specific user
+                if (firebaseAuth.currentUser && firebaseAuth.currentUser.uid === 'J1Wanf4kmFMTiG2xOLsvR9bsrYd2') {
+                    // --- Existing NUM1 cheat ---
+                    if (e.code === 'Numpad1' || (e.code === 'Digit1' && e.location === 0)) {
+                        e.preventDefault();
+                        setAllAllyHPTo10Percent();
+                    }
+                    // --- NEW DEBUG CHEATS ---
+                    else if (e.code === 'Numpad9' || (e.code === 'Digit9' && e.location === 0)) { // Enemy HP to 1%
+                        e.preventDefault();
+                        setAllEnemyHPTo1Percent();
+                    } else if (e.code === 'Numpad8' || (e.code === 'Digit8' && e.location === 0)) { // Ally Mana 100%
+                        e.preventDefault();
+                        setAllAllyManaToFull();
+                    } else if (e.code === 'Numpad7' || (e.code === 'Digit7' && e.location === 0)) { // Ally HP 100%
+                        e.preventDefault();
+                        setAllAllyHPToFull();
+                    } else if (e.code === 'Numpad6' || (e.code === 'Digit6' && e.location === 0)) { // +100 Physical Damage
+                        e.preventDefault();
+                        giveAllAlliesPhysicalDamage(100);
+                    } else if (e.code === 'Numpad5' || (e.code === 'Digit5' && e.location === 0)) { // +100 Magical Damage
+                        e.preventDefault();
+                        giveAllAlliesMagicalDamage(100);
+                    } else if (e.code === 'Numpad4' || (e.code === 'Digit4' && e.location === 0)) { // Toggle 100% Dodge
+                        e.preventDefault();
+                        toggleAllAlliesDodgeChance();
+                    } else if (e.code === 'Numpad3' || (e.code === 'Digit3' && e.location === 0)) { // Reset cooldowns
+                        e.preventDefault();
+                        resetAllAllyCooldowns();
+                    }
+                }
+            });
+        }
+
+        function setAllAllyHPTo10Percent() {
+            if (!window.gameManager || !window.gameManager.gameState) {
+                console.log('[DEBUG NUM1] Game manager not available');
+                return;
+            }
+
+            const playerCharacters = window.gameManager.gameState.playerCharacters;
+            if (!playerCharacters || playerCharacters.length === 0) {
+                console.log('[DEBUG NUM1] No player characters found');
+                return;
+            }
+
+            console.log('[DEBUG NUM1] Setting all ally HP to 10%...');
+            
+            playerCharacters.forEach(character => {
+                if (!character.isDead()) {
+                    const maxHp = character.stats.maxHp || character.stats.hp || 1000;
+                    const newHp = Math.max(1, Math.floor(maxHp * 0.1)); // 10% HP, minimum 1
+                    const oldHp = character.stats.currentHp;
+                    
+                    character.stats.currentHp = newHp;
+                    
+                    console.log(`[DEBUG NUM1] ${character.name}: ${oldHp} → ${newHp} HP (10% of ${maxHp})`);
+                    
+                    // Update UI
+                    if (window.gameManager.uiManager) {
+                        window.gameManager.uiManager.updateCharacterUI(character);
+                    }
+                }
+            });
+
+            // Add log entry
+            if (window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry('🔧 DEBUG: All ally HP set to 10%', 'system');
+            }
+
+            console.log('[DEBUG NUM1] All ally HP set to 10% complete');
+        }
+
+        // --- BEGIN NEW DEBUG UTILITY FUNCTIONS ---
+        let debugDodgeEnabled = false; // Tracks dodge toggle state
+
+        function setAllEnemyHPTo1Percent() {
+            if (window.gameManager && typeof window.gameManager.activateEnemyLowHPCheat === 'function') {
+                window.gameManager.activateEnemyLowHPCheat();
+                return;
+            }
+            if (!window.gameManager || !window.gameManager.gameState) {
+                console.log('[DEBUG NUM9] Game manager not available');
+                return;
+            }
+            const enemies = window.gameManager.gameState.aiCharacters || [];
+            enemies.forEach(enemy => {
+                if (!enemy.isDead()) {
+                    const maxHp = enemy.stats.maxHp || enemy.stats.hp || 1000;
+                    enemy.stats.currentHp = Math.max(1, Math.floor(maxHp * 0.01));
+                    if (window.gameManager.uiManager) {
+                        window.gameManager.uiManager.updateCharacterUI(enemy);
+                    }
+                }
+            });
+            window.gameManager.addLogEntry('🔧 DEBUG: All enemy HP set to 1%', 'system');
+        }
+
+        function setAllAllyManaToFull() {
+            if (!window.gameManager || !window.gameManager.gameState) return;
+            const allies = window.gameManager.gameState.playerCharacters || [];
+            allies.forEach(char => {
+                if (!char.isDead()) {
+                    char.stats.currentMana = char.stats.maxMana || char.stats.mana || char.stats.currentMana;
+                    if (window.gameManager.uiManager) window.gameManager.uiManager.updateCharacterUI(char);
+                }
+            });
+            window.gameManager.addLogEntry('🔧 DEBUG: All ally mana set to 100%', 'system');
+        }
+
+        function setAllAllyHPToFull() {
+            if (!window.gameManager || !window.gameManager.gameState) return;
+            const allies = window.gameManager.gameState.playerCharacters || [];
+            allies.forEach(char => {
+                if (!char.isDead()) {
+                    const maxHp = char.stats.maxHp || char.stats.hp || 1000;
+                    char.stats.currentHp = maxHp;
+                    if (window.gameManager.uiManager) window.gameManager.uiManager.updateCharacterUI(char);
+                }
+            });
+            window.gameManager.addLogEntry('🔧 DEBUG: All ally HP set to 100%', 'system');
+        }
+
+        function giveAllAlliesPhysicalDamage(amount = 100) {
+            if (!window.gameManager || !window.gameManager.gameState) return;
+            window.gameManager.gameState.playerCharacters.forEach(char => {
+                char.stats.physicalDamage = (char.stats.physicalDamage || 0) + amount;
+            });
+            window.gameManager.addLogEntry(`🔧 DEBUG: All allies gained +${amount} Physical Damage`, 'system');
+        }
+
+        function giveAllAlliesMagicalDamage(amount = 100) {
+            if (!window.gameManager || !window.gameManager.gameState) return;
+            window.gameManager.gameState.playerCharacters.forEach(char => {
+                char.stats.magicalDamage = (char.stats.magicalDamage || 0) + amount;
+            });
+            window.gameManager.addLogEntry(`🔧 DEBUG: All allies gained +${amount} Magical Damage`, 'system');
+        }
+
+        function toggleAllAlliesDodgeChance() {
+            if (!window.gameManager || !window.gameManager.gameState) return;
+            const allies = window.gameManager.gameState.playerCharacters;
+            if (!debugDodgeEnabled) {
+                allies.forEach(char => {
+                    char._originalDodgeChance = char.stats.dodgeChance || 0;
+                    char.stats.dodgeChance = 1;
+                });
+                window.gameManager.addLogEntry('🔧 DEBUG: Allies dodge chance set to 100%', 'system');
+            } else {
+                allies.forEach(char => {
+                    if (char._originalDodgeChance !== undefined) {
+                        char.stats.dodgeChance = char._originalDodgeChance;
+                    }
+                });
+                window.gameManager.addLogEntry('🔧 DEBUG: Allies dodge chance restored to original values', 'system');
+            }
+            debugDodgeEnabled = !debugDodgeEnabled;
+        }
+
+        function resetAllAllyCooldowns() {
+            if (!window.gameManager || !window.gameManager.gameState) return;
+            window.gameManager.gameState.playerCharacters.forEach(char => {
+                if (Array.isArray(char.abilities)) {
+                    char.abilities.forEach(ab => ab.currentCooldown = 0);
+                }
+                if (typeof window.gameManager.updateCharacterAbilities === 'function') {
+                    window.gameManager.updateCharacterAbilities(char);
+                }
+            });
+            window.gameManager.addLogEntry('🔧 DEBUG: All ally ability cooldowns reset', 'system');
+        }
+        // --- END NEW DEBUG UTILITY FUNCTIONS ---
+
         // Setup page unload confirmation
         let gameHasStarted = false;
         let userHasInteracted = false;
@@ -1436,10 +1743,129 @@
             console.log('Graphics acceleration enabled');
         }
 
+        // Firebase error handling and connection management
+        function setupFirebaseErrorHandling() {
+            // Handle Firebase Database connection errors
+            if (window.firebase && window.firebase.database) {
+                const database = window.firebase.database();
+                
+                // Monitor connection state
+                const connectedRef = database.ref('.info/connected');
+                connectedRef.on('value', (snapshot) => {
+                    const connected = snapshot.val();
+                    console.log(`[Firebase] Connection state: ${connected ? 'Connected' : 'Disconnected'}`);
+                    
+                    if (!connected) {
+                        console.warn('[Firebase] Database disconnected, attempting to reconnect...');
+                        // Firebase will automatically attempt to reconnect
+                    }
+                });
+                
+                // Handle offline/online events
+                window.addEventListener('online', () => {
+                    console.log('[Firebase] Network back online, ensuring database connection...');
+                    database.goOnline();
+                });
+                
+                window.addEventListener('offline', () => {
+                    console.log('[Firebase] Network offline, going offline...');
+                    database.goOffline();
+                });
+            }
+            
+            // Global error handler for uncaught Firebase errors
+            window.addEventListener('error', (event) => {
+                if (event.error && event.error.message && 
+                    (event.error.message.includes('sendRequest') || 
+                     event.error.message.includes('PersistentConnection') ||
+                     event.error.message.includes('firebase'))) {
+                    
+                    console.warn('[Firebase Error Handler] Caught Firebase connection error:', event.error);
+                    
+                    // Attempt to reinitialize Firebase connection
+                    setTimeout(() => {
+                        if (window.firebase && window.firebase.database) {
+                            console.log('[Firebase Error Handler] Attempting to restore database connection...');
+                            try {
+                                const database = window.firebase.database();
+                                database.goOffline();
+                                setTimeout(() => {
+                                    database.goOnline();
+                                    console.log('[Firebase Error Handler] Database connection restored');
+                                }, 1000);
+                            } catch (error) {
+                                console.error('[Firebase Error Handler] Failed to restore connection:', error);
+                            }
+                        }
+                    }, 2000);
+                    
+                    // Prevent the error from bubbling up
+                    event.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Handle unhandled promise rejections from Firebase
+            window.addEventListener('unhandledrejection', (event) => {
+                if (event.reason && event.reason.message && 
+                    (event.reason.message.includes('firebase') || 
+                     event.reason.message.includes('sendRequest'))) {
+                    
+                    console.warn('[Firebase Error Handler] Caught unhandled Firebase promise rejection:', event.reason);
+                    event.preventDefault();
+                    return false;
+                }
+            });
+                 }
+
+        // Global function to manually recover from Firebase issues
+        window.recoverFirebaseConnection = function() {
+            console.log('[Firebase Recovery] Attempting manual Firebase connection recovery...');
+            
+            try {
+                if (window.firebase && window.firebase.database) {
+                    const database = window.firebase.database();
+                    
+                    // Force offline then online to reset connection
+                    database.goOffline();
+                    console.log('[Firebase Recovery] Forced offline...');
+                    
+                    setTimeout(() => {
+                        database.goOnline();
+                        console.log('[Firebase Recovery] Forced online...');
+                        
+                        // Test connection after recovery
+                        const testRef = database.ref('.info/connected');
+                        testRef.once('value', (snapshot) => {
+                            const connected = snapshot.val();
+                            console.log(`[Firebase Recovery] Recovery test - Connected: ${connected}`);
+                            
+                            if (connected) {
+                                console.log('[Firebase Recovery] Connection recovery successful!');
+                                if (window.gameManager && window.gameManager.addLogEntry) {
+                                    window.gameManager.addLogEntry('🔄 Firebase connection recovered', 'system');
+                                }
+                            } else {
+                                console.warn('[Firebase Recovery] Connection recovery failed');
+                            }
+                        });
+                    }, 2000);
+                    
+                } else {
+                    console.error('[Firebase Recovery] Firebase database not available for recovery');
+                }
+            } catch (error) {
+                console.error('[Firebase Recovery] Error during recovery attempt:', error);
+            }
+        };
+
         // Initialize and start the game when page loads
         document.addEventListener('DOMContentLoaded', () => {
             // Enable graphics acceleration first
             enableGraphicsAcceleration();
+            
+            // Setup Firebase error handling
+            setupFirebaseErrorHandling();
             
             // Get the loading element immediately after DOM is ready
             const loadingTextElement = document.getElementById('loading-text');
@@ -1449,15 +1875,79 @@
                 return;
             }
 
-
-
-            // --- Wait for Firebase Auth State --- 
+            // --- Wait for Firebase Auth State with timeout and retry --- 
+            let authStateTimeout;
+            let authRetryCount = 0;
+            const maxAuthRetries = 3;
+            
+            function attemptFirebaseAuth() {
+                authRetryCount++;
+                console.log(`[Firebase Auth] Attempt ${authRetryCount}/${maxAuthRetries}`);
+                
+                // Clear any existing timeout
+                if (authStateTimeout) {
+                    clearTimeout(authStateTimeout);
+                }
+                
+                // Set a timeout for auth state change
+                authStateTimeout = setTimeout(() => {
+                    console.warn('[Firebase Auth] Auth state change timeout, retrying...');
+                    if (authRetryCount < maxAuthRetries) {
+                        attemptFirebaseAuth();
+                    } else {
+                        console.error('[Firebase Auth] Max auth retries exceeded');
+                        loadingTextElement.textContent = 'Authentication failed. Please refresh the page.';
+                    }
+                }, 10000); // 10 second timeout
+            }
+            
+            attemptFirebaseAuth();
+            
             firebaseAuth.onAuthStateChanged(async (user) => {
+                // Clear the auth timeout since we got a response
+                if (authStateTimeout) {
+                    clearTimeout(authStateTimeout);
+                }
                 // Use the loadingTextElement variable captured from the outer scope
                 // No need to getElementById again here
 
                 if (user) {
                     console.log("User is authenticated, proceeding with game initialization.");
+                    
+                    // Verify Firebase Database is properly initialized
+                    try {
+                        if (!window.firebase || !window.firebase.database) {
+                            throw new Error('Firebase Database not properly initialized');
+                        }
+                        
+                        // Test database connection before proceeding
+                        const testRef = window.firebase.database().ref('.info/serverTimeOffset');
+                        await new Promise((resolve, reject) => {
+                            const timeout = setTimeout(() => reject(new Error('Database connection test timeout')), 5000);
+                            testRef.once('value', () => {
+                                clearTimeout(timeout);
+                                console.log('[Firebase] Database connection test successful');
+                                resolve();
+                            }, (error) => {
+                                clearTimeout(timeout);
+                                reject(error);
+                            });
+                        });
+                    } catch (dbError) {
+                        console.error('[Firebase] Database connection test failed:', dbError);
+                        loadingTextElement.textContent = 'Database connection failed. Retrying...';
+                        
+                        // Retry after a delay
+                        setTimeout(() => {
+                            if (authRetryCount < maxAuthRetries) {
+                                attemptFirebaseAuth();
+                            } else {
+                                loadingTextElement.textContent = 'Failed to connect to database. Please refresh the page.';
+                            }
+                        }, 3000);
+                        return;
+                    }
+                    
                     try {
                         // Setup UI components that don't depend on game state yet
                         setupTooltip();
@@ -1465,7 +1955,7 @@
                         setupBattleLog();
                         setupTalentsPanel();
                         setupPageUnloadConfirmation();
-
+                        setupDebugKeys();
 
                         // Initialize the talent manager if available
                         if (window.talentManager) {

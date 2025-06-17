@@ -10,6 +10,18 @@ function getAbilityPower(character) {
     return character.stats.magicalDamage;
 }
 
+// === ✨ UNIVERSAL VFX HELPERS FOR ATLANTEAN KAGOME ===
+// Lightweight helper to spawn short-lived particle elements anywhere in the battle-container.
+function kagomeSpawnParticle(className, x, y, parent = document.querySelector('.battle-container'), lifeTime = 800) {
+    if (!parent) return;
+    const p = document.createElement('div');
+    p.className = className;
+    p.style.left = `${x}px`;
+    p.style.top = `${y}px`;
+    parent.appendChild(p);
+    setTimeout(() => p.remove(), lifeTime);
+}
+
 // --- Q: Golden Arrow ---
 const goldenArrowEffect = (caster, target) => {
     console.log("[KAGOME DEBUG] Q ABILITY CALLED", caster, target);
@@ -19,17 +31,21 @@ const goldenArrowEffect = (caster, target) => {
     log(`${caster.name} fires a Golden Arrow at ${target.name}!`);
     
     // VFX for Golden Arrow
-    const casterElement = document.getElementById(`character-${caster.id}`);
-    const targetElement = document.getElementById(`character-${target.id}`);
+    const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+    const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
     
     if (casterElement && targetElement) {
-        // Bow pull-back animation
-        casterElement.classList.add('kagome-bow-animation');
-        
-        // Create arrow projectile
+        // Create arrow projectile FIRST
         const arrowVfx = document.createElement('div');
         arrowVfx.className = 'golden-arrow-projectile';
         document.querySelector('.battle-container').appendChild(arrowVfx);
+
+        // === NEW: create small spark trail while arrow is in flight ===
+        let sparkInterval = setInterval(() => {
+            const rect = arrowVfx.getBoundingClientRect();
+            const parentRect = document.querySelector('.battle-container').getBoundingClientRect();
+            kagomeSpawnParticle('golden-arrow-spark', rect.left + rect.width/2 - parentRect.left, rect.top + rect.height/2 - parentRect.top);
+        }, 60);
         
         // Get positions for animation
         const casterRect = casterElement.getBoundingClientRect();
@@ -60,29 +76,62 @@ const goldenArrowEffect = (caster, target) => {
         setTimeout(() => {
             // Remove arrow
             arrowVfx.remove();
+            clearInterval(sparkInterval);
+            
+            // === NEW: impact burst sparks ===
+            for (let i = 0; i < 14; i++) {
+                const angleDeg = (360 / 14) * i + Math.random() * 10;
+                const radius = 5 + Math.random() * 10;
+                const rad = angleDeg * (Math.PI / 180);
+                const offsetX = Math.cos(rad) * radius;
+                const offsetY = Math.sin(rad) * radius;
+                kagomeSpawnParticle('golden-arrow-impact-spark', (targetRect.left + targetRect.width/2) - battleContainerRect.left + offsetX, (targetRect.top + targetRect.height/2) - battleContainerRect.top + offsetY);
+            }
             
             // Create hit effect
             const hitVfx = document.createElement('div');
             hitVfx.className = 'golden-arrow-hit';
             targetElement.appendChild(hitVfx);
             
-            // Remove hit effect after animation
+            // Add screen shake for impact
+            const battleContainer = document.querySelector('.battle-container');
+            if (battleContainer) {
+                battleContainer.style.animation = 'kagomeScreenShake 0.5s ease-out';
+                setTimeout(() => {
+                    battleContainer.style.animation = '';
+                }, 500);
+            }
+            
+            // Create floating damage text
+            const floatingText = document.createElement('div');
+            floatingText.className = 'kagome-floating-text';
+            floatingText.textContent = `${Math.round(result.damage)}${result.isCritical ? ' CRIT!' : ''}`;
+            floatingText.style.top = '-30px';
+            floatingText.style.left = '50%';
+            floatingText.style.transform = 'translateX(-50%)';
+            if (result.isCritical) {
+                floatingText.style.color = '#ff6b35';
+                floatingText.style.fontSize = '22px';
+                floatingText.style.textShadow = '0 0 10px #ff6b35';
+            }
+            targetElement.appendChild(floatingText);
+            
+            // Remove effects after animation
             setTimeout(() => {
                 hitVfx.remove();
-                casterElement.classList.remove('kagome-bow-animation');
-            }, 800);
+                floatingText.remove();
+            }, 2000);
         }, 400);
     }
     
     // Calculate damage
     const abilityPower = getAbilityPower(caster);
-    const baseDamage = 400 + abilityPower; // 400 + 100% AP
+    const baseDamage = 400 + abilityPower; // 400 + 100% Magical Damage
     
-    console.log("[KAGOME Q] Base damage calculated:", baseDamage, "AP:", abilityPower);
+    console.log("[KAGOME Q] Base damage calculated:", baseDamage, "Magical Damage:", abilityPower);
     
     // Apply damage to target
-    caster.isDamageSource = caster; // Ensure proper crit chance calculation
-    const result = target.applyDamage(baseDamage, 'magical');
+    const result = target.applyDamage(baseDamage, 'magical', caster, { abilityId: 'atlantean_kagome_q' });
     
     // Log the damage
     log(`${target.name} takes ${Math.round(result.damage)} magical damage from the golden arrow.`);
@@ -109,15 +158,30 @@ const scatterGoldenArrowsEffect = (caster, target) => {
     log(`${caster.name} uses Scatter Golden Arrows!`);
     
     // --- Particles/VFX for Scatter Golden Arrows ---
-    const casterElement = document.getElementById(`character-${caster.id}`);
+    const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+    
+    console.log("[KAGOME W VFX] Caster element found:", casterElement, "for ID:", `character-${caster.instanceId || caster.id}`);
     
     if (casterElement) {
-        // Create a bow pull-back animation
-        casterElement.classList.add('kagome-bow-animation');
+        console.log("[KAGOME W VFX] Creating bow animation and arrow rain VFX");
         
         // Create the arrow rain VFX
         const arrowRainVfx = document.createElement('div');
         arrowRainVfx.className = 'kagome-arrow-rain';
+        
+        // === NEW: generate individual arrow particles ===
+        const ARROWS_IN_RAIN = 24;
+        for (let i = 0; i < ARROWS_IN_RAIN; i++) {
+            const arrow = document.createElement('div');
+            arrow.className = 'kagome-arrow-rain-arrow';
+            // Random horizontal starting position (in % to fill container width)
+            arrow.style.left = `${Math.random() * 100}%`;
+            // Stagger each arrow slightly
+            arrow.style.animationDelay = `${(Math.random() * 0.5).toFixed(2)}s`;
+            arrowRainVfx.appendChild(arrow);
+        }
+        
+        console.log("[KAGOME W VFX] Created arrow rain element:", arrowRainVfx);
         
         // Position the effect at the top where enemies are
         arrowRainVfx.style.top = '0';
@@ -125,8 +189,11 @@ const scatterGoldenArrowsEffect = (caster, target) => {
         
         // Add to battle-container instead of battle-area
         const battleContainer = document.querySelector('.battle-container');
+        console.log("[KAGOME W VFX] Battle container found:", battleContainer);
+        
         if (battleContainer) {
             battleContainer.appendChild(arrowRainVfx);
+            console.log("[KAGOME W VFX] Arrow rain VFX added to battle container");
             
             // Get the enemy area height (typically the top half of the battleContainer)
             const containerHeight = battleContainer.offsetHeight;
@@ -134,16 +201,28 @@ const scatterGoldenArrowsEffect = (caster, target) => {
             
             // Set a more precise height based on where enemies actually are
             arrowRainVfx.style.height = `${enemyAreaHeight}px`;
+            
+            // Add screen shake for the arrow rain
+            setTimeout(() => {
+                console.log("[KAGOME W VFX] Applying screen shake");
+                battleContainer.style.animation = 'kagomeScreenShake 0.8s ease-out';
+                setTimeout(() => {
+                    battleContainer.style.animation = '';
+                }, 800);
+            }, 300);
         } else {
             // Fallback to body if container not found
+            console.log("[KAGOME W VFX] Fallback: adding to body");
             document.body.appendChild(arrowRainVfx);
         }
         
         // Remove VFX elements after animation completes
         setTimeout(() => {
-            casterElement.classList.remove('kagome-bow-animation');
+            console.log("[KAGOME W VFX] Cleaning up VFX elements");
             arrowRainVfx.remove();
         }, 1500);
+    } else {
+        console.error("[KAGOME W VFX] ERROR: Caster element not found for ID:", `character-${caster.instanceId || caster.id}`);
     }
     
     // Get all enemy characters
@@ -161,68 +240,105 @@ const scatterGoldenArrowsEffect = (caster, target) => {
     
     // Calculate base damage 
     const abilityPower = getAbilityPower(caster);
-    const baseDamage = 200 + (abilityPower * 0.5); // 200 + 50% AP
+    const baseDamage = 200 + (abilityPower * 0.5); // 200 + 50% Magical Damage
     
-    console.log("[KAGOME W] Base damage calculated:", baseDamage, "AP:", abilityPower);
+    console.log("[KAGOME W] Base damage calculated:", baseDamage, "Magical Damage:", abilityPower);
     
-    // Track how many enemies were hit for the buff
-    let enemiesHit = 0;
+    // Track how many enemies actually took damage for the buff (excluding dodges)
+    let enemiesDamaged = 0;
     
     // Deal damage to all enemy characters
     enemies.forEach(enemy => {
         console.log("[KAGOME W] Processing enemy:", enemy.name);
         if (!enemy.isDead()) {
             // Apply damage
-            caster.isDamageSource = caster; // Ensure proper crit chance calculation
-            const result = enemy.applyDamage(baseDamage, 'magical');
+            const result = enemy.applyDamage(baseDamage, 'magical', caster, { abilityId: 'atlantean_kagome_w' });
             
-            // Log the damage
-            log(`${enemy.name} takes ${Math.round(result.damage)} magical damage from the golden arrows.`);
-            if (result.isCritical) {
-                log("Critical Hit!");
+            // Check if the attack was dodged
+            if (result.isDodged) {
+                log(`${enemy.name} dodged the golden arrows!`);
+            } else {
+                // Log the damage only if not dodged
+                log(`${enemy.name} takes ${Math.round(result.damage)} magical damage from the golden arrows.`);
+                if (result.isCritical) {
+                    log("Critical Hit!");
+                }
+                
+                // Only increment counter if damage was actually dealt (not dodged)
+                enemiesDamaged++;
             }
             
-            // Increment enemies hit counter
-            enemiesHit++;
-            
             // Create individual arrow hit VFX on each enemy
-            const enemyElement = document.getElementById(`character-${enemy.id}`);
+            const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
+            console.log(`[KAGOME W VFX] Enemy element found for ${enemy.name}:`, enemyElement, "for ID:", `character-${enemy.instanceId || enemy.id}`);
+            
             if (enemyElement) {
-                const arrowHitVfx = document.createElement('div');
-                arrowHitVfx.className = 'kagome-arrow-hit';
-                enemyElement.appendChild(arrowHitVfx);
+                console.log(`[KAGOME W VFX] Creating arrow hit VFX for ${enemy.name}`);
                 
-                // Remove VFX after animation
+                // Only create hit VFX if the attack wasn't dodged
+                if (!result.isDodged) {
+                    const arrowHitVfx = document.createElement('div');
+                    arrowHitVfx.className = 'kagome-arrow-hit';
+                    enemyElement.appendChild(arrowHitVfx);
+                    
+                    // Remove VFX after animation
+                    setTimeout(() => {
+                        arrowHitVfx.remove();
+                        console.log(`[KAGOME W VFX] Cleaned up hit VFX for ${enemy.name}`);
+                    }, 2000);
+                }
+                
+                // Create floating damage text for each enemy (including dodges)
+                const floatingText = document.createElement('div');
+                floatingText.className = 'kagome-floating-text';
+                if (result.isDodged) {
+                    floatingText.textContent = 'DODGED!';
+                    floatingText.style.color = '#87ceeb';
+                    floatingText.style.textShadow = '0 0 10px #87ceeb';
+                } else {
+                    floatingText.textContent = `${Math.round(result.damage)}${result.isCritical ? ' CRIT!' : ''}`;
+                    if (result.isCritical) {
+                        floatingText.style.color = '#ff6b35';
+                        floatingText.style.fontSize = '22px';
+                        floatingText.style.textShadow = '0 0 10px #ff6b35';
+                    }
+                }
+                floatingText.style.top = '-30px';
+                floatingText.style.left = '50%';
+                floatingText.style.transform = 'translateX(-50%)';
+                enemyElement.appendChild(floatingText);
+                
+                console.log(`[KAGOME W VFX] Added floating text to ${enemy.name}`);
+                
+                // Remove floating text after animation
                 setTimeout(() => {
-                    arrowHitVfx.remove();
-                }, 800);
+                    floatingText.remove();
+                    console.log(`[KAGOME W VFX] Cleaned up floating text for ${enemy.name}`);
+                }, 2000);
+            } else {
+                console.error(`[KAGOME W VFX] ERROR: Enemy element not found for ${enemy.name} with ID: character-${enemy.id}`);
             }
         }
     });
     
-    console.log("[KAGOME W] Enemies hit:", enemiesHit);
+    console.log("[KAGOME W] Enemies damaged:", enemiesDamaged);
     
-    // Apply AP buff to Kagome based on number of enemies hit
-    if (enemiesHit > 0) {
-        // Save original AP for verification
-        const originalAP = caster.stats.magicalDamage;
-        console.log("[KAGOME W] Original AP before buff:", originalAP);
+    // Apply Magical Damage buff to Kagome based on number of enemies that actually took damage
+    if (enemiesDamaged > 0) {
+        // Save original magical damage for verification
+        const originalMagicalDamage = caster.stats.magicalDamage;
+        console.log("[KAGOME W] Original magical damage before buff:", originalMagicalDamage);
         
-        // Calculate buff based on number of enemies hit (25% * number of enemies)
-        const apBuff = 0.25 * enemiesHit * abilityPower;
+        // Calculate buff based on number of enemies damaged (25% * number of enemies damaged)
+        const magicalDamageBuff = 0.25 * enemiesDamaged * abilityPower;
         
-        console.log("[KAGOME W] AP buff to apply:", apBuff);
+        console.log("[KAGOME W] Magical damage buff to apply:", magicalDamageBuff);
         
-        // Create or update the AP buff
-        const buffId = 'kagome_w_ap_buff';
+        // Create or update the magical damage buff
+        const buffId = 'kagome_w_magical_damage_buff';
         const existingBuff = caster.buffs.find(buff => buff.id === buffId);
         
         console.log("[KAGOME W] Existing buff found:", existingBuff);
-        
-        // Ensure magicalDamageBuffs exists
-        if (!caster.stats.magicalDamageBuffs) {
-            caster.stats.magicalDamageBuffs = {};
-        }
         
         // If buff already exists, just refresh its duration without stacking the effect
         if (existingBuff) {
@@ -233,62 +349,39 @@ const scatterGoldenArrowsEffect = (caster, target) => {
             
             // Do NOT reapply the buff stats as they're already applied
         } else {
-            // Remove any existing magic damage from previous buffs (just in case)
-            if (caster.stats.magicalDamageBuffs && caster.stats.magicalDamageBuffs[buffId]) {
-                caster.stats.magicalDamage -= caster.stats.magicalDamageBuffs[buffId];
-                delete caster.stats.magicalDamageBuffs[buffId];
-            }
-            
             console.log("[KAGOME W] Creating new buff");
             
-            // Create a new buff effect
-            const apBuffEffect = new Effect(
+            // Create a new buff effect using proper statModifiers system
+            const magicalDamageBuffEffect = new Effect(
                 buffId,
                 'Golden Power',
                 'Icons/abilities/golden_arrow.png', // Use existing golden arrow image
                 6, // Duration of 6 turns
-                null // Setting effect to null as we'll handle the application directly
+                null // Setting effect to null as we'll use statModifiers
             );
             
-            // Store the AP boost amount in the effect for display in UI
-            apBuffEffect.effects = {
-                apBoost: apBuff
-            };
+            // Add description for tooltip based on enemies damaged
+            magicalDamageBuffEffect.setDescription(`Increases Magical Damage by ${Math.round(magicalDamageBuff)} (${25 * enemiesDamaged}%).`);
             
-            // Add description for tooltip based on enemies hit
-            apBuffEffect.setDescription(`Increases Ability Power by ${Math.round(apBuff)} (${25 * enemiesHit}%).`);
+            // Use proper statModifiers system for automatic application/removal
+            magicalDamageBuffEffect.statModifiers = [
+                { stat: 'magicalDamage', value: magicalDamageBuff, operation: 'add' }
+            ];
             
-            // Custom apply method that runs once when the buff is first added
-            // Apply the buff directly here before adding it
-            caster.stats.magicalDamageBuffs[buffId] = apBuff;
-            caster.stats.magicalDamage += apBuff;
-            
-            // Custom remove method that will run when the buff expires
-            apBuffEffect.remove = (character) => {
-                console.log("[KAGOME W] Removing AP buff from character");
-                if (character.stats.magicalDamageBuffs && character.stats.magicalDamageBuffs[buffId]) {
-                    const buffToRemove = character.stats.magicalDamageBuffs[buffId];
-                    character.stats.magicalDamage -= buffToRemove;
-                    delete character.stats.magicalDamageBuffs[buffId];
-                    console.log("[KAGOME W] Removed buff value:", buffToRemove);
-                    console.log("[KAGOME W] Character AP after buff removal:", character.stats.magicalDamage);
-                }
-            };
-            
-            // Apply the buff
-            caster.addBuff(apBuffEffect);
+            // Apply the buff - this will automatically apply statModifiers
+            caster.addBuff(magicalDamageBuffEffect);
             console.log("[KAGOME W] New buff applied:", caster.buffs);
-            log(`${caster.name} gains +${Math.round(apBuff)} Ability Power (${25 * enemiesHit}%) for 6 turns.`, 'kagome-buff');
+            log(`${caster.name} gains +${Math.round(magicalDamageBuff)} Magical Damage (${25 * enemiesDamaged}%) for 6 turns.`, 'kagome-buff');
         }
         
         // Verify the buff was applied
-        console.log("[KAGOME W] AP after all buff logic:", caster.stats.magicalDamage);
+        console.log("[KAGOME W] Magical damage after all buff logic:", caster.stats.magicalDamage);
         
-        // Create AP buff VFX
+        // Create magical damage buff VFX
         if (casterElement) {
             const buffVfx = document.createElement('div');
-            buffVfx.className = 'ap-buff-vfx';
-            buffVfx.innerHTML = `<span>+${25 * enemiesHit}% AP</span>`;
+            buffVfx.className = 'magical-damage-buff-vfx';
+            buffVfx.innerHTML = `<span>+${25 * enemiesDamaged}% Magical Damage</span>`;
             casterElement.appendChild(buffVfx);
             
             // Remove VFX after animation
@@ -303,7 +396,7 @@ const scatterGoldenArrowsEffect = (caster, target) => {
         updateCharacterUI(caster);
     }
     
-    console.log("[KAGOME W] Ability complete, final AP:", caster.stats.magicalDamage);
+    console.log("[KAGOME W] Ability complete, final Magical Damage:", caster.stats.magicalDamage);
 };
 
 // --- E: Spiritwalk ---
@@ -315,28 +408,56 @@ const spiritwalkEffect = (caster, target) => {
     log(`${caster.name} uses Spiritwalk!`);
     
     // Create VFX for Spiritwalk
-    const casterElement = document.getElementById(`character-${caster.id}`);
+    const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
     
     if (casterElement) {
-        // Add spiritwalk animation class
-        casterElement.classList.add('kagome-spiritwalk-animation');
-        
         // Create spiritwalk VFX overlay
         const spiritwalkVfx = document.createElement('div');
         spiritwalkVfx.className = 'kagome-spiritwalk-vfx';
         casterElement.appendChild(spiritwalkVfx);
         
+        // Create portal effect around the battlefield
+        const battlefieldPortal = document.createElement('div');
+        battlefieldPortal.className = 'kagome-spirit-portal';
+        battlefieldPortal.style.position = 'fixed';
+        battlefieldPortal.style.top = '0';
+        battlefieldPortal.style.left = '0';
+        battlefieldPortal.style.width = '100vw';
+        battlefieldPortal.style.height = '100vh';
+        battlefieldPortal.style.background = 'radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, rgba(75, 0, 130, 0.2) 50%, rgba(25, 25, 112, 0.3) 100%)';
+        battlefieldPortal.style.pointerEvents = 'none';
+        battlefieldPortal.style.zIndex = '500';
+        battlefieldPortal.style.animation = 'spiritPortalPulse 4s ease-in-out';
+        document.body.appendChild(battlefieldPortal);
+        
         // Remove VFX after animation completes
         setTimeout(() => {
             spiritwalkVfx.remove();
-            casterElement.classList.remove('kagome-spiritwalk-animation');
-        }, 1500);
+            battlefieldPortal.remove();
+        }, 4000);
     }
     
     // 1. Heal for 1000 HP
     const healAmount = 1000;
-    const actualHealAmount = caster.heal(healAmount);
+    const actualHealAmount = caster.heal(healAmount, caster, { abilityId: 'atlantean_kagome_e' });
     log(`${caster.name} heals for ${actualHealAmount} HP through Spiritwalk.`);
+    
+    // Create floating heal text
+    if (casterElement) {
+        const floatingHealText = document.createElement('div');
+        floatingHealText.className = 'kagome-floating-text';
+        floatingHealText.textContent = `+${actualHealAmount} HP`;
+        floatingHealText.style.top = '-30px';
+        floatingHealText.style.left = '50%';
+        floatingHealText.style.transform = 'translateX(-50%)';
+        floatingHealText.style.color = '#90EE90';
+        floatingHealText.style.textShadow = '0 0 10px #90EE90';
+        casterElement.appendChild(floatingHealText);
+        
+        setTimeout(() => {
+            floatingHealText.remove();
+        }, 2000);
+    }
     
     // 2. Apply stun to self for 4 turns
     const stunDebuffId = 'kagome_e_stun_debuff';
@@ -430,7 +551,7 @@ const spiritScreamEffect = (caster, target) => {
     log(`${caster.name} unleashes a Spirit Scream!`, 'kagome-buff');
     
     // Create VFX for Spirit Scream
-    const casterElement = document.getElementById(`character-${caster.id}`);
+    const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
     
     if (casterElement) {
         // Create spirit scream shockwave animation
@@ -440,6 +561,17 @@ const spiritScreamEffect = (caster, target) => {
         
         // Create spirit glow effect on caster
         casterElement.classList.add('kagome-spirit-glow');
+        
+        // Add dramatic screen shake for spirit scream
+        const battleContainer = document.querySelector('.battle-container');
+        if (battleContainer) {
+            setTimeout(() => {
+                battleContainer.style.animation = 'kagomeScreenShake 1.2s ease-out';
+                setTimeout(() => {
+                    battleContainer.style.animation = '';
+                }, 1200);
+            }, 500);
+        }
         
         // Remove VFX after animation completes
         setTimeout(() => {
@@ -463,17 +595,16 @@ const spiritScreamEffect = (caster, target) => {
     
     // Calculate damage (200% of Kagome's magical damage)
     const abilityPower = getAbilityPower(caster);
-    const baseDamage = abilityPower * 2; // 200% AP
+    const baseDamage = abilityPower * 2; // 200% Magical Damage
     
-    console.log("[KAGOME R] Base damage calculated:", baseDamage, "AP:", abilityPower);
+    console.log("[KAGOME R] Base damage calculated:", baseDamage, "Magical Damage:", abilityPower);
     
     // Process each enemy
     enemies.forEach(enemy => {
         console.log("[KAGOME R] Processing enemy:", enemy.name);
         if (!enemy.isDead()) {
             // 1. Apply damage
-            caster.isDamageSource = caster; // Ensure proper crit chance calculation
-            const result = enemy.applyDamage(baseDamage, 'magical');
+            const result = enemy.applyDamage(baseDamage, 'magical', caster, { abilityId: 'atlantean_kagome_r' });
             
             // Log the damage
             log(`${enemy.name} takes ${Math.round(result.damage)} magical damage from the Spirit Scream.`);
@@ -533,7 +664,7 @@ const spiritScreamEffect = (caster, target) => {
             }
             
             // Create VFX for the buff removal on each enemy
-            const enemyElement = document.getElementById(`character-${enemy.id}`);
+            const enemyElement = document.getElementById(`character-${enemy.instanceId || enemy.id}`);
             if (enemyElement) {
                 // Create dispel VFX
                 const dispelVfx = document.createElement('div');
@@ -545,11 +676,46 @@ const spiritScreamEffect = (caster, target) => {
                 impactVfx.className = 'kagome-scream-impact';
                 enemyElement.appendChild(impactVfx);
                 
+                // Create floating damage text for each enemy
+                const floatingText = document.createElement('div');
+                floatingText.className = 'kagome-floating-text';
+                floatingText.textContent = `${Math.round(result.damage)}${result.isCritical ? ' CRIT!' : ''}`;
+                floatingText.style.top = '-30px';
+                floatingText.style.left = '50%';
+                floatingText.style.transform = 'translateX(-50%)';
+                floatingText.style.color = '#8a2be2';
+                floatingText.style.textShadow = '0 0 15px #8a2be2, 0 0 30px rgba(138, 43, 226, 0.5)';
+                if (result.isCritical) {
+                    floatingText.style.color = '#ff6b35';
+                    floatingText.style.fontSize = '22px';
+                    floatingText.style.textShadow = '0 0 10px #ff6b35';
+                }
+                enemyElement.appendChild(floatingText);
+                
+                // Add buff dispel notification if buffs were removed
+                if (enemy.buffs && enemy.buffs.length > 0) {
+                    const buffDispelText = document.createElement('div');
+                    buffDispelText.className = 'kagome-floating-text';
+                    buffDispelText.textContent = `Buffs Purged!`;
+                    buffDispelText.style.top = '-60px';
+                    buffDispelText.style.left = '50%';
+                    buffDispelText.style.transform = 'translateX(-50%)';
+                    buffDispelText.style.color = '#ff69b4';
+                    buffDispelText.style.fontSize = '16px';
+                    buffDispelText.style.textShadow = '0 0 10px #ff69b4';
+                    enemyElement.appendChild(buffDispelText);
+                    
+                    setTimeout(() => {
+                        buffDispelText.remove();
+                    }, 2000);
+                }
+                
                 // Remove VFX after animation
                 setTimeout(() => {
                     dispelVfx.remove();
                     impactVfx.remove();
-                }, 1500);
+                    floatingText.remove();
+                }, 2000);
             }
         }
     });
@@ -573,7 +739,7 @@ const kagomeQ = new Ability(
     70, // Mana cost
     2,   // Cooldown
     goldenArrowEffect
-).setDescription('Deals 400 + 100% AP magical damage to an enemy.')
+).setDescription('Deals 400 + 100% Magical Damage to an enemy.')
  .setTargetType('enemy');
 
 const kagomeW = new Ability(
@@ -583,7 +749,7 @@ const kagomeW = new Ability(
     100, // Mana cost
     4,   // Cooldown
     scatterGoldenArrowsEffect
-).setDescription('Deals 200 + 50% AP to ALL enemies. When used, Kagome gains 25% AP for 6 turns based on the number of enemies hit (25% for 1 enemy, 50% for 2 enemies, 75% for 3 enemies, etc). If the buff is already active, using this ability resets the buff duration but does not increase the AP bonus.')
+).setDescription('Deals 200 + 50% Magical Damage to ALL enemies. When used, Kagome gains 25% Magical Damage for 6 turns based on the number of enemies hit (25% for 1 enemy, 50% for 2 enemies, 75% for 3 enemies, etc). If the buff is already active, using this ability resets the buff duration but does not increase the Magical Damage bonus.')
  .setTargetType('all_enemies'); // Auto-targeting all enemies
 
 const kagomeE = new Ability(

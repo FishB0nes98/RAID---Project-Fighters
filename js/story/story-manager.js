@@ -552,9 +552,11 @@ class StoryManager {
                  const newStats = { ...savedState.stats };
                  const newCurrentHP = Math.max(0, Math.min(teamMember.currentHP, newStats.hp));
                  const newCurrentMana = Math.max(0, Math.min(teamMember.currentMana, newStats.mana));
-                 // Also restore hell effects and permanent debuffs if they exist
+                 // Also restore hell effects, permanent debuffs, permanent buffs, and atlantean blessings if they exist
                  const hellEffects = savedState.hellEffects ? { ...savedState.hellEffects } : undefined;
                  const permanentDebuffs = savedState.permanentDebuffs ? [...savedState.permanentDebuffs] : undefined;
+                 const permanentBuffs = savedState.permanentBuffs ? [...savedState.permanentBuffs] : undefined;
+                 const atlanteanBlessings = savedState.atlanteanBlessings ? { ...savedState.atlanteanBlessings } : undefined;
                  
                  return {
                      ...teamMember,
@@ -562,7 +564,9 @@ class StoryManager {
                      currentHP: newCurrentHP,
                      currentMana: newCurrentMana,
                      hellEffects: hellEffects,
-                     permanentDebuffs: permanentDebuffs
+                     permanentDebuffs: permanentDebuffs,
+                     permanentBuffs: permanentBuffs,
+                     atlanteanBlessings: atlanteanBlessings
                  };
             } else {
                  // If no saved stats for this member, keep their base stats
@@ -715,9 +719,10 @@ class StoryManager {
                  currentMana: member.currentMana,
                  // Include the full stats object to persist modifications
                  stats: { ...member.stats },
-                 // Also preserve hell effects and permanent debuffs
+                 // Also preserve hell effects, permanent debuffs, and atlantean blessings
                  hellEffects: member.hellEffects ? { ...member.hellEffects } : undefined,
-                 permanentDebuffs: member.permanentDebuffs ? [...member.permanentDebuffs] : undefined
+                 permanentDebuffs: member.permanentDebuffs ? [...member.permanentDebuffs] : undefined,
+                 atlanteanBlessings: member.atlanteanBlessings ? { ...member.atlanteanBlessings } : undefined
              };
              return acc;
          }, {});
@@ -1056,7 +1061,7 @@ class StoryManager {
 
         const progressRef = firebaseDatabase.ref(`users/${this.userId}/storyProgress/${this.storyId}`);
         try {
-            // Ensure lastTeamState is saved as an object { charId: { currentHP, currentMana, stats, hellEffects, permanentDebuffs } }
+            // Ensure lastTeamState is saved as an object { charId: { currentHP, currentMana, stats, hellEffects, permanentDebuffs, atlanteanBlessings } }
             const teamStateToSave = this.playerTeam.reduce((acc, member) => {
                 const memberState = {
                     currentHP: member.currentHP,
@@ -1075,12 +1080,24 @@ class StoryManager {
                     memberState.permanentDebuffs = [...member.permanentDebuffs];
                 }
                 
+                // Only include permanent buffs if they exist (Firebase doesn't allow undefined)
+                if (member.permanentBuffs && member.permanentBuffs.length > 0) {
+                    memberState.permanentBuffs = [...member.permanentBuffs];
+                }
+                
+                // Only include atlantean blessings if they exist (Firebase doesn't allow undefined)
+                if (member.atlanteanBlessings && Object.keys(member.atlanteanBlessings).length > 0) {
+                    memberState.atlanteanBlessings = { ...member.atlanteanBlessings };
+                }
+                
                 // Debug logging for save
                 console.log(`[StoryManager] Saving ${member.id}:`, {
                     currentHP: memberState.currentHP,
                     maxHP: memberState.stats.hp,
                     hellEffects: memberState.hellEffects || 'none',
-                    permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0
+                    permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0,
+                    permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0,
+                    atlanteanBlessings: memberState.atlanteanBlessings || 'none'
                 });
                 
                 acc[member.id] = memberState;
@@ -1093,6 +1110,7 @@ class StoryManager {
                 lastTeamState: teamStateToSave
             };
 
+            console.log(`[DEBUG] About to save to Firebase:`, JSON.stringify(progressData, null, 2));
             await progressRef.set(progressData);
             console.log(`Saved progress for story ${this.storyId}:`, progressData);
         } catch (error) {
@@ -1225,6 +1243,56 @@ class StoryManager {
                             window.storyUI.showPopupMessage('✨ All team members have been fully restored! HP and Mana are at maximum.', 'success', 4000);
                         }
                         break;
+                    
+                    // --- NEW: Atlantean Blessing Effects for 'all' target ---
+                    case 'atlantean_lifesteal_blessing':
+                        this.playerTeam.forEach(member => {
+                            if (member.stats) {
+                                // Grant 10% lifesteal to the character (0.1 = 10%)
+                                member.stats.lifesteal = (member.stats.lifesteal || 0) + 0.1;
+                                console.log(`Atlantean Lifesteal Blessing: Granted ${member.id} 10% lifesteal. New Lifesteal: ${(member.stats.lifesteal * 100).toFixed(1)}%`);
+                                
+                                // Mark this character as having received this effect
+                                if (!member.atlanteanBlessings) member.atlanteanBlessings = {};
+                                member.atlanteanBlessings.lifesteal_blessing = true;
+                                changesMade = true;
+                            } else {
+                                console.warn(`Cannot apply Atlantean Lifesteal Blessing: Stats object missing for ${member.id}`);
+                            }
+                        });
+                        // Show popup notification
+                        if (window.storyUI && window.storyUI.showPopupMessage) {
+                            window.storyUI.showPopupMessage('🌊 Blessing of the Depths granted! All team members now have +10% Lifesteal.', 'success', 4000);
+                        }
+                        break;
+                    case 'atlantean_mana_efficiency':
+                        this.playerTeam.forEach(member => {
+                            // This effect needs to be applied at the ability level, so we store it as a permanent effect
+                            if (!member.atlanteanBlessings) member.atlanteanBlessings = {};
+                            member.atlanteanBlessings.mana_efficiency = true;
+                            console.log(`Atlantean Mana Efficiency: Granted ${member.id} 50% mana cost reduction for all abilities`);
+                            changesMade = true;
+                        });
+                        // Show popup notification
+                        if (window.storyUI && window.storyUI.showPopupMessage) {
+                            window.storyUI.showPopupMessage('🌊 Blessing of the Tides granted! All abilities now cost 50% less mana.', 'success', 4000);
+                        }
+                        break;
+                    case 'atlantean_swiftness':
+                        this.playerTeam.forEach(member => {
+                            // This effect needs to be applied to Q abilities specifically
+                            if (!member.atlanteanBlessings) member.atlanteanBlessings = {};
+                            member.atlanteanBlessings.swiftness = true;
+                            console.log(`Atlantean Swiftness: Granted ${member.id} -1 turn cooldown reduction for Q ability`);
+                            changesMade = true;
+                        });
+                        // Show popup notification
+                        if (window.storyUI && window.storyUI.showPopupMessage) {
+                            window.storyUI.showPopupMessage('🌊 Blessing of the Currents granted! All Q abilities now have -1 turn cooldown.', 'success', 4000);
+                        }
+                        break;
+                    // --- END NEW ---
+                    
                     default:
                         console.warn(`Unknown effect type for target 'all': ${effect.type}`);
                         break;
@@ -1733,6 +1801,8 @@ class StoryManager {
                             break;
                         // --- END NEW ---
                         
+
+                        
                         case 'none':
                             console.log(`No effect applied to ${character.id} - choice declined.`);
                             break;
@@ -1753,7 +1823,7 @@ class StoryManager {
 
             // --- Common Logic after applying effect (or skipping) ---
             
-                            // Update lastTeamState for saving (reflects changes from effects)
+                                        // Update lastTeamState for saving (reflects changes from effects)
             this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
                 const memberState = { 
                      currentHP: member.currentHP, 
@@ -1776,13 +1846,19 @@ class StoryManager {
                      memberState.permanentBuffs = [...member.permanentBuffs];
                  }
                  
+                 // Only include atlantean blessings if they exist (Firebase doesn't allow undefined)
+                 if (member.atlanteanBlessings && Object.keys(member.atlanteanBlessings).length > 0) {
+                     memberState.atlanteanBlessings = { ...member.atlanteanBlessings };
+                 }
+                 
                  // Debug logging for each character
                  console.log(`[StoryManager] Saving state for ${member.id}:`, {
                      currentHP: memberState.currentHP,
                      maxHP: memberState.stats.hp,
                      hellEffects: memberState.hellEffects || 'none',
                      permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0,
-                     permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0
+                     permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0,
+                     atlanteanBlessings: memberState.atlanteanBlessings || 'none'
                  });
                  
                  acc[member.id] = memberState;
@@ -2139,6 +2215,50 @@ class StoryManager {
     }
 
     /**
+     * Apply atlantean blessings from existing team members to a new character
+     * @param {Object} newCharacter - The character to apply blessings to
+     */
+    applyAtlanteanBlessingsToCharacter(newCharacter) {
+        // Check if any existing team members have atlantean blessings
+        const existingBlessings = new Set();
+        
+        this.playerTeam.forEach(member => {
+            if (member.atlanteanBlessings) {
+                Object.keys(member.atlanteanBlessings).forEach(blessing => {
+                    if (member.atlanteanBlessings[blessing]) {
+                        existingBlessings.add(blessing);
+                    }
+                });
+            }
+        });
+
+        // Apply each found blessing to the new character
+        if (existingBlessings.size > 0) {
+            newCharacter.atlanteanBlessings = {};
+            
+            existingBlessings.forEach(blessing => {
+                switch (blessing) {
+                    case 'lifesteal_blessing':
+                        if (newCharacter.stats) {
+                            newCharacter.stats.lifesteal = (newCharacter.stats.lifesteal || 0) + 0.1;
+                            newCharacter.atlanteanBlessings.lifesteal_blessing = true;
+                            console.log(`Applied Atlantean Lifesteal Blessing to ${newCharacter.id}: +10% lifesteal`);
+                        }
+                        break;
+                    case 'mana_efficiency':
+                        newCharacter.atlanteanBlessings.mana_efficiency = true;
+                        console.log(`Applied Atlantean Mana Efficiency to ${newCharacter.id}: 50% mana cost reduction`);
+                        break;
+                    case 'swiftness':
+                        newCharacter.atlanteanBlessings.swiftness = true;
+                        console.log(`Applied Atlantean Swiftness to ${newCharacter.id}: -1 turn Q cooldown`);
+                        break;
+                }
+            });
+        }
+    }
+
+    /**
      * Adds a recruited character to the team, updates Firebase, and advances the stage.
      * @param {string} characterId - The ID of the character to recruit.
      * @returns {Promise<boolean>} - True if there are more stages, false if the story is complete.
@@ -2177,6 +2297,10 @@ class StoryManager {
                 currentMana: newCharacterData.mana // Start with full Mana
             };
             console.log(`[StoryManager] New character object created:`, newCharacter);
+
+            // 3.5. Apply any existing team-wide atlantean blessings to the new character
+            this.applyAtlanteanBlessingsToCharacter(newCharacter);
+            console.log(`[StoryManager] Applied atlantean blessings to new character ${characterId}`);
 
 
             // 4. Add to the internal player team state

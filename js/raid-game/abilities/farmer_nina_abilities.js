@@ -3107,59 +3107,8 @@ if (typeof window !== 'undefined' && window.GameManager && window.GameManager.pr
 
 // Modify wrapped Sniper Shot and Piercing Shot effects to show doubled damage feedback
 
-// Original wrapper
-const originalSniperShotWrapper = wrappedfarmer_ninaSniperShotEffect;
-wrappedfarmer_ninaSniperShotEffect = function(caster, target) {
-    // Add VFX for Deadly Precision before the shot if talent is active
-    if (caster && caster.id === 'farmer_nina' && 
-        caster.appliedTalents && caster.appliedTalents.includes('deadly_precision')) {
-        
-        // Create doubled damage flash effect
-        const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
-        if (casterElement) {
-            const doubleEffectVfx = document.createElement('div');
-            doubleEffectVfx.className = 'doubled-damage-flash';
-            doubleEffectVfx.textContent = '2× DMG';
-            casterElement.appendChild(doubleEffectVfx);
-            
-            setTimeout(() => {
-                if (doubleEffectVfx.parentNode) {
-                    doubleEffectVfx.remove();
-                }
-            }, 1000);
-        }
-    }
-    
-    // Call original wrapper
-    return originalSniperShotWrapper.call(this, caster, target);
-};
-
-// Original wrapper
-const originalPiercingShotWrapper = wrappedfarmer_ninaPiercingShotEffect;
-wrappedfarmer_ninaPiercingShotEffect = function(caster, target) {
-    // Add VFX for Deadly Precision before the shot if talent is active
-    if (caster && caster.id === 'farmer_nina' && 
-        caster.appliedTalents && caster.appliedTalents.includes('deadly_precision')) {
-        
-        // Create doubled damage flash effect
-        const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
-        if (casterElement) {
-            const doubleEffectVfx = document.createElement('div');
-            doubleEffectVfx.className = 'doubled-damage-flash';
-            doubleEffectVfx.textContent = '2× DMG';
-            casterElement.appendChild(doubleEffectVfx);
-            
-            setTimeout(() => {
-                if (doubleEffectVfx.parentNode) {
-                    doubleEffectVfx.remove();
-                }
-            }, 1000);
-        }
-    }
-    
-    // Call original wrapper
-    return originalPiercingShotWrapper.call(this, caster, target);
-};
+// Note: This section caused variable redeclaration errors and has been removed.
+// The VFX for Deadly Precision should be handled within the original function definitions.
 
 // Add CSS for doubled damage flash
 document.addEventListener('DOMContentLoaded', () => {
@@ -3540,7 +3489,7 @@ function updateTalentIndicators(character, characterElement) {
 function initializeBulletRainEvent(character) {
     if (!character || !character.enableBulletRain) return;
     
-    console.log(`[BULLET RAIN] Setting up event listeners for ${character.name}`);
+    
     
     // Listen for multiple possible turn start events
     const events = ['turnStart', 'TurnStart', 'playerTurnStart', 'characterTurnStart'];
@@ -3548,7 +3497,6 @@ function initializeBulletRainEvent(character) {
         document.addEventListener(eventName, function(event) {
             const currentCharacter = event.detail && event.detail.character;
             if (currentCharacter && currentCharacter.id === character.id) {
-                console.log(`[BULLET RAIN] Turn start detected for ${character.name} via ${eventName} event`);
                 processBulletRainTalent(character);
             }
         });
@@ -3560,18 +3508,10 @@ function initializeBulletRainEvent(character) {
         const currentCharacter = event.detail && event.detail.character;
         
         if (currentPhase === 'player' && currentCharacter && currentCharacter.id === character.id) {
-            console.log(`[BULLET RAIN] Player phase start detected for ${character.name}`);
             processBulletRainTalent(character);
         }
     });
     
-    // Setup manual trigger for testing
-    if (window.gameManager) {
-        // Add a method to the character to manually trigger bullet rain
-        character.triggerBulletRain = function() {
-            console.log(`[BULLET RAIN] Manually triggering Bullet Rain for ${character.name}`);
-            processBulletRainTalent(character);
-        };
         
         // Add a custom event handler for turn detection
         const originalStartTurn = window.gameManager.startTurn;
@@ -3583,25 +3523,13 @@ function initializeBulletRainEvent(character) {
                 if (character && character.id === 'farmer_nina' && 
                     character.appliedTalents && 
                     character.appliedTalents.includes('bullet_rain')) {
-                    console.log(`[BULLET RAIN] Turn start detected via startTurn hook`);
                     processBulletRainTalent(character);
                 }
                 
                 return result;
             };
         }
-    }
-    
-    // For testing - add global function to trigger bullet rain manually
-    window.testBulletRain = function() {
-        if (character) {
-            console.log(`[BULLET RAIN] Test function called for ${character.name}`);
-            processBulletRainTalent(character);
-            return "Bullet Rain test executed";
-        }
-        return "Character not found";
-    };
-}
+    }       
 
 // Add to existing initialization functions
 function initializeNewTalents(character) {
@@ -3686,19 +3614,6 @@ function initializeNewTalents(character) {
                 ninaFound = true;
             }
         }
-        
-        // If not found at all, try again later
-        if (!ninaFound) {
-            console.log('[NinaTalents] Nina not found in game state, trying again in 1s...');
-            setTimeout(checkAndSetupNina, 1000);
-        }
-    }
-    
-    // Start checking once the game is loaded
-    if (document.readyState === 'complete') {
-        checkAndSetupNina();
-    } else {
-        window.addEventListener('load', checkAndSetupNina);
     }
 })();
 
@@ -3706,12 +3621,11 @@ function initializeNewTalents(character) {
 function addProcessEffectsHook() {
     // Wait for Character class to be available
     if (typeof window.Character !== 'function') {
-        console.log('[BULLET RAIN] Character class not found, waiting...');
         setTimeout(addProcessEffectsHook, 500);
         return;
     }
     
-    console.log('[BULLET RAIN] Adding processEffects hook for Bullet Rain talent');
+
     
     // Store original processEffects method
     const originalProcessEffects = window.Character.prototype.processEffects;
@@ -3728,10 +3642,8 @@ function addProcessEffectsHook() {
             
             // Trigger Bullet Rain at the start of turn
             if (typeof processBulletRainTalent === 'function') {
-                console.log(`[BULLET RAIN] Triggering Bullet Rain from processEffects hook`);
                 processBulletRainTalent(this);
             } else {
-                console.warn(`[BULLET RAIN] processBulletRainTalent function not found`);
             }
         }
         
@@ -3748,7 +3660,6 @@ setTimeout(addProcessEffectsHook, 1000);
 // For debugging: Add global function to register with GameManager's onTurnStart
 function registerBulletRainWithGameManager() {
     if (!window.gameManager) {
-        console.log('[BULLET RAIN] GameManager not found, waiting...');
         setTimeout(registerBulletRainWithGameManager, 500);
         return;
     }
@@ -3800,8 +3711,6 @@ window.testBulletRainNow = function() {
     console.log('[BULLET RAIN] Manual test function called');
     
     if (!window.gameManager || !window.gameManager.gameState) {
-        console.error('[BULLET RAIN] GameManager or game state not available');
-        return "Error: Game not properly initialized";
     }
     
     // Find Nina in player characters
@@ -3822,13 +3731,10 @@ window.testBulletRainNow = function() {
             char && char.id === 'farmer_nina');
             
         if (nina) {
-            console.log('[BULLET RAIN] Found Nina in AI characters');
         }
     }
     
     if (!nina) {
-        console.error('[BULLET RAIN] Nina not found in game state');
-        return "Error: Nina not found in game";
     }
     
     // Ensure Nina has the Bullet Rain talent
@@ -4184,11 +4090,6 @@ initializeNewTalents = function(character) {
                     return true; // Setup complete
                 }
             }
-            
-            // If we get here, Nina wasn't found or talents weren't initialized
-            console.log('[Nina New Talents] Nina not found yet, trying again later...');
-            setTimeout(checkAndSetupNina, 1000); // Try again in 1 second
-            return false;
         }
         
         // Start checking

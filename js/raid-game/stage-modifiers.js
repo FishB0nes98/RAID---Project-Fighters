@@ -233,6 +233,91 @@ class StageModifiersRegistry {
             }
         });
 
+        // Icy Preservation Modifier
+        this.registerModifier({
+            id: 'icy_preservation',
+            name: 'Icy Preservation',
+            description: 'The ancient ice magic slows all combat. All characters have their speed reduced by 25%, but gain 15% magical shield to resist the harsh cold.',
+            icon: '❄️',
+            vfx: {
+                type: 'icy_preservation',
+                particles: true,
+                animation: 'ice_crystals'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                const speedReduction = 0.25; // 25% speed reduction
+                const magicalShieldBonus = 0.15; // 15% magical shield bonus
+                
+                const allCharacters = [
+                    ...gameManager.gameState.playerCharacters,
+                    ...gameManager.gameState.aiCharacters
+                ];
+
+                allCharacters.forEach(character => {
+                    // Store original values for restoration
+                    character.stageModifiers = character.stageModifiers || {};
+                    character.stageModifiers.originalSpeed = character.stats.speed;
+                    character.stageModifiers.originalMagicalShield = character.stats.magicalShield;
+                    
+                    // Apply speed reduction
+                    character.stats.speed = Math.floor(character.stats.speed * (1 - speedReduction));
+                    
+                    // Apply magical shield bonus
+                    const shieldBonus = Math.floor(character.stats.magicalShield * magicalShieldBonus);
+                    character.stats.magicalShield = character.stats.magicalShield + shieldBonus;
+                    
+                    // Also update baseStats to preserve through recalculation
+                    if (character.baseStats) {
+                        character.baseStats.speed = character.stats.speed;
+                        character.baseStats.magicalShield = character.stats.magicalShield;
+                    }
+                });
+                
+                gameManager.addLogEntry(
+                    `❄️ The ancient ice magic preserves all combatants! Speed reduced, magical resistance increased.`, 
+                    'stage-effect dramatic'
+                );
+
+                // Create visual effect
+                this.createIcyPreservationVFX(modifier);
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Restore original values when stage ends
+                const allCharacters = [
+                    ...gameManager.gameState.playerCharacters,
+                    ...gameManager.gameState.aiCharacters
+                ];
+
+                allCharacters.forEach(character => {
+                    if (character.stageModifiers) {
+                        if (character.stageModifiers.originalSpeed !== undefined) {
+                            character.stats.speed = character.stageModifiers.originalSpeed;
+                            if (character.baseStats) {
+                                character.baseStats.speed = character.stageModifiers.originalSpeed;
+                            }
+                            delete character.stageModifiers.originalSpeed;
+                        }
+                        
+                        if (character.stageModifiers.originalMagicalShield !== undefined) {
+                            character.stats.magicalShield = character.stageModifiers.originalMagicalShield;
+                            if (character.baseStats) {
+                                character.baseStats.magicalShield = character.stageModifiers.originalMagicalShield;
+                            }
+                            delete character.stageModifiers.originalMagicalShield;
+                        }
+                    }
+                });
+                
+                gameManager.addLogEntry(
+                    `❄️ The icy preservation fades as the battle ends.`, 
+                    'stage-effect'
+                );
+
+                // Clear VFX
+                this.clearIcyPreservationVFX();
+            }
+        });
+
         // Small Space Modifier
         this.registerModifier({
             id: 'small_space',
@@ -921,6 +1006,107 @@ class StageModifiersRegistry {
             }
         });
         console.log('[StageModifiers] Registered healing_mana_flow modifier successfully');
+
+        // ==== AQUATIC HOME PROTECTOR MODIFIER ====
+        this.registerModifier({
+            id: 'aquatic_home_protector',
+            name: 'Aquatic Home Protector',
+            description: 'The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn. Additionally, when player characters deal damage with abilities, they heal for 100% of the damage dealt.',
+            icon: '🌊',
+            vfx: {
+                type: 'aquatic_home_protector',
+                particles: true,
+                animation: 'healing_waters'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                console.log(`[AquaticHomeProtector] Setting up damage-based healing event listeners`);
+                
+                // Store event listeners for cleanup
+                if (!gameManager._aquaticProtectorListeners) {
+                    gameManager._aquaticProtectorListeners = {};
+                }
+
+                // Damage dealt event listener for ability-based healing
+                gameManager._aquaticProtectorListeners.onDamage = (event) => {
+                    console.log(`[AquaticHomeProtector] DAMAGE EVENT TRIGGERED:`, event.detail);
+                    const { character, target, damage, damageType, isCritical } = event.detail;
+                    
+                    // Only heal player characters (not AI characters)
+                    if (character && damage > 0 && !character.isAI) {
+                        console.log(`[AquaticHomeProtector] ${character.name} dealt ${damage} damage, healing for same amount`);
+                        
+                        // Heal the caster for 100% of damage dealt
+                        const healAmount = Math.floor(damage);
+                        character.heal(healAmount, character, { 
+                            isStageEffect: true,
+                            stageModifierName: modifier.name,
+                            abilityId: 'aquatic_home_protector_lifesteal'
+                        });
+                        
+                        gameManager.addLogEntry(
+                            `🌊 ${character.name} is healed by the protective waters for ${healAmount} HP from their attack!`, 
+                            'stage-effect heal'
+                        );
+
+                        // Create aquatic healing VFX on the character
+                        this.createAquaticLifestealVFX(character, healAmount);
+                    } else {
+                        console.log(`[AquaticHomeProtector] Damage event ignored - caster: ${character?.name || 'null'}, damage: ${damage}, isAI: ${character?.isAI}`);
+                    }
+                };
+
+                // Add event listener
+                document.addEventListener('character:damage-dealt', gameManager._aquaticProtectorListeners.onDamage);
+                
+                gameManager.addLogEntry(
+                    `🌊 The protective waters of Atlantis awaken! Player abilities will restore health equal to damage dealt!`, 
+                    'stage-effect dramatic'
+                );
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                console.log(`[AquaticHomeProtector] Cleaning up event listeners`);
+                
+                // Remove event listeners
+                if (gameManager._aquaticProtectorListeners) {
+                    if (gameManager._aquaticProtectorListeners.onDamage) {
+                        document.removeEventListener('character:damage-dealt', gameManager._aquaticProtectorListeners.onDamage);
+                    }
+                    delete gameManager._aquaticProtectorListeners;
+                }
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                const healAmount = modifier.effect?.value || 245;
+                
+                // Only heal player characters
+                const targets = gameManager.gameState.playerCharacters;
+
+                if (targets.length > 0) {
+                    gameManager.addLogEntry(
+                        `🌊 The protective waters of Atlantis surge with healing energy!`, 
+                        'stage-effect dramatic'
+                    );
+                }
+
+                targets.forEach(character => {
+                    if (!character.isDead()) {
+                        character.heal(healAmount, null, { 
+                            isStageEffect: true,
+                            stageModifierName: modifier.name,
+                            abilityId: 'aquatic_home_protector_healing'
+                        });
+                        
+                        gameManager.addLogEntry(
+                            `${character.name} is healed by the protective waters for ${healAmount} HP!`, 
+                            'stage-effect heal'
+                        );
+
+                        // Create aquatic healing VFX on the character
+                        this.createAquaticHealingVFX(character, healAmount);
+                    }
+                });
+            }
+        });
+        console.log('[StageModifiers] Registered aquatic_home_protector modifier successfully');
     }
 
 
@@ -1121,6 +1307,9 @@ class StageModifiersRegistry {
             case 'aggressive_protection':
                 // VFX disabled per user request
                 // this.createAggressiveProtectionVFX(modifier);
+                break;
+            case 'aquatic_home_protector':
+                this.createAquaticHomeProtectorVFX(modifier);
                 break;
 
             default:
@@ -3319,6 +3508,717 @@ class StageModifiersRegistry {
         }, 1500);
         
         console.log(`[AggressiveProtection] Created damage bonus VFX for ${character.name}`);
+    }
+
+    createAquaticHomeProtectorVFX(modifier) {
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'stage-modifier-vfx aquatic-home-protector-vfx';
+        vfxContainer.setAttribute('data-modifier', modifier.id);
+        
+        // Create aquatic healing overlay with flowing water effect
+        const aquaticOverlay = document.createElement('div');
+        aquaticOverlay.className = 'aquatic-healing-overlay';
+        aquaticOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(0, 150, 255, 0.15) 0%, rgba(100, 200, 255, 0.1) 25%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(100, 200, 255, 0.12) 0%, rgba(0, 180, 255, 0.08) 30%, transparent 60%),
+                linear-gradient(45deg, rgba(0, 150, 255, 0.08) 0%, rgba(100, 200, 255, 0.12) 50%, rgba(0, 150, 255, 0.08) 100%);
+            animation: aquaticFlow 6s ease-in-out infinite alternate, aquaticPulse 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(1px);
+        `;
+        vfxContainer.appendChild(aquaticOverlay);
+        
+        // Create floating water bubbles
+        for (let i = 0; i < 25; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'aquatic-bubble';
+            const size = 4 + Math.random() * 12;
+            bubble.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, rgba(100, 200, 255, 0.8) 0%, rgba(0, 150, 255, 0.4) 50%, rgba(100, 200, 255, 0.2) 100%);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: aquaticBubbleFloat ${3 + Math.random() * 4}s linear infinite;
+                animation-delay: ${Math.random() * 4}s;
+                filter: blur(0.5px);
+                box-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
+                z-index: 3;
+            `;
+            vfxContainer.appendChild(bubble);
+        }
+        
+        // Create healing water streams
+        for (let i = 0; i < 15; i++) {
+            const stream = document.createElement('div');
+            stream.className = 'aquatic-healing-stream';
+            const width = 2 + Math.random() * 4;
+            const height = 30 + Math.random() * 50;
+            stream.style.cssText = `
+                position: absolute;
+                width: ${width}px;
+                height: ${height}px;
+                background: linear-gradient(180deg, rgba(100, 200, 255, 0.8) 0%, rgba(0, 150, 255, 0.6) 50%, transparent 100%);
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: aquaticStreamFlow ${2 + Math.random() * 3}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 3}s;
+                filter: blur(0.5px);
+                z-index: 4;
+                border-radius: 50%;
+            `;
+            vfxContainer.appendChild(stream);
+        }
+        
+        // Create floating water droplets
+        for (let i = 0; i < 20; i++) {
+            const droplet = document.createElement('div');
+            droplet.className = 'aquatic-droplet';
+            const size = 3 + Math.random() * 6;
+            droplet.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, rgba(150, 220, 255, 0.9) 0%, rgba(100, 200, 255, 0.6) 70%, transparent 100%);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: aquaticDropletFloat ${4 + Math.random() * 3}s linear infinite;
+                animation-delay: ${Math.random() * 5}s;
+                opacity: ${0.6 + Math.random() * 0.4};
+                z-index: 5;
+                box-shadow: 0 0 4px rgba(150, 220, 255, 0.8);
+            `;
+            vfxContainer.appendChild(droplet);
+        }
+        
+        // Add CSS animations for aquatic home protector
+        if (!document.getElementById('aquatic-home-protector-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'aquatic-home-protector-styles';
+            styleSheet.textContent = `
+                @keyframes aquaticFlow {
+                    0% { 
+                        transform: translateX(0px) scale(1); 
+                        opacity: 0.6; 
+                    }
+                    50% { 
+                        transform: translateX(20px) scale(1.05); 
+                        opacity: 0.8; 
+                    }
+                    100% { 
+                        transform: translateX(-10px) scale(0.95); 
+                        opacity: 0.7; 
+                    }
+                }
+                
+                @keyframes aquaticPulse {
+                    0%, 100% { 
+                        opacity: 0.6; 
+                        transform: scale(1); 
+                    }
+                    50% { 
+                        opacity: 0.9; 
+                        transform: scale(1.02); 
+                    }
+                }
+                
+                @keyframes aquaticBubbleFloat {
+                    0% {
+                        transform: translateY(0px) translateX(0px) scale(0.5);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                    80% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(-80px) translateX(${Math.random() * 40 - 20}px) scale(0.3);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes aquaticStreamFlow {
+                    0%, 100% {
+                        transform: translateY(0px) scaleY(1);
+                        opacity: 0.8;
+                    }
+                    50% {
+                        transform: translateY(-20px) scaleY(1.3);
+                        opacity: 1;
+                    }
+                }
+                
+                @keyframes aquaticDropletFloat {
+                    0% {
+                        transform: translateY(0px) translateX(0px) scale(0.8);
+                        opacity: 0;
+                    }
+                    25% {
+                        opacity: 1;
+                        transform: scale(1.2);
+                    }
+                    75% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(-60px) translateX(${Math.random() * 30 - 15}px) scale(0.4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+        
+        // Add to stage background
+        const stageBackground = document.getElementById('stage-background');
+        if (stageBackground) {
+            stageBackground.appendChild(vfxContainer);
+        }
+
+        console.log(`[StageModifiers] Created aquatic home protector VFX with healing waters for ${modifier.name}`);
+    }
+
+    createAquaticHealingVFX(character, healAmount) {
+        const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!charElement) return;
+        
+        // Create aquatic healing burst effect
+        const aquaticVfx = document.createElement('div');
+        aquaticVfx.className = 'aquatic-healing-character-vfx';
+        aquaticVfx.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 95;
+        `;
+        
+        // Create healing water burst
+        const waterBurst = document.createElement('div');
+        waterBurst.className = 'aquatic-healing-burst';
+        waterBurst.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.6) 0%, rgba(0, 150, 255, 0.4) 40%, rgba(100, 200, 255, 0.2) 70%, transparent 100%);
+            border-radius: 50%;
+            animation: aquaticHealingBurst 1.8s ease-out;
+            z-index: 94;
+        `;
+        
+        // Create floating heal amount text
+        const healText = document.createElement('div');
+        healText.className = 'aquatic-healing-text';
+        healText.textContent = `+${healAmount} HP`;
+        healText.style.cssText = `
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #64c8ff;
+            text-shadow: 
+                0 0 10px rgba(100, 200, 255, 0.8),
+                0 0 20px rgba(0, 150, 255, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: aquaticFloatingText 2s ease-out;
+            pointer-events: none;
+            z-index: 96;
+        `;
+        
+        // Create water healing particles
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = 'aquatic-healing-particles';
+        particlesContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 95;
+        `;
+        
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'aquatic-healing-particle';
+            const size = 6 + Math.random() * 10;
+            const angle = (i / 15) * 360;
+            particle.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, rgba(150, 220, 255, 0.9) 0%, rgba(100, 200, 255, 0.6) 50%, transparent 100%);
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                animation: aquaticHealingParticle 1.5s ease-out;
+                animation-delay: ${i * 0.08}s;
+                box-shadow: 0 0 6px rgba(150, 220, 255, 0.8);
+                z-index: 93;
+            `;
+            particle.style.setProperty('--angle', `${angle}deg`);
+            particle.style.setProperty('--distance', `${50 + Math.random() * 30}px`);
+            particlesContainer.appendChild(particle);
+        }
+        
+        // Create protective water ring
+        const protectiveRing = document.createElement('div');
+        protectiveRing.className = 'aquatic-protective-ring';
+        protectiveRing.style.cssText = `
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(100, 200, 255, 0.8);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.3), transparent 70%);
+            animation: aquaticProtectiveRing 1.8s ease-out;
+            pointer-events: none;
+            z-index: 96;
+            box-shadow: 
+                0 0 12px rgba(100, 200, 255, 0.6),
+                inset 0 0 12px rgba(100, 200, 255, 0.4);
+        `;
+        
+        // Add character-specific animations if not already present
+        if (!document.getElementById('aquatic-healing-character-animations')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'aquatic-healing-character-animations';
+            styleSheet.textContent = `
+                @keyframes aquaticHealingBurst {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(0.3); 
+                        opacity: 0; 
+                    }
+                    30% { 
+                        transform: translate(-50%, -50%) scale(1.3); 
+                        opacity: 0.8; 
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(2); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes aquaticFloatingText {
+                    0% { 
+                        transform: translateX(-50%) scale(0.8) rotate(0deg); 
+                        opacity: 0; 
+                    }
+                    20% { 
+                        transform: translateX(-50%) scale(1.2) rotate(2deg); 
+                        opacity: 1; 
+                    }
+                    40% { 
+                        transform: translateX(-50%) scale(1) rotate(-1deg); 
+                        opacity: 1; 
+                    }
+                    100% { 
+                        transform: translateX(-50%) scale(0.9) rotate(0deg) translateY(-25px); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes aquaticHealingParticle {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0px) scale(0.5);
+                        opacity: 0;
+                    }
+                    30% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(calc(var(--distance) * 0.6)) scale(1);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance)) scale(0.2);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes aquaticProtectiveRing {
+                    0%, 100% { 
+                        transform: translateX(-50%) scale(1); 
+                        opacity: 0.8; 
+                    }
+                    50% { 
+                        transform: translateX(-50%) scale(1.4); 
+                        opacity: 1; 
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+        
+        aquaticVfx.appendChild(waterBurst);
+        aquaticVfx.appendChild(healText);
+        aquaticVfx.appendChild(particlesContainer);
+        aquaticVfx.appendChild(protectiveRing);
+        charElement.appendChild(aquaticVfx);
+        
+        // Remove VFX after animation
+        setTimeout(() => {
+            if (aquaticVfx.parentNode) {
+                aquaticVfx.remove();
+            }
+        }, 2500);
+        
+        console.log(`[StageModifiers] Created aquatic healing VFX for ${character.name} (+${healAmount} HP)`);
+    }
+
+    createAquaticLifestealVFX(character, healAmount) {
+        const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!charElement) return;
+        
+        // Create aquatic lifesteal effect with a different style than regular healing
+        const lifestealVfx = document.createElement('div');
+        lifestealVfx.className = 'aquatic-lifesteal-character-vfx';
+        lifestealVfx.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 92;
+        `;
+        
+        // Create lifesteal water swirl
+        const waterSwirl = document.createElement('div');
+        waterSwirl.className = 'aquatic-lifesteal-swirl';
+        waterSwirl.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.7) 0%, rgba(100, 255, 200, 0.5) 40%, rgba(0, 150, 255, 0.3) 70%, transparent 100%);
+            border-radius: 50%;
+            animation: aquaticLifestealSwirl 1.5s ease-out;
+            z-index: 91;
+        `;
+        
+        // Create floating lifesteal text with different color
+        const lifestealText = document.createElement('div');
+        lifestealText.className = 'aquatic-lifesteal-text';
+        lifestealText.textContent = `+${healAmount} HP`;
+        lifestealText.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #00ff80;
+            text-shadow: 
+                0 0 8px rgba(0, 255, 128, 0.8),
+                0 0 16px rgba(100, 255, 200, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: aquaticLifestealText 1.8s ease-out;
+            pointer-events: none;
+            z-index: 93;
+        `;
+        
+        // Create lifesteal energy streams
+        const streamsContainer = document.createElement('div');
+        streamsContainer.className = 'aquatic-lifesteal-streams';
+        streamsContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 90;
+        `;
+        
+        for (let i = 0; i < 8; i++) {
+            const stream = document.createElement('div');
+            stream.className = 'aquatic-lifesteal-stream';
+            const angle = (i / 8) * 360;
+            stream.style.cssText = `
+                position: absolute;
+                width: 3px;
+                height: 40px;
+                background: linear-gradient(180deg, rgba(0, 255, 128, 0.8) 0%, rgba(100, 255, 200, 0.6) 50%, transparent 100%);
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(${angle}deg);
+                animation: aquaticLifestealStream 1.2s ease-out;
+                animation-delay: ${i * 0.1}s;
+                border-radius: 50%;
+                z-index: 89;
+            `;
+            streamsContainer.appendChild(stream);
+        }
+        
+        // Create combat energy indicator
+        const combatIndicator = document.createElement('div');
+        combatIndicator.className = 'aquatic-combat-indicator';
+        combatIndicator.textContent = '⚔️';
+        combatIndicator.style.cssText = `
+            position: absolute;
+            top: 75%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            animation: aquaticCombatPulse 1.5s ease-out;
+            pointer-events: none;
+            z-index: 94;
+            filter: drop-shadow(0 0 6px rgba(0, 255, 128, 0.8));
+        `;
+        
+        // Add lifesteal-specific animations if not already present
+        if (!document.getElementById('aquatic-lifesteal-animations')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'aquatic-lifesteal-animations';
+            styleSheet.textContent = `
+                @keyframes aquaticLifestealSwirl {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(0.5) rotate(0deg); 
+                        opacity: 0; 
+                    }
+                    30% { 
+                        transform: translate(-50%, -50%) scale(1.2) rotate(120deg); 
+                        opacity: 0.8; 
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(1.5) rotate(360deg); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes aquaticLifestealText {
+                    0% { 
+                        transform: translateX(-50%) scale(0.7) rotate(-3deg); 
+                        opacity: 0; 
+                    }
+                    25% { 
+                        transform: translateX(-50%) scale(1.2) rotate(2deg); 
+                        opacity: 1; 
+                    }
+                    50% { 
+                        transform: translateX(-50%) scale(1) rotate(-1deg); 
+                        opacity: 1; 
+                    }
+                    100% { 
+                        transform: translateX(-50%) scale(0.8) rotate(0deg) translateY(-20px); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes aquaticLifestealStream {
+                    0% { 
+                        opacity: 0; 
+                        transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scaleY(0); 
+                    }
+                    40% { 
+                        opacity: 1; 
+                        transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scaleY(1.3); 
+                    }
+                    100% { 
+                        opacity: 0; 
+                        transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scaleY(0.5) translateY(-20px); 
+                    }
+                }
+                
+                @keyframes aquaticCombatPulse {
+                    0%, 100% { 
+                        transform: translateX(-50%) scale(1); 
+                        opacity: 0.7; 
+                    }
+                    50% { 
+                        transform: translateX(-50%) scale(1.3); 
+                        opacity: 1; 
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+        
+        lifestealVfx.appendChild(waterSwirl);
+        lifestealVfx.appendChild(lifestealText);
+        lifestealVfx.appendChild(streamsContainer);
+        lifestealVfx.appendChild(combatIndicator);
+        charElement.appendChild(lifestealVfx);
+        
+        // Remove VFX after animation
+        setTimeout(() => {
+            if (lifestealVfx.parentNode) {
+                lifestealVfx.remove();
+            }
+        }, 2000);
+        
+        console.log(`[StageModifiers] Created aquatic lifesteal VFX for ${character.name} (+${healAmount} HP from damage)`);
+    }
+
+    createIcyPreservationVFX(modifier) {
+        const gameContainer = document.querySelector('.game-container') || document.body;
+        
+        // Create ice preservation overlay
+        const icyOverlay = document.createElement('div');
+        icyOverlay.id = 'icy-preservation-vfx';
+        icyOverlay.className = 'icy-preservation-environment-vfx';
+        icyOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 10;
+            background: linear-gradient(
+                135deg, 
+                rgba(173, 216, 230, 0.15) 0%, 
+                rgba(135, 206, 235, 0.12) 25%,
+                rgba(176, 224, 230, 0.18) 50%,
+                rgba(173, 216, 230, 0.15) 75%,
+                rgba(135, 206, 235, 0.12) 100%
+            );
+            animation: icyPreservationPulse 4s ease-in-out infinite;
+        `;
+        
+        // Create ice crystals container
+        const crystalsContainer = document.createElement('div');
+        crystalsContainer.className = 'icy-crystals-container';
+        crystalsContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 11;
+        `;
+        
+        // Create multiple ice crystals
+        for (let i = 0; i < 15; i++) {
+            const crystal = document.createElement('div');
+            crystal.className = 'ice-crystal';
+            crystal.textContent = '❄️';
+            const randomX = Math.random() * 100;
+            const randomY = Math.random() * 100;
+            const randomDelay = Math.random() * 3;
+            const randomDuration = 6 + Math.random() * 4;
+            
+            crystal.style.cssText = `
+                position: absolute;
+                left: ${randomX}%;
+                top: ${randomY}%;
+                font-size: ${12 + Math.random() * 8}px;
+                opacity: 0.6;
+                animation: iceCrystalFloat ${randomDuration}s ease-in-out infinite;
+                animation-delay: ${randomDelay}s;
+                filter: drop-shadow(0 0 4px rgba(173, 216, 230, 0.8));
+                z-index: 12;
+            `;
+            crystalsContainer.appendChild(crystal);
+        }
+        
+        // Create frost border effect
+        const frostBorder = document.createElement('div');
+        frostBorder.className = 'frost-border';
+        frostBorder.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid rgba(173, 216, 230, 0.4);
+            box-shadow: 
+                inset 0 0 20px rgba(173, 216, 230, 0.3),
+                0 0 30px rgba(135, 206, 235, 0.2);
+            pointer-events: none;
+            z-index: 13;
+            animation: frostBorderGlow 3s ease-in-out infinite alternate;
+        `;
+        
+        // Add ice preservation animations if not already present
+        if (!document.getElementById('icy-preservation-animations')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'icy-preservation-animations';
+            styleSheet.textContent = `
+                @keyframes icyPreservationPulse {
+                    0%, 100% { 
+                        opacity: 0.8; 
+                        transform: scale(1); 
+                    }
+                    50% { 
+                        opacity: 1; 
+                        transform: scale(1.02); 
+                    }
+                }
+                
+                @keyframes iceCrystalFloat {
+                    0%, 100% { 
+                        transform: translateY(0px) rotate(0deg); 
+                        opacity: 0.6; 
+                    }
+                    25% { 
+                        transform: translateY(-10px) rotate(90deg); 
+                        opacity: 0.8; 
+                    }
+                    50% { 
+                        transform: translateY(-5px) rotate(180deg); 
+                        opacity: 1; 
+                    }
+                    75% { 
+                        transform: translateY(-15px) rotate(270deg); 
+                        opacity: 0.8; 
+                    }
+                }
+                
+                @keyframes frostBorderGlow {
+                    0% { 
+                        box-shadow: 
+                            inset 0 0 20px rgba(173, 216, 230, 0.3),
+                            0 0 30px rgba(135, 206, 235, 0.2);
+                    }
+                    100% { 
+                        box-shadow: 
+                            inset 0 0 40px rgba(173, 216, 230, 0.6),
+                            0 0 50px rgba(135, 206, 235, 0.4);
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+        
+        icyOverlay.appendChild(crystalsContainer);
+        icyOverlay.appendChild(frostBorder);
+        gameContainer.appendChild(icyOverlay);
+        
+        console.log('[StageModifiers] Created Icy Preservation environment VFX');
+    }
+
+    clearIcyPreservationVFX() {
+        const icyVfx = document.getElementById('icy-preservation-vfx');
+        if (icyVfx) {
+            icyVfx.remove();
+        }
+        console.log('[StageModifiers] Cleared Icy Preservation VFX');
     }
 }
 

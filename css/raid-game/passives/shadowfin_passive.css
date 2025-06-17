@@ -1,0 +1,87 @@
+/* Shadowfin Passive: Shadow Evasion VFX */
+
+/* Shadow swirl particle animation */
+@keyframes shadowSwirlParticle {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(360deg) translateY(-30px);
+    }
+}
+
+/* Shadow glow pulse animation */
+@keyframes shadowGlowPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Floating dodge text animation */
+@keyframes shadowfinFloatingText {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.9);
+    }
+}
+
+/* Passive aura animation */
+@keyframes shadowPassiveAura {
+    0% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+}
+
+/* Shadow particle specific styles */
+.shadowfin-shadow-particle {
+    box-shadow: 0 0 6px rgba(74,14,78,0.8), 0 0 12px rgba(42,8,49,0.6);
+}
+
+/* Character shadow glow */
+.shadowfin-shadow-glow {
+    filter: blur(2px);
+}
+
+/* Floating text styling */
+.shadowfin-floating-dodge-text {
+    font-family: 'Arial', sans-serif;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Passive aura styling */
+.shadowfin-passive-aura {
+    filter: blur(1px);
+} 

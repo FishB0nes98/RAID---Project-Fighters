@@ -698,6 +698,30 @@
             "playerunlocked": false,
             "isHidden": true,
             "ingameimage": "Loading Screen/Piranha.png"
+        },
+        {
+            "id": "frozen_soldier",
+            "name": "Frozen Soldier",
+            "image": "Loading Screen/Frozen Soldier.png",
+            "rarity": "rare",
+            "type": "warrior",
+            "tags": ["Enemy", "Undead", "Ice", "Warrior"],
+            "description": "A fallen warrior trapped in eternal ice, still bound by duty to guard the frozen ruins.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Frozen Soldier.png"
+        },
+        {
+            "id": "atlantean_sub_zero",
+            "name": "Atlantean Sub Zero",
+            "image": "Loading Screen/Atlantean Sub Zero.png",
+            "rarity": "legendary",
+            "type": "warrior",
+            "tags": ["Enemy", "Lin Kuei", "Ice", "Ninja"],
+            "description": "The legendary Lin Kuei assassin, master of ice and cold. His frozen powers can chill enemies to the bone.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Atlantean Sub Zero.png"
         }
     ]
 } 
