@@ -179,6 +179,67 @@ class StageModifiersRegistry {
             }
         });
 
+        // Cleansing Winds Modifier
+        this.registerModifier({
+            id: 'cleansing_winds',
+            name: 'Cleansing Winds',
+            description: 'Mystical winds sweep across the battlefield every 3rd turn, removing all buffs and debuffs from all characters.',
+            icon: '🌪️✨',
+            vfx: {
+                type: 'cleansing_winds',
+                particles: true,
+                animation: 'swirling_winds'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                // Debug logging for turn counter
+                console.log(`[CleansingWinds] Turn check: gameManager.turnCounter=${gameManager.turnCounter}, gameManager.gameState.turn=${gameManager.gameState.turn}`);
+                
+                // Use gameState.turn instead of turnCounter, and check if it's every 3rd turn (3, 6, 9, 12, etc.)
+                const currentTurn = gameManager.gameState.turn || gameManager.turnCounter || 1;
+                if (currentTurn % 3 === 0) {
+                    const allCharacters = [
+                        ...gameManager.gameState.playerCharacters,
+                        ...gameManager.gameState.aiCharacters
+                    ];
+
+                    // Log the cleansing event
+                    gameManager.addLogEntry(
+                        `🌪️✨ Cleansing winds sweep across the battlefield on turn ${currentTurn}, purging all magical effects!`, 
+                        'stage-effect dramatic'
+                    );
+
+                    // Remove all buffs and debuffs from all characters
+                    allCharacters.forEach(character => {
+                        if (!character.isDead()) {
+                            const buffCount = character.buffs.length;
+                            const debuffCount = character.debuffs.length;
+                            
+                            // Clear all buffs and debuffs
+                            character.buffs = [];
+                            character.debuffs = [];
+                            
+                            // Update character stats after clearing effects
+                            character.recalculateStats('cleansing_winds');
+                            
+                            // Log individual cleansing effects
+                            if (buffCount > 0 || debuffCount > 0) {
+                                gameManager.addLogEntry(
+                                    `${character.name} has ${buffCount} buffs and ${debuffCount} debuffs cleansed!`, 
+                                    'stage-effect'
+                                );
+                            }
+
+                            // Create VFX for the cleansing effect
+                            this.createCleansingWindsVFX(character);
+                        }
+                    });
+
+                    // Create screen-wide VFX
+                    this.createCleansingWindsScreenVFX();
+                }
+            }
+        });
+
         // Healing Disabled Modifier
         this.registerModifier({
             id: 'healing_disabled',
@@ -1181,13 +1242,91 @@ class StageModifiersRegistry {
         });
 
         console.log('[StageModifiers] Registered atlantean_ambush_defense modifier successfully');
+
+        // Draft Mode Modifier
+        this.registerModifier({
+            id: 'draft_mode',
+            name: 'Draft Mode',
+            description: 'Enhanced combat conditions for draft battles! All characters gain 40% more HP and mana, plus 30 HP regen and 25 mana regen per turn.',
+            icon: '⚔️✨',
+            vfx: {
+                type: 'draft_mode',
+                particles: true,
+                animation: 'draft_enhancement'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                this.applyDraftModeEffect(gameManager, modifier, true);
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                // Reapply draft mode effect at the start of every turn to ensure it persists
+                this.applyDraftModeEffect(gameManager, modifier, false);
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Restore original values when stage ends
+                const allCharacters = [
+                    ...gameManager.gameState.playerCharacters,
+                    ...gameManager.gameState.aiCharacters
+                ];
+
+                allCharacters.forEach(character => {
+                    if (character.stageModifiers) {
+                        // Restore original HP values
+                        if (character.stageModifiers.originalMaxHp !== undefined) {
+                            character.stats.hp = character.stageModifiers.originalMaxHp;
+                            character.stats.maxHp = character.stageModifiers.originalMaxHp;
+                            character.stats.currentHp = Math.min(character.stats.currentHp, character.stats.maxHp);
+                            if (character.baseStats) {
+                                character.baseStats.hp = character.stageModifiers.originalMaxHp;
+                                character.baseStats.maxHp = character.stageModifiers.originalMaxHp;
+                            }
+                            delete character.stageModifiers.originalMaxHp;
+                        }
+                        
+                        // Restore original mana values
+                        if (character.stageModifiers.originalMaxMana !== undefined) {
+                            character.stats.mana = character.stageModifiers.originalMaxMana;
+                            character.stats.maxMana = character.stageModifiers.originalMaxMana;
+                            character.stats.currentMana = Math.min(character.stats.currentMana, character.stats.maxMana);
+                            if (character.baseStats) {
+                                character.baseStats.mana = character.stageModifiers.originalMaxMana;
+                                character.baseStats.maxMana = character.stageModifiers.originalMaxMana;
+                            }
+                            delete character.stageModifiers.originalMaxMana;
+                        }
+                        
+                        // Restore original HP regen
+                        if (character.stageModifiers.originalHpPerTurn !== undefined) {
+                            character.stats.hpPerTurn = character.stageModifiers.originalHpPerTurn;
+                            if (character.baseStats) {
+                                character.baseStats.hpPerTurn = character.stageModifiers.originalHpPerTurn;
+                            }
+                            delete character.stageModifiers.originalHpPerTurn;
+                        }
+                        
+                        // Restore original mana regen
+                        if (character.stageModifiers.originalManaPerTurn !== undefined) {
+                            character.stats.manaPerTurn = character.stageModifiers.originalManaPerTurn;
+                            if (character.baseStats) {
+                                character.baseStats.manaPerTurn = character.stageModifiers.originalManaPerTurn;
+                            }
+                            delete character.stageModifiers.originalManaPerTurn;
+                        }
+                    }
+                });
+                
+                gameManager.addLogEntry('⚔️✨ The draft mode enhancements fade as the battle ends.', 'stage-effect');
+                
+                // Clear VFX
+                this.clearDraftModeVFX();
+            }
+        });
+
+        console.log('[StageModifiers] Registered draft_mode modifier successfully');
     }
 
-
-
-    // Helper method to apply desert heat effect to all characters
-    applyDesertHeatEffect(gameManager, modifier, isStageStart) {
-        console.log(`[DesertHeat] applyDesertHeatEffect called - isStageStart: ${isStageStart}`);
+    // Helper method to apply draft mode effect to all characters
+    applyDraftModeEffect(gameManager, modifier, isStageStart) {
+        console.log(`[DraftMode] applyDraftModeEffect called - isStageStart: ${isStageStart}`);
         
         // Add a delay to ensure characters are fully loaded
         const applyEffect = () => {
@@ -1196,10 +1335,10 @@ class StageModifiersRegistry {
                 ...(gameManager.gameState?.aiCharacters || [])
             ];
 
-            console.log(`[DesertHeat] Found ${allCharacters.length} characters to process for Desert Heat`);
+            console.log(`[DraftMode] Found ${allCharacters.length} characters to process for Draft Mode`);
             
             if (allCharacters.length === 0) {
-                console.warn(`[DesertHeat] No characters found! Retrying in 500ms...`);
+                console.warn(`[DraftMode] No characters found! Retrying in 500ms...`);
                 setTimeout(applyEffect, 500);
                 return;
             }
@@ -1209,41 +1348,94 @@ class StageModifiersRegistry {
             allCharacters.forEach(character => {
                 if (!character.isDead()) {
                     // Store original values if not already stored
-                    if (character.originalCritChance === undefined) {
-                        character.originalCritChance = character.stats.critChance || 0;
-                        console.log(`[DesertHeat] Stored original crit chance for ${character.name}: ${character.originalCritChance}`);
+                    if (character.stageModifiers?.originalMaxHp === undefined) {
+                        character.stageModifiers = character.stageModifiers || {};
+                        character.stageModifiers.originalMaxHp = character.stats.maxHp || character.stats.hp;
+                        console.log(`[DraftMode] Stored original max HP for ${character.name}: ${character.stageModifiers.originalMaxHp}`);
                     }
                     
-                    if (character.originalHpPerTurn === undefined) {
-                        character.originalHpPerTurn = character.stats.hpPerTurn || 0;
-                        console.log(`[DesertHeat] Stored original HP regen for ${character.name}: ${character.originalHpPerTurn}`);
+                    if (character.stageModifiers?.originalMaxMana === undefined) {
+                        character.stageModifiers = character.stageModifiers || {};
+                        character.stageModifiers.originalMaxMana = character.stats.maxMana || character.stats.mana;
+                        console.log(`[DraftMode] Stored original max mana for ${character.name}: ${character.stageModifiers.originalMaxMana}`);
                     }
                     
-                    if (character.originalManaPerTurn === undefined) {
-                        character.originalManaPerTurn = character.stats.manaPerTurn || 0;
-                        console.log(`[DesertHeat] Stored original mana regen for ${character.name}: ${character.originalManaPerTurn}`);
+                    if (character.stageModifiers?.originalHpPerTurn === undefined) {
+                        character.stageModifiers = character.stageModifiers || {};
+                        character.stageModifiers.originalHpPerTurn = character.stats.hpPerTurn || 0;
+                        console.log(`[DraftMode] Stored original HP regen for ${character.name}: ${character.stageModifiers.originalHpPerTurn}`);
                     }
                     
-                    // Set crit chance to 50%
-                    const targetCritChance = 0.5;
-                    console.log(`[DesertHeat] Setting ${character.name}'s crit chance from ${character.stats.critChance} to ${targetCritChance}`);
-                    character.stats.critChance = targetCritChance;
+                    if (character.stageModifiers?.originalManaPerTurn === undefined) {
+                        character.stageModifiers = character.stageModifiers || {};
+                        character.stageModifiers.originalManaPerTurn = character.stats.manaPerTurn || 0;
+                        console.log(`[DraftMode] Stored original mana regen for ${character.name}: ${character.stageModifiers.originalManaPerTurn}`);
+                    }
                     
-                    // Set HP regeneration to 50
-                    const targetHpRegen = 50;
-                    console.log(`[DesertHeat] Setting ${character.name}'s HP regen from ${character.stats.hpPerTurn} to ${targetHpRegen}`);
+                    // Apply 40% HP and mana increase
+                    const originalMaxHp = character.stageModifiers.originalMaxHp;
+                    const originalMaxMana = character.stageModifiers.originalMaxMana;
+                    
+                    const newMaxHp = Math.floor(originalMaxHp * 1.4);
+                    const newMaxMana = Math.floor(originalMaxMana * 1.4);
+                    
+                    console.log(`[DraftMode] Increasing ${character.name}'s HP from ${originalMaxHp} to ${newMaxHp} (40% increase)`);
+                    console.log(`[DraftMode] Increasing ${character.name}'s mana from ${originalMaxMana} to ${newMaxMana} (40% increase)`);
+                    
+                    // Update max HP/Mana stats without forcibly healing the character.
+                    character.stats.hp = newMaxHp;
+                    character.stats.maxHp = newMaxHp;
+
+                    // Only adjust current HP ONCE at stage start so players start with the same percent HP.
+                    if (isStageStart && !character.stageModifiers._draftModeCurrentHpAdjusted) {
+                        const hpRatio = originalMaxHp > 0 ? (character.stats.currentHp / originalMaxHp) : 1;
+                        character.stats.currentHp = Math.min(Math.ceil(newMaxHp * hpRatio), newMaxHp);
+                        character.stageModifiers._draftModeCurrentHpAdjusted = true;
+                    } else if (character.stats.currentHp > newMaxHp) {
+                        // Clamp if something later puts currentHp higher than new max
+                        character.stats.currentHp = newMaxHp;
+                    }
+
+                    // Update max Mana and clamp current Mana similarly.
+                    character.stats.mana = newMaxMana;
+                    character.stats.maxMana = newMaxMana;
+                    if (isStageStart && !character.stageModifiers._draftModeCurrentManaAdjusted) {
+                        const manaRatio = originalMaxMana > 0 ? (character.stats.currentMana / originalMaxMana) : 1;
+                        character.stats.currentMana = Math.min(Math.ceil(newMaxMana * manaRatio), newMaxMana);
+                        character.stageModifiers._draftModeCurrentManaAdjusted = true;
+                    } else if (character.stats.currentMana > newMaxMana) {
+                        character.stats.currentMana = newMaxMana;
+                    }
+                    
+                    // Update base stats to preserve through recalculation
+                    if (character.baseStats) {
+                        character.baseStats.hp = newMaxHp;
+                        character.baseStats.maxHp = newMaxHp;
+                        character.baseStats.mana = newMaxMana;
+                        character.baseStats.maxMana = newMaxMana;
+                    }
+                    
+                    // Apply regeneration bonuses
+                    const targetHpRegen = character.stageModifiers.originalHpPerTurn + 30;
+                    const targetManaRegen = character.stageModifiers.originalManaPerTurn + 25;
+                    
+                    console.log(`[DraftMode] Setting ${character.name}'s HP regen from ${character.stats.hpPerTurn} to ${targetHpRegen} (+30)`);
+                    console.log(`[DraftMode] Setting ${character.name}'s mana regen from ${character.stats.manaPerTurn} to ${targetManaRegen} (+25)`);
+                    
                     character.stats.hpPerTurn = targetHpRegen;
-                    
-                    // Set mana regeneration to 50
-                    const targetManaRegen = 50;
-                    console.log(`[DesertHeat] Setting ${character.name}'s mana regen from ${character.stats.manaPerTurn} to ${targetManaRegen}`);
                     character.stats.manaPerTurn = targetManaRegen;
+                    
+                    // Update base stats for regeneration
+                    if (character.baseStats) {
+                        character.baseStats.hpPerTurn = targetHpRegen;
+                        character.baseStats.manaPerTurn = targetManaRegen;
+                    }
                     
                     affectedCharacters.push(character.name);
                     
-                    // Force recalculate stats to ensure the change is properly applied
+                    // Force recalculate stats to ensure the changes are properly applied
                     if (character.recalculateStats) {
-                        character.recalculateStats('desert_heat_modifier');
+                        character.recalculateStats('draft_mode_modifier');
                     }
                     
                     // Force UI update
@@ -1253,27 +1445,32 @@ class StageModifiersRegistry {
                 }
             });
 
-            console.log(`[DesertHeat] Affected characters: ${affectedCharacters.join(', ')}`);
+            console.log(`[DraftMode] Affected characters: ${affectedCharacters.join(', ')}`);
 
             // Add log entry
             if (isStageStart && affectedCharacters.length > 0) {
                 gameManager.addLogEntry(
-                    `🌵 The desert heat intensifies everyone's focus! All characters gain 50% critical strike chance, 50 HP regen, and 50 mana regen.`, 
+                    `⚔️✨ Draft Mode enhances all combatants! Everyone gains 40% more HP and mana, plus 30 HP regen and 25 mana regen per turn.`, 
                     'stage-effect dramatic'
                 );
             } else if (!isStageStart && affectedCharacters.length > 0) {
                 gameManager.addLogEntry(
-                    `🌵 The desert heat continues to sharpen everyone's reflexes and vitality.`, 
+                    `⚔️✨ Draft Mode enhancements continue to empower all fighters.`, 
                     'stage-effect'
                 );
+            }
+            
+            // Create VFX if it's the stage start
+            if (isStageStart) {
+                this.createDraftModeVFX(modifier);
             }
         };
         
         // Apply immediately if characters exist, otherwise wait for them
         if (isStageStart) {
-            setTimeout(applyEffect, 100); // Small delay for stage start
+            setTimeout(() => applyEffect.call(this), 100); // Small delay for stage start
         } else {
-            applyEffect(); // Apply immediately for turn start
+            applyEffect.call(this); // Apply immediately for turn start
         }
     }
 
@@ -1384,6 +1581,12 @@ class StageModifiersRegistry {
                 break;
             case 'aquatic_home_protector':
                 this.createAquaticHomeProtectorVFX(modifier);
+                break;
+            case 'cleansing_winds':
+                this.createCleansingWindsScreenVFX();
+                break;
+            case 'draft_mode':
+                this.createDraftModeVFX(modifier);
                 break;
 
             default:
@@ -4293,6 +4496,374 @@ class StageModifiersRegistry {
             icyVfx.remove();
         }
         console.log('[StageModifiers] Cleared Icy Preservation VFX');
+    }
+
+    createCleansingWindsVFX(character) {
+        const characterElement = document.querySelector(`[data-character-id="${character.id}"]`);
+        if (!characterElement) return;
+        
+        // Create cleansing winds VFX container
+        const cleansingVfx = document.createElement('div');
+        cleansingVfx.className = 'cleansing-winds-vfx';
+        cleansingVfx.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            border-radius: 10px;
+            overflow: hidden;
+        `;
+        
+        // Create swirling wind effect
+        const windSwirl = document.createElement('div');
+        windSwirl.className = 'wind-swirl';
+        windSwirl.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, -50%);
+            background: conic-gradient(
+                from 0deg,
+                rgba(135, 206, 250, 0.8) 0deg,
+                rgba(175, 238, 238, 0.6) 90deg,
+                rgba(240, 248, 255, 0.4) 180deg,
+                rgba(175, 238, 238, 0.6) 270deg,
+                rgba(135, 206, 250, 0.8) 360deg
+            );
+            border-radius: 50%;
+            animation: windSwirlRotate 1.5s ease-out;
+            filter: blur(2px) drop-shadow(0 0 10px rgba(135, 206, 250, 0.6));
+        `;
+        
+        // Create cleansing particles
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = 'cleansing-particles';
+        particlesContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        `;
+        
+        // Create multiple cleansing particles
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'cleansing-particle';
+            particle.textContent = '✨';
+            const angle = (i / 8) * 360;
+            const delay = i * 0.1;
+            
+            particle.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                font-size: 16px;
+                color: rgba(135, 206, 250, 0.9);
+                transform: translate(-50%, -50%) rotate(${angle}deg) translateX(40px);
+                animation: cleansingParticleFloat 1.5s ease-out;
+                animation-delay: ${delay}s;
+                filter: drop-shadow(0 0 4px rgba(135, 206, 250, 0.8));
+            `;
+            particlesContainer.appendChild(particle);
+        }
+        
+        // Create cleansing text
+        const cleansingText = document.createElement('div');
+        cleansingText.className = 'cleansing-text';
+        cleansingText.textContent = 'CLEANSED';
+        cleansingText.style.cssText = `
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: rgba(135, 206, 250, 1);
+            text-shadow: 0 0 6px rgba(135, 206, 250, 0.8);
+            animation: cleansingTextFloat 1.5s ease-out;
+            z-index: 101;
+        `;
+        
+        // Add animations if not already present
+        if (!document.getElementById('cleansing-winds-animations')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'cleansing-winds-animations';
+            styleSheet.textContent = `
+                @keyframes windSwirlRotate {
+                    0% { 
+                        transform: translate(-50%, -50%) rotate(0deg) scale(0.2);
+                        opacity: 0;
+                    }
+                    50% { 
+                        transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) rotate(360deg) scale(0.8);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes cleansingParticleFloat {
+                    0% { 
+                        transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateX(20px) scale(0);
+                        opacity: 0;
+                    }
+                    30% { 
+                        transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateX(50px) scale(1.2);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateX(80px) scale(0.5);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes cleansingTextFloat {
+                    0% { 
+                        transform: translateX(-50%) translateY(20px) scale(0.5);
+                        opacity: 0;
+                    }
+                    30% { 
+                        transform: translateX(-50%) translateY(0px) scale(1.1);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translateX(-50%) translateY(-20px) scale(0.8);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+        
+        cleansingVfx.appendChild(windSwirl);
+        cleansingVfx.appendChild(particlesContainer);
+        cleansingVfx.appendChild(cleansingText);
+        characterElement.appendChild(cleansingVfx);
+        
+        // Remove VFX after animation
+        setTimeout(() => {
+            if (cleansingVfx.parentNode) {
+                cleansingVfx.remove();
+            }
+        }, 2000);
+        
+        console.log(`[StageModifiers] Created cleansing winds VFX for ${character.name}`);
+    }
+
+    createCleansingWindsScreenVFX() {
+        // Create full-screen cleansing effect
+        const screenVFX = document.createElement('div');
+        screenVFX.className = 'cleansing-winds-screen-vfx';
+        screenVFX.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(173, 216, 230, 0.3) 0%, rgba(135, 206, 235, 0.2) 50%, rgba(30, 144, 255, 0.1) 100%);
+            animation: cleansingWindsScreen 3s ease-in-out;
+            pointer-events: none;
+            z-index: 1000;
+        `;
+        
+        document.body.appendChild(screenVFX);
+        
+        // Remove after animation
+        setTimeout(() => {
+            screenVFX.remove();
+        }, 3000);
+        
+        console.log('[StageModifiers] Created cleansing winds screen VFX');
+    }
+
+    createDraftModeVFX(modifier) {
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'stage-modifier-vfx draft-mode-vfx';
+        vfxContainer.setAttribute('data-modifier', modifier.id);
+        
+        // Create enhancement aura overlay
+        const enhancementAura = document.createElement('div');
+        enhancementAura.className = 'draft-enhancement-aura';
+        enhancementAura.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 215, 0, 0.15) 0%,
+                rgba(255, 140, 0, 0.1) 30%,
+                rgba(138, 43, 226, 0.08) 60%,
+                rgba(75, 0, 130, 0.05) 100%
+            );
+            animation: draftModeAura 6s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 2;
+        `;
+        vfxContainer.appendChild(enhancementAura);
+        
+        // Create floating enhancement particles
+        for (let i = 0; i < 25; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'draft-enhancement-particle';
+            particle.style.cssText = `
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: radial-gradient(circle, #ffd700, #ff8c00);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: draftParticleFloat ${3 + Math.random() * 4}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 2}s;
+                box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+                pointer-events: none;
+                z-index: 3;
+            `;
+            vfxContainer.appendChild(particle);
+        }
+        
+        // Create power surge lines
+        for (let i = 0; i < 8; i++) {
+            const surgeLine = document.createElement('div');
+            surgeLine.className = 'draft-power-surge';
+            surgeLine.style.cssText = `
+                position: absolute;
+                width: 2px;
+                height: 60px;
+                background: linear-gradient(to bottom, rgba(255, 215, 0, 0.8), rgba(138, 43, 226, 0.4));
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                transform: rotate(${Math.random() * 360}deg);
+                animation: draftPowerSurge ${2 + Math.random() * 3}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 1.5}s;
+                pointer-events: none;
+                z-index: 1;
+            `;
+            vfxContainer.appendChild(surgeLine);
+        }
+
+        // Add to stage background
+        const stageBackground = document.getElementById('stage-background');
+        if (stageBackground) {
+            stageBackground.appendChild(vfxContainer);
+        } else {
+            // Fallback to battle container
+            const battleContainer = document.querySelector('.battle-container');
+            if (battleContainer) {
+                battleContainer.appendChild(vfxContainer);
+            }
+        }
+
+        console.log(`[StageModifiers] Created draft mode VFX with enhancement aura and particles for ${modifier.name}`);
+    }
+
+    clearDraftModeVFX() {
+        const existingVFX = document.querySelectorAll('.draft-mode-vfx');
+        existingVFX.forEach(vfx => vfx.remove());
+        console.log('[StageModifiers] Cleared draft mode VFX');
+    }
+
+    // Helper method to apply desert heat effect to all characters
+    applyDesertHeatEffect(gameManager, modifier, isStageStart) {
+        console.log(`[DesertHeat] applyDesertHeatEffect called - isStageStart: ${isStageStart}`);
+        
+        // Add a delay to ensure characters are fully loaded
+        const applyEffect = () => {
+            const allCharacters = [
+                ...(gameManager.gameState?.playerCharacters || []),
+                ...(gameManager.gameState?.aiCharacters || [])
+            ];
+
+            console.log(`[DesertHeat] Found ${allCharacters.length} characters to process for Desert Heat`);
+            
+            if (allCharacters.length === 0) {
+                console.warn(`[DesertHeat] No characters found! Retrying in 500ms...`);
+                setTimeout(applyEffect, 500);
+                return;
+            }
+            
+            let affectedCharacters = [];
+            
+            allCharacters.forEach(character => {
+                if (!character.isDead()) {
+                    // Store original values if not already stored
+                    if (character.originalCritChance === undefined) {
+                        character.originalCritChance = character.stats.critChance || 0;
+                        console.log(`[DesertHeat] Stored original crit chance for ${character.name}: ${character.originalCritChance}`);
+                    }
+                    
+                    if (character.originalHpPerTurn === undefined) {
+                        character.originalHpPerTurn = character.stats.hpPerTurn || 0;
+                        console.log(`[DesertHeat] Stored original HP regen for ${character.name}: ${character.originalHpPerTurn}`);
+                    }
+                    
+                    if (character.originalManaPerTurn === undefined) {
+                        character.originalManaPerTurn = character.stats.manaPerTurn || 0;
+                        console.log(`[DesertHeat] Stored original mana regen for ${character.name}: ${character.originalManaPerTurn}`);
+                    }
+                    
+                    // Set crit chance to 50%
+                    const targetCritChance = 0.5;
+                    console.log(`[DesertHeat] Setting ${character.name}'s crit chance from ${character.stats.critChance} to ${targetCritChance}`);
+                    character.stats.critChance = targetCritChance;
+                    
+                    // Set HP regeneration to 50
+                    const targetHpRegen = 50;
+                    console.log(`[DesertHeat] Setting ${character.name}'s HP regen from ${character.stats.hpPerTurn} to ${targetHpRegen}`);
+                    character.stats.hpPerTurn = targetHpRegen;
+                    
+                    // Set mana regeneration to 50
+                    const targetManaRegen = 50;
+                    console.log(`[DesertHeat] Setting ${character.name}'s mana regen from ${character.stats.manaPerTurn} to ${targetManaRegen}`);
+                    character.stats.manaPerTurn = targetManaRegen;
+                    
+                    affectedCharacters.push(character.name);
+                    
+                    // Force recalculate stats to ensure the change is properly applied
+                    if (character.recalculateStats) {
+                        character.recalculateStats('desert_heat_modifier');
+                    }
+                    
+                    // Force UI update
+                    if (window.gameManager && window.gameManager.uiManager) {
+                        window.gameManager.uiManager.updateCharacterUI(character);
+                    }
+                }
+            });
+
+            console.log(`[DesertHeat] Affected characters: ${affectedCharacters.join(', ')}`);
+
+            // Add log entry
+            if (isStageStart && affectedCharacters.length > 0) {
+                gameManager.addLogEntry(
+                    `🌵 The desert heat intensifies everyone's focus! All characters gain 50% critical strike chance, 50 HP regen, and 50 mana regen.`, 
+                    'stage-effect dramatic'
+                );
+            } else if (!isStageStart && affectedCharacters.length > 0) {
+                gameManager.addLogEntry(
+                    `🌵 The desert heat continues to sharpen everyone's reflexes and vitality.`, 
+                    'stage-effect'
+                );
+            }
+        };
+        
+        // Apply immediately if characters exist, otherwise wait for them
+        if (isStageStart) {
+            setTimeout(applyEffect, 100); // Small delay for stage start
+        } else {
+            applyEffect(); // Apply immediately for turn start
+        }
     }
 }
 

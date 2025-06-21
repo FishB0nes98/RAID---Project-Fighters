@@ -24,7 +24,7 @@
             "type": "damage",
             "damageType": "magical",
             "manaCost": 70,
-            "cooldown": 2,
+            "cooldown": 1,
             "targetType": "enemy",
             "description": "Deals 400 (100% AP) magical damage to an enemy.",
             "icon": "Icons/abilities/golden_arrow.png"

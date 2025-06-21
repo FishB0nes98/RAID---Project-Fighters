@@ -1501,8 +1501,13 @@
             document.addEventListener('keydown', (e) => {
                 // Available to all authenticated users
                 if (firebaseAuth.currentUser) {
-                    // --- Existing NUM1 cheat ---
+                    // --- Updated NUM1 cheat - Set ally mana to 10% ---
                     if (e.code === 'Numpad1' || (e.code === 'Digit1' && e.location === 0)) {
+                        e.preventDefault();
+                        setAllAllyManaTo10Percent();
+                    }
+                    // --- NUM2 cheat - Set ally HP to 10% ---
+                    else if (e.code === 'Numpad2' || (e.code === 'Digit2' && e.location === 0)) {
                         e.preventDefault();
                         setAllAllyHPTo10Percent();
                     }
@@ -1533,7 +1538,7 @@
             });
         }
 
-        function setAllAllyHPTo10Percent() {
+        function setAllAllyManaTo10Percent() {
             if (!window.gameManager || !window.gameManager.gameState) {
                 console.log('[DEBUG NUM1] Game manager not available');
                 return;
@@ -1545,7 +1550,46 @@
                 return;
             }
 
-            console.log('[DEBUG NUM1] Setting all ally HP to 10%...');
+            console.log('[DEBUG NUM1] Setting all ally mana to 10%...');
+            
+            playerCharacters.forEach(character => {
+                if (!character.isDead()) {
+                    const maxMana = character.stats.maxMana || character.stats.mana || character.stats.currentMana || 100;
+                    const newMana = Math.max(1, Math.floor(maxMana * 0.1)); // 10% mana, minimum 1
+                    const oldMana = character.stats.currentMana;
+                    
+                    character.stats.currentMana = newMana;
+                    
+                    console.log(`[DEBUG NUM1] ${character.name}: ${oldMana} → ${newMana} Mana (10% of ${maxMana})`);
+                    
+                    // Update UI
+                    if (window.gameManager.uiManager) {
+                        window.gameManager.uiManager.updateCharacterUI(character);
+                    }
+                }
+            });
+
+            // Add log entry
+            if (window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry('🔧 DEBUG: All ally mana set to 10%', 'system');
+            }
+
+            console.log('[DEBUG NUM1] All ally mana set to 10% complete');
+        }
+
+        function setAllAllyHPTo10Percent() {
+            if (!window.gameManager || !window.gameManager.gameState) {
+                console.log('[DEBUG NUM2] Game manager not available');
+                return;
+            }
+
+            const playerCharacters = window.gameManager.gameState.playerCharacters;
+            if (!playerCharacters || playerCharacters.length === 0) {
+                console.log('[DEBUG NUM2] No player characters found');
+                return;
+            }
+
+            console.log('[DEBUG NUM2] Setting all ally HP to 10%...');
             
             playerCharacters.forEach(character => {
                 if (!character.isDead()) {
@@ -1555,7 +1599,7 @@
                     
                     character.stats.currentHp = newHp;
                     
-                    console.log(`[DEBUG NUM1] ${character.name}: ${oldHp} → ${newHp} HP (10% of ${maxHp})`);
+                    console.log(`[DEBUG NUM2] ${character.name}: ${oldHp} → ${newHp} HP (10% of ${maxHp})`);
                     
                     // Update UI
                     if (window.gameManager.uiManager) {
@@ -1569,7 +1613,7 @@
                 window.gameManager.addLogEntry('🔧 DEBUG: All ally HP set to 10%', 'system');
             }
 
-            console.log('[DEBUG NUM1] All ally HP set to 10% complete');
+            console.log('[DEBUG NUM2] All ally HP set to 10% complete');
         }
 
         // --- BEGIN NEW DEBUG UTILITY FUNCTIONS ---
@@ -1980,7 +2024,7 @@
                         
                         // Get stageId (might be from URL for story mode, or default)
                         const urlParams = new URLSearchParams(window.location.search);
-                        let stageId = urlParams.get('stage') || 'target_dummy_test'; // Default to target dummy test
+                        let stageId = urlParams.get('stage') || 'draft_mode_stage'; // Default to draft mode stage
                         const storyId = urlParams.get('storyId');
                         const stageIndex = urlParams.get('stageIndex');
                         const isWeeklyChallenge = urlParams.get('weekly') === 'true';

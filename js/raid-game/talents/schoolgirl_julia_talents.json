@@ -1,0 +1,193 @@
+{
+    "talentTree": {
+        "pushback_mastery": {
+            "id": "pushback_mastery",
+            "name": "Pushback Mastery",
+            "description": "Increases Pushback Attack's stun chance by 33%.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_julia_e",
+                "property": "stunChance",
+                "value": 0.33,
+                "operation": "add"
+            },
+            "parents": [],
+            "children": [
+                "sprout_swiftness",
+                "healing_kick_mana_flow"
+            ],
+            "position": {
+                "x": 1000,
+                "y": 140
+            }
+        },
+        "sprout_swiftness": {
+            "id": "sprout_swiftness",
+            "name": "Sprout Swiftness",
+            "description": "Sprout Planting no longer ends Julia's turn.",
+            "icon": "Icons/talents/tactical_reload.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_julia_w",
+                "property": "doesNotEndTurn",
+                "value": true,
+                "operation": "set"
+            },
+            "parents": [
+                "pushback_mastery"
+            ],
+            "children": [
+                "flourishing_spirits"
+            ],
+            "position": {
+                "x": 830,
+                "y": 260
+            }
+        },
+        "flourishing_spirits": {
+            "id": "flourishing_spirits",
+            "name": "Flourishing Spirits",
+            "description": "After turn 10, Julia's Healing Power is increased by 15% for the rest of the battle.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "lateHealBoostPercent",
+                "value": 0.15
+            },
+            "parents": [
+                "sprout_swiftness"
+            ],
+            "children": [
+                "spirit_quickness",
+                "mystic_reserve"
+            ],
+            "position": {
+                "x": 830,
+                "y": 410
+            }
+        },
+        "spirit_quickness": {
+            "id": "spirit_quickness",
+            "name": "Spirit Quickness",
+            "description": "Reduces the cooldown of all Julia's abilities by 1 turn.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": {
+                "type": "reduce_all_cooldowns",
+                "value": 1
+            },
+            "parents": [
+                "flourishing_spirits"
+            ],
+            "children": [
+                "sprout_fertility",
+                "spirit_purification"
+            ],
+            "position": {
+                "x": 830,
+                "y": 570
+            }
+        },
+        "mystic_reserve": {
+            "id": "mystic_reserve",
+            "name": "Mystic Reserve",
+            "description": "Increases Julia's maximum Mana by 885.",
+            "icon": "Icons/talents/protective_bond.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "maxMana",
+                "value": 885,
+                "operation": "add"
+            },
+            "parents": [
+                "flourishing_spirits"
+            ],
+            "children": [],
+            "position": {
+                "x": 640,
+                "y": 410
+            }
+        },
+        "sprout_fertility": {
+            "id": "sprout_fertility",
+            "name": "Sprout Fertility",
+            "description": "Healing Sprout now blooms after just 1 turn.",
+            "icon": "Icons/talents/heartbreaking_mark.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "sproutBloomsAfterOneTurn",
+                "value": true
+            },
+            "parents": [
+                "spirit_quickness"
+            ],
+            "children": [],
+            "position": {
+                "x": 830,
+                "y": 710
+            }
+        },
+        "spirit_purification": {
+            "id": "spirit_purification",
+            "name": "Spirit Purification",
+            "description": "Spirits Strength now removes all debuffs from allies.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "spiritsStrengthCleansesDebuffs",
+                "value": true
+            },
+            "parents": [
+                "spirit_quickness"
+            ],
+            "children": [],
+            "position": {
+                "x": 640,
+                "y": 570
+            }
+        },
+        "healing_kick_mana_flow": {
+            "id": "healing_kick_mana_flow",
+            "name": "Healing Mana Flow",
+            "description": "Healing Kick also restores 5% of the healing done as Mana to each healed ally.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingKickRestoresManaPercent",
+                "value": 0.05
+            },
+            "parents": [
+                "pushback_mastery"
+            ],
+            "children": [
+                "natural_regeneration"
+            ],
+            "position": { "x": 1170, "y": 260 }
+        },
+        "natural_regeneration": {
+            "id": "natural_regeneration",
+            "name": "Natural Regeneration",
+            "description": "Julia's attunement with nature grants her +40 HP Regeneration and +15 Mana Regeneration per turn.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": [
+                {
+                    "type": "modify_stat",
+                    "stat": "hpPerTurn",
+                    "value": 40,
+                    "operation": "add"
+                },
+                {
+                    "type": "modify_stat",
+                    "stat": "manaPerTurn",
+                    "value": 15,
+                    "operation": "add"
+                }
+            ],
+            "parents": [
+                "healing_kick_mana_flow"
+            ],
+            "children": [],
+            "position": { "x": 1170, "y": 410 }
+        }
+    }
+}

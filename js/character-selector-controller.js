@@ -169,6 +169,52 @@ class CharacterSelectorController {
             console.log('[CharacterSelector] Selecting initial element');
             this.selectInitialElement();
         }, 500);
+
+        /* -----------------------------------------------------
+           Inject Draft Mode Tab & Content (UI helper)
+        ----------------------------------------------------- */
+        try {
+            const tabsContainer = document.querySelector('.tabs');
+            if (tabsContainer && !tabsContainer.querySelector('[data-tab="draft-tab"]')) {
+                // Create the tab button element
+                const draftBtn = document.createElement('button');
+                draftBtn.className = 'tab-button';
+                draftBtn.setAttribute('data-tab', 'draft-tab');
+                draftBtn.textContent = 'Draft Mode';
+                tabsContainer.appendChild(draftBtn);
+
+                // Create the corresponding content panel
+                const selectorPanel = tabsContainer.closest('.selector-panel');
+                if (selectorPanel) {
+                    const weeklyTabContent = selectorPanel.querySelector('#weekly-tab');
+                    const draftTab = document.createElement('div');
+                    draftTab.className = 'tab-content';
+                    draftTab.id = 'draft-tab';
+                    draftTab.innerHTML = `
+                        <div class="draft-mode-panel" style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:24px;max-width:640px;margin:0 auto;text-align:center;">
+                            <h3 style="font-size:1.8rem;">🛡️ Draft Mode</h3>
+                            <p style="line-height:1.6;color:var(--neutral-300);">Take turns with the AI to pick from a shared hero pool, then battle with your drafted squad. Ready to test your drafting skills?</p>
+                            <button id="start-draft-mode-btn" class="action-button start-button" style="padding:14px 28px;font-size:1rem;">Enter Draft Lobby</button>
+                        </div>`;
+                    // Insert right after the weekly tab panel so order matches buttons
+                    if (weeklyTabContent) {
+                        weeklyTabContent.after(draftTab);
+                    } else {
+                        selectorPanel.appendChild(draftTab);
+                    }
+                }
+
+                // Add click handler to navigate to Draft Mode
+                document.addEventListener('click', (evt) => {
+                    if (evt.target && evt.target.id === 'start-draft-mode-btn') {
+                        window.location.href = 'draft-mode.html';
+                    }
+                });
+            }
+        } catch (draftErr) {
+            console.error('[CharacterSelector] Failed to inject Draft Mode tab:', draftErr);
+        }
+        /* ----------------------------------------------------- */
     }
 
     setupControllerIndicator() {

@@ -1,5 +1,4 @@
 {
-    "characterId": "schoolgirl_kokoro",
     "talentTree": {
         "healing_efficiency": {
             "id": "healing_efficiency",
@@ -15,8 +14,13 @@
                 "value": true
             },
             "parents": [],
-            "children": ["healing_versatility"],
-            "position": { "x": 0, "y": -200 }
+            "children": [
+                "healing_versatility"
+            ],
+            "position": {
+                "x": 1080,
+                "y": 50
+            }
         },
         "protective_healing": {
             "id": "protective_healing",
@@ -31,9 +35,17 @@
                 "property": "protectiveHealing",
                 "value": true
             },
-            "parents": ["healing_efficiency", "enhanced_lesser_heal"],
-            "children": ["overheal_mastery"],
-            "position": { "x": -300, "y": -600 }
+            "parents": [
+                "healing_efficiency",
+                "enhanced_lesser_heal"
+            ],
+            "children": [
+                "overheal_mastery"
+            ],
+            "position": {
+                "x": 660,
+                "y": 190
+            }
         },
         "overheal_mastery": {
             "id": "overheal_mastery",
@@ -48,9 +60,16 @@
                 "property": "overhealMastery",
                 "value": true
             },
-            "parents": ["protective_healing"],
-            "children": ["shielding_aura"],
-            "position": { "x": -15, "y": -415 }
+            "parents": [
+                "protective_healing"
+            ],
+            "children": [
+                "shielding_aura"
+            ],
+            "position": {
+                "x": 20,
+                "y": 200
+            }
         },
         "shielding_aura": {
             "id": "shielding_aura",
@@ -65,9 +84,16 @@
                 "property": "shieldingAura",
                 "value": true
             },
-            "parents": ["overheal_mastery"],
-            "children": ["shield_empowerment"],
-            "position": { "x": -15, "y": -580 }
+            "parents": [
+                "overheal_mastery"
+            ],
+            "children": [
+                "shield_empowerment"
+            ],
+            "position": {
+                "x": 20,
+                "y": 600
+            }
         },
         "shield_empowerment": {
             "id": "shield_empowerment",
@@ -82,9 +108,14 @@
                 "property": "shieldEmpowerment",
                 "value": true
             },
-            "parents": ["shielding_aura"],
+            "parents": [
+                "shielding_aura"
+            ],
             "children": [],
-            "position": { "x": 200, "y": -405 },
+            "position": {
+                "x": 20,
+                "y": 1150
+            },
             "powerful": true
         },
         "healing_versatility": {
@@ -101,9 +132,17 @@
                 "property": "canTargetEnemies",
                 "value": true
             },
-            "parents": ["healing_efficiency"],
-            "children": ["enhanced_lesser_heal", "enhanced_healing_feedback"],
-            "position": { "x": 0, "y": 0 }
+            "parents": [
+                "healing_efficiency"
+            ],
+            "children": [
+                "enhanced_lesser_heal",
+                "enhanced_healing_feedback"
+            ],
+            "position": {
+                "x": 1500,
+                "y": 210
+            }
         },
         "enhanced_lesser_heal": {
             "id": "enhanced_lesser_heal",
@@ -118,9 +157,18 @@
                 "property": "enhancedLesserHeal",
                 "value": true
             },
-            "parents": ["healing_versatility"],
-            "children": ["silencing_ring_mastery", "mana_expansion", "protective_healing"],
-            "position": { "x": 180, "y": 180 }
+            "parents": [
+                "healing_versatility"
+            ],
+            "children": [
+                "silencing_ring_mastery",
+                "mana_expansion",
+                "protective_healing"
+            ],
+            "position": {
+                "x": 1050,
+                "y": 480
+            }
         },
         "enhanced_healing_feedback": {
             "id": "enhanced_healing_feedback",
@@ -135,9 +183,17 @@
                 "property": "enhancedHealingFeedback",
                 "value": true
             },
-            "parents": ["healing_versatility"],
-            "children": ["empathic_resonance", "shielding_feedback"],
-            "position": { "x": -180, "y": 180 }
+            "parents": [
+                "healing_versatility"
+            ],
+            "children": [
+                "empathic_resonance",
+                "shielding_feedback"
+            ],
+            "position": {
+                "x": 1980,
+                "y": 210
+            }
         },
         "shielding_feedback": {
             "id": "shielding_feedback",
@@ -152,9 +208,14 @@
                 "property": "shieldingFeedback",
                 "value": true
             },
-            "parents": ["enhanced_healing_feedback"],
+            "parents": [
+                "enhanced_healing_feedback"
+            ],
             "children": [],
-            "position": { "x": -320, "y": 360 }
+            "position": {
+                "x": 2240,
+                "y": 210
+            }
         },
         "silencing_ring_mastery": {
             "id": "silencing_ring_mastery",
@@ -171,9 +232,16 @@
                 "operation": "subtract",
                 "value": 2
             },
-            "parents": ["enhanced_lesser_heal"],
-            "children": ["focused_mind"],
-            "position": { "x": 80, "y": 360 }
+            "parents": [
+                "enhanced_lesser_heal"
+            ],
+            "children": [
+                "focused_mind"
+            ],
+            "position": {
+                "x": 1500,
+                "y": 490
+            }
         },
         "mana_expansion": {
             "id": "mana_expansion",
@@ -189,9 +257,17 @@
                 "operation": "add",
                 "value": 550
             },
-            "parents": ["enhanced_lesser_heal"],
-            "children": ["mana_flow", "energizing_feedback"],
-            "position": { "x": 280, "y": -75 }
+            "parents": [
+                "enhanced_lesser_heal"
+            ],
+            "children": [
+                "mana_flow",
+                "energizing_feedback"
+            ],
+            "position": {
+                "x": 320,
+                "y": 460
+            }
         },
         "empathic_resonance": {
             "id": "empathic_resonance",
@@ -206,9 +282,16 @@
                 "property": "empathicResonance",
                 "value": true
             },
-            "parents": ["enhanced_healing_feedback"],
-            "children": ["focused_mind"],
-            "position": { "x": -180, "y": 360 }
+            "parents": [
+                "enhanced_healing_feedback"
+            ],
+            "children": [
+                "focused_mind"
+            ],
+            "position": {
+                "x": 1980,
+                "y": 390
+            }
         },
         "mana_flow": {
             "id": "mana_flow",
@@ -224,9 +307,16 @@
                 "operation": "add",
                 "value": 10
             },
-            "parents": ["mana_expansion"],
-            "children": ["mana_infusion"],
-            "position": { "x": 355, "y": 100 }
+            "parents": [
+                "mana_expansion"
+            ],
+            "children": [
+                "mana_infusion"
+            ],
+            "position": {
+                "x": 330,
+                "y": 710
+            }
         },
         "energizing_feedback": {
             "id": "energizing_feedback",
@@ -241,9 +331,16 @@
                 "property": "energizingFeedback",
                 "value": true
             },
-            "parents": ["mana_expansion"],
-            "children": ["empowered_protection"],
-            "position": { "x": 100, "y": 100 }
+            "parents": [
+                "mana_expansion"
+            ],
+            "children": [
+                "empowered_protection"
+            ],
+            "position": {
+                "x": 1240,
+                "y": 970
+            }
         },
         "empowered_protection": {
             "id": "empowered_protection",
@@ -258,9 +355,16 @@
                 "property": "empoweredProtection",
                 "value": true
             },
-            "parents": ["energizing_feedback"],
-            "children": ["magical_amplification"],
-            "position": { "x": 100, "y": 250 }
+            "parents": [
+                "energizing_feedback"
+            ],
+            "children": [
+                "magical_amplification"
+            ],
+            "position": {
+                "x": 1520,
+                "y": 970
+            }
         },
         "focused_mind": {
             "id": "focused_mind",
@@ -274,11 +378,20 @@
                 "type": "modify_stat",
                 "stat": "critChance",
                 "operation": "add",
-                "value": 0.10
+                "value": 0.1
             },
-            "parents": ["empathic_resonance", "silencing_ring_mastery"],
-            "children": ["empowered_silencing", "cooldown_mastery"],
-            "position": { "x": -50, "y": 540 }
+            "parents": [
+                "empathic_resonance",
+                "silencing_ring_mastery"
+            ],
+            "children": [
+                "empowered_silencing",
+                "cooldown_mastery"
+            ],
+            "position": {
+                "x": 1810,
+                "y": 570
+            }
         },
         "empowered_silencing": {
             "id": "empowered_silencing",
@@ -293,9 +406,17 @@
                 "property": "empoweredSilencing",
                 "value": true
             },
-            "parents": ["focused_mind"],
-            "children": ["mana_disruption", "magical_amplification"],
-            "position": { "x": -100, "y": 625}
+            "parents": [
+                "focused_mind"
+            ],
+            "children": [
+                "mana_disruption",
+                "magical_amplification"
+            ],
+            "position": {
+                "x": 1820,
+                "y": 770
+            }
         },
         "mana_disruption": {
             "id": "mana_disruption",
@@ -310,9 +431,14 @@
                 "property": "manaDisruption",
                 "value": true
             },
-            "parents": ["empowered_silencing"],
+            "parents": [
+                "empowered_silencing"
+            ],
             "children": [],
-            "position": { "x": -200, "y": 775 }
+            "position": {
+                "x": 1560,
+                "y": 770
+            }
         },
         "magical_amplification": {
             "id": "magical_amplification",
@@ -327,9 +453,17 @@
                 "property": "magicalAmplification",
                 "value": true
             },
-            "parents": ["empowered_silencing", "empowered_protection"],
-            "children": ["empathic_conversion"],
-            "position": { "x": 120, "y": 400 }
+            "parents": [
+                "empowered_silencing",
+                "empowered_protection"
+            ],
+            "children": [
+                "empathic_conversion"
+            ],
+            "position": {
+                "x": 2040,
+                "y": 970
+            }
         },
         "empathic_conversion": {
             "id": "empathic_conversion",
@@ -344,9 +478,14 @@
                 "property": "empathicConversion",
                 "value": true
             },
-            "parents": ["magical_amplification"],
+            "parents": [
+                "magical_amplification"
+            ],
             "children": [],
-            "position": { "x": 120, "y": 550 },
+            "position": {
+                "x": 2210,
+                "y": 1110
+            },
             "powerful": true
         },
         "cooldown_mastery": {
@@ -362,9 +501,16 @@
                 "property": "cooldownMastery",
                 "value": true
             },
-            "parents": ["focused_mind"],
-            "children": ["circle_heal_mastery"],
-            "position": { "x": -100, "y": 800 }
+            "parents": [
+                "focused_mind"
+            ],
+            "children": [
+                "circle_heal_mastery"
+            ],
+            "position": {
+                "x": 2490,
+                "y": 580
+            }
         },
         "circle_heal_mastery": {
             "id": "circle_heal_mastery",
@@ -381,9 +527,16 @@
                 "operation": "subtract",
                 "value": 1
             },
-            "parents": ["cooldown_mastery"],
-            "children": ["transcendent_healing"],
-            "position": { "x": -100, "y": 950 }
+            "parents": [
+                "cooldown_mastery"
+            ],
+            "children": [
+                "transcendent_healing"
+            ],
+            "position": {
+                "x": 2490,
+                "y": 760
+            }
         },
         "transcendent_healing": {
             "id": "transcendent_healing",
@@ -398,9 +551,16 @@
                 "property": "transcendentHealing",
                 "value": true
             },
-            "parents": ["circle_heal_mastery"],
-            "children": ["divine_resonance"],
-            "position": { "x": -100, "y": 1100 }
+            "parents": [
+                "circle_heal_mastery"
+            ],
+            "children": [
+                "divine_resonance"
+            ],
+            "position": {
+                "x": 2490,
+                "y": 920
+            }
         },
         "divine_resonance": {
             "id": "divine_resonance",
@@ -415,9 +575,14 @@
                 "property": "divineResonance",
                 "value": true
             },
-            "parents": ["transcendent_healing"],
+            "parents": [
+                "transcendent_healing"
+            ],
             "children": [],
-            "position": { "x": -100, "y": 1280 },
+            "position": {
+                "x": 2490,
+                "y": 1110
+            },
             "powerful": true
         },
         "mana_infusion": {
@@ -433,9 +598,16 @@
                 "property": "manaInfusion",
                 "value": true
             },
-            "parents": ["mana_flow"],
-            "children": ["mystic_barrier"],
-            "position": { "x": 450, "y": 125 }
+            "parents": [
+                "mana_flow"
+            ],
+            "children": [
+                "mystic_barrier"
+            ],
+            "position": {
+                "x": 330,
+                "y": 890
+            }
         },
         "mystic_barrier": {
             "id": "mystic_barrier",
@@ -450,10 +622,15 @@
                 "property": "mysticBarrier",
                 "value": true
             },
-            "parents": ["mana_infusion"],
+            "parents": [
+                "mana_infusion"
+            ],
             "children": [],
-            "position": { "x": 450, "y": -25 },
+            "position": {
+                "x": 330,
+                "y": 1150
+            },
             "powerful": true
         }
     }
-} 
+}

@@ -1885,9 +1885,17 @@ const pounceAbility = new Ability(
     pounceAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-pounceAbility.baseDescription = 'Deals 50% AD damage and has a 85% chance to stun the target for 1 turn.';
+pounceAbility.baseDescription = 'Deals 50% AD damage and has a 85% chance to stun the target for 2 turns.';
 // Set default amount property to prevent NaN issues
 pounceAbility.amount = 0.5;
+// Add debuffEffect property for stun functionality
+pounceAbility.debuffEffect = {
+    debuffId: "stun",
+    name: "Stunned",
+    duration: 2,
+    chance: 0.85,
+    effects: { cantAct: true }
+};
 pounceAbility.generateDescription = function() {
     console.log(`[Alice] Generating description for pounce. Base: "${this.baseDescription}"`);
     

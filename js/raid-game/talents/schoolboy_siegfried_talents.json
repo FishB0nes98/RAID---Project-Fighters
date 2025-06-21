@@ -1,0 +1,691 @@
+{
+    "talentTree": {
+        "cleaving_blade": {
+            "id": "cleaving_blade",
+            "name": "Cleaving Blade",
+            "description": "⚔️ Sword Slash now deals 25% of the original damage to two additional random enemies.",
+            "icon": "Icons/talents/frenzied_assault.webp",
+            "tier": 1,
+            "root": true,
+            "cost": 1,
+            "position": {
+                "x": 140,
+                "y": 120
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_q",
+                "property": "cleaving_strikes",
+                "value": {
+                    "enabled": true,
+                    "additional_targets": 2,
+                    "damage_multiplier": 0.25
+                }
+            },
+            "children": [
+                "relentless_strikes",
+                "enhanced_connoisseur"
+            ]
+        },
+        "relentless_strikes": {
+            "id": "relentless_strikes",
+            "name": "Relentless Strikes",
+            "description": "⚡ Sword Slash has a 12% chance not to end your turn, allowing for consecutive attacks.",
+            "icon": "Icons/talents/nimble_strikes.webp",
+            "tier": 2,
+            "cost": 2,
+            "position": {
+                "x": 140,
+                "y": 270
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_q",
+                "property": "relentless_chance",
+                "value": 0.12
+            },
+            "parents": [
+                "cleaving_blade"
+            ],
+            "children": [
+                "empowered_blade",
+                "critical_blessing"
+            ]
+        },
+        "empowered_blade": {
+            "id": "empowered_blade",
+            "name": "Empowered Blade",
+            "description": "⚔️ Sword Slash deals <span class=\"talent-effect damage\">40% additional Physical Damage</span>, making each strike more devastating.",
+            "icon": "Icons/talents/physical_growth.webp",
+            "tier": 3,
+            "cost": 3,
+            "position": {
+                "x": 150,
+                "y": 670
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_q",
+                "property": "damage_scaling_bonus",
+                "value": 0.4
+            },
+            "parents": [
+                "relentless_strikes"
+            ],
+            "children": [
+                "shared_blessing",
+                "ally_strength"
+            ]
+        },
+        "shared_blessing": {
+            "id": "shared_blessing",
+            "name": "Shared Blessing",
+            "description": "🤝 Sword Blessing now also applies a <span class=\"talent-effect utility\">random buff</span> to a random ally, sharing the warrior's power.",
+            "icon": "Icons/talents/shared_blessing.webp",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 50,
+                "y": 870
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_e",
+                "property": "shared_blessing",
+                "value": {
+                    "enabled": true,
+                    "buffs": ["blessed_lifesteal", "blessed_damage"]
+                }
+            },
+            "parents": [
+                "empowered_blade"
+            ],
+            "children": [
+                "blessed_restoration"
+            ]
+        },
+        "ally_strength": {
+            "id": "ally_strength",
+            "name": "Ally's Strength",
+            "description": "💪 Buff Connoisseur now also grants <span class=\"talent-effect damage\">+25 Physical Damage</span> for each active buff on allies (excluding your own buffs).",
+            "icon": "Icons/talents/ally_strength.webp",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 250,
+                "y": 870
+            },
+            "effect": {
+                "type": "modify_passive",
+                "property": "allyBuffDamageBonus",
+                "value": 25
+            },
+            "parents": [
+                "empowered_blade"
+            ],
+            "children": [
+                "blessed_restoration"
+            ]
+        },
+        "critical_blessing": {
+            "id": "critical_blessing",
+            "name": "Critical Blessing",
+            "description": "✨ Sword Blessing now applies a third buff: <span class=\"talent-effect utility\">Blessed Focus</span> (+20% Crit Chance) for 6 turns.",
+            "icon": "Icons/talents/critical.png",
+            "tier": 3,
+            "cost": 3,
+            "position": {
+                "x": 733,
+                "y": 1100
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_e",
+                "property": "critical_blessing",
+                "value": {
+                    "enabled": true,
+                    "crit_chance_bonus": 0.2,
+                    "duration": 6
+                }
+            },
+            "parents": [
+                "relentless_strikes"
+            ],
+            "children": [
+                "judgment_enhancement",
+                "warrior_foundation"
+            ]
+        },
+        "enhanced_connoisseur": {
+            "id": "enhanced_connoisseur",
+            "name": "Enhanced Connoisseur",
+            "description": "🦁 Buff Connoisseur now grants 150 Physical Damage per buff instead of 125.",
+            "icon": "Icons/talents/physical_growth.webp",
+            "tier": 2,
+            "cost": 2,
+            "position": {
+                "x": 350,
+                "y": 130
+            },
+            "effect": {
+                "type": "modify_passive",
+                "property": "damagePerBuff",
+                "value": 150
+            },
+            "parents": [
+                "cleaving_blade"
+            ],
+            "children": [
+                "enduring_mastery",
+                "restorative_buffs"
+            ]
+        },
+        "enduring_mastery": {
+            "id": "enduring_mastery",
+            "name": "Enduring Mastery",
+            "description": "⏳ All buffs you receive last 1 additional turn.",
+            "icon": "Icons/talents/enduring_mastery.webp",
+            "tier": 3,
+            "cost": 3,
+            "position": {
+                "x": 610,
+                "y": 130
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "buffDurationBonus",
+                "value": 1
+            },
+            "parents": [
+                "enhanced_connoisseur"
+            ],
+            "children": [
+                "judgement_mastery",
+                "swift_protection"
+            ]
+        },
+        "restorative_buffs": {
+            "id": "restorative_buffs",
+            "name": "Restorative Buffs",
+            "description": "💚 When you receive a buff, you are healed for 2% of your maximum HP.",
+            "icon": "Icons/talents/restorative_buffs.webp",
+            "tier": 3,
+            "cost": 3,
+            "position": {
+                "x": 630,
+                "y": 430
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healOnBuffReceived",
+                "value": 0.02
+            },
+            "parents": [
+                "enhanced_connoisseur",
+                "warrior_foundation"
+            ],
+            "children": [
+                "enhanced_lion_protection",
+                "warrior_foundation"
+            ]
+        },
+        "enhanced_lion_protection": {
+            "id": "enhanced_lion_protection",
+            "name": "Enhanced Lion Protection",
+            "description": "🛡️ Lion Protection Shield now heals 25% of missing health (instead of 10%) but has increased cooldown (+2 turns).",
+            "icon": "Icons/talents/enhanced_lion_protection.webp",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 900,
+                "y": 630
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_w",
+                "property": "enhanced_healing",
+                "value": {
+                    "healing_percentage": 0.25,
+                    "cooldown_increase": 2
+                }
+            },
+            "parents": [
+                "restorative_buffs"
+            ],
+            "children": [
+                "cleansing_slash",
+                "lionheart_regrowth"
+            ]
+        },
+        "judgement_mastery": {
+            "id": "judgement_mastery",
+            "name": "Judgement Mastery",
+            "description": "⏱️ Judgement's cooldown is reduced by 5 turns.",
+            "icon": "Icons/talents/critical_cooldown.webp",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 850,
+                "y": 130
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_r",
+                "property": "cooldown",
+                "value": 10
+            },
+            "parents": [
+                "enduring_mastery"
+            ],
+            "children": [
+                "guardian_resolve"
+            ]
+        },
+        "swift_protection": {
+            "id": "swift_protection",
+            "name": "Swift Protection",
+            "description": "⚡ Lion Protection and Sword Blessing no longer end your turn.",
+            "icon": "Icons/talents/nimble_strikes.webp",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 860,
+                "y": 320
+            },
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolboy_siegfried_w",
+                    "property": "doesNotEndTurn",
+                    "value": true
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolboy_siegfried_e",
+                    "property": "doesNotEndTurn",
+                    "value": true
+                }
+            ],
+            "parents": [
+                "enduring_mastery"
+            ],
+            "children": [
+                "guardian_resolve"
+            ]
+        },
+        "guardian_resolve": {
+            "id": "guardian_resolve",
+            "name": "Guardian's Resolve",
+            "description": "✨ Siegfried's stalwart spirit empowers him. He gains <span class=\"talent-effect healing\">+10% Healing Power</span>, <span class=\"talent-effect utility\">+4 Armor</span>, and <span class=\"talent-effect utility\">+5 Magic Shield</span>.",
+            "icon": "Icons/talents/guardian_resolve.webp",
+            "tier": 5,
+            "cost": 5,
+            "position": {
+                "x": 1030,
+                "y": 220
+            },
+            "effect": [
+                {
+                    "type": "modify_stat",
+                    "stat": "healingPower",
+                    "value": 0.1,
+                    "operation": "add"
+                },
+                {
+                    "type": "modify_stat",
+                    "stat": "armor",
+                    "value": 4,
+                    "operation": "add"
+                },
+                {
+                    "type": "modify_stat",
+                    "stat": "magicalShield",
+                    "value": 5,
+                    "operation": "add"
+                }
+            ],
+            "parents": [
+                "judgement_mastery",
+                "swift_protection"
+            ],
+            "children": [
+                "stalwart_guardian"
+            ]
+        },
+        "stalwart_guardian": {
+            "id": "stalwart_guardian",
+            "name": "Stalwart Guardian",
+            "description": "🛡️ Siegfried's unwavering determination grants him <span class=\"talent-effect healing\">+1250 Max HP</span> and <span class=\"talent-effect utility\">+555 Max Mana</span>.",
+            "icon": "Icons/talents/stalwart_guardian.webp",
+            "tier": 6,
+            "cost": 6,
+            "position": {
+                "x": 1210,
+                "y": 220
+            },
+            "effect": [
+                {
+                    "type": "modify_stat",
+                    "stat": "maxHp",
+                    "value": 1250,
+                    "operation": "add"
+                },
+                {
+                    "type": "modify_stat",
+                    "stat": "maxMana",
+                    "value": 555,
+                    "operation": "add"
+                }
+            ],
+            "parents": [
+                "guardian_resolve"
+            ],
+            "children": [
+                "guardian_link"
+            ]
+        },
+        "guardian_link": {
+            "id": "guardian_link",
+            "name": "Guardian's Link",
+            "description": "🤝 Whenever an ally is healed, Siegfried is healed for 35% of that heal amount.",
+            "icon": "Icons/talents/guardian_link.webp",
+            "tier": 7,
+            "cost": 7,
+            "position": {
+                "x": 1210,
+                "y": 390
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healOnAllyHealed",
+                "value": 0.35
+            },
+            "parents": [
+                "stalwart_guardian"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "lionheart_regrowth": {
+            "id": "lionheart_regrowth",
+            "name": "Lionheart Regrowth",
+            "description": "🦁 Whenever Siegfried receives a buff, he heals for 300 HP.",
+            "icon": "Icons/talents/lionheart_regrowth.webp",
+            "tier": 5,
+            "cost": 5,
+            "position": {
+                "x": 1100,
+                "y": 630
+            },
+            "effect": {
+                "type": "modify_passive",
+                "property": "healOnBuffReceivedFlat",
+                "value": 300
+            },
+            "parents": [
+                "enhanced_lion_protection"
+            ],
+            "children": [
+                "protective_slash"
+            ]
+        },
+        "protective_slash": {
+            "id": "protective_slash",
+            "name": "Protective Slash",
+            "description": "🛡️ Sword Slash has a 16% chance to extend Lion Protection's duration by 1 turn.",
+            "icon": "Icons/talents/protective_slash.webp",
+            "tier": 6,
+            "cost": 6,
+            "position": {
+                "x": 1110,
+                "y": 1090
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_q",
+                "property": "extend_lion_protection",
+                "value": {
+                    "enabled": true,
+                    "chance": 0.16,
+                    "duration_increase": 1
+                }
+            },
+            "parents": [
+                "lionheart_regrowth"
+            ],
+            "children": [
+                "lion_protection_resonance"
+            ]
+        },
+        "cleansing_slash": {
+            "id": "cleansing_slash",
+            "name": "Cleansing Slash",
+            "description": "⚔️ Sword Slash heals a random ally for 35% of the damage dealt.",
+            "icon": "Icons/talents/cleansing_slash.webp",
+            "tier": 5,
+            "cost": 5,
+            "position": {
+                "x": 910,
+                "y": 920
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_q",
+                "property": "heal_random_ally",
+                "value": {
+                    "enabled": true,
+                    "heal_multiplier": 0.35
+                }
+            },
+            "parents": [
+                "enhanced_lion_protection"
+            ],
+            "children": []
+        },
+        "lion_protection_resonance": {
+            "id": "lion_protection_resonance",
+            "name": "Lion's Resonance",
+            "description": "🦁 Lion Protection can now stack up to 3 times. All of Siegfried's abilities have a 20% chance to grant an additional stack of Lion Protection (no mana or cooldown).",
+            "icon": "Icons/talents/lion_resonance.webp",
+            "tier": 7,
+            "cost": 7,
+            "position": {
+                "x": 1390,
+                "y": 1090
+            },
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolboy_siegfried_w",
+                    "property": "stackable",
+                    "value": {
+                        "enabled": true,
+                        "max_stacks": 3
+                    }
+                },
+                {
+                    "type": "modify_character_property",
+                    "property": "lionProtectionExtraChance",
+                    "value": 0.2
+                }
+            ],
+            "parents": [
+                "protective_slash"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "judgment_enhancement": {
+            "id": "judgment_enhancement",
+            "name": "Divine Judgment",
+            "description": "⚡ Judgement now scales with <span class=\"talent-effect damage\">75% additional Physical Damage</span>, making it devastatingly powerful.",
+            "icon": "Icons/talents/physical_growth.webp",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 750,
+                "y": 1330
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_r",
+                "property": "damage_scaling_bonus",
+                "value": 0.75
+            },
+            "parents": [
+                "critical_blessing"
+            ],
+            "children": [
+                "mana_efficiency",
+                "relentless_justice"
+            ]
+        },
+        "mana_efficiency": {
+            "id": "mana_efficiency",
+            "name": "Mana Efficiency",
+            "description": "🔮 Siegfried's mastery reduces the mana cost of all his abilities by <span class=\"talent-effect resource\">35%</span>.",
+            "icon": "Icons/talents/mana_efficiency.webp",
+            "tier": 5,
+            "cost": 5,
+            "position": {
+                "x": 600,
+                "y": 1580
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "manaCostReduction",
+                "value": 0.35
+            },
+            "parents": [
+                "judgment_enhancement"
+            ],
+            "children": [
+                "purifying_resolve",
+                "blessed_restoration"
+            ]
+        },
+        "relentless_justice": {
+            "id": "relentless_justice",
+            "name": "Relentless Justice",
+            "description": "⚔️ Each successful Sword Slash hit reduces Judgement's cooldown by <span class=\"talent-effect utility\">1 turn</span>, allowing for more frequent divine strikes.",
+            "icon": "Icons/talents/relentless_justice.webp",
+            "tier": 5,
+            "cost": 5,
+            "position": {
+                "x": 900,
+                "y": 1580
+            },
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolboy_siegfried_q",
+                "property": "reduce_judgment_cooldown",
+                "value": {
+                    "enabled": true,
+                    "reduction_amount": 1,
+                    "target_ability": "schoolboy_siegfried_r"
+                }
+            },
+            "parents": [
+                "judgment_enhancement"
+            ],
+            "children": [
+                "purifying_resolve"
+            ]
+        },
+        "warrior_foundation": {
+            "id": "warrior_foundation",
+            "name": "Warrior's Foundation",
+            "description": "💪 Siegfried's mastery grants him <span class=\"talent-effect damage\">+50 Physical Damage</span> as his foundation grows stronger.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 4,
+            "cost": 4,
+            "position": {
+                "x": 660,
+                "y": 700
+            },
+            "effect": {
+                "type": "modify_stat",
+                "stat": "physicalDamage",
+                "value": 50,
+                "operation": "add"
+            },
+            "parents": [
+                "critical_blessing",
+                "restorative_buffs"
+            ],
+            "children": [
+                "restorative_buffs"
+            ]
+        },
+        "purifying_resolve": {
+            "id": "purifying_resolve",
+            "name": "Purifying Resolve",
+            "description": "✨ Siegfried's unwavering spirit purifies his soul. At the start of each turn, he has an <span class=\"talent-effect utility\">18% chance</span> to remove all debuffs from himself.",
+            "icon": "Icons/talents/purifying_resolve.webp",
+            "tier": 6,
+            "cost": 6,
+            "position": {
+                "x": 750,
+                "y": 1800
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "purifyingResolveChance",
+                "value": 0.18
+            },
+            "parents": [
+                "mana_efficiency",
+                "relentless_justice"
+            ],
+            "children": [
+                "tactical_patience"
+            ]
+        },
+        "tactical_patience": {
+            "id": "tactical_patience",
+            "name": "Tactical Patience",
+            "description": "⏰ When Lion Protection, Sword Blessing, and Judgement are all on cooldown, Siegfried gains <span class=\"talent-effect damage\">Prepared Strike</span> buff: <span class=\"talent-effect damage\">+200 Physical Damage</span>. The buff is removed when any of these abilities comes off cooldown.",
+            "icon": "Icons/talents/tactical_patience.webp",
+            "tier": 7,
+            "cost": 7,
+            "position": {
+                "x": 750,
+                "y": 2000
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "tacticalPatienceEnabled",
+                "value": true
+            },
+            "parents": [
+                "purifying_resolve"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "blessed_restoration": {
+            "id": "blessed_restoration",
+            "name": "Blessed Restoration",
+            "description": "✨ At the end of each turn, Siegfried is <span class=\"talent-effect healing\">healed for 500 HP</span> for each active buff he has, drawing power from his accumulated blessings.",
+            "icon": "Icons/talents/blessed_restoration.webp",
+            "tier": 8,
+            "cost": 8,
+            "position": {
+                "x": 400,
+                "y": 1200
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "blessedRestorationEnabled",
+                "value": true
+            },
+            "parents": [
+                "shared_blessing",
+                "ally_strength",
+                "mana_efficiency"
+            ],
+            "children": [],
+            "powerful": true
+        }
+    }
+}

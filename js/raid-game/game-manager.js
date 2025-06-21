@@ -720,7 +720,39 @@ class GameManager {
             return;
         }
 
+        // Prevent infinite loops by checking if we're already updating this character
+        if (character._updatingAbilities) {
+            console.log(`[GameManager] Already updating abilities for ${character.name}, skipping to prevent infinite loop`);
+            return;
+        }
+        
+        character._updatingAbilities = true;
+
         console.log(`[GameManager] Updating abilities for ${character.name}...`);
+        
+        // Handle Siegfried-specific talent ability updates
+        if (character.id === 'schoolboy_siegfried') {
+            // Call Siegfried's specific ability description updater
+            if (typeof updateSiegfriedAbilityDescriptions === 'function') {
+                updateSiegfriedAbilityDescriptions(character);
+                console.log(`[GameManager] ✓ Updated Siegfried-specific ability descriptions`);
+            }
+            
+            // Update UI to reflect Enhanced Lion Protection talent
+            if (character.hasTalent && character.hasTalent('enhanced_lion_protection')) {
+                const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+                if (characterElement) {
+                    characterElement.classList.add('has-enhanced-lion-protection');
+                    
+                    // Find Lion Protection ability element and add cooldown indicator
+                    const lionProtectionAbility = characterElement.querySelector('.ability[data-ability-id="schoolboy_siegfried_w"]');
+                    if (lionProtectionAbility) {
+                        lionProtectionAbility.classList.add('enhanced-cooldown');
+                        console.log(`[GameManager] ✓ Applied Enhanced Lion Protection visual indicators`);
+                    }
+                }
+            }
+        }
         
         character.abilities.forEach((ability, index) => {
             try {
@@ -785,6 +817,11 @@ class GameManager {
         if (this.uiManager && typeof this.uiManager.updateCharacterUI === 'function') {
             this.uiManager.updateCharacterUI(character);
         }
+        
+        // Clear the flag after a short delay
+        setTimeout(() => {
+            character._updatingAbilities = false;
+        }, 100);
     }
 
     // Load stage background image
@@ -1296,6 +1333,12 @@ class GameManager {
             delete usedAbility._tempDoesNotEndTurn;
         }
         
+        // --- NEW: Check if the ability itself is flagged to not end turn (permanent property) ---
+        if (success && usedAbility && usedAbility.doesNotEndTurn === true) {
+            console.log(`[GameManager] Ability property doesNotEndTurn=true detected, preventing turn end`);
+            this.preventTurnEndFlag = true;
+        }
+        
         // Common logic after ability use attempt
         if (success) {
             // Explicitly update the caster's UI to ensure cooldowns/mana are reflected
@@ -1417,6 +1460,49 @@ class GameManager {
         }
         // --- END NEW ---
 
+        // --- NEW: Check for Heart Debuff forced targeting ---
+        // Note: This check should happen AFTER targetType validation for proper self-targeting
+        if (selectedChar && selectedChar.forcedTargeting && selectedChar.forcedTargeting.type === 'heart_debuff') {
+            const forcedCasterId = selectedChar.forcedTargeting.casterId;
+            const forcedCasterName = selectedChar.forcedTargeting.casterName;
+            
+            // Allow self-targeting for 'self' type abilities
+            if (targetType === 'self' || target === selectedChar) {
+                console.log(`[validateTarget] ${selectedChar.name} with Heart Debuff can target self (targetType: ${targetType}).`);
+                // Don't return here, let normal validation continue
+            } else {
+                // For non-self abilities, check Heart Debuff restrictions
+                const allCharacters = [
+                    ...this.gameState.playerCharacters,
+                    ...this.gameState.aiCharacters
+                ];
+                const heartCaster = allCharacters.find(char => 
+                    (char.instanceId || char.id) === forcedCasterId && !char.isDead()
+                );
+                
+                if (heartCaster) {
+                    // Heart Debuff allows targeting:
+                    // 1. The heart caster themselves
+                    // 2. The debuffed character's own allies (same team as debuffed character)
+                    // 3. Self (handled above)
+                    
+                    const targetTeam = target.isAI ? 'ai' : 'player';
+                    const debuffedCharacterTeam = selectedChar.isAI ? 'ai' : 'player';
+                    
+                    const isTargetingHeartCaster = (target === heartCaster);
+                    const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
+                    const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
+                    
+                    if (!isValidHeartDebuffTarget) {
+                        console.log(`[validateTarget] ${selectedChar.name} has Heart Debuff and can only target ${forcedCasterName} or their own allies!`);
+                        this.addLogEntry(`${selectedChar.name} is enchanted and can only target ${forcedCasterName} or their own allies!`, 'heart-debuff');
+                        return false;
+                    }
+                }
+            }
+        }
+        // --- END NEW ---
+
         switch (targetType) {
             case 'enemy':
             case 'single_enemy': // Support for single enemy targeting
@@ -1429,6 +1515,18 @@ class GameManager {
                 return target === selectedChar;
             case 'ally_or_self':
                 return target.isAI === selectedChar.isAI; // Both allies and self
+            case 'ally_except_self':
+                // New target type: Can target allies but not self
+                // Used for Love Bullet with Healing Shot talent
+                return target.isAI === selectedChar.isAI && target !== selectedChar;
+            case 'enemy_or_ally_except_self':
+                // New target type: Can target both enemies and allies but not self
+                // Used for Schoolgirl Elphelt's Love Bullet with Healing Shot talent
+                return target !== selectedChar;
+            case 'ally_or_enemy':
+                // New target type: Can target both allies and enemies
+                // Used for Schoolgirl Elphelt's Love Bullet with Healing Shot talent
+                return true; // Can target anyone
             case 'any':
                 return true;
             case 'any_except_self':
@@ -1436,6 +1534,7 @@ class GameManager {
                 // Used for Farmer Alice's Bunny Bounce ability
                 return target !== selectedChar;
             case 'all_enemies':
+            case 'aoe_enemy': // Support for AOE enemy targeting
             case 'two_random_enemies': // Support for two random enemies
             case 'three_random_enemies': // Support for three random enemies
             case 'random_enemy': // Support for random enemy
@@ -1483,6 +1582,16 @@ class GameManager {
                 //     }
                 // }
                 char.processEffects(true, true); // Reduce duration and regenerate resources
+                
+                // Apply Blessed Restoration healing for Siegfried
+                if (char.id === 'schoolboy_siegfried' && char.passiveHandler && 
+                    typeof char.passiveHandler.applyBlessedRestoration === 'function') {
+                    try {
+                        char.passiveHandler.applyBlessedRestoration(char);
+                    } catch (e) {
+                        console.error(`Error in Blessed Restoration for ${char.name}:`, e);
+                    }
+                }
             }
         });
 
@@ -1719,6 +1828,46 @@ class GameManager {
                 return false;
             }
             
+            // Check for Heart Debuff forced targeting restrictions on the caster
+            if (caster && caster.forcedTargeting && caster.forcedTargeting.type === 'heart_debuff') {
+                const forcedCasterId = caster.forcedTargeting.casterId;
+                
+                // Allow self-targeting always
+                if (target === caster) {
+                    return true;
+                }
+                
+                // Find the heart caster
+                const allCharacters = [
+                    ...this.gameState.playerCharacters,
+                    ...this.gameState.aiCharacters
+                ];
+                const heartCaster = allCharacters.find(char => 
+                    (char.instanceId || char.id) === forcedCasterId && !char.isDead()
+                );
+                
+                if (heartCaster) {
+                    // Heart Debuff allows targeting:
+                    // 1. The heart caster themselves (Elphelt)
+                    // 2. The debuffed character's own allies (same team as debuffed character)
+                    // 3. Self (handled above)
+                    
+                    const targetTeam = target.isAI ? 'ai' : 'player';
+                    const debuffedCharacterTeam = caster.isAI ? 'ai' : 'player';
+                    
+                    const isTargetingHeartCaster = (target === heartCaster);
+                    const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
+                    const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
+                    
+                    console.log(`[AI Heart Debuff] ${caster.name} with heart debuff checking target ${target.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
+                    
+                    if (!isValidHeartDebuffTarget) {
+                        console.log(`[AI Heart Debuff] Blocking target ${target.name} - not the heart caster or debuffed character's ally`);
+                        return false; // Heart Debuff prevents targeting this character
+                    }
+                }
+            }
+            
             return true;
         };
 
@@ -1811,6 +1960,46 @@ class GameManager {
                 return false;
             }
             
+            // Check for Heart Debuff forced targeting restrictions on the caster
+            if (caster && caster.forcedTargeting && caster.forcedTargeting.type === 'heart_debuff') {
+                const forcedCasterId = caster.forcedTargeting.casterId;
+                
+                // Allow self-targeting always
+                if (target === caster) {
+                    return true;
+                }
+                
+                // Find the heart caster
+                const allCharacters = [
+                    ...this.gameState.playerCharacters,
+                    ...this.gameState.aiCharacters
+                ];
+                const heartCaster = allCharacters.find(char => 
+                    (char.instanceId || char.id) === forcedCasterId && !char.isDead()
+                );
+                
+                if (heartCaster) {
+                    // Heart Debuff allows targeting:
+                    // 1. The heart caster themselves (Elphelt)
+                    // 2. The debuffed character's own allies (same team as debuffed character)
+                    // 3. Self (handled above)
+                    
+                    const targetTeam = target.isAI ? 'ai' : 'player';
+                    const debuffedCharacterTeam = caster.isAI ? 'ai' : 'player';
+                    
+                    const isTargetingHeartCaster = (target === heartCaster);
+                    const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
+                    const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
+                    
+                    console.log(`[AI Heart Debuff] ${caster.name} with heart debuff checking target ${target.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
+                    
+                    if (!isValidHeartDebuffTarget) {
+                        console.log(`[AI Heart Debuff] Blocking target ${target.name} - not the heart caster or debuffed character's ally`);
+                        return false; // Heart Debuff prevents targeting this character
+                    }
+                }
+            }
+            
             return true;
         };
 
@@ -1823,6 +2012,17 @@ class GameManager {
                 break;
             case 'ally':
                 possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Exclude self
+                break;
+            case 'ally_except_self':
+                // New target type: Can target allies but not self
+                possibleTargets = allAIChars.filter(c => c.id !== aiChar.id); // Exclude self
+                break;
+            case 'enemy_or_ally_except_self':
+                // New target type: Can target both enemies and allies but not self
+                possibleTargets = [
+                    ...allPlayerChars, // All enemies
+                    ...allAIChars.filter(c => c.id !== aiChar.id) // All allies except self
+                ];
                 break;
             case 'ally_or_self':
                 // Include all AI allies plus self - prioritize injured targets for healing
@@ -1850,6 +2050,7 @@ class GameManager {
                 ];
                 break;
             case 'all_enemies':
+            case 'aoe_enemy': // Support for AOE enemy targeting
             case 'two_random_enemies': // Support for two random enemies
             case 'three_random_enemies': // Support for three random enemies
             case 'random_enemy': // Support for random enemy
@@ -1864,6 +2065,11 @@ class GameManager {
                 break;
             case 'single_enemy': // Support for single enemy targeting
                 possibleTargets = allPlayerChars; // Enemy targets
+                break;
+            case 'ally_or_enemy':
+                // New target type: Can target both allies and enemies
+                // Used for Schoolgirl Elphelt's Love Bullet with Healing Shot talent
+                possibleTargets = [...allPlayerChars, ...allAIChars];
                 break;
             default:
                 console.error(` [AI Planner] Unknown target type '${selectedAbility.targetType}'`);
@@ -1922,7 +2128,7 @@ class GameManager {
         }
 
         // Handle AoE abilities - target the whole group
-        if (selectedAbility.targetType === 'all_enemies') {
+        if (selectedAbility.targetType === 'all_enemies' || selectedAbility.targetType === 'aoe_enemy') {
             selectedTarget = allPlayerChars; // Pass the array
         } else if (selectedAbility.targetType === 'all_allies') {
             selectedTarget = allAIChars; // Pass the array
@@ -2097,7 +2303,7 @@ class GameManager {
            
            if (targetType === 'self') {
                finalTargetInfo = caster.isDead() ? null : caster;
-           } else if (targetType === 'enemy' || targetType === 'ally') {
+           } else if (targetType === 'enemy' || targetType === 'ally' || targetType === 'ally_or_enemy') {
                // Planned target was a single object
                const singleTarget = targetInfo;
                if (singleTarget && !singleTarget.isDead()) {
@@ -2115,7 +2321,7 @@ class GameManager {
                } else {
                    // Attempt to find a new random target if the original is dead
                    console.log(`[AI Execute] Original target ${singleTarget?.name} invalid. Retargeting for ${ability.name}...`);
-                   if (targetType === 'enemy') {
+                   if (targetType === 'enemy' || targetType === 'ally_or_enemy') {
                        const potentialEnemies = this.gameManager.gameState.playerCharacters.filter(p => !p.isDead());
                        if (potentialEnemies.length > 0) finalTargetInfo = potentialEnemies[Math.floor(Math.random() * potentialEnemies.length)];
                        
@@ -4584,6 +4790,46 @@ class GameManager {
                 return false;
             }
             
+            // Check for Heart Debuff forced targeting restrictions on the caster
+            if (caster && caster.forcedTargeting && caster.forcedTargeting.type === 'heart_debuff') {
+                const forcedCasterId = caster.forcedTargeting.casterId;
+                
+                // Allow self-targeting always
+                if (target === caster) {
+                    return true;
+                }
+                
+                // Find the heart caster
+                const allCharacters = [
+                    ...this.gameManager.gameState.playerCharacters,
+                    ...this.gameManager.gameState.aiCharacters
+                ];
+                const heartCaster = allCharacters.find(char => 
+                    (char.instanceId || char.id) === forcedCasterId && !char.isDead()
+                );
+                
+                if (heartCaster) {
+                    // Heart Debuff allows targeting:
+                    // 1. The heart caster themselves (Elphelt)
+                    // 2. The debuffed character's own allies (same team as debuffed character)
+                    // 3. Self (handled above)
+                    
+                    const targetTeam = target.isAI ? 'ai' : 'player';
+                    const debuffedCharacterTeam = caster.isAI ? 'ai' : 'player';
+                    
+                    const isTargetingHeartCaster = (target === heartCaster);
+                    const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
+                    const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
+                    
+                    console.log(`[AI Heart Debuff] ${caster.name} with heart debuff checking target ${target.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
+                    
+                    if (!isValidHeartDebuffTarget) {
+                        console.log(`[AI Heart Debuff] Blocking target ${target.name} - not the heart caster or debuffed character's ally`);
+                        return false; // Heart Debuff prevents targeting this character
+                    }
+                }
+            }
+            
             return true;
         };
 
@@ -4672,6 +4918,46 @@ class GameManager {
                 // The target is untargetable because an enemy is forcing targeting
                 // This means we can only target allies/self for support abilities
                 return false;
+            }
+            
+            // Check for Heart Debuff forced targeting restrictions on the caster
+            if (caster && caster.forcedTargeting && caster.forcedTargeting.type === 'heart_debuff') {
+                const forcedCasterId = caster.forcedTargeting.casterId;
+                
+                // Allow self-targeting always
+                if (target === caster) {
+                    return true;
+                }
+                
+                // Find the heart caster
+                const allCharacters = [
+                    ...this.gameManager.gameState.playerCharacters,
+                    ...this.gameManager.gameState.aiCharacters
+                ];
+                const heartCaster = allCharacters.find(char => 
+                    (char.instanceId || char.id) === forcedCasterId && !char.isDead()
+                );
+                
+                if (heartCaster) {
+                    // Heart Debuff allows targeting:
+                    // 1. The heart caster themselves (Elphelt)
+                    // 2. The debuffed character's own allies (same team as debuffed character)
+                    // 3. Self (handled above)
+                    
+                    const targetTeam = target.isAI ? 'ai' : 'player';
+                    const debuffedCharacterTeam = caster.isAI ? 'ai' : 'player';
+                    
+                    const isTargetingHeartCaster = (target === heartCaster);
+                    const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
+                    const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
+                    
+                    console.log(`[AI Heart Debuff] ${caster.name} with heart debuff checking target ${target.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
+                    
+                    if (!isValidHeartDebuffTarget) {
+                        console.log(`[AI Heart Debuff] Blocking target ${target.name} - not the heart caster or debuffed character's ally`);
+                        return false; // Heart Debuff prevents targeting this character
+                    }
+                }
             }
             
             return true;
@@ -4828,7 +5114,7 @@ class GameManager {
             
             if (targetType === 'self') {
                 finalTargetInfo = caster.isDead() ? null : caster;
-            } else if (targetType === 'enemy' || targetType === 'single_enemy' || targetType === 'ally' || targetType === 'ally_or_self') {
+            } else if (targetType === 'enemy' || targetType === 'single_enemy' || targetType === 'ally' || targetType === 'ally_or_self' || targetType === 'ally_or_enemy') {
                 // Planned target was a single object
                 const singleTarget = targetInfo;
                 if (singleTarget && typeof singleTarget.isDead === 'function' && !singleTarget.isDead()) { // Added type check for isDead
@@ -4846,7 +5132,7 @@ class GameManager {
                 } else {
                     // Attempt to find a new random target if the original is dead
                     console.log(`[AI Execute] Original target ${singleTarget?.name} invalid. Retargeting for ${ability.name}...`);
-                    if (targetType === 'enemy' || targetType === 'single_enemy') {
+                    if (targetType === 'enemy' || targetType === 'single_enemy' || targetType === 'ally_or_enemy') {
                         const potentialEnemies = gameState.playerCharacters.filter(p => !p.isDead());
                         if (potentialEnemies.length > 0) finalTargetInfo = potentialEnemies[Math.floor(Math.random() * potentialEnemies.length)];
                         
@@ -6019,7 +6305,9 @@ class GameManager {
             if (siegfriedPassiveElement) {
                 const buffCount = character.buffs.length;
                 if (buffCount > 0) {
-                    const bonusDamage = buffCount * 125;
+                    // Use the passive handler's damagePerBuff property (can be modified by talents)
+                    const damagePerBuff = character.passiveHandler?.damagePerBuff || character.passiveHandler?.bonusPerBuff || 125;
+                    const bonusDamage = buffCount * damagePerBuff;
                     
                     // Track previous value to detect changes
                     const previousValue = siegfriedPassiveElement.getAttribute('data-value');
@@ -6049,7 +6337,7 @@ class GameManager {
                     siegfriedPassiveElement.appendChild(suffixElem);
                     
                     // Enhanced tooltip with buff details
-                    let tooltipText = `Buff Connoisseur: +${bonusDamage} Physical Damage from ${buffCount} active buff${buffCount > 1 ? 's' : ''}`;
+                    let tooltipText = `Buff Connoisseur: +${bonusDamage} Physical Damage from ${buffCount} active buff${buffCount > 1 ? 's' : ''} (${damagePerBuff} per buff)`;
                     
                     // Add buff list to tooltip if there are buffs
                     if (buffCount > 0) {
@@ -6292,6 +6580,48 @@ class GameManager {
                 if (character.isUntargetable && character.isUntargetable()) return false;
                 if (character.isUntargetableByEnemyForcing && character.isUntargetableByEnemyForcing()) return false;
                 
+                // Check for Heart Debuff forced targeting restrictions on the caster
+                if (selectedChar && selectedChar.forcedTargeting && selectedChar.forcedTargeting.type === 'heart_debuff') {
+                    const forcedCasterId = selectedChar.forcedTargeting.casterId;
+                    console.log(`[Heart Debuff UI] ${selectedChar.name} has heart debuff, checking target ${character.name}...`);
+                    
+                    // Allow self-targeting always
+                    if (character === selectedChar) {
+                        console.log(`[Heart Debuff UI] Allowing self-targeting for ${selectedChar.name}`);
+                        return true;
+                    }
+                    
+                    // Find the heart caster
+                    const allCharacters = [
+                        ...this.gameManager.gameState.playerCharacters,
+                        ...this.gameManager.gameState.aiCharacters
+                    ];
+                    const heartCaster = allCharacters.find(char => 
+                        (char.instanceId || char.id) === forcedCasterId && !char.isDead()
+                    );
+                    
+                    if (heartCaster) {
+                        // Heart Debuff allows targeting:
+                        // 1. The heart caster themselves (Elphelt)
+                        // 2. The debuffed character's own allies (same team as debuffed character)
+                        // 3. Self (handled above)
+                        
+                        const targetTeam = character.isAI ? 'ai' : 'player';
+                        const debuffedCharacterTeam = selectedChar.isAI ? 'ai' : 'player';
+                        
+                        const isTargetingHeartCaster = (character === heartCaster);
+                        const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
+                        const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
+                        
+                        console.log(`[Heart Debuff UI] Target ${character.name} (${targetTeam}), Debuffed ${selectedChar.name} (${debuffedCharacterTeam}), Heart Caster ${heartCaster.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
+                        
+                        if (!isValidHeartDebuffTarget) {
+                            console.log(`[Heart Debuff UI] Blocking target ${character.name} - not the heart caster or debuffed character's ally`);
+                            return false; // Heart Debuff prevents targeting this character
+                        }
+                    }
+                }
+                
                 return true;
             };
             
@@ -6365,6 +6695,51 @@ class GameManager {
                         });
                            }
                            break;
+                    
+                case 'ally_except_self':
+                    if (isPlayerCaster) {
+                        playerChars.forEach((el) => {
+                            if (!el.classList.contains('selected') && isValidTarget(el)) {
+                                el.classList.add('valid-target');
+                                el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
+                            }
+                        });
+                        aiChars.forEach(function(el) {
+                            el.classList.add('invalid-target');
+                            el.style.cursor = 'not-allowed';
+                        });
+                    } else {
+                        aiChars.forEach((el) => {
+                            if (!el.classList.contains('selected') && isValidTarget(el)) {
+                                el.classList.add('valid-target');
+                                el.style.cursor = 'pointer';
+                            } else {
+                                el.classList.add('invalid-target');
+                                el.style.cursor = 'not-allowed';
+                            }
+                        });
+                        playerChars.forEach(function(el) {
+                            el.classList.add('invalid-target');
+                            el.style.cursor = 'not-allowed';
+                        });
+                    }
+                    break;
+                    
+                case 'enemy_or_ally_except_self':
+                    // For abilities that can target both allies and enemies but not self (like Love Bullet with Healing Shot)
+                    document.querySelectorAll('.character-slot').forEach((el) => {
+                        if (!el.classList.contains('selected') && isValidTarget(el)) {
+                            el.classList.add('valid-target');
+                            el.style.cursor = 'pointer';
+                        } else {
+                            el.classList.add('invalid-target');
+                            el.style.cursor = 'not-allowed';
+                        }
+                    });
+                    break;
                     
                 case 'ally_or_self':
                     if (isPlayerCaster) {
@@ -6516,6 +6891,19 @@ class GameManager {
                         if (isValidTarget(el)) {
                             el.classList.add('valid-target');
                             el.classList.add('aoe-target');
+                            el.style.cursor = 'pointer';
+                        } else {
+                            el.classList.add('invalid-target');
+                            el.style.cursor = 'not-allowed';
+                        }
+                    });
+                    break;
+                    
+                case 'ally_or_enemy':
+                    // For abilities that can target both allies and enemies (like Love Bullet with Healing Shot)
+                    document.querySelectorAll('.character-slot').forEach((el) => {
+                        if (isValidTarget(el)) {
+                            el.classList.add('valid-target');
                             el.style.cursor = 'pointer';
                         } else {
                             el.classList.add('invalid-target');
@@ -7023,6 +7411,12 @@ class GameManager {
             // Add passive description - USE UPDATED DESCRIPTION FROM HANDLER
             const passiveDescription = document.createElement('div');
             passiveDescription.classList.add('passive-description');
+            
+            // Add special class for Siegfried's passive to enable enhanced styling
+            if (character.id === 'schoolboy_siegfried') {
+                passiveDescription.classList.add('siegfried-passive');
+            }
+            
             let currentPassiveDesc = character.passive.description;
             // If passive handler exists and has an updated description, use that
             if (character.passiveHandler && typeof character.passiveHandler.description === 'string') {
@@ -7032,6 +7426,15 @@ class GameManager {
             else if (character.id === 'bridget' && typeof character.updatePassiveDescription === 'function') {
                  character.updatePassiveDescription(); // Ensure description reflects talents
                  currentPassiveDesc = character.passive.description;
+            }
+            // Update Elphelt's passive description for talents
+            else if (character.id === 'schoolgirl_elphelt' && typeof window.updateElpheltPassiveDescriptionForTalents === 'function') {
+                currentPassiveDesc = window.updateElpheltPassiveDescriptionForTalents(character);
+                // Also update the character's passive object
+                if (character.passive) {
+                    character.passive.description = currentPassiveDesc;
+                }
+                console.log(`[UIManager] Updated Elphelt passive description for talents: ${currentPassiveDesc}`);
             }
             
             // Use innerHTML to render potential talent spans

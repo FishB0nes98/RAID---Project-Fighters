@@ -1,5 +1,140 @@
 # Project Fighters - Changelog
 
+## Patch 0.3 - Bug Fixes
+*Released: [Current Date]*
+
+### Bug Fixes
+
+#### 🐰 Farmer Alice - Pounce (Q)
+**Rationale**: Pounce was not applying its stun effect and needed to be more impactful as a crowd control ability.
+
+**Changes**:
+- **Fixed**: Pounce now correctly applies stun effects as intended
+- **Stun Duration**: Increased from **1 → 2 turns**
+- **Stun Chance**: Remains 85%
+
+**Impact**: Farmer Alice is now a more viable tank/disruptor option with reliable crowd control that can remove enemies from combat for extended periods.
+
+#### 🌊 Bridget - Complete Balance Overhaul
+**Rationale**: Bridget was overpowered with excessive damage output, low ability costs, and oppressive passive healing. This rebalancing focuses her as a hybrid damage/support character while reducing her overall power level.
+
+**Changes**:
+- **Base Magical Damage**: Reduced from **222 → 195**
+- **Aqua Life Essence (Passive)**: Healing scaling reduced from **22% → 16%** of damage dealt
+- **Ribbon Wave Rush (Q)**:
+  - Cooldown reduced from **2 → 1** turn
+  - Mana cost increased from **30 → 55** mana  
+  - Base damage reduced from **365 → 120**
+  - Damage scaling increased from **85% → 100%** Magical Damage
+- **Bubble Beam Barrage (W)**: Mana cost reduced from **100 → 90** mana
+- **Arcane Bubble Shield (E)**: Mana cost reduced from **200 → 90** mana
+- **Fixed**: Bubble Arsenal from Arcane Bubble Shield now correctly triggers passive healing when dealing damage
+
+**Impact**: Bridget becomes more active in combat with Q available every turn, but significantly less oppressive overall. The ~27% reduction in passive healing and lower total damage output per Q cast creates better counterplay opportunities while maintaining her hybrid role. Reduced mana costs on W and E abilities improve her accessibility and resource management options.
+
+#### 🎯 Farmer Nina - Balance Adjustments & Bug Fixes
+**Rationale**: Farmer Nina had several critical issues: her Hiding ability was healing far too much due to a calculation bug, the ability was too accessible with low cooldown, and her passive was completely non-functional due to missing system integration.
+
+**Changes**:
+- **Hiding (W)**:
+  - Cooldown increased from **5 → 8 turns**
+  - **Critical Bug Fix**: Healing was incorrectly calculated as 10% of Max HP (~698 HP per turn) instead of the intended fixed 350 HP per turn
+  - Now correctly heals exactly **350 HP per turn** as described
+- **Piercing Shot (R)**: Cooldown reduced from **15 → 12 turns**
+- **Evasive Adaptability (Passive)**:
+  - **Major Bug Fix**: Passive was completely broken due to missing registration in the character system
+  - Now correctly provides **5% dodge chance per active buff**
+  - Added modern visual indicator system with lightning bolt icon and dodge percentage display
+  - Indicator positioned in lower-left corner of character image with clean, professional styling
+
+**Impact**: Nina's power level is significantly reduced with the Hiding nerf, removing an overpowered healing exploit while making the ability more strategic with longer cooldown. The Piercing Shot buff provides better ultimate accessibility. Most importantly, her passive now functions as intended, making her much more survivable when using buff abilities like Hiding, creating meaningful synergy between her abilities.
+
+#### 🐱 Farmer Cham Cham - Balance Adjustments
+**Rationale**: Farmer Cham Cham needed power level adjustments to improve her Q ability availability while reducing the strength of her self-buffs and ultimate abilities for better balance.
+
+**Ability Changes:**
+- **Scratch (Q)**: Cooldown: 2 turns → **1 turn**, Mana Cost: 30 → **40**
+- **Leap (W)**: Cooldown: 10 turns → **8 turns**, Dodge Chance buff: 50% → **25%**, Physical Damage buff: 50% → **25%**  
+- **Boomerang (E)**: Cooldown: 6 turns → **5 turns**, Damage scaling: 250% → **185%** Physical Damage
+- **Feral Strike (R)**: Mana Cost: 100 → **125**, Cooldown: 16 turns → **14 turns**
+
+**Impact**: Cham Cham becomes more accessible with Q available every turn, balanced by higher mana cost. Her defensive and offensive buffs are significantly reduced but last the same duration, requiring more strategic use. Boomerang becomes more frequent but less powerful, while Feral Strike is more expensive but available sooner, encouraging better mana management and creating more balanced team fights.
+
+#### ⚡ Farmer Raiden - Passive Nerf
+**Rationale**: Farmer Raiden's passive was too powerful, providing significant damage output while completely bypassing magical shield defenses. This change reduces his passive damage while making it respect defensive stats.
+
+**Changes:**
+- **Zap Passive:** Damage scaling reduced from **100% → 60%** Magical Damage
+- **Zap Passive:** No longer ignores magical shield (now affected by target's magical shield)
+- **Lightning Mastery Talent:** Updated scaling from **200% → 120%** Magical Damage to maintain talent effectiveness
+
+**Impact**: Farmer Raiden's passive damage output is significantly reduced, making him less oppressive while still maintaining his unique zap mechanic. The removal of magical shield bypass means tanky magical characters can better survive his passive procs, creating more strategic counterplay options.
+
+#### ⚾ Schoolboy Shoma - Balance Adjustments
+**Rationale**: Schoolboy Shoma's Boink ability provided unlimited crit chance scaling which could become overpowered in longer battles. The ball types needed individual balancing to create more meaningful choices, while Catch needed to be more expensive to reflect its powerful defensive utility.
+
+**Changes**:
+- **Boink (Q)**: Removed crit chance increase effect (no longer has 50% chance to permanently increase crit chance by 5%)
+- **Ball Throw (W)**:
+  - **Grass Ball**: Base healing increased from **450 → 500** HP
+  - **Water Ball**: Cooldown increased from **3 → 2 turns** (Water Ball only)
+- **Catch! (E)**: Mana cost increased from **65 → 90** mana
+
+**Impact**: Removing the crit chance scaling prevents Shoma from becoming overpowered in extended battles while maintaining his core identity. The Grass Ball buff makes it more appealing as a healing option, while the Water Ball cooldown reduction increases its utility as an AoE damage choice. The Catch mana increase makes the powerful 85% dodge buff more expensive to use strategically.
+
+#### 🐺 Renée - Balance Adjustments
+**Rationale**: Renée's Wolf Claw Strike was dealing excessive damage against high-HP targets due to the max HP scaling, making her disproportionately powerful against tanky enemies. The ability frequency has been increased to maintain overall damage output. Lunar Curse's extended debuff duration was too punishing, especially in prolonged fights.
+
+**Changes:**
+- **Wolf Claw Strike (Q)**:
+  - ❌ **Removed** max HP scaling (no longer deals +1% of target's max HP)
+  - 🔻 **Base damage**: 700 → 585 physical damage  
+  - ⚡ **Cooldown**: 3 → 1 turn
+- **Lunar Curse (R)**:
+  - 🔻 **Mana cost**: 120 → 100 mana
+  - ⏱️ **Debuff duration**: 2 → 1 turn (Lunar Mark debuff)
+
+**Impact**: Renée's damage against high-HP targets is significantly reduced, creating more balanced matchups against tanks while maintaining her identity as a sustained damage dealer through improved ability frequency. The Lunar Curse changes make the ability more accessible and less oppressive, encouraging more frequent use while reducing the punishment window for opponents.
+
+#### 🦋 Schoolgirl Ayane - Balance Adjustments
+**Rationale**: Schoolgirl Ayane needed improvements to her consistency and accessibility. The Butterfly Dagger proc rate was too unreliable, Butterfly Trail had excessive cooldown for a team buff, and Execute Attack was too expensive while suffering from cooldown reset bugs.
+
+**Changes Made:**
+- **Butterfly Dagger (Q)**: Increased dodge buff chance from **40% → 60%**
+- **Butterfly Trail (W)**: Reduced cooldown from **9 → 7** turns  
+- **Execute Attack (R)**: Reduced mana cost from **200 → 100**, reduced cooldown from **15 → 12** turns, **fixed cooldown reset mechanism**
+
+**Impact**: The increased proc rate on Butterfly Dagger makes Ayane more reliable in combat with better defensive utility. The reduced Butterfly Trail cooldown allows for more frequent team support, making her a better team player. Execute Attack becomes more accessible with lower costs while maintaining its high-risk/high-reward nature, and the fixed cooldown reset ensures the ability works as intended when securing kills.
+
+#### 🌟 Zoey - Reliability Improvements
+**Rationale**: Zoey's chance-based mechanics on her W and E abilities created frustrating RNG scenarios where abilities could completely fail, making her unreliable in competitive play. Removing fail chances makes her more consistent while maintaining her unique mechanics.
+
+**Changes:**
+- **Heart Pounce (W)**: Removed 50% failure chance - ability now always succeeds
+- **Sparkle Burst (E)**: Removed 50% hit chance per target - ability now hits all enemies
+- **Strawberry Bell Burst (Q)**: Cooldown reduced from **4 → 1** turn
+- **Base Stats**: Magical Damage reduced from **300 → 162**
+
+**Impact**: Zoey becomes significantly more reliable and viable in competitive scenarios. Players can now count on her abilities working consistently, while she retains her unique damage scaling and cooldown reduction mechanics. This change transforms her from a high-risk, high-reward character to a more balanced and dependable option.
+
+#### 🚜 Farmer Shoma - Balance Adjustments
+**Rationale**: Farmer Shoma needed adjustments to create better ability flow while reducing the power of his ultimate ability. The Q ability was underused due to its cooldown, while his ultimate was too powerful for its frequency.
+
+**Changes**:
+- **Home Run Smash (Q)**: 
+  - Cooldown reduced from **2 → 1 turn**
+  - Base damage increased from **235 → 315**
+  - Mighty Swing talent damage increased from **455 → 495** (maintaining talent scaling)
+- **Apple Throw (W)**: 
+  - Mana cost increased from **45 → 60**
+- **Cottage Run (R)**: 
+  - Healing reduced from **50% → 35%** missing HP
+  - Perfect Dodge duration reduced from **4 → 3 turns**
+
+**Impact**: Home Run Smash becomes more accessible with 1-turn cooldown, encouraging more active gameplay. Apple Throw requires better mana management with higher cost. Cottage Run remains powerful but with reduced healing and dodge duration for better counterplay opportunities.
+
+---
+
 ## Patch 0.2.1 - Infernal Ibuki Hotfix Buffs
 *Released: [Current Date]*
 
@@ -176,4 +311,7 @@ The Heavy Ball buff specifically addresses feedback that the debuff duration was
 - Updated ball selection UI to reflect new Heavy Ball duration
 
 ---
+
+
+
 

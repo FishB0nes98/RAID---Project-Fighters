@@ -723,17 +723,54 @@ class Character {
         // <<< NEW: Apply Siegfried's Passive Bonus >>>
         if (this.id === 'schoolboy_siegfried' && this.passiveHandler) {
             const buffCount = this.buffs.length;
-            const bonusPerBuff = 125; // +125 Physical Damage per buff
-            const passiveBonus = buffCount * bonusPerBuff;
+            // Use the passive's damagePerBuff property (can be modified by talents)
+            const bonusPerBuff = this.passiveHandler.damagePerBuff || this.passiveHandler.bonusPerBuff || 125;
+            let totalPassiveBonus = buffCount * bonusPerBuff;
             
-            if (passiveBonus > 0) {
+            console.log(`[RecalcStats - Siegfried Passive] Base passive damage: ${buffCount} buffs × ${bonusPerBuff} = ${totalPassiveBonus}`);
+            
+            // Add ally buff damage bonus if Ally's Strength talent is active
+            let allyBuffBonus = 0;
+            if (this.passiveHandler.allyBuffDamageBonus > 0) {
+                try {
+                    console.log(`[RecalcStats - Siegfried Ally Strength] Ally buff damage bonus: ${this.passiveHandler.allyBuffDamageBonus}`);
+                    
+                    let allies = [];
+                    if (window.gameManager && typeof window.gameManager.getAllies === 'function') {
+                        allies = window.gameManager.getAllies(this).filter(ally => ally.id !== this.id && ally.instanceId !== this.instanceId);
+                    } else if (window.gameManager && window.gameManager.playerCharacters) {
+                        // Fallback: get all player characters
+                        allies = window.gameManager.playerCharacters.filter(char => char && char.id !== this.id && char.instanceId !== this.instanceId);
+                    }
+                    
+                    console.log(`[RecalcStats - Siegfried Ally Strength] Found ${allies.length} allies:`, allies.map(a => a.name));
+                    
+                    const allyBuffCount = allies.reduce((count, ally) => {
+                        if (ally.id !== this.id && ally.instanceId !== this.instanceId) { // Exclude Siegfried's own buffs
+                            const allyBuffs = ally.buffs ? ally.buffs.length : 0;
+                            console.log(`[RecalcStats - Siegfried Ally Strength] ${ally.name} has ${allyBuffs} buffs`);
+                            return count + allyBuffs;
+                        }
+                        return count;
+                    }, 0);
+                    
+                    allyBuffBonus = allyBuffCount * this.passiveHandler.allyBuffDamageBonus;
+                    totalPassiveBonus += allyBuffBonus;
+                    
+                    console.log(`[RecalcStats - Siegfried Ally Strength] Total ally buffs: ${allyBuffCount}, bonus damage per buff: ${this.passiveHandler.allyBuffDamageBonus}, total ally buff bonus: +${allyBuffBonus} Physical Damage`);
+                } catch (error) {
+                    console.error(`[RecalcStats - Siegfried Ally Strength] Error calculating ally buff bonus:`, error);
+                }
+            }
+            
+            if (totalPassiveBonus > 0) {
                 const originalPhysicalDamage = this.stats.physicalDamage;
-                this.stats.physicalDamage += passiveBonus;
-                console.log(`[RecalcStats - Siegfried Passive] Applied +${passiveBonus} Physical Damage for ${buffCount} buffs. Total: ${this.stats.physicalDamage}`);
+                this.stats.physicalDamage += totalPassiveBonus;
+                console.log(`[RecalcStats - Siegfried Passive] Applied +${totalPassiveBonus} Physical Damage (${buffCount} own buffs + ally buffs). Total: ${this.stats.physicalDamage}`);
                 
                 // Track passive statistics when buff count changes
                 if (window.trackBuffConnoisseurStats) {
-                    window.trackBuffConnoisseurStats(this, buffCount, passiveBonus);
+                    window.trackBuffConnoisseurStats(this, buffCount, totalPassiveBonus);
                 }
             }
         }
@@ -746,6 +783,49 @@ class Character {
             console.log(`[RecalcStats - Julia Passive] Applied +${passiveBonus} Physical Damage from healing empowerment. Total: ${this.stats.physicalDamage}`);
         }
         // <<< END NEW >>>
+        
+        // === TALENT PERSISTENCE SYSTEM ===
+        // Talents should already be baked into baseStats via TalentManager.applyStatModification()
+        // No need to reapply them during recalculateStats() as this would cause stacking
+        if (this.appliedTalents && this.appliedTalents.length > 0) {
+            console.log(`[RecalcStats] Talent effects for ${this.name} are already in baseStats: ${this.appliedTalents.join(', ')}`);
+            
+            // Only update ability descriptions if needed, without reapplying stat modifications
+            if (this.id === 'schoolgirl_elphelt' && typeof window.updateElpheltAbilityDescriptionsForTalents === 'function') {
+                window.updateElpheltAbilityDescriptionsForTalents(this);
+                console.log(`[RecalcStats] Updated Elphelt ability descriptions for active talents`);
+            }
+            
+            // For Schoolboy Siegfried
+            if (this.id === 'schoolboy_siegfried') {
+                // Lion's Resonance (Tier 7) - Lion Protection stack extra chance
+                if (this.appliedTalents.includes('lion_protection_resonance')) {
+                    this.lionProtectionExtraChance = 0.20; // 20% chance for extra stacks
+                    console.log(`[RecalcStats] Reapplied Lion's Resonance: 20% extra stack chance`);
+                }
+            }
+            
+            // Apply other character-specific talent persistence here as needed
+            // This ensures that all stat-modifying talents persist through recalculations
+
+            // === Julia Flourishing Spirits ===
+            if (this.id === 'schoolgirl_julia') {
+                if (this.lateHealBoostPercent && !this.lateHealBoostApplied) {
+                    if (window.gameManager && window.gameManager.gameState && window.gameManager.gameState.turn >= 11) {
+                        const boost = this.lateHealBoostPercent;
+                        this.baseStats.healingPower = (this.baseStats.healingPower || 0) + boost;
+                        this.stats.healingPower = this.baseStats.healingPower;
+                        this.lateHealBoostApplied = true;
+                        console.log(`[RecalcStats] Applied Julia Flourishing Spirits: +${boost*100}% Healing Power`);
+                    }
+                }
+            }
+        }
+        
+        // Update ability descriptions if talents affect them
+        if (this.id === 'schoolboy_siegfried' && typeof window.updateSiegfriedAbilityDescriptions === 'function') {
+            window.updateSiegfriedAbilityDescriptions(this);
+        }
     }
 
     // Add an ability to the character
@@ -1086,6 +1166,11 @@ class Character {
         // Update UI after ability use
         if (window.updateCharacterUI) {
             window.updateCharacterUI(this);
+        }
+        
+        // Check Tactical Patience after ability use
+        if (success && typeof window.checkTacticalPatience === 'function' && this.id === 'schoolboy_siegfried') {
+            window.checkTacticalPatience(this);
         }
         
         return success;
@@ -1855,6 +1940,35 @@ class Character {
 
         // Check if character is dead
         if (this.isDead()) {
+            // Fire CharacterWouldDie event before death processing to allow interception (like Ultimate Sacrifice)
+            const wouldDieEvent = new CustomEvent('CharacterWouldDie', {
+                detail: {
+                    character: this,
+                    finalDamage: actualDamageTaken,
+                    originalDamage: amount,
+                    damageType: type,
+                    caster: caster,
+                    prevented: false // Can be set to true by event handlers to prevent death
+                },
+                cancelable: true
+            });
+            
+            console.log(`[CharacterWouldDie] Firing event for ${this.name} before death processing`);
+            document.dispatchEvent(wouldDieEvent);
+            
+            // Check if death was prevented by an event handler
+            if (wouldDieEvent.detail.prevented || wouldDieEvent.defaultPrevented) {
+                console.log(`[CharacterWouldDie] Death prevented for ${this.name} by event handler`);
+                // Exit early, don't process death
+                return {
+                    actualAmount: actualDamageTaken,
+                    actualHPDamage: actualHPDamage,
+                    actualShieldDamage: actualShieldDamage,
+                    isCritical: isCritical,
+                    deathPrevented: true
+                };
+            }
+            
             // Play death animation, sound, remove character, etc.
             // Use instanceId if available, otherwise fallback to id
             const elementIdForDeath = this.instanceId || this.id;
@@ -1883,7 +1997,7 @@ class Character {
             const critBonusPerHit = 0.02; // <-- MODIFIED: Reduced from 0.05 to 0.02
             this.critDamageFromTakingDamageBonus += critBonusPerHit;
             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
-            log(`${this.name}'s Pain into Power activates! +${critBonusPerHit * 100}% Crit Damage gained. Total bonus: ${(this.critDamageFromTakingDamageBonus * 100).toFixed(1)}%`, 'talent-effect');
+            log(`${this.name}'s Pain into Power activates! +${critBonusPerHit * 100}% Crit Damage gained. Total bonus: ${(this.critDamageFromTakingDamageBonus * 100).toFixed(1)}`, 'talent-effect');
             // Recalculate stats to apply the new crit damage immediately
             this.recalculateStats('pain_into_power_triggered'); 
             
@@ -1926,6 +2040,22 @@ class Character {
                 console.log(`[Event Dispatch] Firing legacy damageDealt event`);
                 document.dispatchEvent(damageEvent);
             }
+        }
+        
+        // Dispatch CharacterDamaged event for passive abilities
+        if (actualDamageTaken > 0) {
+            const characterDamagedEvent = new CustomEvent('CharacterDamaged', {
+                detail: {
+                    character: this,
+                    damage: actualDamageTaken,
+                    damageType: type,
+                    caster: caster,
+                    isCritical: isCritical
+                }
+            });
+            
+            console.log(`[Event Dispatch] Firing CharacterDamaged event for ${this.name}: ${actualDamageTaken} damage`);
+            document.dispatchEvent(characterDamagedEvent);
         }
         
         // --- NEW: Stun removal mechanic (70% chance when taking damage) ---
@@ -2237,6 +2367,28 @@ class Character {
             }
         }
         // --- END NEW: Mana Infusion Talent ---
+        
+        // --- NEW: Guardian's Link Talent (Siegfried) ---
+        if (!options.isPassiveHealing && window.gameManager) {
+            try {
+                const allies = window.gameManager.getAllies ? window.gameManager.getAllies(this) : [];
+                allies.forEach(ally => {
+                    if (ally && ally !== this && ally.healOnAllyHealed && ally.healOnAllyHealed > 0) {
+                        const linkHealAmount = Math.floor(actualHealAmount * ally.healOnAllyHealed);
+                        if (linkHealAmount > 0) {
+                            ally.heal(linkHealAmount, ally, { isPassiveHealing: true });
+                            if (window.gameManager.addLogEntry) {
+                                const percent = Math.round(ally.healOnAllyHealed * 100);
+                                window.gameManager.addLogEntry(`🤝 Guardian's Link: ${ally.name} is healed for ${linkHealAmount} (${percent}% of ally heal).`, 'talent-effect');
+                            }
+                        }
+                    }
+                });
+            } catch (glErr) {
+                console.error('[GuardianLink] Error applying linked heal:', glErr);
+            }
+        }
+        // --- END NEW: Guardian's Link Talent ---
         
         // --- MODIFIED: Check options before playing VFX and add critical class --- 
         if (!options.suppressDefaultVFX) {
@@ -2708,6 +2860,11 @@ class Character {
             electricSwirl.className = 'rain-heal-electric-swirl';
             rainHealContainer.appendChild(electricSwirl);
             
+            // Create wind trail effect
+            const windTrail = document.createElement('div');
+            windTrail.className = 'wind-healing-trail';
+            rainHealContainer.appendChild(windTrail);
+            
             // Play generated rain healing sound
             this.generateRainHealSound();
             
@@ -3009,6 +3166,30 @@ class Character {
             this.updateShield();
         }
 
+        // --- NEW: Flat heal on buff received talent (Lionheart Regrowth) ---
+        if (buffAppliedSuccessfully && this.healOnBuffReceivedFlat && this.healOnBuffReceivedFlat > 0) {
+            const healRes = this.heal(this.healOnBuffReceivedFlat, this, { abilityId: 'lionheart_regrowth' });
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`🦁 ${this.name} heals for ${healRes.healAmount} HP from Lionheart Regrowth!`, 'talent-effect healing');
+            }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Trigger Siegfried's ally buff calculation ---
+        if (buffAppliedSuccessfully && window.gameManager) {
+            const allies = window.gameManager.getAllies(this);
+            const siegfried = allies.find(ally => ally.id === 'schoolboy_siegfried' && ally.passiveHandler && ally.passiveHandler.allyBuffDamageBonus > 0);
+            if (siegfried && siegfried.id !== this.id) {
+                console.log(`[Ally Buff Added] Triggering Siegfried's recalculation due to ${this.name} gaining a buff`);
+                siegfried.recalculateStats('ally_buff_added');
+                // Also update Siegfried's passive description
+                if (siegfried.passiveHandler && typeof siegfried.passiveHandler.updateDescription === 'function') {
+                    siegfried.passiveHandler.updateDescription();
+                }
+            }
+        }
+        // --- END NEW ---
+
         // Return the status of applying the *original* buff
         return buffAppliedSuccessfully; 
     }
@@ -3144,6 +3325,21 @@ class Character {
             // NEW: Update shield after removing buff
             this.updateShield();
 
+            // --- NEW: Trigger Siegfried's ally buff calculation ---
+            if (window.gameManager) {
+                const allies = window.gameManager.getAllies(this);
+                const siegfried = allies.find(ally => ally.id === 'schoolboy_siegfried' && ally.passiveHandler && ally.passiveHandler.allyBuffDamageBonus > 0);
+                if (siegfried && siegfried.id !== this.id) {
+                    console.log(`[Ally Buff Removed] Triggering Siegfried's recalculation due to ${this.name} losing a buff`);
+                    siegfried.recalculateStats('ally_buff_removed');
+                    // Also update Siegfried's passive description
+                    if (siegfried.passiveHandler && typeof siegfried.passiveHandler.updateDescription === 'function') {
+                        siegfried.passiveHandler.updateDescription();
+                    }
+                }
+            }
+            // --- END NEW ---
+
             updateCharacterUI(this); // Update UI after all operations
             return true;
         }
@@ -3237,6 +3433,42 @@ class Character {
                 console.error(`Error executing onTurnStart passive for ${this.name}:`, error);
             }
         }
+        
+        // --- Purifying Resolve Talent (Siegfried) ---
+        if (this.id === 'schoolboy_siegfried' && this.purifyingResolveChance && this.purifyingResolveChance > 0) {
+            if (this.debuffs.length > 0) { // Only try if there are debuffs
+                const purifyChance = Math.random();
+                if (purifyChance < this.purifyingResolveChance) {
+                    const removedDebuffs = this.debuffs.length;
+                    const debuffNames = this.debuffs.map(d => d.name || d.id).join(', ');
+                    
+                    // Remove all debuffs
+                    this.debuffs.forEach(debuff => {
+                        if (typeof debuff.onRemove === 'function') {
+                            try {
+                                debuff.onRemove(this);
+                            } catch (error) {
+                                console.error(`Error executing onRemove for debuff ${debuff.name || debuff.id}:`, error);
+                            }
+                        }
+                    });
+                    this.debuffs = [];
+                    
+                    // Show VFX and log entry
+                    this.showPurifyingResolveVFX();
+                    
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`✨ ${this.name}'s Purifying Resolve cleanses all debuffs! (${debuffNames})`, 'talent-effect utility');
+                    
+                    // Force stats recalculation after debuff removal
+                    this.recalculateStats('purifying_resolve_cleanse');
+                    
+                    console.log(`[Purifying Resolve] ${this.name} cleansed ${removedDebuffs} debuffs (${(this.purifyingResolveChance * 100).toFixed(0)}% chance)`);
+                }
+            }
+        }
+        // --- END Purifying Resolve ---
+        
         // --- END Passive Hook ---
 
         // Process buffs first
@@ -3939,6 +4171,95 @@ class Character {
         }
     }
 
+    showPurifyingResolveVFX() {
+        try {
+            const characterElement = document.getElementById(`character-${this.instanceId || this.id}`);
+            if (!characterElement) {
+                console.warn(`Could not find character element for ${this.id} to show Purifying Resolve VFX`);
+                return;
+            }
+
+            // Create purifying light effect
+            const purifyingLight = document.createElement('div');
+            purifyingLight.className = 'purifying-resolve-vfx';
+            purifyingLight.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 120px;
+                height: 120px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 215, 0, 0.7), transparent);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                animation: purifyingResolveActivation 2s ease-out forwards;
+            `;
+
+            characterElement.appendChild(purifyingLight);
+
+            // Create cleansing particles
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'purifying-resolve-particle';
+                particle.style.cssText = `
+                    position: absolute;
+                    width: 8px;
+                    height: 8px;
+                    background: radial-gradient(circle, #FFD700, #FFF);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 1001;
+                    left: ${40 + Math.random() * 20}%;
+                    top: ${40 + Math.random() * 20}%;
+                    animation: purifyingResolveParticle ${1.5 + Math.random() * 0.5}s ease-out forwards;
+                `;
+                
+                characterElement.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 2000);
+            }
+
+            // Create floating text
+            const purifyText = document.createElement('div');
+            purifyText.className = 'purifying-resolve-text';
+            purifyText.textContent = '✨ PURIFIED ✨';
+            purifyText.style.cssText = `
+                position: absolute;
+                top: 20%;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #FFD700;
+                font-weight: bold;
+                font-size: 14px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.8);
+                pointer-events: none;
+                z-index: 1002;
+                animation: purifyingResolveText 2s ease-out forwards;
+            `;
+
+            characterElement.appendChild(purifyText);
+
+            // Remove main VFX elements after animations complete
+            setTimeout(() => {
+                [purifyingLight, purifyText].forEach(element => {
+                    if (element.parentNode) {
+                        element.parentNode.removeChild(element);
+                    }
+                });
+            }, 2000);
+
+            console.log(`[Purifying Resolve VFX] Displayed cleansing effects for ${this.name}`);
+        } catch (error) {
+            console.error('[Purifying Resolve VFX] Error:', error);
+        }
+    }
+
     /**
      * Universal Damage Redirection Framework
      * Integrates with the game's natural armor/magic shield calculations
@@ -4076,6 +4397,17 @@ class Ability {
     reduceCooldown() {
         if (this.currentCooldown > 0) {
             this.currentCooldown -= 1;
+            
+            // Check for Tactical Patience when cooldown changes
+            if (this.currentCooldown === 0 && typeof window.checkTacticalPatience === 'function') {
+                // Find the character this ability belongs to
+                const siegfried = window.gameManager?.gameState?.playerCharacters?.find(char => 
+                    char.id === 'schoolboy_siegfried' && char.abilities?.some(ab => ab === this)
+                );
+                if (siegfried) {
+                    window.checkTacticalPatience(siegfried);
+                }
+            }
         }
     }
 
@@ -4727,6 +5059,33 @@ const CharacterFactory = {
             console.log('[CharacterFactory] ShadowfinPassive class not found. typeof ShadowfinPassive:', typeof ShadowfinPassive);
         }
         // --- END SHADOWFIN PASSIVE ---
+        // --- ADD FARMER NINA PASSIVE ---
+        else if (passiveId === 'farmer_nina_passive') {
+            console.log('[CharacterFactory] Found Farmer Nina passive, returning custom handler');
+            // Return a simple class that handles the passive
+            return class FarmerNinaPassive {
+                constructor(character) {
+                    this.character = character;
+                    this.id = 'farmer_nina_passive';
+                    this.name = 'Evasive Adaptability';
+                    this.description = 'Nina gains 5% dodge chance for each buff active on her.';
+                    this.initialize();
+                }
+                
+                initialize() {
+                    // Initialize the evasive adaptability system
+                    if (typeof initializeEvasiveAdaptabilityPassive === 'function') {
+                        initializeEvasiveAdaptabilityPassive();
+                    }
+                    
+                    // Apply initial passive effect
+                    if (typeof updateNinaDodgeFromBuffs === 'function') {
+                        updateNinaDodgeFromBuffs(this.character);
+                    }
+                }
+            };
+        }
+        // --- END FARMER NINA PASSIVE ---
         // --- END RENEE PASSIVE ---
         // --- END NEW ---
         // --- ADD ATLANTEAN SUB ZERO PASSIVE ---
@@ -5008,9 +5367,33 @@ const AbilityFactory = {
                 }
             }
             // Ensure description is generated if a custom method was attached or if it's missing
-            if (typeof registeredAbility.generateDescription === 'function' && (!registeredAbility.description || registeredAbility.description === registeredAbility.baseDescription) ) {
-                console.log(`[AbilityFactory] Calling generateDescription for ${abilityData.id}`);
-                 registeredAbility.generateDescription();
+            // The goal is to ensure generateDescription runs once AFTER baseDescription is solidly set.
+            // However, the generic Ability.prototype.generateDescription is very basic.
+            // Character-specific generateDescription methods are needed for talent text.
+
+            // Try to attach character-specific generateDescription if available
+            if (typeof window.getReneeAbilityGenerateDescription === 'function' && abilityData.id.startsWith('renee_')) {
+                const customGenerateDescription = window.getReneeAbilityGenerateDescription(abilityData.id);
+                if (customGenerateDescription) {
+                    console.log(`[AbilityFactory] Attaching Renée-specific generateDescription to registered ${abilityData.id}`);
+                    registeredAbility.generateDescription = customGenerateDescription;
+                     // Call it once to initialize the description with potential talent text structure
+                    registeredAbility.generateDescription();
+                } else {
+                    console.warn(`[AbilityFactory] Could not get Renée-specific generateDescription for ${abilityData.id}`);
+                    // If no custom one, and if a description was in abilityData, ensure it's processed.
+                     if (abilityData.description && typeof registeredAbility.setDescription === 'function') {
+                        registeredAbility.setDescription(abilityData.description); //This will use the (potentially generic) generateDescription
+                    } else if (typeof registeredAbility.generateDescription === 'function') {
+                        registeredAbility.generateDescription();
+                    }
+                }
+            } else if (abilityData.description && typeof registeredAbility.setDescription === 'function') {
+                // For non-Renée abilities or if Renée's specific generator isn't found
+                 registeredAbility.setDescription(abilityData.description);
+            } else if (typeof registeredAbility.generateDescription === 'function') {
+                // Fallback if no description in data but generateDescription exists
+                registeredAbility.generateDescription();
             }
 
             console.log(`[AbilityFactory] ${abilityData.id} final state - description: "${registeredAbility.description}"`);
@@ -5282,18 +5665,8 @@ const AbilityFactory = {
                  }
             }
             
-            // Handle specific character passive triggers (like Shoma's crit chance increase)
+            // Handle specific character passive triggers
             // This should ideally be moved to a more structured passive system/event listener
-            if (abilityData.id === 'boink' && caster.id === 'schoolboy_shoma') {
-                if (Math.random() < 0.50) { // 50% chance
-                    // Increase crit chance via talent stat modification structure
-                    caster.applyStatModification('critChance', 'add', 0.05); 
-                    caster.recalculateStats(); // Recalculate stats immediately
-                    log(`${caster.name}'s focus sharpens! Crit Chance increased by 5%!`);
-                    // Need to update UI if stats change mid-turn
-                    if (window.updateCharacterUI) window.updateCharacterUI(caster);
-                }
-            }
 
             // Check death after applying effects
             if (target.isDead()) {

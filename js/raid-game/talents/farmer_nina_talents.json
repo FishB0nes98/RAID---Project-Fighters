@@ -14,7 +14,14 @@
                 "operation": "multiply",
                 "value": 2
             },
-            "children": ["aoe_target_lock", "evasive_hiding"]
+            "children": [
+                "aoe_target_lock",
+                "evasive_hiding"
+            ],
+            "position": {
+                "x": 1060,
+                "y": 70
+            }
         },
         "aoe_target_lock": {
             "id": "aoe_target_lock",
@@ -29,8 +36,17 @@
                 "property": "affectAllEnemies",
                 "value": true
             },
-            "parents": ["deadly_precision"],
-            "children": ["piercing_rounds", "enhanced_ammunition"]
+            "parents": [
+                "deadly_precision"
+            ],
+            "children": [
+                "piercing_rounds",
+                "enhanced_ammunition"
+            ],
+            "position": {
+                "x": 1260,
+                "y": 190
+            }
         },
         "evasive_hiding": {
             "id": "evasive_hiding",
@@ -45,8 +61,17 @@
                 "property": "grantsDodgeChance",
                 "value": 0.5
             },
-            "parents": ["deadly_precision"],
-            "children": ["critical_dodge", "critical_recuperation"]
+            "parents": [
+                "deadly_precision"
+            ],
+            "children": [
+                "critical_dodge",
+                "critical_recuperation"
+            ],
+            "position": {
+                "x": 880,
+                "y": 190
+            }
         },
         "critical_recuperation": {
             "id": "critical_recuperation",
@@ -61,9 +86,17 @@
                 "property": "enableCriticalHidingHeal",
                 "value": true
             },
-            "parents": ["evasive_hiding"],
-            "children": ["critical_power", "pinpointing_weakness"],
-            "position": {"x": -100, "y": 225}
+            "parents": [
+                "evasive_hiding"
+            ],
+            "children": [
+                "critical_power",
+                "pinpointing_weakness"
+            ],
+            "position": {
+                "x": 650,
+                "y": 190
+            }
         },
         "piercing_rounds": {
             "id": "piercing_rounds",
@@ -78,8 +111,18 @@
                 "property": "piercingChance",
                 "value": 0.1
             },
-            "parents": ["aoe_target_lock"],
-            "children": ["bloodthirst", "deadeye", "armor_ignore"]
+            "parents": [
+                "aoe_target_lock"
+            ],
+            "children": [
+                "bloodthirst",
+                "deadeye",
+                "armor_ignore"
+            ],
+            "position": {
+                "x": 1740,
+                "y": 190
+            }
         },
         "enhanced_ammunition": {
             "id": "enhanced_ammunition",
@@ -94,8 +137,16 @@
                 "property": "baseDamage",
                 "value": 600
             },
-            "parents": ["aoe_target_lock"],
-            "children": ["critical_dodge"]
+            "parents": [
+                "aoe_target_lock"
+            ],
+            "children": [
+                "critical_dodge"
+            ],
+            "position": {
+                "x": 1420,
+                "y": 290
+            }
         },
         "armor_ignore": {
             "id": "armor_ignore",
@@ -110,9 +161,17 @@
                 "property": "armorIgnoreChance",
                 "value": 0.15
             },
-            "parents": ["piercing_rounds"],
-            "children": ["extended_protection", "physical_growth"],
-            "position": {"x": -150, "y": -455}
+            "parents": [
+                "piercing_rounds"
+            ],
+            "children": [
+                "extended_protection",
+                "physical_growth"
+            ],
+            "position": {
+                "x": 1980,
+                "y": 70
+            }
         },
         "bloodthirst": {
             "id": "bloodthirst",
@@ -127,8 +186,17 @@
                 "operation": "add",
                 "value": 0.15
             },
-            "parents": ["piercing_rounds"],
-            "children": ["extended_protection", "deadly_retreat"]
+            "parents": [
+                "piercing_rounds"
+            ],
+            "children": [
+                "extended_protection",
+                "deadly_retreat"
+            ],
+            "position": {
+                "x": 1740,
+                "y": 420
+            }
         },
         "deadeye": {
             "id": "deadeye",
@@ -143,8 +211,16 @@
                 "operation": "add",
                 "value": 0.1
             },
-            "parents": ["piercing_rounds"],
-            "children": ["physical_growth"]
+            "parents": [
+                "piercing_rounds"
+            ],
+            "children": [
+                "physical_growth"
+            ],
+            "position": {
+                "x": 2210,
+                "y": 190
+            }
         },
         "extended_protection": {
             "id": "extended_protection",
@@ -158,8 +234,17 @@
                 "property": "buffDurationExtension",
                 "value": 2
             },
-            "parents": ["bloodthirst"],
-            "children": ["enhanced_target_lock", "damage_to_mana"]
+            "parents": [
+                "bloodthirst"
+            ],
+            "children": [
+                "enhanced_target_lock",
+                "damage_to_mana"
+            ],
+            "position": {
+                "x": 1740,
+                "y": 640
+            }
         },
         "deadly_retreat": {
             "id": "deadly_retreat",
@@ -174,8 +259,16 @@
                 "property": "enablePostHidingDamageBuff",
                 "value": true
             },
-            "parents": ["bloodthirst"],
-            "children": ["physical_growth"]
+            "parents": [
+                "bloodthirst"
+            ],
+            "children": [
+                "physical_growth"
+            ],
+            "position": {
+                "x": 1970,
+                "y": 290
+            }
         },
         "enhanced_target_lock": {
             "id": "enhanced_target_lock",
@@ -190,8 +283,16 @@
                 "property": "damageAmpPercent",
                 "value": 30
             },
-            "parents": ["extended_protection"],
-            "children": ["armor_breach"]
+            "parents": [
+                "extended_protection"
+            ],
+            "children": [
+                "armor_breach"
+            ],
+            "position": {
+                "x": 1740,
+                "y": 830
+            }
         },
         "damage_to_mana": {
             "id": "damage_to_mana",
@@ -205,8 +306,16 @@
                 "property": "damageToManaPercent",
                 "value": 0.02
             },
-            "parents": ["extended_protection"],
-            "children": ["armor_breach"]
+            "parents": [
+                "extended_protection"
+            ],
+            "children": [
+                "armor_breach"
+            ],
+            "position": {
+                "x": 2030,
+                "y": 650
+            }
         },
         "armor_breach": {
             "id": "armor_breach",
@@ -221,8 +330,17 @@
                 "property": "reducesArmorBy",
                 "value": 0.05
             },
-            "parents": ["enhanced_target_lock", "damage_to_mana"],
-            "children": ["unshakeable_focus"]
+            "parents": [
+                "enhanced_target_lock",
+                "damage_to_mana"
+            ],
+            "children": [
+                "unshakeable_focus"
+            ],
+            "position": {
+                "x": 2030,
+                "y": 830
+            }
         },
         "critical_dodge": {
             "id": "critical_dodge",
@@ -236,8 +354,17 @@
                 "property": "enableDodgeCriticalBuff",
                 "value": true
             },
-            "parents": ["evasive_hiding", "enhanced_ammunition"],
-            "children": ["critical_power"]
+            "parents": [
+                "evasive_hiding",
+                "enhanced_ammunition"
+            ],
+            "children": [
+                "critical_power"
+            ],
+            "position": {
+                "x": 1420,
+                "y": 630
+            }
         },
         "physical_growth": {
             "id": "physical_growth",
@@ -251,8 +378,18 @@
                 "property": "enablePhysicalGrowth",
                 "value": true
             },
-            "parents": ["deadeye", "deadly_retreat"],
-            "children": ["critical_power", "focused_precision"]
+            "parents": [
+                "deadeye",
+                "deadly_retreat"
+            ],
+            "children": [
+                "critical_power",
+                "focused_precision"
+            ],
+            "position": {
+                "x": 2210,
+                "y": 420
+            }
         },
         "focused_precision": {
             "id": "focused_precision",
@@ -267,9 +404,16 @@
                 "property": "damageScalingPercent",
                 "value": 0.75
             },
-            "parents": ["physical_growth"],
-            "children": ["pain_into_power"],
-            "position": { "x": 300, "y": 375}
+            "parents": [
+                "physical_growth"
+            ],
+            "children": [
+                "pain_into_power"
+            ],
+            "position": {
+                "x": 2420,
+                "y": 420
+            }
         },
         "critical_power": {
             "id": "critical_power",
@@ -283,9 +427,17 @@
                 "property": "enableCriticalPowerBuff",
                 "value": true
             },
-            "parents": ["critical_dodge", "physical_growth"],
-            "children": ["deadly_accuracy"],
-            "position": { "x": -325, "y": 375}
+            "parents": [
+                "critical_dodge",
+                "physical_growth"
+            ],
+            "children": [
+                "deadly_accuracy"
+            ],
+            "position": {
+                "x": 1880,
+                "y": 520
+            }
         },
         "unshakeable_focus": {
             "id": "unshakeable_focus",
@@ -301,8 +453,14 @@
                 "property": "permanentAndStackingTargetLock",
                 "value": true
             },
-            "parents": ["armor_breach"],
-            "children": []
+            "parents": [
+                "armor_breach"
+            ],
+            "children": [],
+            "position": {
+                "x": 2340,
+                "y": 830
+            }
         },
         "deadly_accuracy": {
             "id": "deadly_accuracy",
@@ -317,9 +475,16 @@
                 "operation": "add",
                 "value": 0.2
             },
-            "parents": ["critical_power"],
-            "children": ["bullet_rain"],
-            "position": { "x": -200, "y": 375}
+            "parents": [
+                "critical_power"
+            ],
+            "children": [
+                "bullet_rain"
+            ],
+            "position": {
+                "x": 1880,
+                "y": 1080
+            }
         },
         "bullet_rain": {
             "id": "bullet_rain",
@@ -334,9 +499,14 @@
                 "property": "enableBulletRain",
                 "value": true
             },
-            "parents": ["deadly_accuracy"],
+            "parents": [
+                "deadly_accuracy"
+            ],
             "children": [],
-            "position": { "x": 0, "y": 450}
+            "position": {
+                "x": 1430,
+                "y": 1080
+            }
         },
         "pain_into_power": {
             "id": "pain_into_power",
@@ -351,9 +521,14 @@
                 "property": "enablePainIntoPower",
                 "value": true
             },
-            "parents": ["focused_precision"],
+            "parents": [
+                "focused_precision"
+            ],
             "children": [],
-            "position": { "x": 300, "y": 450}
+            "position": {
+                "x": 2630,
+                "y": 420
+            }
         },
         "pinpointing_weakness": {
             "id": "pinpointing_weakness",
@@ -368,9 +543,17 @@
                 "property": "appliesDodgeReduction",
                 "value": true
             },
-            "parents": ["critical_recuperation"],
-            "children": ["debuff_exploitation", "cleanse_on_hiding"],
-            "position": { "x": -178, "y": 450}
+            "parents": [
+                "critical_recuperation"
+            ],
+            "children": [
+                "debuff_exploitation",
+                "cleanse_on_hiding"
+            ],
+            "position": {
+                "x": 650,
+                "y": 320
+            }
         },
         "debuff_exploitation": {
             "id": "debuff_exploitation",
@@ -384,9 +567,16 @@
                 "property": "damagePerDebuff",
                 "value": 0.1
             },
-            "parents": ["pinpointing_weakness"],
-            "children": ["rural_resourcefulness"],
-            "position": { "x": -600, "y": 520}
+            "parents": [
+                "pinpointing_weakness"
+            ],
+            "children": [
+                "rural_resourcefulness"
+            ],
+            "position": {
+                "x": 650,
+                "y": 470
+            }
         },
         "cleanse_on_hiding": {
             "id": "cleanse_on_hiding",
@@ -401,9 +591,16 @@
                 "property": "cleanseDebuffsOnActivation",
                 "value": true
             },
-            "parents": ["pinpointing_weakness"],
-            "children": ["rural_resourcefulness"],
-            "position": { "x": -120, "y": 520}
+            "parents": [
+                "pinpointing_weakness"
+            ],
+            "children": [
+                "rural_resourcefulness"
+            ],
+            "position": {
+                "x": 880,
+                "y": 450
+            }
         },
         "rural_resourcefulness": {
             "id": "rural_resourcefulness",
@@ -419,9 +616,15 @@
                 "property": "enableFarmResources",
                 "value": true
             },
-            "parents": ["debuff_exploitation", "cleanse_on_hiding"],
+            "parents": [
+                "debuff_exploitation",
+                "cleanse_on_hiding"
+            ],
             "children": [],
-            "position": { "x": -350, "y": 600}
+            "position": {
+                "x": 770,
+                "y": 670
+            }
         }
     }
-} 
+}

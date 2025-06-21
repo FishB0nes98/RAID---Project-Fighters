@@ -49,7 +49,7 @@
                     "magicalShieldBonus": "50%"
                 }
             },
-            "description": "Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 3 turns.",
+            "description": "Heals for 10% of missing health (scales with Healing Power). Gains 50% bonus Armor and Magical Shield for 3 turns. Can be enhanced by talents.",
             "icon": "Icons/abilities/lion_protection.jfif"
         },
         {
@@ -59,7 +59,7 @@
             "manaCost": 100,
             "cooldown": 9,
             "targetType": "self",
-            "description": "Siegfried blesses his sword, gaining 15% Lifesteal and 200 Physical Damage for 6 turns.",
+            "description": "Siegfried blesses his sword, applying two separate buffs: Blessed Lifesteal (15% Lifesteal) and Blessed Damage (200 Physical Damage) for 6 turns each.",
             "icon": "Icons/abilities/sword_blessing.jfif"
         },
         {

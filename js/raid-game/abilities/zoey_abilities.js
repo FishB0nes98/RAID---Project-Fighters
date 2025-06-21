@@ -195,34 +195,18 @@ function updateHeartPounceDescription(ability, character = null) {
     console.log('[Zoey] Character found:', character?.name, 'Has improved talent:', character?.enableImprovedHeartPounce, 'Has combo talent:', character?.enableFelineCombo, 'Has enhanced talent:', character?.enableEnhancedHeartPounce);
     
     // Build description based on talents
-    let description = 'Zoey jumps onto an enemy. It has ';
-    
-    // Hit chance based on Improved Heart Pounce talent
-    if (character && character.enableImprovedHeartPounce) {
-        description += '60% chance to be successful (improved from 50% by talent)';
-    } else {
-        description += '50% chance to be successful';
-    }
+    let description = 'Zoey jumps onto an enemy, dealing ';
     
     // Damage scaling based on Enhanced Heart Pounce talent
     if (character && character.enableEnhancedHeartPounce) {
-        description += '. If successful, she deals 855 + (125% Magical damage + 50% Physical damage + 50% Magical damage) to the target';
+        description += '855 + (125% Magical damage + 50% Physical damage + 50% Magical damage) to the target';
     } else {
-        description += '. If successful, she deals 855 + (125% Magical damage) to the target';
+        description += '855 + (125% Magical damage) to the target';
     }
     
     // Add Feline Combo description if character has it
     if (character && character.enableFelineCombo) {
-        description += '. When successful, has 35% chance to reset its cooldown and allow another action without ending the turn';
-    }
-    
-    description += '. If it fails, Zoey receives a debuff that reduces her armor and magic shield to 0 for ';
-    
-    // Duration based on Improved Heart Pounce talent
-    if (character && character.enableImprovedHeartPounce) {
-        description += '2 turns (reduced from 5 by talent)';
-    } else {
-        description += '5 turns';
+        description += '. Has 35% chance to reset its cooldown and allow another action without ending the turn';
     }
     
     description += '.';
@@ -244,16 +228,7 @@ function updateSparkleburstDescription(ability, character = null) {
     console.log('[Zoey] Character found:', character?.name, 'Has improved talent:', character?.enableImprovedSparkleburst, 'Has sparkle pounce talent:', character?.enableSparklePounce);
     
     // Build description based on talents
-    let description = 'Zoey unleashes a burst of sparkles with ';
-    
-    // Hit chance based on Improved Sparkle Burst talent
-    if (character && character.enableImprovedSparkleburst) {
-        description += '80% hit chance for each enemy (improved from 50% by talent)';
-    } else {
-        description += '50% hit chance for each enemy';
-    }
-    
-    description += '. Deals 200% Magical Damage to all enemies hit. This ability\'s cooldown is reduced for each enemy hit';
+    let description = 'Zoey unleashes a burst of sparkles, dealing 200% Magical Damage to all enemies. This ability\'s cooldown is reduced for each enemy hit';
     
     // Add Sparkle Pounce description if character has it
     if (character && character.enableSparklePounce) {
@@ -544,18 +519,11 @@ function executeHeartPounce(caster, target, abilityInstance) {
             addLogEntry: (msg, className) => { console.log(msg); }
         };
         
-        // Determine hit chance based on talents
-        let hitChance = 0.5; // Base 50% chance
-        if (caster.enableImprovedHeartPounce) {
-            hitChance = 0.6; // Improved to 60% with talent
-        }
+        // Heart Pounce always succeeds now
+        const isSuccessful = true;
         
-        // Roll for hit success
-        const hitRoll = Math.random();
-        const isSuccessful = hitRoll < hitChance;
-        
-        // Add log entry for the attempt
-        gameManager.addLogEntry(`${caster.name} pounces at ${target.name}...`, 'zoey player-turn');
+        // Add log entry for the attack
+        gameManager.addLogEntry(`${caster.name} pounces at ${target.name}!`, 'zoey player-turn');
         
         // Show the VFX
         showHeartPounceVFX(caster, target, isSuccessful);
@@ -657,23 +625,6 @@ function executeHeartPounce(caster, target, abilityInstance) {
                         }
                     }
                     
-                } else {
-                    // Failed pounce - apply vulnerability debuff to Zoey
-                    gameManager.addLogEntry(`${caster.name}'s Heart Pounce misses! She becomes vulnerable...`, 'zoey player-turn');
-                    
-                    // Track failed Heart Pounce
-                    if (window.trackHeartPounceStats) {
-                        window.trackHeartPounceStats(caster, target, null, false, caster.enableEnhancedHeartPounce, false);
-                    }
-                    
-                    // Determine debuff duration based on talents
-                    let debuffDuration = 5; // Base 5 turns
-                    if (caster.enableImprovedHeartPounce) {
-                        debuffDuration = 2; // Reduced to 2 turns with talent
-                    }
-                    
-                    // Apply vulnerability debuff to caster
-                    applyHeartPounceVulnerability(caster, debuffDuration);
                 }
                 
                 // Create explicit ability used event
@@ -964,11 +915,7 @@ function executeSparkleburst(caster, targets, abilityInstance) {
             targets = [targets];
         }
         
-        // Determine hit chance based on talents
-        let hitChance = 0.5; // Base 50% chance
-        if (caster.enableImprovedSparkleburst) {
-            hitChance = 0.8; // Improved to 80% with talent
-        }
+        // Sparkle Burst now always hits all targets
         
         // Add log entry for the cast
         gameManager.addLogEntry(`${caster.name} unleashes a burst of sparkles at all enemies!`, 'zoey player-turn');
@@ -1010,9 +957,8 @@ function executeSparkleburst(caster, targets, abilityInstance) {
                     
                     const target = targets[index];
                     
-                    // Roll for hit success
-                    const hitRoll = Math.random();
-                    const isHit = hitRoll < hitChance;
+                    // Sparkle Burst always hits
+                    const isHit = true;
                     
                     if (isHit) {
                         hitCount++;
@@ -1097,17 +1043,6 @@ function executeSparkleburst(caster, targets, abilityInstance) {
                                 }, 500);
                             }
                         }
-                    } else {
-                        // Miss
-                        gameManager.addLogEntry(`${caster.name}'s sparkles miss ${target.name}!`, 'zoey player-turn');
-                        
-                        // Track miss statistics
-                        if (window.trackSparkleburstStats) {
-                            window.trackSparkleburstStats(caster, target, null, false, caster.enableImprovedSparkleburst, false);
-                        }
-                        
-                        // Show miss VFX
-                        showSparkleMissVFX(target);
                     }
                     
                     // Process next target after a delay

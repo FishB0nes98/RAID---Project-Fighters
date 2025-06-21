@@ -8,8 +8,8 @@ class BridgetPassiveHandler {
         this.eventListeners = [];
         this.id = 'bridget_passive';
         this.name = 'Aqua Life Essence';
-        this.description = '22% of damage you deal heals a random ally and yourself for the same amount.';
-        this.passiveHealingPercent = 0.22; // Default value of 22%
+        this.description = '16% of damage you deal heals a random ally and yourself for the same amount.';
+        this.passiveHealingPercent = 0.16; // Default value of 16%
         
         // Track talent effects (these will be set by talents when they're applied)
         this.oceanicHarmonyActive = false; // Set by Oceanic Harmony talent
@@ -150,7 +150,7 @@ class BridgetPassiveHandler {
     }
 
     updateDescription() {
-        let description = `Bridget's attacks cause her passive to heal herself for 22% of the damage dealt, and heal a random ally for 22% of the damage dealt.`;
+        let description = `Bridget's attacks cause her passive to heal herself for 16% of the damage dealt, and heal a random ally for 16% of the damage dealt.`;
 
         // Add Oceanic Harmony talent info if active
         if (this.hasOceanicHarmony) {

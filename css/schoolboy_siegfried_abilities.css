@@ -1,6 +1,83 @@
 /* CSS Styles for Schoolboy Siegfried Abilities */
 
-/* Placeholder for future styles */
+/* Siegfried Passive Description Styling */
+.character-stats-menu .passive-description.siegfried-passive {
+    line-height: 1.6;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.character-stats-menu .passive-description.siegfried-passive .talent-effect {
+    display: inline-block;
+    margin: 2px 0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.character-stats-menu .passive-description.siegfried-passive .talent-effect.damage {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 87, 87, 0.1));
+    border-left: 3px solid #ff6b6b;
+    color: #ff4444;
+}
+
+.character-stats-menu .passive-description.siegfried-passive .talent-effect.utility {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(56, 155, 60, 0.1));
+    border-left: 3px solid #4CAF50;
+    color: #388E3C;
+}
+
+.character-stats-menu .passive-description.siegfried-passive .talent-effect.healing {
+    background: linear-gradient(135deg, rgba(102, 187, 106, 0.2), rgba(82, 167, 86, 0.1));
+    border-left: 3px solid #66BB6A;
+    color: #2E7D32;
+}
+
+/* Enhanced styling for the Siegfried passive breakdown */
+.character-stats-menu .passive-description.siegfried-passive .siegfried-passive {
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(50, 50, 50, 0.9));
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.character-stats-menu .passive-description.siegfried-passive .siegfried-passive br {
+    margin: 4px 0;
+    display: block;
+    content: "";
+}
+
+/* Tooltip passive description styling */
+.tooltip-description.siegfried-passive {
+    line-height: 1.5;
+}
+
+.tooltip-description.siegfried-passive .talent-effect {
+    display: block;
+    margin: 4px 0;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid;
+}
+
+.tooltip-description.siegfried-passive .talent-effect.damage {
+    border-left-color: #ff6b6b;
+    color: #ffcccc;
+}
+
+.tooltip-description.siegfried-passive .talent-effect.utility {
+    border-left-color: #4CAF50;
+    color: #ccffcc;
+}
+
+.tooltip-description.siegfried-passive .talent-effect.healing {
+    border-left-color: #66BB6A;
+    color: #ccffdd;
+}
 
 /* New Sword Slash VFX */
 .siegfried-sword-slash {
@@ -42,6 +119,18 @@
         opacity: 0;
         transform: rotate(160deg) scale(1); /* End rotation */
     }
+}
+
+/* Cleave Strike VFX - Modified appearance for secondary strikes */
+.siegfried-sword-slash-vfx.cleave-strike {
+    opacity: 0.7;
+    transform: scale(0.8);
+}
+
+.siegfried-sword-slash-vfx.cleave-strike .siegfried-sword-slash::before {
+    border-top-color: rgba(255, 165, 0, 0.8); /* Orange tint for cleave */
+    box-shadow: 0 0 8px rgba(255, 165, 0, 0.6),
+                inset 0 0 5px rgba(255, 200, 100, 0.4);
 }
 
 /* Physical Impact VFX (keep the old one for impact) */
@@ -93,6 +182,101 @@
     color: #90ee90; /* Light green heal text */
     text-shadow: 0 0 4px #000000, 0 0 6px #32cd32; /* Black and green shadow */
     font-size: 1.1em;
+}
+
+/* --- Shared Blessing VFX --- */
+.shared-blessing-beam {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+    box-shadow: 0 0 10px #FFD700, 0 0 20px #FFA500;
+    z-index: 100;
+    animation: shared-blessing-beam 1s ease-out forwards;
+}
+
+@keyframes shared-blessing-beam {
+    0% {
+        width: 0;
+        opacity: 1;
+        box-shadow: 0 0 10px #FFD700, 0 0 20px #FFA500;
+    }
+    50% {
+        width: 100%;
+        opacity: 1;
+        box-shadow: 0 0 15px #FFD700, 0 0 30px #FFA500, 0 0 40px #FF8C00;
+    }
+    100% {
+        width: 100%;
+        opacity: 0;
+        box-shadow: 0 0 5px #FFD700;
+    }
+}
+
+.shared-blessing-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 101;
+}
+
+.shared-blessing-impact .blessing-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, rgba(255, 165, 0, 0.3) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: blessing-particles 1.5s ease-out forwards;
+}
+
+.shared-blessing-impact .blessing-glow {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #FFD700, #FFA500, #FF8C00, #FFD700);
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: blessing-glow 1.5s ease-out forwards;
+}
+
+@keyframes blessing-particles {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes blessing-glow {
+    0% {
+        transform: scale(0);
+        opacity: 0.8;
+        box-shadow: 0 0 10px #FFD700;
+    }
+    30% {
+        transform: scale(1.1);
+        opacity: 1;
+        box-shadow: 0 0 20px #FFD700, 0 0 30px #FFA500;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+        box-shadow: 0 0 5px #FFD700;
+    }
 }
 
 /* --- Siegfried Passive Indicator (Complete Redesign) --- */
@@ -743,4 +927,1971 @@
     30% { transform: scale(1.05) translateY(-5px); filter: brightness(1.3) drop-shadow(0 0 8px gold); }
     70% { transform: scale(1.05) translateY(-5px); filter: brightness(1.3) drop-shadow(0 0 8px gold); }
     100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Relentless Strikes VFX */
+.relentless-strikes-vfx {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: relentlessStrikesAnim 2s ease-out forwards;
+    z-index: 100;
+    pointer-events: none;
+}
+
+@keyframes relentlessStrikesAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.3) rotate(5deg);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1) rotate(-2deg);
+    }
+    60% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2) rotate(2deg);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+    }
+}
+
+/* Lion Protection Enhanced VFX */
+.lion-protection-enhanced {
+    position: relative;
+}
+
+.lion-protection-enhanced::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 165, 0, 0.2) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: enhancedLionAura 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes enhancedLionAura {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+}
+
+/* Enhanced healing VFX */
+.lion-protection-enhanced-heal {
+    color: #FFD700 !important;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(255, 165, 0, 0.8);
+}
+
+.lion-protection-enhanced-heal::before {
+    content: '✨ ';
+    color: #FFA500;
+}
+
+/* Cooldown increase indicator */
+.ability.enhanced-cooldown {
+    position: relative;
+}
+
+.ability.enhanced-cooldown::after {
+    content: '+2';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 8px;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: cooldownWarningPulse 2s ease-in-out infinite;
+}
+
+@keyframes cooldownWarningPulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* Enhanced talent effect styling */
+.talent-effect.enhanced-healing {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+    border-left: 3px solid #FFD700;
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+.talent-effect.cooldown-increase {
+    color: #ff9500;
+    font-weight: 600;
+    text-shadow: 0 0 4px rgba(255, 149, 0, 0.3);
+}
+
+/* Enhanced visibility for talent effects in ability descriptions */
+.ability-description .talent-effect {
+    display: inline-block;
+    margin: 2px 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ability-description .talent-effect.healing {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.ability-description .talent-effect.cooldown-increase {
+    background: rgba(255, 149, 0, 0.2);
+    color: #ff9500;
+    border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+.ability-description .talent-effect.damage {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.ability-description .talent-effect.utility {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196F3;
+    border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+/* Tooltip specific styling */
+.tooltip-description .talent-effect {
+    display: inline-block;
+    margin: 1px 2px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+/* Enhanced Lion Protection visual indicator */
+.character-slot.has-enhanced-lion-protection .abilities .ability[data-ability-id="schoolboy_siegfried_w"] {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.character-slot.has-enhanced-lion-protection .abilities .ability[data-ability-id="schoolboy_siegfried_w"]:hover {
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Battle log entry for enhanced lion protection */
+.log-entry.enhanced-lion-protection {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+    border-left: 4px solid #FFD700;
+}
+
+.log-entry.enhanced-lion-protection::before {
+    content: '🦁✨ ';
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* Tooltip enhancement for the talent */
+.tooltip-description .enhanced-lion-protection-effect {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 4px 0;
+}
+
+.enhanced-lion-protection-effect .healing-boost {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.enhanced-lion-protection-effect .cooldown-penalty {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+/* Animation for when the enhanced talent is active */
+@keyframes enhancedTalentActivation {
+    0% {
+        background-color: rgba(255, 215, 0, 0.1);
+        transform: scale(1);
+    }
+    50% {
+        background-color: rgba(255, 215, 0, 0.3);
+        transform: scale(1.02);
+    }
+    100% {
+        background-color: rgba(255, 215, 0, 0.1);
+        transform: scale(1);
+    }
+}
+
+.enhanced-talent-activation {
+    animation: enhancedTalentActivation 0.8s ease-in-out;
+}
+
+/* Empowered Blade talent VFX */
+.empowered-blade-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    z-index: 1003;
+    pointer-events: none;
+    animation: empowered-blade-activation 1.2s ease-out forwards;
+}
+
+.empowered-blade-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.8) 0%, 
+        rgba(255, 69, 0, 0.6) 30%, 
+        rgba(220, 20, 60, 0.4) 60%, 
+        transparent 80%
+    );
+    border-radius: 50%;
+    animation: empowered-blade-glow 1.2s ease-out forwards;
+}
+
+.empowered-blade-vfx::after {
+    content: 'EMPOWERED!';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 4px rgba(255, 215, 0, 0.8),
+        0 0 8px rgba(255, 69, 0, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: empowered-blade-text 1.2s ease-out forwards;
+}
+
+@keyframes empowered-blade-activation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes empowered-blade-glow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes empowered-blade-text {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Critical Blessing talent VFX */
+.critical-blessing-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    z-index: 1003;
+    pointer-events: none;
+    animation: critical-blessing-activation 1.5s ease-out forwards;
+}
+
+.critical-blessing-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: conic-gradient(
+        rgba(138, 43, 226, 0.8) 0deg,
+        rgba(75, 0, 130, 0.6) 90deg,
+        rgba(255, 20, 147, 0.7) 180deg,
+        rgba(138, 43, 226, 0.8) 270deg,
+        rgba(75, 0, 130, 0.6) 360deg
+    );
+    border-radius: 50%;
+    animation: critical-blessing-rotation 1.5s linear forwards;
+}
+
+.critical-blessing-vfx::after {
+    content: '✨ FOCUS ✨';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FF69B4;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 4px rgba(255, 105, 180, 0.8),
+        0 0 8px rgba(138, 43, 226, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: critical-blessing-text 1.5s ease-out forwards;
+}
+
+@keyframes critical-blessing-activation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes critical-blessing-rotation {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) rotate(120deg) scale(1.2);
+        opacity: 0.9;
+    }
+    70% {
+        transform: translate(-50%, -50%) rotate(240deg) scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.3);
+        opacity: 0;
+    }
+}
+
+@keyframes critical-blessing-text {
+    0% {
+        transform: translate(-50%, -50%) scale(0.4);
+        opacity: 0;
+    }
+    25% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+    }
+    75% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Blessed Focus buff visual indicator */
+.blessed-focus-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(45deg, #FF69B4, #8A2BE2);
+    border-radius: 50%;
+    border: 2px solid #FFD700;
+    animation: blessed-focus-pulse 2s ease-in-out infinite;
+    z-index: 1001;
+}
+
+.blessed-focus-indicator::before {
+    content: '⚡';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes blessed-focus-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 5px rgba(255, 105, 180, 0.6);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(255, 105, 180, 0.9);
+    }
+}
+
+/* Empowered damage log entry styling */
+.log-entry.empowered-damage {
+    background: linear-gradient(90deg, 
+        rgba(255, 215, 0, 0.1) 0%, 
+        rgba(255, 69, 0, 0.15) 50%, 
+        rgba(220, 20, 60, 0.1) 100%
+    );
+    border-left: 4px solid #FFD700;
+    color: #FFD700;
+}
+
+.log-entry.empowered-damage::before {
+    content: '⚔️';
+    margin-right: 8px;
+    color: #FF4500;
+    font-weight: bold;
+}
+
+/* Critical blessing log entry styling */
+.log-entry.critical-blessing {
+    background: linear-gradient(90deg, 
+        rgba(255, 105, 180, 0.1) 0%, 
+        rgba(138, 43, 226, 0.15) 50%, 
+        rgba(255, 20, 147, 0.1) 100%
+    );
+    border-left: 4px solid #FF69B4;
+    color: #FF69B4;
+}
+
+.log-entry.critical-blessing::before {
+    content: '✨';
+    margin-right: 8px;
+    color: #8A2BE2;
+    font-weight: bold;
+}
+
+/* Enhanced Sword Slash with empowered blade */
+.siegfried-sword-slash-vfx.empowered {
+    animation: siegfried-empowered-slash 0.8s ease-out forwards;
+}
+
+.siegfried-sword-slash-vfx.empowered::before {
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 215, 0, 0.4) 10%, 
+        rgba(255, 69, 0, 0.9) 30%, 
+        #FFD700 50%, 
+        rgba(255, 69, 0, 0.9) 70%, 
+        rgba(255, 215, 0, 0.4) 90%, 
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 6px rgba(255, 215, 0, 0.9),
+        0 0 12px rgba(255, 69, 0, 0.7),
+        0 0 18px rgba(220, 20, 60, 0.5);
+}
+
+@keyframes siegfried-empowered-slash {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(15deg);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1.3) rotate(-10deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.4) rotate(0deg);
+        opacity: 0;
+    }
+}
+
+/* Talent effect highlighting in ability descriptions */
+.ability-description .talent-effect.empowered-blade {
+    color: #FFD700;
+    background: linear-gradient(90deg, 
+        rgba(255, 215, 0, 0.1) 0%, 
+        rgba(255, 69, 0, 0.15) 100%
+    );
+    padding: 2px 4px;
+    border-radius: 3px;
+    border-left: 3px solid #FFD700;
+}
+
+.ability-description .talent-effect.critical-blessing {
+    color: #FF69B4;
+    background: linear-gradient(90deg, 
+        rgba(255, 105, 180, 0.1) 0%, 
+        rgba(138, 43, 226, 0.15) 100%
+    );
+    padding: 2px 4px;
+    border-radius: 3px;
+    border-left: 3px solid #FF69B4;
+}
+
+/* Tooltip enhancements for new talents */
+.tooltip-description .empowered-blade-effect {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.tooltip-description .critical-blessing-effect {
+    color: #FF69B4;
+    font-weight: bold;
+}
+
+.empowered-blade-effect .damage-boost {
+    color: #FF4500;
+    text-shadow: 0 0 2px rgba(255, 69, 0, 0.6);
+}
+
+.critical-blessing-effect .crit-boost {
+    color: #8A2BE2;
+    text-shadow: 0 0 2px rgba(138, 43, 226, 0.6);
+}
+
+/* Character glow when empowered abilities are available */
+.image-container.empowered-blade-ready {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    transition: box-shadow 0.5s ease-in-out;
+}
+
+.image-container.critical-blessing-ready {
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+    transition: box-shadow 0.5s ease-in-out;
+}
+
+/* Divine Judgment VFX - Enhanced Judgement */
+.divine-judgment-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    z-index: 1002;
+    pointer-events: none;
+    animation: divine-judgment-activation 1.5s ease-out forwards;
+}
+
+.divine-judgment-vfx::before {
+    content: '⚡';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #FFD700;
+    text-shadow: 
+        0 0 10px #FFD700,
+        0 0 20px #FF8C00,
+        0 0 30px #FFD700;
+    animation: divine-judgment-rotation 1.5s ease-out forwards;
+}
+
+.divine-judgment-vfx::after {
+    content: 'DIVINE JUDGMENT!';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 
+        0 0 5px #FFD700,
+        2px 2px 4px rgba(0,0,0,0.8);
+    white-space: nowrap;
+    animation: divine-judgment-text 1.5s ease-out forwards;
+}
+
+@keyframes divine-judgment-activation {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes divine-judgment-rotation {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) rotate(180deg) scale(1.3);
+        opacity: 1;
+    }
+    60% {
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(540deg) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes divine-judgment-text {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    40% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-15px);
+    }
+}
+
+/* Warrior's Foundation VFX - Base damage increase */
+.warrior-foundation-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70px;
+    height: 70px;
+    z-index: 1002;
+    pointer-events: none;
+    animation: warrior-foundation-activation 1.2s ease-out forwards;
+}
+
+.warrior-foundation-vfx::before {
+    content: '💪';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    text-shadow: 
+        0 0 8px #FF6B6B,
+        0 0 16px #FF4444,
+        0 0 24px #FF6B6B;
+    animation: warrior-foundation-pulse 1.2s ease-out forwards;
+}
+
+.warrior-foundation-vfx::after {
+    content: 'WARRIOR\'S FOUNDATION!';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: bold;
+    color: #FF6B6B;
+    text-shadow: 
+        0 0 3px #FF6B6B,
+        1px 1px 2px rgba(0,0,0,0.8);
+    white-space: nowrap;
+    animation: warrior-foundation-text 1.2s ease-out forwards;
+}
+
+@keyframes warrior-foundation-activation {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes warrior-foundation-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes warrior-foundation-text {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(8px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+/* Log entry styles for new talents */
+.log-entry.divine-judgment {
+    background: linear-gradient(90deg, 
+        rgba(255, 215, 0, 0.1) 0%, 
+        rgba(255, 140, 0, 0.1) 50%, 
+        rgba(255, 215, 0, 0.1) 100%);
+    border-left: 3px solid #FFD700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.log-entry.divine-judgment::before {
+    content: '⚡';
+    color: #FFD700;
+    text-shadow: 0 0 5px #FFD700;
+}
+
+.log-entry.warrior-foundation {
+    background: linear-gradient(90deg, 
+        rgba(255, 107, 107, 0.1) 0%, 
+        rgba(255, 68, 68, 0.1) 50%, 
+        rgba(255, 107, 107, 0.1) 100%);
+    border-left: 3px solid #FF6B6B;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+}
+
+.log-entry.warrior-foundation::before {
+    content: '💪';
+    color: #FF6B6B;
+    text-shadow: 0 0 5px #FF6B6B;
+}
+
+/* Tooltip descriptions for new talents */
+.tooltip-description .divine-judgment-effect {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.tooltip-description .warrior-foundation-effect {
+    color: #FF6B6B;
+    font-weight: bold;
+}
+
+.divine-judgment-effect .damage-boost {
+    color: #FFD700;
+}
+
+.warrior-foundation-effect .damage-boost {
+    color: #FF6B6B;
+}
+
+/* Character glow when talents are active */
+.image-container.divine-judgment-ready {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.image-container.warrior-foundation-ready {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+}
+
+/* Enhanced talent effect highlighting in ability descriptions */
+.ability-description .talent-effect.divine-judgment {
+    color: #FFD700;
+    background: linear-gradient(90deg, 
+        rgba(255, 215, 0, 0.1) 0%, 
+        rgba(255, 140, 0, 0.15) 100%
+    );
+    padding: 2px 4px;
+    border-radius: 3px;
+    border-left: 3px solid #FFD700;
+}
+
+.ability-description .talent-effect.warrior-foundation {
+    color: #FF6B6B;
+    background: linear-gradient(90deg, 
+        rgba(255, 107, 107, 0.1) 0%, 
+        rgba(255, 68, 68, 0.15) 100%
+    );
+    padding: 2px 4px;
+    border-radius: 3px;
+    border-left: 3px solid #FF6B6B;
+}
+
+/* Mobile responsiveness for new talent effects */
+@media (max-width: 768px) {
+    .empowered-blade-vfx,
+    .critical-blessing-vfx,
+    .divine-judgment-vfx,
+    .warrior-foundation-vfx {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .empowered-blade-vfx::after,
+    .critical-blessing-vfx::after,
+    .divine-judgment-vfx::after,
+    .warrior-foundation-vfx::after {
+        font-size: 8px;
+    }
+    
+    .blessed-focus-indicator {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .blessed-focus-indicator::before {
+        font-size: 8px;
+    }
 } 
+
+/* === NEW TALENTS VFX === */
+
+/* Mana Efficiency VFX */
+.mana-efficiency-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    z-index: 1002;
+    pointer-events: none;
+    animation: mana-efficiency-activation 1.5s ease-out forwards;
+}
+
+.mana-efficiency-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(64, 224, 255, 0.8) 0%, rgba(0, 191, 255, 0.6) 30%, rgba(30, 144, 255, 0.4) 70%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 20px rgba(64, 224, 255, 0.8),
+        0 0 40px rgba(0, 191, 255, 0.6);
+    animation: mana-efficiency-glow 1.5s ease-out forwards;
+}
+
+.mana-efficiency-vfx::after {
+    content: '🔮 MANA EFFICIENCY';
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #40E0FF;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 5px rgba(64, 224, 255, 0.8),
+        0 0 10px rgba(0, 191, 255, 0.6);
+    animation: mana-efficiency-text 1.5s ease-out forwards;
+}
+
+@keyframes mana-efficiency-activation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1) rotate(360deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes mana-efficiency-glow {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 1;
+        box-shadow: 
+            0 0 30px rgba(64, 224, 255, 1),
+            0 0 60px rgba(0, 191, 255, 0.8);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+        box-shadow: 
+            0 0 40px rgba(64, 224, 255, 0.4),
+            0 0 80px rgba(0, 191, 255, 0.3);
+    }
+}
+
+@keyframes mana-efficiency-text {
+    0% {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+    30% {
+        transform: translateX(-50%) translateY(0px);
+        opacity: 1;
+    }
+    70% {
+        transform: translateX(-50%) translateY(-5px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-10px);
+        opacity: 0;
+    }
+}
+
+/* Relentless Justice VFX */
+.relentless-justice-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        0 0 5px rgba(255, 215, 0, 0.8),
+        0 0 10px rgba(255, 215, 0, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    z-index: 1002;
+    pointer-events: none;
+    animation: relentless-justice-anim 2s ease-out forwards;
+}
+
+.relentless-justice-vfx::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 165, 0, 0.2) 40%, transparent 70%);
+    border: 2px solid rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    animation: relentless-justice-pulse 2s ease-out forwards;
+}
+
+@keyframes relentless-justice-anim {
+    0% {
+        transform: translate(-50%, -50%) translateY(0px) scale(0.8);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) translateY(-10px) scale(1.1);
+        opacity: 1;
+    }
+    60% {
+        transform: translate(-50%, -50%) translateY(-20px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) translateY(-30px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes relentless-justice-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+        border-color: rgba(255, 215, 0, 0.8);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+        border-color: rgba(255, 215, 0, 1);
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0.4;
+        border-color: rgba(255, 215, 0, 0.6);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.6);
+        opacity: 0;
+        border-color: rgba(255, 215, 0, 0.2);
+    }
+}
+
+/* Talent Effect Styling for Descriptions */
+.talent-effect.resource {
+    color: #40E0FF;
+    text-shadow: 0 0 3px rgba(64, 224, 255, 0.6);
+    font-weight: bold;
+}
+
+.talent-effect.mana-efficiency {
+    color: #40E0FF;
+    background: linear-gradient(90deg, rgba(64, 224, 255, 0.1) 0%, rgba(0, 191, 255, 0.1) 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(64, 224, 255, 0.3);
+    font-weight: bold;
+}
+
+.talent-effect.relentless-justice {
+    color: #FFD700;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    font-weight: bold;
+}
+
+/* Log Entry Styling for New Talents */
+.log-entry.mana-efficiency {
+    background: linear-gradient(90deg, rgba(64, 224, 255, 0.1) 0%, rgba(0, 191, 255, 0.05) 100%);
+    border-left: 3px solid #40E0FF;
+    color: #40E0FF;
+}
+
+.log-entry.mana-efficiency::before {
+    content: '🔮';
+    margin-right: 8px;
+}
+
+.log-entry.relentless-justice {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.05) 100%);
+    border-left: 3px solid #FFD700;
+    color: #FFD700;
+}
+
+.log-entry.relentless-justice::before {
+    content: '⚔️';
+    margin-right: 8px;
+}
+
+/* Character Image Glow for Mana Efficiency */
+.image-container.mana-efficiency-ready {
+    box-shadow: 0 0 15px rgba(64, 224, 255, 0.5);
+}
+
+.image-container.mana-efficiency-ready img {
+    filter: drop-shadow(0 0 8px rgba(64, 224, 255, 0.6));
+}
+
+/* Character Image Glow for Relentless Justice */
+.image-container.relentless-justice-ready {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.image-container.relentless-justice-ready img {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Tooltip Styling for New Talents */
+.tooltip-description .mana-efficiency-effect {
+    color: #40E0FF;
+    font-weight: bold;
+}
+
+.tooltip-description .relentless-justice-effect {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.mana-efficiency-effect .resource-boost {
+    color: #40E0FF;
+    font-weight: bold;
+}
+
+.relentless-justice-effect .cooldown-boost {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* Ability Description Styling */
+.ability-description .talent-effect.mana-efficiency {
+    background: linear-gradient(135deg, rgba(64, 224, 255, 0.15) 0%, rgba(0, 191, 255, 0.1) 100%);
+    border: 1px solid rgba(64, 224, 255, 0.4);
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin: 2px 0;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(64, 224, 255, 0.2);
+}
+
+.ability-description .talent-effect.relentless-justice {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin: 2px 0;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(255, 215, 0, 0.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .mana-efficiency-vfx,
+    .relentless-justice-vfx {
+        width: 80px;
+        height: 80px;
+    }
+
+    .mana-efficiency-vfx::before {
+        width: 40px;
+        height: 40px;
+    }
+
+    .mana-efficiency-vfx::after,
+    .relentless-justice-vfx {
+        font-size: 10px;
+    }
+
+    .relentless-justice-vfx::before {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* Purifying Resolve VFX */
+.purifying-resolve-vfx {
+    opacity: 0;
+}
+
+@keyframes purifyingResolveActivation {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    30% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    70% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes purifyingResolveParticle {
+    0% {
+        opacity: 0;
+        transform: scale(0) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1.2) translateY(-40px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-60px);
+    }
+}
+
+@keyframes purifyingResolveText {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    40% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px) scale(0.8);
+    }
+}
+
+.purifying-resolve-text {
+    user-select: none;
+    pointer-events: none;
+}
+
+.talent-effect.purifying-resolve {
+    color: #FFD700;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 0 2px;
+}
+
+.log-entry.purifying-resolve {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 255, 255, 0.05));
+    border-left: 3px solid #FFD700;
+    color: #FFD700;
+}
+
+.log-entry.purifying-resolve::before {
+    content: "✨";
+    margin-right: 5px;
+}
+
+.image-container.purifying-resolve-ready {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.image-container.purifying-resolve-ready img {
+    filter: brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+}
+
+.tooltip-description .purifying-resolve-effect {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.purifying-resolve-effect .utility-boost {
+    color: #4CAF50;
+}
+
+.ability-description .talent-effect.purifying-resolve {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 0 2px;
+}
+
+@media (max-width: 768px) {
+    .purifying-resolve-vfx {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .purifying-resolve-text {
+        font-size: 12px;
+    }
+}
+
+/* Tactical Patience Talent VFX */
+.tactical-patience-activation-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    animation: tacticalPatienceActivation 3s ease-out forwards;
+}
+
+.tactical-patience-activation-vfx .patience-clock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: #FFD700;
+    text-shadow: 0 0 20px #FFD700, 0 0 40px #FFA500;
+    animation: tacticalPatienceClockSpin 2s ease-in-out;
+}
+
+.tactical-patience-activation-vfx .patience-text {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 0 0 10px #FFD700;
+    white-space: nowrap;
+    animation: tacticalPatienceTextReveal 2s ease-out;
+}
+
+.tactical-patience-deactivation-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    animation: tacticalPatienceDeactivation 2s ease-out forwards;
+}
+
+.tactical-patience-deactivation-vfx .patience-fade {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    color: #888;
+    animation: tacticalPatienceFade 2s ease-out;
+}
+
+.tactical-patience-deactivation-vfx .patience-fade-text {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #888;
+    white-space: nowrap;
+    animation: tacticalPatienceFadeText 2s ease-out;
+}
+
+.image-container.tactical-patience-ready {
+    position: relative;
+}
+
+.image-container.tactical-patience-ready img {
+    filter: brightness(1.2) drop-shadow(0 0 15px #FFD700);
+    animation: tacticalPatienceReadyPulse 2s ease-in-out infinite;
+}
+
+.image-container.tactical-patience-ready::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 3px solid #FFD700;
+    border-radius: 50%;
+    animation: tacticalPatienceReadyBorder 2s ease-in-out infinite;
+    z-index: 1;
+}
+
+.image-container.tactical-patience-ready::after {
+    content: '⏰';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 16px;
+    color: #FFD700;
+    text-shadow: 0 0 10px #FFD700;
+    animation: tacticalPatienceReadyIcon 2s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes tacticalPatienceActivation {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+@keyframes tacticalPatienceClockSpin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(90deg) scale(1.2);
+    }
+    75% {
+        transform: translate(-50%, -50%) rotate(270deg) scale(1.2);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) scale(0.8);
+        opacity: 0.7;
+    }
+}
+
+@keyframes tacticalPatienceTextReveal {
+    0% {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-50%) translateY(0px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-10px);
+        opacity: 0;
+    }
+}
+
+@keyframes tacticalPatienceDeactivation {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes tacticalPatienceFade {
+    0% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+}
+
+@keyframes tacticalPatienceFadeText {
+    0% {
+        opacity: 0.8;
+        transform: translateX(-50%);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+}
+
+@keyframes tacticalPatienceReadyPulse {
+    0%, 100% {
+        filter: brightness(1.2) drop-shadow(0 0 15px #FFD700);
+    }
+    50% {
+        filter: brightness(1.4) drop-shadow(0 0 25px #FFD700);
+    }
+}
+
+@keyframes tacticalPatienceReadyBorder {
+    0%, 100% {
+        border-color: #FFD700;
+        opacity: 0.8;
+    }
+    50% {
+        border-color: #FFA500;
+        opacity: 1;
+    }
+}
+
+@keyframes tacticalPatienceReadyIcon {
+    0%, 100% {
+        transform: scale(1);
+        color: #FFD700;
+        text-shadow: 0 0 10px #FFD700;
+    }
+    50% {
+        transform: scale(1.2);
+        color: #FFA500;
+        text-shadow: 0 0 20px #FFA500;
+    }
+}
+
+/* Tactical Patience Talent Effect Styling */
+.talent-effect.tactical-patience {
+    color: #FFD700;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(255, 215, 0, 0.3);
+}
+
+.log-entry.tactical-patience {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+    border-left: 4px solid #FFD700;
+}
+
+.log-entry.tactical-patience::before {
+    content: '⏰';
+    margin-right: 8px;
+}
+
+.tooltip-description .tactical-patience-effect {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.tactical-patience-effect .damage-boost {
+    color: #ff6b6b;
+}
+
+.ability-description .talent-effect.tactical-patience {
+    color: #FFD700;
+    font-weight: bold;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+    .tactical-patience-activation-vfx .patience-clock {
+        font-size: 32px;
+    }
+    
+    .tactical-patience-activation-vfx .patience-text,
+    .tactical-patience-deactivation-vfx .patience-fade-text {
+        font-size: 10px;
+    }
+    
+    .image-container.tactical-patience-ready::after {
+        font-size: 12px;
+        top: -8px;
+        right: -8px;
+    }
+} 
+
+/* Blessed Restoration VFX */
+.blessed-restoration-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1000;
+    animation: blessedRestorationActivation 4s ease-out forwards;
+}
+
+.blessed-restoration-vfx .restoration-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.4) 0%,
+        rgba(255, 255, 255, 0.3) 30%,
+        rgba(135, 206, 235, 0.2) 60%,
+        transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: restorationAuraPulse 4s ease-in-out infinite;
+}
+
+.blessed-restoration-vfx .restoration-particles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+}
+
+.blessed-restoration-vfx .restoration-particles::before,
+.blessed-restoration-vfx .restoration-particles::after {
+    content: "✨ ⭐ 💫 ✨ ⭐";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    font-size: 14px;
+    color: #FFD700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+    transform: translate(-50%, -50%);
+    animation: restorationParticleFloat 4s ease-out forwards;
+    white-space: nowrap;
+    letter-spacing: 20px;
+}
+
+.blessed-restoration-vfx .restoration-particles::after {
+    content: "🌟 ✨ 💫 🌟 ✨";
+    animation-delay: 0.5s;
+    animation-direction: reverse;
+}
+
+.blessed-restoration-vfx .restoration-text {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8),
+                 0 2px 4px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    animation: restorationTextReveal 4s ease-out forwards;
+}
+
+.blessed-restoration-vfx .restoration-heal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #4CAF50;
+    text-shadow: 0 0 8px rgba(76, 175, 80, 0.8),
+                 0 2px 4px rgba(0, 0, 0, 0.5);
+    animation: restorationHealBounce 4s ease-out forwards;
+}
+
+.blessed-restoration-vfx .restoration-buffs {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: #87CEEB;
+    text-shadow: 0 0 5px rgba(135, 206, 235, 0.8);
+    animation: restorationBuffsShow 4s ease-out forwards;
+}
+
+.image-container.blessed-restoration-active {
+    position: relative;
+}
+
+.image-container.blessed-restoration-active img {
+    animation: blessedRestorationGlow 4s ease-out forwards;
+}
+
+.image-container.blessed-restoration-active::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.3) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: blessedRestorationAura 4s ease-out forwards;
+}
+
+@keyframes blessedRestorationActivation {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+@keyframes restorationAuraPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0.4;
+    }
+}
+
+@keyframes restorationParticleFloat {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(180deg) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.2);
+        opacity: 0;
+    }
+}
+
+@keyframes restorationTextReveal {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+}
+
+@keyframes restorationHealBounce {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    60% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+@keyframes restorationBuffsShow {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+    40% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.9);
+    }
+}
+
+@keyframes blessedRestorationGlow {
+    0% {
+        filter: brightness(1) drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+    }
+    30% {
+        filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+    }
+    70% {
+        filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+    }
+    100% {
+        filter: brightness(1) drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+    }
+}
+
+@keyframes blessedRestorationAura {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+    70% {
+        opacity: 0.4;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+/* Blessed Restoration Talent Effect Styling */
+.talent-effect.blessed-restoration {
+    color: #FFD700;
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), rgba(255, 255, 255, 0.05));
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Log entry styling for blessed restoration */
+.log-entry.blessed-restoration {
+    color: #FFD700;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
+    border-left: 3px solid #FFD700;
+}
+
+.log-entry.blessed-restoration::before {
+    content: "✨";
+    margin-right: 5px;
+}
+
+/* Tooltip description styling */
+.tooltip-description .blessed-restoration-effect {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.blessed-restoration-effect .healing-boost {
+    color: #4CAF50;
+}
+
+/* Ready state indicator */
+.image-container.blessed-restoration-ready {
+    position: relative;
+}
+
+.image-container.blessed-restoration-ready img {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Ability description styling */
+.ability-description .talent-effect.blessed-restoration {
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.15), rgba(255, 255, 255, 0.08));
+    border-color: rgba(255, 215, 0, 0.4);
+    font-weight: 600;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .blessed-restoration-vfx {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .blessed-restoration-vfx .restoration-text {
+        font-size: 10px;
+    }
+    
+    .blessed-restoration-vfx .restoration-heal {
+        font-size: 14px;
+    }
+    
+    .blessed-restoration-vfx .restoration-buffs {
+        font-size: 9px;
+    }
+}

@@ -222,31 +222,38 @@ function updateNinaDodgeFromBuffs(character) {
     // Add visual effect to show dodge bonus
     const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
     if (characterElement) {
+        // Find the image container element
+        const imageContainer = characterElement.querySelector('.image-container');
+        if (!imageContainer) return;
+        
         // Remove any existing dodge indicator
-        const existingIndicator = characterElement.querySelector('.evasive-adaptability-indicator');
+        const existingIndicator = imageContainer.querySelector('.evasive-adaptability-indicator');
         if (existingIndicator) {
             existingIndicator.remove();
         }
         
         if (activeBuffs > 0) {
-            // Create dodge bonus indicator
+            // Create modern dodge bonus indicator on the image container
             const indicator = document.createElement('div');
             indicator.className = 'evasive-adaptability-indicator';
-            indicator.innerHTML = `<span>+${(bonusDodgeChance * 100).toFixed(0)}% DODGE</span>`;
-            characterElement.appendChild(indicator);
+            indicator.innerHTML = `<span>+${(bonusDodgeChance * 100).toFixed(0)}%</span>`;
+            imageContainer.appendChild(indicator);
             
-            // Add glow effect
+            // Add subtle glow effect to the main character element
             characterElement.classList.add('evasive-adaptability-active');
             
-            // Add animation
+            // Add floating text animation to the main character element
             const dodgeVfx = document.createElement('div');
             dodgeVfx.className = 'evasive-adaptability-vfx';
+            dodgeVfx.textContent = `+${(bonusDodgeChance * 100).toFixed(0)}% Dodge`;
             characterElement.appendChild(dodgeVfx);
             
             // Remove VFX after animation
             setTimeout(() => {
-                dodgeVfx.remove();
-            }, 1000);
+                if (dodgeVfx.parentNode) {
+                    dodgeVfx.remove();
+                }
+            }, 1500);
         } else {
             // Remove glow effect if no buffs
             characterElement.classList.remove('evasive-adaptability-active');
@@ -301,6 +308,10 @@ function initializeEvasiveAdaptabilityPassive() {
     
     console.log('[EVASIVE ADAPTABILITY] Passive hooks initialized');
 }
+
+// Make functions globally accessible
+window.initializeEvasiveAdaptabilityPassive = initializeEvasiveAdaptabilityPassive;
+window.updateNinaDodgeFromBuffs = updateNinaDodgeFromBuffs;
 
 // Initialize the passive as soon as the script loads
 (function() {
@@ -1138,8 +1149,7 @@ const farmer_ninaHidingEffect = (caster, target) => {
     hidingBuff.effect = function(character) { // Use a named function or standard function expression
         const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
         // Heal Farmer Nina at the start of her turn while hiding
-        const healPercentage = 0.10; // 10% of Max HP
-        let healAmount = Math.floor(character.stats.maxHp * healPercentage);
+        let healAmount = 350; // Fixed 350 HP as stated in description
         const previousHealth = character.stats.currentHp || 0;
 
         // --- NEW: Check for Critical Recuperation Talent ---
@@ -1165,7 +1175,7 @@ const farmer_ninaHidingEffect = (caster, target) => {
 
     // Use the new generateDescription method
     hidingBuff.generateDescription = function() {
-        let baseDesc = 'Cannot be directly targeted by enemies. Heals 350 HP each turn. Farmer farmer_nina is completely protected from direct damage. Breaks when damaged or when using other abilities.';
+        let baseDesc = 'Cannot be directly targeted by enemies. Heals 350 HP each turn. Farmer Nina is completely protected from direct damage. Breaks when damaged or when using other abilities.';
         let talentEffects = '';
         if (this.grantsDodgeChance && this.grantsDodgeChance > 0) {
              const dodgePercent = this.grantsDodgeChance * 100;

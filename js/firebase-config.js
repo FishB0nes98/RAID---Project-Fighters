@@ -47,9 +47,29 @@ window.database = firebaseDatabase;
 window.firebase = firebase;
 
 // Add a listener for auth state changes for debugging/logging
-firebaseAuth.onAuthStateChanged(user => {
+firebaseAuth.onAuthStateChanged(async user => {
     if (user) {
         console.log("User is signed in:", user.uid, user.email);
+
+        // === 🔒 Secret Unlock: Infernal Ibuki ===
+        try {
+            const secretId = 'infernal_ibuki';
+            const userId = user.uid;
+            const snapshot = await firebaseDatabase.ref(`users/${userId}/ownedCharacters`).once('value');
+            let ownedChars = [];
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                ownedChars = Array.isArray(data) ? data : (typeof data === 'object' ? Object.values(data) : []);
+            }
+            if (!ownedChars.includes(secretId)) {
+                ownedChars.push(secretId);
+                await firebaseDatabase.ref(`users/${userId}/ownedCharacters`).set(ownedChars);
+                console.log('[SecretUnlock] Infernal Ibuki added to ownedCharacters');
+            }
+        } catch (err) {
+            console.error('[SecretUnlock] Error unlocking Infernal Ibuki:', err);
+        }
+
     } else {
         console.log("User is signed out.");
     }

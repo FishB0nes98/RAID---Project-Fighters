@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const elements = {
         loadingScreen: document.getElementById('loading-screen'),
-        loadingText: document.getElementById('loading-text'),
         talentTreeArea: document.getElementById('talent-tree-area'),
         talentTreeCanvas: document.getElementById('talent-tree-canvas'),
         characterImage: document.getElementById('character-image'),
@@ -96,10 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
         characterLevel: document.getElementById('character-level'),
         xpFill: document.getElementById('xp-fill'),
         xpText: document.getElementById('xp-text'),
-        talentPointsInfo: document.getElementById('talent-points-info'),
         pointsAvailable: document.getElementById('points-available'),
         pointsTotal: document.getElementById('points-total'),
-        talentControls: document.getElementById('talent-controls'),
+        editModeButton: document.getElementById('edit-mode-button'),
+        editModeIndicator: document.getElementById('edit-mode-indicator'),
         saveButton: document.getElementById('save-talents-button'),
         resetButton: document.getElementById('reset-talents-button'),
         backButton: document.getElementById('back-button'),
@@ -108,20 +107,19 @@ document.addEventListener('DOMContentLoaded', () => {
         tooltipName: document.getElementById('tooltip-name'),
         tooltipType: document.getElementById('tooltip-type'),
         tooltipDescription: document.getElementById('tooltip-description'),
-        tooltipEffects: document.getElementById('tooltip-effects'),
         tooltipStatus: document.getElementById('tooltip-status'),
-        tooltipRequirements: document.getElementById('tooltip-requirements'),
         tooltipCost: document.getElementById('tooltip-cost'),
-        classIcon: document.getElementById('class-icon-img'),
-        className: document.getElementById('class-name'),
-        classDescription: document.getElementById('class-description'),
         zoomIn: document.getElementById('zoom-in'),
         zoomOut: document.getElementById('zoom-out'),
-        resetView: document.getElementById('reset-view'),
-        soundSelect: document.getElementById('sound-select'),
-        soundDeselect: document.getElementById('sound-deselect'),
-        soundHover: document.getElementById('sound-hover'),
-        soundUnlock: document.getElementById('sound-unlock')
+        resetView: document.getElementById('reset-view')
+    };
+
+    // Edit Mode State
+    let editMode = {
+        enabled: false,
+        draggedNode: null,
+        dragOffset: { x: 0, y: 0 },
+        originalPosition: { x: 0, y: 0 }
     };
 
     // --- Initialization ---
@@ -261,6 +259,39 @@ document.addEventListener('DOMContentLoaded', () => {
             talentDefinitions = definitions;
             selectedTalents = selections;
             maxTalentPoints = talentPoints;
+
+            // Log loaded talent information
+            const talentCount = Object.keys(talentDefinitions).length;
+            console.log(`📚 Loaded ${talentCount} talent definitions for ${characterId}`);
+            console.log('🎯 Loaded talents:', Object.keys(talentDefinitions));
+            
+            // Log talent details with positions
+            if (talentCount > 0) {
+                console.log('📋 Talent Details:');
+                Object.values(talentDefinitions).forEach((talent, index) => {
+                    const position = talent.position ? `(${talent.position.x}, ${talent.position.y})` : 'No position';
+                    const tier = talent.tier || 'Unknown tier';
+                    const powerful = talent.powerful ? ' [POWERFUL]' : '';
+                    const cost = talent.cost || 1;
+                    console.log(`  ${index + 1}. ${talent.name} - Tier ${tier}, Cost ${cost} at ${position}${powerful}`);
+                });
+                
+                // Log selected talents
+                const selectedCount = Object.keys(selectedTalents).length;
+                console.log(`⭐ Selected talents: ${selectedCount}`);
+                if (selectedCount > 0) {
+                    Object.keys(selectedTalents).forEach(talentId => {
+                        const talent = talentDefinitions[talentId];
+                        const rank = selectedTalents[talentId];
+                        console.log(`  - ${talent?.name || talentId} (Rank: ${rank})`);
+                    });
+                }
+                
+                // Log talent points
+                console.log(`💎 Talent Points: ${maxTalentPoints} total`);
+            } else {
+                console.warn(`⚠️ No talent definitions found for character ${characterId}`);
+            }
             // ----------------------------------------------------------
 
             // Calculate available talent points (NOW that selections and max points are loaded)
@@ -315,12 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeSounds() {
-        // Preload sounds
-        for (const sound in soundElements) {
-            if (soundElements[sound]) {
-                soundElements[sound].load();
-            }
-        }
+        // Sound system removed for simplified version
+        // Preload sounds would go here if needed
     }
 
     function playSound(type) {
@@ -359,12 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update class info section
     function updateClassInfo() {
-        if (classData) {
-            elements.className.textContent = classData.name;
-            elements.classDescription.textContent = classData.description;
-            elements.classIcon.src = classData.icon || 'images/icons/default_class.png';
-            elements.classIcon.alt = classData.name;
-        }
+        // Class info panel removed for simplified version
+        // Class data would be displayed here if needed
     }
 
     /**
@@ -411,12 +434,19 @@ document.addEventListener('DOMContentLoaded', () => {
         availableTalentPoints = maxTalentPoints - usedPoints;
         
         // Update display
-        elements.pointsAvailable.textContent = availableTalentPoints;
-        elements.pointsTotal.textContent = maxTalentPoints;
+        if (elements.pointsAvailable) {
+            elements.pointsAvailable.textContent = availableTalentPoints;
+        }
+        if (elements.pointsTotal) {
+            elements.pointsTotal.textContent = maxTalentPoints;
+        }
         
-        // Color coding
-        elements.talentPointsInfo.style.color = 
-            availableTalentPoints > 0 ? 'var(--accent)' : 'var(--danger)';
+        // Color coding for the talent points info container
+        const talentPointsInfo = document.querySelector('.talent-points-info');
+        if (talentPointsInfo) {
+            talentPointsInfo.style.color = 
+                availableTalentPoints > 0 ? 'var(--accent-gold)' : 'var(--text-muted)';
+        }
     }
     
     function calculateUsedPoints() {
@@ -460,6 +490,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render nodes
         renderNodes(positions);
         
+        // Recalculate all connectors after nodes are rendered to ensure proper positioning
+        setTimeout(() => {
+            recalculateAllConnectors();
+        }, 100);
+        
         // Update node states
         updateAllNodeStates();
     }
@@ -502,13 +537,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Store position
                 positions[talentId] = { x, y };
                 
-                // Apply custom positioning if defined in talent
+                // Use custom positioning if defined in talent (override calculated position)
                 if (talent.position) {
                     if (talent.position.x !== undefined) {
-                        positions[talentId].x += talent.position.x;
+                        positions[talentId].x = talent.position.x;
                     }
                     if (talent.position.y !== undefined) {
-                        positions[talentId].y += talent.position.y;
+                        positions[talentId].y = talent.position.y;
                     }
                 }
             });
@@ -784,10 +819,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Calculate line between centers
         const nodeSize = CONFIG.nodeSize;
-        const parentCenterX = parentPos.x + nodeSize / 2;
-        const parentCenterY = parentPos.y + nodeSize / 2;
-        const childCenterX = childPos.x + nodeSize / 2;
-        const childCenterY = childPos.y + nodeSize / 2;
+        let parentCenterX = parentPos.x + nodeSize / 2;
+        let parentCenterY = parentPos.y + nodeSize / 2;
+        let childCenterX = childPos.x + nodeSize / 2;
+        let childCenterY = childPos.y + nodeSize / 2;
+        
+        // Adjust connection points for powerful talents (account for visual elements)
+        if (parent.powerful) {
+            // Powerful talents have additional visual elements but keep the same connection point
+            parentCenterY = parentPos.y + nodeSize / 2; // Keep center unchanged
+        }
+        if (child.powerful) {
+            // Powerful talents have additional visual elements but keep the same connection point
+            childCenterY = childPos.y + nodeSize / 2; // Keep center unchanged
+        }
         
         // Calculate angle and length
         const angle = Math.atan2(childCenterY - parentCenterY, childCenterX - parentCenterX);
@@ -807,6 +852,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Handlers ---
     function setupEventHandlers() {
+        elements.editModeButton.addEventListener('click', toggleEditMode);
         elements.saveButton.addEventListener('click', handleSaveTalents);
         elements.resetButton.addEventListener('click', handleResetTalents);
         elements.backButton.addEventListener('click', () => {
@@ -1039,83 +1085,79 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPowerful = talent.powerful === true || powerfulTalents.includes(talent.id);
         
         // Update tooltip content
-        elements.tooltipIcon.src = talent.icon || 'images/icons/default_ability.png';
-        elements.tooltipName.textContent = talent.name;
-        // elements.tooltipDescription.textContent = talent.description;
-
-        // --- MODIFIED: Use innerHTML to allow styling --- 
-        let descriptionHtml = talent.description;
-        // Try to find talent-specific additions (simple approach, might need refinement)
-        const talentMarker = "Talent:";
-        const talentIndex = descriptionHtml.indexOf(talentMarker);
-        if (talentIndex !== -1) {
-            const baseDesc = descriptionHtml.substring(0, talentIndex);
-            const talentDesc = descriptionHtml.substring(talentIndex);
-            // Determine class based on simple keywords (can be improved)
-            let talentClass = 'utility';
-            if (talentDesc.toLowerCase().includes('damage')) talentClass = 'damage';
-            else if (talentDesc.toLowerCase().includes('heal') || talentDesc.toLowerCase().includes('lifesteal')) talentClass = 'healing';
-            
-            descriptionHtml = `${baseDesc.trim()}<br><span class="talent-effect ${talentClass}">${talentDesc.replace(talentMarker, 'Talent:').trim()}</span>`;
+        if (elements.tooltipIcon) {
+            elements.tooltipIcon.src = talent.icon || 'images/icons/default_ability.png';
         }
-        elements.tooltipDescription.innerHTML = descriptionHtml.replace(/\n/g, '<br>'); // Replace \n with <br>
-        // --- END MODIFICATION --- 
+        if (elements.tooltipName) {
+            elements.tooltipName.textContent = talent.name;
+        }
+        if (elements.tooltipDescription) {
+            // Use innerHTML to allow styling
+            let descriptionHtml = talent.description;
+            // Try to find talent-specific additions (simple approach, might need refinement)
+            const talentMarker = "Talent:";
+            const talentIndex = descriptionHtml.indexOf(talentMarker);
+            if (talentIndex !== -1) {
+                const baseDesc = descriptionHtml.substring(0, talentIndex);
+                const talentDesc = descriptionHtml.substring(talentIndex);
+                // Determine class based on simple keywords (can be improved)
+                let talentClass = 'utility';
+                if (talentDesc.toLowerCase().includes('damage')) talentClass = 'damage';
+                else if (talentDesc.toLowerCase().includes('heal') || talentDesc.toLowerCase().includes('lifesteal')) talentClass = 'healing';
+                
+                descriptionHtml = `${baseDesc.trim()}<br><span class="talent-effect ${talentClass}">${talentDesc.replace(talentMarker, 'Talent:').trim()}</span>`;
+            }
+            elements.tooltipDescription.innerHTML = descriptionHtml.replace(/\n/g, '<br>'); // Replace \n with <br>
+        }
 
         // Set powerful talent attribute
-        if (isPowerful) {
-            elements.talentTooltip.dataset.powerful = "true";
-            elements.tooltipType.textContent = "Powerful Talent";
-        } else {
-            delete elements.talentTooltip.dataset.powerful;
-            elements.tooltipType.textContent = "Talent";
+        if (elements.tooltipType) {
+            if (isPowerful) {
+                if (elements.talentTooltip) elements.talentTooltip.dataset.powerful = "true";
+                elements.tooltipType.textContent = "Powerful Talent";
+            } else {
+                if (elements.talentTooltip) delete elements.talentTooltip.dataset.powerful;
+                elements.tooltipType.textContent = "Talent";
+            }
         }
         
         // Update status based on selected, available, or locked
         const status = getTalentStatus(talentId);
-        elements.tooltipStatus.className = `tooltip-status ${status}`;
-        
-        switch (status) {
-            case 'selected':
-                elements.tooltipStatus.textContent = "Status: Selected";
-                break;
-            case 'available':
-                elements.tooltipStatus.textContent = "Status: Available";
-                break;
-            case 'locked':
-                elements.tooltipStatus.textContent = "Status: Locked";
-                // Show requirements
-                const requirements = getRequirementsText(talent);
-                elements.tooltipRequirements.textContent = requirements || "";
-                
-                // --- NEW: Add specific message for powerful talent lock ---
-                if (talent.powerful) {
-                    const hasOtherPowerfulSelected = Object.keys(selectedTalents).some(selectedId => {
-                        const otherTalent = talentDefinitions[selectedId];
-                        return otherTalent && otherTalent.powerful && selectedId !== talentId;
-                    });
-                    if (hasOtherPowerfulSelected) {
-                        elements.tooltipRequirements.textContent = "Requires: Only one powerful talent allowed.";
-                    } else if (!requirements) {
-                        // If it's a root powerful talent and none are selected, it should be available, but we show generic reqs if locked for other reasons
-                        elements.tooltipRequirements.textContent = "Requires: Base talent"; // Placeholder if needed
-                    }
-                }
-                // --- END NEW ---
-                break;
+        if (elements.tooltipStatus) {
+            elements.tooltipStatus.className = `tooltip-status ${status}`;
+            
+            switch (status) {
+                case 'selected':
+                    elements.tooltipStatus.textContent = "Status: Selected";
+                    break;
+                case 'available':
+                    elements.tooltipStatus.textContent = "Status: Available";
+                    break;
+                case 'locked':
+                    elements.tooltipStatus.textContent = "Status: Locked";
+                    break;
+            }
         }
         
         // Show tooltip costs for available/selected talents
-        if (status !== 'locked') {
-            elements.tooltipCost.textContent = `Cost: 1 Talent Point`;
-            elements.tooltipRequirements.textContent = "";
+        if (elements.tooltipCost) {
+            if (status !== 'locked') {
+                elements.tooltipCost.textContent = `Cost: 1 Talent Point`;
+            } else {
+                elements.tooltipCost.textContent = "";
+            }
         }
         
         // Position and show the tooltip
-        elements.talentTooltip.classList.add('visible');
-        positionTooltip(event);
+        if (elements.talentTooltip) {
+            elements.talentTooltip.classList.add('visible');
+            positionTooltip(event);
+        }
     }
     
     function positionTooltip(event) {
+        if (!elements.talentTooltip) return;
+        
         // Set initial position off-screen to calculate dimensions
         elements.talentTooltip.style.left = '-9999px';
         elements.talentTooltip.style.top = '-9999px';
@@ -1145,9 +1187,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function hideTooltip() {
         // Use timer to avoid flicker when moving between nodes
         window.tooltipHideTimer = setTimeout(() => {
-            elements.talentTooltip.classList.remove('visible');
+            if (elements.talentTooltip) {
+                elements.talentTooltip.classList.remove('visible');
+            }
             // Only reset tooltip ID if not controller selected (controller keeps tooltip open)
-            if (!currentControllerElement || talentId !== currentControllerElement.dataset.talentId) {
+            if (!currentControllerElement || currentTooltipId !== currentControllerElement.dataset.talentId) {
                 currentTooltipId = null;
             }
         }, 100);
@@ -1911,9 +1955,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateNavGroups() {
-        navGroups['header'] = Array.from(elements.talentControls.querySelectorAll('[data-controller-nav][data-nav-group="header"]'));
-        navGroups['map'] = Array.from(elements.talentTreeArea.querySelector('.map-controls').querySelectorAll('[data-controller-nav][data-nav-group="map"]'));
-        navGroups['talent-grid'] = Array.from(elements.talentTreeCanvas.querySelectorAll('.talent-node'));
+        // Find talent controls container (header controls)
+        const talentControls = document.querySelector('.talent-controls');
+        if (talentControls) {
+            navGroups['header'] = Array.from(talentControls.querySelectorAll('[data-controller-nav][data-nav-group="header"]'));
+        } else {
+            navGroups['header'] = [];
+        }
+        
+        // Find map controls
+        const mapControls = elements.talentTreeArea.querySelector('.map-controls');
+        if (mapControls) {
+            navGroups['map'] = Array.from(mapControls.querySelectorAll('[data-controller-nav][data-nav-group="map"]'));
+        } else {
+            navGroups['map'] = [];
+        }
+        
+        // Find talent nodes
+        if (elements.talentTreeCanvas) {
+            navGroups['talent-grid'] = Array.from(elements.talentTreeCanvas.querySelectorAll('.talent-node'));
+        } else {
+            navGroups['talent-grid'] = [];
+        }
+        
         console.log("Populated Nav Groups:", navGroups);
     }
 
@@ -2019,4 +2083,379 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Talent Screen Initialization failed:", error);
         showLoading("Error initializing talents. Please refresh.", true);
     });
+
+    // Edit mode functionality uses the editMode variable declared at the top
+
+    function setupCanvasInteraction() {
+        const area = elements.talentTreeArea;
+        const canvas = elements.talentTreeCanvas;
+        
+        // Enhanced event handlers with edit mode support
+        area.addEventListener('mousedown', (e) => {
+            console.log('[Edit Mode] Mousedown event - editMode.enabled:', editMode.enabled, 'target:', e.target);
+            
+            // Check if we clicked on a talent node (including child elements)
+            const talentNode = e.target.closest('.talent-node');
+            console.log('[Edit Mode] Found talent node:', talentNode?.dataset?.talentId);
+            
+            if (editMode.enabled && talentNode) {
+                // Edit mode: start dragging talent
+                console.log('[Edit Mode] Starting drag for talent:', talentNode.dataset.talentId);
+                startTalentDrag(e, talentNode);
+                return;
+            }
+            
+            // Normal mode: handle panning
+            console.log('[Edit Mode] Fallback to panning');
+            handlePanStart(e);
+        });
+        
+        // Global mouse move and up events for better drag handling
+        document.addEventListener('mousemove', (e) => {
+            if (editMode.enabled && editMode.draggedNode) {
+                updateTalentDragPosition(e.clientX, e.clientY, e.shiftKey);
+                return;
+            }
+            
+            // Normal mode: handle panning if we're in the area
+            if (isPanning) {
+                handlePanMove(e);
+            }
+        });
+        
+        document.addEventListener('mouseup', (e) => {
+            if (editMode.enabled && editMode.draggedNode) {
+                endTalentDrag();
+                return;
+            }
+            
+            // Normal mode: handle pan end
+            handlePanEnd();
+        });
+        
+        area.addEventListener('mouseleave', () => {
+            if (!editMode.draggedNode) {
+                handlePanEnd();
+            }
+        });
+        
+        // Zooming with buttons
+        elements.zoomIn.addEventListener('click', () => zoomCanvas(CONFIG.zoomStep));
+        elements.zoomOut.addEventListener('click', () => zoomCanvas(-CONFIG.zoomStep));
+        elements.resetView.addEventListener('click', resetView);
+        
+        // Zooming with wheel
+        area.addEventListener('wheel', handleZoomWheel, { passive: false });
+        
+        // Disable context menu
+        area.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    // Edit mode drag functions
+    function startTalentDrag(e, node) {
+        const talentId = node.dataset.talentId;
+        const talent = talentDefinitions[talentId];
+        console.log('[Edit Mode] startTalentDrag called for:', talentId, talent);
+        
+        if (!talent) {
+            console.warn('[Edit Mode] No talent found for ID:', talentId);
+            return;
+        }
+        
+        console.log('[Edit Mode] Starting drag state...');
+        editMode.draggedNode = node;
+        
+        // Calculate initial positions
+        const rect = node.getBoundingClientRect();
+        
+        editMode.originalPosition = {
+            x: parseInt(node.style.left, 10) || 0,
+            y: parseInt(node.style.top, 10) || 0
+        };
+        
+        editMode.dragOffset = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+        
+        // Visual feedback
+        node.classList.add('dragging');
+        elements.talentTreeArea.style.cursor = 'grabbing';
+        document.body.style.userSelect = 'none';
+        
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function updateTalentDragPosition(clientX, clientY, shiftKey) {
+        const containerRect = elements.talentTreeArea.getBoundingClientRect();
+        const scrollLeft = elements.talentTreeArea.scrollLeft;
+        const scrollTop = elements.talentTreeArea.scrollTop;
+        
+        // Calculate new position relative to canvas
+        let newX = clientX - containerRect.left + scrollLeft - editMode.dragOffset.x;
+        let newY = clientY - containerRect.top + scrollTop - editMode.dragOffset.y;
+        
+        // Apply current zoom scale
+        const currentScale = parseFloat(elements.talentTreeCanvas.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1);
+        newX = newX / currentScale;
+        newY = newY / currentScale;
+        
+        // Snap to grid for easier alignment
+        const snapGrid = 10;
+        newX = Math.round(newX / snapGrid) * snapGrid;
+        newY = Math.round(newY / snapGrid) * snapGrid;
+        
+        // Update node position
+        editMode.draggedNode.style.left = `${newX}px`;
+        editMode.draggedNode.style.top = `${newY}px`;
+        
+        // Update connections
+        updateConnectionsForNode(editMode.draggedNode);
+    }
+
+    function endTalentDrag() {
+        if (!editMode.draggedNode) return;
+        
+        // Clean up visual feedback
+        editMode.draggedNode.classList.remove('dragging');
+        elements.talentTreeArea.style.cursor = '';
+        document.body.style.userSelect = '';
+        
+        // Save position change
+        const newX = parseInt(editMode.draggedNode.style.left, 10) || 0;
+        const newY = parseInt(editMode.draggedNode.style.top, 10) || 0;
+        
+        // Update talent definition
+        const talentId = editMode.draggedNode.dataset.talentId;
+        const talent = talentDefinitions[talentId];
+        if (talent) {
+            talent.position = { x: newX, y: newY };
+            console.log(`Talent position updated: ${talent.name} -> (${newX}, ${newY})`);
+            showNotification(`Position updated: ${talent.name}`, 'info');
+        }
+        
+        // Reset drag state
+        editMode.draggedNode = null;
+        editMode.dragOffset = { x: 0, y: 0 };
+        editMode.originalPosition = { x: 0, y: 0 };
+    }
+
+    function updateConnectionsForNode(node) {
+        const talentId = node.dataset.talentId;
+        if (!talentId) return;
+        
+        // Update all connectors involving this node
+        Object.keys(connectorElements).forEach(connectorId => {
+            if (connectorId.includes(talentId)) {
+                const [parentId, childId] = connectorId.split('-').slice(1); // Remove 'connector' prefix
+                const parentTalent = talentDefinitions[parentId];
+                const childTalent = talentDefinitions[childId];
+                
+                if (parentTalent && childTalent) {
+                    // Remove old connector
+                    const oldConnector = connectorElements[connectorId];
+                    if (oldConnector) {
+                        oldConnector.remove();
+                    }
+                    
+                    // Create new connector with updated positions
+                    const positions = {};
+                    positions[parentId] = { 
+                        x: parseInt(nodeElements[parentId].style.left, 10) || 0,
+                        y: parseInt(nodeElements[parentId].style.top, 10) || 0
+                    };
+                    positions[childId] = { 
+                        x: parseInt(nodeElements[childId].style.left, 10) || 0,
+                        y: parseInt(nodeElements[childId].style.top, 10) || 0
+                    };
+                    
+                    createConnector(parentTalent, childTalent, positions);
+                }
+            }
+        });
+    }
+
+    function recalculateAllConnectors() {
+        // Clear all existing connectors
+        Object.values(connectorElements).forEach(connector => {
+            if (connector && connector.parentNode) {
+                connector.parentNode.removeChild(connector);
+            }
+        });
+        connectorElements = {};
+        
+        // Recreate all connectors with current node positions
+        if (!talentDefinitions) return;
+        
+        const currentPositions = {};
+        for (const talentId in nodeElements) {
+            const node = nodeElements[talentId];
+            if (node) {
+                currentPositions[talentId] = {
+                    x: parseInt(node.style.left, 10) || 0,
+                    y: parseInt(node.style.top, 10) || 0
+                };
+            }
+        }
+        
+        // Recreate connectors
+        for (const talentId in talentDefinitions) {
+            const talent = talentDefinitions[talentId];
+            if (!talent || !talent.parents) continue;
+            
+            talent.parents.forEach(parentId => {
+                const parentTalent = talentDefinitions[parentId];
+                if (parentTalent) {
+                    createConnector(parentTalent, talent, currentPositions);
+                }
+            });
+        }
+    }
+
+    function toggleEditMode() {
+        const wasEnabled = editMode.enabled;
+        editMode.enabled = !editMode.enabled;
+        
+        console.log('[Edit Mode] Toggled to:', editMode.enabled);
+        
+        // Update button appearance
+        if (elements.editModeButton) {
+            elements.editModeButton.innerHTML = editMode.enabled ? '<i class="fas fa-lock"></i> Exit' : '<i class="fas fa-edit"></i> Edit';
+            elements.editModeButton.className = editMode.enabled ? 'rpg-button edit-mode active' : 'rpg-button edit-mode';
+        }
+        
+        // Update canvas class
+        if (elements.talentTreeCanvas) {
+            if (editMode.enabled) {
+                elements.talentTreeCanvas.classList.add('edit-mode');
+            } else {
+                elements.talentTreeCanvas.classList.remove('edit-mode');
+            }
+        }
+        
+        // Show/hide edit mode indicator
+        if (elements.editModeIndicator) {
+            if (editMode.enabled) {
+                elements.editModeIndicator.classList.add('visible');
+            } else {
+                elements.editModeIndicator.classList.remove('visible');
+            }
+        }
+        
+        if (editMode.enabled) {
+            showNotification('Edit mode enabled - drag talents to reposition them', 'info');
+        } else {
+            // When exiting edit mode, save the talent file
+            if (wasEnabled) {
+                saveTalentPositions();
+            }
+            showNotification('Edit mode disabled', 'info');
+        }
+    }
+
+    async function saveTalentPositions() {
+        if (!talentDefinitions || !characterId) {
+            console.warn('[Edit Mode] Cannot save - missing talent definitions or character ID');
+            return;
+        }
+
+        try {
+            // Create the complete talent file structure
+            const talentFileData = {
+                talentTree: {}
+            };
+
+            // Copy all talent definitions with updated positions
+            for (const talentId in talentDefinitions) {
+                const talent = { ...talentDefinitions[talentId] };
+                
+                // Update position from DOM if the node exists
+                const node = nodeElements[talentId];
+                if (node) {
+                    const x = parseInt(node.style.left, 10) || 0;
+                    const y = parseInt(node.style.top, 10) || 0;
+                    talent.position = { x, y };
+                }
+                
+                talentFileData.talentTree[talentId] = talent;
+            }
+
+            console.log('[Edit Mode] Saving talent positions...', talentFileData);
+
+            // Send to server to save
+            const response = await fetch('/save-talents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    fileName: `${characterId}_talents.json`,
+                    content: talentFileData
+                })
+            });
+
+            if (response.ok) {
+                showNotification('✅ Talent positions saved successfully!', 'success');
+                console.log('[Edit Mode] Talent positions saved successfully');
+            } else {
+                const errorText = await response.text();
+                throw new Error(`Server error: ${errorText}`);
+            }
+
+        } catch (error) {
+            console.error('[Edit Mode] Error saving talent positions:', error);
+            showNotification(`❌ Error saving positions: ${error.message}`, 'error');
+            
+            // Fallback: download file locally
+            try {
+                downloadTalentFile();
+                showNotification('💾 Downloaded talent file locally as fallback', 'warning');
+            } catch (downloadError) {
+                console.error('[Edit Mode] Fallback download failed:', downloadError);
+            }
+        }
+    }
+
+    function downloadTalentFile() {
+        if (!talentDefinitions || !characterId) return;
+
+        // Create the complete talent file structure
+        const talentFileData = {
+            talentTree: {}
+        };
+
+        // Copy all talent definitions with updated positions
+        for (const talentId in talentDefinitions) {
+            const talent = { ...talentDefinitions[talentId] };
+            
+            // Update position from DOM if the node exists
+            const node = nodeElements[talentId];
+            if (node) {
+                const x = parseInt(node.style.left, 10) || 0;
+                const y = parseInt(node.style.top, 10) || 0;
+                talent.position = { x, y };
+            }
+            
+            talentFileData.talentTree[talentId] = talent;
+        }
+
+        // Create and download file
+        const jsonStr = JSON.stringify(talentFileData, null, 4);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${characterId}_talents.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Make toggleEditMode globally accessible
+    window.toggleEditMode = toggleEditMode;
+
+
 }); 

@@ -28,10 +28,10 @@
         {
             "id": "renee_q",
             "name": "Wolf Claw Strike",
-            "description": "Renée attacks with her claws, dealing 700 + 1% of target's maximum HP as physical damage. This ability's critical chance is doubled.",
+            "description": "Renée attacks with her claws, dealing 585 physical damage. This ability's critical chance is doubled.",
             "icon": "Icons/abilities/claw_slash.png",
             "manaCost": 75,
-            "cooldown": 3,
+            "cooldown": 1,
             "targetType": "enemy",
             "type": "custom",
             "functionName": "reneeWolfClawStrikeEffect"
@@ -61,9 +61,9 @@
         {
             "id": "renee_r",
             "name": "Lunar Curse",
-            "description": "Renée places a moon-powered buff on herself for 5 turns. While active, enemies damaged by her are marked with a debuff for 2 turns. When this debuff expires, the enemy is stunned for 1 turn and takes double damage from all sources while the debuff is active.",
+            "description": "Renée places a moon-powered buff on herself for 5 turns. While active, enemies damaged by her are marked with a debuff for 1 turn. When this debuff expires, the enemy is stunned for 1 turn and takes double damage from all sources while the debuff is active.",
             "icon": "Icons/abilities/lunar_mark.png",
-            "manaCost": 120,
+            "manaCost": 100,
             "cooldown": 8,
             "targetType": "self",
             "type": "custom",

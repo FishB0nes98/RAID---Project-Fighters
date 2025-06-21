@@ -1,8 +1,4 @@
 {
-    "id": "bridget",
-    "name": "Bridget",
-    "description": "A water-themed magical girl with powerful healing abilities.",
-    "talentPoints": 10,
     "talentTree": {
         "healing_affinity": {
             "id": "healing_affinity",
@@ -16,7 +12,14 @@
                 "operation": "add"
             },
             "parents": [],
-            "children": ["surging_tides", "tidal_precision"]
+            "children": [
+                "surging_tides",
+                "tidal_precision"
+            ],
+            "position": {
+                "x": 990,
+                "y": 140
+            }
         },
         "surging_tides": {
             "id": "surging_tides",
@@ -30,8 +33,14 @@
                 "value": 600,
                 "operation": "set"
             },
-            "parents": ["healing_affinity"],
-            "children": []
+            "parents": [
+                "healing_affinity"
+            ],
+            "children": [],
+            "position": {
+                "x": 1440,
+                "y": 140
+            }
         },
         "tidal_precision": {
             "id": "tidal_precision",
@@ -44,8 +53,18 @@
                 "value": 0.15,
                 "operation": "add"
             },
-            "parents": ["healing_affinity"],
-            "children": ["aqueous_renewal", "crushing_depths", "healing_tsunami"]
+            "parents": [
+                "healing_affinity"
+            ],
+            "children": [
+                "aqueous_renewal",
+                "crushing_depths",
+                "healing_tsunami"
+            ],
+            "position": {
+                "x": 1160,
+                "y": 250
+            }
         },
         "healing_tsunami": {
             "id": "healing_tsunami",
@@ -57,11 +76,13 @@
                 "property": "healingTsunamiActive",
                 "value": true
             },
-            "parents": ["tidal_precision"],
+            "parents": [
+                "tidal_precision"
+            ],
             "children": [],
             "position": {
-                "x": -280,
-                "y": 222
+                "x": 1440,
+                "y": 250
             }
         },
         "aqueous_renewal": {
@@ -75,8 +96,17 @@
                 "value": 0.05,
                 "operation": "add_permanent_percentage_on_trigger"
             },
-            "parents": ["tidal_precision"],
-            "children": ["focused_barrage", "bubble_healing"]
+            "parents": [
+                "tidal_precision"
+            ],
+            "children": [
+                "focused_barrage",
+                "bubble_healing"
+            ],
+            "position": {
+                "x": 1370,
+                "y": 440
+            }
         },
         "bubble_healing": {
             "id": "bubble_healing",
@@ -88,11 +118,16 @@
                 "property": "bubbleHealingActive",
                 "value": true
             },
-            "parents": ["aqueous_renewal"],
-            "children": ["enhanced_bubble_shield", "improved_wave_crush"],
+            "parents": [
+                "aqueous_renewal"
+            ],
+            "children": [
+                "enhanced_bubble_shield",
+                "improved_wave_crush"
+            ],
             "position": {
-                "x": 100,
-                "y": -300
+                "x": 1370,
+                "y": 730
             }
         },
         "enhanced_bubble_shield": {
@@ -105,11 +140,15 @@
                 "property": "enhancedBubbleShieldActive",
                 "value": true
             },
-            "parents": ["bubble_healing"],
-            "children": ["echoing_bubbles"],
+            "parents": [
+                "bubble_healing"
+            ],
+            "children": [
+                "echoing_bubbles"
+            ],
             "position": {
-                "x": 100,
-                "y": -455
+                "x": 1370,
+                "y": 930
             }
         },
         "echoing_bubbles": {
@@ -122,11 +161,15 @@
                 "property": "echoingBubblesActive",
                 "value": true
             },
-            "parents": ["enhanced_bubble_shield"],
-            "children": ["resonant_cascade"],
+            "parents": [
+                "enhanced_bubble_shield"
+            ],
+            "children": [
+                "resonant_cascade"
+            ],
             "position": {
-                "x": 200,
-                "y": -200
+                "x": 1240,
+                "y": 1150
             }
         },
         "resonant_cascade": {
@@ -139,11 +182,13 @@
                 "property": "resonantCascadeActive",
                 "value": true
             },
-            "parents": ["echoing_bubbles"],
+            "parents": [
+                "echoing_bubbles"
+            ],
             "children": [],
             "position": {
-                "x": 200,
-                "y": -100
+                "x": 1240,
+                "y": 1450
             },
             "powerful": true
         },
@@ -168,11 +213,13 @@
                     "operation": "set"
                 }
             ],
-            "parents": ["bubble_healing"],
+            "parents": [
+                "bubble_healing"
+            ],
             "children": [],
             "position": {
-                "x": -400,
-                "y": -500
+                "x": 1680,
+                "y": 1160
             }
         },
         "focused_barrage": {
@@ -196,8 +243,17 @@
                     "operation": "set"
                 }
             ],
-            "parents": ["aqueous_renewal"],
-            "children": ["enhanced_barrage", "critical_cooldown"]
+            "parents": [
+                "aqueous_renewal"
+            ],
+            "children": [
+                "enhanced_barrage",
+                "critical_cooldown"
+            ],
+            "position": {
+                "x": 1500,
+                "y": 550
+            }
         },
         "enhanced_barrage": {
             "id": "enhanced_barrage",
@@ -209,8 +265,16 @@
                 "property": "enhancedBubbleBarrage",
                 "value": true
             },
-            "parents": ["focused_barrage"],
-            "children": ["oceanic_harmony"]
+            "parents": [
+                "focused_barrage"
+            ],
+            "children": [
+                "oceanic_harmony"
+            ],
+            "position": {
+                "x": 1870,
+                "y": 740
+            }
         },
         "critical_cooldown": {
             "id": "critical_cooldown",
@@ -222,8 +286,16 @@
                 "property": "critReducesCooldowns",
                 "value": true
             },
-            "parents": ["focused_barrage"],
-            "children": ["oceanic_harmony"]
+            "parents": [
+                "focused_barrage"
+            ],
+            "children": [
+                "oceanic_harmony"
+            ],
+            "position": {
+                "x": 1500,
+                "y": 740
+            }
         },
         "crushing_depths": {
             "id": "crushing_depths",
@@ -236,8 +308,18 @@
                 "value": 90,
                 "operation": "add"
             },
-            "parents": ["tidal_precision"],
-            "children": ["tidal_mark", "evasive_insight", "low_tide_power"]
+            "parents": [
+                "tidal_precision"
+            ],
+            "children": [
+                "tidal_mark",
+                "evasive_insight",
+                "low_tide_power"
+            ],
+            "position": {
+                "x": 1070,
+                "y": 420
+            }
         },
         "low_tide_power": {
             "id": "low_tide_power",
@@ -249,11 +331,15 @@
                 "property": "lowTidePowerActive",
                 "value": true
             },
-            "parents": ["crushing_depths"],
-            "children": ["chain_wave"],
+            "parents": [
+                "crushing_depths"
+            ],
+            "children": [
+                "chain_wave"
+            ],
             "position": {
-                "x": -177,
-                "y": 0
+                "x": 730,
+                "y": 420
             }
         },
         "chain_wave": {
@@ -266,11 +352,16 @@
                 "property": "chainWaveActive",
                 "value": true
             },
-            "parents": ["low_tide_power"],
-            "children": ["oceanic_precision", "aquatic_resonance"],
+            "parents": [
+                "low_tide_power"
+            ],
+            "children": [
+                "oceanic_precision",
+                "aquatic_resonance"
+            ],
             "position": {
-                "x": -200,
-                "y": 444
+                "x": 730,
+                "y": 540
             }
         },
         "oceanic_precision": {
@@ -284,11 +375,15 @@
                 "value": 0.15,
                 "operation": "add"
             },
-            "parents": ["chain_wave"],
-            "children": ["endless_cascade"],
+            "parents": [
+                "chain_wave"
+            ],
+            "children": [
+                "endless_cascade"
+            ],
             "position": {
-                "x": -150,
-                "y": 550
+                "x": 730,
+                "y": 720
             }
         },
         "endless_cascade": {
@@ -301,11 +396,15 @@
                 "property": "endlessCascadeActive",
                 "value": true
             },
-            "parents": ["oceanic_precision"],
-            "children": ["water_dance"],
+            "parents": [
+                "oceanic_precision"
+            ],
+            "children": [
+                "water_dance"
+            ],
             "position": {
-                "x": -100,
-                "y": 650
+                "x": 730,
+                "y": 930
             }
         },
         "water_dance": {
@@ -318,11 +417,13 @@
                 "property": "waterDanceActive",
                 "value": true
             },
-            "parents": ["endless_cascade"],
+            "parents": [
+                "endless_cascade"
+            ],
             "children": [],
             "position": {
-                "x": -100,
-                "y": 750
+                "x": 730,
+                "y": 1450
             },
             "powerful": true
         },
@@ -336,11 +437,15 @@
                 "property": "aquaticResonanceActive",
                 "value": true
             },
-            "parents": ["chain_wave"],
-            "children": ["tidal_mastery"],
+            "parents": [
+                "chain_wave"
+            ],
+            "children": [
+                "tidal_mastery"
+            ],
             "position": {
-                "x": -250,
-                "y": 777
+                "x": 480,
+                "y": 740
             }
         },
         "tidal_mastery": {
@@ -353,11 +458,15 @@
                 "property": "tidalMasteryActive",
                 "value": true
             },
-            "parents": ["aquatic_resonance"],
-            "children": ["bubble_pop"],
+            "parents": [
+                "aquatic_resonance"
+            ],
+            "children": [
+                "bubble_pop"
+            ],
             "position": {
-                "x": -250,
-                "y": 900
+                "x": 480,
+                "y": 940
             }
         },
         "bubble_pop": {
@@ -371,11 +480,13 @@
                 "value": true
             },
             "debug": true,
-            "parents": ["tidal_mastery"],
+            "parents": [
+                "tidal_mastery"
+            ],
             "children": [],
             "position": {
-                "x": -250,
-                "y": 1050
+                "x": 480,
+                "y": 1450
             },
             "powerful": true
         },
@@ -389,8 +500,14 @@
                 "property": "abyssalMarkActive",
                 "value": true
             },
-            "parents": ["crushing_depths"],
-            "children": []
+            "parents": [
+                "crushing_depths"
+            ],
+            "children": [],
+            "position": {
+                "x": 1180,
+                "y": 550
+            }
         },
         "evasive_insight": {
             "id": "evasive_insight",
@@ -402,8 +519,14 @@
                 "property": "fluidEvasionActive",
                 "value": true
             },
-            "parents": ["crushing_depths"],
-            "children": []
+            "parents": [
+                "crushing_depths"
+            ],
+            "children": [],
+            "position": {
+                "x": 990,
+                "y": 550
+            }
         },
         "oceanic_harmony": {
             "id": "oceanic_harmony",
@@ -415,8 +538,17 @@
                 "property": "oceanicHarmonyActive",
                 "value": true
             },
-            "parents": ["enhanced_barrage", "critical_cooldown"],
-            "children": ["clam_protection_aura"]
+            "parents": [
+                "enhanced_barrage",
+                "critical_cooldown"
+            ],
+            "children": [
+                "clam_protection_aura"
+            ],
+            "position": {
+                "x": 1500,
+                "y": 930
+            }
         },
         "clam_protection_aura": {
             "id": "clam_protection_aura",
@@ -428,9 +560,15 @@
                 "property": "clamProtectionAuraActive",
                 "value": true
             },
-            "parents": ["oceanic_harmony"],
+            "parents": [
+                "oceanic_harmony"
+            ],
             "children": [],
-            "powerful": true
+            "powerful": true,
+            "position": {
+                "x": 1500,
+                "y": 1450
+            }
         }
     }
-} 
+}

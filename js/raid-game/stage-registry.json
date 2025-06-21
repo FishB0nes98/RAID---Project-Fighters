@@ -412,11 +412,11 @@
       "isHidden": true
     },
     {
-      "id": "healing_forbidden_challenge",
-      "path": "js/raid-game/stages/healing_forbidden_challenge.json",
-      "name": "Healing Forbidden Challenge",
-      "description": "Face a quartet of formidable opponents where no healing magic can save you! Farmer Raiden, Schoolgirl Ephelt, Farmer Nina, and Schoolgirl Ayane await in this ultimate test of endurance. Choose your 3 strongest fighters wisely!",
-      "difficulty": 7,
+      "id": "cleansing_winds_challenge",
+      "path": "js/raid-game/stages/cleansing_winds_challenge.json",
+      "name": "Cleansing Winds Challenge",
+      "description": "Face five formidable opponents in a mystical battlefield where cleansing winds sweep away all magical effects every 3rd turn! Bridget, Farmer Raiden, Infernal Ibuki, Atlantean Kagome, and Zoey await in this ultimate test of strategy. Choose your 5 strongest fighters wisely!",
+      "difficulty": 8,
       "type": "weekly_challenge",
       "backgroundImage": "images/stages/burning_school_gym.png",
       "backgroundMusic": "sounds/music/epic_battle_theme.mp3",
@@ -494,6 +494,19 @@
       "backgroundMusic": "sounds/music/frozen_theme.mp3",
       "unlockRequirements": [],
       "path": "js/raid-game/stages/frozen_underground_ruins.json"
+    },
+    {
+      "id": "draft_mode_stage",
+      "name": "Draft Battle Arena",
+      "description": "A neutral arena for draft mode battles between player and AI teams.",
+      "difficulty": 3,
+      "type": "draft",
+      "backgroundImage": "images/stages/default.png",
+      "backgroundMusic": null,
+      "unlockRequirements": [],
+      "path": "js/raid-game/stages/draft_mode_stage.json",
+      "playerunlocked": true,
+      "isDraftMode": true
     }
   ]
 }

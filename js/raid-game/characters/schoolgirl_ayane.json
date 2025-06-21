@@ -29,7 +29,7 @@
             "manaCost": 50,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 425 (+55% Physical Damage). 40% chance to gain 50% dodge chance for 1 turn.",
+            "description": "Deals 425 (+55% Physical Damage). 60% chance to gain 50% dodge chance for 1 turn.",
             "icon": "Icons/abilities/butterfly_dagger.webp"
         },
         {
@@ -37,7 +37,7 @@
             "name": "Butterfly Trail (Schoolgirl Version)",
             "type": "buff",
             "manaCost": 85,
-            "cooldown": 9,
+            "cooldown": 7,
             "targetType": "all_allies",
             "description": "Gives ALL allies a buff increasing Physical Damage and Magical Damage by 20% for 4 turns.",
             "icon": "Icons/abilities/butterfly_trail_schoolgirl.webp"
@@ -59,8 +59,8 @@
             "damageType": "physical",
             "amount": 2.5,
             "scalingStat": "physicalDamage",
-            "manaCost": 200,
-            "cooldown": 15,
+            "manaCost": 100,
+            "cooldown": 12,
             "targetType": "enemy",
             "description": "Deals 250% Physical Damage. If the target is below 25% HP, deals 600% Physical Damage instead. Cooldown resets if this ability defeats the target.",
             "icon": "Icons/abilities/execute_attack_schoolgirl.webp"

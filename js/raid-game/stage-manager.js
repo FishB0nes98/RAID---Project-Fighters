@@ -162,17 +162,31 @@ class StageManager {
             this.currentStage = stageData;
             this.currentStage.id = stageId; // Ensure the ID is stored on the loaded data
             
+            // Handle random background selection for draft mode
+            if (stageData.isDraftMode && stageData.randomBackgrounds && Array.isArray(stageData.randomBackgrounds)) {
+                const randomIndex = Math.floor(Math.random() * stageData.randomBackgrounds.length);
+                const selectedBackground = stageData.randomBackgrounds[randomIndex];
+                this.currentStage.backgroundImage = selectedBackground;
+                console.log(`[StageManager] Draft mode: Selected random background: ${selectedBackground}`);
+            }
+            
             // Initialize the game state for this stage
             this.resetGameState();
 
             // Load stage modifiers if present
             this.loadStageModifiers();
             
-            // Load AI characters
-            await this.loadAICharacters(stageData.enemies);
-            
-            // Load player characters using the provided state
-            await this.loadPlayerCharacters(teamState); // Pass the state directly
+            // Check if this is draft mode and handle accordingly
+            if (stageData.isDraftMode || stageId === 'draft_mode_stage') {
+                console.log('[StageManager] Draft mode detected, loading draft results...');
+                await this.loadDraftModeTeams();
+            } else {
+                // Load AI characters
+                await this.loadAICharacters(stageData.enemies);
+                
+                // Load player characters using the provided state
+                await this.loadPlayerCharacters(teamState); // Pass the state directly
+            }
             
             // --- NEW: Initialize Passives After Loading --- 
             console.log("[StageManager] Initializing passives after stage load...");
@@ -524,6 +538,173 @@ class StageManager {
         this.stageModificationMessages = [];
     }
     
+    // Load draft mode teams from localStorage
+    async loadDraftModeTeams() {
+        console.log('[StageManager] Loading draft mode teams...');
+        
+        // Get draft results from localStorage
+        const draftResults = localStorage.getItem('draftResults');
+        if (!draftResults) {
+            console.error('[StageManager] No draft results found in localStorage');
+            throw new Error('No draft results found. Please complete a draft first.');
+        }
+        
+        let draftData;
+        try {
+            draftData = JSON.parse(draftResults);
+            console.log('[StageManager] Draft results loaded:', draftData);
+        } catch (error) {
+            console.error('[StageManager] Error parsing draft results:', error);
+            throw new Error('Invalid draft results data');
+        }
+        
+        // Validate draft data
+        if (!draftData.playerTeam || !draftData.aiTeam) {
+            console.error('[StageManager] Invalid draft data structure:', draftData);
+            throw new Error('Invalid draft data structure');
+        }
+        
+        // Handle stage modifiers from draft settings
+        if (draftData.stageModifiers) {
+            console.log('[StageManager] Processing stage modifier settings:', draftData.stageModifiers);
+            
+            if (draftData.stageModifiers.randomModifierEnabled && draftData.stageModifiers.selectedRandomModifier) {
+                // Add the selected random modifier to the stage
+                const randomModifier = draftData.stageModifiers.selectedRandomModifier;
+                console.log(`[StageManager] Adding random stage modifier: ${randomModifier.name} (${randomModifier.id})`);
+                
+                // Add to current stage's stageEffects
+                if (!this.currentStage.stageEffects) {
+                    this.currentStage.stageEffects = [];
+                }
+                
+                // Check if the modifier is not already present
+                const existingModifier = this.currentStage.stageEffects.find(effect => effect.id === randomModifier.id);
+                if (!existingModifier) {
+                    this.currentStage.stageEffects.push({
+                        id: randomModifier.id,
+                        name: randomModifier.name,
+                        description: randomModifier.description,
+                        icon: randomModifier.icon
+                    });
+                    console.log(`[StageManager] Added random modifier ${randomModifier.name} to stage effects`);
+                } else {
+                    console.log(`[StageManager] Random modifier ${randomModifier.name} already exists in stage effects`);
+                }
+            } else {
+                console.log('[StageManager] Random modifier disabled or not selected');
+            }
+        }
+        
+        // Initialize arrays
+        this.gameState.playerCharacters = [];
+        this.gameState.aiCharacters = [];
+        
+        // Extract character IDs from the draft data (handle both old and new formats)
+        const playerTeamIds = draftData.playerTeam.map(char => 
+            typeof char === 'string' ? char : char.id
+        );
+        const aiTeamIds = draftData.aiTeam.map(char => 
+            typeof char === 'string' ? char : char.id
+        );
+        
+        // Load player team
+        console.log('[StageManager] Loading player team:', playerTeamIds);
+        await this.loadDraftTeam(playerTeamIds, false); // false = player team
+        
+        // Load AI team
+        console.log('[StageManager] Loading AI team:', aiTeamIds);
+        await this.loadDraftTeam(aiTeamIds, true); // true = AI team
+        
+        // Reload stage modifiers after adding the random modifier
+        this.loadStageModifiers();
+        
+        // Clear draft results from localStorage after loading
+        localStorage.removeItem('draftResults');
+        console.log('[StageManager] Draft results cleared from localStorage');
+        
+        console.log('[StageManager] Draft mode teams loaded successfully');
+        console.log('Player characters:', this.gameState.playerCharacters.map(c => c.name));
+        console.log('AI characters:', this.gameState.aiCharacters.map(c => c.name));
+    }
+    
+    // Load a specific draft team (player or AI)
+    async loadDraftTeam(teamArray, isAI) {
+        console.log(`[StageManager] Loading ${isAI ? 'AI' : 'player'} team:`, teamArray);
+        
+        const targetArray = isAI ? this.gameState.aiCharacters : this.gameState.playerCharacters;
+        let instanceCounter = 0;
+        
+        // Load character registry for talent data (for player characters)
+        let allSelectedTalents = {};
+        if (!isAI) {
+            const userId = getCurrentUserId();
+            if (userId) {
+                try {
+                    const talentsRef = firebaseDatabase.ref(`users/${userId}/characterTalents`);
+                    const snapshot = await talentsRef.once('value');
+                    allSelectedTalents = snapshot.val() || {};
+                    console.log("[StageManager] Fetched selected talents for draft team:", JSON.stringify(allSelectedTalents));
+                } catch (error) {
+                    console.error("[StageManager] Error fetching selected talents from Firebase:", error);
+                }
+            }
+        }
+        
+        for (const charId of teamArray) {
+            if (!charId) continue; // Skip empty slots
+            
+            try {
+                console.log(`[StageManager] Loading character: ${charId} for ${isAI ? 'AI' : 'player'} team`);
+                
+                const charData = await CharacterFactory.loadCharacterData(charId);
+                if (!charData) {
+                    console.error(`Failed to load character data: ${charId}`);
+                    continue;
+                }
+                
+                // Create character with talents (for player) or without (for AI)
+                let character;
+                if (isAI) {
+                    character = await CharacterFactory.createCharacter(charData, []);
+                } else {
+                    const characterTalentData = allSelectedTalents[charId] || {};
+                    const selectedTalentIds = Object.keys(characterTalentData);
+                    console.log(`[StageManager] Loading player character ${charId} with talents:`, selectedTalentIds);
+                    character = await CharacterFactory.createCharacter(charData, selectedTalentIds);
+                    // Ensure talents are applied during Draft Mode so they affect stats and appear in the Talents panel
+                    if (selectedTalentIds.length > 0 && window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function') {
+                        try {
+                            await window.talentManager.applyTalentsToCharacter(character, selectedTalentIds);
+                        } catch (talentError) {
+                            console.error(`[StageManager] Error applying talents to ${character.name} in Draft Mode:`, talentError);
+                        }
+                    }
+                }
+                
+                if (!character) {
+                    console.error(`[StageManager] CharacterFactory returned null for ${charId}. Skipping.`);
+                    continue;
+                }
+                
+                // Assign unique instanceId and team properties
+                const teamPrefix = isAI ? 'ai' : 'player';
+                character.instanceId = `${character.id}-${teamPrefix}-${instanceCounter++}`;
+                character.isAI = isAI;
+                
+                console.log(`Assigned ${teamPrefix} instance ID: ${character.instanceId} to ${character.name}`);
+                
+                // Add to the appropriate team
+                targetArray.push(character);
+                
+            } catch (error) {
+                console.error(`Error loading character ${charId}:`, error);
+            }
+        }
+        
+        console.log(`[StageManager] ${isAI ? 'AI' : 'Player'} team loaded with ${targetArray.length} characters`);
+    }
+
     // Load AI characters for the stage
     async loadAICharacters(enemyList) {
         if (!enemyList || !Array.isArray(enemyList)) {
@@ -814,13 +995,15 @@ class StageManager {
                 // SAFETY CHECK: Only apply talents to player characters (not AI)
                 if (window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function' && character.isAI === false) {
                     const selectedTalents = await window.talentManager.getSelectedTalents(charId, userId);
-                    // Check if selectedTalents is not null and has keys
-                    if (selectedTalents && Object.keys(selectedTalents).length > 0) {
+                    // Check if selectedTalents is not null and is an array with length > 0
+                    if (selectedTalents && Array.isArray(selectedTalents) && selectedTalents.length > 0) {
                         console.log(`[StageManager] Stats BEFORE talent application for ${character.name}:`, {
                             hp: character.stats.hp,
                             maxHp: character.stats.maxHp,
                             baseHp: character.baseStats?.hp,
-                            baseMaxHp: character.baseStats?.maxHp
+                            baseMaxHp: character.baseStats?.maxHp,
+                            critChance: character.stats.critChance,
+                            baseCritChance: character.baseStats?.critChance
                         });
                         console.log(`[StageManager] Applying selected talents for ${character.name}:`, selectedTalents);
                         await window.talentManager.applyTalentsToCharacter(character, selectedTalents);
@@ -828,10 +1011,12 @@ class StageManager {
                             hp: character.stats.hp,
                             maxHp: character.stats.maxHp,
                             baseHp: character.baseStats?.hp,
-                            baseMaxHp: character.baseStats?.maxHp
+                            baseMaxHp: character.baseStats?.maxHp,
+                            critChance: character.stats.critChance,
+                            baseCritChance: character.baseStats?.critChance
                         });
                     } else {
-                        console.log(`[StageManager] No talents selected or found for ${character.name}`);
+                        console.log(`[StageManager] No talents selected or found for ${character.name}. Selected talents:`, selectedTalents);
                     }
                 } else {
                     console.warn('[StageManager] TalentManager or applyTalentsToCharacter method not available. Skipping talent application for', character.name);
@@ -963,7 +1148,7 @@ class StageManager {
                                                     character.stats.currentMana = (character.stats.currentMana || character.stats.mana) + growth;
                                                 }
                                                 
-                                                statsGrown.push(`${statName}: +${growth}`);
+                                                statsGrown.push(`${statName}: +${growthPercent}%`);
                                             }
                                         }
                                     });
@@ -1290,7 +1475,7 @@ class StageManager {
                                                     character.stats.currentMana = (character.stats.currentMana || character.stats.mana) + growth;
                                                 }
                                                 
-                                                statsGrown.push(`${statName}: +${growth}`);
+                                                statsGrown.push(`${statName}: +${growthPercent}%`);
                                             }
                                         }
                                     });

@@ -285,7 +285,7 @@ let bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
     // Use baseDamage from the abilityInstance passed to the effect function
     const baseDamage = abilityInstance.baseDamage || 365; // Default if not found or undefined
     const magicalDamage = caster.stats.magicalDamage || 0;
-    const damagePerHit = baseDamage + Math.floor(magicalDamage * 0.85);
+    const damagePerHit = baseDamage + Math.floor(magicalDamage * 1.0);
     
     // Process each target with a small delay between them
     selectedTargets.forEach((target, index) => {
@@ -1196,6 +1196,13 @@ function showBubbleSourceVFX(caster) {
         bubble.style.animationDelay = `${Math.random() * 0.5}s`;
         bubble.style.width = `${8 + Math.random() * 12}px`;
         bubble.style.height = bubble.style.width;
+        
+        // Add random direction for float animation
+        const randomX = (Math.random() - 0.5) * 80; // -40 to 40px
+        const randomY = -30 - (Math.random() * 40); // -30 to -70px
+        bubble.style.setProperty('--float-x', `${randomX}px`);
+        bubble.style.setProperty('--float-y', `${randomY}px`);
+        
         bubbleSourceVFX.appendChild(bubble);
     }
     
@@ -1438,6 +1445,12 @@ const bridgetArcaneBubbleShieldEffect = (caster) => {
                 window.trackBubbleArsenalStats(character, target, damageResult, false);
             }
             
+            // Trigger passive healing from the damage dealt
+            if (character.passiveHandler && character.passiveHandler.applyPassiveHealing) {
+                character.passiveHandler.applyPassiveHealing(damageResult.damage);
+                console.log(`[Bubble Arsenal] Triggered passive healing for ${damageResult.damage} damage from ${character.name}`);
+            }
+            
             // Check if critical hit occurred and dispatch event
             if (damageResult.isCritical) {
                 dispatchBridgetCriticalHit(character, target, damageResult.damage);
@@ -1496,31 +1509,35 @@ function showWaterShieldVFX(character) {
     
     if (!charElement) return;
     
-    // Create water shield element if it doesn't exist
-    let shieldElement = charElement.querySelector('.bridget-water-shield');
-    if (!shieldElement) {
-        shieldElement = document.createElement('div');
-        shieldElement.className = 'bridget-water-shield';
-        charElement.appendChild(shieldElement);
-        
-        // Create shield ripples
-        for (let i = 0; i < 3; i++) {
-            const ripple = document.createElement('div');
-            ripple.className = 'bridget-shield-ripple';
-            ripple.style.animationDelay = `${i * 0.5}s`;
-            shieldElement.appendChild(ripple);
-        }
-        
-        // Create shield particles
-        for (let i = 0; i < 20; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'bridget-shield-particle';
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.top = `${Math.random() * 100}%`;
-            particle.style.animationDelay = `${Math.random() * 2}s`;
-            shieldElement.appendChild(particle);
-        }
+    // Remove any existing water shield VFX to prevent duplicates
+    cleanupWaterShieldVFX(character);
+    
+    // Create water shield element
+    const shieldElement = document.createElement('div');
+    shieldElement.className = 'bridget-water-shield';
+    shieldElement.setAttribute('data-persistent-vfx', 'true'); // Mark as persistent
+    shieldElement.setAttribute('data-buff-source', 'bridget_water_shield'); // Link to buff
+    charElement.appendChild(shieldElement);
+    
+    // Create shield ripples
+    for (let i = 0; i < 3; i++) {
+        const ripple = document.createElement('div');
+        ripple.className = 'bridget-shield-ripple';
+        ripple.style.animationDelay = `${i * 0.8}s`; // Stagger ripples more
+        shieldElement.appendChild(ripple);
     }
+    
+    // Create shield particles
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'bridget-shield-particle';
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 2.5}s`; // Match animation duration
+        shieldElement.appendChild(particle);
+    }
+    
+    console.log(`[showWaterShieldVFX] Persistent water shield VFX created for: ${character.name}`);
 }
 
 /**
@@ -1532,40 +1549,95 @@ function updateBubbleArsenalVFX(character, bubbleCount) {
     
     if (!charElement) return;
     
-    // Remove existing bubble arsenal if present
     let arsenalElement = charElement.querySelector('.bridget-bubble-arsenal');
-    if (arsenalElement) {
-        charElement.removeChild(arsenalElement);
+    
+    // If no arsenal element exists and we need bubbles, create it
+    if (!arsenalElement && bubbleCount > 0) {
+        // Create new bubble arsenal container
+        arsenalElement = document.createElement('div');
+        arsenalElement.className = 'bridget-bubble-arsenal';
+        arsenalElement.setAttribute('data-persistent-vfx', 'true'); // Mark as persistent
+        arsenalElement.setAttribute('data-buff-source', 'bridget_bubble_arsenal'); // Link to buff
+        charElement.appendChild(arsenalElement);
+        
+        // Create orbit element
+        const orbitElement = document.createElement('div'); 
+        orbitElement.className = 'bridget-bubble-orbit';
+        arsenalElement.appendChild(orbitElement);
+        
+        console.log(`[updateBubbleArsenalVFX] Created new bubble arsenal for ${character.name}`);
     }
     
-    // If no bubbles left, don't create new element
-    if (bubbleCount <= 0) return;
+    // If no bubbles left, remove the entire arsenal
+    if (bubbleCount <= 0) {
+        if (arsenalElement) {
+            cleanupBubbleArsenalVFX(character);
+        }
+        return;
+    }
     
-    // Create new bubble arsenal container
-    arsenalElement = document.createElement('div');
-    arsenalElement.className = 'bridget-bubble-arsenal';
-    charElement.appendChild(arsenalElement);
+    const orbitElement = arsenalElement.querySelector('.bridget-bubble-orbit');
+    if (!orbitElement) return;
     
-    // Create orbit element
-    const orbitElement = document.createElement('div');
-    orbitElement.className = 'bridget-bubble-orbit';
-    arsenalElement.appendChild(orbitElement);
+    const currentBubbles = orbitElement.querySelectorAll('.bridget-arsenal-bubble');
+    const currentCount = currentBubbles.length;
     
-    // Create the bubbles
-    for (let i = 0; i < bubbleCount; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'bridget-arsenal-bubble';
+    console.log(`[updateBubbleArsenalVFX] Current: ${currentCount}, Target: ${bubbleCount} for ${character.name}`);
+    
+    // If we need to remove bubbles (fired one)
+    if (bubbleCount < currentCount) {
+        const bubblesToRemove = currentCount - bubbleCount;
         
-        // Position bubbles in orbit
-        const angle = (i * (360 / bubbleCount)) * (Math.PI / 180);
-        const orbitRadius = 50; // Adjust as needed
+        for (let i = 0; i < bubblesToRemove; i++) {
+            if (currentBubbles[i]) {
+                // Add firing animation before removal
+                currentBubbles[i].classList.add('firing');
+                
+                // Remove the bubble after animation
+                setTimeout(() => {
+                    if (currentBubbles[i] && currentBubbles[i].parentNode) {
+                        currentBubbles[i].parentNode.removeChild(currentBubbles[i]);
+                    }
+                }, 300); // Match firing animation duration
+            }
+        }
         
+        // Reposition remaining bubbles after a brief delay
+        setTimeout(() => {
+            repositionBubbles(orbitElement, bubbleCount);
+        }, 350);
+    }
+    // If we need to add bubbles (initial creation or refresh)
+    else if (bubbleCount > currentCount) {
+        const bubblesToAdd = bubbleCount - currentCount;
+        
+        for (let i = 0; i < bubblesToAdd; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bridget-arsenal-bubble';
+            bubble.style.animationDelay = `${(currentCount + i) * 0.3}s`;
+            orbitElement.appendChild(bubble);
+        }
+        
+        // Reposition all bubbles
+        repositionBubbles(orbitElement, bubbleCount);
+    }
+    
+    console.log(`[updateBubbleArsenalVFX] Updated bubble arsenal VFX for ${character.name} with ${bubbleCount} bubbles`);
+}
+
+/**
+ * Repositions bubbles in orbit formation
+ */
+function repositionBubbles(orbitElement, bubbleCount) {
+    const bubbles = orbitElement.querySelectorAll('.bridget-arsenal-bubble:not(.firing)');
+    const orbitRadius = 50;
+    
+    bubbles.forEach((bubble, index) => {
+        const angle = (index * (360 / bubbleCount)) * (Math.PI / 180);
         bubble.style.left = `calc(50% + ${Math.cos(angle) * orbitRadius}px)`;
         bubble.style.top = `calc(50% + ${Math.sin(angle) * orbitRadius}px)`;
-        bubble.style.animationDelay = `${i * 0.2}s`;
-        
-        orbitElement.appendChild(bubble);
-    }
+        bubble.style.transition = 'left 0.5s ease, top 0.5s ease'; // Smooth repositioning
+    });
 }
 
 /**
@@ -1795,13 +1867,16 @@ function cleanupWaterShieldVFX(character) {
     // Find water shield element
     const shieldElement = charElement.querySelector('.bridget-water-shield');
     if (shieldElement) {
+        console.log(`[cleanupWaterShieldVFX] Cleaning up water shield VFX for: ${character.name}`);
+        
         // Add removing class for fade-out animation
         shieldElement.classList.add('removing');
         
         // Remove after animation completes
         setTimeout(() => {
-            if (shieldElement.parentNode === charElement) {
+            if (shieldElement && shieldElement.parentNode === charElement) {
                 charElement.removeChild(shieldElement);
+                console.log(`[cleanupWaterShieldVFX] Water shield VFX removed for: ${character.name}`);
             }
         }, 800); // Match duration with CSS animation
     }
@@ -1819,13 +1894,16 @@ function cleanupBubbleArsenalVFX(character) {
     // Find bubble arsenal element
     const arsenalElement = charElement.querySelector('.bridget-bubble-arsenal');
     if (arsenalElement) {
+        console.log(`[cleanupBubbleArsenalVFX] Cleaning up bubble arsenal VFX for: ${character.name}`);
+        
         // Add removing class for fade-out animation
         arsenalElement.classList.add('removing');
         
         // Remove after animation completes
         setTimeout(() => {
-            if (arsenalElement.parentNode === charElement) {
+            if (arsenalElement && arsenalElement.parentNode === charElement) {
                 charElement.removeChild(arsenalElement);
+                console.log(`[cleanupBubbleArsenalVFX] Bubble arsenal VFX removed for: ${character.name}`);
             }
         }, 800); // Match duration with CSS animation
     }

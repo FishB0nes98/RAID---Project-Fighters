@@ -2,6 +2,45 @@
 window.SkinRegistry = {
     // Define all available skins
     skins: {
+        // Schoolgirl Julia 2
+        'schoolgirl_julia_2': {
+            id: 'schoolgirl_julia_2',
+            name: 'Schoolgirl Julia 2',
+            characterId: 'schoolgirl_julia',
+            description: 'A stylish alternative school uniform for the dedicated healer Julia.',
+            imagePath: 'Loading Screen/Schoolgirl Julia 2.png',
+            price: 1500,
+            rarity: 'common',
+            category: 'schoolgirl',
+            unlocked: false
+        },
+        
+        // Schoolgirl Ayane Black
+        'schoolgirl_ayane_black': {
+            id: 'schoolgirl_ayane_black',
+            name: 'Schoolgirl Ayane Black',
+            characterId: 'schoolgirl_ayane',
+            description: 'A sleek black school uniform that enhances Ayane\'s mysterious aura.',
+            imagePath: 'Loading Screen/Schoolgirl Ayane Black.png',
+            price: 1500,
+            rarity: 'common',
+            category: 'schoolgirl',
+            unlocked: false
+        },
+        
+        // Schoolgirl Elphelt White
+        'schoolgirl_elphelt_white': {
+            id: 'schoolgirl_elphelt_white',
+            name: 'Schoolgirl Elphelt White',
+            characterId: 'schoolgirl_elphelt',
+            description: 'A pure white school dress that radiates elegance and grace for Elphelt.',
+            imagePath: 'Loading Screen/Schoolgirl Elphelt White.png',
+            price: 1500,
+            rarity: 'common',
+            category: 'schoolgirl',
+            unlocked: false
+        },
+        
         // Farmer Nina Nature
         'farmer_nina_nature': {
             id: 'farmer_nina_nature',

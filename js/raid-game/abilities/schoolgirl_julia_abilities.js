@@ -132,7 +132,44 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
             const healResult = ally.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_q' });
             const actualHeal = healResult.healAmount; // Extract healAmount from result object
             log(`${ally.name} is healed for ${actualHeal}.`);
-            
+
+            // NEW: Healing Kick Mana Flow talent - restore mana equal to 5% of the healing
+            const manaPercent = caster.healingKickRestoresManaPercent || 0;
+            if (manaPercent > 0 && actualHeal > 0) {
+                const manaRestore = Math.floor(actualHeal * manaPercent);
+                if (manaRestore > 0) {
+                    const oldMana = ally.stats.currentMana !== undefined ? ally.stats.currentMana : (ally.stats.mana || 0);
+                    const maxMana = ally.stats.maxMana !== undefined ? ally.stats.maxMana : (ally.stats.mana || 0);
+                    const imprisonDebuff = ally.debuffs?.find(d => d && d.effects && d.effects.cantRestoreMana);
+                    if (!imprisonDebuff && maxMana > 0) {
+                        let newMana = oldMana;
+                        if (ally.stats.currentMana !== undefined) {
+                            ally.stats.currentMana = Math.min(oldMana + manaRestore, maxMana);
+                            newMana = ally.stats.currentMana;
+                        } else if (ally.stats.mana !== undefined) {
+                            ally.stats.mana = Math.min(oldMana + manaRestore, maxMana);
+                            newMana = ally.stats.mana;
+                        }
+                        const actualRestored = newMana - oldMana;
+                        if (actualRestored > 0) {
+                            log(`${ally.name} regains ${actualRestored} mana from Healing Mana Flow.`);
+                            if (window.gameManager && window.gameManager.uiManager) {
+                                window.gameManager.uiManager.triggerManaAnimation(ally, 'restore', actualRestored);
+                            }
+                            // Optional VFX for mana restore
+                            const allyElement = document.getElementById(`character-${ally.instanceId || ally.id}`);
+                            if (allyElement) {
+                                const manaVfx = document.createElement('div');
+                                manaVfx.className = 'julia-mana-restore-vfx';
+                                manaVfx.textContent = `+${actualRestored} MP`;
+                                allyElement.appendChild(manaVfx);
+                                setTimeout(() => manaVfx.remove(), 1000);
+                            }
+                        }
+                    }
+                }
+            }
+
             // Trigger passive if heal was successful and caster has the handler
             if (actualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
                 caster.passiveHandler.onHealDealt(caster, ally, actualHeal);
@@ -214,18 +251,18 @@ const schoolgirlJuliaSproutPlantingEffect = (caster, target) => {
     }
     // --- End Sprout Planting VFX ---
 
-    // Create the Sprout buff
+    // --- Modify Sprout Planting duration based on talent ---
+    const sproutDuration = caster.sproutBloomsAfterOneTurn ? 1 : 2;
     const sproutBuff = new Effect(
-        'schoolgirl_julia_w_sprout', // Unique ID for the buff
+        'schoolgirl_julia_w_sprout',
         'Healing Sprout',
-        'Icons/abilities/sprout_planting.jfif', // Use a placeholder icon path
-        2, // Duration: 2 turns (Changed from 3)
+        'Icons/abilities/sprout_planting.jfif',
+        sproutDuration,
         (character) => {
-            // Optional: Effect that runs each turn while the buff is active
-            // log(`${character.name}'s Healing Sprout is growing...`);
+            // Optional: effect each turn
         },
-        false // isDebuff = false
-    ).setDescription('A healing sprout that will bloom after 2 turns, restoring health.');
+        false
+    ).setDescription('A healing sprout that will bloom after ' + sproutDuration + ' turns, restoring health.');
 
     // Define the onRemove function (called when buff expires or is removed)
     sproutBuff.onRemove = (buffedCharacter) => {
@@ -276,8 +313,30 @@ const schoolgirlJuliaW = new Ability(
     75, // Mana cost
     6,  // Cooldown (Changed from 9)
     schoolgirlJuliaSproutPlantingEffect
-).setDescription('Plants a healing sprout on an ally for 2 turns. When the sprout expires, it heals the target for 500 (+100% Healing Power) HP.')
- .setTargetType('ally'); // Target allies
+);
+
+// --- Dynamic End-Turn Text & doesNotEndTurn Support ---
+// By default the ability ends the turn
+schoolgirlJuliaW.doesNotEndTurn = false;
+
+// --- Update generateDescription for W ---
+schoolgirlJuliaW.generateDescription = function () {
+    const base = Ability.prototype.generateDescription.call(this);
+    const extras = [];
+    if (this.doesNotEndTurn === true) extras.push('Does not end your turn.');
+    if (this.bloomsAfterOneTurn) extras.push('Blooms after 1 turn.');
+    if (extras.length > 0) {
+        return base + '\n<span class="talent-effect utility">Talent: ' + extras.join(' ') + '</span>';
+    }
+    return base;
+};
+
+// Ensure flag exists
+schoolgirlJuliaW.bloomsAfterOneTurn = false;
+
+schoolgirlJuliaW
+    .setDescription('Plants a healing sprout on an ally for ' + schoolgirlJuliaW.duration + ' turns. When the sprout expires, it heals the target for 1250 (+100% Healing Power) HP.')
+    .setTargetType('ally');
 
 // --- Ability Factory Integration ---
 if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbilities === 'function') {
@@ -492,8 +551,12 @@ const schoolgirlJuliaPushbackEffect = (caster, target) => {
     // Apply lifesteal if any (though Julia likely won't have base lifesteal)
     caster.applyLifesteal(result.damage);
 
-    // Apply stun effect (40% chance, 2 turn duration)
-    if (Math.random() < 0.40) {
+    // Determine stun chance from ability instance (supports talent mods)
+    const abilityInstance = caster.abilities.find(a => a.id === 'schoolgirl_julia_e');
+    const stunChance = (abilityInstance && typeof abilityInstance.stunChance === 'number') ? abilityInstance.stunChance : 0.40;
+
+    // Apply stun effect based on current stun chance
+    if (Math.random() < stunChance) {
         const stunDebuff = new Effect(
             'stun_debuff', // Use generic stun ID
             'Stunned',
@@ -544,10 +607,24 @@ const schoolgirlJuliaE = new Ability(
     'Pushback Attack',
     'Icons/abilities/pushback_attack.jfif', // Placeholder icon
     50, // Mana cost
-    5, // Cooldown (Changed from 10)
+    5, // Cooldown
     schoolgirlJuliaPushbackEffect
-).setDescription('Deals 150% physical damage to the target and has an 40% chance to stun it for 2 turns.') // Updated description
- .setTargetType('enemy');
+);
+
+// --- Dynamic Stun Chance & Description Support ---
+// Base stun chance (40%) before talents
+schoolgirlJuliaE.stunChance = 0.40;
+
+// Custom generateDescription that inserts the current stun chance percentage
+schoolgirlJuliaE.generateDescription = function () {
+    this.stunChancePercent = Math.round((this.stunChance || 0) * 100);
+    return Ability.prototype.generateDescription.call(this);
+};
+
+// Set base description with placeholder and target type
+schoolgirlJuliaE
+    .setDescription('Deals 150% physical damage to the target and has an {stunChancePercent}% chance to stun it for 2 turns.')
+    .setTargetType('enemy');
 
 // --- Ability Factory Integration ---
 // Ensure this runs after the main game scripts have loaded
@@ -637,6 +714,16 @@ const schoolgirlJuliaSpiritsStrengthEffect = (caster, target) => { // Target par
              }, 1500); // Duration of VFX
         }
          // --- End Spirits Strength VFX ---
+
+        if (caster.spiritsStrengthCleansesDebuffs && ally.debuffs && ally.debuffs.length > 0) {
+            // Remove all debuffs
+            const debuffIds = ally.debuffs.map(d => d.id);
+            debuffIds.forEach(id => ally.removeDebuff(id));
+            if (typeof ally.showPurifyingResolveVFX === 'function') {
+                ally.showPurifyingResolveVFX();
+            }
+            log(`${ally.name}'s debuffs are cleansed by Spirits Strength!`, 'talent-effect positive');
+        }
     });
 
     log(`Spirits Strength healed the team for a total of ${totalHealed}.`);
@@ -688,4 +775,58 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
      window.definedAbilities.schoolgirl_julia_w = schoolgirlJuliaW;
      window.definedAbilities.schoolgirl_julia_e = schoolgirlJuliaE;
      window.definedAbilities.schoolgirl_julia_r = schoolgirlJuliaR;
-} 
+}
+
+// === TurnStart Listener for Flourishing Spirits ===
+if (typeof window !== 'undefined') {
+    document.addEventListener('TurnStart', (e) => {
+        const turn = e.detail?.turn || 0;
+        if (turn >= 11 && window.gameManager) {
+            const allChars = [...window.gameManager.gameState.playerCharacters, ...window.gameManager.gameState.aiCharacters];
+            allChars.forEach(ch => {
+                if (ch.id === 'schoolgirl_julia' && ch.lateHealBoostPercent && !ch.lateHealBoostApplied) {
+                    ch.recalculateStats('FlourishingSpiritsTurnStart');
+                    if (window.updateCharacterUI) {
+                        window.updateCharacterUI(ch);
+                    }
+                }
+            });
+        }
+    });
+}
+
+// --- GenerateDescription for R ---
+schoolgirlJuliaR.generateDescription = function () {
+    const base = Ability.prototype.generateDescription.call(this);
+    const notes = [];
+    if (this.cleansesDebuffs) notes.push('Removes all debuffs from allies.');
+    if (notes.length > 0) {
+        return base + '\n<span class="talent-effect utility">Talent: ' + notes.join(' ') + '</span>';
+    }
+    return base;
+};
+
+// flag
+schoolgirlJuliaR.cleansesDebuffs = false;
+
+// --- Utility function to refresh Julia ability descriptions ---
+window.updateJuliaAbilityDescriptions = function(character) {
+    if (!character || character.id !== 'schoolgirl_julia') return;
+    character.abilities.forEach(ab => {
+        if (ab.id === 'schoolgirl_julia_w') {
+            ab.bloomsAfterOneTurn = !!character.sproutBloomsAfterOneTurn;
+        }
+        if (ab.id === 'schoolgirl_julia_r') {
+            ab.cleansesDebuffs = !!character.spiritsStrengthCleansesDebuffs;
+        }
+        if (ab.id === 'schoolgirl_julia_q') {
+            if (character.healingKickRestoresManaPercent) {
+                const percent = Math.round(character.healingKickRestoresManaPercent * 100);
+                ab.description = 'Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 40% of the total damage dealt. Restores ' + percent + '% of the healing as Mana to each healed ally.';
+            } else {
+                ab.description = 'Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 40% of the total damage dealt.';
+            }
+        }
+        ab.description = (ab.id === 'schoolgirl_julia_q') ? ab.description : ab.generateDescription();
+    });
+}; 

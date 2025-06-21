@@ -27,7 +27,7 @@
             "manaCost": 45,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 125% physical damage to the target. Has a 40% chance to stun the target for 2 turns. Has a 50% chance to permanently increase Shoma's critical hit chance by 5%.",
+            "description": "Deals 125% physical damage to the target. Has a 40% chance to stun the target for 2 turns.",
             "icon": "Icons/abilities/boink.jfif",
             "debuffEffect": {
                 "debuffId": "stun",
@@ -56,7 +56,7 @@
             "id": "catch",
             "name": "Catch!",
             "type": "buff",
-            "manaCost": 65,
+            "manaCost": 90,
             "cooldown": 9,
             "targetType": "ally_or_self",
             "description": "Gives himself or an ally 85% dodge chance for 3 turns.",

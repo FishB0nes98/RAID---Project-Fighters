@@ -4742,6 +4742,40 @@ img {
     margin-right: 8px;
 }
 
+/* Stage modifier styles for "Cleansing Winds" */
+.stage-modifier[data-modifier-id="cleansing_winds"] {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.15) 0%, rgba(175, 238, 238, 0.12) 50%, rgba(240, 248, 255, 0.08) 100%);
+    border-left: 4px solid #87CEEB;
+    animation: cleansingWindsGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes cleansingWindsGlow {
+    0% {
+        box-shadow: 0 0 12px rgba(135, 206, 235, 0.4);
+        border-left-color: #87CEEB;
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(175, 238, 238, 0.6), 0 0 35px rgba(135, 206, 235, 0.3);
+        border-left-color: #AFEEEE;
+    }
+    100% {
+        box-shadow: 0 0 18px rgba(240, 248, 255, 0.5), 0 0 28px rgba(135, 206, 235, 0.4);
+        border-left-color: #F0F8FF;
+    }
+}
+
+/* Log entry styles for cleansing winds messages */
+.log-entry.stage-effect.cleansing-winds {
+    color: #87CEEB;
+    border-left: 3px solid #87CEEB;
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.1), rgba(175, 238, 238, 0.05));
+}
+
+.log-entry.stage-effect.cleansing-winds::before {
+    content: "🌪️✨";
+    margin-right: 8px;
+}
+
 /* Modern Volume Control */
 .volume-control {
     position: fixed;

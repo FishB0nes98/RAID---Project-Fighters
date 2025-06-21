@@ -1,396 +1,577 @@
 {
-  "talentTree": {
-    "talent_renee_root": {
-      "id": "talent_renee_root",
-      "name": "Lone Wolf",
-      "description": "When Renée is the only character in the team, she gains 3000 HP and 3% Armor and Magic Shield.",
-      "icon": "Icons/talents/lone_wolf.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableLoneWolfTalent",
-        "value": true
-      },
-      "position": { "x": 0, "y": 0 },
-      "isRoot": true,
-      "children": ["instinctive_veil", "dual_spirit_awakening"]
-    },
-    "instinctive_veil": {
-      "id": "instinctive_veil",
-      "name": "Instinctive Veil",
-      "description": "Wolf Claw Strike has a 25% chance to trigger Lupine Veil for 1 turn, granting stealth and 100% crit chance.",
-      "icon": "Icons/talents/instinctive_veil.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_q",
-        "property": "chanceToTriggerStealth",
-        "value": 0.25
-      },
-      "parents": ["talent_renee_root"],
-      "children": ["wolf_claw_cooldown_reduction", "relentless_whip"],
-      "position": { "x": -177, "y": 200 }
-    },
-    "wolf_claw_cooldown_reduction": {
-      "id": "wolf_claw_cooldown_reduction",
-      "name": "Predatory Rhythm",
-      "description": "Wolf Claw Strike's cooldown is reduced by 1 turn.",
-      "icon": "Icons/talents/predatory_rhythm.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_q",
-        "property": "cooldown",
-        "value": 2,
-        "operation": "set"
-      },
-      "parents": ["instinctive_veil"],
-      "children": ["new_lunar_instinct_talent"],
-      "position": { "x": -180, "y": 140 }
-    },
-    "dual_spirit_awakening": {
-      "id": "dual_spirit_awakening",
-      "name": "Dual Spirit Awakening",
-      "description": "Renée receives a second Wolf Spirit buff at game start, reducing an additional ability's cooldown.",
-      "icon": "Icons/talents/dual_spirit.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "dualSpiritAwakening",
-        "value": true
-      },
-      "parents": ["talent_renee_root"],
-      "children": ["mystical_convergence", "opportunistic_spirit"],
-      "position": { "x": 177, "y": -119 }
-    },
-    "mystical_convergence": {
-      "id": "mystical_convergence",
-      "name": "Mystical Convergence",
-      "description": "Renée gains +100 Physical Damage at game start. Her Mystical Whip now deals magical damage instead of physical damage (but still scales with Physical Damage).",
-      "icon": "Icons/talents/mystical_convergence.webp",
-      "effect": [
-        {
-          "type": "modify_stat",
-          "stat": "physicalDamage",
-          "value": 100,
-          "operation": "add"
+    "talentTree": {
+        "talent_renee_root": {
+            "id": "talent_renee_root",
+            "name": "Lone Wolf",
+            "description": "When Renée is the only character in the team, she gains 3000 HP and 3% Armor and Magic Shield.",
+            "icon": "Icons/talents/lone_wolf.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableLoneWolfTalent",
+                "value": true
+            },
+            "position": {
+                "x": 1190,
+                "y": 60
+            },
+            "isRoot": true,
+            "children": [
+                "instinctive_veil",
+                "dual_spirit_awakening"
+            ]
         },
-        {
-          "type": "modify_ability",
-          "abilityId": "renee_e",
-          "property": "damageType",
-          "value": "magical"
+        "instinctive_veil": {
+            "id": "instinctive_veil",
+            "name": "Instinctive Veil",
+            "description": "Wolf Claw Strike has a 25% chance to trigger Lupine Veil for 1 turn, granting stealth and 100% crit chance.",
+            "icon": "Icons/talents/instinctive_veil.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_q",
+                "property": "chanceToTriggerStealth",
+                "value": 0.25
+            },
+            "parents": [
+                "talent_renee_root"
+            ],
+            "children": [
+                "wolf_claw_cooldown_reduction",
+                "relentless_whip"
+            ],
+            "position": {
+                "x": 1680,
+                "y": 300
+            }
+        },
+        "wolf_claw_cooldown_reduction": {
+            "id": "wolf_claw_cooldown_reduction",
+            "name": "Predatory Rhythm",
+            "description": "Wolf Claw Strike's cooldown is reduced by 1 turn.",
+            "icon": "Icons/talents/predatory_rhythm.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_q",
+                "property": "cooldown",
+                "value": 2,
+                "operation": "set"
+            },
+            "parents": [
+                "instinctive_veil"
+            ],
+            "children": [
+                "new_lunar_instinct_talent"
+            ],
+            "position": {
+                "x": 1680,
+                "y": 400
+            }
+        },
+        "dual_spirit_awakening": {
+            "id": "dual_spirit_awakening",
+            "name": "Dual Spirit Awakening",
+            "description": "Renée receives a second Wolf Spirit buff at game start, reducing an additional ability's cooldown.",
+            "icon": "Icons/talents/dual_spirit.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "dualSpiritAwakening",
+                "value": true
+            },
+            "parents": [
+                "talent_renee_root"
+            ],
+            "children": [
+                "mystical_convergence",
+                "opportunistic_spirit"
+            ],
+            "position": {
+                "x": 580,
+                "y": 60
+            }
+        },
+        "mystical_convergence": {
+            "id": "mystical_convergence",
+            "name": "Mystical Convergence",
+            "description": "Renée gains +100 Physical Damage at game start. Her Mystical Whip now deals magical damage instead of physical damage (but still scales with Physical Damage).",
+            "icon": "Icons/talents/mystical_convergence.webp",
+            "effect": [
+                {
+                    "type": "modify_stat",
+                    "stat": "physicalDamage",
+                    "value": 100,
+                    "operation": "add"
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "renee_e",
+                    "property": "damageType",
+                    "value": "magical"
+                }
+            ],
+            "parents": [
+                "dual_spirit_awakening"
+            ],
+            "children": [],
+            "position": {
+                "x": 430,
+                "y": 60
+            }
+        },
+        "opportunistic_spirit": {
+            "id": "opportunistic_spirit",
+            "name": "Opportunistic Spirit",
+            "description": "When Renée uses an ability, it has a 5% chance not to end turn and a 5% chance to reset its cooldown to 0.",
+            "icon": "Icons/talents/spirit_rush.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableOpportunisticSpirit",
+                "value": true
+            },
+            "parents": [
+                "dual_spirit_awakening"
+            ],
+            "children": [
+                "cornered_predator",
+                "essence_drain",
+                "moonlit_reflexes"
+            ],
+            "position": {
+                "x": 580,
+                "y": 370
+            }
+        },
+        "moonlit_reflexes": {
+            "id": "moonlit_reflexes",
+            "name": "Moonlit Reflexes",
+            "description": "Using an ability grants Renée 10% dodge chance for 5 turns, stacking up to 3 times (max 30% dodge).",
+            "icon": "Icons/talents/moonlit_reflexes.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableMoonlitReflexes",
+                "value": true
+            },
+            "parents": [
+                "opportunistic_spirit"
+            ],
+            "children": [
+                "lunar_resonance",
+                "lunar_cascade"
+            ],
+            "position": {
+                "x": 1170,
+                "y": 370
+            }
+        },
+        "lunar_resonance": {
+            "id": "lunar_resonance",
+            "name": "Lunar Resonance",
+            "description": "When Renée casts an ability, there's a 10% chance that one random ability on cooldown has its cooldown reduced by 1 turn.",
+            "icon": "Icons/talents/lunar_resonance.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableLunarResonance",
+                "value": true
+            },
+            "parents": [
+                "moonlit_reflexes"
+            ],
+            "children": [
+                "veil_of_the_moon"
+            ],
+            "position": {
+                "x": 880,
+                "y": 510
+            }
+        },
+        "lunar_cascade": {
+            "id": "lunar_cascade",
+            "name": "Lunar Cascade",
+            "description": "When Renée casts Lunar Curse, there's a 15% chance to also cast either Wolf Claw Strike or Mystical Whip on a random enemy.",
+            "icon": "Icons/talents/lunar_cascade.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_r",
+                "property": "enableLunarCascade",
+                "value": true
+            },
+            "parents": [
+                "moonlit_reflexes",
+                "new_lunar_instinct_talent"
+            ],
+            "children": [
+                "veil_of_the_moon"
+            ],
+            "position": {
+                "x": 1400,
+                "y": 510
+            }
+        },
+        "veil_of_the_moon": {
+            "id": "veil_of_the_moon",
+            "name": "Veil of the Moon",
+            "description": "Using Lupine Veil decreases all active ability cooldowns by 2.",
+            "icon": "Icons/talents/veil_of_the_moon.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableVeilOfTheMoon",
+                "value": true
+            },
+            "parents": [
+                "lunar_resonance",
+                "lunar_cascade"
+            ],
+            "children": [
+                "endless_veil"
+            ],
+            "position": {
+                "x": 1180,
+                "y": 510
+            }
+        },
+        "endless_veil": {
+            "id": "endless_veil",
+            "name": "Endless Veil",
+            "description": "Lupine Veil no longer breaks when using abilities.",
+            "icon": "Icons/talents/endless_veil.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableEndlessVeil",
+                "value": true
+            },
+            "parents": [
+                "veil_of_the_moon"
+            ],
+            "children": [],
+            "position": {
+                "x": 1180,
+                "y": 650
+            },
+            "powerful": true
+        },
+        "cornered_predator": {
+            "id": "cornered_predator",
+            "name": "Cornered Predator",
+            "description": "When Renée is below 50% HP, she gains 25% additional critical chance.",
+            "icon": "Icons/talents/cornered_predator.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableCorneredPredator",
+                "value": true
+            },
+            "parents": [
+                "opportunistic_spirit"
+            ],
+            "children": [],
+            "position": {
+                "x": 350,
+                "y": 640
+            }
+        },
+        "essence_drain": {
+            "id": "essence_drain",
+            "name": "Essence Drain",
+            "description": "Mystical Whip steals 50 mana from the target and restores it to Renée.",
+            "icon": "Icons/talents/essence_drain.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_e",
+                "property": "enableManaDrain",
+                "value": true
+            },
+            "parents": [
+                "opportunistic_spirit"
+            ],
+            "children": [
+                "arcane_lash",
+                "disruptive_lash"
+            ],
+            "position": {
+                "x": 580,
+                "y": 640
+            }
+        },
+        "arcane_lash": {
+            "id": "arcane_lash",
+            "name": "Arcane Lash",
+            "description": "Mystical Whip now scales with 200% Magical Damage in addition to its Physical Damage scaling.",
+            "icon": "Icons/talents/magic_whip.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_e",
+                "property": "enableMagicalDamageScaling",
+                "value": true
+            },
+            "parents": [
+                "essence_drain"
+            ],
+            "children": [
+                "chain_whip"
+            ],
+            "position": {
+                "x": 840,
+                "y": 800
+            }
+        },
+        "disruptive_lash": {
+            "id": "disruptive_lash",
+            "name": "Disruptive Lash",
+            "description": "Mystical Whip has a 50% chance to disable a random ability of the target for 2 turns.",
+            "icon": "Icons/talents/disable_ability.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_e",
+                "property": "enableAbilityDisable",
+                "value": true
+            },
+            "parents": [
+                "essence_drain"
+            ],
+            "children": [
+                "chain_whip"
+            ],
+            "position": {
+                "x": 690,
+                "y": 800
+            }
+        },
+        "chain_whip": {
+            "id": "chain_whip",
+            "name": "Chain Whip",
+            "description": "Mystical Whip has a 50% chance to strike an additional random enemy target.",
+            "icon": "Icons/talents/chain_lash.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_e",
+                "property": "enableChainWhip",
+                "value": true
+            },
+            "parents": [
+                "arcane_lash",
+                "disruptive_lash"
+            ],
+            "children": [],
+            "position": {
+                "x": 580,
+                "y": 1000
+            },
+            "powerful": true
+        },
+        "new_lunar_instinct_talent": {
+            "id": "new_lunar_instinct_talent",
+            "name": "Lunar Instinct",
+            "description": "Wolf Claw Strike's base damage is increased by 300 (to 1000). Her predatory instincts surge under the moon, empowering her most savage attack.",
+            "icon": "Icons/talents/lunar_instinct.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_q",
+                "property": "baseDamage",
+                "value": 1000,
+                "operation": "set"
+            },
+            "parents": [
+                "wolf_claw_cooldown_reduction"
+            ],
+            "children": [
+                "lunar_cascade"
+            ],
+            "position": {
+                "x": 1680,
+                "y": 510
+            }
+        },
+        "relentless_whip": {
+            "id": "relentless_whip",
+            "name": "Relentless Whip",
+            "description": "Mystical Whip has a 30% chance to trigger twice.",
+            "icon": "Icons/talents/relentless_whip.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_e",
+                "property": "triggerTwiceChance",
+                "value": 0.3
+            },
+            "parents": [
+                "instinctive_veil"
+            ],
+            "children": [
+                "predators_momentum",
+                "double_claw"
+            ],
+            "position": {
+                "x": 1970,
+                "y": 310
+            }
+        },
+        "predators_momentum": {
+            "id": "predators_momentum",
+            "name": "Predator's Momentum",
+            "description": "When Renée lands a critical hit, she gains 20% crit chance as a buff for 3 turns.",
+            "icon": "Icons/talents/predators_momentum.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enablePredatorsMomentum",
+                "value": true
+            },
+            "parents": [
+                "relentless_whip"
+            ],
+            "children": [
+                "bloodthirsty_predator",
+                "lunar_empowerment"
+            ],
+            "position": {
+                "x": 2190,
+                "y": 520
+            }
+        },
+        "bloodthirsty_predator": {
+            "id": "bloodthirsty_predator",
+            "name": "Bloodthirsty Predator",
+            "description": "Renée gains 17% lifesteal, healing for a portion of the damage she deals.",
+            "icon": "Icons/talents/bloodthirsty_predator.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "lifesteal",
+                "value": 0.17,
+                "operation": "set"
+            },
+            "parents": [
+                "predators_momentum"
+            ],
+            "children": [
+                "lunar_devastation",
+                "predators_vitality"
+            ],
+            "position": {
+                "x": 2200,
+                "y": 840
+            }
+        },
+        "lunar_devastation": {
+            "id": "lunar_devastation",
+            "name": "Lunar Devastation",
+            "description": "Lunar Marked enemies now take triple damage instead of double while marked. The moon's power surges through their veins, amplifying all damage they receive.",
+            "icon": "Icons/talents/lunar_devastation.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableLunarDevastation",
+                "value": true
+            },
+            "parents": [
+                "bloodthirsty_predator"
+            ],
+            "children": [],
+            "position": {
+                "x": 2200,
+                "y": 1200
+            },
+            "powerful": true
+        },
+        "double_claw": {
+            "id": "double_claw",
+            "name": "Double Claw",
+            "description": "Wolf Claw Strike has a 30% chance to trigger twice.",
+            "icon": "Icons/talents/double_claws.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_q",
+                "property": "triggerTwiceChance",
+                "value": 0.3
+            },
+            "parents": [
+                "relentless_whip"
+            ],
+            "children": [
+                "bloodthirsty_resilience",
+                "lunar_empowerment"
+            ],
+            "position": {
+                "x": 1970,
+                "y": 520
+            }
+        },
+        "bloodthirsty_resilience": {
+            "id": "bloodthirsty_resilience",
+            "name": "Bloodthirsty Resilience",
+            "description": "When Renée takes critical damage, she gains 10% lifesteal as a buff for 4 turns.",
+            "icon": "Icons/talents/bloodthirsty_resilience.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableBloodthirstyResilience",
+                "value": true
+            },
+            "parents": [
+                "double_claw"
+            ],
+            "children": [
+                "primal_healing",
+                "predators_vitality"
+            ],
+            "position": {
+                "x": 1790,
+                "y": 930
+            }
+        },
+        "primal_healing": {
+            "id": "primal_healing",
+            "name": "Primal Healing",
+            "description": "Wolf Claw Strike heals Renée for 77% of the damage it deals. This healing stacks with Lifesteal.",
+            "icon": "Icons/talents/primal_healing.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "renee_q",
+                "property": "enablePrimalHealing",
+                "value": true
+            },
+            "parents": [
+                "bloodthirsty_resilience"
+            ],
+            "children": [],
+            "position": {
+                "x": 2000,
+                "y": 1200
+            },
+            "powerful": true
+        },
+        "lunar_empowerment": {
+            "id": "lunar_empowerment",
+            "name": "Lunar Empowerment",
+            "description": "Lunar Curse now also grants Renée 15% critical chance and 25% additional critical damage while the buff is active.",
+            "icon": "Icons/talents/lunar_empowerment.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enableLunarEmpowerment",
+                "value": true
+            },
+            "parents": [
+                "predators_momentum",
+                "double_claw"
+            ],
+            "children": [],
+            "position": {
+                "x": 1970,
+                "y": 690
+            }
+        },
+        "predators_vitality": {
+            "id": "predators_vitality",
+            "name": "Predator's Vitality",
+            "description": "Renée's maximum health is increased by 2500 at game start, further enhancing her survivability.",
+            "icon": "Icons/talents/predators_vitality.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "maxHp",
+                "value": 2500,
+                "operation": "add"
+            },
+            "parents": [
+                "bloodthirsty_predator",
+                "bloodthirsty_resilience"
+            ],
+            "children": [],
+            "position": {
+                "x": 2010,
+                "y": 880
+            }
         }
-      ],
-      "parents": ["dual_spirit_awakening"],
-      "children": [],
-      "position": { "x": 0, "y": -500 }
-    },
-    "opportunistic_spirit": {
-      "id": "opportunistic_spirit",
-      "name": "Opportunistic Spirit",
-      "description": "When Renée uses an ability, it has a 5% chance not to end turn and a 5% chance to reset its cooldown to 0.",
-      "icon": "Icons/talents/spirit_rush.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableOpportunisticSpirit",
-        "value": true
-      },
-      "parents": ["dual_spirit_awakening"],
-      "children": ["cornered_predator", "essence_drain", "moonlit_reflexes"],
-      "position": { "x": 354, "y": -200 }
-    },
-    "moonlit_reflexes": {
-      "id": "moonlit_reflexes",
-      "name": "Moonlit Reflexes",
-      "description": "Using an ability grants Renée 10% dodge chance for 5 turns, stacking up to 3 times (max 30% dodge).",
-      "icon": "Icons/talents/moonlit_reflexes.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableMoonlitReflexes",
-        "value": true
-      },
-      "parents": ["opportunistic_spirit"],
-      "children": ["lunar_resonance", "lunar_cascade"],
-      "position": { "x": 177, "y": -175 }
-    },
-    "lunar_resonance": {
-      "id": "lunar_resonance",
-      "name": "Lunar Resonance",
-      "description": "When Renée casts an ability, there's a 10% chance that one random ability on cooldown has its cooldown reduced by 1 turn.",
-      "icon": "Icons/talents/lunar_resonance.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableLunarResonance",
-        "value": true
-      },
-      "parents": ["moonlit_reflexes"],
-      "children": ["veil_of_the_moon"],
-      "position": { "x": 100, "y": -50 }
-    },
-    "lunar_cascade": {
-      "id": "lunar_cascade",
-      "name": "Lunar Cascade",
-      "description": "When Renée casts Lunar Curse, there's a 15% chance to also cast either Wolf Claw Strike or Mystical Whip on a random enemy.",
-      "icon": "Icons/talents/lunar_cascade.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_r",
-        "property": "enableLunarCascade",
-        "value": true
-      },
-      "parents": ["moonlit_reflexes", "new_lunar_instinct_talent"],
-      "children": ["veil_of_the_moon"],
-      "position": { "x": -200, "y": -50 }
-    },
-    "veil_of_the_moon": {
-      "id": "veil_of_the_moon",
-      "name": "Veil of the Moon",
-      "description": "Using Lupine Veil decreases all active ability cooldowns by 2.",
-      "icon": "Icons/talents/veil_of_the_moon.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableVeilOfTheMoon",
-        "value": true
-      },
-      "parents": ["lunar_resonance", "lunar_cascade"],
-      "children": ["endless_veil"],
-      "position": { "x": 0, "y": 500 }
-    },
-    "endless_veil": {
-      "id": "endless_veil",
-      "name": "Endless Veil",
-      "description": "Lupine Veil no longer breaks when using abilities.",
-      "icon": "Icons/talents/endless_veil.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableEndlessVeil",
-        "value": true
-      },
-      "parents": ["veil_of_the_moon"],
-      "children": [],
-      "position": { "x": 0, "y": 800 },
-      "powerful": true
-    },
-    "cornered_predator": {
-      "id": "cornered_predator",
-      "name": "Cornered Predator",
-      "description": "When Renée is below 50% HP, she gains 25% additional critical chance.",
-      "icon": "Icons/talents/cornered_predator.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableCorneredPredator",
-        "value": true
-      },
-      "parents": ["opportunistic_spirit"],
-      "children": [],
-      "position": { "x": 400, "y": -400 }
-    },
-    "essence_drain": {
-      "id": "essence_drain",
-      "name": "Essence Drain",
-      "description": "Mystical Whip steals 50 mana from the target and restores it to Renée.",
-      "icon": "Icons/talents/essence_drain.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_e",
-        "property": "enableManaDrain",
-        "value": true
-      },
-      "parents": ["opportunistic_spirit"],
-      "children": ["arcane_lash", "disruptive_lash"],
-      "position": { "x": 500, "y": -300 }
-    },
-    "arcane_lash": {
-      "id": "arcane_lash",
-      "name": "Arcane Lash",
-      "description": "Mystical Whip now scales with 200% Magical Damage in addition to its Physical Damage scaling.",
-      "icon": "Icons/talents/magic_whip.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_e",
-        "property": "enableMagicalDamageScaling",
-        "value": true
-      },
-      "parents": ["essence_drain"],
-      "children": ["chain_whip"],
-      "position": { "x": 550, "y": 50 }
-    },
-    "disruptive_lash": {
-      "id": "disruptive_lash",
-      "name": "Disruptive Lash",
-      "description": "Mystical Whip has a 50% chance to disable a random ability of the target for 2 turns.",
-      "icon": "Icons/talents/disable_ability.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_e",
-        "property": "enableAbilityDisable",
-        "value": true
-      },
-      "parents": ["essence_drain"],
-      "children": ["chain_whip"],
-      "position": { "x": 450, "y": 50 }
-    },
-    "chain_whip": {
-      "id": "chain_whip",
-      "name": "Chain Whip",
-      "description": "Mystical Whip has a 50% chance to strike an additional random enemy target.",
-      "icon": "Icons/talents/chain_lash.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_e",
-        "property": "enableChainWhip",
-        "value": true
-      },
-      "parents": ["arcane_lash", "disruptive_lash"],
-      "children": [],
-      "position": { "x": 500, "y": 150 },
-      "powerful": true
-    },
-    "new_lunar_instinct_talent": {
-      "id": "new_lunar_instinct_talent",
-      "name": "Lunar Instinct",
-      "description": "Wolf Claw Strike's base damage is increased by 300 (to 1000). Her predatory instincts surge under the moon, empowering her most savage attack.",
-      "icon": "Icons/talents/lunar_instinct.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_q",
-        "property": "baseDamage",
-        "value": 1000,
-        "operation": "set"
-      },
-      "parents": ["wolf_claw_cooldown_reduction"],
-      "children": ["lunar_cascade"],
-      "position": { "x": -180, "y": 80 }
-    },
-    "relentless_whip": {
-      "id": "relentless_whip",
-      "name": "Relentless Whip",
-      "description": "Mystical Whip has a 30% chance to trigger twice.",
-      "icon": "Icons/talents/relentless_whip.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_e",
-        "property": "triggerTwiceChance",
-        "value": 0.3
-      },
-      "parents": ["instinctive_veil"],
-      "children": ["predators_momentum", "double_claw"],
-      "position": { "x": -250, "y": 270 }
-    },
-    "predators_momentum": {
-      "id": "predators_momentum",
-      "name": "Predator's Momentum",
-      "description": "When Renée lands a critical hit, she gains 20% crit chance as a buff for 3 turns.",
-      "icon": "Icons/talents/predators_momentum.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enablePredatorsMomentum",
-        "value": true
-      },
-      "parents": ["relentless_whip"],
-      "children": ["bloodthirsty_predator", "lunar_empowerment"],
-      "position": { "x": -500, "y": 550 }
-    },
-    "bloodthirsty_predator": {
-      "id": "bloodthirsty_predator",
-      "name": "Bloodthirsty Predator",
-      "description": "Renée gains 17% lifesteal, healing for a portion of the damage she deals.",
-      "icon": "Icons/talents/bloodthirsty_predator.webp",
-      "effect": {
-        "type": "modify_stat",
-        "stat": "lifesteal",
-        "value": 0.17,
-        "operation": "set"
-      },
-      "parents": ["predators_momentum"],
-      "children": ["lunar_devastation", "predators_vitality"],
-      "position": { "x": -500, "y": 1000 }
-    },
-    "lunar_devastation": {
-      "id": "lunar_devastation",
-      "name": "Lunar Devastation",
-      "description": "Lunar Marked enemies now take triple damage instead of double while marked. The moon's power surges through their veins, amplifying all damage they receive.",
-      "icon": "Icons/talents/lunar_devastation.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableLunarDevastation",
-        "value": true
-      },
-      "parents": ["bloodthirsty_predator"],
-      "children": [],
-      "position": { "x": -500, "y": 1300 },
-      "powerful": true
-    },
-    "double_claw": {
-      "id": "double_claw",
-      "name": "Double Claw",
-      "description": "Wolf Claw Strike has a 30% chance to trigger twice.",
-      "icon": "Icons/talents/double_claws.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_q",
-        "property": "triggerTwiceChance",
-        "value": 0.3
-      },
-      "parents": ["relentless_whip"],
-      "children": ["bloodthirsty_resilience", "lunar_empowerment"],
-      "position": { "x": -200, "y": 350 }
-    },
-    "bloodthirsty_resilience": {
-      "id": "bloodthirsty_resilience",
-      "name": "Bloodthirsty Resilience",
-      "description": "When Renée takes critical damage, she gains 10% lifesteal as a buff for 4 turns.",
-      "icon": "Icons/talents/bloodthirsty_resilience.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableBloodthirstyResilience",
-        "value": true
-      },
-      "parents": ["double_claw"],
-      "children": ["primal_healing", "predators_vitality"],
-      "position": { "x": -200, "y": 777 }
-    },
-    "primal_healing": {
-      "id": "primal_healing",
-      "name": "Primal Healing",
-      "description": "Wolf Claw Strike heals Renée for 77% of the damage it deals. This healing stacks with Lifesteal.",
-      "icon": "Icons/talents/primal_healing.webp",
-      "effect": {
-        "type": "modify_ability",
-        "abilityId": "renee_q",
-        "property": "enablePrimalHealing",
-        "value": true
-      },
-      "parents": ["bloodthirsty_resilience"],
-      "children": [],
-      "position": { "x": -200, "y": 950 },
-      "powerful": true
-    },
-    "lunar_empowerment": {
-      "id": "lunar_empowerment",
-      "name": "Lunar Empowerment",
-      "description": "Lunar Curse now also grants Renée 15% critical chance and 25% additional critical damage while the buff is active.",
-      "icon": "Icons/talents/lunar_empowerment.webp",
-      "effect": {
-        "type": "modify_character_property",
-        "property": "enableLunarEmpowerment",
-        "value": true
-      },
-      "parents": ["predators_momentum", "double_claw"],
-      "children": [],
-      "position": { "x": -500, "y": 0 }
-    },
-    "predators_vitality": {
-      "id": "predators_vitality",
-      "name": "Predator's Vitality",
-      "description": "Renée's maximum health is increased by 2500 at game start, further enhancing her survivability.",
-      "icon": "Icons/talents/predators_vitality.webp",
-      "effect": {
-        "type": "modify_stat",
-        "stat": "maxHp",
-        "value": 2500,
-        "operation": "add"
-      },
-      "parents": ["bloodthirsty_predator", "bloodthirsty_resilience"],
-      "children": [],
-      "position": { "x": -600, "y": 400 }
     }
-  }
-} 
+}

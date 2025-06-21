@@ -10,7 +10,7 @@
         "hp": 8752,
         "hpPerTurn": 0,
         "mana": 1900,
-        "manaPerTurn": 39,
+        "manaPerTurn": 0,
         "lifesteal": 0,
         "dodgeChance": 0.05,
         "critChance": 0.02,
@@ -26,7 +26,7 @@
             "manaCost": 50,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 300 + (50% AD + 50% MD) physical damage.",
+            "description": "Deals <span class=\"damage-value\">300</span> + (<span class=\"scaling-value\">50% AD</span> + <span class=\"scaling-value\">50% MD</span>) physical damage to enemies. <span class=\"talent-effect damage\">With Arcane Mastery: gains additional 50% MD scaling.</span> <span class=\"talent-effect utility\">With Healing Shot: can target allies to heal for 150% MD.</span> <span class=\"talent-effect damage\">With Chain Shot: 30% chance to fire at another enemy.</span>",
             "icon": "Icons/abilities/love_bullet.jfif" 
         },
         {
@@ -36,47 +36,41 @@
             "manaCost": 75,
             "cooldown": 8,
             "targetType": "enemy",
-            "description": "Throws a flower bomb, disabling one of the target's abilities for 2 turns.",
+            "description": "Throws a flower bomb, disabling one of the target's abilities for <span class=\"duration-value\">2 turns</span>.",
             "icon": "Icons/abilities/flower_bomb.jfif"
         },
         {
             "id": "schoolgirl_elphelt_e",
             "name": "Affection",
-            "type": "buff",
+            "type": "debuff",
             "manaCost": 100,
             "cooldown": 9,
             "targetType": "enemy",
-            "description": "Places a heart onto the target enemy, causing them to deal 50% less damage to Elphelt for 4 turns.",
+            "description": "Places a Heart Debuff on the target enemy. The target can only target Elphelt or her allies, and deals <span class=\"debuff-value\">50% less damage</span> for <span class=\"duration-value\">4 turns</span>.",
             "icon": "Icons/abilities/affection.jfif",
-            "buffEffect": {
-                "buffId": "affection_buff",
-                "name": "Affection",
-                "duration": 4,
-                "description": "Receives 50% less damage from the targeted enemy."
-            },
             "debuffEffect": {
-                "debuffId": "affection_debuff",
-                "name": "Affected by Affection",
+                "debuffId": "heart_debuff",
+                "name": "Heart Debuff",
                 "duration": 4,
-                "description": "Infatuated with Elphelt."
+                "description": "Enchanted by Elphelt. Can only target Elphelt or her allies. Deals 50% less damage."
             }
         },
         {
             "id": "schoolgirl_elphelt_r",
-            "name": "Piercing Bullet",
+            "name": "Heart Storm",
             "type": "custom",
-            "damageType": "physical",
+            "damageType": "magical",
             "manaCost": 100,
             "cooldown": 14,
-            "targetType": "enemy",
-            "description": "Deals 350% Physical Damage to the target. Has a 50% chance to pierce to another random enemy for 50% of the original damage, potentially chaining multiple times.",
-            "icon": "Icons/abilities/piercing_bullet.jfif"
+            "targetType": "aoe_enemy",
+            "description": "Fires a powerful shot that deals <span class=\"damage-value\">350% Magical Damage</span> to an enemy. 50% chance to bounce to new enemies (up to 5 bounces). Heals self for <span class=\"healing-value\">10%</span> of total damage dealt. <span class=\"talent-effect damage\">With Arcane Mastery: gains additional 50% MD scaling.</span>",
+            "icon": "Icons/abilities/heart_storm.jfif"
         }
     ],
     "passive": {
         "id": "schoolgirl_elphelt_passive",
         "name": "Defensive Maneuvers",
-        "description": "Gains 10 Armor and 10 Magic Shield for 2 turns after using any ability.",
-        "icon": "Icons/passives/schoolgirl_elphelt_passive.png"
+        "description": "After using any ability, gains 10 Armor and 10 Magical Shield for 3 turns. This effect can stack.",
+        "icon": "Icons/abilities/defensive_stance.webp"
     }
 } 

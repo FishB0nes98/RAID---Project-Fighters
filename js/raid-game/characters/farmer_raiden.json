@@ -62,7 +62,7 @@
     "passive": {
         "id": "farmer_raiden_zap",
         "name": "Zap",
-        "description": "Using an ability zaps a random enemy target, dealing 100% magical damage ignoring magical shield.",
+        "description": "Using an ability zaps a random enemy target, dealing 60% magical damage.",
         "icon": "Icons/passives/lightning_zap.png"
     }
 } 

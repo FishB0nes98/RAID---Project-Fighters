@@ -24,9 +24,9 @@
             "type": "damage",
             "damageType": "physical",
             "manaCost": 35,
-            "cooldown": 2,
+            "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 235 damage and has 35% chance to stun the target for 2 turns.",
+            "description": "Deals 315 damage and has 35% chance to stun the target for 2 turns.",
             "icon": "Icons/abilities/homerun_smash.jpeg"
         },
         {
@@ -34,7 +34,7 @@
             "name": "Apple Throw",
             "type": "heal_or_damage",
             "damageType": "physical",
-            "manaCost": 45,
+            "manaCost": 60,
             "cooldown": 3,
             "targetType": "any",
             "description": "If targets ally: Heals 750 health. If targets enemy: Deals 400 damage and reduces their damage by 20% for 4 turns. Both effects can crit.",
@@ -59,7 +59,7 @@
             "manaCost": 150,
             "cooldown": 22,
             "targetType": "self",
-            "description": "Heals 50% of missing health to himself and gains 100% dodge chance for 4 turns.",
+            "description": "Heals 35% of missing health to himself and gains 100% dodge chance for 3 turns.",
             "icon": "Icons/abilities/cottage_run.jpeg"
         }
     ],

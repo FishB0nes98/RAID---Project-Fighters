@@ -2,7 +2,7 @@
 
 class FarmerRaidenPassive {
     constructor() {
-        this.zapDamageMultiplier = 1.0; // 100% magical damage
+        this.zapDamageMultiplier = 0.6; // 60% magical damage
         this.totalZapsDone = 0; // Track how many zaps have been triggered
         this.lastPowerGrowthTurn = 0; // Track when we last gained magical damage
         this.magicalDamageGrowthAmount = 100; // Amount to increase magical damage by
@@ -15,7 +15,7 @@ class FarmerRaidenPassive {
         this.initialMagicalShieldBonus = 0.15; // 15% magical shield at game start
         this.stormEmpowermentAmount = 300; // Magical damage bonus from Storm Empowerment talent
         this.stormEmpowermentDuration = 3; // Duration of the Storm Empowerment buff in turns
-        this.basePassiveDescription = "Using an ability zaps a random enemy target, dealing 100% magical damage ignoring magical shield.";
+        this.basePassiveDescription = "Using an ability zaps a random enemy target, dealing 60% magical damage.";
         this.passiveTalentEffects = [];
         // New talent properties
         this.disabledAbilityDuration = 0; // Will be set by the shocked debuff duration
@@ -761,12 +761,11 @@ class FarmerRaidenPassive {
         console.log(`[FarmerRaidenPassive] Applying zap damage: ${amount} to ${target.name}`);
         
         try {
-            // Apply the damage
-            const damageResult = target.applyDamage(amount, 'magical', caster, {
-                source: 'Zap Passive',
-                ignoresMagicalShield: true,
-                abilityId: 'zap_passive'
-            });
+                    // Apply the damage
+        const damageResult = target.applyDamage(amount, 'magical', caster, {
+            source: 'Zap Passive',
+            abilityId: 'zap_passive'
+        });
             
             // Track passive zap damage
             if (window.trackZapPassiveStats) {
@@ -1025,8 +1024,8 @@ class FarmerRaidenPassive {
         let description = this.basePassiveDescription;
         this.passiveTalentEffects = [];
         
-        // Check for Lightning Mastery talent (200% damage)
-        if (character.zapDamageMultiplier && character.zapDamageMultiplier > 1.0) {
+        // Check for Lightning Mastery talent (120% damage)
+        if (character.zapDamageMultiplier && character.zapDamageMultiplier > 0.6) {
             const dmgPercent = Math.floor(character.zapDamageMultiplier * 100);
             this.passiveTalentEffects.push(`<span class="talent-effect damage">Talent (Lightning Mastery): Zap now deals ${dmgPercent}% Magical Damage.</span>`);
         }

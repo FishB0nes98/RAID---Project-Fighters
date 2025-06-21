@@ -31,7 +31,7 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                     <div class="ball-option" data-ball-id="grass_ball" style="cursor: pointer;" onclick="window.shomaSelectBall('grass_ball')">
                         <img src="Icons/abilities/grassball.jfif" alt="Grass Ball">
                         <h3>Grass Ball</h3>
-                        <p>Heals ally for 450 + 2% target max HP (scales with Healing Power)</p>
+                        <p>Heals ally for 500 + 2% target max HP (scales with Healing Power)</p>
                     </div>
                     <div class="ball-option" data-ball-id="fire_ball" style="cursor: pointer;" onclick="window.shomaSelectBall('fire_ball')">
                         <img src="Icons/abilities/fireball.jfif" alt="Fire Ball">
@@ -682,7 +682,7 @@ function selectBall(shomaCharacter, ballId) {
                 // Grass Ball - Healing effect
                 ballThrowAbility.id = 'ball_throw_grass';
                 ballThrowAbility.name = 'Grass Ball Throw';
-                ballThrowAbility.description = 'Heals ally for 450 + 2% of target\'s max HP. Scales with Healing Power.';
+                ballThrowAbility.description = 'Heals ally for 500 + 2% of target\'s max HP. Scales with Healing Power.';
                 ballThrowAbility.type = 'heal';
                 ballThrowAbility.targetType = 'ally';
                 ballThrowAbility.healAmount = undefined;
@@ -701,8 +701,8 @@ function selectBall(shomaCharacter, ballId) {
                     // Play the ball throw animation
                     showBallThrowAnimation('grass_ball', caster, target);
                     
-                    // Calculate heal amount: 450 base + 2% of target's max HP
-                    const baseHeal = 450;
+                    // Calculate heal amount: 500 base + 2% of target's max HP
+                    const baseHeal = 500;
                     const percentHpHeal = Math.floor(target.stats.maxHp * 0.02);
                     const totalHealAmount = baseHeal + percentHpHeal;
                     
@@ -895,6 +895,7 @@ function selectBall(shomaCharacter, ballId) {
                 ballThrowAbility.targetType = 'enemy';
                 ballThrowAbility.damageType = 'physical';
                 ballThrowAbility.fixedDamage = undefined;
+                ballThrowAbility.cooldown = 2;
                 ballThrowAbility.icon = ballIcon;
                 
                 // Replace the default effect with a multi-target damage effect

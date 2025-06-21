@@ -3,136 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Talents Tree</title>
-    <link rel="stylesheet" href="css/talents.css">
+    <title>Talents - Character Talent Tree</title>
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/talents.css">
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loader"></div>
-        <div id="loading-text" class="loading-text">Loading Talents...</div>
+        <div class="loading-text">Loading Talents...</div>
     </div>
-
-    <!-- Sound Effects -->
-    <audio id="sound-select" preload="auto" src="sounds/ui/talent_select.mp3"></audio>
-    <audio id="sound-deselect" preload="auto" src="sounds/ui/talent_deselect.mp3"></audio>
-    <audio id="sound-hover" preload="auto" src="sounds/ui/talent_hover.mp3"></audio>
-    <audio id="sound-unlock" preload="auto" src="sounds/ui/talent_unlock.mp3"></audio>
 
     <!-- Main Container -->
     <div class="talent-container">
         <!-- Header -->
         <header class="talent-header">
-            <div class="header-decoration left"></div>
-            
+            <!-- Character Info -->
             <div class="character-info">
                 <div class="portrait-frame">
                     <img id="character-image" class="character-image" src="images/characters/default.png" alt="Character">
                 </div>
                 <div class="character-details">
                     <h1 id="character-name">Character Name</h1>
-                    <div id="character-level-xp" class="character-level-xp">
+                    <div class="character-level-xp">
                         <div class="level-display">
-                            <i class="fas fa-medal"></i> Level <span id="character-level">1</span>
+                            <i class="fas fa-medal"></i>
+                            Level <span id="character-level">1</span>
                         </div>
-                        <div class="xp-display">
-                            <div class="xp-bar-container">
-                                <div class="xp-bar" id="xp-bar">
-                                    <div class="xp-fill" id="xp-fill"></div>
-                                </div>
-                                <div class="xp-text" id="xp-text">0 / 1000 XP</div>
+                        <div class="xp-bar-container">
+                            <div class="xp-bar">
+                                <div class="xp-fill" id="xp-fill"></div>
                             </div>
+                            <div class="xp-text" id="xp-text">0 / 1000 XP</div>
                         </div>
                     </div>
-                    <div id="talent-points-info" class="talent-points-info">
-                        <i class="fas fa-star"></i> Available Points: <span id="points-available">0</span>/<span id="points-total">0</span>
+                    <div class="talent-points-info">
+                        <i class="fas fa-star"></i>
+                        Points: <span id="points-available">0</span>/<span id="points-total">0</span>
                     </div>
                 </div>
             </div>
             
-            <div class="talent-controls" id="talent-controls">
-                <button id="reset-talents-button" class="rpg-button secondary" data-controller-nav data-nav-group="header">
+            <!-- Controls -->
+            <div class="talent-controls">
+                <button id="edit-mode-button" class="rpg-button edit-mode">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button id="reset-talents-button" class="rpg-button secondary">
                     <i class="fas fa-undo-alt"></i> Reset
                 </button>
-                <button id="save-talents-button" class="rpg-button primary" data-controller-nav data-nav-group="header">
+                <button id="save-talents-button" class="rpg-button primary">
                     <i class="fas fa-save"></i> Save
                 </button>
-                <button id="back-button" class="rpg-button secondary" data-controller-nav data-nav-group="header">
+                <button id="back-button" class="rpg-button secondary">
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
             </div>
-            
-            <div class="header-decoration right"></div>
         </header>
 
         <!-- Talent Tree Area -->
         <div id="talent-tree-area" class="talent-tree-area">
             <!-- Map Controls -->
             <div class="map-controls">
-                <button id="zoom-in" class="map-control-button" data-controller-nav data-nav-group="map"><i class="fas fa-plus"></i></button>
-                <button id="zoom-out" class="map-control-button" data-controller-nav data-nav-group="map"><i class="fas fa-minus"></i></button>
-                <button id="reset-view" class="map-control-button" data-controller-nav data-nav-group="map"><i class="fas fa-compress-arrows-alt"></i></button>
+                <button id="zoom-in" class="map-control-button">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button id="zoom-out" class="map-control-button">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button id="reset-view" class="map-control-button">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                </button>
             </div>
             
-            <!-- Tree Canvas -->
+            <!-- Canvas -->
             <div id="talent-tree-canvas" class="talent-tree-canvas">
-                <!-- Talent nodes and connectors will be rendered here by JS -->
+                <!-- Talent nodes will be rendered here -->
             </div>
             
-            <!-- Legend -->
-            <div class="talent-legend">
-                <div class="legend-item">
-                    <div class="legend-icon locked"></div>
-                    <span>Locked</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon available"></div>
-                    <span>Available</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon selected"></div>
-                    <span>Selected</span>
-                </div>
+            <!-- Edit Mode Indicator -->
+            <div id="edit-mode-indicator" class="edit-mode-indicator">
+                <i class="fas fa-mouse-pointer"></i> Drag talents to reposition
             </div>
         </div>
     </div>
 
-    <!-- Enhanced Tooltip -->
+    <!-- Tooltip -->
     <div id="talent-tooltip" class="talent-tooltip">
         <div class="tooltip-header">
             <div class="tooltip-icon-container">
-                <img id="tooltip-icon" class="tooltip-icon" src="" alt="Talent Icon">
+                <img id="tooltip-icon" class="tooltip-icon" src="" alt="">
             </div>
             <div id="tooltip-name" class="tooltip-name">Talent Name</div>
         </div>
         <div id="tooltip-type" class="tooltip-type">Passive Ability</div>
-        <div id="tooltip-description" class="tooltip-description">Talent description goes here...</div>
-        <div id="tooltip-effects" class="tooltip-effects">
-            <!-- Effects will be added dynamically -->
-        </div>
+        <div id="tooltip-description" class="tooltip-description">Description...</div>
         <div id="tooltip-status" class="tooltip-status">Status: Locked</div>
-        <div id="tooltip-requirements" class="tooltip-requirements"></div>
-        <div id="tooltip-cost" class="tooltip-cost">Cost: 1 Talent Point</div>
+        <div id="tooltip-cost" class="tooltip-cost">Cost: 1 Point</div>
     </div>
 
-    <!-- Firebase JS SDK -->
+    <!-- Scripts -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
-
-    <!-- Firebase Config -->
     <script src="js/firebase-config.js"></script>
-
-    <!-- Character Classes (required for XP calculations) -->
+    
+    <!-- Game Scripts -->
     <script src="js/raid-game/character.js"></script>
-
-    <!-- Talent Tree Logic -->
     <script src="js/raid-game/character-xp-manager.js"></script>
     <script src="js/raid-game/controller-manager.js"></script>
     <script src="js/raid-game/talents.js"></script>
-    
-
 </body>
 </html> 

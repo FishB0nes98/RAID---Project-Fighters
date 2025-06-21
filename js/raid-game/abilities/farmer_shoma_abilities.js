@@ -449,7 +449,7 @@ const homeRunSmashEffect = (caster, target, ability, actualManaCost, options = {
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
     // --- Determine Base Damage CHECKING TALENT MODIFIERS --- 
-    let baseDamage = 235; // Default base damage
+    let baseDamage = 315; // Updated from 235 to 315
     if (ability.talentModifiers && ability.talentModifiers.baseDamage !== undefined) {
         baseDamage = ability.talentModifiers.baseDamage;
         console.log(`[HomeRunSmash] Using talent-modified base damage: ${baseDamage}`);
@@ -600,13 +600,13 @@ const homeRunSmashAbility = new Ability(
     'Home Run Smash',
     'Icons/abilities/homerun_smash.jpeg',
     35, // Mana cost
-    2,  // Cooldown in turns
+    1,  // Cooldown reduced from 2 to 1 turn
     homeRunSmashEffect
 )
 .setTargetType('enemy');
 
 // Assign relevant properties for description generation
-homeRunSmashAbility.baseDamage = 235; // Set the base damage value
+homeRunSmashAbility.baseDamage = 315; // Updated from 235 to 315
 homeRunSmashAbility.stunChance = 0.35; // Set the stun chance value
 homeRunSmashAbility.scalingPercent = 0; // Default no scaling until talent
 
@@ -1197,7 +1197,7 @@ const appleThrowAbility = new Ability(
     'farmer_shoma_w',
     'Apple Throw',
     'Icons/abilities/apple_throw.jpeg',
-    45, // Mana cost
+    60, // Mana cost increased from 45 to 60
     3,  // Cooldown in turns - THIS IS OVERRIDDEN BY TALENT LATER
     appleThrowEffect
 )
@@ -1633,9 +1633,9 @@ const cottageRunEffect = (caster, target) => {
     }
     // --- End Caster Animation VFX ---
 
-    // Calculate healing - 50% of missing health
+    // Calculate healing - 35% of missing health (reduced from 50%)
     const missingHealth = target.stats.maxHp - target.stats.currentHp;
-    const healAmount = Math.round(missingHealth * 0.5);
+    const healAmount = Math.round(missingHealth * 0.35);
     
     // Apply healing
     const healResult = target.heal(healAmount, caster); // Pass caster for crit check
@@ -1644,7 +1644,7 @@ const cottageRunEffect = (caster, target) => {
     
     // Log the healing (Critical heal log is handled inside target.heal)
     if (!isCriticalHeal) { // Only log non-critical heals here
-        logFunction(`${caster.name} used Cottage Run to heal ${Math.round(actualHeal)} health (50% of missing health).`);
+        logFunction(`${caster.name} used Cottage Run to heal ${Math.round(actualHeal)} health (35% of missing health).`);
     }
     
     // --- NEW: Check for and apply mana restoration from talent ---
@@ -1794,7 +1794,7 @@ const cottageRunEffect = (caster, target) => {
         'cottage_run_buff',
         'Perfect Dodge',
         'Icons/buffs/cottage_run.webp',
-        4, // Duration of 4 turns
+        3, // Duration reduced from 4 to 3 turns
         null,
         false // Is a buff, not a debuff
     );
@@ -1804,7 +1804,7 @@ const cottageRunEffect = (caster, target) => {
         { stat: 'dodgeChance', value: 1.0, operation: 'set' } // Set to 100% dodge chance total
     ];
     
-    perfectDodgeBuff.setDescription('Grants 100% dodge chance for 4 turns.');
+    perfectDodgeBuff.setDescription('Grants 100% dodge chance for 3 turns.');
 
     // --- Refactored Buff Apply/Remove for Indicator ---
     perfectDodgeBuff.onApply = function(character) {
@@ -1836,7 +1836,7 @@ const cottageRunEffect = (caster, target) => {
             setTimeout(() => buffVfxContainer.remove(), 1200);
         }
         const logFunction = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
-        logFunction(`${character.name} gains Perfect Dodge! (100% dodge chance for 4 turns)`, 'buff-effect');
+        logFunction(`${character.name} gains Perfect Dodge! (100% dodge chance for 3 turns)`, 'buff-effect');
     };
 
     perfectDodgeBuff.remove = function(character) {
@@ -1860,7 +1860,7 @@ const cottageRunEffect = (caster, target) => {
     target.addBuff(perfectDodgeBuff.clone()); // Clone before adding
 
     // Log the buff application
-    logFunction(`${caster.name} used Cottage Run, granting themselves Perfect Dodge for 4 turns!`);
+    logFunction(`${caster.name} used Cottage Run, granting themselves Perfect Dodge for 3 turns!`);
 
     // Update UI
     updateCharacterUI(caster);
@@ -1921,7 +1921,7 @@ const cottageRunAbility = new Ability(
 
 // Update description generation to include talent effects
 cottageRunAbility.generateDescription = function() {
-    let description = 'Heals 50% of missing health to himself and gains 100% dodge chance for 4 turns.';
+    let description = 'Heals 35% of missing health to himself and gains 100% dodge chance for 3 turns.';
     
     // Add mana restoration to description if talent is active
     if (this.restoresManaPercent) {

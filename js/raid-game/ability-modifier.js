@@ -74,6 +74,12 @@
     
     // Add ability modification storage method to Character class
     Character.prototype.storeAbilityModification = function(abilityId, property, value) {
+        // Prevent infinite loops
+        if (this._updatingAbilities) {
+            console.log(`[StoreAbilityModification] Skipping modification for ${this.name} to prevent infinite loop`);
+            return;
+        }
+        
         // Initialize if needed
         if (!abilityModifications[abilityId]) {
             abilityModifications[abilityId] = {};
@@ -89,9 +95,22 @@
         const ability = this.abilities.find(a => a.id === abilityId);
         if (ability) {
             const oldValue = ability[property];
+            
+            // Only proceed if the value is actually different
+            if (oldValue === value) {
+                console.log(`[StoreAbilityModification] Value unchanged for ${ability.name}.${property}, skipping update`);
+                return;
+            }
+            
             ability[property] = value;
             console.log(`[StoreAbilityModification] Modified ${this.name}'s ${abilityId} ${property} from ${oldValue} to ${value}`);
             
+            // Handle cooldown modifications specially
+            if (property === 'cooldown') {
+                console.log(`[StoreAbilityModification] Cooldown modified for ${ability.name}: ${oldValue} → ${value}`);
+            }
+            
+            let descriptionChanged = false;
             if (typeof ability.generateDescription === 'function') {
                 const oldDescription = ability.description;
                 ability.generateDescription();
@@ -101,33 +120,41 @@
                     console.log(`[StoreAbilityModification] Updated description for ${ability.name}`);
                     console.log(`Old: ${oldDescription}`);
                     console.log(`New: ${ability.description}`);
+                    descriptionChanged = true;
                 } else {
                     console.log(`[StoreAbilityModification] Description unchanged for ${ability.name} despite property change`);
                 }
             }
             
-            // Dispatch an event to notify that the ability was modified
-            const abilityModifiedEvent = new CustomEvent('abilityModified', {
-                detail: {
-                    abilityId: abilityId,
-                    property: property,
-                    oldValue: oldValue,
-                    newValue: value,
-                    character: this,
-                    ability: ability
-                },
-                bubbles: true
-            });
-            document.dispatchEvent(abilityModifiedEvent);
-            
-            // Update the UI immediately if possible
-            if (window.gameManager && window.gameManager.uiManager && this.instanceId) {
-                try {
-                    window.gameManager.uiManager.updateCharacterUI(this);
-                    console.log(`[StoreAbilityModification] UI updated for ${this.name} after modifying ${abilityId}`);
-                } catch (error) {
-                    console.warn(`[StoreAbilityModification] Error updating UI after ability modification: ${error.message}`);
+            // Only dispatch event and update UI if something actually changed
+            if (descriptionChanged || property === 'cooldown') {
+                // Dispatch an event to notify that the ability was modified
+                const abilityModifiedEvent = new CustomEvent('abilityModified', {
+                    detail: {
+                        abilityId: abilityId,
+                        property: property,
+                        oldValue: oldValue,
+                        newValue: value,
+                        character: this,
+                        ability: ability
+                    },
+                    bubbles: true
+                });
+                document.dispatchEvent(abilityModifiedEvent);
+                
+                // Update the UI with a delay to break call stack
+                if (window.gameManager && window.gameManager.uiManager && this.instanceId) {
+                    setTimeout(() => {
+                        try {
+                            window.gameManager.uiManager.updateCharacterUI(this);
+                            console.log(`[StoreAbilityModification] UI updated for ${this.name} after modifying ${abilityId}`);
+                        } catch (error) {
+                            console.warn(`[StoreAbilityModification] Error updating UI after ability modification: ${error.message}`);
+                        }
+                    }, 10);
                 }
+            } else {
+                console.log(`[StoreAbilityModification] No meaningful changes detected, skipping UI update`);
             }
         } else {
             console.warn(`[StoreAbilityModification] Ability ${abilityId} not found on character ${this.name || this.id}`);

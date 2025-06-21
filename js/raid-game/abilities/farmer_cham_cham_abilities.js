@@ -530,8 +530,8 @@ const farmerScratchAbility = new Ability(
     'farmer_scratch',              // id
     'Scratch (Farmer Version)',    // name
     'Icons/abilities/scratch_farmer.jpeg', // icon
-    30,                            // mana cost
-    2,                             // cooldown
+    40,                            // mana cost
+    1,                             // cooldown
     farmerScratchEffect            // effect function
 );
 
@@ -603,15 +603,15 @@ const farmerLeapEffect = (caster, target) => { // Target is not used but kept fo
         buffDuration,
         null, // Effect logic handled by Character.recalculateStats
         false // Is not a debuff
-    ).setDescription('Increased agility grants 50% dodge chance.');
+    ).setDescription('Increased agility grants 25% dodge chance.');
     // Use statModifiers for proper stat modification
-    dodgeBuff.statModifiers = [{ stat: 'dodgeChance', value: 0.5, operation: 'add' }];
+    dodgeBuff.statModifiers = [{ stat: 'dodgeChance', value: 0.25, operation: 'add' }];
     caster.addBuff(dodgeBuff.clone()); // Apply a clone to avoid mutation issues
-    log(`${caster.name} gains 50% Dodge Chance for ${buffDuration} turns.`);
+    log(`${caster.name} gains 25% Dodge Chance for ${buffDuration} turns.`);
 
     // 2. Physical Damage Buff
     // Calculate bonus damage based on BASE physical damage
-    const bonusPhysDamage = Math.floor((caster.baseStats.physicalDamage || 0) * 0.50);
+    const bonusPhysDamage = Math.floor((caster.baseStats.physicalDamage || 0) * 0.25);
     const physDamageBuff = new Effect(
         'farmer_leap_phys_buff',
         'Leap Power',
@@ -619,7 +619,7 @@ const farmerLeapEffect = (caster, target) => { // Target is not used but kept fo
         buffDuration,
         null, // Effect logic handled by Character.recalculateStats
         false // Is not a debuff
-    ).setDescription(`Empowered stance increases Physical Damage by ${bonusPhysDamage} (50% base).`);
+    ).setDescription(`Empowered stance increases Physical Damage by ${bonusPhysDamage} (25% base).`);
     physDamageBuff.statModifiers = [{ stat: 'physicalDamage', value: bonusPhysDamage, operation: 'add' }];
     caster.addBuff(physDamageBuff.clone()); // Apply a clone
     log(`${caster.name} gains +${bonusPhysDamage} Physical Damage for ${buffDuration} turns.`);
@@ -754,11 +754,11 @@ const farmerLeapAbility = new Ability(
     'Leap (Farmer Version)',        // name
     'Icons/abilities/leap_farmer.jpeg', // icon (Placeholder)
     70,                             // manaCost
-    10,                             // cooldown
+    8,                              // cooldown
     farmerLeapEffect                // effect function
 );
 // Set base description separately for clarity
-farmerLeapAbility.baseDescription = 'Leaps into an agile stance, gaining 50% Dodge Chance and 50% bonus Physical Damage for 4 turns.';
+farmerLeapAbility.baseDescription = 'Leaps into an agile stance, gaining 25% Dodge Chance and 25% bonus Physical Damage for 4 turns.';
 farmerLeapAbility.description = farmerLeapAbility.generateDescription(); // Generate initial description
 farmerLeapAbility.setTargetType('self'); // This ability targets the caster
 
@@ -792,8 +792,8 @@ const farmerBoomerangEffect = (caster, target) => {
     log(`${caster.name} throws a Boomerang (Farmer Version) at ${target.name}!`);
     // playSound('sounds/cat_boomerang.mp3', 0.7); // TODO: Add sound
 
-    // Damage Calculation (250% Physical Damage)
-    const damageMultiplier = 2.5;
+    // Damage Calculation (185% Physical Damage)
+    const damageMultiplier = 1.85;
     let physicalDamage = Math.floor((caster.stats.physicalDamage || 0) * damageMultiplier);
     
     // Check for Arcane Awakening talent (magical damage scaling)
@@ -1158,11 +1158,11 @@ const farmerBoomerangAbility = new Ability(
     'Boomerang (Farmer Version)',   // name
     'Icons/abilities/boomerang_farmer.jpeg', // icon (Placeholder)
     50,                             // manaCost
-    6,                              // cooldown
+    5,                              // cooldown
     farmerBoomerangEffect           // effect function
 );
 // Set base description separately
-farmerBoomerangAbility.baseDescription = 'Throws a cat-themed boomerang, dealing 250% Physical Damage twice.';
+farmerBoomerangAbility.baseDescription = 'Throws a cat-themed boomerang, dealing 185% Physical Damage twice.';
 
 // Add custom generateDescription method to handle the talent changes
 farmerBoomerangAbility.generateDescription = function() {
@@ -1538,8 +1538,8 @@ const farmerFeralStrikeAbility = new Ability(
     'farmer_feral_strike',          // id
     'Feral Strike (Farmer Version)', // name
     'Icons/abilities/feral_strike_farmer.jpeg', // icon (Placeholder)
-    100,                            // manaCost
-    16,                             // cooldown
+    125,                            // manaCost
+    14,                             // cooldown
     farmerFeralStrikeEffect         // effect function
 ).setDescription('Unleashes a flurry of 6 strikes, each dealing 100% Physical Damage with 50% chance to critically hit.')
  .setTargetType('enemy');

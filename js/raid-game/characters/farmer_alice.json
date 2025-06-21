@@ -21,14 +21,14 @@
         {
             "id": "pounce",
             "name": "Pounce",
-            "description": "Deals 50% AD damage and has a 85% chance to stun the target for 1 turn.",
+            "description": "Deals 50% AD damage and has a 85% chance to stun the target for 2 turns.",
             "manaCost": 50,
             "cooldown": 2,
             "icon": "Icons/abilities/pounce.jpeg",
             "debuffEffect": {
                 "debuffId": "stun",
                 "name": "Stunned",
-                "duration": 1,
+                "duration": 2,
                 "chance": 0.85,
                 "effects": { "cantAct": true }
             }

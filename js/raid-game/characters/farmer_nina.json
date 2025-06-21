@@ -34,9 +34,9 @@
             "name": "Hiding",
             "type": "buff",
             "manaCost": 30,
-            "cooldown": 5,
+            "cooldown": 8,
             "targetType": "self",
-            "description": "Become untargetable for 2 turns and regenerate 350 HP each turn. Farmer farmer_nina can still be damaged by AOE and DOT effects. Stealth breaks if damaged or when using other abilities.",
+            "description": "Become untargetable for 2 turns and regenerate 350 HP each turn. Farmer Nina can still be damaged by AOE and DOT effects. Stealth breaks if damaged or when using other abilities.",
             "icon": "Icons/abilities/hiding.jpeg"
         },
         {
@@ -56,7 +56,7 @@
             "type": "damage",
             "damageType": "physical",
             "manaCost": 100,
-            "cooldown": 15,
+            "cooldown": 12,
             "targetType": "enemy",
             "description": "Fires a specialized round that deals 750 (+250% AD) physical damage and completely ignores the target's armor.",
             "icon": "Icons/abilities/piercing_shot.jpeg"

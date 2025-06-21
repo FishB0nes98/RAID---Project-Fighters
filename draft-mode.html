@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Mode - Fighter Selection</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Nunito:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="css/draft-mode.css">
+    <!-- Firebase JS SDK (compat version to match other pages) -->
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+<body>
+    <div class="draft-container">
+        <!-- Header -->
+        <div class="draft-header">
+            <h1>Draft Mode</h1>
+            <div class="timer-container">
+                <div class="timer">30</div>
+                <div class="timer-label">Pick Timer</div>
+            </div>
+            <button class="exit-draft-btn" onclick="exitDraft()">✕ Exit Draft</button>
+        </div>
+
+        <!-- Draft Info -->
+        <div class="draft-info">
+            <div class="turn-indicator">
+                <span id="current-turn-text">Randomizing pick order...</span>
+            </div>
+            <div class="phase-indicator">
+                <span id="phase-text">Draft Phase</span>
+            </div>
+            
+            <!-- Stage Modifier Settings -->
+            <div class="stage-modifier-settings">
+                <div class="modifier-toggle-container">
+                    <label class="modifier-toggle">
+                        <input type="checkbox" id="random-modifier-toggle" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Random Stage Modifier</span>
+                    </label>
+                </div>
+                <div class="selected-modifier-display" id="selected-modifier-display">
+                    <div class="modifier-preview" id="modifier-preview">
+                        <span class="modifier-icon" id="modifier-icon">🎲</span>
+                        <div class="modifier-info">
+                            <span class="modifier-name" id="modifier-name">Random Modifier</span>
+                            <span class="modifier-description" id="modifier-description">A random stage effect will be selected for this battle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Draft Area -->
+        <div class="draft-main">
+            <!-- Player Team (Left) -->
+            <div class="team-section player-team">
+                <div class="team-header">
+                    <h2>Your Team</h2>
+                    <div class="team-indicator player"></div>
+                </div>
+                <div class="team-slots">
+                    <div class="character-slot" data-slot="0">
+                        <div class="slot-number">1</div>
+                        <div class="slot-content">
+                            <div class="empty-slot">Pick your champion</div>
+                        </div>
+                    </div>
+                    <div class="character-slot" data-slot="1">
+                        <div class="slot-number">2</div>
+                        <div class="slot-content">
+                            <div class="empty-slot">Pick your champion</div>
+                        </div>
+                    </div>
+                    <div class="character-slot" data-slot="2">
+                        <div class="slot-number">3</div>
+                        <div class="slot-content">
+                            <div class="empty-slot">Pick your champion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Grid (Center) -->
+            <div class="character-grid-section">
+                <div class="character-grid-header">
+                    <h3>Select Your Champion</h3>
+                    <div class="grid-controls">
+                        <input type="text" id="champion-search" placeholder="Search champions..." />
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="owned">Owned</button>
+                            <button class="filter-btn" data-filter="available">Available</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="character-grid" id="character-grid">
+                    <!-- Characters will be populated here -->
+                </div>
+                <div class="selection-area">
+                    <div class="selected-champion" id="selected-champion">
+                        <div class="champion-preview">
+                            <div class="champion-image-large">
+                                <img id="preview-image" alt="Champion Preview">
+                            </div>
+                            <div class="champion-details">
+                                <h3 id="preview-name">Select a champion</h3>
+                                <p id="preview-description">Click on a champion to see details</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="pick-button" id="pick-btn" disabled>
+                        <span class="pick-text">PICK CHAMPION</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Team (Right) -->
+            <div class="team-section ai-team">
+                <div class="team-header">
+                    <h2>Enemy Team</h2>
+                    <div class="team-indicator ai"></div>
+                </div>
+                <div class="team-slots">
+                    <div class="character-slot" data-slot="0">
+                        <div class="slot-number">1</div>
+                        <div class="slot-content">
+                            <div class="empty-slot">AI Champion</div>
+                        </div>
+                    </div>
+                    <div class="character-slot" data-slot="1">
+                        <div class="slot-number">2</div>
+                        <div class="slot-content">
+                            <div class="empty-slot">AI Champion</div>
+                        </div>
+                    </div>
+                    <div class="character-slot" data-slot="2">
+                        <div class="slot-number">3</div>
+                        <div class="slot-content">
+                            <div class="empty-slot">AI Champion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pick Order Display -->
+        <div class="pick-order">
+            <div class="pick-order-title">Pick Order</div>
+            <div class="pick-sequence" id="pick-sequence">
+                <!-- Pick order will be generated here -->
+            </div>
+        </div>
+
+        <!-- Draft Complete Overlay -->
+        <div class="draft-complete-overlay" id="draft-complete">
+            <div class="draft-complete-content">
+                <h2>Draft Complete!</h2>
+                <div class="final-teams">
+                    <div class="final-team player">
+                        <h3>Your Team</h3>
+                        <div class="final-team-chars" id="final-player-team"></div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="final-team ai">
+                        <h3>Enemy Team</h3>
+                        <div class="final-team-chars" id="final-ai-team"></div>
+                    </div>
+                </div>
+                <button class="start-battle-btn" onclick="startBattle()">START BATTLE</button>
+                <button class="redraft-btn" onclick="restartDraft()">NEW DRAFT</button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading champions...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/draft-mode.js"></script>
+</body>
+</html> 

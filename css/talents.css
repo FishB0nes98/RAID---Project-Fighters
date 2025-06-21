@@ -1,87 +1,43 @@
 /* talents.css - RPG Style Talent Tree */
 
-:root {
-    /* Core Colors */
-    --bg-dark: #0a0d14;
-    --bg-medium: #131720;
-    --bg-light: #1c2334;
-    --primary: #8564d2;
-    --primary-dark: #5e35b1;
-    --primary-light: #b39ddb;
-    --accent: #ff9d2f;
-    --accent-dark: #e67e22;
-    --accent-light: #ffc06a;
-    
-    /* Status Colors */
-    --danger: #e53935;
-    --success: #43a047;
-    --warning: #ffb74d;
-    --info: #29b6f6;
-    
-    /* Text Colors */
-    --text-light: #f5f5f5;
-    --text-medium: #c0ccd8;
-    --text-dark: #8596a5;
-    
-    /* Talent States */
-    --talent-locked: #3c4654;
-    --talent-locked-border: #505c6d;
-    --talent-available: #4d9bf5;
-    --talent-available-border: #64b5f6;
-    --talent-selected: var(--primary);
-    --talent-selected-border: var(--primary-light);
-    
-    /* Connectors */
-    --connector-locked: #2c394a;
-    --connector-available: #3a506b;
-    --connector-selected: var(--primary-light);
-    
-    /* Effects */
-    --shadow-soft: 0 4px 8px rgba(0, 0, 0, 0.3);
-    --shadow-medium: 0 6px 14px rgba(0, 0, 0, 0.4);
-    --shadow-hard: 0 8px 20px rgba(0, 0, 0, 0.5);
-    --border-radius: 8px;
-    --border-radius-lg: 12px;
-    --glow-primary: 0 0 15px rgba(126, 87, 194, 0.6);
-    --glow-accent: 0 0 15px rgba(255, 157, 47, 0.6);
-    
-    /* Element Sizes */
-    --talent-node-size: 64px;
-    --talent-icon-size: 40px;
-    --header-height: 80px;
-    
-    /* Animations */
-    --transition-fast: 0.2s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
-}
-
-/* Base Styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    background-color: var(--bg-dark);
-    color: var(--text-light);
-    min-height: 100vh;
-    line-height: 1.6;
-    font-family: 'Exo 2', sans-serif;
-    overflow: hidden;
-    background-image: 
-        url('../images/backgrounds/stars.png'),
-        radial-gradient(circle at top right, rgba(126, 87, 194, 0.15), transparent 70%),
-        radial-gradient(circle at bottom left, rgba(255, 152, 0, 0.08), transparent 70%);
-    background-attachment: fixed;
+:root {
+    /* Colors */
+    --bg-primary: #0f1419;
+    --bg-secondary: #1a1f2e;
+    --bg-tertiary: #252a3a;
+    --text-primary: #ffffff;
+    --text-secondary: #b8c5d1;
+    --text-muted: #6b7280;
+    --accent-primary: #8b5cf6;
+    --accent-secondary: #a78bfa;
+    --accent-gold: #fbbf24;
+    --border-primary: #374151;
+    --border-accent: #6366f1;
+    
+    /* Node States */
+    --node-locked: #374151;
+    --node-available: #3b82f6;
+    --node-selected: #8b5cf6;
+    --node-powerful: #fbbf24;
+    
+    /* Sizes */
+    --node-size: 64px;
+    --header-height: 80px;
+    --sidebar-width: 300px;
 }
 
-/* Text Styles */
-h1, h2, h3 {
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
-    letter-spacing: 1px;
+body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
 }
 
 /* Loading Screen */
@@ -91,93 +47,52 @@ h1, h2, h3 {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-dark);
+    background: var(--bg-primary);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    transition: opacity var(--transition-slow);
-    background-image: radial-gradient(circle, rgba(126, 87, 194, 0.1), transparent 70%);
 }
 
 .loader {
-    width: 70px;
-    height: 70px;
-    border: 5px solid rgba(126, 87, 194, 0.2);
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-primary);
+    border-top: 4px solid var(--accent-primary);
     border-radius: 50%;
-    border-top-color: var(--primary);
-    animation: spin 1.5s ease-in-out infinite;
-    margin-bottom: 25px;
-    box-shadow: 0 0 20px rgba(126, 87, 194, 0.3);
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
 }
 
 .loading-text {
-    font-size: 1.3rem;
-    color: var(--text-light);
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-.loading-text::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 2px;
-    background: linear-gradient(to right, transparent, var(--primary), transparent);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Main Container */
+/* Main Layout */
 .talent-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    position: relative;
 }
 
-/* Header */
+/* Compact Header */
 .talent-header {
+    height: var(--header-height);
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-primary);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
-    background-color: rgba(30, 35, 50, 0.8);
-    box-shadow: var(--shadow-medium);
-    border-bottom: 1px solid rgba(126, 87, 194, 0.3);
-    backdrop-filter: blur(5px);
-    height: var(--header-height);
+    justify-content: space-between;
+    padding: 0 20px;
     position: relative;
-    z-index: 5;
-}
-
-.header-decoration {
-    position: absolute;
-    top: 0;
-    height: var(--header-height);
-    width: 150px;
-    z-index: -1;
-}
-
-.header-decoration.left {
-    left: 0;
-    background: url('../images/ui/header-decoration-left.png') no-repeat left center;
-    background-size: contain;
-}
-
-.header-decoration.right {
-    right: 0;
-    background: url('../images/ui/header-decoration-right.png') no-repeat right center;
-    background-size: contain;
+    z-index: 100;
 }
 
 .character-info {
@@ -187,963 +102,518 @@ h1, h2, h3 {
 }
 
 .portrait-frame {
-    width: 62px;
-    height: 62px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.portrait-frame::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: url('../images/ui/portrait-frame.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    z-index: 2;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--accent-primary);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
 }
 
 .character-image {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    z-index: 1;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.character-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.talent-header h1 {
-    font-size: 1.8rem;
-    color: var(--text-light);
+.character-details h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
     margin-bottom: 4px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    color: var(--accent-secondary);
 }
 
-/* Character Level and XP Display */
 .character-level-xp {
-    margin: 8px 0;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    gap: 15px;
 }
 
 .level-display {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 1rem;
-    color: var(--primary-light);
-    font-weight: 600;
-}
-
-.level-display i {
-    color: var(--accent);
     font-size: 0.9rem;
-}
-
-.xp-display {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .xp-bar-container {
-    position: relative;
-    width: 200px;
+    width: 120px;
 }
 
 .xp-bar {
     width: 100%;
-    height: 8px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
     overflow: hidden;
-    border: 1px solid var(--primary-dark);
+    border: 1px solid var(--border-primary);
 }
 
 .xp-fill {
     height: 100%;
-    background: linear-gradient(to right, var(--accent-dark), var(--accent));
-    border-radius: 3px;
-    width: 0%;
-    transition: width 0.5s ease;
-    box-shadow: 0 0 8px rgba(255, 157, 47, 0.4);
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 2px;
+    transition: width 0.3s ease;
 }
 
 .xp-text {
-    font-size: 0.85rem;
-    color: var(--text-medium);
+    font-size: 0.75rem;
+    color: var(--text-muted);
     text-align: center;
     margin-top: 2px;
 }
 
 .talent-points-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 1.1rem;
-    color: var(--accent);
+    font-size: 1rem;
+    color: var(--accent-gold);
     font-weight: 600;
-}
-
-.talent-points-info i {
-    color: var(--accent);
-    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .talent-controls {
     display: flex;
-    gap: 15px;
+    gap: 10px;
 }
 
-/* RPG Buttons */
+/* Compact Buttons */
 .rpg-button {
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-normal);
-    position: relative;
-    overflow: hidden;
-    min-width: 100px;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: 'Exo 2', sans-serif;
-}
-
-.rpg-button i {
-    font-size: 0.9rem;
+    gap: 6px;
 }
 
 .rpg-button.primary {
-    background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+    background: var(--accent-primary);
     color: white;
-    border: 1px solid var(--primary-light);
-    box-shadow: 0 0 10px rgba(126, 87, 194, 0.4);
 }
 
 .rpg-button.primary:hover {
-    background: linear-gradient(to bottom, var(--primary-light), var(--primary));
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(126, 87, 194, 0.6);
-}
-
-.rpg-button.primary:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 5px rgba(126, 87, 194, 0.4);
+    background: var(--accent-secondary);
+    transform: translateY(-1px);
 }
 
 .rpg-button.secondary {
-    background: rgba(20, 30, 45, 0.7);
-    border: 1px solid var(--primary);
-    color: var(--primary-light);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-primary);
 }
 
 .rpg-button.secondary:hover {
-    background: rgba(126, 87, 194, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 0 10px rgba(126, 87, 194, 0.3);
+    border-color: var(--accent-primary);
+    color: var(--accent-secondary);
 }
 
-.rpg-button.secondary:active {
-    transform: translateY(1px);
-    box-shadow: none;
+/* Edit Mode Button */
+.rpg-button.edit-mode {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-primary);
 }
 
-/* Class Description Panel */
-.class-description-panel {
-    background: rgba(20, 30, 45, 0.75);
-    border-bottom: 1px solid rgba(126, 87, 194, 0.2);
-    padding: 15px 40px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    backdrop-filter: blur(5px);
-}
-
-.class-icon {
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(126, 87, 194, 0.2);
-    border: 1px solid var(--primary);
-    box-shadow: 0 0 10px rgba(126, 87, 194, 0.3);
-}
-
-.class-icon img {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-}
-
-.class-text h2 {
-    font-size: 1.3rem;
-    color: var(--primary-light);
-    margin-bottom: 5px;
-}
-
-.class-text p {
-    font-size: 0.95rem;
-    color: var(--text-medium);
-    max-width: 800px;
+.rpg-button.edit-mode.active {
+    background: var(--accent-gold);
+    color: var(--bg-primary);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
 }
 
 /* Talent Tree Area */
 .talent-tree-area {
-    flex-grow: 1;
-    overflow: auto;
-    background-color: var(--bg-dark);
+    flex: 1;
     position: relative;
-    cursor: grab;
-}
-
-.talent-tree-area:active {
-    cursor: grabbing;
+    overflow: hidden;
+    background: var(--bg-primary);
 }
 
 .talent-tree-canvas {
-    position: relative;
-    width: 2500px;
-    height: 2500px;
-    transform-origin: 0 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3000px;
+    height: 2000px;
     background-image: 
-        radial-gradient(circle, rgba(126, 87, 194, 0.03) 1px, transparent 1px),
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 30px 30px, 50px 50px, 50px 50px;
-    background-position: 0 0;
+        radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    cursor: grab;
+}
+
+.talent-tree-canvas:active {
+    cursor: grabbing;
+}
+
+/* Edit Mode Canvas */
+.talent-tree-canvas.edit-mode {
+    cursor: default;
+}
+
+.talent-tree-canvas.edit-mode .talent-node {
+    cursor: grab;
+}
+
+.talent-tree-canvas.edit-mode .talent-node:active {
+    cursor: grabbing;
 }
 
 /* Map Controls */
 .map-controls {
     position: absolute;
-    right: 20px;
     top: 20px;
+    right: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    z-index: 10;
+    gap: 8px;
+    z-index: 50;
 }
 
 .map-control-button {
     width: 40px;
     height: 40px;
+    border: 2px solid var(--border-primary);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
     border-radius: 50%;
-    background: rgba(30, 35, 50, 0.8);
-    border: 1px solid var(--primary);
-    color: var(--primary-light);
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    box-shadow: var(--shadow-medium);
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
 .map-control-button:hover {
-    background: rgba(126, 87, 194, 0.2);
-    transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(126, 87, 194, 0.5);
+    border-color: var(--accent-primary);
+    color: var(--accent-secondary);
+    background: var(--bg-tertiary);
 }
 
-/* Talent Legend */
-.talent-legend {
+.map-control-button.active {
+    background: var(--accent-gold);
+    color: var(--bg-primary);
+    border-color: var(--accent-gold);
+}
+
+/* Talent Nodes */
+.talent-node {
     position: absolute;
-    right: 20px;
-    bottom: 20px;
-    background: rgba(20, 30, 45, 0.75);
-    border: 1px solid rgba(126, 87, 194, 0.3);
-    border-radius: var(--border-radius);
-    padding: 10px 15px;
+    width: var(--node-size);
+    height: var(--node-size);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 3px solid var(--node-locked);
     display: flex;
-    gap: 15px;
-    backdrop-filter: blur(5px);
-    box-shadow: var(--shadow-medium);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
     z-index: 10;
 }
 
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    color: var(--text-medium);
-}
-
-.legend-icon {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    border: 2px solid;
-}
-
-.legend-icon.locked {
-    background-color: var(--talent-locked);
-    border-color: var(--talent-locked-border);
-}
-
-.legend-icon.available {
-    background-color: var(--talent-available);
-    border-color: var(--talent-available-border);
-}
-
-.legend-icon.selected {
-    background-color: var(--talent-selected);
-    border-color: var(--talent-selected-border);
-    box-shadow: 0 0 5px var(--primary);
-}
-
-/* Talent Node Styles */
-.talent-node {
-    position: absolute;
-    width: var(--talent-node-size);
-    height: var(--talent-node-size);
-    border-radius: 15%;
-    background-color: var(--bg-light);
-    border: 3px solid var(--talent-locked-border);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    box-shadow: var(--shadow-medium);
-    z-index: 5;
-}
-
-.talent-node::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 18%;
-    border: 2px solid transparent;
-    opacity: 0;
-    pointer-events: none;
-    transition: all var(--transition-normal);
-}
-
 .talent-node:hover {
-    transform: scale(1.15);
-    box-shadow: var(--shadow-hard);
-    z-index: 15;
+    transform: scale(1.1);
+    z-index: 20;
 }
 
 .talent-icon {
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
+    border-radius: 8px;
     object-fit: cover;
-    filter: grayscale(0.9) brightness(0.7);
-    transition: all var(--transition-normal);
-    border-radius: 10%;
+    filter: grayscale(1) brightness(0.6);
+    transition: filter 0.2s ease;
 }
 
 /* Node States */
 .talent-node.locked {
-    border-color: var(--talent-locked-border);
+    border-color: var(--node-locked);
     cursor: not-allowed;
 }
 
-.talent-node.locked .talent-icon {
-    filter: grayscale(1) brightness(0.5);
-}
-
 .talent-node.available {
-    border-color: var(--talent-available-border);
-    box-shadow: 0 0 10px rgba(77, 155, 245, 0.3);
-    cursor: pointer;
+    border-color: var(--node-available);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
 .talent-node.available .talent-icon {
-    filter: grayscale(0.3) brightness(0.9);
+    filter: grayscale(0.5) brightness(0.8);
 }
 
 .talent-node.available:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 15px var(--talent-available);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
 }
 
 .talent-node.available:hover .talent-icon {
-    filter: grayscale(0) brightness(1.1);
-}
-
-.talent-node.available::before {
-    border-color: var(--talent-available);
-    opacity: 0.4;
-}
-
-.talent-node.available:hover::before {
-    opacity: 0.8;
-    animation: pulseAvailable 1.5s infinite ease-in-out;
+    filter: grayscale(0) brightness(1);
 }
 
 .talent-node.selected {
-    border-color: var(--talent-selected-border);
-    background: linear-gradient(135deg, var(--bg-light), var(--bg-medium));
-    box-shadow: 0 0 20px rgba(126, 87, 194, 0.6);
+    border-color: var(--node-selected);
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
 }
 
 .talent-node.selected .talent-icon {
-    filter: grayscale(0) brightness(1.2);
+    filter: grayscale(0) brightness(1.1);
 }
 
-/* Add hover effect for selected node icons */
-.talent-node.selected:hover .talent-icon {
-    filter: grayscale(0) brightness(1.3);
+/* Dragging State */
+.talent-node.dragging {
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.6);
+    z-index: 999;
+    opacity: 0.9;
 }
 
-.talent-node.selected::before {
-    border-color: var(--talent-selected);
-    opacity: 0.8;
-    animation: pulseSelected 2s infinite ease-in-out;
+/* Powerful Talents */
+.talent-node[data-powerful="true"] {
+    border-color: var(--node-powerful);
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+    border-width: 3px;
+    background: linear-gradient(135deg, 
+        var(--bg-secondary) 0%, 
+        rgba(251, 191, 36, 0.1) 50%, 
+        var(--bg-secondary) 100%);
+    /* Ensure the node itself stays properly positioned for connectors */
+    transform-origin: center center;
 }
 
-@keyframes pulseAvailable {
-    0% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.05); opacity: 0.3; }
-    100% { transform: scale(1); opacity: 0.5; }
-}
-
-@keyframes pulseSelected {
-    0% { transform: scale(1); opacity: 0.7; border-color: var(--primary); }
-    50% { transform: scale(1.15); opacity: 0.4; border-color: var(--primary-light); }
-    100% { transform: scale(1); opacity: 0.7; border-color: var(--primary); }
-}
-
-/* Talent Rank Indicator */
-.talent-rank {
+.talent-node[data-powerful="true"]::before {
+    content: 'POWERFUL';
     position: absolute;
-    bottom: -6px;
-    right: -6px;
-    background: var(--bg-dark);
-    color: var(--text-light);
-    border: 2px solid var(--talent-locked-border);
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: bold;
-    z-index: 6;
-    transition: all var(--transition-normal);
+    top: -8px;  /* Move badge further up to not interfere with connections */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--node-powerful);
+    color: var(--bg-primary);
+    font-size: 0.5rem;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 2px;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 15;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+    /* Prevent badge from affecting layout */
+    pointer-events: none;
 }
 
-.talent-node.available .talent-rank {
-    border-color: var(--talent-available-border);
-    color: var(--talent-available);
+.talent-node[data-powerful="true"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid var(--node-powerful);
+    border-radius: 8px;
+    opacity: 0.4;
+    animation: powerfulPulse 2.5s infinite ease-in-out;
+    box-shadow: inset 0 0 8px rgba(251, 191, 36, 0.2);
 }
 
-.talent-node.selected .talent-rank {
-    border-color: var(--talent-selected-border);
-    color: var(--accent);
-    background: var(--bg-medium);
-    box-shadow: 0 0 5px rgba(126, 87, 194, 0.5);
+.talent-node[data-powerful="true"].selected {
+    border-color: var(--node-powerful);
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.8);
+    background: linear-gradient(135deg, 
+        var(--bg-secondary) 0%, 
+        rgba(251, 191, 36, 0.15) 50%, 
+        var(--bg-secondary) 100%);
+}
+
+.talent-node[data-powerful="true"].selected::before {
+    background: var(--accent-secondary);
+    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.4);
+}
+
+@keyframes powerfulPulse {
+    0%, 100% { 
+        opacity: 0.4; 
+        box-shadow: inset 0 0 8px rgba(251, 191, 36, 0.2);
+    }
+    50% { 
+        opacity: 0.2; 
+        box-shadow: inset 0 0 12px rgba(251, 191, 36, 0.4);
+    }
+}
+
+/* Remove the old badge and particle styles since we're using pseudo-elements now */
+.powerful-badge {
+    display: none !important;
+}
+
+.power-particles {
+    display: none !important;
+}
+
+.talent-icon-container {
+    display: contents;
 }
 
 /* Talent Connectors */
 .talent-connector {
     position: absolute;
-    background-color: var(--connector-locked);
-    height: 5px;
-    border-radius: 3px;
+    background: var(--node-locked);
+    height: 4px;
+    border-radius: 2px;
     z-index: 1;
-    transition: all var(--transition-slow);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    /* Ensure connectors don't interfere with node positioning */
+    pointer-events: none;
 }
 
 .talent-connector.available {
-    background-color: var(--connector-available);
+    background: var(--node-available);
 }
 
 .talent-connector.selected {
-    background: linear-gradient(to right, var(--talent-selected), var(--primary-light));
-    box-shadow: 0 0 10px var(--primary);
-    height: 6px;
+    background: var(--node-selected);
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
 }
 
-/* Enhanced Tooltip */
+/* Tooltip */
 .talent-tooltip {
     position: fixed;
-    background: rgba(20, 30, 45, 0.95);
-    border: 2px solid var(--primary);
-    border-radius: var(--border-radius-lg);
-    padding: 18px;
-    box-shadow: var(--shadow-hard), 0 0 20px rgba(126, 87, 194, 0.3);
-    z-index: 1000;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-accent);
+    border-radius: 12px;
+    padding: 20px;
     max-width: 350px;
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast);
-    pointer-events: none;
-    backdrop-filter: blur(10px);
-    transform: scale(0.95) translateY(10px);
+    transition: all 0.2s ease;
+    transform: translateY(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .talent-tooltip.visible {
     opacity: 1;
     visibility: visible;
-    transform: scale(1) translateY(0);
+    transform: translateY(0);
 }
 
 .tooltip-header {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(126, 87, 194, 0.4);
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .tooltip-icon-container {
-    width: 45px;
-    height: 45px;
-    border-radius: 10%;
-    background: rgba(126, 87, 194, 0.2);
-    border: 2px solid var(--primary);
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid var(--accent-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 10px rgba(126, 87, 194, 0.4);
-    flex-shrink: 0;
+    background: var(--bg-tertiary);
 }
 
 .tooltip-icon {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    object-fit: cover;
 }
 
 .tooltip-name {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--primary-light);
     font-family: 'Cinzel', serif;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    font-size: 1.4rem;
+    color: var(--accent-secondary);
+    font-weight: 700;
 }
 
 .tooltip-type {
-    font-size: 0.85rem;
-    color: var(--accent);
+    color: var(--accent-gold);
+    font-size: 0.9rem;
     font-style: italic;
     margin-bottom: 10px;
-    border-left: 3px solid var(--accent);
-    padding-left: 10px;
 }
 
 .tooltip-description {
-    font-size: 1rem;
-    color: var(--text-medium);
-    margin-bottom: 15px;
+    color: var(--text-secondary);
     line-height: 1.5;
-}
-
-.tooltip-effects {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
     margin-bottom: 15px;
-}
-
-.tooltip-effect {
-    display: flex;
-    align-items: baseline;
-    font-size: 0.95rem;
-}
-
-.tooltip-effect-label {
-    color: var(--text-light);
-    margin-right: 8px;
-    font-weight: 600;
-}
-
-.tooltip-effect-value {
-    color: var(--info);
-}
-
-.tooltip-effect-value.positive {
-    color: var(--success);
-}
-
-.tooltip-effect-value.negative {
-    color: var(--danger);
 }
 
 .tooltip-status {
-    font-size: 0.95rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.tooltip-status::before {
-    content: '';
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.tooltip-status.locked {
-    color: var(--danger);
-}
-
-.tooltip-status.locked::before {
-    background-color: var(--danger);
-}
-
-.tooltip-status.available {
-    color: var(--talent-available);
-}
-
-.tooltip-status.available::before {
-    background-color: var(--talent-available);
-}
-
-.tooltip-status.selected {
-    color: var(--primary-light);
-}
-
-.tooltip-status.selected::before {
-    background-color: var(--primary-light);
-}
-
-.tooltip-requirements {
-    font-size: 0.9rem;
-    color: var(--text-dark);
+    font-weight: 600;
     margin-bottom: 8px;
 }
 
+.tooltip-status.locked { color: var(--text-muted); }
+.tooltip-status.available { color: var(--node-available); }
+.tooltip-status.selected { color: var(--node-selected); }
+
 .tooltip-cost {
-    font-size: 0.9rem;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    color: var(--accent-gold);
+    font-weight: 600;
 }
 
-.tooltip-cost i {
-    font-size: 0.8rem;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes glow {
-    0% { box-shadow: 0 0 5px rgba(126, 87, 194, 0.5); }
-    50% { box-shadow: 0 0 20px rgba(126, 87, 194, 0.8); }
-    100% { box-shadow: 0 0 5px rgba(126, 87, 194, 0.5); }
-}
-
-/* Special Node Effects */
-.talent-node[data-tier="special"] {
-    transform: scale(1.2);
-    border-width: 4px;
-    z-index: 10;
-}
-
-.talent-node[data-tier="special"]::after {
-    content: '';
+/* Edit Mode Indicator */
+.edit-mode-indicator {
     position: absolute;
-    width: 140%;
-    height: 140%;
-    border-radius: 15%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-    z-index: -1;
-    animation: specialPulse 3s infinite ease-in-out;
-}
-
-/* Powerful Talent Styling */
-.talent-node[data-powerful="true"] {
-    transform: scale(1.15);
-    border-width: 4px;
-    z-index: 12;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-    background: linear-gradient(135deg, rgba(40, 44, 52, 0.9), rgba(30, 35, 50, 0.9));
-    overflow: visible;
-}
-
-.talent-node[data-powerful="true"]::before {
-    content: '';
-    position: absolute;
-    width: 120%;
-    height: 120%;
-    border-radius: 15%;
-    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.1), transparent 70%);
-    z-index: -1;
-}
-
-.talent-node[data-powerful="true"]:hover {
-    transform: scale(1.25);
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.3);
-}
-
-.talent-node[data-powerful="true"]::after {
-    content: '';
-    position: absolute;
-    width: 160%;
-    height: 160%;
-    top: -30%;
-    left: -30%;
-    background-image: 
-        radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0) 60%),
-        radial-gradient(circle at center, rgba(255, 186, 0, 0.1) 0%, rgba(255, 186, 0, 0) 70%);
-    border-radius: 50%;
-    z-index: -2;
-    animation: powerfulGlow 4s infinite ease-in-out;
-    transform-origin: center;
-}
-
-/* Gold corners decoration for powerful talents */
-.talent-node[data-powerful="true"] .talent-icon-container {
-    position: relative;
-}
-
-.talent-node[data-powerful="true"] .talent-icon-container::before,
-.talent-node[data-powerful="true"] .talent-icon-container::after {
-    content: '';
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    z-index: 3;
-}
-
-.talent-node[data-powerful="true"] .talent-icon-container::before {
-    top: -15px;
-    right: -15px;
-    background-image: url('../images/ui/corner-decoration-tr.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.talent-node[data-powerful="true"] .talent-icon-container::after {
-    bottom: -15px;
-    left: -15px;
-    background-image: url('../images/ui/corner-decoration-bl.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-/* Subtle particle effect around powerful talents */
-.talent-node[data-powerful="true"] .power-particles {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.talent-node[data-powerful="true"] .power-particles::before,
-.talent-node[data-powerful="true"] .power-particles::after {
-    content: '';
-    position: absolute;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background-color: rgba(255, 215, 0, 0.6);
-    animation: floatingParticle 6s infinite ease-in-out;
-    opacity: 0.7;
-}
-
-.talent-node[data-powerful="true"] .power-particles::before {
-    top: 25%;
-    left: 30%;
-    animation-delay: 0s;
-}
-
-.talent-node[data-powerful="true"] .power-particles::after {
-    top: 65%;
-    left: 70%;
-    animation-delay: 2s;
-}
-
-.talent-node[data-powerful="true"] .power-particles span {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background-color: rgba(255, 215, 0, 0.7);
-    animation: floatingParticle 6s infinite ease-in-out;
-    opacity: 0.7;
-}
-
-.talent-node[data-powerful="true"] .power-particles span:nth-child(1) {
-    top: 45%;
-    left: 20%;
-    animation-delay: 1s;
-}
-
-.talent-node[data-powerful="true"] .power-particles span:nth-child(2) {
-    top: 30%;
-    left: 65%;
-    animation-delay: 3s;
-}
-
-.talent-node[data-powerful="true"] .power-particles span:nth-child(3) {
-    top: 75%;
-    left: 40%;
-    animation-delay: 4s;
-}
-
-/* Special effects for selected powerful talents */
-.talent-node[data-powerful="true"].selected {
-    border-color: gold;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4);
-}
-
-.talent-node[data-powerful="true"].selected .talent-icon {
-    filter: brightness(1.3) contrast(1.1);
-}
-
-.talent-node[data-powerful="true"].selected::before {
-    border-color: gold;
-    animation: powerfulSelected 3s infinite ease-in-out;
-    opacity: 0.9;
-}
-
-/* Tooltip enhancement for powerful talents */
-.talent-tooltip[data-powerful="true"] {
-    border-color: gold;
-    box-shadow: var(--shadow-hard), 0 0 25px rgba(255, 215, 0, 0.4);
-    background: linear-gradient(135deg, rgba(20, 30, 45, 0.95), rgba(30, 40, 60, 0.95));
-}
-
-.talent-tooltip[data-powerful="true"] .tooltip-name {
-    color: gold;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-}
-
-.talent-tooltip[data-powerful="true"] .tooltip-type {
-    border-left: 3px solid gold;
-    color: gold;
-}
-
-.talent-tooltip[data-powerful="true"] .tooltip-icon-container {
-    border-color: gold;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-}
-
-.talent-tooltip[data-powerful="true"]::before {
-    content: '';
-    position: absolute;
-    top: -8px;
+    top: 80px;
     left: 20px;
-    width: 16px;
-    height: 16px;
-    background-color: gold;
-    transform: rotate(45deg);
-    z-index: -1;
-}
-
-/* Animations for powerful talents */
-@keyframes powerfulGlow {
-    0% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.1); opacity: 0.3; }
-    100% { transform: scale(1); opacity: 0.5; }
-}
-
-@keyframes powerfulSelected {
-    0% { transform: scale(1); opacity: 0.8; border-color: gold; }
-    50% { transform: scale(1.1); opacity: 0.4; border-color: var(--accent-light); }
-    100% { transform: scale(1); opacity: 0.8; border-color: gold; }
-}
-
-@keyframes floatingParticle {
-    0% { transform: translate(0, 0); opacity: 0.2; }
-    25% { transform: translate(10px, -10px); opacity: 0.7; }
-    50% { transform: translate(15px, 5px); opacity: 0.2; }
-    75% { transform: translate(-5px, 10px); opacity: 0.7; }
-    100% { transform: translate(0, 0); opacity: 0.2; }
-}
-
-/* Additional powerful tier text badge */
-.talent-node[data-powerful="true"] .powerful-badge {
-    position: absolute;
-    top: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(to right, var(--accent-dark), gold, var(--accent-dark));
-    color: #000;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 10px;
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: var(--accent-gold);
+    color: var(--bg-primary);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    z-index: 60;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
 }
 
-.talent-node[data-powerful="true"]:hover .powerful-badge {
+.edit-mode-indicator.visible {
     opacity: 1;
+    transform: translateY(0);
 }
 
-@keyframes specialPulse {
-    0% { transform: scale(0.8); opacity: 0.5; }
-    50% { transform: scale(1.2); opacity: 0.2; }
-    100% { transform: scale(0.8); opacity: 0.5; }
-}
-
-/* Responsive Adjustments */
+/* Responsive */
 @media (max-width: 1024px) {
     .talent-header {
-        padding: 10px 20px;
+        padding: 0 15px;
+        height: 70px;
     }
     
-    .rpg-button {
-        padding: 8px 15px;
-        min-width: auto;
-    }
-    
-    .talent-header h1 {
-        font-size: 1.6rem;
-    }
-    
-    .class-description-panel {
-        padding: 10px 20px;
-    }
-    
-    .class-text h2 {
+    .character-details h1 {
         font-size: 1.2rem;
     }
     
-    .class-text p {
-        font-size: 0.9rem;
+    .rpg-button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .portrait-frame {
+        width: 50px;
+        height: 50px;
     }
 }
 
 @media (max-width: 768px) {
     .talent-header {
         flex-direction: column;
-        gap: 10px;
         height: auto;
         padding: 15px;
+        gap: 10px;
     }
     
     .character-info {
@@ -1156,8 +626,9 @@ h1, h2, h3 {
         justify-content: center;
     }
     
-    .header-decoration {
-        display: none;
+    .character-level-xp {
+        flex-direction: column;
+        gap: 8px;
     }
 }
 
@@ -1213,10 +684,10 @@ h1, h2, h3 {
 
 /* Controller Selection Highlight */
 .controller-selected {
-    outline: 3px solid var(--accent) !important;
+    outline: 3px solid var(--accent-primary) !important;
     outline-offset: 3px;
-    box-shadow: 0 0 15px var(--accent) !important; /* Ensure high visibility */
-    border-color: var(--accent) !important; /* Override existing borders */
+    box-shadow: 0 0 15px var(--accent-primary) !important; /* Ensure high visibility */
+    border-color: var(--accent-primary) !important; /* Override existing borders */
     filter: brightness(1.1); /* Make it slightly brighter */
     z-index: 20 !important; /* Ensure selected is on top */
 }
@@ -1235,8 +706,38 @@ h1, h2, h3 {
 
 /* Ensure powerful talents remain distinct when selected */
 .talent-node[data-powerful="true"].controller-selected {
-    outline-color: gold !important;
-    box-shadow: 0 0 20px gold, 0 0 10px var(--accent) !important;
-    border-color: gold !important;
+    outline-color: var(--node-powerful) !important;
+    box-shadow: 0 0 20px var(--node-powerful), 0 0 10px var(--accent-primary) !important;
+    border-color: var(--node-powerful) !important;
     transform: scale(1.25) !important;
+}
+
+/* === Edit Mode Styles === */
+.edit-active {
+    background: var(--accent-primary) !important;
+    color: var(--bg-primary) !important;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5) !important;
+    transform: scale(1.1) !important;
+}
+
+.talent-tree-canvas[style*="cursor: grab"] .talent-node {
+    cursor: grab !important;
+}
+
+.talent-tree-canvas[style*="cursor: grab"] .talent-node:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(133, 100, 210, 0.4);
+    transition: all 0.2s ease;
+}
+
+.talent-tree-canvas[style*="cursor: grab"] .talent-node:active {
+    cursor: grabbing !important;
+}
+
+/* Enhanced dragging visual feedback */
+.talent-node.dragging {
+    transform: scale(1.1) !important;
+    box-shadow: 0 10px 30px rgba(133, 100, 210, 0.6) !important;
+    z-index: 9999 !important;
+    opacity: 0.9;
 } 

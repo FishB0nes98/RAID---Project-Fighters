@@ -48,15 +48,12 @@ function executeWolfClawStrike(caster, target, abilityInstance, isDoubleClawSeco
     
     console.log('[WolfClawStrike] Starting ability execution...');
     
-    // Base damage calculation: 700 + 1% of target's max HP
-    const baseDamage = abilityInstance.baseDamage || 700;
-    const maxHpPercent = 0.01;
-    const targetMaxHpDamage = target.stats.maxHp * maxHpPercent;
-    let totalDamage = baseDamage + targetMaxHpDamage;
+    // Base damage calculation: 585 fixed damage
+    const baseDamage = abilityInstance.baseDamage || 585;
+    let totalDamage = baseDamage;
     
     console.log('[WolfClawStrike] Damage calculation:', {
         baseDamage,
-        targetMaxHpDamage,
         totalDamage
     });
     
@@ -374,7 +371,7 @@ function showWolfClawVFX(caster, target) {
  * Update Wolf Claw Strike description to show accurate damage calculation
  */
 function updateWolfClawDescription(ability, character) {
-    let description = `Deal ${ability.baseDamage || 700} physical damage to a target enemy. Wolf Claw Strike has double critical strike chance.`;
+    let description = `Deal ${ability.baseDamage || 585} physical damage to a target enemy. Wolf Claw Strike has double critical strike chance.`;
     
     if (ability.triggerTwiceChance) {
         description += `\n\n<span class="talent-effect damage">Double Claw: ${Math.round(ability.triggerTwiceChance * 100)}% chance to strike a second time.</span>`;
@@ -1709,7 +1706,7 @@ function applyLunarMarkDebuff(target, caster) {
         id: 'renee_lunar_mark_debuff',
         name: 'Lunar Mark',
         icon: 'Icons/abilities/lunar_mark.png',
-        duration: 2,
+        duration: 1,
         isDebuff: true,
         increasesDamageTaken: damageMultiplier,
         description: `Marked by the moon. Taking ${damageText} damage from all sources. When this debuff expires, you will be stunned for 1 turn.`,
@@ -1768,7 +1765,7 @@ function applyLunarMarkDebuff(target, caster) {
     target.addDebuff(lunarMarkDebuff);
     
     // Log the effect
-    log(`${target.name} is marked with a Lunar Mark! They will take double damage for 2 turns and be stunned when it expires.`, 'renee');
+    log(`${target.name} is marked with a Lunar Mark! They will take double damage for 1 turn and be stunned when it expires.`, 'renee');
 }
 
 /**

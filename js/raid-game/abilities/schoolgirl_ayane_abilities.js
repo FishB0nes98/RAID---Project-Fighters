@@ -215,9 +215,9 @@ const schoolgirlAyaneButterflyDaggerEffect = (caster, target) => {
     // Apply lifesteal if caster has any
     caster.applyLifesteal(result.damage);
 
-    // 40% chance to gain dodge chance buff
+    // 60% chance to gain dodge chance buff
     let dodgeBuffApplied = false;
-    if (Math.random() < 0.40) {
+    if (Math.random() < 0.60) {
         dodgeBuffApplied = true;
         log(`${caster.name} gains Evasive Maneuver!`);
         const dodgeBuff = new Effect(
@@ -269,7 +269,7 @@ const schoolgirlAyaneQ = new Ability(
     50, // Mana cost
     1,  // Cooldown (Changed from 2)
     schoolgirlAyaneButterflyDaggerEffect
-).setDescription('Deals 425 (+55% Physical Damage). 40% chance to gain 50% dodge chance for 1 turn.') // Changed from 20%
+).setDescription('Deals 425 (+55% Physical Damage). 60% chance to gain 50% dodge chance for 1 turn.')
  .setTargetType('enemy');
 
 // --- W: Butterfly Trail --- 
@@ -372,7 +372,7 @@ const schoolgirlAyaneW = new Ability(
     'Butterfly Trail (Schoolgirl Version)',
     'Icons/abilities/butterfly_trail_schoolgirl.webp',
     85, // Mana cost
-    9, // Cooldown
+    7, // Cooldown
     schoolgirlAyaneWEffect
 ).setDescription('Gives ALL allies a buff increasing Physical Damage and Magical Damage by 20% for 4 turns.')
  .setTargetType('all_allies'); // Important: Set target type for UI/targeting logic
@@ -524,13 +524,33 @@ const schoolgirlAyaneREffect = (caster, target) => {
     let cooldownReset = false;
     if (target.isDead()) {
         log(`${target.name} has been defeated by Execute Attack!`);
-        // Find this ability on the caster and reset cooldown
-        const abilityInstance = caster.abilities.find(ab => ab.id === 'schoolgirl_ayane_r');
-        if (abilityInstance) {
-            abilityInstance.currentCooldown = 0;
+        
+        // Reset cooldown - simplified approach based on working ayane_abilities.js
+        const executeAttackAbility = caster.abilities.find(ability => ability.id === 'schoolgirl_ayane_r');
+        if (executeAttackAbility) {
+            executeAttackAbility.currentCooldown = 0;
             cooldownReset = true;
             log(`${caster.name}'s Execute Attack cooldown has been reset!`);
+            
+            // Add reset VFX similar to working example
+            const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+            if (casterElement) {
+                const resetVfx = document.createElement('div');
+                resetVfx.className = 'cooldown-reset-vfx';
+                resetVfx.textContent = 'RESET!';
+                casterElement.appendChild(resetVfx);
+                
+                // Remove the VFX after animation
+                setTimeout(() => {
+                    resetVfx.remove();
+                }, 1200);
+            }
+            
             updateCharacterUI(caster); // Update UI to show reset cooldown
+        } else {
+            // Debug logging to see what abilities exist
+            console.warn('Could not find Execute Attack ability to reset cooldown. Available abilities:', 
+                caster.abilities.map(ab => ({ id: ab.id, name: ab.name })));
         }
     }
     
@@ -549,14 +569,19 @@ const schoolgirlAyaneREffect = (caster, target) => {
 
     updateCharacterUI(caster);
     updateCharacterUI(target);
+    
+    // Return result object for the ability system
+    return {
+        resetCooldown: cooldownReset  // This tells the Ability.use method whether to reset cooldown
+    };
 };
 
 const schoolgirlAyaneR = new Ability(
     'schoolgirl_ayane_r',
     'Execute Attack',
     'Icons/abilities/execute_attack_schoolgirl.webp', // Placeholder icon
-    200, // Mana cost
-    15, // Cooldown
+    100, // Mana cost
+    12, // Cooldown
     schoolgirlAyaneREffect
 ).setDescription('Deals 250% Physical Damage. If the target is below 25% HP, deals 600% Physical Damage instead. Cooldown resets if this ability defeats the target.') // Update description
  .setTargetType('enemy');

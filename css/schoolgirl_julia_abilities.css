@@ -182,4 +182,25 @@
 .status-icon[style*="spirits_strength.jfif"] {
     background-color: #98FB98; /* Pale Green */
     border: 1px solid #3CB371; /* Medium Sea Green border */
+}
+
+/* --- Mana Restore VFX for Healing Mana Flow --- */
+.julia-mana-restore-vfx {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #89c4ff; /* Soft blue for mana */
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 4px rgba(137,196,255,0.8);
+    pointer-events: none;
+    animation: juliaManaRestoreFloat 1s ease-out forwards;
+    z-index: 15;
+}
+
+@keyframes juliaManaRestoreFloat {
+    0%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    50%  { opacity: 1; transform: translate(-50%, -15px) scale(1.05); }
+    100% { opacity: 0; transform: translate(-50%, -35px) scale(0.9); }
 } 

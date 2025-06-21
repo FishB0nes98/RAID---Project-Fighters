@@ -2320,7 +2320,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            max-height: 580px;
+            max-height: 1080px;
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -2899,13 +2899,13 @@
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                     </svg>
                     What's New
-                    <span class="version-badge">v0.2</span>
+                    <span class="version-badge">v0.3</span>
                 </button>
                 <button class="nav-button" onclick="showOldChangelog()">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
                     </svg>
-                    v0.1.1
+                    v0.2
                 </button>
             </div>
         </header>
@@ -2952,6 +2952,7 @@
                     <button class="tab-button active" data-tab="story-tab">Story Mode</button>
                     <button class="tab-button" data-tab="stage-tab">Single Stages</button>
                     <button class="tab-button" data-tab="weekly-tab">Weekly Challenges</button>
+                    <button class="tab-button" onclick="window.location.href='draft-mode.html'">Draft Mode</button>
                 </div>
                 
                 <div class="tab-content active" id="story-tab">
@@ -3389,27 +3390,27 @@
                     }
                 });
 
-                // Initialize weekly challenges – Healing Forbidden replaces old Siegfried challenge
+                // Initialize weekly challenges – Cleansing Winds Challenge
                 allWeeklyChallenges = [
                     {
-                        id: 'healing_forbidden_challenge',
-                        name: 'Healing Forbidden Challenge',
-                        description: 'No healing magic can save you! Defeat Farmer Raiden, Schoolgirl Elphelt, Farmer Nina and Schoolgirl Ayane with a team of only 3 heroes.',
-                        difficulty: 7,
-                        teamSize: 3,
-                        enemies: ['farmer_raiden', 'schoolgirl_elphelt', 'farmer_nina', 'schoolgirl_ayane'],
+                        id: 'cleansing_winds_challenge',
+                        name: 'Cleansing Winds Challenge',
+                        description: 'Face five formidable opponents in a mystical battlefield where cleansing winds sweep away all magical effects every 3rd turn! Defeat Bridget, Farmer Raiden, Infernal Ibuki, Atlantean Kagome, and Zoey with a team of 5 heroes.',
+                        difficulty: 8,
+                        teamSize: 5,
+                        enemies: ['bridget', 'farmer_raiden', 'infernal_ibuki', 'atlantean_kagome', 'zoey'],
                         modifiers: [{
-                            id: 'healing_disabled',
-                            name: 'Healing Disabled',
-                            description: 'All healing is blocked for the entire battle.'
+                            id: 'cleansing_winds',
+                            name: 'Cleansing Winds',
+                            description: 'Every 3rd turn, mystical winds cleanse all buffs and debuffs from all characters!'
                         }],
                         rewards: [{
                             type: 'character',
-                            id: 'zoey',
-                            name: 'Zoey',
-                            icon: '🍓'
+                            id: 'atlantean_kagome',
+                            name: 'Atlantean Kagome',
+                            icon: '🌊'
                         }],
-                        timeRemaining: 'Resets in 3 days, 12 hours',
+                        timeRemaining: 'Resets in 6 days, 8 hours',
                         isAvailable: true
                     }
                 ];
@@ -7350,10 +7351,209 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
             <div class="changelog-header">
                 <h1 class="changelog-title">
                     🚀 Patch Notes
+                    <span class="changelog-version">v0.3</span>
+                </h1>
+                <p class="changelog-subtitle">Major Bug Fixes & Balance Overhaul</p>
+                <button class="changelog-close" onclick="hideChangelog()">&times;</button>
+            </div>
+            
+            <div class="changelog-body">
+                <div class="changelog-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        🔧 Critical Bug Fixes
+                    </h3>
+                    
+                    <div class="character-changes alice">
+                        <div class="character-name">
+                            <span class="character-emoji">🐰</span>
+                            <strong>Farmer Alice - Pounce Ability Fixed</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Bug Fixed:</strong> Pounce was not applying its stun effect and needed to be more impactful as a crowd control ability.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>✅ Fixed:</strong> Pounce now correctly applies stun effects as intended
+                            </li>
+                            <li class="change-item">
+                                <strong>Stun Duration:</strong> Increased <span class="change-arrow">1 → 2</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Stun Chance:</strong> Remains at <span class="change-highlight">85%</span>
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> Farmer Alice is now a more viable tank/disruptor option with reliable crowd control that can remove enemies from combat for extended periods.
+                        </div>
+                    </div>
+
+                    <div class="character-changes nina">
+                        <div class="character-name">
+                            <span class="character-emoji">🎯</span>
+                            <strong>Farmer Nina - Major Bug Fixes & Balance</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Critical Issues Fixed:</strong> Hiding ability had a calculation bug healing too much, and her passive was completely non-functional due to missing system integration.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>🐛 Critical Bug Fix:</strong> Hiding healing was incorrectly calculated as <span class="change-highlight">~698 HP per turn</span> instead of intended <span class="change-highlight">350 HP per turn</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>Hiding Cooldown:</strong> Increased <span class="change-arrow">5 → 8</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>Piercing Shot Cooldown:</strong> Reduced <span class="change-arrow">15 → 12</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>🔧 Major Fix:</strong> Evasive Adaptability passive was completely broken - now correctly provides <span class="change-highlight">5% dodge per active buff</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>✨ Added:</strong> Modern visual indicator system with lightning bolt icon and dodge percentage display
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> Nina's power level is significantly reduced with the Hiding nerf, removing an overpowered healing exploit. Most importantly, her passive now functions as intended, making her much more survivable.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gameplay-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                        </svg>
+                        ⚖️ Major Balance Overhauls
+                    </h3>
+                    
+                    <div class="character-changes bridget">
+                        <div class="character-name">
+                            <span class="character-emoji">🌊</span>
+                            <strong>Bridget - Complete Balance Overhaul</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Bridget was overpowered with excessive damage output, low ability costs, and oppressive passive healing. This rebalancing focuses her as a hybrid damage/support character.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Base Magical Damage:</strong> Reduced <span class="change-arrow">222 → 195</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>Passive Healing:</strong> Reduced <span class="change-arrow">22% → 16%</span> of damage dealt (~27% reduction)
+                            </li>
+                            <li class="change-item">
+                                <strong>Ribbon Wave Rush (Q):</strong> Cooldown <span class="change-arrow">2 → 1</span> turn, Mana cost <span class="change-arrow">30 → 55</span>, Base damage <span class="change-arrow">365 → 120</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>Bubble Beam (W) & Shield (E):</strong> Mana costs reduced <span class="change-arrow">100/200 → 90</span> each
+                            </li>
+                            <li class="change-item">
+                                <strong>🔧 Fixed:</strong> Bubble Arsenal now correctly triggers passive healing when dealing damage
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> Bridget becomes more active in combat with Q available every turn, but significantly less oppressive overall with better counterplay opportunities.
+                        </div>
+                    </div>
+
+                    <div class="character-changes multiple-balance">
+                        <div class="character-name">
+                            <span class="character-emoji">⚖️</span>
+                            <strong>Multiple Character Balance Updates</strong>
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>🐱 Farmer Cham Cham:</strong> Scratch cooldown <span class="change-arrow">2 → 1</span> turn, mana <span class="change-arrow">30 → 40</span>. Leap buffs reduced <span class="change-arrow">50% → 25%</span> each
+                            </li>
+                            <li class="change-item">
+                                <strong>⚡ Farmer Raiden:</strong> Zap passive damage <span class="change-arrow">100% → 60%</span> scaling, no longer ignores magical shield
+                            </li>
+                            <li class="change-item">
+                                <strong>⚾ Schoolboy Shoma:</strong> Removed unlimited crit scaling from Boink. Water Ball cooldown improved <span class="change-arrow">3 → 2</span> turns
+                            </li>
+                            <li class="change-item">
+                                <strong>🐺 Renée:</strong> Wolf Claw Strike damage <span class="change-arrow">700 → 585</span>, cooldown <span class="change-arrow">3 → 1</span> turn. Removed max HP scaling
+                            </li>
+                            <li class="change-item">
+                                <strong>🦋 Schoolgirl Ayane:</strong> Butterfly Dagger proc <span class="change-arrow">40% → 60%</span>, Execute Attack mana <span class="change-arrow">200 → 100</span> + cooldown reset fix
+                            </li>
+                            <li class="change-item">
+                                <strong>🌟 Zoey:</strong> Removed failure chances from W & E abilities. Q cooldown <span class="change-arrow">4 → 1</span> turn, base damage <span class="change-arrow">300 → 162</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>🚜 Farmer Shoma:</strong> Home Run cooldown <span class="change-arrow">2 → 1</span> turn, damage <span class="change-arrow">235 → 315</span>. Cottage Run healing <span class="change-arrow">50% → 35%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="new-character-section">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V7H1V9H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V9H21ZM19 19H5V9H19V19Z"/>
+                        </svg>
+                        🥷 Infernal Ibuki Power Enhancement
+                    </h3>
+                    
+                    <div class="character-changes ibuki">
+                        <div class="character-name">
+                            <span class="character-emoji">🥷</span>
+                            <strong>Infernal Ibuki - Significant Buffs</strong>
+                        </div>
+                        <div class="character-rationale">
+                            <strong>Rationale:</strong> Infernal Ibuki was underperforming compared to other carry characters. These buffs significantly enhance her damage scaling and utility.
+                        </div>
+                        <ul class="change-list">
+                            <li class="change-item">
+                                <strong>Blade Expertise Passive:</strong> Damage bonus per stack <span class="change-arrow">+2% → +10%</span> per stack
+                            </li>
+                            <li class="change-item">
+                                <strong>Maximum Stacks:</strong> Increased <span class="change-arrow">10 → 15</span> stacks
+                            </li>
+                            <li class="change-item">
+                                <strong>Total Passive Potential:</strong> Now provides up to <span class="change-highlight">+150% damage</span> at max stacks (was +20%)
+                            </li>
+                            <li class="change-item">
+                                <strong>Swift Strike (E):</strong> Chain chance <span class="change-arrow">30% → 45%</span>
+                            </li>
+                            <li class="change-item">
+                                <strong>Shadow Veil (W):</strong> Cooldown <span class="change-arrow">16 → 11</span> turns
+                            </li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
+                            <strong>Impact:</strong> These changes transform Infernal Ibuki into a legitimate late-game damage dealer. At max stacks, she becomes one of the highest damage dealers in the game.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="developer-notes">
+                    <h3>
+                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Developer Notes
+                    </h3>
+                    <p>Patch 0.3 represents our largest balance update yet, focusing heavily on fixing critical bugs that were impacting gameplay experience. Farmer Nina's passive being completely broken and her Hiding ability's calculation error were serious issues that needed immediate attention.</p>
+                    <p>The extensive balance changes to Bridget, Zoey, and other characters aim to create more strategic diversity and reduce oppressive gameplay patterns. Characters should feel powerful but not overwhelming, with clear counterplay opportunities available.</p>
+                    <p>We've also addressed reliability issues by removing frustrating RNG failure chances from abilities, making characters more consistent and competitive-viable while maintaining their unique mechanics.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Old Changelog Modal (v0.1.1) -->
+    <div class="changelog-modal" id="old-changelog-modal">
+        <div class="changelog-content">
+            <div class="changelog-header">
+                <h1 class="changelog-title">
+                    🚀 Patch Notes
                     <span class="changelog-version">v0.2</span>
                 </h1>
                 <p class="changelog-subtitle">Schoolgirl Julia Balance Adjustments</p>
-                <button class="changelog-close" onclick="hideChangelog()">&times;</button>
+                <button class="changelog-close" onclick="hideOldChangelog()">&times;</button>
             </div>
             
             <div class="changelog-body">
@@ -7431,76 +7631,7 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
                             <li class="change-item">
                                 <strong>🐰 Farmer Alice:</strong> Pounce stun chance <span class="change-arrow">65% → 85%</span>, duration <span class="change-arrow">4 → 1</span> turn. Bunny Bounce reworked for allies
                             </li>
-                            <li class="change-item">
-                                <strong>🐺 Renée:</strong> Mystical Whip critical hit formula changed <span class="change-arrow">1400 + 100% → 1000 + 100%</span>
-                            </li>
-                            <li class="change-item">
-                                <strong>⚡ Farmer Raiden:</strong> Electric Shock & Storm Circle now have <span class="change-highlight">80% hit chance</span> per target
-                            </li>
                         </ul>
-                    </div>
-                </div>
-
-                <div class="gameplay-section">
-                    <h3>
-                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                        Gameplay Improvements
-                    </h3>
-                    
-                    <div class="improvement-item">
-                        <h4>🤖 AI Turn Timing Optimization</h4>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> AI turns previously felt sluggish during the planning phase but rushed during action execution, leading to poor gameplay pacing and reduced player engagement.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>AI Planning Speed:</strong> Reduced planning delay <span class="change-arrow">800ms → 400ms</span> per character (50% faster)
-                            </li>
-                            <li class="change-item">
-                                <strong>Planning Transitions:</strong> Reduced delay between character planning <span class="change-arrow">300ms → 200ms</span> (33% faster)
-                            </li>
-                            <li class="change-item">
-                                <strong>Action Execution Pacing:</strong> Increased delay between AI actions <span class="change-arrow">1000ms → 1500ms</span> (50% slower)
-                            </li>
-                        </ul>
-                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
-                            <strong>Impact:</strong> These changes create a more responsive AI experience where players spend less time waiting during the planning phase but have more time to observe and react to each AI action. The improved pacing enhances the tactical feel of combat while maintaining dramatic impact for AI abilities.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="new-character-section">
-                    <h3>
-                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V7H1V9H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V9H21ZM19 19H5V9H19V19Z"/>
-                        </svg>
-                        New Playable Character
-                    </h3>
-                    
-                    <div class="character-changes ibuki">
-                        <div class="character-name">
-                            <span class="character-emoji">🥷</span>
-                            <strong>Infernal Ibuki - Balance Adjustments & Quest Integration</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Infernal Ibuki's damage scaling was too high for a character with utility and mobility, making her overpowered in both damage and survivability. The balance changes focus her role as a tactical ninja with moderate damage but strong utility.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Kunai Throw (Q):</strong> Physical damage scaling reduced <span class="change-arrow">150% → 100%</span>
-                            </li>
-                            <li class="change-item">
-                                <strong>Swift Strike (E):</strong> Cooldown reduced <span class="change-arrow">8 → 6</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Smoke Bomb (R):</strong> Cooldown increased <span class="change-arrow">12 → 15</span> turns
-                            </li>
-                        </ul>
-                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
-                            <strong>New Character Quests:</strong> "Blade Master" (Use Kunai Throw 80 times) and "Smoke Specialist" (Apply Smoke Bomb debuff 30 times). Both quests reward +520 XP.
-                        </div>
                     </div>
                 </div>
 
@@ -7512,145 +7643,7 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
                         Developer Notes
                     </h3>
                     <p>This patch focuses primarily on balance adjustments, particularly addressing the overpowered nature of Schoolgirl Julia's healing ability. The changes aim to create more strategic decision-making around healing usage while maintaining character viability.</p>
-                    <p>The AI timing improvements should create a more enjoyable combat flow, reducing downtime during AI planning while allowing players to better appreciate each AI action. Infernal Ibuki's adjustments position her as a balanced tactical character rather than an overpowered damage dealer.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Old Changelog Modal (v0.1.1) -->
-    <div class="changelog-modal" id="old-changelog-modal">
-        <div class="changelog-content">
-            <div class="changelog-header">
-                <h1 class="changelog-title">
-                    🚀 Patch Notes
-                    <span class="changelog-version">v0.1.1</span>
-                </h1>
-                <p class="changelog-subtitle">School Characters Cooldown Balancing</p>
-                <button class="changelog-close" onclick="hideOldChangelog()">&times;</button>
-            </div>
-            
-            <div class="changelog-body">
-                <div class="changelog-section">
-                    <h3>
-                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                        </svg>
-                        Character Balance Changes
-                    </h3>
-                    
-                    <div class="character-changes siegfried">
-                        <div class="character-name">
-                            <span class="character-emoji">🛡️</span>
-                            <strong>Schoolboy Siegfried</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Siegfried was struggling with long defensive cooldowns, making him less viable in sustained fights.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Lion Protection (W):</strong> Cooldown reduced <span class="change-arrow">15 → 10</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Sword Blessing (E):</strong> Cooldown reduced <span class="change-arrow">12 → 9</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Judgement (R):</strong> Cooldown reduced <span class="change-arrow">25 → 15</span> turns
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="character-changes kokoro">
-                        <div class="character-name">
-                            <span class="character-emoji">💚</span>
-                            <strong>Schoolgirl Kokoro</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> As a primary healer/support, Kokoro's abilities were too infrequent to provide consistent team support.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Silencing Ring (W):</strong> Cooldown reduced <span class="change-arrow">15 → 9</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Circle Heal (E):</strong> Cooldown reduced <span class="change-arrow">9 → 8</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Protective Aura (R):</strong> Cooldown reduced <span class="change-arrow">20 → 16</span> turns
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="character-changes ayane">
-                        <div class="character-name">
-                            <span class="character-emoji">🦋</span>
-                            <strong>Schoolgirl Ayane</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Ayane's utility and damage abilities were not available frequently enough to maintain her intended role as a mobile damage dealer.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Butterfly Trail (W):</strong> Cooldown reduced <span class="change-arrow">10 → 9</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Quick Reflexes (E):</strong> Cooldown reduced <span class="change-arrow">12 → 11</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Execute Attack (R):</strong> Cooldown reduced <span class="change-arrow">20 → 15</span> turns
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="character-changes elphelt">
-                        <div class="character-name">
-                            <span class="character-emoji">💕</span>
-                            <strong>Schoolgirl Elphelt</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Elphelt's longer cooldowns prevented her from effectively controlling enemies and dealing consistent damage.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Affection (E):</strong> Cooldown reduced <span class="change-arrow">12 → 9</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Piercing Bullet (R):</strong> Cooldown reduced <span class="change-arrow">22 → 14</span> turns
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="character-changes shoma">
-                        <div class="character-name">
-                            <span class="character-emoji">⚾</span>
-                            <strong>Schoolboy Shoma</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Shoma's utility abilities needed to be more accessible, and Heavy Ball needed to be more impactful.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Catch! (E):</strong> Cooldown reduced <span class="change-arrow">11 → 9</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Heavy Ball:</strong> Debuff duration increased <span class="change-arrow">2 → 4</span> turns
-                                <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 4px; font-style: italic;">
-                                    The Heavy Ball now applies damage reduction for 4 turns instead of 2, making it more strategically valuable
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="developer-notes">
-                    <h3>
-                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                        Developer Notes
-                    </h3>
-                    <p>These changes are designed to improve the viability of school faction characters in both story mode and single stages. The reduced cooldowns should allow players to use these characters' signature abilities more frequently, leading to more engaging and dynamic gameplay patterns.</p>
-                    <p>The Heavy Ball buff specifically addresses feedback that the debuff duration was too short to be meaningful in longer encounters.</p>
+                    <p>Schoolgirl Kokoro's Silencing Ring enhancement transforms it from a purely defensive ability into a hybrid damage/support tool, making her more valuable in team compositions while maintaining her supportive identity.</p>
                 </div>
             </div>
         </div>
@@ -7708,4 +7701,5 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
         });
     </script>
 </body>
+</html> 
 </html> 

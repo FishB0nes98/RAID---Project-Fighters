@@ -1,0 +1,99 @@
+{
+  "id": "draft_mode_stage",
+  "name": "Draft Battle Arena",
+  "description": "A neutral arena for draft mode battles between player and AI teams.",
+  "difficulty": 3,
+  "backgroundImage": "images/stages/default.png",
+  "playerCharacters": [],
+  "aiCharacters": [],
+  "isDraftMode": true,
+  "randomBackgrounds": [
+    "images/stages/background4.png",
+    "images/stages/burning_school_gym.png",
+    "images/stages/crowfield.webp",
+    "images/stages/farm_clearing.png",
+    "images/stages/farm_field.webp",
+    "images/stages/farmstage2.png",
+    "images/stages/hell_castle_entrace.png",
+    "images/stages/hell_castle_throne.png",
+    "images/stages/hell_cave.png",
+    "images/stages/hell_desert.png",
+    "images/stages/hell_forest.png",
+    "images/stages/hell_stage1.png",
+    "images/stages/school_rooftop.png",
+    "images/stages/school_yard.png",
+    "images/stages/Stage_1_BG.jpeg",
+    "images/stages/stage1.png",
+    "images/stages/stage1_background.png",
+    "images/stages/stage2_ice.png",
+    "images/stages/stage3.png",
+    "images/stages/stage4.png",
+    "images/stages/stage5.png",
+    "images/stages/stage6.png",
+    "images/stages/the_barn.png",
+    "images/stages/under_the_apple_tree.png"
+  ],
+  "stageEffects": [
+    {
+      "id": "draft_mode",
+      "name": "Draft Mode",
+      "description": "Enhanced combat conditions for draft battles! All characters gain 40% more HP and mana, plus 30 HP regen and 25 mana regen per turn.",
+      "icon": "⚔️✨"
+    }
+  ],
+  "randomStageModifiers": [
+    {
+      "id": "burning_ground",
+      "name": "Burning Ground",
+      "description": "The ground is ablaze with hellish flames! Player characters take fire damage at the start of each turn.",
+      "icon": "🔥"
+    },
+    {
+      "id": "healing_wind",
+      "name": "Healing Wind",
+      "description": "A gentle breeze carries healing energy across the battlefield.",
+      "icon": "🌬️"
+    },
+    {
+      "id": "its_raining_man",
+      "name": "It's raining man!",
+      "description": "Heavy rain falls from the burning sky! All player characters heal HP each turn.",
+      "icon": "🌧️"
+    },
+    {
+      "id": "frozen_ground",
+      "name": "Frozen Ground",
+      "description": "The ground is frozen solid! All characters move 25% slower.",
+      "icon": "❄️"
+    },
+    {
+      "id": "toxic_miasma",
+      "name": "Toxic Miasma",
+      "description": "Poisonous gas fills the air! All characters take poison damage each turn.",
+      "icon": "☠️"
+    },
+    {
+      "id": "desert_heat",
+      "name": "Desert Heat",
+      "description": "The desert heat intensifies everyone's focus! All characters gain 50% critical strike chance, 50 HP regen, and 50 mana regen.",
+      "icon": "🌵"
+    },
+    {
+      "id": "cleansing_winds",
+      "name": "Cleansing Winds",
+      "description": "Mystical winds sweep across the battlefield every 3rd turn, removing all buffs and debuffs from all characters.",
+      "icon": "🌪️✨"
+    },
+    {
+      "id": "small_space",
+      "name": "Small Space",
+      "description": "The confined space makes dodging impossible! All characters have their dodge chance reduced to 0.",
+      "icon": "🚪"
+    }
+  ],
+  "rewards": {
+    "xp": 300,
+    "talentPoints": 2
+  },
+  "music": "default"
+} 

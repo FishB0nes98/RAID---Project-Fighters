@@ -104,6 +104,9 @@ class TalentManager {
                 return null;
             }
             const data = await response.json();
+            // Store the full talent definition object in talentRegistry for quick access by UI helpers like TalentsPanelManager
+            // This ensures panels can access metadata (icon, description, etc.) without making additional fetches.
+            this.talentRegistry[characterId] = data;
             this.talentDefinitionsCache[characterId] = data.talentTree; // Store only the talentTree part
             return data.talentTree;
         } catch (error) {
@@ -343,15 +346,23 @@ class TalentManager {
             
             console.log(`Applying talent: ${talent.name}`);
             
-            // Handle talent with multiple effects (array)
-            if (Array.isArray(talent.effect)) {
+            // Handle talent with multiple effects (array) - check both 'effects' and 'effect'
+            if (Array.isArray(talent.effects)) {
+                for (const effect of talent.effects) {
+                    this.applyTalentEffect(character, effect);
+                    appliedEffectsCount++;
+                }
+            } else if (Array.isArray(talent.effect)) {
                 for (const effect of talent.effect) {
                     this.applyTalentEffect(character, effect);
                     appliedEffectsCount++;
                 }
             } 
-            // Handle single effect (object)
-            else if (talent.effect) {
+            // Handle single effect (object) - check both 'effects' and 'effect'
+            else if (talent.effects) {
+                this.applyTalentEffect(character, talent.effects);
+                appliedEffectsCount++;
+            } else if (talent.effect) {
                 this.applyTalentEffect(character, talent.effect);
                 appliedEffectsCount++;
             }
@@ -447,6 +458,38 @@ class TalentManager {
             }));
         }
         
+        // For Siegfried: Force-update ability descriptions to ensure they reflect talent changes
+        if (character.id === 'schoolboy_siegfried') {
+            console.log(`[TalentManager] Forcing special description update for Siegfried abilities`);
+            
+            // Update ability descriptions if the global function exists
+            if (typeof window.updateSiegfriedAbilityDescriptions === 'function') {
+                window.updateSiegfriedAbilityDescriptions(character);
+                console.log(`[TalentManager] Updated Siegfried ability descriptions via global function`);
+            }
+            
+            // After all individual updates, dispatch a general update event
+            console.log(`[TalentManager] Dispatching special siegfried_talents_applied event`);
+            document.dispatchEvent(new CustomEvent('siegfried_talents_applied', {
+                detail: {
+                    character: character,
+                    talentIds: selectedTalentIds
+                }
+            }));
+        }
+        
+        // For Schoolgirl Elphelt: Force-update ability descriptions to ensure they reflect talent changes
+        if (character.id === 'schoolgirl_elphelt' && typeof window.updateElpheltAbilityDescriptionsForTalents === 'function') {
+            console.log('[TalentManager] Updating Elphelt ability and passive descriptions');
+            window.updateElpheltAbilityDescriptionsForTalents(character);
+        }
+        
+        // For Schoolgirl Julia: update ability descriptions to reflect new talents
+        if (character.id === 'schoolgirl_julia' && typeof window.updateJuliaAbilityDescriptions === 'function') {
+            console.log('[TalentManager] Updating Julia ability descriptions');
+            window.updateJuliaAbilityDescriptions(character);
+        }
+        
         // Get talent definitions for more detailed event
         const talentDefinitionsForEvent = await this.loadTalentDefinitions(character.id);
         if (talentDefinitionsForEvent) {
@@ -503,80 +546,12 @@ class TalentManager {
 
         switch (effect.type) {
             case 'modify_stat':
+            case 'stat_modification':
                 this.applyStatModification(character, effect);
                 break;
             case 'modify_ability':
-                const ability = character.abilities.find(a => a.id === effect.abilityId);
-                if (!ability) {
-                    console.warn(`Cannot modify ability [${effect.abilityId}] - not found on character ${character.name}`);
-                    return false;
-                }
-                
-                // Get the property to modify
-                const property = effect.property;
-                const value = effect.value;
-                const operation = effect.operation || 'set';
-                
-                // Apply the modification
-                if (operation === 'set') {
-                    ability[property] = value;
-                } else if (operation === 'add') {
-                    if (typeof ability[property] === 'undefined') {
-                        ability[property] = value;
-                    } else if (typeof ability[property] === 'number') {
-                        ability[property] += value;
-                    } else {
-                        console.warn(`Cannot add to non-numeric ability property: ${property}`);
-                    }
-                } else if (operation === 'subtract') {
-                    if (typeof ability[property] === 'number') {
-                        ability[property] -= value;
-                        // Make sure cooldown doesn't go below 0
-                        if (property === 'cooldown' && ability[property] < 0) {
-                            ability[property] = 0;
-                        }
-                    } else {
-                        console.warn(`Cannot subtract from non-numeric ability property: ${property}`);
-                    }
-                } else if (operation === 'multiply') {
-                    if (typeof ability[property] === 'number') {
-                        ability[property] *= value;
-                    } else {
-                        console.warn(`Cannot multiply non-numeric ability property: ${property}`);
-                    }
-                }
-                
-                // Special handling for Primal Healing
-                if (property === 'enablePrimalHealing' && value === true) {
-                    console.log(`Enabling Primal Healing for ${character.name}'s ${ability.name}`);
-                    // Make sure the ability description is updated
-                    if (typeof ability.generateDescription === 'function') {
-                        ability.generateDescription();
-                    }
-                    
-                    // If the character has a method to update ability descriptions, call it
-                    if (character.updateAbilityDescriptions && typeof character.updateAbilityDescriptions === 'function') {
-                        character.updateAbilityDescriptions();
-                    }
-                    
-                    // Fire a custom event that the passive can listen for
-                    const talentAppliedEvent = new CustomEvent('TalentApplied', {
-                        detail: {
-                            talentId: 'primal_healing',
-                            character: character,
-                            ability: ability
-                        }
-                    });
-                    document.dispatchEvent(talentAppliedEvent);
-                }
-                
-                // Update ability description if needed
-                if (ability.generateDescription && typeof ability.generateDescription === 'function') {
-                    ability.generateDescription();
-                }
-                break;
-            case 'add_ability':
-                this.applyAddAbility(character, effect);
+            case 'ability_modification':
+                this.applyAbilityModification(character, effect);
                 break;
             case 'modify_passive':
                 this.applyPassiveModification(character, effect);
@@ -588,6 +563,15 @@ class TalentManager {
                 console.log(`[TalentManager] Setting up 'on_crit_heal_self_stat_buff_permanent' for ${character.name}. Effect details:`, effect);
                 this.setupCritHealStatBuffListener(character, effect);
                 break;
+            case 'passive_modification':
+                this.applyPassiveModification(character, effect);
+                break;
+            case 'property_modification':
+                this.applyPropertyModification(character, effect);
+                break;
+            case 'reduce_all_cooldowns':
+                this.applyReduceCooldowns(character, effect);
+                break;
             default:
                 console.warn(`[TalentManager] Unknown talent effect type: ${effect.type}`);
         }
@@ -597,116 +581,62 @@ class TalentManager {
      * Updates any character properties after a talent is applied
      */
     updateCharacterAfterTalent(character) {
-        if (!character) return;
+        console.log(`[TalentManager] Updating character ${character.name} after talent application`);
         
-        // Check if character has Firebase stats loaded (indicated by hellEffects or other story-specific properties)
-        const hasFirebaseStats = character.hellEffects || character._firebaseStatsLoaded;
-        
-        if (hasFirebaseStats) {
-            console.log(`[TalentManager] Skipping recalculateStats for ${character.name || character.id} - Firebase stats detected`);
-        } else {
-            // Recalculate stats after talent application only if no Firebase stats are present
-            console.log(`[TalentManager] Recalculating stats for ${character.name || character.id} after talent application`);
-            if (typeof character.recalculateStats === 'function') {
-                character.recalculateStats('talent-application');
-            }
+        // Update stats to ensure all modifications are applied
+        if (typeof character.recalculateStats === 'function') {
+            character.recalculateStats('talent-application');
         }
         
-        // Update ability descriptions after talent application
-        if (character.abilities && Array.isArray(character.abilities)) {
-            for (const ability of character.abilities) {
-                if (ability && typeof ability.generateDescription === 'function') {
-                    try {
-                        ability.generateDescription();
-                        console.log(`[TalentManager] Updated description for ability ${ability.name || ability.id}`);
-                    } catch (error) {
-                        console.error(`[TalentManager] Error updating description for ability ${ability.name || ability.id}:`, error);
-                    }
-                }
-            }
+        // Update UI to reflect changes
+        if (window.gameManager && window.gameManager.uiManager) {
+            window.gameManager.uiManager.updateCharacterUI(character);
         }
         
-        // Update passive description if there's a passive handler with the update method
-        if (character.passiveHandler && typeof character.passiveHandler.updatePassiveDescription === 'function') {
-            try {
-                character.passiveHandler.updatePassiveDescription(character);
-                console.log(`[TalentManager] Updated passive description for ${character.name}`);
-            } catch (error) {
-                console.error(`[TalentManager] Error updating passive description for ${character.name}:`, error);
-            }
-        }
-        // --- NEW: Check for direct method on character ---
-        else if (typeof character.generatePassiveDescription === 'function') {
-            try {
-                character.generatePassiveDescription();
-                console.log(`[TalentManager] Updated passive description directly for ${character.name}`);
-            } catch (error) {
-                console.error(`[TalentManager] Error updating passive description directly for ${character.name}:`, error);
-            }
-        }
-        // --- END NEW ---
-        
-        // Special handling for Schoolgirl Kokoro's ability descriptions
-        if (character.id === 'schoolgirl_kokoro') {
-            console.log(`[TalentManager] Updating Schoolgirl Kokoro's ability descriptions`);
-            
-            // Update Lesser Heal description
-            const lesserHealAbility = character.abilities.find(a => a.id === 'lesser_heal');
-            if (lesserHealAbility && typeof lesserHealAbility.generateDescription === 'function') {
-                lesserHealAbility.updateCaster(character);
-                lesserHealAbility.description = lesserHealAbility.generateDescription();
-                console.log(`[TalentManager] Updated Lesser Heal description for ${character.name}`);
-            }
-            
-            // Update passive indicator tooltip
-            if (typeof character.generatePassiveDescription === 'function') {
-                character.generatePassiveDescription();
-                
-                // Update existing passive indicator tooltip if it exists
-                setTimeout(() => {
-                    const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
-                    if (characterElement) {
-                        const passiveIndicator = characterElement.querySelector('.kokoro-passive');
-                        if (passiveIndicator) {
-                            const passiveDescription = character.generatePassiveDescription();
-                            const tooltipDescription = passiveDescription.replace(/<[^>]*>/g, '');
-                            passiveIndicator.title = `Healing Feedback: ${tooltipDescription}`;
-                            console.log(`[TalentManager] Updated passive indicator tooltip for ${character.name}`);
-                        }
-                    }
-                }, 100);
-            }
+        // Update ability descriptions for specific characters
+        if (character.id === 'schoolboy_siegfried' && typeof window.updateSiegfriedAbilityDescriptions === 'function') {
+            console.log(`[TalentManager] Updating Siegfried ability descriptions`);
+            setTimeout(() => {
+                window.updateSiegfriedAbilityDescriptions(character);
+            }, 100);
         }
         
-        // Update UI if needed
-        if (typeof updateCharacterUI === 'function') {
-            try {
-                updateCharacterUI(character);
-                console.log(`[TalentManager] Updated UI for ${character.name || character.id} after talent application`);
-            } catch (error) {
-                console.warn(`[TalentManager] Error updating UI for ${character.name || character.id}:`, error);
-            }
+        // Special handling for Elphelt to update ability descriptions
+        if (character.id === 'schoolgirl_elphelt' && typeof window.updateElpheltAbilityDescriptionsForTalents === 'function') {
+            console.log('[TalentManager] Updating Elphelt ability and passive descriptions');
+            window.updateElpheltAbilityDescriptionsForTalents(character);
         }
+        
+        // Dispatch talent application event
+        const talentEvent = new CustomEvent('talentsApplied', {
+            detail: { character: character },
+            bubbles: true
+        });
+        document.dispatchEvent(talentEvent);
+        
+        console.log(`[TalentManager] Character ${character.name} updated after talent application`);
     }
 
     /**
      * Apply stat modification from talent
      */
     applyStatModification(character, effect) {
-        if (!effect.stat || effect.value === undefined) {
+        // Support both 'stat' and 'statName' properties
+        const statName = effect.stat || effect.statName;
+        if (!statName || effect.value === undefined) {
             console.warn('Invalid stat modification effect', effect);
             return;
         }
 
         // --- NEW: Add flag for Reinforced Fur --- 
-        if (character.id === 'farmer_alice' && effect.stat === 'armor' && effect.operation === 'add' && effect.value === 8) {
+        if (character.id === 'farmer_alice' && statName === 'armor' && effect.operation === 'add' && effect.value === 8) {
              console.log(`[TalentManager] Setting hasReinforcedFurTalent flag for ${character.name}`);
              character.hasReinforcedFurTalent = true;
         }
         // --- END NEW ---
 
         // Special handling for maxMana increases - give the player the extra mana immediately
-        if (effect.stat === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
+        if (statName === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
             const oldCurrentMana = character.stats.currentMana || character.stats.mana || 0;
             const oldMaxMana = character.stats.maxMana || character.stats.mana || 0;
             
@@ -715,10 +645,19 @@ class TalentManager {
 
         // Use the character's existing method to modify stats
         const operation = effect.operation || 'set'; // Default to set
-        character.applyStatModification(effect.stat, operation, effect.value);
+
+        if (operation === 'add_base_percentage') {
+            const baseVal = character.baseStats[statName] || 0;
+            const addVal = baseVal * effect.value;
+            console.log(`[TalentManager] add_base_percentage converted for ${statName}: base ${baseVal} + ${(effect.value*100).toFixed(1)}% = +${addVal}`);
+            character.applyStatModification(statName, 'add', addVal);
+            return;
+        }
+
+        character.applyStatModification(statName, operation, effect.value);
         
         // Special handling for maxMana increases - ensure current mana also increases
-        if (effect.stat === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
+        if (statName === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
             const newMaxMana = character.stats.maxMana || character.stats.mana || 0;
             
             if (effect.operation === 'add') {
@@ -740,7 +679,39 @@ class TalentManager {
             console.log(`[TalentManager] After mana modification - Current: ${character.stats.currentMana}, Max: ${newMaxMana}`);
         }
         
-        console.log(`Applied stat modification to ${character.name}: ${effect.stat} ${operation} ${effect.value}`);
+        // Special handling for HP increases - give the player the extra HP immediately
+        if ((statName === 'hp' || statName === 'maxHp') && (effect.operation === 'add' || effect.operation === 'set')) {
+            // Wait for the stat modification to be applied first
+            setTimeout(() => {
+                const newMaxHp = character.stats.maxHp || character.stats.hp || 0;
+                const currentHp = character.stats.currentHp || character.stats.hp || 0;
+
+                if (effect.operation === 'add') {
+                    // Increase current HP by the exact amount we increased max HP
+                    const hpIncrease = effect.value;
+                    character.stats.currentHp = currentHp + hpIncrease;
+                    console.log(`[TalentManager] Increased current HP by ${hpIncrease} due to ${statName} talent`);
+                } else if (effect.operation === 'set') {
+                    // For set operations, heal to full
+                    character.stats.currentHp = newMaxHp;
+                    console.log(`[TalentManager] Set current HP to max (${newMaxHp}) due to ${statName} talent`);
+                }
+
+                // Ensure current HP does not exceed the new maximum
+                if (character.stats.currentHp > newMaxHp) {
+                    character.stats.currentHp = newMaxHp;
+                }
+
+                console.log(`[TalentManager] After HP modification - Current: ${character.stats.currentHp}, Max: ${newMaxHp}`);
+                
+                // Update the UI to reflect the new HP values
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                }
+            }, 10);
+        }
+        
+        console.log(`Applied stat modification to ${character.name}: ${statName} ${operation} ${effect.value}`);
     }
 
     /**
@@ -758,9 +729,21 @@ class TalentManager {
         }
         // <<< END SPECIFIC LOGGING >>>
         
-        // --- NEW: Directly set the property on the character object --- 
-        character[property] = value;
-        console.log(`[TalentManager] Set character.${property} = ${value}`);
+        // Handle Siegfried's talent properties by routing them to the passive ONLY
+        if (character.id === 'schoolboy_siegfried' && (property === 'buffDurationBonus' || property === 'healOnBuffReceived' || property === 'healOnAllyHealed')) {
+            // For Siegfried, don't set the character-level property, only route to passive
+            if (character.passiveHandler && typeof character.passiveHandler.applyTalentModification === 'function') {
+                character.passiveHandler.applyTalentModification(property, value);
+                console.log(`[TalentManager] Routed ${property} to Siegfried's passive only: ${value}`);
+            } else if (character.passive && typeof character.passive.applyTalentModification === 'function') {
+                character.passive.applyTalentModification(property, value);
+                console.log(`[TalentManager] Routed ${property} to Siegfried's passive via passive object only: ${value}`);
+            }
+        } else {
+            // --- For other characters: Directly set the property on the character object --- 
+            character[property] = value;
+            console.log(`[TalentManager] Set character.${property} = ${value}`);
+        }
         
         // Update ability descriptions for Zoey's improved talents
         if (character.id === 'zoey') {
@@ -840,6 +823,27 @@ class TalentManager {
                 document.dispatchEvent(new CustomEvent('abilityDescriptionUpdated', {
                     detail: { character: character }
                 }));
+            }
+        }
+        
+        // --- NEW: Handle Siegfried Mana Efficiency talent ---
+        if (property === 'manaCostReduction' && character.id === 'schoolboy_siegfried') {
+            console.log(`[TalentManager] Applying mana cost reduction of ${Math.round(value * 100)}% to all abilities for ${character.name}`);
+            if (character.abilities && Array.isArray(character.abilities)) {
+                character.abilities.forEach(ability => {
+                    if (ability.baseManaCost === undefined) {
+                        ability.baseManaCost = ability.manaCost; // Store original cost
+                    }
+                    const reducedCost = Math.ceil(ability.baseManaCost * (1 - value));
+                    ability.manaCost = Math.max(1, reducedCost); // Minimum 1 mana
+                    console.log(`[TalentManager] ${ability.name} mana cost: ${ability.baseManaCost} -> ${ability.manaCost}`);
+                });
+            }
+            
+            // Update ability descriptions to show reduced mana costs
+            if (typeof window.updateSiegfriedAbilityDescriptions === 'function') {
+                window.updateSiegfriedAbilityDescriptions(character);
+                console.log(`[TalentManager] Updated Siegfried ability descriptions after mana cost reduction`);
             }
         }
         // --- END NEW ---
@@ -972,6 +976,23 @@ class TalentManager {
                 break;
             // --- END NEW ---
 
+            // --- NEW: Siegfried Mana Efficiency talent ---
+            case 'manaCostReduction':
+                // Apply mana cost reduction to all abilities
+                console.log(`[TalentManager] Applying mana cost reduction of ${Math.round(value * 100)}% to all abilities for ${character.name}`);
+                if (character.abilities && Array.isArray(character.abilities)) {
+                    character.abilities.forEach(ability => {
+                        if (ability.baseManaCost === undefined) {
+                            ability.baseManaCost = ability.manaCost; // Store original cost
+                        }
+                        const reducedCost = Math.ceil(ability.baseManaCost * (1 - value));
+                        ability.manaCost = Math.max(1, reducedCost); // Minimum 1 mana
+                        console.log(`[TalentManager] ${ability.name} mana cost: ${ability.baseManaCost} -> ${ability.manaCost}`);
+                    });
+                }
+                break;
+            // --- END NEW ---
+
             default:
                 console.warn(`Unknown character property modification: ${property}`);
                 break;
@@ -992,11 +1013,48 @@ class TalentManager {
         if (abilityToModify) {
             // Store the modification details (optional, mainly for debugging or complex logic)
             abilityToModify.talentModifiers = abilityToModify.talentModifiers || {};
-            abilityToModify.talentModifiers[effect.property] = effect.value;
             
-            // Directly modify the ability property value
-            abilityToModify[effect.property] = effect.value;
-            console.log(`[TalentManager] Applied DIRECT MODIFICATION: Set ${character.name}'s ability ${effect.abilityId} property ${effect.property} to ${effect.value}`);
+            // Get the property to modify
+            const property = effect.property;
+            const value = effect.value;
+            const operation = effect.operation || 'set';
+            
+            // Apply the modification based on operation
+            if (operation === 'set') {
+                abilityToModify[property] = value;
+                abilityToModify.talentModifiers[property] = value;
+                console.log(`[TalentManager] Applied SET: Set ${character.name}'s ability ${effect.abilityId} property ${property} to ${value}`);
+            } else if (operation === 'add') {
+                if (typeof abilityToModify[property] === 'undefined') {
+                    abilityToModify[property] = value;
+                } else if (typeof abilityToModify[property] === 'number') {
+                    abilityToModify[property] += value;
+                } else {
+                    console.warn(`Cannot add to non-numeric ability property: ${property}`);
+                }
+                abilityToModify.talentModifiers[property] = abilityToModify[property];
+                console.log(`[TalentManager] Applied ADD: Added ${value} to ${character.name}'s ability ${effect.abilityId} property ${property}, new value: ${abilityToModify[property]}`);
+            } else if (operation === 'subtract') {
+                if (typeof abilityToModify[property] === 'number') {
+                    abilityToModify[property] -= value;
+                    // Make sure cooldown doesn't go below 0
+                    if (property === 'cooldown' && abilityToModify[property] < 0) {
+                        abilityToModify[property] = 0;
+                    }
+                } else {
+                    console.warn(`Cannot subtract from non-numeric ability property: ${property}`);
+                }
+                abilityToModify.talentModifiers[property] = abilityToModify[property];
+                console.log(`[TalentManager] Applied SUBTRACT: Subtracted ${value} from ${character.name}'s ability ${effect.abilityId} property ${property}, new value: ${abilityToModify[property]}`);
+            } else if (operation === 'multiply') {
+                if (typeof abilityToModify[property] === 'number') {
+                    abilityToModify[property] *= value;
+                } else {
+                    console.warn(`Cannot multiply non-numeric ability property: ${property}`);
+                }
+                abilityToModify.talentModifiers[property] = abilityToModify[property];
+                console.log(`[TalentManager] Applied MULTIPLY: Multiplied ${character.name}'s ability ${effect.abilityId} property ${property} by ${value}, new value: ${abilityToModify[property]}`);
+            }
             
             // Special handling for target type changes
             if (effect.property === 'canTargetEnemies' && effect.value === true) {
@@ -1106,6 +1164,24 @@ class TalentManager {
         if (!effect.property || effect.value === undefined) {
             console.warn('Invalid passive modification effect', effect);
             return;
+        }
+
+        // Handle character-specific passive modifications
+        if (character.id === 'schoolboy_siegfried' && character.passiveHandler) {
+            if (typeof character.passiveHandler.applyTalentModification === 'function') {
+                character.passiveHandler.applyTalentModification(effect.property, effect.value);
+                console.log(`Applied talent modification to Siegfried's passive: ${effect.property} = ${effect.value}`);
+                return;
+            }
+        }
+        
+        // Handle Elphelt's passive modifications (defensive recovery, stalwart defense)
+        if (character.id === 'schoolgirl_elphelt' && character.passiveHandler) {
+            if (typeof character.passiveHandler.applyTalentModification === 'function') {
+                character.passiveHandler.applyTalentModification(effect.property, effect.value);
+                console.log(`Applied talent modification to Elphelt's passive: ${effect.property} = ${effect.value}`);
+                return;
+            }
         }
 
         // Modify the passive
@@ -1249,6 +1325,57 @@ class TalentManager {
         document.addEventListener('criticalHeal', listener);
         
         console.log(`[TalentManager] Event listener for '${talentEffect.id || 'Aqueous Renewal'}' on critical heal set up for ${character.name}.`);
+    }
+
+    /**
+     * Apply property modification from talent
+     */
+    applyPropertyModification(character, effect) {
+        if (!effect.property || effect.value === undefined) {
+            console.warn('Invalid property modification effect', effect);
+            return false;
+        }
+
+        const property = effect.property;
+        const value = effect.value;
+        const operation = effect.operation || 'set';
+
+        console.log(`Applying property modification: ${property} = ${value} for ${character.name}`);
+
+        // Apply the modification
+        if (operation === 'set') {
+            character[property] = value;
+        } else if (operation === 'add') {
+            if (typeof character[property] === 'undefined') {
+                character[property] = value;
+            } else if (typeof character[property] === 'number') {
+                character[property] += value;
+            } else {
+                console.warn(`Cannot add to non-numeric character property: ${property}`);
+            }
+        } else if (operation === 'subtract') {
+            if (typeof character[property] === 'number') {
+                character[property] -= value;
+            } else {
+                console.warn(`Cannot subtract from non-numeric character property: ${property}`);
+            }
+        }
+
+        console.log(`[TalentManager] Set character.${property} = ${character[property]}`);
+        return true;
+    }
+
+    applyReduceCooldowns(character, effect) {
+        const reduction = typeof effect.value === 'number' ? effect.value : 1;
+        if (!character.abilities || character.abilities.length === 0) return;
+        console.log(`[TalentManager] Reducing cooldowns of all ${character.abilities.length} abilities for ${character.name} by ${reduction}`);
+        character.abilities.forEach(ab => {
+            if (typeof ab.cooldown === 'number') {
+                const oldCd = ab.cooldown;
+                ab.cooldown = Math.max(0, ab.cooldown - reduction);
+                console.log(` - Ability ${ab.name}: cooldown ${oldCd} -> ${ab.cooldown}`);
+            }
+        });
     }
 }
 

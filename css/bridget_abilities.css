@@ -280,7 +280,7 @@
         opacity: 0.8;
     }
     100% {
-        transform: translate(var(--x, 20px), var(--y, -60px)) scale(1.2);
+        transform: translate(var(--float-x, 20px), var(--float-y, -60px)) scale(1.2);
         opacity: 0;
     }
 }
@@ -370,6 +370,17 @@
 }
 
 /* Bridget's Bubble Beam Projectiles */
+.bridget-bubble-beam-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    pointer-events: none;
+    overflow: visible;
+}
+
 .bridget-bubble-beam {
     position: absolute;
     width: 100%;
@@ -394,6 +405,28 @@
     transform-origin: center;
     z-index: 16;
     will-change: transform;
+}
+
+.bridget-bubble-projectile.critical {
+    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(200, 230, 255, 0.9) 40%, rgba(30, 180, 255, 0.8) 100%);
+    box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 1),
+        0 0 15px rgba(30, 180, 255, 0.8);
+    filter: drop-shadow(0 0 10px rgba(30, 180, 255, 0.7));
+    animation: critical-bubble-pulse 0.3s ease-in-out infinite alternate;
+}
+
+.bridget-bubble-projectile.healing-beam {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(144, 238, 144, 0.8) 40%, rgba(34, 139, 34, 0.6) 100%);
+    box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(34, 139, 34, 0.5);
+    filter: drop-shadow(0 0 5px rgba(144, 238, 144, 0.4));
+}
+
+@keyframes critical-bubble-pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
 }
 
 .bridget-bubble-projectile::before {

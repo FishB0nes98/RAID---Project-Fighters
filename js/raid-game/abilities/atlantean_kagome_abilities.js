@@ -737,7 +737,7 @@ const kagomeQ = new Ability(
     'Golden Arrow',
     'Icons/abilities/golden_arrow.png',
     70, // Mana cost
-    2,   // Cooldown
+    1,   // Cooldown
     goldenArrowEffect
 ).setDescription('Deals 400 + 100% Magical Damage to an enemy.')
  .setTargetType('enemy');
