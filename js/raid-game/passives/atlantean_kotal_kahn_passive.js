@@ -32,8 +32,10 @@ class AtlanteanKotalKahnPassive {
 
     addSunlight(amount) {
         if (amount <= 0) return;
-        const prev = this.character.stats.currentSunlight;
-        this.character.stats.currentSunlight = Math.min(this.maxSunlight, this.character.stats.currentSunlight + amount);
+        const prevValue = Number.isFinite(this.character.stats.currentSunlight) ? this.character.stats.currentSunlight : 0;
+        const newValue = prevValue + (Number.isFinite(amount) ? amount : 0);
+        this.character.stats.currentSunlight = Math.min(this.maxSunlight, newValue);
+        const prev = prevValue;
         if (this.character.stats.currentSunlight !== prev) {
             if (window.updateCharacterUI) {
                 window.updateCharacterUI(this.character);
@@ -42,13 +44,23 @@ class AtlanteanKotalKahnPassive {
     }
 
     onDamageTaken(event) {
+        // Ensure the event has a detail payload before attempting to access it
+        if (!event || !event.detail) {
+            return; // Malformed event – ignore
+        }
+
         const { character } = event.detail;
         if (character === this.character) {
-            this.addSunlight(25);
+            this.addSunlight(15);
         }
     }
 
     onDamageDealt(event) {
+        // Guard against events without a detail object
+        if (!event || !event.detail) {
+            return;
+        }
+
         const { character: attacker } = event.detail;
         if (attacker === this.character) {
             this.addSunlight(10);
@@ -59,6 +71,16 @@ class AtlanteanKotalKahnPassive {
     destroy() {
         document.removeEventListener('CharacterDamaged', this.onDamageTaken);
         document.removeEventListener('character:damage-dealt', this.onDamageDealt);
+    }
+
+    // Handle character death - required by GameManager.handleCharacterDeath
+    onDeath(character, gameManager) {
+        console.log(`[AtlanteanKotalKahnPassive] onDeath called for ${character.name}`);
+        
+        // Clean up event listeners
+        this.destroy();
+        
+        // Optional: Add any death-specific logic here if needed
     }
 }
 

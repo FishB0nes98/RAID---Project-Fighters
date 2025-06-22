@@ -866,22 +866,10 @@ class DraftMode {
                     icon: "🔥"
                 },
                 {
-                    id: "healing_wind",
-                    name: "Healing Wind",
-                    description: "A gentle breeze carries healing energy across the battlefield.",
-                    icon: "🌬️"
-                },
-                {
                     id: "its_raining_man",
                     name: "It's raining man!",
                     description: "Heavy rain falls from the burning sky! All player characters heal HP each turn.",
                     icon: "🌧️"
-                },
-                {
-                    id: "frozen_ground",
-                    name: "Frozen Ground",
-                    description: "The ground is frozen solid! All characters move 25% slower.",
-                    icon: "❄️"
                 },
                 {
                     id: "toxic_miasma",
@@ -906,6 +894,48 @@ class DraftMode {
                     name: "Small Space",
                     description: "The confined space makes dodging impossible! All characters have their dodge chance reduced to 0.",
                     icon: "🚪"
+                },
+                {
+                    id: "tidal_wave_chaos",
+                    name: "Tidal Wave Chaos",
+                    description: "Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.",
+                    icon: "🌊💥"
+                },
+                {
+                    id: "healing_disabled",
+                    name: "Healing Disabled",
+                    description: "A malevolent curse prevents all healing! No character can recover HP through any means.",
+                    icon: "🚫💚"
+                },
+                {
+                    id: "smoke_cloud",
+                    name: "Smoke Cloud",
+                    description: "Dense smoke clouds the battlefield. Player abilities have a 21% chance to miss completely and go on cooldown.",
+                    icon: "☁️"
+                },
+                {
+                    id: "healing_fire",
+                    name: "Healing Fire",
+                    description: "The infernal flames corrupt all healing! Whenever a player character heals, they take 22% of the heal amount as fire damage.",
+                    icon: "🔥💚"
+                },
+                {
+                    id: "essence_transfer",
+                    name: "Essence Transfer",
+                    description: "When a character dies, their remaining power is transferred to a random survivor, adding each of their stats to the recipient.",
+                    icon: "💀"
+                },
+                {
+                    id: "healing_mana_flow",
+                    name: "Healing Mana Flow",
+                    description: "Healing energy is supercharged: whenever a character is healed, they also restore 20% of the heal amount as mana.",
+                    icon: "💧"
+                },
+                {
+                    id: "freezing_waters",
+                    name: "Freezing Waters",
+                    description: "All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 40% chance for their abilities to succeed.",
+                    icon: "❄️"
                 }
             ];
             

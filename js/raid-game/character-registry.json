@@ -96,7 +96,7 @@
             "image": "Icons/characters/Atlantean Christie.png",
             "rarity": "legendary",
             "type": "assassin",
-            "tags": ["Atlantean", "Carry", "Solo", "Physical"],
+            "tags": ["Atlantean", "Physical"],
             "description": "A deadly Atlantean assassin who has mastered the art of underwater combat. Her swift strikes and aquatic abilities make her a formidable ally in the depths of the ocean.",
             "playerunlocked": false,
             "ingameimage": "Loading Screen/Atlantean Christie.png"
@@ -128,10 +128,10 @@
         {
             "id": "atlantean_kotal_kahn",
             "name": "Atlantean Kotal Kahn",
-            "image": "Icons/Profile/Kotal Kahn.png",
+            "image": "Icons/characters/Atlantean Kotal Kahn.png",
             "rarity": "legendary",
             "type": "fighter",
-            "tags": ["Atlantean", "Ruler", "Magical", "Tank"],
+            "tags": ["Atlantean", "Healer", "Tank"],
             "description": "The noble ruler of ancient Atlantis, blessed with the power of the ocean depths. His mastery over water and light magic makes him a formidable ally in the fight to save his homeland.",
             "playerunlocked": false,
             "ingameimage": "Loading Screen/Atlantean Kotal Kahn.png"

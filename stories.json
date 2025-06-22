@@ -940,8 +940,9 @@
     "playerunlocked": false,
     "requirements": {
       "tags": ["Atlantean"],
-      "teamSize": { "min": 1, "max": 3 }
+      "teamSize": { "min": 1, "max": 1 }
     },
+    "forcedInitialCharacters": ["atlantean_kagome"],
     "stages": [
       {
         "name": "The Deep Waters",
@@ -1174,12 +1175,6 @@
       ],
       "modifiers": [
         {
-          "id": "aquatic_home_protector",
-          "name": "Aquatic Home Protector",
-          "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
-          "icon": "🌊"
-        },
-        {
           "id": "dark_current",
           "name": "Dark Current",
           "description": "The dark waters drain the strength from all abilities. Using an ability costs an additional 20 mana.",
@@ -1193,6 +1188,34 @@
       },
       "backgroundImage": "images/stages/stage6.png",
       "backgroundMusic": "sounds/music/final_boss_atlantis.mp3"
+    },
+    {
+      "name": "Legacy of Atlantis",
+      "description": "With Atlantis saved at last, its greatest champions stand before you. Choose one of them to accompany you on future adventures!",
+      "type": "character_unlock",
+      "firstTimeCompletionReward": true,
+      "unlockableCharacters": [
+        {
+          "characterId": "atlantean_kotal_kahn",
+          "name": "Atlantean Kotal Kahn",
+          "description": "The indomitable ruler of Atlantis, mastering solar energy and oceanic might.",
+          "image": "Icons/characters/Atlantean Kotal Kahn.png"
+        },
+        {
+          "characterId": "atlantean_sub_zero_playable",
+          "name": "Atlantean Sub Zero",
+          "description": "A legendary cryomancer who channels the frigid depths to freeze his foes.",
+          "image": "Icons/characters/Atlantean Sub Zero.png"
+        },
+        {
+          "characterId": "atlantean_christie",
+          "name": "Atlantean Christie",
+          "description": "A nimble guardian assassin, dancing through water with deadly grace.",
+          "image": "Icons/characters/Atlantean Christie.png"
+        }
+      ],
+      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
     }
   ]
 }

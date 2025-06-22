@@ -177,24 +177,34 @@ class StoryManager {
 
             // 4. Determine initial team based on progress or fallback
             if (this.storyProgress.lastTeamState && Object.keys(this.storyProgress.lastTeamState).length > 0) {
-                // Use team from saved story progress
                 currentTeamIds = Object.keys(this.storyProgress.lastTeamState);
                 console.log("[StoryManager] Using team IDs from saved story progress:", currentTeamIds);
-                initialTeamObjects = currentTeamIds.map(id => ({ id }));
             } else {
-                // Fallback to general currentTeamSelection if no saved state
-                console.log("[StoryManager] No saved team state found. Fetching currentTeamSelection from Firebase as fallback...");
+                // Fallback to currentTeamSelection
                 const teamSelectionSnapshot = await firebaseDatabase.ref(`users/${this.userId}/currentTeamSelection`).once('value');
                 currentTeamIds = teamSelectionSnapshot.exists() ? teamSelectionSnapshot.val() : [];
-                if (!Array.isArray(currentTeamIds) || currentTeamIds.length === 0) {
-                    console.warn("[StoryManager] Fallback failed: No valid team selection found in Firebase.");
-                    this.playerTeam = [];
-                    // Potentially throw an error or redirect if no team can be determined
-                } else {
-                    console.log("[StoryManager] Using team IDs from fallback currentTeamSelection:", currentTeamIds);
-                    initialTeamObjects = currentTeamIds.map(id => ({ id }));
+                console.log("[StoryManager] Fetched currentTeamSelection:", currentTeamIds);
+            }
+
+            // --- Force initial characters if story defines them ---
+            if (Array.isArray(this.currentStory.forcedInitialCharacters) && this.currentStory.forcedInitialCharacters.length > 0) {
+                console.log('[StoryManager] Overriding team with forcedInitialCharacters:', this.currentStory.forcedInitialCharacters);
+                currentTeamIds = this.currentStory.forcedInitialCharacters.slice();
+
+                // Also clear any saved progress team state to avoid reintroducing old members
+                this.storyProgress.lastTeamState = {};
+
+                // Persist this enforced team to Firebase so UI reflects it
+                try {
+                    await firebaseDatabase.ref(`users/${this.userId}/currentTeamSelection`).set(currentTeamIds);
+                    console.log('[StoryManager] Saved forcedInitialCharacters to currentTeamSelection in Firebase');
+                } catch (err) {
+                    console.warn('[StoryManager] Failed to save forcedInitialCharacters to Firebase:', err);
                 }
             }
+
+            // Build initialTeamObjects after final determination
+            initialTeamObjects = Array.isArray(currentTeamIds) ? currentTeamIds.map(id => ({ id })) : [];
 
             // 5. Load team data using the determined IDs
             if (initialTeamObjects.length > 0) {
@@ -1290,7 +1300,7 @@ class StoryManager {
                             if (member.stats) {
                                 // Grant 10% lifesteal to the character (0.1 = 10%)
                                 member.stats.lifesteal = (member.stats.lifesteal || 0) + 0.1;
-                                console.log(`Atlantean Lifesteal Blessing: Granted ${member.id} 10% lifesteal. New Lifesteal: ${(member.stats.lifesteal * 100).toFixed(1)}%`);
+                                console.log(`Applied Atlantean Lifesteal Blessing to ${member.id}: +10% lifesteal`);
                                 
                                 // Mark this character as having received this effect
                                 if (!member.atlanteanBlessings) member.atlanteanBlessings = {};
@@ -1310,7 +1320,7 @@ class StoryManager {
                             // This effect needs to be applied at the ability level, so we store it as a permanent effect
                             if (!member.atlanteanBlessings) member.atlanteanBlessings = {};
                             member.atlanteanBlessings.mana_efficiency = true;
-                            console.log(`Atlantean Mana Efficiency: Granted ${member.id} 50% mana cost reduction for all abilities`);
+                            console.log(`Applied Atlantean Mana Efficiency to ${member.id}: 50% mana cost reduction for all abilities`);
                             changesMade = true;
                         });
                         // Show popup notification
@@ -1323,7 +1333,7 @@ class StoryManager {
                             // This effect needs to be applied to Q abilities specifically
                             if (!member.atlanteanBlessings) member.atlanteanBlessings = {};
                             member.atlanteanBlessings.swiftness = true;
-                            console.log(`Atlantean Swiftness: Granted ${member.id} -1 turn cooldown reduction for Q ability`);
+                            console.log(`Applied Atlantean Swiftness to ${member.id}: -1 turn cooldown reduction for Q ability`);
                             changesMade = true;
                         });
                         // Show popup notification

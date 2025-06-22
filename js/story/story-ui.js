@@ -60,6 +60,7 @@ class StoryUI {
         // Bind event handlers that need `this` context early
         this.handleStageNodeClick = this.handleStageNodeClick.bind(this);
         // Bind others in setupEventHandlers if needed
+        this.characterUnlockInProgress = false; // Prevent multiple unlock actions
     }
 
     /**
@@ -641,51 +642,54 @@ class StoryUI {
                  }
              });
         } else if (storyTitle === "Saving Atlantis" && mapContainerWidth > 0 && mapContainerHeight > 0) {
-            console.log("[StoryUI] Applying SPECIFIC underwater layout for 'Saving Atlantis'");
-            
-            // Create an underwater descent layout that follows the narrative progression
-            // Map dimensions - ensure plenty of space for the underwater journey
-            const width = Math.max(mapContainerWidth, 2200); // Increased width for better spacing
-            const height = Math.max(mapContainerHeight, 1600); // Increased height for vertical progression
-            
-            // Define specific positions for each stage in the Saving Atlantis story
-            // Organized in a flowing underwater descent pattern
-            const atlantisLayout = {
-                "The Deep Waters": { x: 0.50, y: 0.10 },                    // Start at surface (top center)
-                "Atlantean Blessings": { x: 0.35, y: 0.20 },               // Choice stage (left)
-                "Frozen Underground Ruins": { x: 0.20, y: 0.35 },          // Frozen ruins (far left)
-                "Alliance with Sub Zero": { x: 0.35, y: 0.45 },           // Recruit stage (left-center)
-                "Ambush of the Shadow Assassins": { x: 0.55, y: 0.35 },    // Assassin ambush (right)
-                "Returning Home": { x: 0.50, y: 0.55 },                    // Safe haven (center, middle depth)
-                "Dark Underwater Cave": { x: 0.30, y: 0.75 },              // Dark Leviathan (left, deep)
-                "Atlantean Recovery Chamber": { x: 0.50, y: 0.85 },        // Recovery choice (center, deeper)
-                "Ancient Atlantean Throne Room": { x: 0.70, y: 0.95 }      // Final boss (right, deepest)
+            console.log("[StoryUI] Applying SPECIFIC layout for 'Saving Atlantis'");
+            // Ensure plenty of scrollable area
+            const width = Math.max(mapContainerWidth, 2600);
+            const height = Math.max(mapContainerHeight, 2000);
+
+            const layout = {
+                "The Deep Waters": { x: 0.50, y: 0.05 },
+                "Atlantean Blessings": { x: 0.50, y: 0.15 },
+                "Frozen Underground Ruins": { x: 0.25, y: 0.30 },
+                "Alliance with Sub Zero": { x: 0.25, y: 0.40 },
+                "Ambush of the Shadow Assassins": { x: 0.75, y: 0.40 },
+                "Returning Home": { x: 0.75, y: 0.50 },
+                "Dark Underwater Cave": { x: 0.50, y: 0.60 },
+                "Atlantean Recovery Chamber": { x: 0.25, y: 0.70 },
+                "The Ruler's Return": { x: 0.75, y: 0.70 },
+                "Ancient Atlantean Throne Room": { x: 0.50, y: 0.85 },
+                "Legacy of Atlantis": { x: 0.50, y: 0.95 }
             };
-            
+
             stages.forEach((stage, index) => {
-                let position = atlantisLayout[stage.name];
-                
-                if (position) {
-                    // Calculate absolute pixel values from percentages
-                    const x = position.x * width;
-                    const y = position.y * height;
-                    
-                    // Add slight variation for more natural underwater feel
-                    const jitterAmount = 20;
-                    const jitterX = (Math.random() - 0.5) * jitterAmount;
-                    const jitterY = (Math.random() - 0.5) * jitterAmount;
-                    
-                    positions.push({ x: x + jitterX, y: y + jitterY });
+                let posPercent = layout[stage.name];
+                let x, y;
+
+                if (posPercent) {
+                    x = posPercent.x * width;
+                    y = posPercent.y * height;
                 } else {
-                    // Fallback for any unexpected stages
-                    console.warn(`[StoryUI] No specific position defined for stage: ${stage.name}. Using fallback.`);
-                    const fallbackX = minPadding + (width / 4) * (index % 4);
-                    const fallbackY = minPadding + Math.floor(index / 4) * (stageHeight + 200);
-                    positions.push({ x: fallbackX, y: fallbackY });
+                    // Fallback grid if unexpected stage found
+                    const cols = 3;
+                    const colIndex = index % cols;
+                    const rowIndex = Math.floor(index / cols);
+                    x = minPadding + (width / cols) * colIndex;
+                    y = minPadding + rowIndex * (stageHeight + 120);
                 }
+
+                // Apply jitter to avoid perfect alignment
+                const jitter = 30;
+                x += (Math.random() - 0.5) * jitter;
+                y += (Math.random() - 0.5) * jitter;
+
+                // Clamp within bounds
+                x = Math.max(minPadding, Math.min(x, width - stageWidth - minPadding));
+                y = Math.max(minPadding, Math.min(y, height - stageHeight - minPadding));
+
+                positions.push({ x, y });
             });
-            
-            // Ensure the map container is large enough
+
+            // Expand container to allow scrolling
             this.mapStagesElement.style.width = `${width}px`;
             this.mapStagesElement.style.height = `${height}px`;
         } else {
@@ -3169,6 +3173,19 @@ class StoryUI {
      * @param {boolean} isFirstTimeCompletionReward - Whether this is a first-time completion reward.
      */
     async handleCharacterUnlock(characterId, isTutorialReward = false, isFirstTimeCompletionReward = false) {
+        // Guard against multiple selections
+        if (this.characterUnlockInProgress) {
+            console.warn('[StoryUI] Character unlock already in progress – ignoring additional clicks');
+            return;
+        }
+        this.characterUnlockInProgress = true;
+
+        // Disable all unlock buttons to prevent further interaction
+        const allButtons = this.stageRecruitContainer?.querySelectorAll('.character-unlock-button');
+        if (allButtons) {
+            allButtons.forEach(btn => btn.disabled = true);
+        }
+
         console.log(`[StoryUI] Character unlock selected: ${characterId}`);
         
         const characterDisplayName = characterId.replace('farmer_', 'Farmer ').replace('_', ' ')
@@ -3177,6 +3194,9 @@ class StoryUI {
             .join(' ');
             
         if (!confirm(`Are you sure you want to unlock ${characterDisplayName}? This choice cannot be changed.`)) {
+            // Re-enable buttons and release guard if user cancels
+            if (allButtons) allButtons.forEach(btn => btn.disabled = false);
+            this.characterUnlockInProgress = false;
             return;
         }
 
@@ -3274,6 +3294,7 @@ class StoryUI {
             this.showPopupMessage(`Error unlocking character: ${error.message}`, 'error');
         } finally {
             this.hideLoadingOverlay();
+            this.characterUnlockInProgress = false; // Reset guard after operation completes
         }
     }
 

@@ -64,4 +64,50 @@
 @keyframes solarBulwarkAuraPulse {
   from { box-shadow: 0 0 8px 3px rgba(255, 223, 102, 0.4), 0 0 18px 6px rgba(255, 190, 20, 0.3); }
   to   { box-shadow: 0 0 18px 6px rgba(255, 223, 102, 0.9), 0 0 30px 12px rgba(255, 190, 20, 0.7); }
+}
+
+/* === Dagger Throw VFX === */
+.dagger-projectile {
+  position: fixed;
+  width: 18px;
+  height: 4px;
+  background: linear-gradient(90deg, #ffe8b0 0%, #f3c46e 45%, #d8a44e 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(255, 223, 160, 0.9);
+  transform-origin: center;
+  z-index: 1003;
+}
+
+.dagger-trail {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 223, 160, 0.75);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: daggerTrailFade 0.4s linear forwards;
+  z-index: 1002;
+}
+
+@keyframes daggerTrailFade {
+  0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+}
+
+.dagger-impact {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 249, 216, 1) 0%, rgba(243, 196, 110, 0.95) 50%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 25px rgba(255, 223, 160, 0.9);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: daggerImpactFade 0.3s ease-out forwards;
+  z-index: 1004;
+}
+
+@keyframes daggerImpactFade {
+  0% { width: 8px; height: 8px; opacity: 1; }
+  100% { width: 40px; height: 40px; opacity: 0; }
 } 

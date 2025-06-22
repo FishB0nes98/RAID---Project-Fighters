@@ -3,19 +3,19 @@
   "name": "Atlantean Zasalamel",
   "image": "Icons/Profile/Zasalamel.png",
   "stats": {
-    "hp": 18000,
-    "mana": 850,
-    "physicalDamage": 420,
-    "magicalDamage": 380,
-    "armor": 85,
-    "magicalShield": 95,
+    "hp": 10500,
+    "mana": 2000,
+    "physicalDamage": 488,
+    "magicalDamage": 295,
+    "armor": 10,
+    "magicalShield": 20,
     "speed": 75,
     "lifeSteal": 0.35,
-    "critChance": 35,
-    "critMultiplier": 2.2,
+    "critChance": 0.05,
+    "critMultiplier": 0.5,
     "dodgeChance": 0.0,
-    "hpPerTurn": 150,
-    "manaPerTurn": 65
+    "hpPerTurn": 0,
+    "manaPerTurn": 0
   },
   "description": "An ancient Atlantean necromancer who has mastered the dark arts of the deep sea. His mastery over death and water magic makes him a formidable final boss.",
   "tags": ["boss", "atlantean", "necromancer", "final_boss"],
@@ -32,9 +32,47 @@
       "fixedDamage": 300,
       "physicalDamagePercent": 1.5,
       "icon": "Icons/abilities/slash.png"
+    },
+    {
+      "id": "zasalamel_time_manipulation",
+      "name": "Time Manipulation",
+      "type": "custom",
+      "damageType": "none",
+      "manaCost": 100,
+      "cooldown": 5,
+      "targetType": "self",
+      "description": "Sets each enemy's random ability on a 5-turn cooldown.",
+      "icon": "Icons/abilities/time_manipulation.png"
+    },
+    {
+      "id": "zasalamel_time_explosion",
+      "name": "Time Explosion",
+      "type": "custom",
+      "damageType": "magical",
+      "manaCost": 100,
+      "cooldown": 3,
+      "targetType": "all_enemies",
+      "description": "Deals 490 + 100 × each active cooldown on the victim to ALL enemies.",
+      "icon": "Icons/abilities/time_explosion.png"
+    },
+    {
+      "id": "zasalamel_dark_time_bomb",
+      "name": "Dark Time Bomb",
+      "type": "custom",
+      "damageType": "magical",
+      "manaCost": 80,
+      "cooldown": 6,
+      "targetType": "enemy",
+      "description": "Afflicts an enemy with a bomb that explodes after 3 turns, dealing 1985 + 50% Magical Damage.",
+      "icon": "Icons/abilities/dark_time_bomb.png"
     }
   ],
   "passives": [],
+  "passive": {
+    "id": "zasalamel_cooldown_lifesteal",
+    "name": "Temporal Hunger",
+    "description": "Gains 5% lifesteal for each active ability cooldown across all characters."
+  },
   "isAI": true,
   "aiType": "boss"
 } 

@@ -612,53 +612,54 @@ const spiritScreamEffect = (caster, target) => {
                 log("Critical Hit!");
             }
             
-            // 2. Remove all active buffs
+            // 2. Remove all non-permanent buffs (duration !== -1)
             if (enemy.buffs && enemy.buffs.length > 0) {
-                const buffCount = enemy.buffs.length;
-                
-                // Log that buffs are being removed
-                log(`${enemy.name}'s ${buffCount} buffs are purged by Spirit Scream!`);
-                
-                // Create a copy of the buffs array to avoid modification issues during iteration
-                const buffsToRemove = [...enemy.buffs];
-                
-                // Remove each buff individually
-                buffsToRemove.forEach(buff => {
-                    console.log("[KAGOME R] Removing buff:", buff.name, "from", enemy.name);
+                const buffsToRemove = enemy.buffs.filter(b => b.duration !== -1);
+                const buffCount = buffsToRemove.length;
+                if (buffCount > 0) {
+                    // Log that buffs are being removed
+                    log(`${enemy.name}'s ${buffCount} buffs are purged by Spirit Scream!`);
                     
-                    // Call the buff's remove function if it exists
-                    if (typeof buff.remove === 'function') {
-                        buff.remove(enemy);
-                    }
-                    
-                    // Remove the buff from the character's buff list
-                    const buffIndex = enemy.buffs.findIndex(b => b.id === buff.id);
-                    if (buffIndex !== -1) {
-                        enemy.buffs.splice(buffIndex, 1);
-                    }
-                    
-                    // If the buff has stat modifiers, remove them
-                    if (buff.statModifiers) {
-                        if (Array.isArray(buff.statModifiers)) {
-                            // New format: array of modifier objects
-                            buff.statModifiers.forEach(modifier => {
-                                if (modifier.value > 0) { // Only decrease if it's a positive modifier (buff)
-                                    enemy.stats[modifier.stat] -= modifier.value;
-                                }
-                            });
-                        } else {
-                            // Old format: key-value object (backward compatibility)
-                            Object.keys(buff.statModifiers).forEach(statKey => {
-                                // Only decrease if it's a positive modifier (buff)
-                                if (buff.statModifiers[statKey] > 0) {
-                                    enemy.stats[statKey] -= buff.statModifiers[statKey];
-                                }
-                            });
+                    // Remove each buff individually
+                    buffsToRemove.forEach(buff => {
+                        console.log("[KAGOME R] Removing buff:", buff.name, "from", enemy.name);
+                        
+                        // Call the buff's remove function if it exists
+                        if (typeof buff.remove === 'function') {
+                            buff.remove(enemy);
                         }
-                    }
-                });
-                
-                console.log("[KAGOME R] After buff removal, enemy buffs:", enemy.buffs);
+                        
+                        // Remove the buff from the character's buff list
+                        const buffIndex = enemy.buffs.findIndex(b => b.id === buff.id);
+                        if (buffIndex !== -1) {
+                            enemy.buffs.splice(buffIndex, 1);
+                        }
+                        
+                        // If the buff has stat modifiers, remove them
+                        if (buff.statModifiers) {
+                            if (Array.isArray(buff.statModifiers)) {
+                                // New format: array of modifier objects
+                                buff.statModifiers.forEach(modifier => {
+                                    if (modifier.value > 0) { // Only decrease if it's a positive modifier (buff)
+                                        enemy.stats[modifier.stat] -= modifier.value;
+                                    }
+                                });
+                            } else {
+                                // Old format: key-value object (backward compatibility)
+                                Object.keys(buff.statModifiers).forEach(statKey => {
+                                    // Only decrease if it's a positive modifier (buff)
+                                    if (buff.statModifiers[statKey] > 0) {
+                                        enemy.stats[statKey] -= buff.statModifiers[statKey];
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    console.log("[KAGOME R] After buff removal, enemy buffs:", enemy.buffs);
+                } else {
+                    console.log("[KAGOME R] No removable buffs on", enemy.name);
+                }
             } else {
                 console.log("[KAGOME R] No buffs to remove from", enemy.name);
             }

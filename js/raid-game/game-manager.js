@@ -2637,6 +2637,23 @@ class GameManager {
             // --- DEBUG LOGGING ---
             console.log(`[GameManager] saveBattleResultToFirebase called. Victory: ${isVictory}`);
             // --- DEBUG LOGGING END ---
+
+            // Helper to remove NaN / undefined numeric values and strip Sunlight from non-Sunlight characters
+            const sanitizeStats = (statsObj = {}) => {
+                const cleaned = {};
+                for (const [key, val] of Object.entries(statsObj)) {
+                    if (typeof val === 'number') {
+                        cleaned[key] = Number.isFinite(val) ? val : 0;
+                    } else if (val !== undefined) {
+                        cleaned[key] = val;
+                    }
+                }
+                // Remove or fix Sunlight values when not applicable
+                if (cleaned.maxSunlight === undefined && cleaned.currentSunlight !== undefined) {
+                    delete cleaned.currentSunlight;
+                }
+                return cleaned;
+            };
            
            // Check if Firebase is properly initialized and try to reinitialize if needed
            if (!firebaseDatabase) {
@@ -2711,7 +2728,7 @@ class GameManager {
                                     currentHP: char.stats.currentHp,
                                     currentMana: char.stats.currentMana,
                                     // --- IMPORTANT: Include stats to persist modifications ---
-                                    stats: { ...char.stats } 
+                                    stats: sanitizeStats(char.stats) 
                                     // --- END IMPORTANT ---
                                 };
                                 
@@ -6201,72 +6218,36 @@ class GameManager {
             
             // Helper function to check if a character element represents a valid target
             const isValidTarget = (characterElement) => {
-                const characterId = characterElement.dataset.characterId || characterElement.id.replace('character-', '');
-                const character = this.gameManager.gameState.playerCharacters.concat(this.gameManager.gameState.aiCharacters)
-                    .find(c => (c.instanceId || c.id) === characterId);
-                
-                if (!character) return false;
-                if (character.isDead()) return false;
-                if (character.isUntargetable && character.isUntargetable()) return false;
-                if (character.isUntargetableByEnemyForcing && character.isUntargetableByEnemyForcing()) return false;
-                
-                // Check for Heart Debuff forced targeting restrictions on the caster
-                if (selectedChar && selectedChar.forcedTargeting && selectedChar.forcedTargeting.type === 'heart_debuff') {
-                    const forcedCasterId = selectedChar.forcedTargeting.casterId;
-                    console.log(`[Heart Debuff UI] ${selectedChar.name} has heart debuff, checking target ${character.name}...`);
-                    
-                    // Allow self-targeting always
-                    if (character === selectedChar) {
-                        console.log(`[Heart Debuff UI] Allowing self-targeting for ${selectedChar.name}`);
-                        return true;
-                    }
-                    
-                    // Find the heart caster
-                    const allCharacters = [
-                        ...this.gameManager.gameState.playerCharacters,
-                        ...this.gameManager.gameState.aiCharacters
-                    ];
-                    const heartCaster = allCharacters.find(char => 
-                        (char.instanceId || char.id) === forcedCasterId && !char.isDead()
-                    );
-                    
-                    if (heartCaster) {
-                        // Heart Debuff allows targeting:
-                        // 1. The heart caster themselves (Elphelt)
-                        // 2. The debuffed character's own allies (same team as debuffed character)
-                        // 3. Self (handled above)
-                        
-                        const targetTeam = character.isAI ? 'ai' : 'player';
-                        const debuffedCharacterTeam = selectedChar.isAI ? 'ai' : 'player';
-                        
-                        const isTargetingHeartCaster = (character === heartCaster);
-                        const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
-                        const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
-                        
-                        console.log(`[Heart Debuff UI] Target ${character.name} (${targetTeam}), Debuffed ${selectedChar.name} (${debuffedCharacterTeam}), Heart Caster ${heartCaster.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
-                        
-                        if (!isValidHeartDebuffTarget) {
-                            console.log(`[Heart Debuff UI] Blocking target ${character.name} - not the heart caster or debuffed character's ally`);
-                            return false; // Heart Debuff prevents targeting this character
-                        }
-                    }
+                // Resolve the Character instance behind the DOM element
+                const characterIdAttr = characterElement.dataset.instanceId || characterElement.dataset.characterId || characterElement.id.replace('character-', '');
+                const allCharacters = this.gameManager.gameState.playerCharacters.concat(this.gameManager.gameState.aiCharacters);
+                const characterObj = allCharacters.find(c => (c.instanceId || c.id) === characterIdAttr || c.id === characterIdAttr);
+                if (!characterObj) {
+                    return false; // Element does not map to a live character
                 }
-                
-                return true;
+
+                // Use the central validation logic so UI highlights match real targeting rules
+                return this.gameManager.validateTarget(targetType, characterObj);
             };
             
             // Remove targeting message logs
+            
+            console.log(`[showValidTargets] Processing targetType: ${targetType}, isPlayerCaster: ${isPlayerCaster}`);
             
             switch (targetType) {
                 case 'enemy':
                     if (isPlayerCaster) {
                         aiChars.forEach((el) => {
-                            if (isValidTarget(el)) {
+                            const isValid = isValidTarget(el);
+                            console.log(`[showValidTargets] AI character element ${el.id}, isValid: ${isValid}`);
+                            if (isValid) {
                                 el.classList.add('valid-target');
                                 el.style.cursor = 'pointer';
+                                console.log(`[showValidTargets] Added valid-target to ${el.id}`);
                             } else {
                                 el.classList.add('invalid-target');
                                 el.style.cursor = 'not-allowed';
+                                console.log(`[showValidTargets] Added invalid-target to ${el.id}`);
                             }
                         });
                         playerChars.forEach(function(el) {

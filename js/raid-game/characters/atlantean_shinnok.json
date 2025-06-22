@@ -3,18 +3,18 @@
   "name": "Atlantean Shinnok",
   "image": "Icons/Profile/Shinnok.png",
   "stats": {
-    "hp": 16500,
-    "mana": 900,
-    "physicalDamage": 380,
-    "magicalDamage": 450,
-    "armor": 75,
-    "magicalShield": 105,
+    "hp": 8700,
+    "mana": 3865,
+    "physicalDamage": 70,
+    "magicalDamage": 559,
+    "armor": 9,
+    "magicalShield": 20,
     "speed": 85,
-    "critChance": 40,
-    "critMultiplier": 2.3,
+    "critChance": 0.01,
+    "critMultiplier": 1.2,
     "dodgeChance": 0.0,
-    "hpPerTurn": 120,
-    "manaPerTurn": 75
+    "hpPerTurn": 0,
+    "manaPerTurn": 0
   },
   "description": "A fallen elder god of Atlantis, corrupted by dark magic from the depths. His divine powers combined with abyssal corruption make him a devastating adversary.",
   "tags": ["boss", "atlantean", "elder_god", "final_boss"],
@@ -32,9 +32,35 @@
       "magicalDamagePercent": 1.0,
       "amount": 1.0,
       "icon": "Icons/abilities/dark_bubble.png"
+    },
+    {
+      "id": "shinnok_skeletal_barrier",
+      "name": "Skeletal Barrier",
+      "type": "custom",
+      "damageType": "none",
+      "manaCost": 75,
+      "cooldown": 9,
+      "targetType": "ally",
+      "description": "Grants an ally (or self) a 1800 HP shield for 3 turns.",
+      "icon": "Icons/abilities/skeletal_barrier.png"
+    },
+    {
+      "id": "shinnok_magical_spheres",
+      "name": "Magical Spheres",
+      "type": "custom",
+      "damageType": "magical",
+      "manaCost": 70,
+      "cooldown": 2,
+      "targetType": "enemy",
+      "description": "Launches 5 spheres dealing 200% Magical Damage each to random enemies.",
+      "icon": "Icons/abilities/magical_spheres.png"
     }
   ],
-  "passives": [],
+  "passive": {
+    "id": "shinnok_shadow_protection",
+    "name": "Shadow Protection",
+    "description": "Takes 50% less damage while an ally is alive."
+  },
   "isAI": true,
   "aiType": "boss"
 } 

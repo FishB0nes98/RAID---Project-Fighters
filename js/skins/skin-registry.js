@@ -2,6 +2,32 @@
 window.SkinRegistry = {
     // Define all available skins
     skins: {
+        // Atlantean Christie Silver
+        'atlantean_christie_silver': {
+            id: 'atlantean_christie_silver',
+            name: 'Atlantean Christie Silver',
+            characterId: 'atlantean_christie',
+            description: 'A shimmering silver assassin uniform forged in the depths of Atlantis.',
+            imagePath: 'Loading Screen/Atlantean Christie Silver.png',
+            price: 1500,
+            rarity: 'common',
+            category: 'atlantean',
+            unlocked: false
+        },
+        
+        // Atlantean Kagome Silver
+        'atlantean_kagome_silver': {
+            id: 'atlantean_kagome_silver',
+            name: 'Atlantean Kagome Silver',
+            characterId: 'atlantean_kagome',
+            description: 'A sleek silver armor set enhancing Kagome\'s mystical archery talents.',
+            imagePath: 'Loading Screen/Atlantean Kagome Silver.png',
+            price: 1500,
+            rarity: 'common',
+            category: 'atlantean',
+            unlocked: false
+        },
+        
         // Schoolgirl Julia 2
         'schoolgirl_julia_2': {
             id: 'schoolgirl_julia_2',

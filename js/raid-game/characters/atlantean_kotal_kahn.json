@@ -1,7 +1,7 @@
 {
   "id": "atlantean_kotal_kahn",
   "name": "Atlantean Kotal Kahn",
-  "image": "Icons/Profile/Kotal Kahn.png",
+  "image": "Icons/characters/Atlantean Kotal Kahn.png",
   "stats": {
     "hp": 9200,
     "maxSunlight": 100,
@@ -53,6 +53,17 @@
       "targetType": "self",
       "description": "Sets Sunlight to 100 and Kotal Kahn sacrifices 50% of his current HP. Does not end turn.",
       "icon": "Icons/abilities/blood_sacrifice.png"
+    },
+    {
+      "id": "atlantean_kotal_kahn_r",
+      "name": "Dagger Throw",
+      "type": "custom",
+      "damageType": "physical",
+      "manaCost": 0,
+      "cooldown": 8,
+      "targetType": "enemy",
+      "description": "Deals 700 physical damage to an enemy, stuns for 2 turns, and applies Bleeding (100 dmg/turn, 3 turns). 80% chance to bounce to another enemy.",
+      "icon": "Icons/abilities/dagger_throw.png"
     }
   ],
   "passive": {

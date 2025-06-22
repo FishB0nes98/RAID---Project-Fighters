@@ -683,6 +683,18 @@ class Character {
         this.stats.currentSunlight = Math.min(preservedCurrentSunlight, maxSunlight);
         this.stats.currentSunlight = Math.max(0, this.stats.currentSunlight);
 
+        // === Sunlight Sanitization ===
+        // Prevent NaN values that cause Firebase write errors
+        if (!Number.isFinite(this.stats.currentSunlight)) {
+            console.warn(`[RecalcStats] Non-finite currentSunlight for ${this.name}; resetting to 0.`);
+            this.stats.currentSunlight = 0;
+        }
+
+        // Remove currentSunlight for characters that don't use the Sunlight resource
+        if (this.stats.maxSunlight === undefined) {
+            delete this.stats.currentSunlight;
+        }
+
         // <<< ADDED SPECIFIC HEALING POWER LOG >>>
         console.log(`[Recalc Final Check] ${this.name}'s Healing Power before final log: ${this.stats.healingPower}`);
         // <<< END ADDED LOG >>>
