@@ -1,0 +1,237 @@
+/* Atlantean Christie Passive: Aquatic Meditation VFX */
+
+.aquatic-meditation-aura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    background: radial-gradient(
+        circle at center,
+        rgba(0, 191, 255, 0.3) 0%,
+        rgba(64, 224, 255, 0.2) 30%,
+        rgba(135, 206, 235, 0.1) 60%,
+        transparent 100%
+    );
+    animation: aquaticMeditationAura 3s ease-in-out;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.meditation-ripples-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 11;
+}
+
+.meditation-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 191, 255, 0.8);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: meditationRippleExpand 2s ease-out forwards;
+    pointer-events: none;
+}
+
+.meditation-droplets-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.meditation-droplet {
+    position: absolute;
+    top: 100%;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(0, 191, 255, 0.8) 40%,
+        rgba(64, 224, 255, 0.6) 100%
+    );
+    border-radius: 50%;
+    box-shadow: 
+        0 0 8px rgba(0, 191, 255, 0.6),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    animation: meditationDropletFloat 2.5s ease-out forwards;
+    pointer-events: none;
+}
+
+.ap-restoration-indicator {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #00bfff;
+    text-shadow: 
+        0 0 8px rgba(0, 191, 255, 0.8),
+        0 0 16px rgba(64, 224, 255, 0.6),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: apRestorationFloat 3s ease-out forwards;
+    pointer-events: none;
+    z-index: 15;
+}
+
+/* Keyframe Animations */
+
+@keyframes aquaticMeditationAura {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        filter: blur(2px);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0px);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1.05);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
+        filter: blur(1px);
+    }
+}
+
+@keyframes meditationRippleExpand {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+        border-width: 2px;
+    }
+    50% {
+        width: 80px;
+        height: 80px;
+        opacity: 0.6;
+        border-width: 1px;
+    }
+    100% {
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+        border-width: 0px;
+    }
+}
+
+@keyframes meditationDropletFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0px) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1);
+    }
+    80% {
+        opacity: 0.8;
+        transform: translateY(-60px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(0.8);
+    }
+}
+
+@keyframes apRestorationFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px) scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scale(0.9);
+    }
+}
+
+/* Enhanced effects for critical moments */
+.character-slot[data-character-id="atlantean_christie"].meditation-active {
+    box-shadow: 
+        0 0 20px rgba(0, 191, 255, 0.4),
+        inset 0 0 20px rgba(64, 224, 255, 0.2);
+}
+
+.character-slot[data-character-id="atlantean_christie"].meditation-active .character-image {
+    filter: 
+        drop-shadow(0 0 10px rgba(0, 191, 255, 0.6))
+        brightness(1.1)
+        saturate(1.2);
+}
+
+/* Mana bar enhancement during meditation */
+.character-slot[data-character-id="atlantean_christie"] .mana-bar.meditation-restore {
+    background: linear-gradient(
+        90deg,
+        rgba(0, 191, 255, 0.8) 0%,
+        rgba(64, 224, 255, 0.9) 50%,
+        rgba(135, 206, 235, 0.8) 100%
+    );
+    box-shadow: 
+        0 0 10px rgba(0, 191, 255, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    animation: meditationManaRestore 2s ease-in-out;
+}
+
+@keyframes meditationManaRestore {
+    0%, 100% {
+        filter: brightness(1);
+        transform: scaleY(1);
+    }
+    50% {
+        filter: brightness(1.3);
+        transform: scaleY(1.1);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .ap-restoration-indicator {
+        font-size: 14px;
+        top: 15%;
+    }
+    
+    .meditation-droplet {
+        width: 4px;
+        height: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ap-restoration-indicator {
+        font-size: 12px;
+        top: 10%;
+    }
+    
+    .meditation-ripple {
+        width: 15px;
+        height: 15px;
+    }
+} 

@@ -1,0 +1,82 @@
+{
+    "id": "atlantean_christie",
+    "name": "Atlantean Christie",
+    "image": "Loading Screen/Atlantean Christie.png",
+    "rarity": "legendary",
+    "type": "assassin",
+    "tags": ["Atlantean", "Assassin", "Water", "Ninja"],
+    "description": "A deadly Atlantean assassin who has mastered the art of underwater combat. Her swift strikes and aquatic abilities make her a formidable ally in the depths of the ocean.",
+    "playerunlocked": false,
+    "isHidden": false,
+    "ingameimage": "Loading Screen/Atlantean Christie.png",
+    "stats": {
+        "hp": 7490,
+        "mana": 6,
+        "physicalDamage": 205,
+        "magicalDamage": 0,
+        "armor": 10,
+        "magicalShield": 7,
+        "speed": 125,
+        "critChance": 0.05,
+        "critMultiplier": 2.0,
+        "dodgeChance": 0.0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 0.5
+    },
+    "abilities": [
+        {
+            "id": "atlantean_christie_kick",
+            "name": "Kick",
+            "icon": "Icons/abilities/kick.png",
+            "manaCost": 3,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "doesNotEndTurn": true,
+            "type": "damage",
+            "damageType": "physical",
+            "description": "Strike the target 3 times with devastating kicks. Each strike has a 25% chance to hit 1-4 additional enemies for reduced damage. Costs 3 ability points."
+        },
+        {
+            "id": "atlantean_christie_charming_kiss",
+            "name": "Charming Kiss",
+            "icon": "Icons/abilities/charming_kiss.png",
+            "manaCost": 4,
+            "cooldown": 8,
+            "targetType": "all_enemies",
+            "type": "utility",
+            "doesNotEndTurn": true,
+            "description": "Blows a charming kiss that has a 58% chance to hit each enemy. Affected enemies take 75% more damage from Christie for 5 turns. When Christie hits a charmed enemy, she gains back one Ability point. Costs 4 ability points."
+        },
+        {
+            "id": "atlantean_christie_samba_slam",
+            "name": "Samba Slam",
+            "icon": "Icons/abilities/samba_slam.png",
+            "manaCost": 1,
+            "cooldown": 5,
+            "targetType": "enemy",
+            "doesNotEndTurn": true,
+            "type": "damage",
+            "damageType": "physical",
+            "description": "Performs a powerful samba-inspired slam attack that deals 300 + 100% Physical Damage. Has 100% stun chance for 2 turns if not dodged. Costs 1 ability point."
+        },
+        {
+            "id": "atlantean_christie_throwkick",
+            "name": "Throwkick",
+            "icon": "Icons/abilities/throwkick.png",
+            "manaCost": 6,
+            "cooldown": 1,
+            "targetType": "enemy",
+            "doesNotEndTurn": true,
+            "type": "damage",
+            "damageType": "physical",
+            "description": "Christie gains 50% physical damage and 30% lifesteal for this turn, then deals 315% of Physical Damage. If successful, Christie gains 3 ability points. Costs 6 ability points."
+        }
+    ],
+    "passive": {
+        "id": "atlantean_christie_passive",
+        "name": "Aquatic Meditation",
+        "icon": "Icons/abilities/default.png",
+        "description": "When Christie doesn't act during a turn, she restores 1 additional Ability Point at the end of the turn through aquatic meditation."
+    },
+    "usesAbilityPoints": true
+} 

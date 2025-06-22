@@ -1,0 +1,191 @@
+/* Shadow Assassin - Assassin Strike VFX */
+
+.assassin-shadow-trail {
+    position: absolute;
+    background: linear-gradient(90deg, 
+        rgba(75, 0, 130, 0.8) 0%, 
+        rgba(138, 43, 226, 0.6) 50%, 
+        rgba(75, 0, 130, 0.8) 100%);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+    animation: shadowTrailExpand 0.4s ease-out forwards;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+@keyframes shadowTrailExpand {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.assassin-strike-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, 
+        rgba(138, 43, 226, 0.9) 0%, 
+        rgba(75, 0, 130, 0.7) 30%, 
+        rgba(25, 25, 112, 0.5) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: assassinStrikeImpact 0.6s ease-out forwards;
+    z-index: 999;
+    pointer-events: none;
+}
+
+.assassin-strike-impact.critical {
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, 
+        rgba(255, 20, 147, 0.9) 0%, 
+        rgba(138, 43, 226, 0.8) 30%, 
+        rgba(75, 0, 130, 0.6) 60%, 
+        transparent 100%);
+    animation: assassinStrikeCriticalImpact 0.8s ease-out forwards;
+}
+
+@keyframes assassinStrikeImpact {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes assassinStrikeCriticalImpact {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
+
+.assassin-shadow-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(138, 43, 226, 0.8);
+    border-radius: 50%;
+    animation: shadowParticleBurst 0.8s ease-out forwards;
+}
+
+.assassin-shadow-particle:nth-child(1) { transform: rotate(0deg) translateX(30px); }
+.assassin-shadow-particle:nth-child(2) { transform: rotate(45deg) translateX(35px); }
+.assassin-shadow-particle:nth-child(3) { transform: rotate(90deg) translateX(25px); }
+.assassin-shadow-particle:nth-child(4) { transform: rotate(135deg) translateX(40px); }
+.assassin-shadow-particle:nth-child(5) { transform: rotate(180deg) translateX(30px); }
+.assassin-shadow-particle:nth-child(6) { transform: rotate(225deg) translateX(35px); }
+.assassin-shadow-particle:nth-child(7) { transform: rotate(270deg) translateX(25px); }
+.assassin-shadow-particle:nth-child(8) { transform: rotate(315deg) translateX(40px); }
+
+@keyframes shadowParticleBurst {
+    0% {
+        opacity: 1;
+        transform: rotate(var(--rotation, 0deg)) translateX(0px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(var(--rotation, 0deg)) translateX(50px) scale(0.3);
+    }
+}
+
+.assassin-afterimage {
+    position: absolute;
+    opacity: 0.3;
+    filter: hue-rotate(240deg) brightness(0.7);
+    animation: assassinAfterimage 0.6s ease-out forwards;
+    z-index: 998;
+    pointer-events: none;
+}
+
+@keyframes assassinAfterimage {
+    0% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.2;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Screen shake effect for Assassin Strike */
+.battle-container.assassin-strike-shake {
+    animation: assassinStrikeShake 0.4s ease-in-out;
+}
+
+@keyframes assassinStrikeShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-3px) translateY(-2px); }
+    20% { transform: translateX(3px) translateY(2px); }
+    30% { transform: translateX(-2px) translateY(-1px); }
+    40% { transform: translateX(2px) translateY(1px); }
+    50% { transform: translateX(-1px) translateY(-2px); }
+    60% { transform: translateX(1px) translateY(2px); }
+    70% { transform: translateX(-2px) translateY(-1px); }
+    80% { transform: translateX(2px) translateY(1px); }
+    90% { transform: translateX(-1px) translateY(-1px); }
+}
+
+/* Enhanced shadow effects for character during ability */
+.character-slot:has(.assassin-shadow-trail) .character-image {
+    filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.8));
+}
+
+/* Critical strike enhancements */
+.assassin-strike-impact.critical::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle, 
+        rgba(255, 20, 147, 0.3) 0%, 
+        transparent 70%);
+    border-radius: 50%;
+    animation: criticalPulse 0.8s ease-out;
+}
+
+@keyframes criticalPulse {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+} 

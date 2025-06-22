@@ -1,0 +1,25 @@
+{
+  "id": "atlantean_zasalamel",
+  "name": "Atlantean Zasalamel",
+  "image": "Icons/Profile/Zasalamel.png",
+  "stats": {
+    "hp": 18000,
+    "mana": 850,
+    "physicalDamage": 420,
+    "magicalDamage": 380,
+    "armor": 85,
+    "magicalShield": 95,
+    "speed": 75,
+    "critChance": 35,
+    "critMultiplier": 2.2,
+    "dodgeChance": 15,
+    "hpPerTurn": 150,
+    "manaPerTurn": 65
+  },
+  "description": "An ancient Atlantean necromancer who has mastered the dark arts of the deep sea. His mastery over death and water magic makes him a formidable final boss.",
+  "tags": ["boss", "atlantean", "necromancer", "final_boss"],
+  "abilities": [],
+  "passives": [],
+  "isAI": true,
+  "aiType": "boss"
+} 

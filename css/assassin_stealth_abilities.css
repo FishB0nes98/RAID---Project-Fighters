@@ -1,0 +1,229 @@
+/* Assassin Stealth VFX */
+
+.stealth-active {
+    opacity: 0.6;
+    filter: brightness(0.7) contrast(1.2);
+    transition: all 0.5s ease-in-out;
+}
+
+.stealth-smoke-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.stealth-smoke {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, 
+        rgba(60, 60, 60, 0.8) 0%, 
+        rgba(80, 80, 80, 0.6) 40%, 
+        rgba(100, 100, 100, 0.3) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: stealthSmokeFloat 3s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    opacity: 0.7;
+    filter: blur(1px);
+}
+
+.stealth-smoke:nth-child(1) { top: 10%; left: 20%; }
+.stealth-smoke:nth-child(2) { top: 30%; left: 80%; }
+.stealth-smoke:nth-child(3) { top: 60%; left: 10%; }
+.stealth-smoke:nth-child(4) { top: 80%; left: 70%; }
+.stealth-smoke:nth-child(5) { top: 20%; left: 50%; }
+.stealth-smoke:nth-child(6) { top: 70%; left: 30%; }
+.stealth-smoke:nth-child(7) { top: 40%; left: 90%; }
+.stealth-smoke:nth-child(8) { top: 90%; left: 60%; }
+
+@keyframes stealthSmokeFloat {
+    0% { 
+        transform: translateY(0px) scale(0.5); 
+        opacity: 0.3; 
+    }
+    25% { 
+        transform: translateY(-15px) scale(1); 
+        opacity: 0.8; 
+    }
+    50% { 
+        transform: translateY(-25px) scale(1.2); 
+        opacity: 0.6; 
+    }
+    75% { 
+        transform: translateY(-20px) scale(0.9); 
+        opacity: 0.4; 
+    }
+    100% { 
+        transform: translateY(-30px) scale(0.3); 
+        opacity: 0; 
+    }
+}
+
+.stealth-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 70%
+    );
+    background-size: 200% 200%;
+    animation: stealthShimmer 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 15;
+    border-radius: 8px;
+}
+
+@keyframes stealthShimmer {
+    0% { 
+        background-position: -100% -100%; 
+        opacity: 0; 
+    }
+    25% { 
+        opacity: 0.6; 
+    }
+    50% { 
+        background-position: 100% 100%; 
+        opacity: 0.8; 
+    }
+    75% { 
+        opacity: 0.4; 
+    }
+    100% { 
+        background-position: 200% 200%; 
+        opacity: 0; 
+    }
+}
+
+/* Enhanced stealth effect for character image */
+.stealth-active .character-image {
+    filter: brightness(0.6) contrast(1.3) saturate(0.7);
+    box-shadow: 0 0 15px rgba(100, 100, 100, 0.3);
+    transition: all 0.5s ease-in-out;
+}
+
+/* Stealth activation effect */
+.stealth-active::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(
+        45deg,
+        rgba(150, 150, 150, 0.2),
+        rgba(200, 200, 200, 0.1),
+        rgba(150, 150, 150, 0.2)
+    );
+    border-radius: 12px;
+    animation: stealthAura 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes stealthAura {
+    0%, 100% { 
+        opacity: 0.3; 
+        transform: scale(1); 
+    }
+    50% { 
+        opacity: 0.6; 
+        transform: scale(1.05); 
+    }
+}
+
+/* Stealth particle effects */
+.stealth-active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px, 30px 30px, 50px 50px, 35px 35px;
+    animation: stealthParticles 6s linear infinite;
+    pointer-events: none;
+    z-index: 12;
+    border-radius: 8px;
+}
+
+@keyframes stealthParticles {
+    0% { 
+        background-position: 0 0, 10px 10px, 20px 0, 30px 20px; 
+        opacity: 0.4; 
+    }
+    25% { 
+        opacity: 0.8; 
+    }
+    50% { 
+        background-position: 20px -20px, 30px -10px, 40px -20px, 50px 0px; 
+        opacity: 0.6; 
+    }
+    75% { 
+        opacity: 0.3; 
+    }
+    100% { 
+        background-position: 40px -40px, 50px -30px, 60px -40px, 70px -20px; 
+        opacity: 0.4; 
+    }
+}
+
+/* Status effect styling for stealth */
+.status-icon[title*="Stealth"] {
+    border: 2px solid rgba(150, 150, 150, 0.6);
+    box-shadow: 0 0 8px rgba(150, 150, 150, 0.4);
+    animation: stealthStatusPulse 2s ease-in-out infinite;
+}
+
+@keyframes stealthStatusPulse {
+    0%, 100% { 
+        box-shadow: 0 0 8px rgba(150, 150, 150, 0.4); 
+        transform: scale(1); 
+    }
+    50% { 
+        box-shadow: 0 0 15px rgba(150, 150, 150, 0.7); 
+        transform: scale(1.05); 
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .stealth-smoke {
+        width: 15px;
+        height: 15px;
+    }
+    
+    .stealth-active::before {
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        bottom: -3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stealth-smoke {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .stealth-shimmer {
+        border-radius: 6px;
+    }
+} 

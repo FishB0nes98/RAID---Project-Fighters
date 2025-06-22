@@ -91,6 +91,41 @@
             "ingameimage": "Loading Screen/Atlantean Kagome.png"
         },
         {
+            "id": "atlantean_christie",
+            "name": "Atlantean Christie",
+            "image": "Icons/characters/Atlantean Christie.png",
+            "rarity": "legendary",
+            "type": "assassin",
+            "tags": ["Atlantean", "Carry", "Solo", "Physical"],
+            "description": "A deadly Atlantean assassin who has mastered the art of underwater combat. Her swift strikes and aquatic abilities make her a formidable ally in the depths of the ocean.",
+            "playerunlocked": false,
+            "ingameimage": "Loading Screen/Atlantean Christie.png"
+        },
+        {
+            "id": "atlantean_zasalamel",
+            "name": "Atlantean Zasalamel",
+            "image": "Icons/Profile/Zasalamel.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "tags": ["boss", "atlantean", "necromancer", "final_boss"],
+            "description": "An ancient Atlantean necromancer who has mastered the dark arts of the deep sea. His mastery over death and water magic makes him a formidable final boss.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Zasalamel.png"
+        },
+        {
+            "id": "atlantean_shinnok",
+            "name": "Atlantean Shinnok",
+            "image": "Icons/Profile/Shinnok.png",
+            "rarity": "legendary",
+            "type": "boss",
+            "tags": ["boss", "atlantean", "elder_god", "final_boss"],
+            "description": "A fallen elder god of Atlantis, corrupted by dark magic from the depths. His divine powers combined with abyssal corruption make him a devastating adversary.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Shinnok.png"
+        },
+        {
             "id": "farmer_alice",
             "name": "Farmer Alice",
             "image": "Icons/characters/Farmer Alice.png",
@@ -686,6 +721,18 @@
             "playerunlocked": false,
             "isHidden": true,
             "ingameimage": "Loading Screen/Shadowfin.png"
+        },
+        {
+            "id": "dark_leviathan",
+            "name": "Dark Leviathan",
+            "image": "Loading Screen/Dark Leviathan.png",
+            "rarity": "legendary",
+            "type": "beast",
+            "tags": ["Enemy", "Boss", "Dark", "Sea Creature", "Atlantean"],
+            "description": "A massive ancient sea creature corrupted by dark forces. This colossal leviathan commands the deepest trenches of the ocean with its immense power and malevolent presence.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Dark Leviathan.png"
         },
         {
             "id": "piranha",

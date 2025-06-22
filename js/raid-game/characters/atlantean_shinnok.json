@@ -1,0 +1,25 @@
+{
+  "id": "atlantean_shinnok",
+  "name": "Atlantean Shinnok",
+  "image": "Icons/Profile/Shinnok.png",
+  "stats": {
+    "hp": 16500,
+    "mana": 900,
+    "physicalDamage": 380,
+    "magicalDamage": 450,
+    "armor": 75,
+    "magicalShield": 105,
+    "speed": 85,
+    "critChance": 40,
+    "critMultiplier": 2.3,
+    "dodgeChance": 20,
+    "hpPerTurn": 120,
+    "manaPerTurn": 75
+  },
+  "description": "A fallen elder god of Atlantis, corrupted by dark magic from the depths. His divine powers combined with abyssal corruption make him a devastating adversary.",
+  "tags": ["boss", "atlantean", "elder_god", "final_boss"],
+  "abilities": [],
+  "passives": [],
+  "isAI": true,
+  "aiType": "boss"
+} 

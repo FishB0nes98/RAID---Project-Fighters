@@ -11,7 +11,7 @@
     "ingameimage": "Loading Screen/Reptilian Assassin.png",
     "stats": {
         "hp": 2750,
-        "mana": 180,
+        "mana": 2180,
         "physicalDamage": 280,
         "magicalDamage": 70,
         "armor": 11,
@@ -23,6 +23,29 @@
         "hpPerTurn": 0,
         "manaPerTurn": 18
     },
-    "abilities": [],
+    "abilities": [
+        {
+            "id": "venomous_blade",
+            "name": "Venomous Blade",
+            "type": "custom",
+            "manaCost": 60,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "description": "Strikes with a venomous blade, dealing <span class=\"damage-value\">420</span> physical damage and applying a stacking <span class=\"debuff-text\">Poison</span> debuff for <span class=\"duration-value\">3 turns</span>. The poison deals <span class=\"damage-value\">420</span> poison damage each turn.",
+            "icon": "Icons/abilities/venomous_blade.png",
+            "functionName": "venomousBladEffect"
+        },
+        {
+            "id": "stealth",
+            "name": "Stealth",
+            "icon": "Icons/abilities/shadow_step.png",
+            "description": "Become untargetable by enemies for 2 turns.",
+            "manaCost": 60,
+            "cooldown": 5,
+            "targetType": "self",
+            "type": "buff",
+            "keybind": "W"
+        }
+    ],
     "passives": []
 } 

@@ -1043,10 +1043,16 @@
       ],
       "modifiers": [
         {
-          "id": "shadow_ambush",
-          "name": "Shadow Ambush",
-          "description": "The assassins move with uncanny speed on their first strike, gaining +50% Speed during the first turn of battle.",
-          "icon": "🗡️"
+          "id": "aquatic_home_protector",
+          "name": "Aquatic Home Protector",
+          "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
+          "icon": "🌊"
+        },
+        {
+          "id": "freezing_waters",
+          "name": "Freezing Waters",
+          "description": "All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 40% chance for their abilities to succeed.",
+          "icon": "❄️"
         }
       ],
       "objectives": {
@@ -1054,8 +1060,135 @@
           { "type": "allEnemiesDefeated" }
         ]
       },
-      "backgroundImage": "images/stages/atlantis_ambush.png",
+      "backgroundImage": "images/stages/stage3.png",
       "backgroundMusic": "sounds/music/assassin_attack.mp3"
+    },
+    {
+      "name": "Returning Home",
+      "description": "After the fierce battle with the shadow assassins, you find sanctuary in a peaceful Atlantean healing chamber. The ancient waters restore your strength completely, and you are joined by Atlantean Christie, a skilled assassin who has been protecting the sacred waters. With your team fully healed and reinforced, you are ready to face the ultimate threat lurking in the deepest depths.",
+      "type": "healing_and_recruit",
+      "isEncounter": true,
+      "healingEffect": {
+        "type": "heal_and_mana_restore_all_full",
+        "target": "all"
+      },
+      "recruitEffect": {
+        "type": "add_specific_ally",
+        "characterId": "atlantean_christie"
+      },
+      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
+    },
+    {
+      "name": "Dark Underwater Cave",
+      "description": "Deep beneath the ocean floor lies a massive underwater cavern shrouded in darkness. Ancient corruption has awakened the Dark Leviathan, a colossal sea beast that guards the deepest secrets of Atlantis. With your team fully restored and reinforced with Atlantean Christie's skills, you venture into the abyss to face this ultimate threat to your homeland.",
+      "difficulty": 8,
+      "type": "battle",
+      "enemies": [
+        { "characterId": "dark_leviathan" }
+      ],
+      "modifiers": [
+        {
+          "id": "aquatic_home_protector",
+          "name": "Aquatic Home Protector",
+          "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
+          "icon": "🌊"
+        },
+        {
+          "id": "atlantean_purification",
+          "name": "Atlantean Purification",
+          "description": "The pure waters of Atlantis instantly cleanse all debuffs from characters at the start of each turn.",
+          "icon": "💧✨"
+        },
+        {
+          "id": "tidal_wave_chaos",
+          "name": "Tidal Wave Chaos",
+          "description": "Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.",
+          "icon": "🌊💥"
+        }
+      ],
+      "objectives": {
+        "winConditions": [
+          { "type": "enemyDefeated", "targetId": "dark_leviathan" }
+        ]
+      },
+      "backgroundImage": "images/stages/stage4.png",
+      "backgroundMusic": "sounds/music/dark_depths.mp3"
+    },
+    {
+      "name": "Atlantean Recovery Chamber",
+      "description": "After defeating the Dark Leviathan, you discover an ancient Atlantean recovery chamber filled with mystical artifacts and healing pools. The chamber offers three powerful boons to aid your team. Choose wisely, as each option will provide different advantages for your future endeavors.",
+      "type": "choice",
+      "isEncounter": true,
+      "choices": [
+        {
+          "name": "Pool of Infinite Mana",
+          "description": "Immerse your entire team in the mystical mana pool, completely restoring all team members' magical energy to full capacity.",
+          "effect": { 
+            "type": "mana_restore", 
+            "target": "all", 
+            "amount": "full" 
+          }
+        },
+        {
+          "name": "Crystal of Magical Enhancement",
+          "description": "Choose one team member to receive the blessing of an ancient Atlantean crystal, permanently increasing their magical damage by 200.",
+          "effect": { 
+            "type": "stat_boost", 
+            "target": "selected", 
+            "stat": "magicalDamage", 
+            "amount": 200 
+          }
+        },
+        {
+          "name": "Blessing of Enduring Magic",
+          "description": "The ancient spirits grant your entire team enhanced magical resilience. All buffs will now last 1 additional turn, making your magical enhancements more persistent.",
+          "effect": { 
+            "type": "extend_buff_duration", 
+            "target": "all", 
+            "amount": 1 
+          }
+        }
+      ],
+      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
+    },
+    {
+      "name": "Ancient Atlantean Throne Room",
+      "description": "Your journey reaches its climax in the ancient throne room of Atlantis, where the ocean's greatest powers once ruled. Here, the corrupted remnants of Atlantean Zasalamel and Atlantean Shinnok await - two powerful beings who have fallen to the darkness of the abyss. These ancient lords of Atlantis have been twisted by dark magic and now seek to drag the entire realm into eternal shadow. This is your final stand to save Atlantis from complete destruction.",
+      "difficulty": 10,
+      "type": "battle",
+      "enemies": [
+        { "characterId": "atlantean_zasalamel" },
+        { "characterId": "atlantean_shinnok" }
+      ],
+      "modifiers": [
+        {
+          "id": "aquatic_home_protector",
+          "name": "Aquatic Home Protector",
+          "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
+          "icon": "🌊"
+        },
+        {
+          "id": "atlantean_purification",
+          "name": "Atlantean Purification",
+          "description": "The pure waters of Atlantis instantly cleanse all debuffs from characters at the start of each turn.",
+          "icon": "💧✨"
+        },
+        {
+          "id": "tidal_wave_chaos",
+          "name": "Tidal Wave Chaos",
+          "description": "Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.",
+          "icon": "🌊💥"
+        }
+      ],
+      "objectives": {
+        "winConditions": [
+          { "type": "allEnemiesDefeated" }
+        ]
+      },
+      "backgroundImage": "images/stages/stage6.png",
+      "backgroundMusic": "sounds/music/final_boss_atlantis.mp3"
     }
   ]
 }

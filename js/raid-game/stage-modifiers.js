@@ -179,6 +179,145 @@ class StageModifiersRegistry {
             }
         });
 
+        // Atlantean Purification Modifier
+        this.registerModifier({
+            id: 'atlantean_purification',
+            name: 'Atlantean Purification',
+            description: 'The pure waters of Atlantis instantly cleanse all debuffs from characters at the start of each turn.',
+            icon: '💧✨',
+            vfx: {
+                type: 'atlantean_purification',
+                particles: true,
+                animation: 'purifying_waters'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                const allCharacters = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
+                let totalDebuffsRemoved = 0;
+                const affectedCharacters = [];
+                
+                allCharacters.forEach(character => {
+                    if (!character.isDead() && character.debuffs.length > 0) {
+                        const debuffCount = character.debuffs.length;
+                        const debuffNames = character.debuffs.map(d => d.name || d.id).join(', ');
+                        
+                        // Remove all debuffs
+                        character.debuffs.forEach(debuff => {
+                            if (debuff.remove && typeof debuff.remove === 'function') {
+                                debuff.remove(character);
+                            }
+                        });
+                        character.debuffs = [];
+                        
+                        totalDebuffsRemoved += debuffCount;
+                        affectedCharacters.push({ character, debuffCount, debuffNames });
+                        
+                        // Create purification VFX
+                        this.createAtlanteanPurificationVFX(character);
+                        
+                        // Update UI
+                        if (gameManager.uiManager) {
+                            gameManager.uiManager.updateCharacterUI(character);
+                        }
+                    }
+                });
+                
+                if (totalDebuffsRemoved > 0) {
+                    gameManager.addLogEntry(
+                        `💧✨ The pure waters of Atlantis cleanse all debuffs from the battlefield!`, 
+                        'stage-effect positive'
+                    );
+                    
+                    affectedCharacters.forEach(({ character, debuffCount, debuffNames }) => {
+                        gameManager.addLogEntry(
+                            `${character.name} is purified of ${debuffCount} debuff${debuffCount > 1 ? 's' : ''}: ${debuffNames}`, 
+                            'stage-effect heal'
+                        );
+                    });
+                    
+                    // Create screen-wide purification effect
+                    this.createAtlanteanPurificationScreenVFX();
+                }
+            }
+        });
+
+        // Tidal Wave Chaos Modifier
+        this.registerModifier({
+            id: 'tidal_wave_chaos',
+            name: 'Tidal Wave Chaos',
+            description: 'Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.',
+            icon: '🌊💥',
+            vfx: {
+                type: 'tidal_wave_chaos',
+                particles: true,
+                animation: 'massive_wave'
+            },
+            turnCounter: 0,
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                modifier.turnCounter = (modifier.turnCounter || 0) + 1;
+                
+                if (modifier.turnCounter % 6 === 0) {
+                    const allCharacters = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
+                    const livingCharacters = allCharacters.filter(char => !char.isDead());
+                    
+                    if (livingCharacters.length === 0) return;
+                    
+                    gameManager.addLogEntry(
+                        `🌊💥 A massive tidal wave rises from the depths and crashes across the battlefield!`, 
+                        'stage-effect dramatic'
+                    );
+                    
+                    // Create massive wave VFX
+                    this.createTidalWaveChaosBattlefieldVFX();
+                    
+                    // Clear all debuff VFX from the battlefield (wave washes them away)
+                    this.clearAllDebuffVFX();
+                    
+                    // Add log entry about VFX being washed away
+                    setTimeout(() => {
+                        gameManager.addLogEntry(
+                            `🌊 The powerful wave washes away all lingering effects from the battlefield!`, 
+                            'stage-effect positive'
+                        );
+                    }, 800);
+                    
+                    // Process each character with a delay for dramatic effect
+                    livingCharacters.forEach((character, index) => {
+                        setTimeout(() => {
+                            const isHeal = Math.random() < 0.5; // 50% chance
+                            const amount = 1000;
+                            
+                            if (isHeal) {
+                                character.heal(amount, null, { 
+                                    isStageEffect: true,
+                                    stageModifierName: modifier.name 
+                                });
+                                gameManager.addLogEntry(
+                                    `🌊 The healing tide restores ${amount} HP to ${character.name}!`, 
+                                    'stage-effect heal'
+                                );
+                                this.createTidalWaveHealVFX(character);
+                            } else {
+                                character.applyDamage(amount, 'water', null, { 
+                                    isStageEffect: true,
+                                    stageModifierName: modifier.name 
+                                });
+                                gameManager.addLogEntry(
+                                    `💥 The crushing wave deals ${amount} damage to ${character.name}!`, 
+                                    'stage-effect damage'
+                                );
+                                this.createTidalWaveDamageVFX(character);
+                            }
+                            
+                            // Update UI
+                            if (gameManager.uiManager) {
+                                gameManager.uiManager.updateCharacterUI(character);
+                            }
+                        }, index * 200); // Stagger effects for dramatic impact
+                    });
+                }
+            }
+        });
+
         // Cleansing Winds Modifier
         this.registerModifier({
             id: 'cleansing_winds',
@@ -1072,68 +1211,12 @@ class StageModifiersRegistry {
         this.registerModifier({
             id: 'aquatic_home_protector',
             name: 'Aquatic Home Protector',
-            description: 'The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn. Additionally, when player characters deal damage with abilities, they heal for 100% of the damage dealt.',
+            description: 'The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.',
             icon: '🌊',
             vfx: {
                 type: 'aquatic_home_protector',
                 particles: true,
                 animation: 'healing_waters'
-            },
-            onStageStart: (gameManager, stageManager, modifier) => {
-                console.log(`[AquaticHomeProtector] Setting up damage-based healing event listeners`);
-                
-                // Store event listeners for cleanup
-                if (!gameManager._aquaticProtectorListeners) {
-                    gameManager._aquaticProtectorListeners = {};
-                }
-
-                // Damage dealt event listener for ability-based healing
-                gameManager._aquaticProtectorListeners.onDamage = (event) => {
-                    console.log(`[AquaticHomeProtector] DAMAGE EVENT TRIGGERED:`, event.detail);
-                    const { character, target, damage, damageType, isCritical } = event.detail;
-                    
-                    // Only heal player characters (not AI characters)
-                    if (character && damage > 0 && !character.isAI) {
-                        console.log(`[AquaticHomeProtector] ${character.name} dealt ${damage} damage, healing for same amount`);
-                        
-                        // Heal the caster for 100% of damage dealt
-                        const healAmount = Math.floor(damage);
-                        character.heal(healAmount, character, { 
-                            isStageEffect: true,
-                            stageModifierName: modifier.name,
-                            abilityId: 'aquatic_home_protector_lifesteal'
-                        });
-                        
-                        gameManager.addLogEntry(
-                            `🌊 ${character.name} is healed by the protective waters for ${healAmount} HP from their attack!`, 
-                            'stage-effect heal'
-                        );
-
-                        // Create aquatic healing VFX on the character
-                        this.createAquaticLifestealVFX(character, healAmount);
-                    } else {
-                        console.log(`[AquaticHomeProtector] Damage event ignored - caster: ${character?.name || 'null'}, damage: ${damage}, isAI: ${character?.isAI}`);
-                    }
-                };
-
-                // Add event listener
-                document.addEventListener('character:damage-dealt', gameManager._aquaticProtectorListeners.onDamage);
-                
-                gameManager.addLogEntry(
-                    `🌊 The protective waters of Atlantis awaken! Player abilities will restore health equal to damage dealt!`, 
-                    'stage-effect dramatic'
-                );
-            },
-            onStageEnd: (gameManager, stageManager, modifier) => {
-                console.log(`[AquaticHomeProtector] Cleaning up event listeners`);
-                
-                // Remove event listeners
-                if (gameManager._aquaticProtectorListeners) {
-                    if (gameManager._aquaticProtectorListeners.onDamage) {
-                        document.removeEventListener('character:damage-dealt', gameManager._aquaticProtectorListeners.onDamage);
-                    }
-                    delete gameManager._aquaticProtectorListeners;
-                }
             },
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const healAmount = modifier.effect?.value || 245;
@@ -1242,6 +1325,101 @@ class StageModifiersRegistry {
         });
 
         console.log('[StageModifiers] Registered atlantean_ambush_defense modifier successfully');
+
+        // ==== FREEZING WATERS MODIFIER ====
+        this.registerModifier({
+            id: 'freezing_waters',
+            name: 'Freezing Waters',
+            description: 'All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 40% chance for their abilities to succeed.',
+            icon: '❄️',
+            vfx: {
+                type: 'freezing_waters',
+                particles: true,
+                animation: 'ice_crystals'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                console.log(`[FreezingWaters] Setting up ability usage event listeners`);
+                
+                // Store event listeners for cleanup
+                if (!gameManager._freezingWatersListeners) {
+                    gameManager._freezingWatersListeners = {};
+                }
+
+                // Ability usage event listener for freeze chance
+                gameManager._freezingWatersListeners.onAbilityUsed = (event) => {
+                    console.log(`[FreezingWaters] ABILITY USED EVENT TRIGGERED:`, event.detail);
+                    const { caster, target, ability } = event.detail;
+                    
+                    // Only apply to player characters using abilities that target enemies
+                    if (caster && target && ability && !caster.isAI && target.isAI) {
+                        // Check if ability targets enemies
+                        const targetsEnemies = ability.targetType === 'enemy' || 
+                                             ability.targetType === 'aoe_enemy' ||
+                                             (ability.targetType === 'any' && target.isAI);
+                        
+                        if (targetsEnemies) {
+                            console.log(`[FreezingWaters] ${caster.name} used ${ability.name} on enemy ${target.name}, rolling for freeze...`);
+                            
+                            // 38% chance to freeze
+                            if (Math.random() < 0.38) {
+                                const freezeDebuff = {
+                                    id: 'freeze',
+                                    name: 'Freeze',
+                                    icon: '❄️',
+                                    duration: 2,
+                                    maxDuration: 2,
+                                    isDebuff: true,
+                                    source: 'Freezing Waters',
+                                    description: 'Frozen by the icy waters! Abilities have only 40% chance to succeed.',
+                                    effect: function(character) {
+                                        // Freeze effect is handled in the ability usage logic
+                                    },
+                                    onRemove: function(character) {
+                                        // Remove freeze VFX when debuff expires
+                                        if (window.stageModifiersRegistry) {
+                                            window.stageModifiersRegistry.removeFreezingWatersVFX(character);
+                                        }
+                                    }
+                                };
+                                
+                                target.addDebuff(freezeDebuff);
+                                
+                                // Show freeze VFX
+                                this.showFreezingWatersApplicationVFX(target);
+                                
+                                gameManager.addLogEntry(
+                                    `❄️ ${target.name} is frozen by the icy waters for 2 turns!`, 
+                                    'stage-effect debuff'
+                                );
+                            }
+                        }
+                    }
+                };
+
+                // Add event listener
+                document.addEventListener('AbilityUsed', gameManager._freezingWatersListeners.onAbilityUsed);
+                
+                gameManager.addLogEntry(
+                    `❄️ The waters around you turn ice-cold! Player abilities now have a chance to freeze enemies!`, 
+                    'stage-effect dramatic'
+                );
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                console.log(`[FreezingWaters] Cleaning up event listeners`);
+                
+                // Remove event listeners
+                if (gameManager._freezingWatersListeners) {
+                    if (gameManager._freezingWatersListeners.onAbilityUsed) {
+                        document.removeEventListener('AbilityUsed', gameManager._freezingWatersListeners.onAbilityUsed);
+                    }
+                    delete gameManager._freezingWatersListeners;
+                }
+                
+                // Clear any remaining freeze VFX
+                this.clearFreezingWatersVFX();
+            }
+        });
+        console.log('[StageModifiers] Registered freezing_waters modifier successfully');
 
         // Draft Mode Modifier
         this.registerModifier({
@@ -1587,6 +1765,9 @@ class StageModifiersRegistry {
                 break;
             case 'draft_mode':
                 this.createDraftModeVFX(modifier);
+                break;
+            case 'freezing_waters':
+                this.createFreezingWatersVFX(modifier);
                 break;
 
             default:
@@ -4685,6 +4866,204 @@ class StageModifiersRegistry {
         console.log('[StageModifiers] Created cleansing winds screen VFX');
     }
 
+    createAtlanteanPurificationVFX(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+
+        // Create purifying water aura around character
+        const purificationAura = document.createElement('div');
+        purificationAura.className = 'atlantean-purification-aura';
+        purificationAura.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.4) 0%, rgba(50, 150, 255, 0.2) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: atlanteanPurificationAura 2.5s ease-in-out;
+            pointer-events: none;
+            z-index: 100;
+        `;
+        characterElement.appendChild(purificationAura);
+
+        // Create water droplets floating around character
+        const dropletsContainer = document.createElement('div');
+        dropletsContainer.className = 'atlantean-purification-droplets';
+        dropletsContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 101;
+        `;
+        characterElement.appendChild(dropletsContainer);
+
+        // Add multiple water droplets
+        for (let i = 0; i < 12; i++) {
+            const droplet = document.createElement('div');
+            droplet.className = 'atlantean-droplet';
+            droplet.style.cssText = `
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background: radial-gradient(circle, #64C8FF, #3296FF);
+                border-radius: 50% 50% 50% 0;
+                transform-origin: center;
+                animation: atlanteanDropletFloat 2s ease-in-out infinite;
+                animation-delay: ${i * 0.1}s;
+                left: 50%;
+                top: 10px;
+                transform: translate(-50%, 0) rotate(${i * 30}deg);
+            `;
+            dropletsContainer.appendChild(droplet);
+        }
+
+        // Create cleansing sparkles
+        const sparklesContainer = document.createElement('div');
+        sparklesContainer.className = 'atlantean-purification-sparkles';
+        sparklesContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 102;
+        `;
+        characterElement.appendChild(sparklesContainer);
+
+        // Add sparkle particles
+        for (let i = 0; i < 8; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'atlantean-sparkle';
+            sparkle.style.cssText = `
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: radial-gradient(circle, #FFFFFF, #64C8FF);
+                border-radius: 50%;
+                box-shadow: 0 0 8px rgba(100, 200, 255, 0.8);
+                left: ${20 + Math.random() * 60}%;
+                top: ${20 + Math.random() * 60}%;
+                animation: atlanteanSparkle 1.5s ease-in-out infinite;
+                animation-delay: ${Math.random() * 1}s;
+            `;
+            sparklesContainer.appendChild(sparkle);
+        }
+
+        // Create purification ripple effect
+        const ripple = document.createElement('div');
+        ripple.className = 'atlantean-purification-ripple';
+        ripple.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(100, 200, 255, 0.6);
+            border-radius: 50%;
+            animation: atlanteanPurificationRipple 2.5s ease-out;
+            pointer-events: none;
+            z-index: 99;
+        `;
+        characterElement.appendChild(ripple);
+
+        // Cleanup after animation
+        setTimeout(() => {
+            purificationAura.remove();
+            dropletsContainer.remove();
+            sparklesContainer.remove();
+            ripple.remove();
+        }, 2500);
+
+        console.log(`[StageModifiers] Created Atlantean purification VFX for ${character.name}`);
+    }
+
+    createAtlanteanPurificationScreenVFX() {
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+
+        // Create screen-wide water wave effect
+        const waterWave = document.createElement('div');
+        waterWave.className = 'atlantean-purification-screen-wave';
+        waterWave.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(100, 200, 255, 0.3) 0%, rgba(50, 150, 255, 0.15) 50%, transparent 70%);
+            animation: atlanteanScreenWave 3s ease-in-out;
+            pointer-events: none;
+            z-index: 1000;
+        `;
+        document.body.appendChild(waterWave);
+
+        // Create floating water particles across screen
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = 'atlantean-purification-screen-particles';
+        particlesContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1001;
+        `;
+        document.body.appendChild(particlesContainer);
+
+        // Add floating particles
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'atlantean-screen-particle';
+            particle.style.cssText = `
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(100, 200, 255, 0.6));
+                border-radius: 50% 50% 50% 0;
+                box-shadow: 0 0 6px rgba(100, 200, 255, 0.6);
+                left: ${Math.random() * 100}%;
+                top: 100vh;
+                animation: atlanteanScreenParticleFloat ${2 + Math.random() * 2}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 2}s;
+            `;
+            particlesContainer.appendChild(particle);
+        }
+
+        // Create purification light flash
+        const lightFlash = document.createElement('div');
+        lightFlash.className = 'atlantean-purification-flash';
+        lightFlash.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, rgba(100, 200, 255, 0.2) 30%, transparent 60%);
+            animation: atlanteanPurificationFlash 1s ease-out;
+            pointer-events: none;
+            z-index: 1002;
+        `;
+        document.body.appendChild(lightFlash);
+
+        // Cleanup after animation
+        setTimeout(() => {
+            waterWave.remove();
+            particlesContainer.remove();
+            lightFlash.remove();
+        }, 3000);
+
+        console.log('[StageModifiers] Created Atlantean purification screen VFX');
+    }
+
     createDraftModeVFX(modifier) {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx draft-mode-vfx';
@@ -4864,6 +5243,598 @@ class StageModifiersRegistry {
         } else {
             applyEffect(); // Apply immediately for turn start
         }
+    }
+    // ==== FREEZING WATERS VFX METHODS ====
+    createFreezingWatersVFX(modifier) {
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'stage-modifier-vfx freezing-waters-vfx';
+        vfxContainer.setAttribute('data-modifier', modifier.id);
+        
+        // Create ice crystal overlay
+        const iceCrystalOverlay = document.createElement('div');
+        iceCrystalOverlay.className = 'ice-crystal-overlay';
+        iceCrystalOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at center,
+                rgba(173, 216, 230, 0.2) 0%,
+                rgba(135, 206, 235, 0.15) 30%,
+                rgba(30, 144, 255, 0.1) 60%,
+                rgba(0, 191, 255, 0.05) 100%
+            );
+            animation: freezingWatersAura 8s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 2;
+        `;
+        vfxContainer.appendChild(iceCrystalOverlay);
+        
+        // Create floating ice crystals
+        for (let i = 0; i < 30; i++) {
+            const crystal = document.createElement('div');
+            crystal.className = 'freezing-waters-crystal';
+            crystal.style.cssText = `
+                position: absolute;
+                width: ${3 + Math.random() * 5}px;
+                height: ${3 + Math.random() * 5}px;
+                background: radial-gradient(circle, #87ceeb, #4169e1);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: freezingCrystalFloat ${4 + Math.random() * 6}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 3}s;
+                box-shadow: 0 0 8px rgba(135, 206, 235, 0.8);
+                pointer-events: none;
+                z-index: 3;
+            `;
+            vfxContainer.appendChild(crystal);
+        }
+        
+        // Create frost waves
+        for (let i = 0; i < 12; i++) {
+            const frostWave = document.createElement('div');
+            frostWave.className = 'freezing-frost-wave';
+            frostWave.style.cssText = `
+                position: absolute;
+                width: 1px;
+                height: 40px;
+                background: linear-gradient(to bottom, rgba(173, 216, 230, 0.9), rgba(30, 144, 255, 0.3));
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                transform: rotate(${Math.random() * 360}deg);
+                animation: freezingFrostWave ${3 + Math.random() * 4}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 2}s;
+                pointer-events: none;
+                z-index: 1;
+            `;
+            vfxContainer.appendChild(frostWave);
+        }
+
+        // Add to stage background
+        const stageBackground = document.getElementById('stage-background');
+        if (stageBackground) {
+            stageBackground.appendChild(vfxContainer);
+        } else {
+            // Fallback to battle container
+            const battleContainer = document.querySelector('.battle-container');
+            if (battleContainer) {
+                battleContainer.appendChild(vfxContainer);
+            }
+        }
+
+        console.log(`[StageModifiers] Created freezing waters VFX with ice crystals and frost waves for ${modifier.name}`);
+    }
+
+    showFreezingWatersApplicationVFX(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+        
+        // Add freeze overlay if not already present
+        let freezeOverlay = characterElement.querySelector('.freeze-overlay');
+        if (!freezeOverlay) {
+            freezeOverlay = document.createElement('div');
+            freezeOverlay.className = 'freeze-overlay freezing-waters-freeze';
+            freezeOverlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(circle, rgba(173, 216, 230, 0.4), rgba(30, 144, 255, 0.2));
+                border: 2px solid rgba(135, 206, 235, 0.6);
+                border-radius: 8px;
+                animation: freezingWatersFreeze 2s ease-in-out;
+                pointer-events: none;
+                z-index: 10;
+            `;
+            characterElement.appendChild(freezeOverlay);
+        }
+        
+        // Create ice crystal burst
+        for (let i = 0; i < 12; i++) {
+            const crystal = document.createElement('div');
+            crystal.className = 'freeze-crystal-burst';
+            crystal.style.cssText = `
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background: radial-gradient(circle, #87ceeb, #4169e1);
+                border-radius: 50%;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                animation: freezeCrystalBurst 1.5s ease-out forwards;
+                animation-delay: ${i * 0.1}s;
+                box-shadow: 0 0 6px rgba(135, 206, 235, 0.8);
+                pointer-events: none;
+                z-index: 11;
+            `;
+            
+            const angle = (i / 12) * 360;
+            const distance = 30 + Math.random() * 20;
+            crystal.style.setProperty('--angle', angle + 'deg');
+            crystal.style.setProperty('--distance', distance + 'px');
+            
+            characterElement.appendChild(crystal);
+            
+            setTimeout(() => crystal.remove(), 1500);
+        }
+        
+        // Show freeze indicator on character
+        this.showFreezingWatersIndicator(character);
+    }
+
+    showFreezingWatersIndicator(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+        
+        let freezeIndicator = characterElement.querySelector('.freeze-indicator');
+        if (!freezeIndicator) {
+            freezeIndicator = document.createElement('div');
+            freezeIndicator.className = 'freeze-indicator freezing-waters-indicator';
+            freezeIndicator.innerHTML = '❄️';
+            freezeIndicator.style.cssText = `
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                font-size: 20px;
+                animation: freezingWatersIndicator 2s ease-in-out infinite;
+                text-shadow: 0 0 6px rgba(135, 206, 235, 0.8);
+                pointer-events: none;
+                z-index: 12;
+            `;
+            characterElement.appendChild(freezeIndicator);
+        }
+    }
+
+    removeFreezingWatersVFX(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+
+        // Create melt effect
+        const overlays = characterElement.querySelectorAll('.freeze-overlay');
+        overlays.forEach(overlay => {
+            overlay.style.transition = 'opacity 1s ease-out';
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 1000);
+        });
+        
+        // Fade indicators
+        const indicators = characterElement.querySelectorAll('.freeze-indicator');
+        indicators.forEach(indicator => {
+            indicator.style.transition = 'opacity 0.8s ease-out';
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 800);
+        });
+    }
+
+    clearFreezingWatersVFX() {
+        const existingVFX = document.querySelectorAll('.freezing-waters-vfx');
+        existingVFX.forEach(vfx => vfx.remove());
+        
+        // Also clear any character freeze overlays
+        const freezeOverlays = document.querySelectorAll('.freezing-waters-freeze');
+        freezeOverlays.forEach(overlay => overlay.remove());
+        
+        const freezeIndicators = document.querySelectorAll('.freezing-waters-indicator');
+        freezeIndicators.forEach(indicator => indicator.remove());
+        
+        console.log('[StageModifiers] Cleared freezing waters VFX');
+    }
+
+    createTidalWaveChaosBattlefieldVFX() {
+        // Clear any existing tidal wave VFX
+        this.clearTidalWaveVFX();
+        
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+        
+        // Create main wave container
+        const waveContainer = document.createElement('div');
+        waveContainer.className = 'tidal-wave-chaos-container';
+        waveContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        `;
+        
+        // Create massive wave that sweeps across the screen
+        const massiveWave = document.createElement('div');
+        massiveWave.className = 'tidal-massive-wave';
+        massiveWave.style.cssText = `
+            position: absolute;
+            width: 200%;
+            height: 150%;
+            background: linear-gradient(
+                45deg,
+                rgba(0, 100, 200, 0.9) 0%,
+                rgba(0, 150, 255, 0.8) 25%,
+                rgba(30, 144, 255, 0.7) 50%,
+                rgba(135, 206, 235, 0.6) 75%,
+                rgba(173, 216, 230, 0.4) 100%
+            );
+            border-radius: 50% 50% 0 0;
+            bottom: -100%;
+            left: -50%;
+            animation: tidalMassiveWave 3s ease-in-out;
+            transform: rotate(-5deg);
+            box-shadow: 
+                0 -20px 40px rgba(0, 100, 200, 0.5),
+                0 -40px 80px rgba(30, 144, 255, 0.3),
+                inset 0 20px 40px rgba(255, 255, 255, 0.2);
+        `;
+        waveContainer.appendChild(massiveWave);
+        
+        // Create wave particles and foam
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'tidal-wave-particle';
+            particle.style.cssText = `
+                position: absolute;
+                width: ${8 + Math.random() * 15}px;
+                height: ${8 + Math.random() * 15}px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(173, 216, 230, 0.6));
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 50}%;
+                animation: tidalWaveParticleFloat ${2 + Math.random() * 3}s ease-out;
+                animation-delay: ${Math.random() * 2}s;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            `;
+            waveContainer.appendChild(particle);
+        }
+        
+        // Create foam spray effects
+        for (let i = 0; i < 20; i++) {
+            const foam = document.createElement('div');
+            foam.className = 'tidal-wave-foam';
+            foam.style.cssText = `
+                position: absolute;
+                width: ${3 + Math.random() * 6}px;
+                height: ${3 + Math.random() * 6}px;
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 30}%;
+                animation: tidalWaveFoam ${1.5 + Math.random() * 2}s ease-out;
+                animation-delay: ${0.5 + Math.random() * 1.5}s;
+            `;
+            waveContainer.appendChild(foam);
+        }
+        
+        // Create water droplets
+        for (let i = 0; i < 50; i++) {
+            const droplet = document.createElement('div');
+            droplet.className = 'tidal-wave-droplet';
+            droplet.style.cssText = `
+                position: absolute;
+                width: ${2 + Math.random() * 4}px;
+                height: ${2 + Math.random() * 4}px;
+                background: rgba(30, 144, 255, 0.8);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: tidalWaveDroplet ${2 + Math.random() * 2}s ease-out;
+                animation-delay: ${Math.random() * 2}s;
+                box-shadow: 0 0 4px rgba(30, 144, 255, 0.6);
+            `;
+            waveContainer.appendChild(droplet);
+        }
+        
+        // Add to battle container
+        battleContainer.appendChild(waveContainer);
+        
+        // Create screen shake effect
+        battleContainer.classList.add('tidal-wave-shake');
+        setTimeout(() => {
+            battleContainer.classList.remove('tidal-wave-shake');
+        }, 2000);
+        
+        // Remove wave after animation
+        setTimeout(() => {
+            waveContainer.remove();
+        }, 5000);
+        
+        console.log('[StageModifiers] Created massive tidal wave battlefield VFX');
+    }
+    
+    createTidalWaveHealVFX(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+        
+        // Create healing water aura
+        const healingAura = document.createElement('div');
+        healingAura.className = 'tidal-healing-aura';
+        healingAura.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.6), rgba(135, 206, 235, 0.3), transparent);
+            border-radius: 50%;
+            animation: tidalHealingAura 2s ease-out;
+            pointer-events: none;
+            z-index: 10;
+        `;
+        characterElement.appendChild(healingAura);
+        
+        // Create healing sparkles
+        for (let i = 0; i < 12; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'tidal-healing-sparkle';
+            sparkle.style.cssText = `
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: rgba(0, 255, 255, 0.9);
+                border-radius: 50%;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                animation: tidalHealingSparkle 2s ease-out;
+                animation-delay: ${i * 0.1}s;
+                box-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+                pointer-events: none;
+                z-index: 11;
+            `;
+            
+            const angle = (i / 12) * 360;
+            const distance = 40 + Math.random() * 20;
+            sparkle.style.setProperty('--angle', angle + 'deg');
+            sparkle.style.setProperty('--distance', distance + 'px');
+            
+            characterElement.appendChild(sparkle);
+        }
+        
+        // Create floating heal text
+        const healText = document.createElement('div');
+        healText.className = 'tidal-heal-text';
+        healText.textContent = '+1000 HP';
+        healText.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 255, 255, 0.8);
+            animation: tidalHealText 2.5s ease-out;
+            pointer-events: none;
+            z-index: 12;
+        `;
+        characterElement.appendChild(healText);
+        
+        // Cleanup
+        setTimeout(() => {
+            healingAura.remove();
+            healText.remove();
+            const sparkles = characterElement.querySelectorAll('.tidal-healing-sparkle');
+            sparkles.forEach(s => s.remove());
+        }, 2500);
+    }
+    
+    createTidalWaveDamageVFX(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+        
+        // Create damage splash effect
+        const damageEffect = document.createElement('div');
+        damageEffect.className = 'tidal-damage-effect';
+        damageEffect.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.6), rgba(255, 100, 100, 0.4), transparent);
+            border-radius: 50%;
+            animation: tidalDamageImpact 1.5s ease-out;
+            pointer-events: none;
+            z-index: 10;
+        `;
+        characterElement.appendChild(damageEffect);
+        
+        // Create water impact particles
+        for (let i = 0; i < 16; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'tidal-damage-particle';
+            particle.style.cssText = `
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background: rgba(255, 50, 50, 0.8);
+                border-radius: 50%;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                animation: tidalDamageParticle 1.5s ease-out;
+                animation-delay: ${i * 0.05}s;
+                box-shadow: 0 0 6px rgba(255, 50, 50, 0.6);
+                pointer-events: none;
+                z-index: 11;
+            `;
+            
+            const angle = (i / 16) * 360;
+            const distance = 30 + Math.random() * 30;
+            particle.style.setProperty('--angle', angle + 'deg');
+            particle.style.setProperty('--distance', distance + 'px');
+            
+            characterElement.appendChild(particle);
+        }
+        
+        // Create damage text
+        const damageText = document.createElement('div');
+        damageText.className = 'tidal-damage-text';
+        damageText.textContent = '-1000 HP';
+        damageText.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff3333;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 51, 51, 0.8);
+            animation: tidalDamageText 2s ease-out;
+            pointer-events: none;
+            z-index: 12;
+        `;
+        characterElement.appendChild(damageText);
+        
+        // Cleanup
+        setTimeout(() => {
+            damageEffect.remove();
+            damageText.remove();
+            const particles = characterElement.querySelectorAll('.tidal-damage-particle');
+            particles.forEach(p => p.remove());
+        }, 2000);
+    }
+    
+    clearTidalWaveVFX() {
+        const existingVFX = document.querySelectorAll('.tidal-wave-chaos-container');
+        existingVFX.forEach(vfx => vfx.remove());
+        
+        const healingEffects = document.querySelectorAll('.tidal-healing-aura, .tidal-heal-text, .tidal-healing-sparkle');
+        healingEffects.forEach(effect => effect.remove());
+        
+        const damageEffects = document.querySelectorAll('.tidal-damage-effect, .tidal-damage-text, .tidal-damage-particle');
+        damageEffects.forEach(effect => effect.remove());
+        
+        console.log('[StageModifiers] Cleared tidal wave VFX');
+    }
+    
+    clearAllDebuffVFX() {
+        // Clear common debuff VFX elements
+        const debuffVFXSelectors = [
+            // Stun effects
+            '.stun-effect-container', '.stun-effect', '.stun-stars', '.stun-circle', '.stunned',
+            '.samba-stun-swirl', '.samba-stun-particle', '.samba-dizzy-indicator',
+            
+            // Freeze effects
+            '.freeze-overlay', '.freeze-indicator', '.freezing-waters-freeze', '.freezing-waters-indicator',
+            '.freeze-crystal-burst', '.frost-shard',
+            
+            // Charm effects
+            '.aquatic-charm-indicator', '.charm-effect',
+            
+            // Poison/Toxic effects
+            '.poison-effect', '.toxic-effect', '.poison-indicator',
+            
+            // Burn effects
+            '.burn-effect', '.burning-indicator', '.fire-effect',
+            
+            // General debuff VFX
+            '.debuff-vfx', '.debuff-overlay', '.debuff-indicator', '.debuff-effect',
+            '.status-effect-overlay', '.debuff-particles',
+            
+            // Ability-specific debuff VFX
+            '.flower-bomb-vfx', '.ability-disabled-vfx',
+            
+            // Shadow/Dark effects
+            '.shadow-effect', '.dark-effect', '.corruption-effect',
+            
+            // Miscellaneous debuff effects
+            '.weakness-effect', '.slow-effect', '.blind-effect', '.silence-effect'
+        ];
+        
+        let removedCount = 0;
+        debuffVFXSelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                // Add fade-out effect before removal
+                element.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                element.style.opacity = '0';
+                element.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    if (element.parentNode) {
+                        element.remove();
+                    }
+                }, 500);
+                
+                removedCount++;
+            });
+        });
+        
+        // Also remove stunned class from character elements
+        const stunnedCharacters = document.querySelectorAll('.character-slot.stunned');
+        stunnedCharacters.forEach(char => {
+            char.classList.remove('stunned');
+        });
+        
+        // Clear any character-specific debuff overlays
+        const characterSlots = document.querySelectorAll('.character-slot');
+        characterSlots.forEach(slot => {
+            // Remove debuff-related classes
+            const debuffClasses = ['stunned', 'frozen', 'poisoned', 'burning', 'charmed', 'weakened', 'slowed'];
+            debuffClasses.forEach(debuffClass => {
+                slot.classList.remove(debuffClass);
+            });
+        });
+        
+        if (removedCount > 0) {
+            console.log(`[StageModifiers] Tidal wave cleared ${removedCount} debuff VFX elements from the battlefield`);
+        }
+    }
+
+    getCharacterElement(character) {
+        // Try different possible element ID patterns
+        const possibleIds = [
+            `character-${character.instanceId || character.id}`,
+            `character-${character.id}`,
+            character.instanceId || character.id
+        ];
+        
+        for (const id of possibleIds) {
+            const element = document.getElementById(id);
+            if (element) {
+                return element;
+            }
+        }
+        
+        // Fallback: search by character name or other attributes
+        const allCharacterElements = document.querySelectorAll('.character-slot');
+        for (const element of allCharacterElements) {
+            const nameElement = element.querySelector('.character-name');
+            if (nameElement && nameElement.textContent.trim() === character.name) {
+                return element;
+            }
+        }
+        
+        console.warn(`[StageModifiers] Could not find character element for ${character.name} (${character.id})`);
+        return null;
     }
 }
 

@@ -1737,6 +1737,38 @@ class Character {
         }
         // --- END QUEST TRACKING ---
 
+        // --- NEW: Christie's Charming Kiss ability point restoration ---
+        if (caster && caster.id === 'atlantean_christie' && actualDamageTaken > 0) {
+            // Check if target has Christie's charm debuff
+            const charmDebuff = this.debuffs.find(d => d.id === 'charming_kiss_debuff' && d.source === caster.id);
+            if (charmDebuff && caster.stats.currentMana < caster.stats.maxMana) {
+                // Store previous mana for animation
+                const previousMana = caster.stats.currentMana;
+                
+                // Restore 1 ability point
+                caster.stats.currentMana = Math.min(caster.stats.maxMana, caster.stats.currentMana + 1);
+                
+                // Add log entry
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(`${caster.name} restores 1 ability point from hitting charmed target ${this.name}!`, 'buff-effect');
+                }
+                
+                // Show mana restore VFX and update UI
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.triggerManaAnimation(caster, 'restore', 1);
+                    window.gameManager.uiManager.updateCharacterUI(caster);
+                    
+                    // Show floating text for ability point restore
+                    const elementId = caster.instanceId || caster.id;
+                    window.gameManager.uiManager.showFloatingText(`character-${elementId}`, '+1 AP', 'buff');
+                }
+                
+                // Store the new mana value for future animations
+                caster._previousMana = caster.stats.currentMana;
+            }
+        }
+        // --- END NEW ---
+
         // --- Apply Lifesteal to the caster --- 
         if (caster && actualDamageTaken > 0) { // Only apply if there is a caster and damage was dealt
             caster.applyLifesteal(actualDamageTaken);
@@ -2185,6 +2217,21 @@ class Character {
             // Apply multiplier first, then reduction
             finalDamage = finalDamage * (1 + multiplier);
             finalDamage = finalDamage * (1 - reduction);
+        }
+        // --- END NEW ---
+
+        // --- NEW: Apply Charming Kiss damage amplification ---
+        if (target && target.debuffs) {
+            const charmDebuff = target.debuffs.find(d => d.id === 'charming_kiss_debuff' && d.source === this.id);
+            if (charmDebuff) {
+                const originalDamage = finalDamage;
+                finalDamage = Math.floor(finalDamage * 1.75); // 75% more damage
+                
+                // Add log entry for damage amplification
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(`${target.name} takes 75% more damage from ${this.name}'s attack due to Charming Kiss!`, 'buff-effect');
+                }
+            }
         }
         // --- END NEW ---
 
@@ -3008,6 +3055,19 @@ class Character {
             // Add log entry
             if (window.gameManager && window.gameManager.addLogEntry) {
                 window.gameManager.addLogEntry(`${this.name}'s Lasting Protection extends ${buffName} by ${this.buffDurationBonus} turns.`, 'talent-effect');
+            }
+        }
+        // --- END NEW ---
+        
+        // --- NEW: Apply story effect - extended buff duration ---
+        if (this.storyEffects && this.storyEffects.extendedBuffDuration && buff.duration) {
+            const originalDuration = buff.duration;
+            buff.duration += this.storyEffects.extendedBuffDuration;
+            console.log(`[AddBuff] ${this.name} has Extended Buff Duration story effect: ${buffName} duration ${originalDuration} → ${buff.duration} (+${this.storyEffects.extendedBuffDuration} turns)`);
+            
+            // Add log entry
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`${this.name}'s Blessing of Enduring Magic extends ${buffName} by ${this.storyEffects.extendedBuffDuration} turns.`, 'system-update');
             }
         }
         // --- END NEW ---
@@ -4506,6 +4566,54 @@ class Ability {
         this.requiresTarget = true;
         return this;
     }
+
+    /**
+     * Creates a deep copy of this ability.
+     * @returns {Ability} A new Ability instance with the same properties.
+     */
+    clone() {
+        const cloned = new Ability(
+            this.id,
+            this.name,
+            this.icon,
+            this.manaCost,
+            this.baseCooldown || this.cooldown,
+            this.effect
+        );
+        
+        // Copy all properties
+        cloned.description = this.description;
+        cloned.baseDescription = this.baseDescription;
+        cloned.targetType = this.targetType;
+        cloned.requiresTarget = this.requiresTarget;
+        cloned.baseDamage = this.baseDamage;
+        cloned.healAmount = this.healAmount;
+        cloned.stunChance = this.stunChance;
+        cloned.cooldown = this.cooldown;
+        cloned.currentCooldown = 0; // Reset cooldown for new instance
+        
+        // Copy additional properties that might exist
+        const additionalProps = [
+            'type', 'functionName', 'damageScaling', 'healing', 'duration', 
+            'buffValue', 'debuffValue', 'chance', 'numProjectiles', 'aoeModifier', 
+            'fixedDamage', 'damageType', 'scalingStat', 'targetMaxHpMultiplier', 
+            'effectFunctionName', 'isPlaceholder', 'placeholderAbility', 'unlockLevel', 
+            'tags', 'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn'
+        ];
+        
+        for (const prop of additionalProps) {
+            if (this.hasOwnProperty(prop)) {
+                cloned[prop] = this[prop];
+            }
+        }
+        
+        // Copy any custom methods that might have been attached
+        if (typeof this.generateDescription === 'function' && this.generateDescription !== Ability.prototype.generateDescription) {
+            cloned.generateDescription = this.generateDescription;
+        }
+        
+        return cloned;
+    }
 }
 
 // Effect class definition
@@ -5093,6 +5201,12 @@ const CharacterFactory = {
             return AtlanteanSubZeroPassive;
         }
         // --- ADD ATLANTEAN SUB ZERO PASSIVE END ---
+        // --- ADD ATLANTEAN CHRISTIE PASSIVE ---
+        else if (passiveId === 'atlantean_christie_passive' && typeof AtlanteanChristiePassive !== 'undefined') {
+            console.log('[CharacterFactory] Found AtlanteanChristiePassive class for passive:', passiveId);
+            return AtlanteanChristiePassive;
+        }
+        // --- ADD ATLANTEAN CHRISTIE PASSIVE END ---
         // Add other hardcoded checks here if necessary
         return null;
     },
@@ -5397,7 +5511,10 @@ const AbilityFactory = {
             }
 
             console.log(`[AbilityFactory] ${abilityData.id} final state - description: "${registeredAbility.description}"`);
-            return registeredAbility;
+            
+            // FIXED: Return a clone instead of the shared object to prevent cooldown sharing
+            console.log(`[AbilityFactory] Cloning registered ability ${abilityData.id} to prevent shared cooldowns`);
+            return registeredAbility.clone();
         }
 
         // If not pre-defined, create it using the generic method
@@ -5653,6 +5770,11 @@ const AbilityFactory = {
             }
             log(message);
             
+            // Handle specific ability VFX
+            if (abilityData.id === 'assassin_strike' && window.ShadowAssassinAbilities) {
+                window.ShadowAssassinAbilities.showAssassinStrikeVFX(caster, target, result.isCritical);
+            }
+            
             // Handle debuffs if defined - only if attack wasn't dodged
             if (abilityData.debuffEffect) {
                  if (!abilityData.debuffEffect.chance || Math.random() < abilityData.debuffEffect.chance) {
@@ -5904,6 +6026,11 @@ const AbilityFactory = {
             target.addBuff(buff);
             addLogEntry(`${caster.name} used ${abilityData.name} on ${target.name}, applying ${buff.name} for ${buff.duration} turns.`);
 
+            // Handle specific ability VFX
+            if (abilityData.id === 'stealth' && window.AssassinStealthAbilities) {
+                window.AssassinStealthAbilities.showStealthVFX(caster);
+            }
+
             // Play sound for specific buff abilities
             const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
             if (abilityData.id === 'catch') { // Shoma's E
@@ -5976,7 +6103,7 @@ const AbilityFactory = {
     },
 
     createAoEDamageEffect(abilityData) {
-        return (caster, targetOrTargets) => {
+        return async (caster, targetOrTargets) => {
              // This effect type expects an array of targets
              let targets = [];
              if (Array.isArray(targetOrTargets)) {
@@ -5991,9 +6118,14 @@ const AbilityFactory = {
                  return; // No targets to affect
              }
              
+            // Handle chaining for Fan of Knives
+            if (abilityData.chainOnCrit) {
+                return await this.executeFanOfKnivesChain(caster, targets, abilityData);
+            }
+             
             // --- Corrected Damage Calculation ---
-            const effectConfig = abilityData.effects.aoe_damage; // Access the nested config
-            const damageType = effectConfig.damageType || 'magical'; // Read from effectConfig
+            const effectConfig = abilityData.effects?.aoe_damage || abilityData; // Access nested config or use abilityData directly
+            const damageType = effectConfig.damageType || abilityData.damageType || 'magical';
             const statToUse = damageType === 'physical' ? 'physicalDamage' : 'magicalDamage';
             const statPercent = damageType === 'physical' ? effectConfig.physicalDamagePercent : effectConfig.magicalDamagePercent;
             
@@ -6001,6 +6133,10 @@ const AbilityFactory = {
             // Add fixed amount if defined
             if (effectConfig.fixedAmount !== undefined) {
                 baseDamage += Math.floor(effectConfig.fixedAmount);
+            } else if (effectConfig.fixedDamage !== undefined) {
+                baseDamage += Math.floor(effectConfig.fixedDamage);
+            } else if (abilityData.fixedDamage !== undefined) {
+                baseDamage += Math.floor(abilityData.fixedDamage);
             }
             // Add percentage amount if defined
             if (statPercent !== undefined) {
@@ -6126,6 +6262,85 @@ const AbilityFactory = {
              // Update caster UI after potential lifesteal heal
              updateCharacterUI(caster);
         };
+    },
+
+    async executeFanOfKnivesChain(caster, allTargets, abilityData, chainCount = 0) {
+        // Safety limit to prevent infinite loops
+        if (chainCount >= 20) {
+            console.warn('[Fan of Knives] Chain limit reached (20 casts)');
+            addLogEntry(`${caster.name}'s Fan of Knives chain ends after 20 consecutive crits!`, 'system');
+            return;
+        }
+
+        // Filter valid targets
+        const validTargets = allTargets.filter(target => 
+            target && typeof target.isDead === 'function' && !target.isDead()
+        );
+
+        if (validTargets.length === 0) {
+            addLogEntry(`${caster.name}'s Fan of Knives finds no valid targets.`);
+            return;
+        }
+
+        const damageType = abilityData.damageType || 'physical';
+        const baseDamage = abilityData.fixedDamage || 565;
+        const chainText = chainCount > 0 ? ` (Chain ${chainCount + 1})` : '';
+        
+        addLogEntry(`${caster.name} unleashes Fan of Knives${chainText}, targeting ${validTargets.length} enemies!`);
+        
+        // Show VFX - call global function
+        console.log('[Fan of Knives] Attempting to show VFX');
+        if (typeof window.showFanOfKnivesVFX === 'function') {
+            console.log('[Fan of Knives] Calling VFX with:', { caster: caster.name, targetCount: validTargets.length, isChain: chainCount > 0 });
+            window.showFanOfKnivesVFX(caster, validTargets, chainCount > 0, chainCount);
+        } else {
+            console.warn('[Fan of Knives] VFX function not available');
+        }
+        
+        let anyCrit = false;
+        
+        // Apply damage to all valid targets
+        for (const target of validTargets) {
+            if (!target || target.isDead()) continue;
+            
+            const result = target.applyDamage(baseDamage, damageType, caster, {
+                abilityId: 'fan_of_knives'
+            });
+            
+            if (result.isCritical) {
+                anyCrit = true;
+                addLogEntry(`💥⭐ Fan of Knives critically strikes ${target.name}!`, 'critical');
+            }
+            
+            let message = `${target.name} takes ${result.damage} ${damageType} damage`;
+            if (result.isCritical) message += " (Critical Hit!)";
+            addLogEntry(message, result.isCritical ? 'critical' : '');
+            
+            if (target.isDead()) {
+                addLogEntry(`${target.name} has been defeated!`);
+                if (caster.passiveHandler && typeof caster.passiveHandler.onKill === 'function') {
+                    caster.passiveHandler.onKill(caster, target);
+                }
+            }
+            
+            // Update target UI
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(target);
+            }
+        }
+        
+        // If any target was critically hit, chain the ability
+        if (anyCrit) {
+            addLogEntry(`🔥 Fan of Knives chains due to critical strike!`, 'system');
+            
+            // Brief delay before chaining
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // Recursively call the chain with incremented count
+            await this.executeFanOfKnivesChain(caster, allTargets, abilityData, chainCount + 1);
+        } else if (chainCount > 0) {
+            addLogEntry(`Fan of Knives chain ends after ${chainCount + 1} casts.`, 'system');
+        }
     },
 
     createAoEHealEffect(abilityData) {
@@ -7563,6 +7778,432 @@ const AbilityFactory = {
         }
         this.registeredEffects[effectName] = effectFunction;
         
+    },
+
+
+
+    showFanOfKnivesVFX(caster, targets, isChainCast = false, chainNumber = 0) {
+        console.log('[Fan of Knives VFX] Method called with:', { 
+            caster: caster.name, 
+            targetCount: targets.length, 
+            isChainCast, 
+            chainNumber 
+        });
+        try {
+            // Get caster element
+            const casterElement = document.querySelector(`.character-slot[data-character-id="${caster.id}"]`) ||
+                                document.querySelector(`.character-slot[data-character-id="${caster.instanceId}"]`);
+            if (!casterElement) {
+                console.warn('[Fan of Knives VFX] Caster element not found for:', caster.id || caster.instanceId);
+                return;
+            }
+            console.log('[Fan of Knives VFX] Caster element found, proceeding with VFX');
+
+            // Create VFX container
+            const vfxContainer = document.createElement('div');
+            vfxContainer.className = 'fan-of-knives-vfx';
+            vfxContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                pointer-events: none;
+                z-index: 1000;
+                overflow: hidden;
+            `;
+            document.body.appendChild(vfxContainer);
+
+            // Add caster charging effect
+            this.createCasterChargingEffect(casterElement, vfxContainer, isChainCast);
+
+            // Create multiple knife waves for more spectacular effect
+            const knivesPerWave = Math.max(8, targets.length * 2);
+            const waveCount = isChainCast ? 3 : 2;
+            
+            for (let wave = 0; wave < waveCount; wave++) {
+                setTimeout(() => {
+                    this.createKnifeWave(casterElement, targets, vfxContainer, wave, knivesPerWave, isChainCast);
+                }, wave * 150);
+            }
+
+            // Add screen effects for chain casts
+            if (isChainCast) {
+                this.createChainCastEffects(vfxContainer, chainNumber);
+            }
+
+            // Add battlefield darkening effect
+            this.createBattlefieldDarkening(vfxContainer, isChainCast);
+
+            // Clean up VFX container
+            setTimeout(() => {
+                if (vfxContainer.parentNode) {
+                    document.body.removeChild(vfxContainer);
+                }
+            }, 3000);
+
+        } catch (error) {
+            console.error('[Fan of Knives VFX] Error:', error);
+        }
+    },
+
+    createCasterChargingEffect(casterElement, container, isChainCast) {
+        const casterRect = casterElement.getBoundingClientRect();
+        const centerX = casterRect.left + casterRect.width / 2;
+        const centerY = casterRect.top + casterRect.height / 2;
+
+        // Create spinning blade aura around caster
+        const aura = document.createElement('div');
+        aura.style.cssText = `
+            position: fixed;
+            left: ${centerX}px;
+            top: ${centerY}px;
+            width: 120px;
+            height: 120px;
+            border: 3px solid ${isChainCast ? '#ff4444' : '#silver'};
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: fanOfKnivesAura 0.8s ease-out;
+            box-shadow: 0 0 30px ${isChainCast ? '#ff4444' : '#silver'};
+            z-index: 1001;
+        `;
+        container.appendChild(aura);
+
+        // Create spinning knife symbols
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * 360;
+            const radius = 50;
+            const x = centerX + Math.cos(angle * Math.PI / 180) * radius;
+            const y = centerY + Math.sin(angle * Math.PI / 180) * radius;
+
+            const knife = document.createElement('div');
+            knife.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: 12px;
+                height: 3px;
+                background: linear-gradient(90deg, #c0c0c0, #ffffff, #c0c0c0);
+                border-radius: 1px;
+                transform: translate(-50%, -50%) rotate(${angle}deg);
+                box-shadow: 0 0 6px rgba(255,255,255,0.8);
+                animation: fanOfKnivesOrbit 0.8s ease-out;
+                z-index: 1002;
+            `;
+            container.appendChild(knife);
+        }
+
+        // Remove charging effects after animation
+        setTimeout(() => {
+            if (aura.parentNode) aura.parentNode.removeChild(aura);
+            container.querySelectorAll('[style*="fanOfKnivesOrbit"]').forEach(el => {
+                if (el.parentNode) el.parentNode.removeChild(el);
+            });
+        }, 800);
+    },
+
+    createKnifeWave(casterElement, targets, container, waveIndex, knivesPerWave, isChainCast) {
+        const casterRect = casterElement.getBoundingClientRect();
+        const centerX = casterRect.left + casterRect.width / 2;
+        const centerY = casterRect.top + casterRect.height / 2;
+        
+        // Create knives targeting actual enemies
+        targets.forEach((target, targetIndex) => {
+            const targetElement = document.querySelector(`.character-slot[data-character-id="${target.id}"]`) ||
+                                document.querySelector(`.character-slot[data-character-id="${target.instanceId}"]`);
+            if (!targetElement) return;
+
+            // Create multiple knives per target for more spectacular effect
+            const knivesPerTarget = Math.ceil(knivesPerWave / targets.length);
+            
+            for (let k = 0; k < knivesPerTarget; k++) {
+                setTimeout(() => {
+                    this.createEnhancedKnifeProjectile(
+                        casterElement, 
+                        targetElement, 
+                        container, 
+                        waveIndex * knivesPerTarget + k, 
+                        isChainCast,
+                        k * 0.05 // Slight spread for each knife
+                    );
+                }, (targetIndex * knivesPerTarget + k) * 50);
+            }
+        });
+    },
+
+    createChainCastEffects(container, chainNumber) {
+        // Create pulsing energy waves
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                const wave = document.createElement('div');
+                wave.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    width: 50px;
+                    height: 50px;
+                    border: 2px solid #ff4444;
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: chainWaveExpand 1s ease-out;
+                    z-index: 999;
+                `;
+                container.appendChild(wave);
+                
+                setTimeout(() => {
+                    if (wave.parentNode) wave.parentNode.removeChild(wave);
+                }, 1000);
+            }, i * 200);
+        }
+
+        // Add chain number indicator
+        const chainIndicator = document.createElement('div');
+        chainIndicator.style.cssText = `
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4444;
+            text-shadow: 0 0 10px #ff4444;
+            animation: chainIndicatorPulse 1s ease-out;
+            z-index: 1003;
+        `;
+        chainIndicator.textContent = `CHAIN ${chainNumber + 1}!`;
+        container.appendChild(chainIndicator);
+        
+        setTimeout(() => {
+            if (chainIndicator.parentNode) chainIndicator.parentNode.removeChild(chainIndicator);
+        }, 1500);
+    },
+
+    createBattlefieldDarkening(container, isChainCast) {
+        const darkening = document.createElement('div');
+        darkening.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: ${isChainCast ? 
+                'radial-gradient(circle, rgba(255,68,68,0.2) 0%, rgba(0,0,0,0.4) 70%)' : 
+                'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.3) 70%)'
+            };
+            pointer-events: none;
+            animation: battlefieldDarken 0.5s ease-in-out;
+            z-index: 998;
+        `;
+        container.appendChild(darkening);
+        
+        setTimeout(() => {
+            if (darkening.parentNode) darkening.parentNode.removeChild(darkening);
+        }, 2000);
+    },
+
+    createEnhancedKnifeProjectile(casterElement, targetElement, container, index, isChainCast, spread = 0) {
+        const casterRect = casterElement.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        
+        const startX = casterRect.left + casterRect.width / 2;
+        const startY = casterRect.top + casterRect.height / 2;
+        const endX = targetRect.left + targetRect.width / 2 + (Math.random() - 0.5) * 40 * spread;
+        const endY = targetRect.top + targetRect.height / 2 + (Math.random() - 0.5) * 40 * spread;
+        
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+        
+        // Create enhanced knife projectile with trail
+        const knife = document.createElement('div');
+        knife.style.cssText = `
+            position: fixed;
+            left: ${startX}px;
+            top: ${startY}px;
+            width: 24px;
+            height: 5px;
+            background: linear-gradient(90deg, #a0a0a0, #ffffff, #ffffff, #a0a0a0);
+            border-radius: 2px;
+            transform: rotate(${angle}deg);
+            transform-origin: center;
+            box-shadow: 
+                0 0 12px rgba(255,255,255,0.9),
+                0 0 24px ${isChainCast ? 'rgba(255,68,68,0.6)' : 'rgba(255,255,255,0.4)'};
+            z-index: 1001;
+        `;
+        
+        // Create knife trail
+        const trail = document.createElement('div');
+        trail.style.cssText = `
+            position: fixed;
+            left: ${startX}px;
+            top: ${startY}px;
+            width: 3px;
+            height: 3px;
+            background: ${isChainCast ? '#ff4444' : '#ffffff'};
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px ${isChainCast ? '#ff4444' : '#ffffff'};
+            z-index: 1000;
+        `;
+        
+        container.appendChild(knife);
+        container.appendChild(trail);
+        
+        // Animate knife with spinning and scaling
+        const knifeAnimation = knife.animate([
+            { 
+                left: `${startX}px`, 
+                top: `${startY}px`,
+                transform: `rotate(${angle}deg) scale(1)`,
+                opacity: 1
+            },
+            { 
+                left: `${endX}px`, 
+                top: `${endY}px`,
+                transform: `rotate(${angle + 1080}deg) scale(1.3)`,
+                opacity: 0.9
+            }
+        ], {
+            duration: 500,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        });
+        
+        // Animate trail following knife
+        const trailAnimation = trail.animate([
+            { 
+                left: `${startX}px`, 
+                top: `${startY}px`,
+                opacity: 0.8,
+                transform: 'translate(-50%, -50%) scale(1)'
+            },
+            { 
+                left: `${endX}px`, 
+                top: `${endY}px`,
+                opacity: 0,
+                transform: 'translate(-50%, -50%) scale(3)'
+            }
+        ], {
+            duration: 600,
+            easing: 'ease-out'
+        });
+        
+        // Create impact effect
+        setTimeout(() => {
+            this.createEnhancedKnifeImpact(endX, endY, container, isChainCast);
+            
+            // Remove knife and trail
+            if (knife.parentNode) knife.parentNode.removeChild(knife);
+            if (trail.parentNode) trail.parentNode.removeChild(trail);
+        }, 500);
+    },
+
+    createKnifeProjectile(casterElement, targetElement, container, index, isChainCast) {
+        // Legacy method - redirect to enhanced version
+        this.createEnhancedKnifeProjectile(casterElement, targetElement, container, index, isChainCast, 0);
+    },
+
+    createEnhancedKnifeImpact(x, y, container, isChainCast) {
+        // Create main impact explosion
+        const impact = document.createElement('div');
+        impact.style.cssText = `
+            position: fixed;
+            left: ${x}px;
+            top: ${y}px;
+            width: 4px;
+            height: 4px;
+            background: ${isChainCast ? '#ff4444' : '#ffffff'};
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px ${isChainCast ? '#ff4444' : '#ffffff'};
+            z-index: 1002;
+        `;
+        container.appendChild(impact);
+        
+        // Create impact particles
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            const angle = (i / 8) * 360;
+            const distance = 20 + Math.random() * 15;
+            const particleX = x + Math.cos(angle * Math.PI / 180) * distance;
+            const particleY = y + Math.sin(angle * Math.PI / 180) * distance;
+            
+            particle.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: 2px;
+                height: 2px;
+                background: ${isChainCast ? '#ff6666' : '#cccccc'};
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1001;
+            `;
+            container.appendChild(particle);
+            
+            // Animate particles flying outward
+            particle.animate([
+                { 
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    opacity: 1,
+                    transform: 'translate(-50%, -50%) scale(1)'
+                },
+                { 
+                    left: `${particleX}px`,
+                    top: `${particleY}px`,
+                    opacity: 0,
+                    transform: 'translate(-50%, -50%) scale(0.5)'
+                }
+            ], {
+                duration: 400,
+                easing: 'ease-out'
+            });
+        }
+        
+        // Animate main impact explosion
+        impact.animate([
+            { 
+                width: '4px',
+                height: '4px',
+                opacity: 1,
+                boxShadow: `0 0 30px ${isChainCast ? '#ff4444' : '#ffffff'}`
+            },
+            { 
+                width: '60px',
+                height: '60px',
+                opacity: 0,
+                boxShadow: `0 0 80px ${isChainCast ? '#ff4444' : '#ffffff'}`
+            }
+        ], {
+            duration: 400,
+            easing: 'ease-out'
+        });
+        
+        // Screen shake effect for impacts
+        if (isChainCast) {
+            this.addKnifeImpactScreenShake();
+        }
+        
+        // Remove impact and particles after animation
+        setTimeout(() => {
+            if (impact.parentNode) impact.parentNode.removeChild(impact);
+            container.querySelectorAll('[style*="' + x + 'px"]').forEach(el => {
+                if (el.parentNode && el !== impact) el.parentNode.removeChild(el);
+            });
+        }, 400);
+    },
+
+    createKnifeImpact(x, y, container, isChainCast) {
+        // Legacy method - redirect to enhanced version
+        this.createEnhancedKnifeImpact(x, y, container, isChainCast);
+    },
+
+    addKnifeImpactScreenShake() {
+        const gameContainer = document.body;
+        gameContainer.style.animation = 'knifeImpactShake 0.3s ease-in-out';
+        
+        setTimeout(() => {
+            gameContainer.style.animation = '';
+        }, 300);
     }
     // <<< END MOVED METHOD >>>
 }; // Closing brace for AbilityFactory
@@ -7574,6 +8215,8 @@ window.AbilityFactory = AbilityFactory;
 window.CharacterFactory = CharacterFactory; // Expose CharacterFactory globally
 window.AbilityFactory = AbilityFactory; // Expose AbilityFactory globally
 window.Effect = Effect; // Make Effect class globally accessible
+
+
 
 // Function to show Zoey-specific dodge VFX
 function showZoeyDodgeVFX(character) {
@@ -7641,4 +8284,473 @@ function showZoeyDodgeVFX(character) {
 
 // Make the function available globally
 window.showZoeyDodgeVFX = showZoeyDodgeVFX;
+
+// Create global Fan of Knives VFX function
+window.showFanOfKnivesVFX = function(caster, targets, isChainCast = false, chainNumber = 0) {
+    try {
+        console.log('[Fan of Knives VFX] Starting VFX with:', { caster: caster?.name, targetCount: targets?.length, isChainCast, chainNumber });
+        
+        // Get caster element - try multiple selectors
+        let casterElement = null;
+        const characterId = caster.id || caster.instanceId;
+        
+        // Try different selector patterns
+        const selectors = [
+            `.character-slot[data-character-id="${characterId}"]`,
+            `#character-${characterId}`,
+            `.character-slot[data-id="${characterId}"]`,
+            `.character-slot:has(.character-image[alt*="${caster.name}"])`
+        ];
+        
+        for (const selector of selectors) {
+            try {
+                casterElement = document.querySelector(selector);
+                if (casterElement) {
+                    console.log('[Fan of Knives VFX] Found caster element with selector:', selector);
+                    break;
+                }
+            } catch (e) {
+                // Skip invalid selectors
+            }
+        }
+        
+        // If still not found, try finding by character name or any AI character
+        if (!casterElement) {
+            const allCharacters = document.querySelectorAll('.character-slot');
+            for (const element of allCharacters) {
+                const nameElement = element.querySelector('.character-name');
+                if (nameElement && nameElement.textContent.includes(caster.name)) {
+                    casterElement = element;
+                    console.log('[Fan of Knives VFX] Found caster element by name match');
+                    break;
+                }
+            }
+        }
+        
+        if (!casterElement) {
+            console.warn('[Fan of Knives VFX] Caster element not found for:', characterId, 'Available elements:', 
+                Array.from(document.querySelectorAll('.character-slot')).map(el => ({
+                    id: el.getAttribute('data-character-id') || el.getAttribute('data-id') || el.id,
+                    name: el.querySelector('.character-name')?.textContent
+                }))
+            );
+            return;
+        }
+
+        // Create VFX container
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'fan-of-knives-vfx';
+        vfxContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        `;
+        document.body.appendChild(vfxContainer);
+
+        // Add caster charging effect
+        createCasterChargingEffect(casterElement, vfxContainer, isChainCast);
+
+        // Create multiple knife waves for more spectacular effect
+        const knivesPerWave = Math.max(8, targets.length * 2);
+        const waveCount = isChainCast ? 3 : 2;
+        
+        for (let wave = 0; wave < waveCount; wave++) {
+            setTimeout(() => {
+                createKnifeWave(casterElement, targets, vfxContainer, wave, knivesPerWave, isChainCast);
+            }, wave * 150);
+        }
+
+        // Add screen effects for chain casts
+        if (isChainCast) {
+            createChainCastEffects(vfxContainer, chainNumber);
+        }
+
+        // Add battlefield darkening effect
+        createBattlefieldDarkening(vfxContainer, isChainCast);
+
+        // Clean up VFX container
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                document.body.removeChild(vfxContainer);
+            }
+        }, 3000);
+
+        console.log('[Fan of Knives VFX] VFX completed successfully');
+
+    } catch (error) {
+        console.error('[Fan of Knives VFX] Error:', error);
+    }
+};
+
+// Helper functions for Fan of Knives VFX
+function createCasterChargingEffect(casterElement, container, isChainCast) {
+    const casterRect = casterElement.getBoundingClientRect();
+    const centerX = casterRect.left + casterRect.width / 2;
+    const centerY = casterRect.top + casterRect.height / 2;
+
+    // Create spinning blade aura around caster
+    const aura = document.createElement('div');
+    aura.style.cssText = `
+        position: fixed;
+        left: ${centerX}px;
+        top: ${centerY}px;
+        width: 120px;
+        height: 120px;
+        border: 3px solid ${isChainCast ? '#ff4444' : '#silver'};
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: fanOfKnivesAura 0.8s ease-out;
+        box-shadow: 0 0 30px ${isChainCast ? '#ff4444' : '#silver'};
+        z-index: 1001;
+    `;
+    container.appendChild(aura);
+
+    // Create spinning knife symbols
+    for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * 360;
+        const radius = 50;
+        const x = centerX + Math.cos(angle * Math.PI / 180) * radius;
+        const y = centerY + Math.sin(angle * Math.PI / 180) * radius;
+
+        const knife = document.createElement('div');
+        knife.style.cssText = `
+            position: fixed;
+            left: ${x}px;
+            top: ${y}px;
+            width: 12px;
+            height: 3px;
+            background: linear-gradient(90deg, #c0c0c0, #ffffff, #c0c0c0);
+            border-radius: 1px;
+            transform: translate(-50%, -50%) rotate(${angle}deg);
+            box-shadow: 0 0 6px rgba(255,255,255,0.8);
+            animation: fanOfKnivesOrbit 0.8s ease-out;
+            z-index: 1002;
+        `;
+        container.appendChild(knife);
+    }
+
+    // Remove charging effects after animation
+    setTimeout(() => {
+        if (aura.parentNode) aura.parentNode.removeChild(aura);
+        container.querySelectorAll('[style*="fanOfKnivesOrbit"]').forEach(el => {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        });
+    }, 800);
+}
+
+function createKnifeWave(casterElement, targets, container, waveIndex, knivesPerWave, isChainCast) {
+    const casterRect = casterElement.getBoundingClientRect();
+    
+    // Create knives targeting actual enemies
+    targets.forEach((target, targetIndex) => {
+        let targetElement = null;
+        const targetId = target.id || target.instanceId;
+        
+        // Try different selector patterns for targets
+        const targetSelectors = [
+            `.character-slot[data-character-id="${targetId}"]`,
+            `#character-${targetId}`,
+            `.character-slot[data-id="${targetId}"]`
+        ];
+        
+        for (const selector of targetSelectors) {
+            try {
+                targetElement = document.querySelector(selector);
+                if (targetElement) break;
+            } catch (e) {
+                // Skip invalid selectors
+            }
+        }
+        
+        // If still not found, try finding by character name
+        if (!targetElement) {
+            const allCharacters = document.querySelectorAll('.character-slot');
+            for (const element of allCharacters) {
+                const nameElement = element.querySelector('.character-name');
+                if (nameElement && nameElement.textContent.includes(target.name)) {
+                    targetElement = element;
+                    break;
+                }
+            }
+        }
+        
+        if (!targetElement) return;
+
+        // Create multiple knives per target for more spectacular effect
+        const knivesPerTarget = Math.ceil(knivesPerWave / targets.length);
+        
+        for (let k = 0; k < knivesPerTarget; k++) {
+            setTimeout(() => {
+                createEnhancedKnifeProjectile(
+                    casterElement, 
+                    targetElement, 
+                    container, 
+                    waveIndex * knivesPerTarget + k, 
+                    isChainCast,
+                    k * 0.05 // Slight spread for each knife
+                );
+            }, (targetIndex * knivesPerTarget + k) * 50);
+        }
+    });
+}
+
+function createChainCastEffects(container, chainNumber) {
+    // Create pulsing energy waves
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            const wave = document.createElement('div');
+            wave.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 50px;
+                height: 50px;
+                border: 2px solid #ff4444;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                animation: chainWaveExpand 1s ease-out;
+                z-index: 999;
+            `;
+            container.appendChild(wave);
+            
+            setTimeout(() => {
+                if (wave.parentNode) wave.parentNode.removeChild(wave);
+            }, 1000);
+        }, i * 200);
+    }
+
+    // Add chain number indicator
+    const chainIndicator = document.createElement('div');
+    chainIndicator.style.cssText = `
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff4444;
+        text-shadow: 0 0 10px #ff4444;
+        animation: chainIndicatorPulse 1s ease-out;
+        z-index: 1003;
+    `;
+    chainIndicator.textContent = `CHAIN ${chainNumber + 1}!`;
+    container.appendChild(chainIndicator);
+    
+    setTimeout(() => {
+        if (chainIndicator.parentNode) chainIndicator.parentNode.removeChild(chainIndicator);
+    }, 1500);
+}
+
+function createBattlefieldDarkening(container, isChainCast) {
+    const darkening = document.createElement('div');
+    darkening.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: ${isChainCast ? 
+            'radial-gradient(circle, rgba(255,68,68,0.2) 0%, rgba(0,0,0,0.4) 70%)' : 
+            'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.3) 70%)'
+        };
+        animation: battlefieldDarken 1s ease-out;
+        z-index: 998;
+    `;
+    container.appendChild(darkening);
+}
+
+function createEnhancedKnifeProjectile(casterElement, targetElement, container, index, isChainCast, spread = 0) {
+    const casterRect = casterElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    const startX = casterRect.left + casterRect.width / 2;
+    const startY = casterRect.top + casterRect.height / 2;
+    const endX = targetRect.left + targetRect.width / 2 + (Math.random() - 0.5) * 40; // Add some randomness
+    const endY = targetRect.top + targetRect.height / 2 + (Math.random() - 0.5) * 40;
+    
+    // Create knife projectile
+    const knife = document.createElement('div');
+    knife.style.cssText = `
+        position: fixed;
+        left: ${startX}px;
+        top: ${startY}px;
+        width: 16px;
+        height: 4px;
+        background: linear-gradient(90deg, #666, #fff, #666);
+        border-radius: 2px;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 8px rgba(255,255,255,0.9);
+        z-index: 1001;
+    `;
+    container.appendChild(knife);
+    
+    // Create knife trail
+    const trail = document.createElement('div');
+    trail.style.cssText = `
+        position: fixed;
+        left: ${startX}px;
+        top: ${startY}px;
+        width: 30px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    `;
+    container.appendChild(trail);
+    
+    // Calculate rotation angle
+    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+    
+    // Animate knife to target
+    knife.animate([
+        { 
+            left: `${startX}px`,
+            top: `${startY}px`,
+            transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+            opacity: 1
+        },
+        { 
+            left: `${endX}px`,
+            top: `${endY}px`,
+            transform: `translate(-50%, -50%) rotate(${angle + 720}deg)`,
+            opacity: 0.8
+        }
+    ], {
+        duration: 500,
+        easing: 'ease-out'
+    });
+    
+    // Animate trail
+    trail.animate([
+        { 
+            left: `${startX}px`,
+            top: `${startY}px`,
+            transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+            opacity: 0.6
+        },
+        { 
+            left: `${endX}px`,
+            top: `${endY}px`,
+            transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+            opacity: 0
+        }
+    ], {
+        duration: 500,
+        easing: 'ease-out'
+    });
+    
+    // Create impact effect
+    setTimeout(() => {
+        createEnhancedKnifeImpact(endX, endY, container, isChainCast);
+        
+        // Remove knife and trail
+        if (knife.parentNode) knife.parentNode.removeChild(knife);
+        if (trail.parentNode) trail.parentNode.removeChild(trail);
+    }, 500);
+}
+
+function createEnhancedKnifeImpact(x, y, container, isChainCast) {
+    // Create main impact explosion
+    const impact = document.createElement('div');
+    impact.style.cssText = `
+        position: fixed;
+        left: ${x}px;
+        top: ${y}px;
+        width: 4px;
+        height: 4px;
+        background: ${isChainCast ? '#ff4444' : '#ffffff'};
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 30px ${isChainCast ? '#ff4444' : '#ffffff'};
+        z-index: 1002;
+    `;
+    container.appendChild(impact);
+    
+    // Create impact particles
+    for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        const angle = (i / 8) * 360;
+        const distance = 20 + Math.random() * 15;
+        const particleX = x + Math.cos(angle * Math.PI / 180) * distance;
+        const particleY = y + Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.cssText = `
+            position: fixed;
+            left: ${x}px;
+            top: ${y}px;
+            width: 2px;
+            height: 2px;
+            background: ${isChainCast ? '#ff6666' : '#cccccc'};
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+        `;
+        container.appendChild(particle);
+        
+        // Animate particles flying outward
+        particle.animate([
+            { 
+                left: `${x}px`,
+                top: `${y}px`,
+                opacity: 1,
+                transform: 'translate(-50%, -50%) scale(1)'
+            },
+            { 
+                left: `${particleX}px`,
+                top: `${particleY}px`,
+                opacity: 0,
+                transform: 'translate(-50%, -50%) scale(0.5)'
+            }
+        ], {
+            duration: 400,
+            easing: 'ease-out'
+        });
+    }
+    
+    // Animate main impact explosion
+    impact.animate([
+        { 
+            width: '4px',
+            height: '4px',
+            opacity: 1,
+            boxShadow: `0 0 30px ${isChainCast ? '#ff4444' : '#ffffff'}`
+        },
+        { 
+            width: '60px',
+            height: '60px',
+            opacity: 0,
+            boxShadow: `0 0 80px ${isChainCast ? '#ff4444' : '#ffffff'}`
+        }
+    ], {
+        duration: 400,
+        easing: 'ease-out'
+    });
+    
+    // Screen shake effect for impacts
+    if (isChainCast) {
+        addKnifeImpactScreenShake();
+    }
+    
+    // Remove impact and particles after animation
+    setTimeout(() => {
+        if (impact.parentNode) impact.parentNode.removeChild(impact);
+        container.querySelectorAll('[style*="' + x + 'px"]').forEach(el => {
+            if (el.parentNode && el !== impact) el.parentNode.removeChild(el);
+        });
+    }, 400);
+}
+
+function addKnifeImpactScreenShake() {
+    const gameContainer = document.body;
+    gameContainer.style.animation = 'knifeImpactShake 0.3s ease-in-out';
+    
+    setTimeout(() => {
+        gameContainer.style.animation = '';
+    }, 300);
+}
   

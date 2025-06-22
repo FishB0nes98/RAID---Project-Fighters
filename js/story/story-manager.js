@@ -454,6 +454,8 @@ class StoryManager {
             firstTimeCompletionReward: stage.firstTimeCompletionReward || false,
             maxSelections: stage.maxSelections || 1, // For ally_selection stages
             description_detail: stage.description_detail || null, // For ally_selection stages
+            healingEffect: stage.healingEffect || null, // For healing_and_recruit stages
+            recruitEffect: stage.recruitEffect || null, // For healing_and_recruit stages
             index: currentStageIndex,
             // Use storyProgress to determine completion status accurately
             isCompleted: currentStageIndex < this.storyProgress.completedStages, 
@@ -557,6 +559,7 @@ class StoryManager {
                  const permanentDebuffs = savedState.permanentDebuffs ? [...savedState.permanentDebuffs] : undefined;
                  const permanentBuffs = savedState.permanentBuffs ? [...savedState.permanentBuffs] : undefined;
                  const atlanteanBlessings = savedState.atlanteanBlessings ? { ...savedState.atlanteanBlessings } : undefined;
+                 const storyEffects = savedState.storyEffects ? { ...savedState.storyEffects } : undefined;
                  
                  return {
                      ...teamMember,
@@ -566,7 +569,8 @@ class StoryManager {
                      hellEffects: hellEffects,
                      permanentDebuffs: permanentDebuffs,
                      permanentBuffs: permanentBuffs,
-                     atlanteanBlessings: atlanteanBlessings
+                     atlanteanBlessings: atlanteanBlessings,
+                     storyEffects: storyEffects
                  };
             } else {
                  // If no saved stats for this member, keep their base stats
@@ -719,10 +723,11 @@ class StoryManager {
                  currentMana: member.currentMana,
                  // Include the full stats object to persist modifications
                  stats: { ...member.stats },
-                 // Also preserve hell effects, permanent debuffs, and atlantean blessings
+                 // Also preserve hell effects, permanent debuffs, atlantean blessings, and story effects
                  hellEffects: member.hellEffects ? { ...member.hellEffects } : undefined,
                  permanentDebuffs: member.permanentDebuffs ? [...member.permanentDebuffs] : undefined,
-                 atlanteanBlessings: member.atlanteanBlessings ? { ...member.atlanteanBlessings } : undefined
+                 atlanteanBlessings: member.atlanteanBlessings ? { ...member.atlanteanBlessings } : undefined,
+                 storyEffects: member.storyEffects ? { ...member.storyEffects } : undefined
              };
              return acc;
          }, {});
@@ -1326,6 +1331,19 @@ class StoryManager {
                             window.storyUI.showPopupMessage('🌊 Blessing of the Currents granted! All Q abilities now have -1 turn cooldown.', 'success', 4000);
                         }
                         break;
+                    case 'extend_buff_duration':
+                        this.playerTeam.forEach(member => {
+                            // Store the extended buff duration effect that will be applied in battle
+                            if (!member.storyEffects) member.storyEffects = {};
+                            member.storyEffects.extendedBuffDuration = (member.storyEffects.extendedBuffDuration || 0) + effect.amount;
+                            console.log(`Extended Buff Duration: Granted ${member.id} +${effect.amount} turn(s) to all buffs. Total extension: ${member.storyEffects.extendedBuffDuration}`);
+                            changesMade = true;
+                        });
+                        // Show popup notification
+                        if (window.storyUI && window.storyUI.showPopupMessage) {
+                            window.storyUI.showPopupMessage('✨ Blessing of Enduring Magic granted! All buffs will now last 1 additional turn.', 'success', 4000);
+                        }
+                        break;
                     // --- END NEW ---
                     
                     default:
@@ -1363,6 +1381,40 @@ class StoryManager {
                             // Show popup notification
                             if (window.storyUI && window.storyUI.showPopupMessage) {
                                 window.storyUI.showPopupMessage(`🔥 ${randomAlly.name || randomAlly.id} has been summoned to aid your journey!`, 'success', 4000);
+                            }
+                        }
+                        break;
+                    case 'add_specific_ally':
+                        // Add a specific character to the team
+                        const characterId = effect.characterId;
+                        if (!characterId) {
+                            console.error('add_specific_ally effect missing characterId');
+                            break;
+                        }
+                        
+                        try {
+                            // Check if character is already in the team
+                            const isAlreadyInTeam = this.playerTeam.some(member => member.id === characterId);
+                            if (isAlreadyInTeam) {
+                                console.log(`Character ${characterId} is already in the team`);
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`${characterId} is already part of your team!`, 'info', 3000);
+                                }
+                            } else {
+                                // Add the specific ally to the team
+                                await this.addSelectedAlly(characterId);
+                                
+                                console.log(`Added specific ally: ${characterId}`);
+                                // Show popup notification
+                                if (window.storyUI && window.storyUI.showPopupMessage) {
+                                    window.storyUI.showPopupMessage(`🌊 Atlantean Christie has joined your team!`, 'success', 4000);
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Error adding specific ally ${characterId}:`, error);
+                            if (window.storyUI && window.storyUI.showPopupMessage) {
+                                window.storyUI.showPopupMessage(`❌ Error adding ally to team. Please try again.`, 'error', 3000);
                             }
                         }
                         break;
@@ -1886,6 +1938,11 @@ class StoryManager {
                      memberState.atlanteanBlessings = { ...member.atlanteanBlessings };
                  }
                  
+                 // Only include story effects if they exist (Firebase doesn't allow undefined)
+                 if (member.storyEffects && Object.keys(member.storyEffects).length > 0) {
+                     memberState.storyEffects = { ...member.storyEffects };
+                 }
+                 
                  // Debug logging for each character
                  console.log(`[StoryManager] Saving state for ${member.id}:`, {
                      currentHP: memberState.currentHP,
@@ -1893,7 +1950,8 @@ class StoryManager {
                      hellEffects: memberState.hellEffects || 'none',
                      permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0,
                      permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0,
-                     atlanteanBlessings: memberState.atlanteanBlessings || 'none'
+                     atlanteanBlessings: memberState.atlanteanBlessings || 'none',
+                     storyEffects: memberState.storyEffects || 'none'
                  });
                  
                  acc[member.id] = memberState;

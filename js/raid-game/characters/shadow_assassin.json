@@ -11,7 +11,7 @@
     "ingameimage": "Loading Screen/Shadow Assassin.png",
     "stats": {
         "hp": 2600,
-        "mana": 200,
+        "mana": 2200,
         "physicalDamage": 270,
         "magicalDamage": 80,
         "armor": 10,
@@ -23,6 +23,31 @@
         "hpPerTurn": 0,
         "manaPerTurn": 20
     },
-    "abilities": [],
+    "abilities": [
+        {
+            "id": "assassin_strike",
+            "name": "Assassin Strike",
+            "icon": "Icons/abilities/assassin_strike.png",
+            "description": "A swift and deadly strike that deals 800 physical damage to a single target.",
+            "manaCost": 40,
+            "cooldown": 2,
+            "targetType": "enemy",
+            "type": "damage",
+            "damageType": "physical",
+            "fixedDamage": 800,
+            "keybind": "Q"
+        },
+        {
+            "id": "stealth",
+            "name": "Stealth",
+            "icon": "Icons/abilities/shadow_step.png",
+            "description": "Become untargetable by enemies for 2 turns.",
+            "manaCost": 60,
+            "cooldown": 5,
+            "targetType": "self",
+            "type": "buff",
+            "keybind": "W"
+        }
+    ],
     "passives": []
 } 

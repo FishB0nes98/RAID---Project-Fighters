@@ -263,8 +263,18 @@ class GameManager {
     // --- NEW METHOD: Change the current game phase ---
     changePhase(newPhase) {
         if (this.gameState) {
+            const oldPhase = this.gameState.phase;
             this.gameState.phase = newPhase;
             console.log(`[GameManager] Phase changed to: ${newPhase}`);
+            
+            // Dispatch phase change event for passives
+            document.dispatchEvent(new CustomEvent('phaseChange', {
+                detail: { 
+                    oldPhase: oldPhase,
+                    newPhase: newPhase 
+                }
+            }));
+            
             if (this.uiManager) {
                 this.uiManager.updatePhase(newPhase);
             } else {
@@ -1599,6 +1609,11 @@ class GameManager {
 
         this.gameState.phase = 'ai';
 
+        // Dispatch turn end event for passives
+        document.dispatchEvent(new CustomEvent('turnEnd', {
+            detail: { phase: 'player' }
+        }));
+
         // Deselect character and ability
         this.gameState.selectedCharacter = null;
         this.gameState.selectedAbility = null;
@@ -1679,271 +1694,6 @@ class GameManager {
         setTimeout(() => this.aiManager.executeAITurn(), this.turnDelay);
     }
 
-    // Execute AI turn
-    async executeAITurn() {
-        try {
-            this.gameManager.gameState.phase = 'ai';
-            this.gameManager.uiManager.updatePhase('ai');
-
-            // Process AI effects at start of their turn WITH duration reduction
-            this.gameManager.gameState.aiCharacters.forEach(aiChar => {
-                if (!aiChar.isDead()) {
-                    // Process buffs/debuffs, reduce duration=true, regenerate resources
-                    aiChar.processEffects(true, true);
-                    // Reduce ability cooldowns
-                    aiChar.abilities.forEach(ability => ability.reduceCooldown());
-                    // Update UI after processing
-                    this.gameManager.uiManager.updateCharacterUI(aiChar);
-                }
-            });
-
-            // Show planning phase overlay
-            this.gameManager.uiManager.showPlanningPhase(true);
-            
-            // Get list of AI characters that can act (not stunned)
-            const activeAICharacters = this.gameManager.gameState.aiCharacters.filter(char => {
-                if (char.isStunned()) {
-                    this.gameManager.addLogEntry(`${char.name} is stunned and cannot act this turn.`, 'enemy-turn');
-                    return false;
-                }
-                return true;
-            });
-            
-            // Plan actions for each AI character
-            const actions = [];
-            for (const aiChar of activeAICharacters) {
-                // Show planning animation for this character
-                this.gameManager.uiManager.showCharacterPlanning(aiChar, true);
-                
-                // Plan the action with delay for visualization
-                await this.delay(800);
-                const plannedAction = await this.planAIAction(aiChar);
-                
-                // If an action was planned (not null and no error)
-                if (plannedAction && !plannedAction.error) {
-                    // --- NEW: Construct the action object expected by executeAction --- 
-                    const casterIndex = this.gameManager.gameState.aiCharacters.findIndex(c => c.instanceId === aiChar.instanceId);
-                    const abilityIndex = aiChar.abilities.findIndex(a => a.id === plannedAction.ability.id);
-
-                    if (casterIndex !== -1 && abilityIndex !== -1) {
-                         const finalAction = {
-                             casterIndex: casterIndex,
-                             abilityIndex: abilityIndex,
-                             target: plannedAction.target // Use the target from the plan
-                         };
-                         actions.push(finalAction);
-                    } else {
-                         console.error(`[AI EXECUTE TURN] Failed to find caster or ability index for planned action by ${aiChar.name}:`, plannedAction);
-                    }
-                    // --- END NEW --- 
-                } else if (plannedAction && plannedAction.error) {
-                     // Log the reason why the action couldn't be fully planned (e.g., no target)
-                     console.log(`[AI EXECUTE TURN] Skipping action for ${aiChar.name} (${plannedAction.ability.name}): ${plannedAction.error}`);
-                     // Optionally add to game log
-                     // this.gameManager.addLogEntry(`${aiChar.name} tried to use ${plannedAction.ability.name} but could not: ${plannedAction.error}`, 'enemy-turn');
-                }
-                
-                // Hide planning animation when done
-                this.gameManager.uiManager.showCharacterPlanning(aiChar, false);
-                
-                // Add small delay between planning for each character
-                await this.delay(300);
-            }
-            
-            // Hide planning phase overlay
-            this.gameManager.uiManager.showPlanningPhase(false);
-            
-            // Execute each planned action with delay between them
-            for (const action of actions) {
-                await this.executeAction(action);
-                await this.delay(1000); // Delay between AI actions
-            }
-            
-            // End AI turn
-            this.gameManager.endAITurn();
-            
-            return true;
-        } catch (error) {
-            console.error('Error in AI turn:', error);
-            this.gameManager.uiManager.showPlanningPhase(false);
-            this.gameManager.endAITurn();
-            return false;
-        }
-    }
-
-    // Plan an action for an AI character (but don't execute it yet)
-    async planAIAction(aiChar) {
-        // Get available abilities
-        console.log(`[AI Planner Debug] ${aiChar.name} has ${aiChar.abilities?.length || 0} total abilities`);
-        
-        const availableAbilities = (aiChar.abilities || []).filter(ability => {
-            const cooldownOk = ability.currentCooldown <= 0;
-            const manaOk = aiChar.stats.currentMana >= ability.manaCost;
-            const notDisabled = !ability.isDisabled;
-            
-            if (!cooldownOk) {
-                console.log(`[AI Planner Debug] ${aiChar.name}'s ${ability.name} is on cooldown (${ability.currentCooldown})`);
-            }
-            if (!manaOk) {
-                console.log(`[AI Planner Debug] ${aiChar.name} lacks mana for ${ability.name} (${aiChar.stats.currentMana}/${ability.manaCost})`);
-            }
-            if (!notDisabled) {
-                console.log(`[AI Planner Debug] ${aiChar.name}'s ${ability.name} is disabled`);
-            }
-            
-            return cooldownOk && manaOk && notDisabled;
-        });
-
-        if (availableAbilities.length === 0) {
-            console.log(`[AI Planner] ${aiChar.name} has no available abilities.`);
-            if (aiChar.abilities && aiChar.abilities.length > 0) {
-                console.log(`[AI Planner Debug] ${aiChar.name} ability details:`, aiChar.abilities.map(a => ({
-                    name: a.name,
-                    cooldown: a.currentCooldown,
-                    manaCost: a.manaCost,
-                    disabled: a.isDisabled
-                })));
-            } else {
-                console.log(`[AI Planner Debug] ${aiChar.name} has no abilities array or empty abilities!`);
-            }
-            return null; // No action possible
-        }
-
-        // SPECIAL AI BEHAVIOR FOR INFERNAL RAIDEN
-        console.log(`[AI Planner Debug] Character ID: "${aiChar.id}", Name: "${aiChar.name}"`);
-        if (aiChar.id === 'infernal_raiden' || aiChar.name === 'Infernal Raiden') {
-            console.log(`[AI Planner] Using special Infernal Raiden AI for ${aiChar.name}`);
-            return this.planInfernalRaidenAction(aiChar, availableAbilities);
-        }
-
-        // Helper function to filter targetable characters considering enemy forced targeting
-        const isTargetableByCharacter = (target, caster) => {
-            if (target.isDead()) return false;
-            if (target.isUntargetable && target.isUntargetable()) return false;
-            
-            // Check if this target is untargetable due to enemy forced targeting
-            if (target.isUntargetableByEnemyForcing && target.isUntargetableByEnemyForcing()) {
-                // The target is untargetable because an enemy is forcing targeting
-                // This means we can only target allies/self for support abilities
-                return false;
-            }
-            
-            // Check for Heart Debuff forced targeting restrictions on the caster
-            if (caster && caster.forcedTargeting && caster.forcedTargeting.type === 'heart_debuff') {
-                const forcedCasterId = caster.forcedTargeting.casterId;
-                
-                // Allow self-targeting always
-                if (target === caster) {
-                    return true;
-                }
-                
-                // Find the heart caster
-                const allCharacters = [
-                    ...this.gameState.playerCharacters,
-                    ...this.gameState.aiCharacters
-                ];
-                const heartCaster = allCharacters.find(char => 
-                    (char.instanceId || char.id) === forcedCasterId && !char.isDead()
-                );
-                
-                if (heartCaster) {
-                    // Heart Debuff allows targeting:
-                    // 1. The heart caster themselves (Elphelt)
-                    // 2. The debuffed character's own allies (same team as debuffed character)
-                    // 3. Self (handled above)
-                    
-                    const targetTeam = target.isAI ? 'ai' : 'player';
-                    const debuffedCharacterTeam = caster.isAI ? 'ai' : 'player';
-                    
-                    const isTargetingHeartCaster = (target === heartCaster);
-                    const isTargetingOwnAlly = (targetTeam === debuffedCharacterTeam);
-                    const isValidHeartDebuffTarget = isTargetingHeartCaster || isTargetingOwnAlly;
-                    
-                    console.log(`[AI Heart Debuff] ${caster.name} with heart debuff checking target ${target.name}. IsHeartCaster: ${isTargetingHeartCaster}, IsOwnAlly: ${isTargetingOwnAlly}, Valid: ${isValidHeartDebuffTarget}`);
-                    
-                    if (!isValidHeartDebuffTarget) {
-                        console.log(`[AI Heart Debuff] Blocking target ${target.name} - not the heart caster or debuffed character's ally`);
-                        return false; // Heart Debuff prevents targeting this character
-                    }
-                }
-            }
-            
-            return true;
-        };
-
-        // Smart ability selection: Prioritize healing if allies need it
-        const allPlayerChars = this.gameState.playerCharacters.filter(c => isTargetableByCharacter(c, aiChar));
-        const allAIChars = this.gameState.aiCharacters.filter(c => isTargetableByCharacter(c, aiChar));
-        
-        // Check if any allies need healing (below 70% HP)
-        const injuredAllies = allAIChars.filter(ally => ally !== aiChar && ally.stats.currentHp < ally.stats.maxHp * 0.7);
-        const selfNeedsHealing = aiChar.stats.currentHp < aiChar.stats.maxHp * 0.5; // Self at 50% or below
-        
-                    // Look for healing abilities that can target allies or self
-            const healingAbilities = availableAbilities.filter(ability => 
-                ability.targetType === 'ally_or_self' || 
-                ability.targetType === 'ally' || 
-                (ability.targetType === 'self' && selfNeedsHealing) ||
-                ability.targetType === 'all_allies' ||
-                (ability.name && ability.name.toLowerCase().includes('heal')) || 
-                (ability.description && ability.description.toLowerCase().includes('heal'))
-            );
-        
-        let selectedAbility = null;
-        
-        // Prioritize healing if someone needs it and we have healing abilities
-        if ((injuredAllies.length > 0 || selfNeedsHealing) && healingAbilities.length > 0) {
-            // Use healing ability with 80% chance if allies are injured
-            if (Math.random() < 0.8) {
-                selectedAbility = healingAbilities[Math.floor(Math.random() * healingAbilities.length)];
-                console.log(`[AI Planner] ${aiChar.name} prioritizing healing ability: ${selectedAbility.name}`);
-            }
-        }
-        
-        // If no healing ability selected, pick randomly from all available
-        if (!selectedAbility) {
-            const randomIndex = Math.floor(Math.random() * availableAbilities.length);
-            selectedAbility = availableAbilities[randomIndex];
-            console.log(`[AI Planner] ${aiChar.name} randomly selected: ${selectedAbility.name}`);
-        }
-
-        // Try to plan the action - if it fails for healing, fallback to non-healing
-        const result = this.tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing);
-        if (result && result.error === 'No healing targets needed') {
-            // Healing was selected but no targets need it - fallback to non-healing abilities
-            console.log(`[AI Planner] ${aiChar.name} fallback: healing not needed, selecting non-healing ability`);
-            const nonHealingAbilities = availableAbilities.filter(ability => {
-                // Check if it's a healing ability
-                const isHealingAbility = (ability.name && ability.name.toLowerCase().includes('heal')) || 
-                                       (ability.description && ability.description.toLowerCase().includes('heal')) ||
-                                       (ability.type === 'heal');
-                
-                // Check if it's a buff/support ability
-                const isBuffAbility = (ability.name && (ability.name.toLowerCase().includes('buff') || 
-                                                       ability.name.toLowerCase().includes('pact') ||
-                                                       ability.name.toLowerCase().includes('blessing') ||
-                                                       ability.name.toLowerCase().includes('boost') ||
-                                                       ability.name.toLowerCase().includes('enhance') ||
-                                                       ability.name.toLowerCase().includes('empow'))) ||
-                                      (ability.description && (ability.description.toLowerCase().includes('double') ||
-                                                              ability.description.toLowerCase().includes('increase') ||
-                                                              ability.description.toLowerCase().includes('buff') ||
-                                                              ability.description.toLowerCase().includes('empower') ||
-                                                              ability.description.toLowerCase().includes('stats')));
-                
-                // Include non-healing abilities and buff abilities (even if they target allies)
-                return !isHealingAbility || isBuffAbility;
-            });
-            
-            if (nonHealingAbilities.length > 0) {
-                selectedAbility = nonHealingAbilities[Math.floor(Math.random() * nonHealingAbilities.length)];
-                console.log(`[AI Planner] ${aiChar.name} fallback selected: ${selectedAbility.name}`);
-                return this.tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing);
-            }
-        }
-        
-        return result;
-    }
 
     // Helper method to try planning an action with a specific ability
     tryPlanAction(aiChar, selectedAbility, allPlayerChars, allAIChars, injuredAllies, selfNeedsHealing) {
@@ -2260,183 +2010,6 @@ class GameManager {
         return { ability: selectedAbility, target: selectedTarget };
     }
 
-    // Execute a previously planned action
-      async executeAction(action) {
-          if (!action || action.casterIndex === undefined || action.abilityIndex === undefined || action.target === undefined) {
-              console.error("AI executeAction called with invalid or incomplete action:", action);
-              this.addLogEntry(`AI encountered an error retrieving planned action.`, 'error');
-              return;
-          }
-
-          const caster = this.gameState.aiCharacters[action.casterIndex];
-          const ability = caster ? caster.abilities[action.abilityIndex] : null;
-          let targetInfo = action.target; // Target from the planned action (can be object or array)
-
-          if (!caster || !ability) {
-              console.error("AI executeAction: Caster or Ability not found for action:", action);
-              this.addLogEntry(`AI encountered an error finding character or ability.`, 'error');
-              return;
-          }
-          
-          // --- VALIDATION CHECKS --- 
-           if (caster.isDead() || caster.isStunned()) {
-               this.addLogEntry(`${caster.name} cannot execute action (dead or stunned).`, 'enemy-turn');
-               return;
-           }
-           if (caster.stats.currentMana < ability.manaCost) {
-               this.addLogEntry(`${caster.name} does not have enough mana for ${ability.name}. Skipping action.`, 'enemy-turn');
-               return;
-           }
-           if (ability.currentCooldown > 0) {
-                this.addLogEntry(`${caster.name}'s ${ability.name} is still on cooldown (${ability.currentCooldown} turns). Skipping action.`, 'enemy-turn');
-                return;
-           }
-           if (ability.isDisabled) { 
-                this.addLogEntry(`${caster.name}'s ${ability.name} is disabled. Skipping action.`, 'enemy-turn');
-                return;
-           }
-           // --- END VALIDATION CHECKS ---
-           
-           // --- TARGET RE-VALIDATION (Just before execution) ---
-           let finalTargetInfo = null;
-           const targetType = ability.targetType; // Use targetType from the ability itself
-           
-           if (targetType === 'self') {
-               finalTargetInfo = caster.isDead() ? null : caster;
-           } else if (targetType === 'enemy' || targetType === 'ally' || targetType === 'ally_or_enemy') {
-               // Planned target was a single object
-               const singleTarget = targetInfo;
-               if (singleTarget && !singleTarget.isDead()) {
-                   finalTargetInfo = singleTarget;
-                   
-                   // --- NEW: Check for ability redirection (Furry Guardian talent) ---
-                   if (targetType === 'enemy' && !Array.isArray(finalTargetInfo)) {
-                       // Only check for redirection on enemy abilities targeting a single player character
-                       const redirected = this.checkForAbilityRedirection(caster, ability, finalTargetInfo);
-                       if (redirected) {
-                           finalTargetInfo = redirected;
-                       }
-                   }
-                   // --- END NEW ---
-               } else {
-                   // Attempt to find a new random target if the original is dead
-                   console.log(`[AI Execute] Original target ${singleTarget?.name} invalid. Retargeting for ${ability.name}...`);
-                   if (targetType === 'enemy' || targetType === 'ally_or_enemy') {
-                       const potentialEnemies = this.gameManager.gameState.playerCharacters.filter(p => !p.isDead());
-                       if (potentialEnemies.length > 0) finalTargetInfo = potentialEnemies[Math.floor(Math.random() * potentialEnemies.length)];
-                       
-                       // --- NEW: Check for ability redirection (Furry Guardian talent) ---
-                       if (finalTargetInfo) {
-                           const redirected = this.checkForAbilityRedirection(caster, ability, finalTargetInfo);
-                           if (redirected) {
-                               finalTargetInfo = redirected;
-                           }
-                       }
-                       // --- END NEW ---
-                   } else { // targetType === 'ally'
-                       const potentialAllies = this.gameManager.gameState.aiCharacters.filter(a => !a.isDead() && a.instanceId !== caster.instanceId);
-                       if (potentialAllies.length > 0) finalTargetInfo = potentialAllies[Math.floor(Math.random() * potentialAllies.length)];
-                       else finalTargetInfo = caster; // Fallback to self if no allies
-                   }
-                   if(finalTargetInfo) console.log(`[AI Execute] Re-targeted to ${finalTargetInfo.name}.`);
-               }
-           } else if (targetType === 'aoe_enemy' || targetType === 'all_enemies') {
-               // Planned target was an array of enemies
-               finalTargetInfo = this.gameManager.gameState.playerCharacters.filter(p => !p.isDead());
-               console.log(`[AI Execute] Validating ${finalTargetInfo.length} living enemies for AoE.`);
-           } else if (targetType === 'aoe_ally' || targetType === 'all_allies') {
-               // Planned target was an array of allies
-               finalTargetInfo = this.gameState.aiCharacters.filter(a => !a.isDead());
-               console.log(`[AI Execute] Validating ${finalTargetInfo.length} living allies for AoE.`);
-            } else if (targetType === 'all') {
-                // Planned target was an array of all characters
-                const livingEnemies = this.gameState.playerCharacters.filter(p => !p.isDead());
-                const livingAllies = this.gameState.aiCharacters.filter(a => !a.isDead());
-                finalTargetInfo = [...livingEnemies, ...livingAllies];
-                console.log(`[AI Execute] Validating ${finalTargetInfo.length} living characters for 'all'.`);
-            } else if (targetType === 'all_allies_except_self') { // Added this case
-                // Re-fetch living allies excluding self just before execution
-                finalTargetInfo = this.gameState.aiCharacters.filter(a => !a.isDead() && a.instanceId !== caster.instanceId);
-                console.log(`[AI Execute] Validating ${finalTargetInfo.length} living allies (excluding self) for AoE buff.`);
-            } else {
-                 console.warn(`[AI Execute] Unhandled target type ${targetType} during re-validation.`);
-                 finalTargetInfo = targetInfo; // Pass original planned target if type is unknown
-            }
-
-           // Final check: If after re-validation, there are no targets for non-self abilities
-           if (targetType !== 'self' && (!finalTargetInfo || (Array.isArray(finalTargetInfo) && finalTargetInfo.length === 0))) {
-               this.addLogEntry(`${caster.name} uses ${ability.name}, but there are no valid targets remaining.`, 'enemy-turn');
-               // Decide whether to still consume mana/cooldown or just skip
-               // Skipping seems more logical if the ability couldn't execute.
-               return; 
-           }
-           // --- END TARGET RE-VALIDATION ---
-
-           // Log the action being taken (handle single target name vs array)
-           let targetName = '';
-            if (finalTargetInfo) {
-                if (Array.isArray(finalTargetInfo)) {
-                    targetName = `${finalTargetInfo.length} targets`;
-                } else if (finalTargetInfo.name) {
-                    targetName = `on ${finalTargetInfo.name}`;
-                }
-            }
-           this.addLogEntry(`${caster.name} uses ${ability.name} ${targetName}.`, 'enemy-turn');
-
-           // Use ability (pass the final validated target info)
-           const success = caster.useAbility(action.abilityIndex, finalTargetInfo); 
-
-           if (success) {
-               // Log cooldown only if successful
-               if (ability.cooldown > 0) {
-                    this.addLogEntry(`${ability.name} is on cooldown for ${ability.cooldown} more turns.`);
-               }
-               
-               // CHECK FOR ABILITIES THAT DON'T END TURN
-               if (ability.doesNotEndTurn === true) {
-                   console.log(`[AI Execute] ${ability.name} doesn't end turn, planning second action for ${caster.name}`);
-                   
-                   // Add a small delay for visual clarity
-                   await this.delay(500);
-                   
-                   // Plan and execute a second action immediately
-                   const secondAction = await this.planAIAction(caster);
-                   if (secondAction && secondAction.ability) {
-                       console.log(`[AI Execute] Executing second action: ${secondAction.ability.name}`);
-                       
-                       // Create the action object format expected by executeAction
-                       const casterIndex = this.gameState.aiCharacters.indexOf(caster);
-                       const abilityIndex = caster.abilities.indexOf(secondAction.ability);
-                       
-                       if (casterIndex !== -1 && abilityIndex !== -1) {
-                           const secondActionData = {
-                               casterIndex: casterIndex,
-                               abilityIndex: abilityIndex,
-                               target: secondAction.target
-                           };
-                           
-                           // Recursively execute the second action
-                           await this.executeAction(secondActionData);
-                       } else {
-                           console.warn(`[AI Execute] Could not find caster or ability indices for second action`);
-                       }
-                   } else {
-                       console.log(`[AI Execute] No valid second action found for ${caster.name}`);
-                   }
-               }
-           } else {
-               // Log failure if useAbility returned false 
-               this.addLogEntry(`${caster.name} failed to use ${ability.name} (possible internal check failure).`, 'error');
-           }
-
-           // Check for game over after each action
-           if (this.checkGameOver()) {
-               // Game over handling (including XP awarding and UI) is now done in checkGameOver()
-               console.log(`[GameManager executeAction] Game Over detected and handled by checkGameOver()`);
-               this.isGameRunning = false;
-           }
-       }
-
        // Helper to create a delay
        async delay(ms) {
            return new Promise(resolve => setTimeout(resolve, ms));
@@ -2497,8 +2070,8 @@ class GameManager {
                        }
                    }
 
-                   // 2. Process effects (apply buffs/debuffs, NO duration reduction, WITH regeneration)
-                   char.processEffects(false, true); // false, true -> Apply effects, don't reduce duration, do regenerate
+                   // 2. Process effects (apply buffs/debuffs, NO duration reduction, NO regeneration - already done at end of player turn)
+                   char.processEffects(false, false); // false, false -> Apply effects, don't reduce duration, don't regenerate
 
                    // 4. Reduce ability cooldowns
                    char.abilities.forEach(ability => ability.reduceCooldown());
@@ -3143,9 +2716,14 @@ class GameManager {
                                 };
                                 
                                 // --- NEW: Include atlantean blessings if they exist ---
-                                if (char.atlanteanBlessings && Object.keys(char.atlanteanBlessings).length > 0) {
-                                    charState.atlanteanBlessings = { ...char.atlanteanBlessings };
-                                }
+                                                if (char.atlanteanBlessings && Object.keys(char.atlanteanBlessings).length > 0) {
+                    charState.atlanteanBlessings = { ...char.atlanteanBlessings };
+                }
+                
+                // Include story effects if present
+                if (char.storyEffects && Object.keys(char.storyEffects).length > 0) {
+                    charState.storyEffects = { ...char.storyEffects };
+                }
                                 // --- END NEW ---
                                 
                                 // Include hell effects if they exist (Firebase doesn't allow undefined)
@@ -5900,7 +5478,9 @@ class GameManager {
             charDiv.id = `character-${elementId}`;
             charDiv.className = 'character character-slot';
             // Store the unique instanceId in a data attribute for easy retrieval
-            charDiv.dataset.instanceId = elementId; 
+            charDiv.dataset.instanceId = elementId;
+            // Also store the character ID for CSS targeting
+            charDiv.dataset.characterId = character.id; 
             if (isAI) {
                 charDiv.classList.add('ai-character');
             }
@@ -5993,9 +5573,19 @@ class GameManager {
             const manaBar = document.createElement('div');
             manaBar.className = 'mana-bar';
             manaBar.style.width = `${(character.stats.currentMana / character.stats.maxMana) * 100}%`;
+            
+            // Add data-ap attribute for Atlantean Christie styling
+            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                manaBar.setAttribute('data-ap', Math.round(character.stats.currentMana));
+            }
+            
             const manaText = document.createElement('div');
             manaText.className = 'bar-text';
-            manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)} AP`;
+            } else {
+                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+            }
             manaContainer.appendChild(manaBar);
             manaContainer.appendChild(manaText);
             
@@ -6107,13 +5697,26 @@ class GameManager {
                 hpText.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}`;
             }
             
-            // Update Mana bar
+            // Update Mana bar (or Ability Points for Atlantean Christie)
             const manaBar = charElement.querySelector('.mana-bar');
-            manaBar.style.width = `${(character.stats.currentMana / character.stats.maxMana) * 100}%`;
+            const manaPercentage = (character.stats.currentMana / character.stats.maxMana) * 100;
             
-            // Update Mana text
+            // For Atlantean Christie, always show full width bar (beans handle the display)
+            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                manaBar.style.width = '100%';
+                manaBar.setAttribute('data-ap', Math.round(character.stats.currentMana));
+            } else {
+                manaBar.style.width = `${manaPercentage}%`;
+                manaBar.removeAttribute('data-ap');
+            }
+            
+            // Update Mana text (or Ability Points for Atlantean Christie)
             const manaText = charElement.querySelector('.mana-bar').parentElement.querySelector('.bar-text');
-            manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)} AP`;
+            } else {
+                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+            }
             
             // Trigger Mana animations based on changes
             if (previousMana !== character.stats.currentMana) {
@@ -6963,6 +6566,11 @@ class GameManager {
             if (charElement) {
                 charElement.classList.add('acted'); // Use 'acted' class
             }
+            
+            // Dispatch character acted event for passives
+            document.dispatchEvent(new CustomEvent('characterActed', {
+                detail: { character: character }
+            }));
         }
         
         // Reverse the 'acted' state of a character (for Ayane's ability)

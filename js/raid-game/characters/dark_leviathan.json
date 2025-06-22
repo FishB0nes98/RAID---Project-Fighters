@@ -1,0 +1,59 @@
+{
+    "id": "dark_leviathan",
+    "name": "Dark Leviathan",
+    "image": "Loading Screen/Dark Leviathan.png",
+    "rarity": "legendary",
+    "type": "beast",
+    "tags": ["Dark", "Sea Creature", "Boss", "Atlantean"],
+    "description": "A massive ancient sea creature corrupted by dark forces. This colossal leviathan commands the deepest trenches of the ocean with its immense power and malevolent presence.",
+    "playerunlocked": false,
+    "isHidden": false,
+    "ingameimage": "Loading Screen/Dark Leviathan.png",
+    "stats": {
+        "hp": 12500,
+        "mana": 1800,
+        "physicalDamage": 285,
+        "magicalDamage": 320,
+        "armor": 15,
+        "magicalShield": 18,
+        "speed": 85,
+        "lifesteal": 0.24,
+        "critChance": 0.0,
+        "critMultiplier": 0,
+        "dodgeChance": 0.00,
+        "hpPerTurn": 0,
+        "manaPerTurn": 0
+    },
+    "abilities": [
+        {
+            "id": "dark_leviathan_abyssal_smash",
+            "name": "Abyssal Smash",
+            "icon": "Icons/abilities/abyssal_slam.png",
+            "manaCost": 0,
+            "cooldown": 3,
+            "type": "damage",
+            "targetType": "all_enemies",
+            "description": "Channels the power of the abyss to unleash a devastating smash that deals 1000 damage to ALL enemies. The sheer force of this attack cannot be dodged or reduced."
+        },
+        {
+            "id": "dark_leviathan_tidal_splash",
+            "name": "Tidal Splash",
+            "icon": "Icons/abilities/tidal_splash.png",
+            "manaCost": 100,
+            "cooldown": 1,
+            "type": "damage",
+            "targetType": "all_enemies",
+            "description": "Moves the water in the cave, splashing water to everyone. Each enemy has a 50% chance to take either 755 damage or 400 damage (ignoring magical shield). Dark Leviathan heals for all damage dealt."
+        },
+        {
+            "id": "dark_leviathan_abyssal_regen",
+            "name": "Abyssal Regen",
+            "icon": "Icons/abilities/abyssal_regen.png",
+            "manaCost": 75,
+            "cooldown": 6,
+            "type": "buff",
+            "targetType": "self",
+            "description": "Channels the regenerative power of the abyss, increasing HP regeneration to 425 per turn for 5 turns. The dark waters restore the leviathan's vitality."
+        }
+    ]
+} 

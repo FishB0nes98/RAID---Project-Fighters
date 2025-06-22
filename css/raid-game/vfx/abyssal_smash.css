@@ -1,0 +1,465 @@
+/* Dark Leviathan Abyssal Smash VFX Styles */
+
+/* Preparation Phase Effects */
+.abyssal-smash-dark-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, 
+        rgba(75, 0, 130, 0.8) 0%, 
+        rgba(25, 25, 112, 0.6) 30%, 
+        rgba(0, 0, 0, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalAuraPulse 1.2s ease-in-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.abyssal-energy-tendrils {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.abyssal-tendril {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 60px;
+    background: linear-gradient(to top, 
+        transparent 0%, 
+        rgba(138, 43, 226, 0.8) 20%, 
+        rgba(75, 0, 130, 1) 50%, 
+        rgba(138, 43, 226, 0.8) 80%, 
+        transparent 100%);
+    transform-origin: bottom center;
+    animation: abyssalTendrilWave 1.2s ease-in-out;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.6);
+}
+
+.abyssal-power-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(138, 43, 226, 1) 30%, 
+        rgba(75, 0, 130, 0.8) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalCorePulse 1.2s ease-in-out;
+    pointer-events: none;
+    z-index: 1002;
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.8), 
+                0 0 40px rgba(75, 0, 130, 0.6);
+}
+
+.abyssal-particle-swarm {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.abyssal-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, 
+        rgba(138, 43, 226, 1) 0%, 
+        rgba(75, 0, 130, 0.8) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalParticleSwirl 2s linear infinite;
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.8);
+}
+
+/* Wave Phase Effects */
+.abyssal-smash-shockwave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, 
+        rgba(75, 0, 130, 0.8) 0%, 
+        rgba(25, 25, 112, 0.6) 30%, 
+        rgba(0, 0, 0, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalShockwaveExpand 2.5s ease-out;
+    pointer-events: none;
+    z-index: 998;
+}
+
+.abyssal-energy-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        transparent 0%, 
+        rgba(75, 0, 130, 0.3) 25%, 
+        rgba(138, 43, 226, 0.5) 50%, 
+        rgba(75, 0, 130, 0.3) 75%, 
+        transparent 100%);
+    animation: abyssalEnergyWaveSweep 2s ease-out;
+    pointer-events: none;
+    z-index: 997;
+}
+
+.abyssal-wave-rings {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 996;
+}
+
+.abyssal-wave-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(138, 43, 226, 0.8);
+    border-radius: 50%;
+    animation: abyssalWaveRingExpand 1.5s ease-out;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.6), 
+                inset 0 0 15px rgba(75, 0, 130, 0.4);
+}
+
+.abyssal-darkness-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, 
+        transparent 0%, 
+        rgba(0, 0, 0, 0.3) 40%, 
+        rgba(25, 25, 112, 0.5) 70%, 
+        rgba(0, 0, 0, 0.7) 100%);
+    animation: abyssalDarknessSpread 2.5s ease-out;
+    pointer-events: none;
+    z-index: 995;
+}
+
+/* Impact Phase Effects */
+.abyssal-impact-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(138, 43, 226, 1) 20%, 
+        rgba(75, 0, 130, 0.8) 50%, 
+        rgba(25, 25, 112, 0.4) 80%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalImpactBurst 1.5s ease-out;
+    pointer-events: none;
+    z-index: 1003;
+    box-shadow: 0 0 30px rgba(138, 43, 226, 1), 
+                0 0 60px rgba(75, 0, 130, 0.8);
+}
+
+.abyssal-energy-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.abyssal-burst-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 25px;
+    background: linear-gradient(to top, 
+        transparent 0%, 
+        rgba(138, 43, 226, 1) 30%, 
+        rgba(255, 255, 255, 1) 50%, 
+        rgba(138, 43, 226, 1) 70%, 
+        transparent 100%);
+    transform-origin: bottom center;
+    animation: abyssalBurstParticleShoot 1.5s ease-out;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+}
+
+.abyssal-crushing-force {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.abyssal-force-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 50px;
+    background: linear-gradient(to top, 
+        rgba(75, 0, 130, 1) 0%, 
+        rgba(138, 43, 226, 1) 50%, 
+        transparent 100%);
+    transform-origin: bottom center;
+    animation: abyssalForceLineStrike 1.5s ease-out;
+    border-radius: 3px;
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.8);
+}
+
+.abyssal-void-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, 
+        rgba(0, 0, 0, 1) 0%, 
+        rgba(25, 25, 112, 0.8) 30%, 
+        rgba(75, 0, 130, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalVoidPulse 1.5s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+    border: 2px solid rgba(138, 43, 226, 0.6);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), 
+                inset 0 0 20px rgba(75, 0, 130, 0.6);
+}
+
+/* Screen Shake Effect */
+.battle-container.abyssal-smash-shake {
+    animation: abyssalSmashScreenShake 1s ease-out;
+}
+
+/* Keyframe Animations */
+@keyframes abyssalAuraPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes abyssalTendrilWave {
+    0% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(0);
+        opacity: 0;
+    }
+    30% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(0.7);
+        opacity: 0.8;
+    }
+    70% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(1);
+        opacity: 0.9;
+    }
+}
+
+@keyframes abyssalCorePulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes abyssalParticleSwirl {
+    0% { 
+        transform: rotate(0deg) translateX(60px) rotate(0deg);
+        opacity: 0;
+    }
+    20% { 
+        opacity: 1;
+    }
+    80% { 
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(360deg) translateX(60px) rotate(-360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalShockwaveExpand {
+    0% { 
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(20);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalEnergyWaveSweep {
+    0% { 
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    50% { 
+        opacity: 1;
+    }
+    100% { 
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalWaveRingExpand {
+    0% { 
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(15);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalDarknessSpread {
+    0% { 
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes abyssalImpactBurst {
+    0% { 
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    30% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalBurstParticleShoot {
+    0% { 
+        transform: rotate(var(--rotation, 0deg)) translateY(0) scaleY(0);
+        opacity: 1;
+    }
+    50% { 
+        transform: rotate(var(--rotation, 0deg)) translateY(-30px) scaleY(1);
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(var(--rotation, 0deg)) translateY(-60px) scaleY(0.5);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalForceLineStrike {
+    0% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(0);
+        opacity: 0;
+    }
+    30% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(1.5);
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(var(--rotation, 0deg)) scaleY(1);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalVoidPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes abyssalSmashScreenShake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-4px, -2px); }
+    20% { transform: translate(4px, 2px); }
+    30% { transform: translate(-3px, 3px); }
+    40% { transform: translate(3px, -3px); }
+    50% { transform: translate(-2px, 2px); }
+    60% { transform: translate(2px, -2px); }
+    70% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    90% { transform: translate(-1px, 0px); }
+} 

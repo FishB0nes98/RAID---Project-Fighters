@@ -1,0 +1,202 @@
+/* Freezing Waters Stage Modifier VFX */
+
+/* Background aura animation */
+@keyframes freezingWatersAura {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.9;
+        transform: scale(0.98);
+    }
+}
+
+/* Floating ice crystals */
+@keyframes freezingCrystalFloat {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.6;
+    }
+    25% {
+        transform: translateY(-15px) rotate(90deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-5px) rotate(180deg);
+        opacity: 0.8;
+    }
+    75% {
+        transform: translateY(-20px) rotate(270deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0px) rotate(360deg);
+        opacity: 0.6;
+    }
+}
+
+/* Frost wave animation */
+@keyframes freezingFrostWave {
+    0% {
+        opacity: 0.3;
+        transform: scale(0.8) rotate(var(--rotation, 0deg));
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) rotate(calc(var(--rotation, 0deg) + 180deg));
+    }
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8) rotate(calc(var(--rotation, 0deg) + 360deg));
+    }
+}
+
+/* Character freeze application */
+@keyframes freezingWatersFreeze {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+/* Freeze crystal burst */
+@keyframes freezeCrystalBurst {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) 
+                   translateX(calc(cos(var(--angle, 0deg) * 3.14159 / 180) * var(--distance, 30px)))
+                   translateY(calc(sin(var(--angle, 0deg) * 3.14159 / 180) * var(--distance, 30px)))
+                   scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) 
+                   translateX(calc(cos(var(--angle, 0deg) * 3.14159 / 180) * var(--distance, 30px)))
+                   translateY(calc(sin(var(--angle, 0deg) * 3.14159 / 180) * var(--distance, 30px)))
+                   scale(0.3);
+    }
+}
+
+/* Freeze indicator pulse */
+@keyframes freezingWatersIndicator {
+    0% {
+        transform: scale(1);
+        filter: brightness(1) drop-shadow(0 0 4px rgba(135, 206, 235, 0.6));
+    }
+    50% {
+        transform: scale(1.2);
+        filter: brightness(1.3) drop-shadow(0 0 8px rgba(135, 206, 235, 1));
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1) drop-shadow(0 0 4px rgba(135, 206, 235, 0.6));
+    }
+}
+
+/* Freezing waters VFX container */
+.freezing-waters-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Ice crystal overlay */
+.ice-crystal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Individual ice crystals */
+.freezing-waters-crystal {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(0.5px);
+}
+
+/* Frost wave elements */
+.freezing-frost-wave {
+    position: absolute;
+    border-radius: 1px;
+    filter: blur(0.3px);
+}
+
+/* Character freeze overlay */
+.freeze-overlay.freezing-waters-freeze {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    border-radius: 8px;
+}
+
+/* Freeze indicator */
+.freeze-indicator.freezing-waters-indicator {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 20px;
+    pointer-events: none;
+    z-index: 12;
+}
+
+/* Freeze crystal burst particles */
+.freeze-crystal-burst {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Stage modifier indicator styling for freezing waters */
+.stage-modifier[data-modifier-id="freezing_waters"] {
+    border-left: 4px solid #87ceeb;
+    background: linear-gradient(135deg, rgba(173, 216, 230, 0.1), rgba(30, 144, 255, 0.05));
+}
+
+.stage-modifier[data-modifier-id="freezing_waters"] .stage-modifier-icon {
+    color: #87ceeb;
+    text-shadow: 0 0 6px rgba(135, 206, 235, 0.6);
+}
+
+.stage-modifier[data-modifier-id="freezing_waters"]:hover {
+    background: linear-gradient(135deg, rgba(173, 216, 230, 0.2), rgba(30, 144, 255, 0.1));
+}
+
+@keyframes freezingWatersGlow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(135, 206, 235, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(135, 206, 235, 0.6);
+    }
+}
+
+.stage-modifier[data-modifier-id="freezing_waters"] {
+    animation: freezingWatersGlow 3s ease-in-out infinite;
+} 

@@ -11,7 +11,7 @@
     "ingameimage": "Loading Screen/Shadow Assassin Female.png",
     "stats": {
         "hp": 2450,
-        "mana": 200,
+        "mana": 2200,
         "physicalDamage": 255,
         "magicalDamage": 90,
         "armor": 9,
@@ -23,6 +23,31 @@
         "hpPerTurn": 0,
         "manaPerTurn": 20
     },
-    "abilities": [],
+    "abilities": [
+        {
+            "id": "fan_of_knives",
+            "name": "Fan of Knives",
+            "icon": "Icons/abilities/fan_of_knives.png",
+            "manaCost": 50,
+            "cooldown": 2,
+            "targetType": "all_enemies",
+            "type": "aoe_damage",
+            "damageType": "physical",
+            "fixedDamage": 565,
+            "chainOnCrit": true,
+            "description": "Hurls a deadly fan of knives at all enemies for 565 physical damage. If this ability critically strikes, it is immediately cast again without cost or cooldown. Can chain indefinitely on consecutive crits."
+        },
+        {
+            "id": "stealth",
+            "name": "Stealth",
+            "icon": "Icons/abilities/shadow_step.png",
+            "description": "Become untargetable by enemies for 2 turns.",
+            "manaCost": 60,
+            "cooldown": 5,
+            "targetType": "self",
+            "type": "buff",
+            "keybind": "W"
+        }
+    ],
     "passives": []
 } 

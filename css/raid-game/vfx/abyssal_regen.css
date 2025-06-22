@@ -1,0 +1,546 @@
+/* ====================================
+   ABYSSAL REGEN VFX STYLES
+   Dark Leviathan - Regeneration Ability
+   ==================================== */
+
+/* =====================================
+   CAST VFX - Initial Ability Activation
+   ===================================== */
+
+.abyssal-regen-cast-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, 
+        rgba(75, 0, 130, 0.8) 0%, 
+        rgba(25, 25, 112, 0.6) 40%, 
+        rgba(0, 0, 0, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalRegenCastAura 0.8s ease-out;
+    pointer-events: none;
+    z-index: 900;
+}
+
+@keyframes abyssalRegenCastAura {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+}
+
+.abyssal-regen-tendrils {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 901;
+}
+
+.abyssal-tendril {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 40px;
+    background: linear-gradient(to top, 
+        transparent 0%, 
+        rgba(138, 43, 226, 0.8) 30%, 
+        rgba(75, 0, 130, 1) 60%, 
+        rgba(25, 25, 112, 0.9) 80%, 
+        transparent 100%);
+    transform-origin: bottom center;
+    animation: abyssalTendrilGrow 0.8s ease-out;
+    border-radius: 2px 2px 0 0;
+}
+
+@keyframes abyssalTendrilGrow {
+    0% {
+        height: 0;
+        opacity: 0;
+    }
+    50% {
+        height: 50px;
+        opacity: 1;
+    }
+    100% {
+        height: 40px;
+        opacity: 0.8;
+    }
+}
+
+.abyssal-regen-vortex {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: conic-gradient(from 0deg, 
+        transparent 0deg, 
+        rgba(75, 0, 130, 0.6) 90deg, 
+        rgba(25, 25, 112, 0.8) 180deg, 
+        rgba(138, 43, 226, 0.6) 270deg, 
+        transparent 360deg);
+    border-radius: 50%;
+    animation: abyssalVortexSpin 0.8s linear;
+    pointer-events: none;
+    z-index: 902;
+}
+
+@keyframes abyssalVortexSpin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) scale(1);
+        opacity: 1;
+    }
+}
+
+.abyssal-regen-particles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 900;
+}
+
+.abyssal-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, rgba(138, 43, 226, 1) 0%, rgba(75, 0, 130, 0.8) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: abyssalParticleSwirl 2s linear infinite;
+}
+
+.abyssal-particle:nth-child(1) { top: 10%; left: 20%; }
+.abyssal-particle:nth-child(2) { top: 80%; left: 70%; }
+.abyssal-particle:nth-child(3) { top: 30%; left: 90%; }
+.abyssal-particle:nth-child(4) { top: 70%; left: 10%; }
+.abyssal-particle:nth-child(5) { top: 50%; left: 50%; }
+.abyssal-particle:nth-child(6) { top: 20%; left: 60%; }
+.abyssal-particle:nth-child(7) { top: 90%; left: 30%; }
+.abyssal-particle:nth-child(8) { top: 40%; left: 15%; }
+.abyssal-particle:nth-child(9) { top: 60%; left: 85%; }
+.abyssal-particle:nth-child(10) { top: 15%; left: 45%; }
+
+@keyframes abyssalParticleSwirl {
+    0% {
+        transform: rotate(0deg) translateX(30px) rotate(0deg);
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) translateX(30px) rotate(-360deg);
+        opacity: 0;
+    }
+}
+
+/* =====================================
+   BUFF VFX - Persistent Regeneration Aura
+   ===================================== */
+
+.abyssal-regen-buff-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, 
+        rgba(75, 0, 130, 0.4) 0%, 
+        rgba(25, 25, 112, 0.3) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalRegenBuffPulse 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 850;
+}
+
+@keyframes abyssalRegenBuffPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.abyssal-regen-absorption {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 90px;
+    pointer-events: none;
+    z-index: 851;
+}
+
+.abyssal-absorption-stream {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 25px;
+    background: linear-gradient(to top, 
+        transparent 0%, 
+        rgba(138, 43, 226, 0.6) 40%, 
+        rgba(75, 0, 130, 0.8) 80%, 
+        transparent 100%);
+    transform-origin: bottom center;
+    animation: abyssalAbsorptionStream 1.5s ease-in-out infinite;
+    border-radius: 1px;
+}
+
+@keyframes abyssalAbsorptionStream {
+    0%, 100% {
+        height: 20px;
+        opacity: 0.4;
+    }
+    50% {
+        height: 30px;
+        opacity: 0.8;
+    }
+}
+
+/* =====================================
+   ONGOING VFX - Continuous Regeneration
+   ===================================== */
+
+.abyssal-regen-ongoing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 130px;
+    height: 130px;
+    pointer-events: none;
+    z-index: 800;
+}
+
+.abyssal-regen-pulse-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, 
+        rgba(75, 0, 130, 0.3) 0%, 
+        rgba(25, 25, 112, 0.2) 50%, 
+        rgba(138, 43, 226, 0.1) 80%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalRegenOngoingPulse 3s ease-in-out infinite;
+}
+
+@keyframes abyssalRegenOngoingPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.6;
+    }
+}
+
+.abyssal-regen-heal-particles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+    z-index: 801;
+}
+
+.abyssal-heal-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, 
+        rgba(138, 43, 226, 0.9) 0%, 
+        rgba(75, 0, 130, 0.7) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: abyssalHealParticleFloat 3.6s ease-in-out infinite;
+}
+
+.abyssal-heal-particle:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+.abyssal-heal-particle:nth-child(2) { top: 70%; left: 80%; animation-delay: 0.3s; }
+.abyssal-heal-particle:nth-child(3) { top: 40%; left: 10%; animation-delay: 0.6s; }
+.abyssal-heal-particle:nth-child(4) { top: 80%; left: 40%; animation-delay: 0.9s; }
+.abyssal-heal-particle:nth-child(5) { top: 10%; left: 70%; animation-delay: 1.2s; }
+.abyssal-heal-particle:nth-child(6) { top: 60%; left: 20%; animation-delay: 1.5s; }
+.abyssal-heal-particle:nth-child(7) { top: 30%; left: 90%; animation-delay: 1.8s; }
+.abyssal-heal-particle:nth-child(8) { top: 90%; left: 60%; animation-delay: 2.1s; }
+.abyssal-heal-particle:nth-child(9) { top: 50%; left: 5%; animation-delay: 2.4s; }
+.abyssal-heal-particle:nth-child(10) { top: 15%; left: 85%; animation-delay: 2.7s; }
+.abyssal-heal-particle:nth-child(11) { top: 85%; left: 15%; animation-delay: 3.0s; }
+.abyssal-heal-particle:nth-child(12) { top: 45%; left: 50%; animation-delay: 3.3s; }
+
+@keyframes abyssalHealParticleFloat {
+    0% {
+        transform: translateY(0px) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(-15px) scale(1);
+    }
+    100% {
+        transform: translateY(-25px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+.abyssal-regen-swirls {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110px;
+    height: 110px;
+    pointer-events: none;
+    z-index: 802;
+}
+
+.abyssal-energy-swirl {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: conic-gradient(from 0deg, 
+        transparent 0deg, 
+        rgba(75, 0, 130, 0.4) 60deg, 
+        rgba(138, 43, 226, 0.6) 120deg, 
+        rgba(25, 25, 112, 0.4) 180deg, 
+        transparent 240deg,
+        rgba(75, 0, 130, 0.3) 300deg,
+        transparent 360deg);
+    border-radius: 50%;
+    animation: abyssalEnergySwirlRotate 4s linear infinite;
+}
+
+.abyssal-energy-swirl:nth-child(1) { 
+    width: 40px; height: 40px; 
+    animation-duration: 3s; 
+    animation-direction: normal;
+}
+.abyssal-energy-swirl:nth-child(2) { 
+    width: 60px; height: 60px; 
+    animation-duration: 4s; 
+    animation-direction: reverse;
+}
+.abyssal-energy-swirl:nth-child(3) { 
+    width: 80px; height: 80px; 
+    animation-duration: 5s; 
+    animation-direction: normal;
+}
+.abyssal-energy-swirl:nth-child(4) { 
+    width: 50px; height: 50px; 
+    animation-duration: 3.5s; 
+    animation-direction: reverse;
+}
+.abyssal-energy-swirl:nth-child(5) { 
+    width: 70px; height: 70px; 
+    animation-duration: 4.5s; 
+    animation-direction: normal;
+}
+.abyssal-energy-swirl:nth-child(6) { 
+    width: 45px; height: 45px; 
+    animation-duration: 3.2s; 
+    animation-direction: reverse;
+}
+
+@keyframes abyssalEnergySwirlRotate {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+        opacity: 0.3;
+    }
+}
+
+/* =====================================
+   EXPIRATION VFX - Buff Removal
+   ===================================== */
+
+.abyssal-regen-expiration {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 900;
+}
+
+.abyssal-dispersion-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, 
+        rgba(138, 43, 226, 0.8) 0%, 
+        rgba(75, 0, 130, 0.6) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    transform-origin: center;
+    animation: abyssalDispersionParticle 1s ease-out;
+}
+
+@keyframes abyssalDispersionParticle {
+    0% {
+        transform: translateX(0) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(40px) scale(0.2);
+        opacity: 0;
+    }
+}
+
+/* =====================================
+   SCREEN EFFECTS & UTILITIES
+   ===================================== */
+
+.battle-container.abyssal-regen-cast {
+    animation: abyssalRegenScreenPulse 0.8s ease-out;
+}
+
+@keyframes abyssalRegenScreenPulse {
+    0%, 100% {
+        filter: brightness(1) hue-rotate(0deg);
+    }
+    50% {
+        filter: brightness(1.1) hue-rotate(15deg);
+    }
+}
+
+/* =====================================
+   RESPONSIVE DESIGN
+   ===================================== */
+
+@media (max-width: 768px) {
+    .abyssal-regen-cast-aura,
+    .abyssal-regen-buff-aura,
+    .abyssal-regen-ongoing {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .abyssal-regen-tendrils,
+    .abyssal-regen-absorption,
+    .abyssal-regen-heal-particles {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .abyssal-tendril {
+        height: 30px;
+    }
+    
+    .abyssal-particle,
+    .abyssal-heal-particle {
+        width: 5px;
+        height: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .abyssal-regen-cast-aura,
+    .abyssal-regen-buff-aura,
+    .abyssal-regen-ongoing {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .abyssal-regen-tendrils,
+    .abyssal-regen-absorption,
+    .abyssal-regen-heal-particles {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .abyssal-tendril {
+        height: 25px;
+        width: 3px;
+    }
+    
+    .abyssal-particle,
+    .abyssal-heal-particle {
+        width: 4px;
+        height: 4px;
+    }
+}
+
+/* =====================================
+   ACCESSIBILITY & PERFORMANCE
+   ===================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .abyssal-regen-cast-aura,
+    .abyssal-regen-buff-aura,
+    .abyssal-regen-ongoing,
+    .abyssal-particle,
+    .abyssal-heal-particle,
+    .abyssal-energy-swirl {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+/* Improved performance for complex animations */
+.abyssal-regen-cast-aura,
+.abyssal-regen-buff-aura,
+.abyssal-regen-ongoing,
+.abyssal-regen-vortex,
+.abyssal-energy-swirl {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+} 

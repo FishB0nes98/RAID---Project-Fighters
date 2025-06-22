@@ -1,0 +1,653 @@
+/* Tidal Splash VFX Styles */
+
+/* Preparation VFX */
+.tidal-splash-water-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(64, 164, 223, 0.8) 0%, rgba(32, 107, 156, 0.6) 50%, rgba(16, 53, 78, 0.3) 100%);
+    border-radius: 50%;
+    animation: tidalWaterAuraPulse 1s ease-in-out;
+    pointer-events: none;
+    z-index: 100;
+}
+
+@keyframes tidalWaterAuraPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+}
+
+.tidal-splash-water-tendrils {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 99;
+}
+
+.tidal-water-tendril {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 60px;
+    background: linear-gradient(to top, transparent 0%, rgba(100, 200, 255, 0.9) 30%, rgba(64, 164, 223, 1) 70%, transparent 100%);
+    transform-origin: bottom center;
+    animation: tidalTendrilGather 1s ease-out;
+    border-radius: 2px;
+}
+
+@keyframes tidalTendrilGather {
+    0% { 
+        height: 20px;
+        opacity: 0;
+    }
+    50% { 
+        height: 80px;
+        opacity: 1;
+    }
+    100% { 
+        height: 60px;
+        opacity: 0.8;
+    }
+}
+
+.tidal-splash-vortex {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(64, 164, 223, 0.7);
+    border-radius: 50%;
+    animation: tidalVortexSpin 1s linear;
+    pointer-events: none;
+    z-index: 98;
+}
+
+.tidal-splash-vortex::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(100, 200, 255, 0.5);
+    border-radius: 50%;
+    animation: tidalVortexSpin 0.8s linear reverse;
+}
+
+@keyframes tidalVortexSpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.5); }
+    100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+}
+
+.tidal-splash-particles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 97;
+}
+
+.tidal-water-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, rgba(100, 200, 255, 1) 0%, rgba(64, 164, 223, 0.8) 70%, transparent 100%);
+    border-radius: 50%;
+    animation: tidalParticleSwirl 2.5s linear infinite;
+}
+
+.tidal-water-particle:nth-child(odd) {
+    animation-direction: reverse;
+}
+
+@keyframes tidalParticleSwirl {
+    0% { 
+        transform: rotate(0deg) translateX(40px) rotate(0deg);
+        opacity: 0;
+    }
+    20% { 
+        opacity: 1;
+    }
+    80% { 
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(360deg) translateX(75px) rotate(-360deg);
+        opacity: 0;
+    }
+}
+
+.tidal-surge-prepare {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(64, 164, 223, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: tidalSurgePrepare 1s ease-out;
+    pointer-events: none;
+    z-index: 96;
+}
+
+@keyframes tidalSurgePrepare {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    60% { 
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Wave VFX */
+.tidal-splash-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(64, 164, 223, 0.6) 0%, rgba(32, 107, 156, 0.4) 40%, transparent 70%);
+    animation: tidalWaveExpand 3s ease-out;
+    pointer-events: none;
+    z-index: 50;
+}
+
+@keyframes tidalWaveExpand {
+    0% { 
+        transform: scale(0.1);
+        opacity: 0;
+    }
+    30% { 
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.tidal-water-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.7) 0%, rgba(64, 164, 223, 0.5) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: tidalWaterWaveExpand 2.5s ease-out;
+    pointer-events: none;
+    z-index: 49;
+}
+
+@keyframes tidalWaterWaveExpand {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    40% { 
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+    }
+}
+
+.tidal-wave-rings {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 48;
+}
+
+.tidal-wave-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(64, 164, 223, 0.8);
+    border-radius: 50%;
+    animation: tidalRingExpand 2s ease-out;
+}
+
+@keyframes tidalRingExpand {
+    0% { 
+        width: 50px;
+        height: 50px;
+        opacity: 1;
+        border-width: 3px;
+    }
+    100% { 
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+.tidal-splash-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(64, 164, 223, 0.3) 0%, rgba(100, 200, 255, 0.2) 50%, rgba(32, 107, 156, 0.3) 100%);
+    animation: tidalSplashOverlay 3s ease-out;
+    pointer-events: none;
+    z-index: 47;
+}
+
+@keyframes tidalSplashOverlay {
+    0% { opacity: 0; }
+    30% { opacity: 0.6; }
+    100% { opacity: 0; }
+}
+
+.tidal-water-droplets {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 46;
+}
+
+.tidal-droplet {
+    position: absolute;
+    width: 4px;
+    height: 8px;
+    background: linear-gradient(to bottom, rgba(100, 200, 255, 0.9) 0%, rgba(64, 164, 223, 1) 50%, rgba(32, 107, 156, 0.8) 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: tidalDropletFall 4s linear;
+}
+
+@keyframes tidalDropletFall {
+    0% { 
+        top: -10px;
+        opacity: 0;
+    }
+    10% { 
+        opacity: 1;
+    }
+    90% { 
+        opacity: 1;
+    }
+    100% { 
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+/* Impact VFX */
+.tidal-splash-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    animation: tidalImpactBlast 1.8s ease-out;
+    pointer-events: none;
+    z-index: 110;
+}
+
+.tidal-splash-impact.powerful {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.9) 0%, rgba(64, 164, 223, 0.7) 50%, rgba(32, 107, 156, 0.4) 100%);
+}
+
+.tidal-splash-impact.moderate {
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle, rgba(64, 164, 223, 0.8) 0%, rgba(32, 107, 156, 0.6) 50%, rgba(16, 53, 78, 0.3) 100%);
+}
+
+@keyframes tidalImpactBlast {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    30% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
+
+.tidal-water-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 109;
+}
+
+.tidal-burst-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 20px;
+    background: linear-gradient(to top, rgba(64, 164, 223, 1) 0%, rgba(100, 200, 255, 0.8) 70%, transparent 100%);
+    transform-origin: bottom center;
+    animation: tidalBurstParticle 1.5s ease-out;
+    border-radius: 4px;
+}
+
+.tidal-burst-particle.powerful {
+    width: 10px;
+    height: 25px;
+    background: linear-gradient(to top, rgba(100, 200, 255, 1) 0%, rgba(150, 220, 255, 0.9) 70%, transparent 100%);
+}
+
+@keyframes tidalBurstParticle {
+    0% { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% { 
+        transform: translateY(-40px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+.tidal-splash-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    z-index: 108;
+}
+
+.tidal-splash-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 30px;
+    background: linear-gradient(to top, rgba(64, 164, 223, 1) 0%, rgba(100, 200, 255, 0.8) 50%, transparent 100%);
+    transform-origin: bottom center;
+    animation: tidalSplashLine 1.2s ease-out;
+    border-radius: 2px;
+}
+
+.tidal-splash-line.powerful {
+    width: 5px;
+    height: 40px;
+    background: linear-gradient(to top, rgba(100, 200, 255, 1) 0%, rgba(150, 220, 255, 0.9) 50%, transparent 100%);
+}
+
+@keyframes tidalSplashLine {
+    0% { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% { 
+        transform: translateY(-30px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.tidal-impact-ripples {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 107;
+}
+
+.tidal-ripple-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(64, 164, 223, 0.7);
+    border-radius: 50%;
+    animation: tidalRippleExpand 1.5s ease-out;
+}
+
+.tidal-ripple-ring.powerful {
+    border: 3px solid rgba(100, 200, 255, 0.8);
+}
+
+@keyframes tidalRippleExpand {
+    0% { 
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+    }
+    100% { 
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+    }
+}
+
+/* Healing VFX */
+.tidal-healing-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(64, 164, 223, 0.6) 0%, rgba(100, 200, 255, 0.4) 50%, rgba(150, 220, 255, 0.2) 100%);
+    border-radius: 50%;
+    animation: tidalHealingAuraPulse 2s ease-in-out;
+    pointer-events: none;
+    z-index: 120;
+}
+
+@keyframes tidalHealingAuraPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+.tidal-absorption-streams {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 119;
+}
+
+.tidal-absorption-stream {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 50px;
+    background: linear-gradient(to bottom, transparent 0%, rgba(100, 200, 255, 0.8) 30%, rgba(64, 164, 223, 1) 70%, rgba(32, 107, 156, 0.8) 100%);
+    transform-origin: top center;
+    animation: tidalAbsorptionStream 2s ease-in;
+    border-radius: 3px;
+}
+
+@keyframes tidalAbsorptionStream {
+    0% { 
+        height: 80px;
+        opacity: 1;
+    }
+    100% { 
+        height: 20px;
+        opacity: 0;
+    }
+}
+
+.tidal-healing-particles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 118;
+}
+
+.tidal-healing-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, rgba(150, 220, 255, 1) 0%, rgba(100, 200, 255, 0.8) 70%, transparent 100%);
+    border-radius: 50%;
+    animation: tidalHealingParticleFloat 2.5s ease-out;
+}
+
+@keyframes tidalHealingParticleFloat {
+    0% { 
+        transform: rotate(0deg) translateX(30px) rotate(0deg) translateY(0);
+        opacity: 0;
+    }
+    20% { 
+        opacity: 1;
+    }
+    80% { 
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(360deg) translateX(10px) rotate(-360deg) translateY(-20px);
+        opacity: 0;
+    }
+}
+
+.tidal-healing-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #64a4df;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(100, 200, 255, 0.6);
+    animation: tidalHealingTextFloat 2s ease-out;
+    pointer-events: none;
+    z-index: 121;
+}
+
+@keyframes tidalHealingTextFloat {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    30% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -70%) scale(1);
+        opacity: 0;
+    }
+}
+
+.tidal-rejuvenation-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.3) 0%, rgba(64, 164, 223, 0.2) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: tidalRejuvenationGlow 2s ease-in-out;
+    pointer-events: none;
+    z-index: 117;
+}
+
+@keyframes tidalRejuvenationGlow {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Screen Shake Effect */
+.battle-container.tidal-splash-shake {
+    animation: tidalSplashShake 0.8s ease-out;
+}
+
+@keyframes tidalSplashShake {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(-3px) translateY(2px); }
+    20% { transform: translateX(3px) translateY(-2px); }
+    30% { transform: translateX(-2px) translateY(3px); }
+    40% { transform: translateX(2px) translateY(-1px); }
+    50% { transform: translateX(-1px) translateY(2px); }
+    60% { transform: translateX(1px) translateY(-2px); }
+    70% { transform: translateX(-1px) translateY(1px); }
+    80% { transform: translateX(1px) translateY(-1px); }
+    90% { transform: translateX(-1px) translateY(1px); }
+    100% { transform: translateX(0); }
+} 

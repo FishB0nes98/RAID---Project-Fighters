@@ -1503,9 +1503,15 @@ class StageManager {
                 }
                 
                 // --- NEW: Apply atlantean blessings from saved state ---
-                if (savedState && savedState.atlanteanBlessings) {
-                    character.atlanteanBlessings = { ...savedState.atlanteanBlessings };
-                    console.log(`[StageManager] Restored atlantean blessings for ${character.name}:`, character.atlanteanBlessings);
+                            if (savedState && savedState.atlanteanBlessings) {
+                character.atlanteanBlessings = { ...savedState.atlanteanBlessings };
+                console.log(`[StageManager] Restored atlantean blessings for ${character.name}:`, character.atlanteanBlessings);
+            }
+            
+            // Restore story effects if they exist
+            if (savedState && savedState.storyEffects) {
+                character.storyEffects = { ...savedState.storyEffects };
+                console.log(`[StageManager] Restored story effects for ${character.name}:`, character.storyEffects);
                     
                     // Apply lifesteal blessing if present
                     if (savedState.atlanteanBlessings.lifesteal_blessing) {

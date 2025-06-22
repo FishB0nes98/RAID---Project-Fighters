@@ -640,6 +640,54 @@ class StoryUI {
                      positions.push({ x: fallbackX, y: fallbackY });
                  }
              });
+        } else if (storyTitle === "Saving Atlantis" && mapContainerWidth > 0 && mapContainerHeight > 0) {
+            console.log("[StoryUI] Applying SPECIFIC underwater layout for 'Saving Atlantis'");
+            
+            // Create an underwater descent layout that follows the narrative progression
+            // Map dimensions - ensure plenty of space for the underwater journey
+            const width = Math.max(mapContainerWidth, 2200); // Increased width for better spacing
+            const height = Math.max(mapContainerHeight, 1600); // Increased height for vertical progression
+            
+            // Define specific positions for each stage in the Saving Atlantis story
+            // Organized in a flowing underwater descent pattern
+            const atlantisLayout = {
+                "The Deep Waters": { x: 0.50, y: 0.10 },                    // Start at surface (top center)
+                "Atlantean Blessings": { x: 0.35, y: 0.20 },               // Choice stage (left)
+                "Frozen Underground Ruins": { x: 0.20, y: 0.35 },          // Frozen ruins (far left)
+                "Alliance with Sub Zero": { x: 0.35, y: 0.45 },           // Recruit stage (left-center)
+                "Ambush of the Shadow Assassins": { x: 0.55, y: 0.35 },    // Assassin ambush (right)
+                "Returning Home": { x: 0.50, y: 0.55 },                    // Safe haven (center, middle depth)
+                "Dark Underwater Cave": { x: 0.30, y: 0.75 },              // Dark Leviathan (left, deep)
+                "Atlantean Recovery Chamber": { x: 0.50, y: 0.85 },        // Recovery choice (center, deeper)
+                "Ancient Atlantean Throne Room": { x: 0.70, y: 0.95 }      // Final boss (right, deepest)
+            };
+            
+            stages.forEach((stage, index) => {
+                let position = atlantisLayout[stage.name];
+                
+                if (position) {
+                    // Calculate absolute pixel values from percentages
+                    const x = position.x * width;
+                    const y = position.y * height;
+                    
+                    // Add slight variation for more natural underwater feel
+                    const jitterAmount = 20;
+                    const jitterX = (Math.random() - 0.5) * jitterAmount;
+                    const jitterY = (Math.random() - 0.5) * jitterAmount;
+                    
+                    positions.push({ x: x + jitterX, y: y + jitterY });
+                } else {
+                    // Fallback for any unexpected stages
+                    console.warn(`[StoryUI] No specific position defined for stage: ${stage.name}. Using fallback.`);
+                    const fallbackX = minPadding + (width / 4) * (index % 4);
+                    const fallbackY = minPadding + Math.floor(index / 4) * (stageHeight + 200);
+                    positions.push({ x: fallbackX, y: fallbackY });
+                }
+            });
+            
+            // Ensure the map container is large enough
+            this.mapStagesElement.style.width = `${width}px`;
+            this.mapStagesElement.style.height = `${height}px`;
         } else {
             // --- Generic layout (remains the same) ---
             console.log("[StoryUI] Applying generic layout.");
@@ -884,6 +932,10 @@ class StoryUI {
                 this.showStageDetails(stage); // Show base details - custom demonic interface is rendered inside showStageDetails
                 // Note: No additional renderAllySelection call - demonic interface handles everything
                 break;
+            case 'healing_and_recruit':
+                this.showStageDetails(stage); // Show base details
+                // Don't process effects here - wait for user to click "Continue Journey"
+                break;
             default:
                 console.error("Unknown stage type:", stage.type);
                 this.showStageDetails(stage); // Default to showing details
@@ -977,6 +1029,15 @@ class StoryUI {
             // Create a custom ally selection interface in the description area
             this.renderDemonicAllyInterface(stage);
             // Note: Continue to show the details panel but skip other rendering
+        } else if (stage.type === 'healing_and_recruit') {
+            console.log('[StoryUI] Handling healing_and_recruit stage type');
+            this.enemyListElement.parentElement.classList.add('hidden');
+            this.rewardListElement.parentElement.classList.add('hidden');
+            this.startStageButton.classList.remove('hidden'); // Keep start button visible
+            this.startStageButton.textContent = 'Continue Journey'; // Change button text
+            this.startStageButton.disabled = false;
+            if (this.closeDetailsButton) this.closeDetailsButton.classList.remove('hidden'); // Keep close button
+            if (stageActionsContainer) stageActionsContainer.classList.remove('hidden'); // Keep actions container
         } else if (isCombatStage) {
             // This is a combat stage (battle, boss, or has enemies/difficulty)
             // Populate enemies and rewards for battle stages
@@ -1631,6 +1692,32 @@ class StoryUI {
         if (currentStage && currentStage.type === 'ally_selection') {
             // For ally selection stages, trigger the demonic summoning process
             this.handleDemonicSummoning();
+            return;
+        }
+        
+        if (currentStage && currentStage.type === 'healing_and_recruit') {
+            console.log('[StoryUI] startCurrentStage: Processing healing_and_recruit stage');
+            // For healing and recruit stages, apply effects and advance
+            this.handleHealingAndRecruitStage(currentStage).then(() => {
+                // Close the details panel
+                this.closeStageDetails();
+                
+                // Advance to next stage
+                this.storyManager.advanceToNextStage().then((hasMoreStages) => {
+                    if (!hasMoreStages) {
+                        this.showStoryCompleteScreen();
+                    } else {
+                        this.renderPlayerTeam(); // Update UI
+                        this.updateStageNodes(); // Update map
+                    }
+                }).catch(error => {
+                    console.error('[StoryUI] Error advancing after healing and recruit stage:', error);
+                    this.showPopupMessage('❌ Error advancing to next stage. Please try again.', 'error', 3000);
+                });
+            }).catch(error => {
+                console.error('[StoryUI] Error processing healing and recruit stage:', error);
+                this.showPopupMessage('❌ Error processing stage effects. Please try again.', 'error', 3000);
+            });
             return;
         }
         
@@ -3336,6 +3423,76 @@ class StoryUI {
         if (this.zoomTextElement) {
             const zoomPercentage = Math.round(scale * 100);
             this.zoomTextElement.textContent = `Zoom: ${zoomPercentage}%`;
+        }
+    }
+
+    /**
+     * Handle healing and recruit stage type
+     * @param {Object} stage - The stage data
+     */
+    async handleHealingAndRecruitStage(stage) {
+        console.log('[StoryUI] Processing healing and recruit stage:', stage);
+        console.log('[StoryUI] Stage healingEffect:', stage.healingEffect);
+        console.log('[StoryUI] Stage recruitEffect:', stage.recruitEffect);
+        console.log('[StoryUI] Stage keys:', Object.keys(stage));
+        
+        try {
+            // Apply healing effect if present (without advancing)
+            if (stage.healingEffect) {
+                console.log('[StoryUI] Applying healing effect:', stage.healingEffect);
+                // Apply the effect directly without advancing stage
+                const effect = stage.healingEffect;
+                if (effect.target === 'all' && effect.type === 'heal_and_mana_restore_all_full') {
+                    console.log('[StoryUI] Healing all team members to full HP and Mana');
+                    this.storyManager.playerTeam.forEach(member => {
+                        if (member.currentHP > 0) { // Only affect living characters
+                            const maxHP = member.stats?.hp ?? 1;
+                            const maxMana = member.stats?.mana ?? 0;
+                            const oldHP = member.currentHP;
+                            const oldMana = member.currentMana;
+                            member.currentHP = maxHP;
+                            member.currentMana = maxMana;
+                            console.log(`Fully restored ${member.id}: HP ${oldHP}→${member.currentHP}/${maxHP}, Mana ${oldMana}→${member.currentMana}/${maxMana}`);
+                        }
+                    });
+                    console.log('[StoryUI] Healing effect applied successfully');
+                } else {
+                    console.warn('[StoryUI] Healing effect type not recognized:', effect);
+                }
+            } else {
+                console.log('[StoryUI] No healing effect found in stage');
+            }
+            
+            // Apply recruit effect if present (without advancing)
+            if (stage.recruitEffect) {
+                console.log('[StoryUI] Applying recruit effect:', stage.recruitEffect);
+                const effect = stage.recruitEffect;
+                if (effect.type === 'add_specific_ally' && effect.characterId) {
+                    console.log(`[StoryUI] Attempting to add specific ally: ${effect.characterId}`);
+                    // Check if character is already in the team
+                    const isAlreadyInTeam = this.storyManager.playerTeam.some(member => member.id === effect.characterId);
+                    if (!isAlreadyInTeam) {
+                        console.log(`[StoryUI] Character ${effect.characterId} not in team, adding...`);
+                        // Add the specific ally to the team
+                        await this.storyManager.addSelectedAlly(effect.characterId);
+                        console.log(`[StoryUI] Successfully added specific ally: ${effect.characterId}`);
+                    } else {
+                        console.log(`[StoryUI] Character ${effect.characterId} is already in the team`);
+                    }
+                } else {
+                    console.warn('[StoryUI] Recruit effect type not recognized or missing characterId:', effect);
+                }
+            } else {
+                console.log('[StoryUI] No recruit effect found in stage');
+            }
+            
+            // Show success message
+            this.showPopupMessage('✨ Your team has been fully healed and reinforced! Ready to continue the journey.', 'success', 4000);
+            
+        } catch (error) {
+            console.error('[StoryUI] Error processing healing and recruit stage:', error);
+            this.showPopupMessage('❌ Error processing stage effects. Please try again.', 'error', 3000);
+            throw error; // Re-throw to be handled by startCurrentStage
         }
     }
 } 

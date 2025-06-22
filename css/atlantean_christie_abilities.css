@@ -1,0 +1,1669 @@
+/* Atlantean Christie Ability Points Styling */
+
+/* Override mana bar styling for Atlantean Christie */
+.character-slot[data-character-id="atlantean_christie"] .mana-bar {
+    background: linear-gradient(90deg, #2d3748 0%, #1a202c 100%) !important;
+    border: 2px solid #4a5568 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    position: relative !important;
+    height: 18px !important;
+    border-radius: 12px !important;
+    overflow: visible !important;
+}
+
+/* Create 6 individual ability point beans (empty/background) */
+.character-slot[data-character-id="atlantean_christie"] .mana-bar::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: calc(100% - 6px);
+    height: calc(100% - 4px);
+    background: 
+        radial-gradient(circle at 8.33% 50%, #4a5568 0%, #2d3748 60%, transparent 70%),
+        radial-gradient(circle at 25% 50%, #4a5568 0%, #2d3748 60%, transparent 70%),
+        radial-gradient(circle at 41.67% 50%, #4a5568 0%, #2d3748 60%, transparent 70%),
+        radial-gradient(circle at 58.33% 50%, #4a5568 0%, #2d3748 60%, transparent 70%),
+        radial-gradient(circle at 75% 50%, #4a5568 0%, #2d3748 60%, transparent 70%),
+        radial-gradient(circle at 91.67% 50%, #4a5568 0%, #2d3748 60%, transparent 70%);
+    background-size: 14% 100%, 14% 100%, 14% 100%, 14% 100%, 14% 100%, 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%, 18% 0%, 34% 0%, 50% 0%, 66% 0%, 82% 0%;
+    border-radius: 8px;
+    z-index: 1;
+}
+
+/* Show filled beans based on current ability points */
+.character-slot[data-character-id="atlantean_christie"] .mana-bar::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: calc(100% - 6px);
+    height: calc(100% - 4px);
+    border-radius: 8px;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Show beans based on ability point count */
+.character-slot[data-character-id="atlantean_christie"] .mana-bar[data-ap="1"]::after {
+    opacity: 1;
+    background: radial-gradient(circle at 8.33% 50%, #10b981 0%, #059669 60%, transparent 70%);
+    background-size: 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%;
+}
+
+.character-slot[data-character-id="atlantean_christie"] .mana-bar[data-ap="2"]::after {
+    opacity: 1;
+    background: 
+        radial-gradient(circle at 8.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 25% 50%, #10b981 0%, #059669 60%, transparent 70%);
+    background-size: 14% 100%, 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%, 18% 0%;
+}
+
+.character-slot[data-character-id="atlantean_christie"] .mana-bar[data-ap="3"]::after {
+    opacity: 1;
+    background: 
+        radial-gradient(circle at 8.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 25% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 41.67% 50%, #10b981 0%, #059669 60%, transparent 70%);
+    background-size: 14% 100%, 14% 100%, 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%, 18% 0%, 34% 0%;
+}
+
+.character-slot[data-character-id="atlantean_christie"] .mana-bar[data-ap="4"]::after {
+    opacity: 1;
+    background: 
+        radial-gradient(circle at 8.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 25% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 41.67% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 58.33% 50%, #10b981 0%, #059669 60%, transparent 70%);
+    background-size: 14% 100%, 14% 100%, 14% 100%, 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%, 18% 0%, 34% 0%, 50% 0%;
+}
+
+.character-slot[data-character-id="atlantean_christie"] .mana-bar[data-ap="5"]::after {
+    opacity: 1;
+    background: 
+        radial-gradient(circle at 8.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 25% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 41.67% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 58.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 75% 50%, #10b981 0%, #059669 60%, transparent 70%);
+    background-size: 14% 100%, 14% 100%, 14% 100%, 14% 100%, 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%, 18% 0%, 34% 0%, 50% 0%, 66% 0%;
+}
+
+.character-slot[data-character-id="atlantean_christie"] .mana-bar[data-ap="6"]::after {
+    opacity: 1;
+    background: 
+        radial-gradient(circle at 8.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 25% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 41.67% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 58.33% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 75% 50%, #10b981 0%, #059669 60%, transparent 70%),
+        radial-gradient(circle at 91.67% 50%, #10b981 0%, #059669 60%, transparent 70%);
+    background-size: 14% 100%, 14% 100%, 14% 100%, 14% 100%, 14% 100%, 14% 100%;
+    background-repeat: no-repeat;
+    background-position: 2% 0%, 18% 0%, 34% 0%, 50% 0%, 66% 0%, 82% 0%;
+    animation: abilityPointsPulse 2s ease-in-out infinite;
+}
+
+/* Add subtle glow effect */
+.character-slot[data-character-id="atlantean_christie"] .mana-bar {
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.6),
+        0 0 8px rgba(16, 185, 129, 0.3) !important;
+}
+
+@keyframes abilityPointsPulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+/* Kick ability VFX animations */
+@keyframes kickStrike {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(0.8) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes chainKickStrike {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.0);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+    }
+}
+
+.kick-strike-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #00ffff 0%, #0080ff 50%, transparent 70%);
+    border-radius: 50%;
+    animation: kickStrike 0.5s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.chain-kick-vfx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #80ffff 0%, #4080ff 60%, transparent 80%);
+    border-radius: 50%;
+    animation: chainKickStrike 0.4s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Charming Kiss VFX - Enhanced Aquatic Theme */
+.charming-kiss-cast-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(0, 255, 255, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+        radial-gradient(circle, rgba(0, 191, 255, 0.2) 0%, transparent 70%);
+    animation: aquaticAuraPulse 2s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.aquatic-ripples-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.aquatic-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(0, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: aquaticRippleExpand 2s ease-out infinite;
+}
+
+.aquatic-bubbles-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1001;
+    overflow: hidden;
+}
+
+.aquatic-bubble {
+    position: absolute;
+    bottom: 0;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.8) 0%, rgba(0, 191, 255, 0.4) 70%, transparent 100%);
+    border-radius: 50%;
+    animation: bubbleFloat 3s ease-in-out infinite;
+    box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+        0 0 8px rgba(0, 255, 255, 0.3);
+}
+
+.kiss-indicator {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 16px;
+    height: 12px;
+    background: 
+        radial-gradient(ellipse at 30% 40%, rgba(255, 20, 147, 0.9) 0%, rgba(255, 20, 147, 0.7) 60%, transparent 80%),
+        radial-gradient(ellipse at 70% 40%, rgba(255, 20, 147, 0.9) 0%, rgba(255, 20, 147, 0.7) 60%, transparent 80%);
+    background-size: 50% 100%, 50% 100%;
+    background-position: 0% 0%, 50% 0%;
+    background-repeat: no-repeat;
+    border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+    animation: kissIndicatorPulse 1s ease-in-out 2;
+    pointer-events: none;
+    z-index: 1002;
+    box-shadow: 
+        0 0 8px rgba(255, 20, 147, 0.8),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Aquatic Kiss Projectile */
+.aquatic-kiss-projectile {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(255, 20, 147, 0.9) 0%, rgba(0, 255, 255, 0.7) 50%, transparent 80%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 15px rgba(255, 20, 147, 0.8),
+        0 0 25px rgba(0, 255, 255, 0.6),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+    z-index: 1500;
+    animation: projectilePulse 0.3s ease-in-out infinite alternate;
+}
+
+.aquatic-trail-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1499;
+}
+
+.aquatic-trail-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: trailParticleFade 0.8s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Impact and Splash Effects */
+.aquatic-kiss-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 20, 147, 0.6) 0%, rgba(0, 255, 255, 0.4) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: impactExplosion 0.6s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.aquatic-splash-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.aquatic-splash-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 12px;
+    background: linear-gradient(180deg, rgba(0, 255, 255, 0.9) 0%, rgba(173, 216, 230, 0.6) 50%, transparent 100%);
+    border-radius: 2px;
+    transform-origin: bottom center;
+    animation: splashParticle 0.8s ease-out forwards;
+}
+
+.aquatic-charm-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.water-droplet {
+    position: absolute;
+    top: 20%;
+    width: 6px;
+    height: 8px;
+    background: radial-gradient(ellipse at center top, rgba(0, 255, 255, 0.9) 0%, rgba(173, 216, 230, 0.7) 70%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: waterDropletFloat 2s ease-in-out infinite;
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.aquatic-charm-indicator {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    width: 30px;
+    height: 30px;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(255, 20, 147, 0.8) 0%, rgba(0, 255, 255, 0.6) 60%, transparent 80%);
+    border-radius: 50%;
+    animation: charmIndicatorPulse 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1002;
+    box-shadow: 
+        0 0 15px rgba(255, 20, 147, 0.6),
+        0 0 25px rgba(0, 255, 255, 0.4);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Resist Effects */
+.aquatic-resist-shield {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border: 3px solid rgba(0, 255, 255, 0.8);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, rgba(173, 216, 230, 0.2) 50%, transparent 70%);
+    animation: resistShieldPulse 1.5s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.6),
+        inset 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.aquatic-resist-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #00ffff;
+    text-shadow: 
+        0 0 10px rgba(0, 255, 255, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: resistTextFloat 1.5s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.resist-water-droplet {
+    position: absolute;
+    top: 30%;
+    width: 4px;
+    height: 6px;
+    background: radial-gradient(ellipse at center top, rgba(0, 255, 255, 0.8) 0%, rgba(173, 216, 230, 0.6) 70%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: resistDropletFall 1.5s ease-in forwards;
+    pointer-events: none;
+}
+
+/* Animations */
+@keyframes aquaticAuraPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes aquaticRippleExpand {
+    0% { 
+        width: 20px;
+        height: 20px;
+        opacity: 0.8;
+    }
+    100% { 
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+@keyframes bubbleFloat {
+    0% { 
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    50% { 
+        opacity: 0.8;
+        transform: translateY(-50px) scale(1);
+    }
+    100% { 
+        transform: translateY(-100px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+@keyframes kissIndicatorPulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: scale(1.3);
+        opacity: 1;
+    }
+}
+
+@keyframes projectilePulse {
+    0% { 
+        transform: scale(1);
+        box-shadow: 
+            0 0 15px rgba(255, 20, 147, 0.8),
+            0 0 25px rgba(0, 255, 255, 0.6);
+    }
+    100% { 
+        transform: scale(1.1);
+        box-shadow: 
+            0 0 20px rgba(255, 20, 147, 1),
+            0 0 35px rgba(0, 255, 255, 0.8);
+    }
+}
+
+@keyframes trailParticleFade {
+    0% { 
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(0.3);
+    }
+}
+
+@keyframes impactExplosion {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0.9;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.7;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes splashParticle {
+    0% { 
+        transform: translate(-50%, -50%) scale(1) translateY(0);
+        opacity: 0.9;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(0.5) translateY(-30px);
+        opacity: 0;
+    }
+}
+
+@keyframes waterDropletFloat {
+    0%, 100% { 
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translateY(-10px) rotate(5deg);
+        opacity: 1;
+    }
+}
+
+@keyframes charmIndicatorPulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+@keyframes resistShieldPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    30% { 
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.9;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes resistTextFloat {
+    0% { 
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+    }
+    30% { 
+        opacity: 1;
+    }
+    100% { 
+        transform: translateX(-50%) translateY(-30px);
+        opacity: 0;
+    }
+}
+
+@keyframes resistDropletFall {
+    0% { 
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translateY(60px);
+        opacity: 0;
+    }
+}
+
+/* Samba Slam VFX Styles */
+.samba-slam-energy-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, rgba(0, 128, 255, 0.2) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: sambaEnergyPulse 0.8s ease-in-out;
+    pointer-events: none;
+    z-index: 900;
+}
+
+.samba-dancing-waters {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 901;
+}
+
+.samba-water-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #00ffff 0%, #0080ff 70%, transparent 100%);
+    border-radius: 50%;
+    transform-origin: 0 0;
+    animation: sambaWaterDance 0.8s ease-out;
+}
+
+.samba-rhythm-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(0, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: sambaRhythmPulse 0.8s ease-in-out;
+    pointer-events: none;
+    z-index: 902;
+}
+
+.samba-slam-wave {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #00ffff 0%, #0080ff 40%, rgba(0, 128, 255, 0.3) 70%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    animation: sambaSlamWavePulse 0.4s ease-out infinite;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.samba-slam-impact-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(0, 255, 255, 0.7) 30%, rgba(0, 128, 255, 0.4) 60%, transparent 100%);
+    border-radius: 50%;
+    animation: sambaImpactExplosion 1s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.samba-shockwave-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.samba-shockwave-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(0, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: sambaShockwaveExpand 1s ease-out;
+}
+
+.samba-water-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.samba-explosion-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #00ffff 0%, #0080ff 60%, transparent 100%);
+    border-radius: 50%;
+    transform-origin: 0 0;
+    animation: sambaExplosionParticle 1.2s ease-out;
+}
+
+.samba-stun-swirl {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 1002;
+    animation: sambaStunSwirl 2s linear infinite;
+}
+
+.samba-stun-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, rgba(255, 255, 0, 0.8) 0%, rgba(255, 200, 0, 0.4) 70%, transparent 100%);
+    border-radius: 50%;
+    transform-origin: 0 -30px;
+    animation: sambaStunParticleOrbit 1s ease-in-out infinite;
+}
+
+.samba-dizzy-indicator {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 20px;
+    background: linear-gradient(45deg, #ffff00, #ffa500);
+    border-radius: 20px;
+    animation: sambaDizzyFloat 2s ease-in-out infinite;
+    opacity: 0.9;
+}
+
+.samba-dizzy-indicator::before {
+    content: '★ ★ ★';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    color: #fff;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Screen shake for Samba Slam */
+.battle-container.samba-slam-shake {
+    animation: sambaSlamScreenShake 0.6s ease-in-out;
+}
+
+/* Animations */
+@keyframes sambaEnergyPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+}
+
+@keyframes sambaWaterDance {
+    0% { 
+        transform: translate(-4px, -4px) rotate(0deg) translateX(0);
+        opacity: 1;
+    }
+    50% { 
+        transform: translate(-4px, -4px) rotate(180deg) translateX(25px);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-4px, -4px) rotate(360deg) translateX(40px);
+        opacity: 0;
+    }
+}
+
+@keyframes sambaRhythmPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.6;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0;
+    }
+}
+
+@keyframes sambaSlamWavePulse {
+    0% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes sambaImpactExplosion {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 1;
+    }
+    30% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.9;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes sambaShockwaveExpand {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+    }
+}
+
+@keyframes sambaExplosionParticle {
+    0% { 
+        transform: translate(-3px, -3px) rotate(0deg) translateX(0);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-3px, -3px) rotate(720deg) translateX(60px);
+        opacity: 0;
+    }
+}
+
+@keyframes sambaStunSwirl {
+    0% { 
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% { 
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes sambaStunParticleOrbit {
+    0% { 
+        transform: translate(-5px, -5px) rotate(0deg) translateX(30px) rotate(0deg);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-5px, -5px) rotate(360deg) translateX(30px) rotate(-360deg);
+        opacity: 0.6;
+    }
+}
+
+@keyframes sambaDizzyFloat {
+    0%, 100% { 
+        transform: translateX(-50%) translateY(0);
+    }
+    50% { 
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+@keyframes sambaSlamScreenShake {
+    0%, 100% { 
+        transform: translate(0, 0);
+    }
+    10% { 
+        transform: translate(-2px, -1px);
+    }
+    20% { 
+        transform: translate(2px, 1px);
+    }
+    30% { 
+        transform: translate(-1px, 2px);
+    }
+    40% { 
+        transform: translate(1px, -2px);
+    }
+    50% { 
+        transform: translate(-2px, 1px);
+    }
+    60% { 
+        transform: translate(2px, -1px);
+    }
+    70% { 
+        transform: translate(-1px, -2px);
+    }
+    80% { 
+        transform: translate(1px, 2px);
+    }
+    90% { 
+        transform: translate(-1px, -1px);
+    }
+}
+
+/* Throwkick Ability VFX Styles */
+
+/* Throwkick Buff VFX */
+.throwkick-power-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.8) 0%, 
+        rgba(255, 140, 0, 0.6) 40%, 
+        rgba(255, 69, 0, 0.4) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickPowerPulse 0.6s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes throwkickPowerPulse {
+    0% {
+        transform: scale(0.2);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+.throwkick-energy-rings {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    z-index: 11;
+    pointer-events: none;
+}
+
+.throwkick-energy-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(255, 215, 0, 0.8);
+    border-radius: 50%;
+    animation: throwkickEnergyRing 0.6s ease-out forwards;
+}
+
+@keyframes throwkickEnergyRing {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+        border-color: rgba(255, 215, 0, 1);
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+        border-color: rgba(255, 140, 0, 0);
+    }
+}
+
+.throwkick-lifesteal-sparkles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.throwkick-sparkle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    background: radial-gradient(circle, 
+        rgba(220, 20, 60, 1) 0%, 
+        rgba(255, 105, 180, 0.8) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickSparkle 0.6s ease-out;
+}
+
+@keyframes throwkickSparkle {
+    0% {
+        transform: translateX(0) scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(30px) scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(50px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Throwkick Preparation VFX */
+.throwkick-charging-field {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140px;
+    height: 140px;
+    margin: -70px 0 0 -70px;
+    background: radial-gradient(circle, 
+        rgba(30, 144, 255, 0.3) 0%, 
+        rgba(0, 191, 255, 0.2) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickChargingField 0.8s ease-in-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes throwkickChargingField {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+}
+
+.throwkick-stance-prep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    background: conic-gradient(
+        from 0deg,
+        rgba(30, 144, 255, 0.8) 0deg,
+        rgba(0, 191, 255, 0.6) 90deg,
+        rgba(135, 206, 250, 0.4) 180deg,
+        rgba(30, 144, 255, 0.8) 270deg,
+        rgba(30, 144, 255, 0.8) 360deg
+    );
+    border-radius: 50%;
+    animation: throwkickStancePrep 0.8s linear;
+    z-index: 11;
+    pointer-events: none;
+}
+
+@keyframes throwkickStancePrep {
+    0% {
+        transform: rotate(0deg) scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 0.7;
+    }
+}
+
+.throwkick-energy-waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.throwkick-energy-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(30, 144, 255, 0.7);
+    border-radius: 50%;
+    animation: throwkickEnergyWave 0.8s ease-out;
+}
+
+@keyframes throwkickEnergyWave {
+    0% {
+        transform: scale(0.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+.throwkick-focus-lines {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    z-index: 13;
+    pointer-events: none;
+}
+
+.throwkick-focus-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 20px;
+    margin: -10px 0 0 -1px;
+    background: linear-gradient(to bottom, 
+        rgba(30, 144, 255, 1) 0%, 
+        rgba(0, 191, 255, 0.8) 50%, 
+        transparent 100%);
+    animation: throwkickFocusLine 0.8s ease-out;
+}
+
+@keyframes throwkickFocusLine {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-15px) scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-30px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Throwkick Projectile VFX */
+.throwkick-projectile {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    background: radial-gradient(circle, 
+        rgba(30, 144, 255, 1) 0%, 
+        rgba(0, 191, 255, 0.8) 40%, 
+        rgba(135, 206, 250, 0.6) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 20px rgba(30, 144, 255, 0.8),
+        0 0 40px rgba(0, 191, 255, 0.6),
+        0 0 60px rgba(135, 206, 250, 0.4);
+    z-index: 15;
+    pointer-events: none;
+}
+
+.throwkick-projectile-trail {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 6px;
+    margin: -3px 0 0 -40px;
+    background: linear-gradient(to right, 
+        transparent 0%, 
+        rgba(30, 144, 255, 0.6) 30%, 
+        rgba(0, 191, 255, 0.8) 70%, 
+        rgba(30, 144, 255, 1) 100%);
+    border-radius: 3px;
+    animation: throwkickProjectileTrail 0.3s ease-out infinite;
+}
+
+@keyframes throwkickProjectileTrail {
+    0% {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scaleX(0.3);
+        opacity: 0.3;
+    }
+}
+
+/* Throwkick Impact VFX */
+.throwkick-impact-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    margin: -75px 0 0 -75px;
+    background: radial-gradient(circle, 
+        rgba(30, 144, 255, 1) 0%, 
+        rgba(0, 191, 255, 0.8) 30%, 
+        rgba(135, 206, 250, 0.6) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickImpactBurst 0.6s ease-out;
+    z-index: 14;
+    pointer-events: none;
+}
+
+@keyframes throwkickImpactBurst {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+.throwkick-shockwave-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    z-index: 13;
+    pointer-events: none;
+}
+
+.throwkick-shockwave-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(30, 144, 255, 0.8);
+    border-radius: 50%;
+    animation: throwkickShockwaveRing 0.8s ease-out;
+}
+
+@keyframes throwkickShockwaveRing {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+        border-color: rgba(30, 144, 255, 1);
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+        border-color: rgba(135, 206, 250, 0);
+    }
+}
+
+.throwkick-energy-explosion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.throwkick-explosion-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    background: radial-gradient(circle, 
+        rgba(30, 144, 255, 1) 0%, 
+        rgba(0, 191, 255, 0.8) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickExplosionParticle 0.8s ease-out;
+}
+
+@keyframes throwkickExplosionParticle {
+    0% {
+        transform: translateX(0) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translateX(20px) scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(60px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Throwkick Mana Gain VFX */
+.throwkick-mana-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    background: radial-gradient(circle, 
+        rgba(0, 191, 255, 0.6) 0%, 
+        rgba(30, 144, 255, 0.4) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickManaAura 1.2s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes throwkickManaAura {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.throwkick-energy-return {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    z-index: 11;
+    pointer-events: none;
+}
+
+.throwkick-return-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    background: radial-gradient(circle, 
+        rgba(0, 191, 255, 1) 0%, 
+        rgba(30, 144, 255, 0.8) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: throwkickReturnParticle 1.2s ease-out;
+}
+
+@keyframes throwkickReturnParticle {
+    0% {
+        transform: translateX(40px) scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(20px) scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(0) scale(0);
+        opacity: 0;
+    }
+}
+
+.throwkick-mana-gain-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #00BFFF;
+    text-shadow: 
+        0 0 10px rgba(0, 191, 255, 0.8),
+        0 0 20px rgba(30, 144, 255, 0.6);
+    animation: throwkickManaGainText 1.2s ease-out;
+    z-index: 15;
+    pointer-events: none;
+}
+
+@keyframes throwkickManaGainText {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translateX(-50%) translateY(-10px) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-40px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Screen Shake Effect */
+.throwkick-impact-shake {
+    animation: throwkickImpactShake 0.5s ease-out;
+}
+
+@keyframes throwkickImpactShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10% {
+        transform: translateX(-8px);
+    }
+    20% {
+        transform: translateX(8px);
+    }
+    30% {
+        transform: translateX(-6px);
+    }
+    40% {
+        transform: translateX(6px);
+    }
+    50% {
+        transform: translateX(-4px);
+    }
+    60% {
+        transform: translateX(4px);
+    }
+    70% {
+        transform: translateX(-2px);
+    }
+    80% {
+        transform: translateX(2px);
+    }
+    90% {
+        transform: translateX(-1px);
+    }
+}
+
+/* Christie Kick Animation */
+.christie-kick-animation {
+    animation: christieKickStance 0.8s ease-in-out;
+}
+
+@keyframes christieKickStance {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.05) rotate(-2deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(2deg);
+    }
+    75% {
+        transform: scale(1.08) rotate(-1deg);
+    }
+    100% {
+        transform: scale(1.02) rotate(0deg);
+    }
+}
+
+.christie-kick-power-buildup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    background: radial-gradient(circle, 
+        rgba(30, 144, 255, 0.8) 0%, 
+        rgba(0, 191, 255, 0.6) 30%, 
+        rgba(135, 206, 250, 0.4) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: christieKickPowerBuildup 0.8s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes christieKickPowerBuildup {
+    0% {
+        transform: scale(0.2);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.christie-kick-stance {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    border: 3px solid rgba(30, 144, 255, 0.9);
+    border-radius: 50%;
+    animation: christieKickStanceRing 0.8s ease-out;
+    z-index: 11;
+    pointer-events: none;
+}
+
+@keyframes christieKickStanceRing {
+    0% {
+        transform: scale(0.3) rotate(0deg);
+        opacity: 0;
+        border-color: rgba(30, 144, 255, 1);
+    }
+    50% {
+        transform: scale(1.1) rotate(180deg);
+        opacity: 1;
+        border-color: rgba(0, 191, 255, 0.8);
+    }
+    100% {
+        transform: scale(1.4) rotate(360deg);
+        opacity: 0;
+        border-color: rgba(135, 206, 250, 0);
+    }
+}
+
+.christie-kick-focus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.christie-kick-focus-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 25px;
+    margin: -12.5px 0 0 -1.5px;
+    background: linear-gradient(to bottom, 
+        rgba(30, 144, 255, 1) 0%, 
+        rgba(0, 191, 255, 0.8) 50%, 
+        transparent 100%);
+    animation: christieKickFocusLine 0.8s ease-out;
+}
+
+@keyframes christieKickFocusLine {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translateY(-10px) scale(1.2);
+        opacity: 1;
+    }
+    70% {
+        transform: translateY(-20px) scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-35px) scale(0);
+        opacity: 0;
+    }
+}
+
+.christie-kick-windup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140px;
+    height: 140px;
+    margin: -70px 0 0 -70px;
+    background: conic-gradient(
+        from 0deg,
+        rgba(30, 144, 255, 0.6) 0deg,
+        rgba(0, 191, 255, 0.4) 90deg,
+        rgba(135, 206, 250, 0.3) 180deg,
+        rgba(30, 144, 255, 0.6) 270deg,
+        rgba(30, 144, 255, 0.6) 360deg
+    );
+    border-radius: 50%;
+    animation: christieKickWindup 0.8s linear;
+    z-index: 9;
+    pointer-events: none;
+}
+
+@keyframes christieKickWindup {
+    0% {
+        transform: rotate(0deg) scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: rotate(360deg) scale(1.3);
+        opacity: 0;
+    }
+} 
