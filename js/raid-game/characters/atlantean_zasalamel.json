@@ -10,15 +10,30 @@
     "armor": 85,
     "magicalShield": 95,
     "speed": 75,
+    "lifeSteal": 0.35,
     "critChance": 35,
     "critMultiplier": 2.2,
-    "dodgeChance": 15,
+    "dodgeChance": 0.0,
     "hpPerTurn": 150,
     "manaPerTurn": 65
   },
   "description": "An ancient Atlantean necromancer who has mastered the dark arts of the deep sea. His mastery over death and water magic makes him a formidable final boss.",
   "tags": ["boss", "atlantean", "necromancer", "final_boss"],
-  "abilities": [],
+  "abilities": [
+    {
+      "id": "zasalamel_slash",
+      "name": "Slash",
+      "type": "aoe_damage",
+      "damageType": "physical",
+      "manaCost": 40,
+      "cooldown": 1,
+      "targetType": "all_enemies",
+      "description": "Deals <span class='damage-text'>300 + 150% Physical Damage</span> as physical damage to ALL enemies.",
+      "fixedDamage": 300,
+      "physicalDamagePercent": 1.5,
+      "icon": "Icons/abilities/slash.png"
+    }
+  ],
   "passives": [],
   "isAI": true,
   "aiType": "boss"

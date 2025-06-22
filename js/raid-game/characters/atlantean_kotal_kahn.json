@@ -1,0 +1,65 @@
+{
+  "id": "atlantean_kotal_kahn",
+  "name": "Atlantean Kotal Kahn",
+  "image": "Icons/Profile/Kotal Kahn.png",
+  "stats": {
+    "hp": 9200,
+    "maxSunlight": 100,
+    "currentSunlight": 0,
+    "mana": 0,
+    "physicalDamage": 125,
+    "magicalDamage": 286,
+    "armor": 14,
+    "magicalShield": 11,
+    "speed": 75,
+    "critChance": 0,
+    "critMultiplier": 1.5,
+    "dodgeChance": 0,
+    "hpPerTurn": 0,
+    "manaPerTurn": 0
+  },
+  "description": "The noble ruler of ancient Atlantis, blessed with the power of the ocean depths. His mastery over water and light magic makes him a formidable ally in the fight to save his homeland.",
+  "tags": ["atlantean", "ruler", "water_magic", "light_magic"],
+  "abilities": [
+    {
+      "id": "atlantean_kotal_kahn_q",
+      "name": "Sunburst",
+      "type": "heal_and_damage",
+      "damageType": "magical",
+      "manaCost": 0,
+      "cooldown": 1,
+      "targetType": "self",
+      "description": "Heals all allies (including self) for 200 + 22×Sunlight stacks. Each enemy has a 30% chance to take magical damage equal to 50% of this heal. Consumes all Sunlight.",
+      "icon": "Icons/abilities/sunburst.png"
+    },
+    {
+      "id": "atlantean_kotal_kahn_w",
+      "name": "Solar Bulwark",
+      "type": "custom",
+      "damageType": "none",
+      "manaCost": 0,
+      "cooldown": 8,
+      "targetType": "self",
+      "description": "For 2 turns: Sets Kotal Kahn's armor & magic resistance to 80 and redirects all ally damage to him.",
+      "icon": "Icons/abilities/sun_protection.png"
+    },
+    {
+      "id": "atlantean_kotal_kahn_e",
+      "name": "Blood Sacrifice",
+      "type": "custom",
+      "damageType": "none",
+      "manaCost": 0,
+      "cooldown": 5,
+      "targetType": "self",
+      "description": "Sets Sunlight to 100 and Kotal Kahn sacrifices 50% of his current HP. Does not end turn.",
+      "icon": "Icons/abilities/blood_sacrifice.png"
+    }
+  ],
+  "passive": {
+    "id": "kotal_sunlight_collector",
+    "name": "Solar Ascendance",
+    "description": "Kotal Kahn gathers Sunlight whenever he inflicts or receives damage, up to 100."
+  },
+  "isAI": false,
+  "aiType": "ally"
+} 

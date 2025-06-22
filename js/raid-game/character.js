@@ -23,7 +23,10 @@ class Character {
             maxHp: stats.hp || 100,
             hpPerTurn: stats.hpPerTurn || 0,
             maxMana: stats.mana || 100,
-            manaPerTurn: stats.manaPerTurn || 0
+            manaPerTurn: stats.manaPerTurn || 0,
+            // Sunlight resource (optional)
+            ...(stats.maxSunlight !== undefined ? { maxSunlight: stats.maxSunlight } : {}),
+            ...(stats.currentSunlight !== undefined ? { currentSunlight: stats.currentSunlight } : {}),
         };
 
         // Current stats including modifications
@@ -372,6 +375,7 @@ class Character {
         // Store current resources to preserve them
         const preservedCurrentHp = this.stats.currentHp;
         const preservedCurrentMana = this.stats.currentMana;
+        const preservedCurrentSunlight = this.stats.currentSunlight;
         
         // Store stage modifier values BEFORE resetting stats
         const preservedStageValues = {};
@@ -501,6 +505,7 @@ class Character {
         // Set current HP and mana back to their preserved values
         this.stats.currentHp = preservedCurrentHp;
         this.stats.currentMana = preservedCurrentMana;
+        this.stats.currentSunlight = preservedCurrentSunlight;
         
         // <<< END NEW LOG >>>
         
@@ -673,6 +678,10 @@ class Character {
         const maxMana = this.stats.maxMana !== undefined ? this.stats.maxMana : (this.stats.mana || 0);
         this.stats.currentMana = Math.min(preservedCurrentMana, maxMana);
         this.stats.currentMana = Math.max(0, this.stats.currentMana);
+
+        const maxSunlight = this.stats.maxSunlight !== undefined ? this.stats.maxSunlight : (this.stats.sunlight || 0);
+        this.stats.currentSunlight = Math.min(preservedCurrentSunlight, maxSunlight);
+        this.stats.currentSunlight = Math.max(0, this.stats.currentSunlight);
 
         // <<< ADDED SPECIFIC HEALING POWER LOG >>>
         console.log(`[Recalc Final Check] ${this.name}'s Healing Power before final log: ${this.stats.healingPower}`);
@@ -1156,6 +1165,21 @@ class Character {
                 }
             });
             document.dispatchEvent(abilityUsedEvent);
+            
+            // --- NEW: Process stage modifiers that trigger on ability use ---
+            if (window.gameManager && window.gameManager.stageManager && window.stageModifiersRegistry) {
+                try {
+                    window.stageModifiersRegistry.processModifiers(
+                        window.gameManager, 
+                        window.gameManager.stageManager, 
+                        'abilityUse', 
+                        { character: this, ability: ability }
+                    );
+                } catch (error) {
+                    console.error(`[StageModifiers] Error processing onAbilityUse modifiers:`, error);
+                }
+            }
+            // --- END NEW ---
         } else {
             // Log if ability.use returned false for some internal reason
             console.warn(`${this.name}'s attempt to use ${ability.name} returned false.`);

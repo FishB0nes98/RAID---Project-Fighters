@@ -12,13 +12,28 @@
     "speed": 85,
     "critChance": 40,
     "critMultiplier": 2.3,
-    "dodgeChance": 20,
+    "dodgeChance": 0.0,
     "hpPerTurn": 120,
     "manaPerTurn": 75
   },
   "description": "A fallen elder god of Atlantis, corrupted by dark magic from the depths. His divine powers combined with abyssal corruption make him a devastating adversary.",
   "tags": ["boss", "atlantean", "elder_god", "final_boss"],
-  "abilities": [],
+  "abilities": [
+    {
+      "id": "shinnok_dark_bubble",
+      "name": "Dark Bubble",
+      "type": "damage",
+      "damageType": "magical",
+      "manaCost": 40,
+      "cooldown": 1,
+      "targetType": "enemy",
+      "description": "Deals <span class='damage-text'>610 + 100% Magical Damage</span> as magical damage to the target.",
+      "fixedDamage": 610,
+      "magicalDamagePercent": 1.0,
+      "amount": 1.0,
+      "icon": "Icons/abilities/dark_bubble.png"
+    }
+  ],
   "passives": [],
   "isAI": true,
   "aiType": "boss"

@@ -5567,28 +5567,47 @@ class GameManager {
             hpContainer.appendChild(shieldBar);
             hpContainer.appendChild(hpText);
             
-            // Mana bar
-            const manaContainer = document.createElement('div');
+            // Resource bar (Sunlight or Mana)
+            let manaContainer = document.createElement('div');
             manaContainer.className = 'bar-container';
-            const manaBar = document.createElement('div');
-            manaBar.className = 'mana-bar';
-            manaBar.style.width = `${(character.stats.currentMana / character.stats.maxMana) * 100}%`;
-            
-            // Add data-ap attribute for Atlantean Christie styling
-            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
-                manaBar.setAttribute('data-ap', Math.round(character.stats.currentMana));
-            }
-            
-            const manaText = document.createElement('div');
-            manaText.className = 'bar-text';
-            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
-                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)} AP`;
+
+            let resourceBar, resourceText;
+
+            if (typeof character.stats.maxSunlight !== 'undefined') {
+                // --- Sunlight resource ---
+                resourceBar = document.createElement('div');
+                resourceBar.className = 'sunlight-bar';
+                resourceBar.style.width = `${(character.stats.currentSunlight / character.stats.maxSunlight) * 100}%`;
+
+                resourceText = document.createElement('div');
+                resourceText.className = 'bar-text';
+                resourceText.textContent = `${Math.round(character.stats.currentSunlight)} / ${Math.round(character.stats.maxSunlight)} Sun`;
+
+                manaContainer.appendChild(resourceBar);
+                manaContainer.appendChild(resourceText);
             } else {
-                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+                // --- Mana (default) ---
+                resourceBar = document.createElement('div');
+                resourceBar.className = 'mana-bar';
+                resourceBar.style.width = `${(character.stats.currentMana / character.stats.maxMana) * 100}%`;
+
+                // Add data-ap attribute for Atlantean Christie styling
+                if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                    resourceBar.setAttribute('data-ap', Math.round(character.stats.currentMana));
+                }
+
+                resourceText = document.createElement('div');
+                resourceText.className = 'bar-text';
+                if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                    resourceText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)} AP`;
+                } else {
+                    resourceText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+                }
+
+                manaContainer.appendChild(resourceBar);
+                manaContainer.appendChild(resourceText);
             }
-            manaContainer.appendChild(manaBar);
-            manaContainer.appendChild(manaText);
-            
+
             // Ability slots
             const abilitiesDiv = document.createElement('div');
             abilitiesDiv.className = 'abilities';
@@ -5697,42 +5716,50 @@ class GameManager {
                 hpText.textContent = `${Math.round(character.stats.currentHp)} / ${Math.round(character.stats.maxHp)}`;
             }
             
-            // Update Mana bar (or Ability Points for Atlantean Christie)
+            // Update Resource bar
+            const sunlightBar = charElement.querySelector('.sunlight-bar');
             const manaBar = charElement.querySelector('.mana-bar');
-            const manaPercentage = (character.stats.currentMana / character.stats.maxMana) * 100;
-            
-            // For Atlantean Christie, always show full width bar (beans handle the display)
-            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
-                manaBar.style.width = '100%';
-                manaBar.setAttribute('data-ap', Math.round(character.stats.currentMana));
-            } else {
-                manaBar.style.width = `${manaPercentage}%`;
-                manaBar.removeAttribute('data-ap');
+
+            if (sunlightBar) {
+                const sunPerc = (character.stats.currentSunlight / character.stats.maxSunlight) * 100;
+                sunlightBar.style.width = `${sunPerc}%`;
+                const sunText = sunlightBar.parentElement.querySelector('.bar-text');
+                sunText.textContent = `${Math.round(character.stats.currentSunlight)} / ${Math.round(character.stats.maxSunlight)} Sun`;
+            }
+
+            if (manaBar) {
+                const manaPercentage = (character.stats.currentMana / character.stats.maxMana) * 100;
+
+                // For Atlantean Christie, always show full width bar (beans handle the display)
+                if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                    manaBar.style.width = '100%';
+                    manaBar.setAttribute('data-ap', Math.round(character.stats.currentMana));
+                } else {
+                    manaBar.style.width = `${manaPercentage}%`;
+                    manaBar.removeAttribute('data-ap');
+                }
+
+                // Update Mana text (or Ability Points for Atlantean Christie)
+                const manaText = manaBar.parentElement.querySelector('.bar-text');
+                if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
+                    manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)} AP`;
+                } else {
+                    manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
+                }
             }
             
-            // Update Mana text (or Ability Points for Atlantean Christie)
-            const manaText = charElement.querySelector('.mana-bar').parentElement.querySelector('.bar-text');
-            if (character.usesAbilityPoints || character.id === 'atlantean_christie') {
-                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)} AP`;
-            } else {
-                manaText.textContent = `${Math.round(character.stats.currentMana)} / ${Math.round(character.stats.maxMana)}`;
-            }
-            
-            // Trigger Mana animations based on changes
-            if (previousMana !== character.stats.currentMana) {
+            // Trigger Sunlight/Mana animations (only for mana currently)
+            if (manaBar && previousMana !== character.stats.currentMana) {
                 const manaChange = character.stats.currentMana - previousMana;
                 if (manaChange < 0) {
-                    // Mana decreased (drain/casting)
                     this.triggerManaAnimation(character, 'drain', Math.abs(manaChange));
                 } else if (manaChange > 0) {
-                    // Mana increased (restore)
                     this.triggerManaAnimation(character, 'restore', manaChange);
                 }
                 character._previousMana = character.stats.currentMana;
             }
             
-            // Check for empty mana
-            if (character.stats.currentMana === 0) {
+            if (manaBar && character.stats.currentMana === 0) {
                 this.triggerManaAnimation(character, 'empty');
             }
             

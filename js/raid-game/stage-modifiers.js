@@ -1500,6 +1500,57 @@ class StageModifiersRegistry {
         });
 
         console.log('[StageModifiers] Registered draft_mode modifier successfully');
+
+        // ==== DARK CURRENT MODIFIER ====
+        this.registerModifier({
+            id: 'dark_current',
+            name: 'Dark Current',
+            description: 'The dark waters drain the strength from all abilities. Using an ability costs an additional 20 mana.',
+            icon: '🌊⚡',
+            vfx: {
+                type: 'dark_current',
+                particles: true,
+                animation: 'dark_energy_swirl'
+            },
+            onAbilityUse: (gameManager, stageManager, modifier, character, ability) => {
+                // Apply additional mana cost to any character using an ability
+                const additionalManaCost = 20;
+                
+                // Check if character has enough current mana to pay the additional cost
+                if (character.stats.currentMana >= additionalManaCost) {
+                    character.stats.currentMana -= additionalManaCost;
+                    
+                    // Create dark energy drain VFX
+                    this.createDarkCurrentDrainVFX(character, additionalManaCost);
+                    
+                    gameManager.addLogEntry(
+                        `🌊⚡ The Dark Current drains ${additionalManaCost} additional mana from ${character.name}!`, 
+                        'stage-effect damage'
+                    );
+                } else {
+                    // If not enough mana, take what's available
+                    const drainedMana = character.stats.currentMana;
+                    character.stats.currentMana = 0;
+                    
+                    if (drainedMana > 0) {
+                        // Create dark energy drain VFX
+                        this.createDarkCurrentDrainVFX(character, drainedMana);
+                        
+                        gameManager.addLogEntry(
+                            `🌊⚡ The Dark Current drains ${drainedMana} mana from ${character.name}, leaving them completely drained!`, 
+                            'stage-effect damage'
+                        );
+                    }
+                }
+                
+                // Force UI update to show mana change
+                if (gameManager.uiManager) {
+                    gameManager.uiManager.updateCharacterUI(character);
+                }
+            }
+        });
+
+        console.log('[StageModifiers] Registered dark_current modifier successfully');
     }
 
     // Helper method to apply draft mode effect to all characters
@@ -1698,6 +1749,8 @@ class StageModifiersRegistry {
                         registeredModifier.onStageEnd(gameManager, stageManager, modifier);
                     } else if (phase === 'characterDeath' && registeredModifier.onCharacterDeath) {
                         registeredModifier.onCharacterDeath(gameManager, stageManager, modifier, options?.character);
+                    } else if (phase === 'abilityUse' && registeredModifier.onAbilityUse) {
+                        registeredModifier.onAbilityUse(gameManager, stageManager, modifier, options?.character, options?.ability);
                     } else {
                         console.log(`[StageModifiers] No ${phase} handler for ${modifier.id}`);
                     }
@@ -1768,6 +1821,9 @@ class StageModifiersRegistry {
                 break;
             case 'freezing_waters':
                 this.createFreezingWatersVFX(modifier);
+                break;
+            case 'dark_current':
+                this.createDarkCurrentVFX(modifier);
                 break;
 
             default:
@@ -5835,6 +5891,327 @@ class StageModifiersRegistry {
         
         console.warn(`[StageModifiers] Could not find character element for ${character.name} (${character.id})`);
         return null;
+    }
+
+    createDarkCurrentVFX(modifier) {
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'stage-modifier-vfx dark-current-vfx';
+        vfxContainer.setAttribute('data-modifier', modifier.id);
+        
+        // Create dark water overlay with swirling energy
+        const darkOverlay = document.createElement('div');
+        darkOverlay.className = 'dark-current-overlay';
+        darkOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 30%, rgba(20, 5, 40, 0.25) 0%, rgba(60, 20, 80, 0.15) 30%, transparent 60%),
+                radial-gradient(circle at 75% 70%, rgba(40, 5, 60, 0.2) 0%, rgba(80, 20, 100, 0.12) 40%, transparent 70%),
+                linear-gradient(120deg, rgba(30, 5, 50, 0.15) 0%, rgba(70, 20, 90, 0.2) 50%, rgba(30, 5, 50, 0.15) 100%);
+            animation: darkCurrentFlow 8s ease-in-out infinite alternate, darkCurrentPulse 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 2;
+        `;
+        vfxContainer.appendChild(darkOverlay);
+        
+        // Create dark energy particles floating around
+        for (let i = 0; i < 35; i++) {
+            const energyParticle = document.createElement('div');
+            energyParticle.className = 'dark-energy-particle';
+            const size = 3 + Math.random() * 8;
+            energyParticle.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, rgba(120, 50, 150, 0.9) 0%, rgba(60, 20, 100, 0.6) 50%, rgba(30, 10, 60, 0.3) 100%);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: darkEnergyFloat ${4 + Math.random() * 6}s linear infinite;
+                animation-delay: ${Math.random() * 5}s;
+                filter: blur(0.8px);
+                box-shadow: 0 0 12px rgba(120, 50, 150, 0.7);
+                z-index: 3;
+            `;
+            vfxContainer.appendChild(energyParticle);
+        }
+        
+        // Create dark current streams
+        for (let i = 0; i < 20; i++) {
+            const stream = document.createElement('div');
+            stream.className = 'dark-current-stream';
+            const width = 2 + Math.random() * 3;
+            const height = 25 + Math.random() * 40;
+            stream.style.cssText = `
+                position: absolute;
+                width: ${width}px;
+                height: ${height}px;
+                background: linear-gradient(180deg, rgba(100, 40, 120, 0.8) 0%, rgba(60, 20, 80, 0.6) 50%, transparent 100%);
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: darkCurrentStreamFlow ${3 + Math.random() * 4}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 4}s;
+                filter: blur(0.5px);
+                z-index: 4;
+                border-radius: 50%;
+            `;
+            vfxContainer.appendChild(stream);
+        }
+        
+        // Create lightning-like energy bolts
+        for (let i = 0; i < 15; i++) {
+            const bolt = document.createElement('div');
+            bolt.className = 'dark-energy-bolt';
+            const size = 4 + Math.random() * 6;
+            bolt.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size * 2}px;
+                background: linear-gradient(180deg, rgba(150, 80, 200, 0.9) 0%, rgba(100, 50, 150, 0.7) 70%, transparent 100%);
+                border-radius: 20%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: darkEnergyBoltFloat ${5 + Math.random() * 4}s linear infinite;
+                animation-delay: ${Math.random() * 6}s;
+                opacity: ${0.7 + Math.random() * 0.3};
+                z-index: 5;
+                box-shadow: 0 0 8px rgba(150, 80, 200, 0.8);
+            `;
+            vfxContainer.appendChild(bolt);
+        }
+        
+        // Add CSS animations for dark current
+        if (!document.getElementById('dark-current-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'dark-current-styles';
+            styleSheet.textContent = `
+                @keyframes darkCurrentFlow {
+                    0% { 
+                        transform: translateX(0px) scale(1); 
+                        opacity: 0.7; 
+                    }
+                    50% { 
+                        transform: translateX(-15px) scale(1.1); 
+                        opacity: 0.9; 
+                    }
+                    100% { 
+                        transform: translateX(10px) scale(0.95); 
+                        opacity: 0.8; 
+                    }
+                }
+                
+                @keyframes darkCurrentPulse {
+                    0%, 100% { 
+                        opacity: 0.7; 
+                        transform: scale(1); 
+                    }
+                    50% { 
+                        opacity: 1; 
+                        transform: scale(1.05); 
+                    }
+                }
+                
+                @keyframes darkEnergyFloat {
+                    0% {
+                        transform: translateY(0px) translateX(0px) scale(0.8);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 1;
+                        transform: scale(1.2);
+                    }
+                    80% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(-100px) translateX(${Math.random() * 60 - 30}px) scale(0.3);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes darkCurrentStreamFlow {
+                    0%, 100% {
+                        transform: translateY(0px) scaleY(1);
+                        opacity: 0.8;
+                    }
+                    50% {
+                        transform: translateY(-25px) scaleY(1.4);
+                        opacity: 1;
+                    }
+                }
+                
+                @keyframes darkEnergyBoltFloat {
+                    0% {
+                        transform: translateY(0px) translateX(0px) rotate(0deg) scale(0.6);
+                        opacity: 0;
+                    }
+                    25% {
+                        opacity: 1;
+                        transform: scale(1.3) rotate(15deg);
+                    }
+                    75% {
+                        opacity: 1;
+                        transform: rotate(-10deg);
+                    }
+                    100% {
+                        transform: translateY(-80px) translateX(${Math.random() * 40 - 20}px) rotate(${Math.random() * 60 - 30}deg) scale(0.2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+        
+        // Add to stage background
+        const stageBackground = document.getElementById('stage-background');
+        if (stageBackground) {
+            stageBackground.appendChild(vfxContainer);
+        }
+
+        console.log(`[StageModifiers] Created dark current VFX with swirling dark energy for ${modifier.name}`);
+    }
+
+    createDarkCurrentDrainVFX(character, manaDrained) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+
+        // Create dark energy drain effect around character
+        const drainEffect = document.createElement('div');
+        drainEffect.className = 'dark-current-drain-effect';
+        drainEffect.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(100, 40, 120, 0.6) 0%, rgba(60, 20, 80, 0.4) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: darkCurrentDrain 2s ease-out;
+            pointer-events: none;
+            z-index: 100;
+        `;
+        characterElement.appendChild(drainEffect);
+
+        // Create energy drain text
+        const drainText = document.createElement('div');
+        drainText.className = 'dark-current-drain-text';
+        drainText.textContent = `-${manaDrained} Mana`;
+        drainText.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #a050c8;
+            text-shadow: 
+                0 0 8px rgba(160, 80, 200, 0.8),
+                0 0 16px rgba(100, 50, 150, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: darkCurrentDrainText 2s ease-out;
+            pointer-events: none;
+            z-index: 101;
+        `;
+        characterElement.appendChild(drainText);
+
+        // Create dark energy particles being drained away
+        for (let i = 0; i < 12; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'dark-drain-particle';
+            particle.style.cssText = `
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: radial-gradient(circle, #a050c8, #6020a0);
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                animation: darkDrainParticle 1.8s ease-out;
+                animation-delay: ${i * 0.1}s;
+                box-shadow: 0 0 6px rgba(160, 80, 200, 0.8);
+                pointer-events: none;
+                z-index: 99;
+            `;
+            
+            const angle = (i / 12) * 360;
+            const distance = 40 + Math.random() * 30;
+            particle.style.setProperty('--angle', angle + 'deg');
+            particle.style.setProperty('--distance', distance + 'px');
+            
+            characterElement.appendChild(particle);
+        }
+
+        // Add CSS animations for drain effects
+        if (!document.getElementById('dark-current-drain-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'dark-current-drain-styles';
+            styleSheet.textContent = `
+                @keyframes darkCurrentDrain {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(0.5); 
+                        opacity: 0; 
+                    }
+                    30% { 
+                        transform: translate(-50%, -50%) scale(1.3); 
+                        opacity: 0.9; 
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(2); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes darkCurrentDrainText {
+                    0% { 
+                        transform: translateX(-50%) scale(0.8); 
+                        opacity: 0; 
+                    }
+                    20% { 
+                        transform: translateX(-50%) scale(1.2); 
+                        opacity: 1; 
+                    }
+                    40% { 
+                        transform: translateX(-50%) scale(1); 
+                        opacity: 1; 
+                    }
+                    100% { 
+                        transform: translateX(-50%) scale(0.9) translateY(-30px); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes darkDrainParticle {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0px) scale(0.5);
+                        opacity: 0;
+                    }
+                    30% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(calc(var(--distance) * 0.6)) scale(1);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance)) scale(0.2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+
+        // Cleanup
+        setTimeout(() => {
+            drainEffect.remove();
+            drainText.remove();
+            const particles = characterElement.querySelectorAll('.dark-drain-particle');
+            particles.forEach(p => p.remove());
+        }, 2500);
+
+        console.log(`[StageModifiers] Created dark current drain VFX for ${character.name} (-${manaDrained} mana)`);
     }
 }
 

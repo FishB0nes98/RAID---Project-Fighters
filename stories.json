@@ -1154,6 +1154,16 @@
       "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
     },
     {
+      "name": "The Ruler's Return",
+      "description": "As you prepare for the final confrontation, a powerful presence emerges from the deepest sanctum of the ancient palace. Atlantean Kotal Kahn, the rightful ruler of Atlantis, steps forward from his meditative state where he has been channeling the ocean's power to resist the corruption. Having witnessed your heroic deeds throughout Atlantis, he pledges his strength to join your cause in the ultimate battle to save his realm from eternal darkness.",
+      "type": "recruit",
+      "isEncounter": true,
+      "recruitCount": 1,
+      "specificCharacters": ["atlantean_kotal_kahn"],
+      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
+    },
+    {
       "name": "Ancient Atlantean Throne Room",
       "description": "Your journey reaches its climax in the ancient throne room of Atlantis, where the ocean's greatest powers once ruled. Here, the corrupted remnants of Atlantean Zasalamel and Atlantean Shinnok await - two powerful beings who have fallen to the darkness of the abyss. These ancient lords of Atlantis have been twisted by dark magic and now seek to drag the entire realm into eternal shadow. This is your final stand to save Atlantis from complete destruction.",
       "difficulty": 10,
@@ -1170,16 +1180,10 @@
           "icon": "🌊"
         },
         {
-          "id": "atlantean_purification",
-          "name": "Atlantean Purification",
-          "description": "The pure waters of Atlantis instantly cleanse all debuffs from characters at the start of each turn.",
-          "icon": "💧✨"
-        },
-        {
-          "id": "tidal_wave_chaos",
-          "name": "Tidal Wave Chaos",
-          "description": "Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.",
-          "icon": "🌊💥"
+          "id": "dark_current",
+          "name": "Dark Current",
+          "description": "The dark waters drain the strength from all abilities. Using an ability costs an additional 20 mana.",
+          "icon": "🌊⚡"
         }
       ],
       "objectives": {
