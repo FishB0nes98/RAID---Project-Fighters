@@ -84,6 +84,7 @@ class SkinSelector {
             'farmer_shoma': 'Farmer Shoma',
             'farmer_cham_cham': 'Farmer Cham Cham',
             'atlantean_kagome': 'Atlantean Kagome',
+            'atlantean_christie': 'Atlantean Christie',
             'schoolboy_shoma': 'Schoolboy Shoma',
             'schoolboy_siegfried': 'Schoolboy Siegfried',
             'schoolgirl_julia': 'Schoolgirl Julia',
@@ -94,7 +95,8 @@ class SkinSelector {
             'ayane': 'Ayane',
             'bridget': 'Bridget',
             'renée': 'Renée',
-            'zoey': 'Zoey'
+            'zoey': 'Zoey',
+            'infernal_ibuki': 'Infernal Ibuki'
         };
         return nameMap[characterId] || characterId;
     }
@@ -108,6 +110,7 @@ class SkinSelector {
             'farmer_shoma': 'Farmer Shoma',
             'farmer_cham_cham': 'Farmer Cham Cham',
             'atlantean_kagome': 'Atlantean Kagome',
+            'atlantean_christie': 'Atlantean Christie',
             'schoolboy_shoma': 'Schoolboy Shoma',
             'schoolboy_siegfried': 'Schoolboy Siegfried',
             'schoolgirl_julia': 'Schoolgirl Julia',
@@ -118,7 +121,8 @@ class SkinSelector {
             'ayane': 'Ayane',
             'bridget': 'Bridget',
             'renée': 'Renée',
-            'zoey': 'Zoey'
+            'zoey': 'Zoey',
+            'infernal_ibuki': 'Infernal Ibuki'
         };
         
         const imageName = imageNameMap[characterId] || characterId;

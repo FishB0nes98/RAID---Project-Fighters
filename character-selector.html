@@ -2901,12 +2901,6 @@
                     What's New
                     <span class="version-badge">v0.3</span>
                 </button>
-                <button class="nav-button" onclick="showOldChangelog()">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
-                    </svg>
-                    v0.2
-                </button>
             </div>
         </header>
 
@@ -2939,7 +2933,18 @@
             📜
         </button>
         -->
-        
+                <!-- Team Preview Section -->
+                <section class="team-preview">
+                    <h2 id="selected-team-title">Your Team</h2>
+                    <div class="team-slots" id="team-slots">
+                        <!-- Slots will be dynamically generated -->
+                    </div>
+                    <div class="action-buttons">
+                        <button id="back-button" class="action-button back-button">Back</button>
+                        <button id="start-button" class="action-button start-button">Start Battle</button>
+                    </div>
+                </section>
+                
         <main class="content-wrapper">
             <!-- Story/Stage Selection Panel -->
             <section class="selector-panel">
@@ -2968,6 +2973,7 @@
                 </div>
             </section>
             
+            
             <!-- Character Selection Panel -->
             <section class="selector-panel">
                 <div class="panel-header">
@@ -2987,18 +2993,8 @@
             </section>
         </main>
         
-        <!-- Team Preview Section -->
-        <section class="team-preview">
-            <h2 id="selected-team-title">Your Team</h2>
-            <div class="team-slots" id="team-slots">
-                <!-- Slots will be dynamically generated -->
-            </div>
             
-            <div class="action-buttons">
-                <button id="back-button" class="action-button back-button">Back</button>
-                <button id="start-button" class="action-button start-button">Start Battle</button>
-            </div>
-        </section>
+
     </div>
     
     <!-- Stage Detail Modal -->

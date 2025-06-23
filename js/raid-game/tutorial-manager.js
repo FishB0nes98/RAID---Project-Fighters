@@ -361,6 +361,28 @@ class TutorialManager {
         // Show tooltip
         this.showTooltip(step);
         
+        // Update step counter
+        const counterEl = this.tooltipElement.querySelector('.tutorial-step-counter');
+        if (counterEl) {
+            counterEl.textContent = `${stepIndex + 1}/${this.tutorialSteps.length}`;
+        }
+
+        // Update Back button state
+        const backBtn = this.tooltipElement.querySelector('.tutorial-prev-button');
+        if (backBtn) {
+            backBtn.disabled = stepIndex === 0;
+        }
+
+        // Update Next button label (Finish on last step)
+        const nextBtn = this.tooltipElement.querySelector('.tutorial-next-button');
+        if (nextBtn) {
+            if (stepIndex === this.tutorialSteps.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+        }
+        
         console.log(`[TutorialManager] Showing step ${stepIndex + 1}/${this.tutorialSteps.length}: ${step.title}`);
     }
 
@@ -390,6 +412,7 @@ class TutorialManager {
                     <p class="tutorial-tooltip-description"></p>
                 </div>
                 <div class="tutorial-tooltip-footer">
+                    <button class="tutorial-button tutorial-prev-button" disabled>Back</button>
                     <button class="tutorial-button tutorial-skip-button">Skip Tutorial</button>
                     <button class="tutorial-button tutorial-next-button">Next</button>
                 </div>
@@ -411,6 +434,11 @@ class TutorialManager {
         // Next button
         this.tooltipElement.querySelector('.tutorial-next-button').addEventListener('click', () => {
             this.nextStep();
+        });
+        
+        // Previous (Back) button
+        this.tooltipElement.querySelector('.tutorial-prev-button').addEventListener('click', () => {
+            this.previousStep();
         });
         
         // Skip button
@@ -638,6 +666,15 @@ class TutorialManager {
             this.showStep(this.currentStep + 1);
         } else {
             this.complete();
+        }
+    }
+
+    /**
+     * Go to previous tutorial step
+     */
+    previousStep() {
+        if (this.currentStep > 0) {
+            this.showStep(this.currentStep - 1);
         }
     }
 

@@ -31,7 +31,7 @@ class DraftMode {
             'farmer_nina', 'farmer_raiden', 'farmer_shoma', 'infernal_ibuki', 
             'renée', 'schoolboy_shoma', 'schoolboy_siegfried', 'schoolgirl_ayane', 
             'schoolgirl_elphelt', 'schoolgirl_julia', 'schoolgirl_kokoro', 
-            'atlantean_sub_zero', 'zoey'
+            'atlantean_sub_zero', 'zoey', "atlantean_kotal_kahn", "atlantean_christie"
         ];
 
         // Character registry

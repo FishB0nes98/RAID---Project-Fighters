@@ -55,6 +55,6 @@ app.post('/save-talents', (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
-  console.log(`Open http://localhost:${port}/raid-game.html to view your game`);
+  console.log(`Open http://localhost:${port}/character-selector.html to view your game`);
   console.log(`Talent editor at http://localhost:${port}/talent-editor.html`);
 });

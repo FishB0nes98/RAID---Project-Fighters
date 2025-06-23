@@ -521,7 +521,7 @@
          }
     </style>
 </head>
-<body>
+<body class="raid-game-context">
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loader"></div>
@@ -688,6 +688,14 @@
         <!-- Context Menu (Hidden by default) -->
         <div id="context-menu" class="context-menu">
             <!-- Context menu items will be dynamically populated -->
+        </div>
+
+        <!-- Quick Action Bar -->
+        <div id="quick-action-bar" class="quick-action-bar">
+            <button id="qab-quests" class="quick-action-btn" title="Toggle Quests">🎯</button>
+            <button id="qab-talents" class="quick-action-btn" title="Toggle Talents">⭐</button>
+            <button id="qab-log" class="quick-action-btn" title="Toggle Battle Log">📋</button>
+            <button id="qab-stats" class="quick-action-btn" title="Toggle Statistics">📊</button>
         </div>
     </div>
 
@@ -1139,12 +1147,42 @@
             battleLogContainer.style.width = '350px';
             battleLogContainer.style.height = '300px';
             
-            // Ensure show button is hidden when battle log is visible
-            if (showLogButton) {
-                showLogButton.style.display = 'none';
+            // Load saved position from localStorage
+            const savedPosition = localStorage.getItem('battleLogPosition');
+            if (savedPosition) {
+                try {
+                    const position = JSON.parse(savedPosition);
+                    if (position.x !== undefined && position.y !== undefined) {
+                        console.log(`[setupBattleLog] Loading saved position: ${position.x}, ${position.y}`);
+                        battleLogContainer.style.right = 'auto';
+                        battleLogContainer.style.bottom = 'auto';
+                        battleLogContainer.style.left = position.x + 'px';
+                        battleLogContainer.style.top = position.y + 'px';
+                        
+                        // Set the offset variables for dragging - REMOVED: now handled in drag initialization
+                    }
+                } catch (error) {
+                    console.warn('[setupBattleLog] Failed to parse saved position:', error);
+                }
             }
             
-            console.log('[setupBattleLog] Battle log forced visible at bottom-right');
+            // Load saved visibility from localStorage
+            const savedVisibility = localStorage.getItem('battleLogVisible');
+            if (savedVisibility === 'false') {
+                console.log('[setupBattleLog] Loading saved visibility: hidden');
+                battleLogContainer.style.display = 'none';
+                if (showLogButton) {
+                    showLogButton.style.display = 'block';
+                }
+            } else {
+                console.log('[setupBattleLog] Loading saved visibility: visible');
+                battleLogContainer.style.display = 'flex';
+                if (showLogButton) {
+                    showLogButton.style.display = 'none';
+                }
+            }
+            
+            console.log('[setupBattleLog] Battle log initialized with saved position and visibility');
             
             // Dragging functionality
             let isDragging = false;
@@ -1154,6 +1192,21 @@
             let initialY = 0;
             let xOffset = 0;
             let yOffset = 0;
+            
+            // Initialize drag variables with saved position if available
+            if (savedPosition) {
+                try {
+                    const position = JSON.parse(savedPosition);
+                    if (position.x !== undefined && position.y !== undefined) {
+                        xOffset = position.x;
+                        yOffset = position.y;
+                        currentX = position.x;
+                        currentY = position.y;
+                    }
+                } catch (error) {
+                    console.warn('[setupBattleLog] Failed to parse saved position for drag variables:', error);
+                }
+            }
             
             function setTranslate(xPos, yPos, el) {
                 el.style.position = 'fixed';
@@ -2139,6 +2192,27 @@
                     console.log('%c>>> BRIDGET HAS NO APPLIED TALENTS ARRAY! <<<', 'background: orange; color: black; font-weight: bold;');
                 }
             }
+        });
+
+        // Quick Action Bar JS
+        document.addEventListener('DOMContentLoaded', () => {
+            const clickIfExists = (id) => {
+                const el = document.getElementById(id);
+                if (el) el.click();
+            };
+
+            document.getElementById('qab-quests').addEventListener('click', () => clickIfExists('quest-panel-toggle'));
+            document.getElementById('qab-talents').addEventListener('click', () => clickIfExists('show-talents-button'));
+            document.getElementById('qab-log').addEventListener('click', () => {
+                // If battle log is hidden, show-log-button is visible, else close-log-button is present
+                const showBtn = document.getElementById('show-log-button');
+                if (showBtn && showBtn.style.display !== 'none') {
+                    showBtn.click();
+                } else {
+                    clickIfExists('close-log-button');
+                }
+            });
+            document.getElementById('qab-stats').addEventListener('click', () => clickIfExists('show-statistics-button'));
         });
     </script>
 </body>

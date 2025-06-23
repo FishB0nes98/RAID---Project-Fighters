@@ -22,14 +22,14 @@
     "passive": {
         "id": "zoey_passive",
         "name": "Sparkle Bell Mark",
-        "description": "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals double damage to marked enemies. The mark disappears when the enemy takes damage.",
+        "description": "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 125% damage to marked enemies. The mark disappears when the enemy takes damage.",
         "icon": "Icons/abilities/sparkle_bell_mark.png"
     },
     "abilities": [
         {
             "id": "zoey_q",
             "name": "Strawberry Bell Burst",
-            "description": "Zoey channels her Strawberry Bell to unleash a magical beam, dealing 200% magical damage to an enemy. This ability cannot critically strike.",
+            "description": "Zoey channels her Strawberry Bell to unleash a magical beam, dealing 122% magical damage to an enemy. This ability cannot critically strike.",
             "icon": "Icons/abilities/strawberry_bell_burst.png",
             "manaCost": 90,
             "cooldown": 1,
@@ -40,7 +40,7 @@
         {
             "id": "zoey_w",
             "name": "Heart Pounce",
-            "description": "Zoey jumps onto an enemy, dealing 855 + (125% Magical damage) to the target.",
+            "description": "Zoey jumps onto an enemy, dealing 855 + (50% Magical damage) to the target.",
             "icon": "Icons/abilities/heart_pounce.png",
             "manaCost": 55,
             "cooldown": 5,
@@ -51,7 +51,7 @@
         {
             "id": "zoey_e",
             "name": "Sparkle Burst",
-            "description": "Zoey unleashes a burst of sparkles, dealing 200% Magical Damage to all enemies. This ability's cooldown is reduced for each enemy hit.",
+            "description": "Zoey unleashes a burst of sparkles, dealing 122% Magical Damage to all enemies. This ability's cooldown is reduced for each enemy hit.",
             "icon": "Icons/abilities/sparkle_burst.png",
             "manaCost": 100,
             "cooldown": 11,
@@ -62,7 +62,7 @@
         {
             "id": "zoey_r",
             "name": "Glowing Light Arc",
-            "description": "Zoey unleashes a glowing arc of light that deals 255 + 100% Magical Damage to all enemies with a 75% chance to hit each target. If it hits, it disables a random ability of the target.",
+            "description": "Zoey unleashes a glowing arc of light that deals 100% Magical Damage to all enemies with a 75% chance to hit each target. If it hits, it disables a random ability of the target.",
             "icon": "Icons/abilities/glowing_light_arc.png",
             "manaCost": 120,
             "cooldown": 8,

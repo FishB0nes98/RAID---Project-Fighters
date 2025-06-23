@@ -45,13 +45,6 @@
             overflow: hidden;
         }
 
-        .logo {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 2rem;
-            display: block;
-        }
-
         .tabs {
             display: flex;
             margin-bottom: 2rem;
@@ -112,60 +105,11 @@
             box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
         }
 
-        .social-login {
-            margin-top: 2rem;
-            text-align: center;
-        }
-
-        .social-btn {
-            padding: 0.8rem 1.5rem;
-            margin: 0.5rem;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .social-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .forgot-password {
-            text-align: right;
-            margin-top: 1rem;
-        }
-
-        .forgot-password a {
-            color: #888;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .forgot-password a:hover {
-            color: #ff6b6b;
-        }
-
         .error-message {
             color: #ff6b6b;
             font-size: 0.9rem;
             margin-top: 0.5rem;
             display: none;
-        }
-        
-        .game-access {
-            margin-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1.5rem;
-            text-align: center;
-        }
-        
-        .game-btn {
-            background: linear-gradient(45deg, #4a5, #2a3);
-            margin: 0.5rem auto;
-            max-width: 80%;
         }
     </style>
 </head>
@@ -175,8 +119,6 @@
     </video>
 
     <div class="container">
-        <img src="res/img/logo.png" alt="Project Fighters Logo" class="logo">
-        
         <div class="tabs">
             <div class="tab active" onclick="showLogin()">Login</div>
             <div class="tab" onclick="showRegister()">Register</div>
@@ -186,28 +128,7 @@
             <input type="text" id="login-username" placeholder="Username" autocomplete="username">
             <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
             <div class="error-message" id="login-error"></div>
-            <div class="forgot-password">
-                <a href="#" onclick="forgotPassword()">Forgot Password?</a>
-            </div>
             <button onclick="login()">Login</button>
-            
-            <div class="social-login">
-                <button class="social-btn" onclick="loginWithGoogle()">
-                    Continue with Google
-                </button>
-                <button class="social-btn" onclick="loginWithDiscord()">
-                    Continue with Discord
-                </button>
-            </div>
-            
-            <div class="game-access">
-                <button class="game-btn" onclick="window.location.href='character-selector.html'">
-                    Play Raid Game (Character Selector)
-                </button>
-                <button class="game-btn" onclick="window.location.href='raid-game.html'">
-                    Play Raid Game (Direct)
-                </button>
-            </div>
         </div>
 
         <div id="register-form" style="display: none;">
@@ -217,12 +138,6 @@
             <input type="password" id="register-confirm-password" placeholder="Confirm Password" autocomplete="new-password">
             <div class="error-message" id="register-error"></div>
             <button onclick="register()">Create Account</button>
-            
-            <div class="game-access">
-                <button class="game-btn" onclick="window.location.href='character-selector.html'">
-                    Play Raid Game (Character Selector)
-                </button>
-            </div>
         </div>
     </div>
 
@@ -379,61 +294,6 @@
                     errorElement.textContent = error.message;
                     errorElement.style.display = 'block';
                 });
-        }
-
-        // New functions for additional features
-        function forgotPassword() {
-            const email = prompt("Please enter your email address:");
-            if (email) {
-                auth.sendPasswordResetEmail(email)
-                    .then(() => {
-                        alert("Password reset email sent! Please check your inbox.");
-                    })
-                    .catch((error) => {
-                        alert(error.message);
-                    });
-            } else {
-                alert('Username not found');
-            }
-        }
-
-        function loginWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    // Handle new user registration if needed
-                    // Check if user exists in DB, if not, add default data
-                    const userRef = firebase.database().ref(`users/${user.uid}`);
-                    userRef.once('value').then((snapshot) => {
-                        if (!snapshot.exists()) {
-                            console.log("New Google Sign-In user, creating DB entry...");
-                            const defaultUsername = user.displayName || user.email.split('@')[0]; // Use display name or part of email
-                            const userData = {
-                                username: defaultUsername, // Ensure unique username handling might be needed
-                                email: user.email,
-                                icon: 'Julia.png', // Default icon
-                                skins: { /* Default skins... */ },
-                                ownedCharacters: ['schoolboy_shoma', 'schoolgirl_julia'] // Example starting characters
-                                // Add other default fields like storyProgress: {}
-                            };
-                            userRef.set(userData).then(() => {
-                                window.location.href = 'character-selector.html'; // Redirect after setting data
-                            }).catch(error => console.error("Failed to save new user data:", error));
-                        } else {
-                             window.location.href = 'character-selector.html'; // Existing user, redirect
-                        }
-                    });
-                })
-                .catch((error) => {
-                    document.getElementById('login-error').textContent = error.message;
-                    document.getElementById('login-error').style.display = 'block';
-                });
-        }
-
-        function loginWithDiscord() {
-            // Implement Discord authentication
-            alert("Discord login coming soon!");
         }
 
         // Enhance video background

@@ -199,9 +199,9 @@ function updateHeartPounceDescription(ability, character = null) {
     
     // Damage scaling based on Enhanced Heart Pounce talent
     if (character && character.enableEnhancedHeartPounce) {
-        description += '855 + (125% Magical damage + 50% Physical damage + 50% Magical damage) to the target';
+        description += '855 + (100% Magical damage + 50% Physical damage) to the target';
     } else {
-        description += '855 + (125% Magical damage) to the target';
+        description += '855 + (50% Magical damage) to the target';
     }
     
     // Add Feline Combo description if character has it
@@ -228,7 +228,7 @@ function updateSparkleburstDescription(ability, character = null) {
     console.log('[Zoey] Character found:', character?.name, 'Has improved talent:', character?.enableImprovedSparkleburst, 'Has sparkle pounce talent:', character?.enableSparklePounce);
     
     // Build description based on talents
-    let description = 'Zoey unleashes a burst of sparkles, dealing 200% Magical Damage to all enemies. This ability\'s cooldown is reduced for each enemy hit';
+    let description = 'Zoey unleashes a burst of sparkles, dealing 122% Magical Damage to all enemies. This ability\'s cooldown is reduced for each enemy hit';
     
     // Add Sparkle Pounce description if character has it
     if (character && character.enableSparklePounce) {
@@ -534,12 +534,12 @@ function executeHeartPounce(caster, target, abilityInstance) {
                 if (isSuccessful) {
                     // Successful pounce - deal damage
                     let baseDamage = 855;
-                    let magicalScaling = 1.25; // Base 125% magical damage
+                    let magicalScaling = 0.5; // Base 50% magical damage (reduced from 125%)
                     let physicalScaling = 0; // Base 0% physical damage
                     
                     // Check for Enhanced Heart Pounce talent
                     if (caster.enableEnhancedHeartPounce) {
-                        magicalScaling += 0.5; // +50% magical damage (125% -> 175%)
+                        magicalScaling += 0.5; // +50% magical damage (50% -> 100%)
                         physicalScaling += 0.5; // +50% physical damage (0% -> 50%)
                     }
                     
@@ -963,8 +963,8 @@ function executeSparkleburst(caster, targets, abilityInstance) {
                     if (isHit) {
                         hitCount++;
                         
-                        // Calculate damage (200% magical damage)
-                        const baseDamage = Math.round(caster.stats.magicalDamage * 2.0);
+                        // Calculate damage (122% magical damage - reduced from 200%)
+                        const baseDamage = Math.round(caster.stats.magicalDamage * 1.22);
                         
                         // Create damage calculation event for passive integration
                         const attackCalculationEvent = new CustomEvent('attack:calculation', {
@@ -1242,8 +1242,8 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
             gameManager.addLogEntry(castMessage, 'player-turn');
         }
         
-        // Get base damage (200% of magical damage)
-        const damageMultiplier = 2.0; // 200%
+        // Get base damage (122% of magical damage - reduced from 200%)
+        const damageMultiplier = 1.22; // 122%
         const baseDamage = Math.round(caster.stats.magicalDamage * damageMultiplier);
         
         // Show the VFX - modify based on Bell Mastery
@@ -1852,9 +1852,9 @@ function updateStrawberryBellDescription(ability, character = null) {
     // Base description - check for Bell Mastery talent
     let description;
     if (character && character.enableBellMastery) {
-        description = 'Zoey unleashes her MASTERED Strawberry Bell in a devastating area attack, dealing 200% magical damage to ALL ENEMIES. This ability cannot critically strike.';
+        description = 'Zoey unleashes her MASTERED Strawberry Bell in a devastating area attack, dealing 122% magical damage to ALL ENEMIES. This ability cannot critically strike.';
     } else {
-        description = 'Zoey channels her Strawberry Bell to unleash a magical beam, dealing 200% magical damage to an enemy. This ability cannot critically strike.';
+        description = 'Zoey channels her Strawberry Bell to unleash a magical beam, dealing 122% magical damage to an enemy. This ability cannot critically strike.';
     }
     
     // Add Bell Recast talent description if character has it
@@ -1870,7 +1870,7 @@ function updateStrawberryBellDescription(ability, character = null) {
 // Update the Glowing Light Arc description with any talent modifications
 function updateGlowingLightArcDescription(ability, character = null) {
     // Base description
-    let description = 'Zoey unleashes a glowing arc of light that deals 255 + ';
+    let description = 'Zoey unleashes a glowing arc of light that deals ';
     
     // Check for Enhanced Light Arc talent
     if (character && character.enableEnhancedLightArc) {
@@ -2298,7 +2298,7 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
         await showGlowingLightArcVFX(caster, targets);
         
         // Process each target
-        const baseDamage = 255;
+        const baseDamage = 0; // Removed base damage (was 255)
         // Check for Enhanced Light Arc talent
         const magicDamageMultiplier = caster.enableEnhancedLightArc ? 1.75 : 1.0; // 175% or 100% of magical damage
         

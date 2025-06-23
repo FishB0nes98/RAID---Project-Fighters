@@ -181,7 +181,7 @@
         "enhanced_heart_pounce": {
             "id": "enhanced_heart_pounce",
             "name": "Enhanced Heart Pounce",
-            "description": "Zoey's Heart Pounce becomes even more devastating. It now scales with additional 50% physical damage and 50% magical damage, increasing the total scaling from 125% to 225%.",
+            "description": "Zoey's Heart Pounce becomes even more devastating. It now scales with additional 50% physical damage and 50% magical damage, increasing the total scaling from 50% to 100% magical + 50% physical.",
             "icon": "Icons/talents/enhanced_heart_pounce.webp",
             "effect": {
                 "type": "modify_character_property",

@@ -8,7 +8,7 @@ class AtlanteanChristiePassive {
         this.character = character;
         this.passiveId = 'atlantean_christie_passive';
         this.name = 'Aquatic Meditation';
-        this.description = 'When Christie doesn\'t act during a turn, she restores 1 additional Ability Point at the end of the turn through aquatic meditation.';
+        this.description = 'When Christie doesn\'t act during a turn, she restores 2 additional Ability Points at the end of the turn through aquatic meditation.';
         this.actedThisTurn = false;
         this.initialized = false;
     }
@@ -130,11 +130,11 @@ class AtlanteanChristiePassive {
         const oldMana = Number(this.character.stats.currentMana) || 0;
         // Use base max mana of 6 for Christie, not modified mana which could be buffed
         const maxMana = 6; // Christie's base maximum is always 6
-        const newMana = Math.min(oldMana + 1, maxMana);
+        const newMana = Math.min(oldMana + 2, maxMana);
         
         this.character.stats.currentMana = newMana;
 
-        console.log(`[ATLANTEAN CHRISTIE PASSIVE] Mana calculation: ${oldMana} + 1 = ${newMana} (max: ${maxMana})`);
+        console.log(`[ATLANTEAN CHRISTIE PASSIVE] Mana calculation: ${oldMana} + 2 = ${newMana} (max: ${maxMana})`);
 
         // Only show effects if mana was actually restored
         if (newMana > oldMana) {
@@ -144,7 +144,7 @@ class AtlanteanChristiePassive {
             // Add battle log entry
             if (window.gameManager) {
                 window.gameManager.addLogEntry(
-                    `💧 ${this.character.name} restores 1 Ability Point through Aquatic Meditation`,
+                    `💧 ${this.character.name} restores 2 Ability Points through Aquatic Meditation`,
                     'heal passive'
                 );
             }
@@ -152,10 +152,10 @@ class AtlanteanChristiePassive {
             // Update UI
             if (window.gameManager && window.gameManager.uiManager) {
                 window.gameManager.uiManager.updateCharacterUI(this.character);
-                window.gameManager.uiManager.triggerManaAnimation(this.character, 'restore', 1);
+                window.gameManager.uiManager.triggerManaAnimation(this.character, 'restore', 2);
             }
 
-            console.log(`[ATLANTEAN CHRISTIE PASSIVE] Restored 1 AP: ${oldMana} -> ${newMana}`);
+            console.log(`[ATLANTEAN CHRISTIE PASSIVE] Restored 2 AP: ${oldMana} -> ${newMana}`);
         } else {
             console.log(`[ATLANTEAN CHRISTIE PASSIVE] No AP restored - already at maximum (${newMana}/${maxMana})`);
         }
@@ -216,7 +216,7 @@ class AtlanteanChristiePassive {
         // Create ability point restoration indicator
         const apIndicator = document.createElement('div');
         apIndicator.className = 'ap-restoration-indicator';
-        apIndicator.textContent = '+1 AP';
+        apIndicator.textContent = '+2 AP';
         characterElement.appendChild(apIndicator);
 
         // Cleanup all VFX after animation

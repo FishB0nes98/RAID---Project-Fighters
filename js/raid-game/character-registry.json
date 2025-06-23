@@ -142,7 +142,7 @@
             "image": "Icons/characters/Farmer Alice.png",
             "rarity": "epic",
             "type": "tank",
-            "tags": ["Tank", "Support", "Farmer", "Physical"],
+            "tags": ["Tank", "Farmer"],
             "description": "A bulky tank with magical resistance. Her Magical Resistance passive allows her to gain permanent Magic Shield when taking magical damage.",
             "playerunlocked": false,
             "ingameimage": "Loading Screen/Farmer Alice.png"
@@ -323,7 +323,7 @@
             "image": "Icons/characters/Bridget.png",
             "rarity": "epic",
             "type": "support",
-            "tags": ["Magical", "Support", "Carry", "Mew Mew"],
+            "tags": ["Magical", "Support", "Mew Mew"],
             "description": "A water-themed magical girl with powerful healing abilities. Her attacks create beautiful aquatic displays that both damage enemies and nurture allies.",
             "playerunlocked": false,
             "ingameimage": "Loading Screen/Bridget.png"
@@ -353,14 +353,14 @@
         {
             "id": "little_devil",
             "name": "Little Devil",
-            "image": "Loading Screen/Little_Devil.webp",
+            "image": "Loading Screen/Little Devil.webp",
             "rarity": "rare",
             "type": "fighter",
             "tags": ["Enemy", "Demon", "Tutorial"],
             "description": "A mischievous little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Little Devil.png"
+            "ingameimage": "Loading Screen/Little Devil.webp"
         },
         {
             "id": "little_devil_female",
@@ -372,7 +372,7 @@
             "description": "A cunning little devil with sharp claws and an appetite for mana. Has natural resilience against damage.",
             "playerunlocked": false,
             "isHidden": true,
-            "ingameimage": "Loading Screen/Little Devil Female.png"
+            "ingameimage": "Loading Screen/Little_Devil_Female.webp"
         },
         {
             "id": "hotshot_diablo",

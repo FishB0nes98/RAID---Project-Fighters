@@ -4634,7 +4634,9 @@ class Ability {
             'buffValue', 'debuffValue', 'chance', 'numProjectiles', 'aoeModifier', 
             'fixedDamage', 'damageType', 'scalingStat', 'targetMaxHpMultiplier', 
             'effectFunctionName', 'isPlaceholder', 'placeholderAbility', 'unlockLevel', 
-            'tags', 'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn'
+            'tags', 'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn', 
+            // --- NEW: Ensure targeting-related flags are preserved ---
+            'canTargetEnemies', 'canTargetAllies'
         ];
         
         for (const prop of additionalProps) {
@@ -4646,6 +4648,9 @@ class Ability {
         // Copy any custom methods that might have been attached
         if (typeof this.generateDescription === 'function' && this.generateDescription !== Ability.prototype.generateDescription) {
             cloned.generateDescription = this.generateDescription;
+        }
+        if (typeof this.getTargetType === 'function') {
+            cloned.getTargetType = this.getTargetType;
         }
         
         return cloned;
@@ -7802,22 +7807,6 @@ const AbilityFactory = {
         }, 600);
     },
 
-    // <<< MOVED THIS METHOD INSIDE >>>
-    // Method to register custom effect functions by name
-    registerAbilityEffect(effectName, effectFunction) {
-        if (typeof effectFunction !== 'function') {
-           
-            return;
-        }
-        if (this.registeredEffects[effectName]) {
-            
-        }
-        this.registeredEffects[effectName] = effectFunction;
-        
-    },
-
-
-
     showFanOfKnivesVFX(caster, targets, isChainCast = false, chainNumber = 0) {
         console.log('[Fan of Knives VFX] Method called with:', { 
             caster: caster.name, 
@@ -8241,7 +8230,6 @@ const AbilityFactory = {
             gameContainer.style.animation = '';
         }, 300);
     }
-    // <<< END MOVED METHOD >>>
 }; // Closing brace for AbilityFactory
   
 // <<< ADDED: Make AbilityFactory globally accessible >>>

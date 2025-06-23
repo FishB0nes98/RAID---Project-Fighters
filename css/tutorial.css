@@ -7,7 +7,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10000;
+    z-index: 20000;
     display: none;
     pointer-events: none;
 }
@@ -36,7 +36,7 @@
 /* Tutorial Highlight */
 .tutorial-highlight {
     position: fixed;
-    z-index: 10001;
+    z-index: 20001;
     border: 3px solid #00ff88;
     border-radius: 12px;
     background: rgba(0, 255, 136, 0.1);
@@ -71,7 +71,7 @@
 /* Tutorial Tooltip */
 .tutorial-tooltip {
     position: fixed;
-    z-index: 10010 !important;
+    z-index: 20010 !important;
     max-width: 400px;
     min-width: 300px;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -254,7 +254,7 @@ body.tutorial-active {
 }
 
 body.tutorial-active .battle-container > *:not(.tutorial-overlay):not(.tutorial-tooltip):not(.tutorial-highlight) {
-    position: relative;
+    /* Ensures z-index layering without altering existing positioning context */
     z-index: 1;
 }
 
@@ -730,4 +730,17 @@ body.tutorial-active #player-characters-container .ability:nth-child(1) {
     .tutorial-overlay .tutorial-backdrop {
         transition: opacity 0.2s ease;
     }
-} 
+}
+
+/* ------------------------------------------------------------------ */
+/* Ensure Volume Control keeps correct size during tutorial */
+body.tutorial-active .volume-control {
+    pointer-events: all !important;
+    min-width: 160px !important;
+}
+
+body.tutorial-active .volume-control .volume-slider {
+    /* Width comes from the main raid-game.css so we only ensure interaction here */
+    pointer-events: all !important;
+}
+/* ------------------------------------------------------------------ */ 

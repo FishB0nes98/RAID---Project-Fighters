@@ -48,13 +48,44 @@ class StageManager {
     // Load the stage registry
     async loadStageRegistry() {
         try {
+            // Load main stage registry
             const response = await fetch('js/raid-game/stage-registry.json');
             if (!response.ok) {
                 throw new Error('Failed to load stage registry');
             }
             const data = await response.json();
             this.availableStages = data.stages || [];
-            console.log(`Loaded ${this.availableStages.length} stages from registry`);
+            console.log(`Loaded ${this.availableStages.length} stages from main registry`);
+            
+            // Load single stages and merge them
+            try {
+                const singleStagesResponse = await fetch('single-stages.json');
+                if (singleStagesResponse.ok) {
+                    const singleStagesData = await singleStagesResponse.json();
+                    if (Array.isArray(singleStagesData)) {
+                        // Convert single stages to registry format and add them
+                        const convertedSingleStages = singleStagesData.map(stage => ({
+                            id: stage.id,
+                            name: stage.name,
+                            description: stage.description,
+                            difficulty: stage.difficulty,
+                            type: stage.type,
+                            backgroundImage: stage.backgroundImage,
+                            backgroundMusic: stage.backgroundMusic,
+                            path: null, // Single stages don't have separate files
+                            ...stage // Include all other properties
+                        }));
+                        
+                        this.availableStages = [...this.availableStages, ...convertedSingleStages];
+                        console.log(`Loaded ${singleStagesData.length} additional stages from single-stages.json`);
+                    }
+                }
+            } catch (singleStagesError) {
+                console.warn('Failed to load single-stages.json:', singleStagesError);
+                // Continue without single stages - not critical
+            }
+            
+            console.log(`Total stages loaded: ${this.availableStages.length}`);
             return this.availableStages;
         } catch (error) {
             console.error('Error loading stage registry:', error);
@@ -90,13 +121,6 @@ class StageManager {
                             console.log(`Loading single stage from localStorage: ${stageId}`);
                             stageData = parsedStage;
                             
-                            // Handle random battle type stages
-                            if (stageData.type === 'random_battle' && stageData.enemyPool && stageData.enemyCount) {
-                                console.log(`Generating random enemies for ${stageId}`);
-                                stageData.enemies = this.generateRandomEnemies(stageData.enemyPool, stageData.enemyCount);
-                                console.log(`Generated enemies: ${stageData.enemies.map(e => e.characterId).join(', ')}`);
-                            }
-                            
                             // If the localStorage stage data doesn't have enemies, it's probably just registry metadata
                             // We need to load the full stage data from the stage file
                             if (!stageData.enemies || !Array.isArray(stageData.enemies) || stageData.enemies.length === 0) {
@@ -126,14 +150,21 @@ class StageManager {
                         throw new Error(`Stage ${stageId} not found in registry`);
                     }
                     
-                    // Load the stage data using the path from the registry
-                    const response = await fetch(stageInfo.path);
-                    if (!response.ok) {
-                        console.error(`Failed to fetch stage file from path ${stageInfo.path} for ${stageId}. Status: ${response.status}`);
-                        throw new Error(`Failed to load stage data for ${stageId} from path ${stageInfo.path}`);
+                    // Handle single stages (no separate file) vs traditional stages (with separate file)
+                    if (stageInfo.path) {
+                        // Traditional stage with separate file
+                        console.log(`Loading stage data from file: ${stageInfo.path}`);
+                        const response = await fetch(stageInfo.path);
+                        if (!response.ok) {
+                            console.error(`Failed to fetch stage file from path ${stageInfo.path} for ${stageId}. Status: ${response.status}`);
+                            throw new Error(`Failed to load stage data for ${stageId} from path ${stageInfo.path}`);
+                        }
+                        stageData = await response.json();
+                    } else {
+                        // Single stage - use the registry data directly
+                        console.log(`Using single stage data directly from registry for: ${stageId}`);
+                        stageData = { ...stageInfo };
                     }
-                    
-                    stageData = await response.json();
                     
                     // Merge registry data with stage file data (registry takes priority)
                     if (stageInfo.enemies) {
@@ -162,12 +193,20 @@ class StageManager {
             this.currentStage = stageData;
             this.currentStage.id = stageId; // Ensure the ID is stored on the loaded data
             
-            // Handle random background selection for draft mode
-            if (stageData.isDraftMode && stageData.randomBackgrounds && Array.isArray(stageData.randomBackgrounds)) {
-                const randomIndex = Math.floor(Math.random() * stageData.randomBackgrounds.length);
-                const selectedBackground = stageData.randomBackgrounds[randomIndex];
+            // If this is a random battle stage, dynamically generate enemy list
+            if (this.currentStage.type === 'random_battle' && this.currentStage.enemyPool && this.currentStage.enemyCount && (!Array.isArray(this.currentStage.enemies) || this.currentStage.enemies.length === 0)) {
+                console.log(`[StageManager] Generating ${this.currentStage.enemyCount} random enemies from pool of ${this.currentStage.enemyPool.length}`);
+                this.currentStage.enemies = this.generateRandomEnemies(this.currentStage.enemyPool, this.currentStage.enemyCount);
+            }
+
+            // Handle random background selection for any stage that defines a list of randomBackgrounds
+            if (this.currentStage.randomBackgrounds && Array.isArray(this.currentStage.randomBackgrounds) && this.currentStage.randomBackgrounds.length > 0) {
+                const randomIndex = Math.floor(Math.random() * this.currentStage.randomBackgrounds.length);
+                const selectedBackground = this.currentStage.randomBackgrounds[randomIndex];
                 this.currentStage.backgroundImage = selectedBackground;
-                console.log(`[StageManager] Draft mode: Selected random background: ${selectedBackground}`);
+
+                const contextLabel = this.currentStage.isDraftMode ? 'Draft mode' : (this.currentStage.type === 'random_battle' ? 'Random battle' : 'Stage');
+                console.log(`[StageManager] ${contextLabel}: Selected random background: ${selectedBackground}`);
             }
             
             // Initialize the game state for this stage

@@ -1458,6 +1458,19 @@ body {
     overflow: hidden;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.unlock-card .character-info {
+    text-align: center;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.unlock-card .character-unlock-button {
+    margin-top: auto;
 }
 
 .unlock-card::before {
@@ -1513,10 +1526,6 @@ body {
 
 .unlock-card:hover .character-image-container img {
     transform: scale(1.1);
-}
-
-.unlock-card .character-info {
-    text-align: center;
 }
 
 .unlock-card .character-info h4 {

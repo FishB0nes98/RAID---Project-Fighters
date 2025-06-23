@@ -12,7 +12,7 @@
     "stats": {
         "hp": 7490,
         "mana": 6,
-        "physicalDamage": 205,
+        "physicalDamage": 255,
         "magicalDamage": 0,
         "armor": 10,
         "magicalShield": 7,
@@ -34,18 +34,18 @@
             "doesNotEndTurn": true,
             "type": "damage",
             "damageType": "physical",
-            "description": "Strike the target 3 times with devastating kicks. Each strike has a 25% chance to hit 1-4 additional enemies for reduced damage. Costs 3 ability points."
+            "description": "Strike the target 3 times with devastating kicks, each dealing 112% Physical Damage. Each strike has a 25% chance to hit 1-4 additional enemies for 60% Physical Damage. Costs 3 ability points."
         },
         {
             "id": "atlantean_christie_charming_kiss",
             "name": "Charming Kiss",
             "icon": "Icons/abilities/charming_kiss.png",
-            "manaCost": 4,
+            "manaCost": 3,
             "cooldown": 8,
             "targetType": "all_enemies",
             "type": "utility",
             "doesNotEndTurn": true,
-            "description": "Blows a charming kiss that has a 58% chance to hit each enemy. Affected enemies take 75% more damage from Christie for 5 turns. When Christie hits a charmed enemy, she gains back one Ability point. Costs 4 ability points."
+            "description": "Blows a charming kiss that has a 58% chance to hit each enemy. Affected enemies take 75% more damage from Christie for 5 turns. When Christie hits a charmed enemy, she gains back one Ability point. Costs 3 ability points."
         },
         {
             "id": "atlantean_christie_samba_slam",
@@ -76,7 +76,7 @@
         "id": "atlantean_christie_passive",
         "name": "Aquatic Meditation",
         "icon": "Icons/abilities/default.png",
-        "description": "When Christie doesn't act during a turn, she restores 1 additional Ability Point at the end of the turn through aquatic meditation."
+        "description": "When Christie doesn't act during a turn, she restores 2 additional Ability Points at the end of the turn through aquatic meditation."
     },
     "usesAbilityPoints": true
 } 

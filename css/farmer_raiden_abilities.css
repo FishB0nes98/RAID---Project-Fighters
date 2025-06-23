@@ -184,10 +184,15 @@
     pointer-events: none;
     z-index: 15;
     opacity: 0;
-    animation: zap-buildup 0.4s ease-out forwards;
+    animation: zap-buildup 1.5s ease-out forwards;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 230, 150, 0.2) 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 20px 5px rgba(255, 230, 150, 0.4);
 }
 
 .raiden-zap-effect.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
 
 /* Style for the individual particles */
@@ -206,6 +211,10 @@
     0% {
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
     }
     70% {
         opacity: 0.9;

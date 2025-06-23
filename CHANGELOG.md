@@ -1,5 +1,59 @@
 # Project Fighters - Changelog
 
+## Patch 0.4 - Zoey Balance Overhaul
+*Released: [Current Date]*
+
+### Character Balance Changes
+
+#### 🌟 Zoey - Complete Damage Scaling Rebalance
+**Rationale**: Zoey was dealing excessive damage across all abilities with her 200% magical damage scaling, making her oppressive in both single-target and AoE scenarios. Additionally, her Bell Mark passive was providing too much bonus damage. This comprehensive rebalance reduces her raw damage output while maintaining her unique mechanics and playstyle identity.
+
+**Ability Changes:**
+
+**🍓 Strawberry Bell Burst (Q)**
+- **Damage Scaling**: Reduced from **200% → 122%** Magical Damage
+- *Impact: ~39% reduction in Q ability damage output, bringing her primary damage source in line with other characters*
+
+**💖 Heart Pounce (W)**
+- **Base Damage**: Remains **855** (unchanged)
+- **Magical Damage Scaling**: Reduced from **125% → 50%** Magical Damage
+- **Enhanced Heart Pounce Talent**: Now adds **+50% Magical + 50% Physical** damage scaling
+  - *Total with talent: 855 + 100% Magical + 50% Physical damage*
+- *Impact: Significant reduction in W ability scaling, but talent provides meaningful upgrade path*
+
+**⚡ Sparkle Burst (E)**
+- **Damage Scaling**: Reduced from **200% → 122%** Magical Damage
+- *Impact: AoE damage potential significantly reduced, preventing oppressive team-fight scenarios*
+
+**🌈 Glowing Light Arc (R)**
+- **Base Damage**: Removed **255** base damage (now **0**)
+- **Magical Damage Scaling**: Remains **100%** (175% with Enhanced Light Arc talent)
+- *Impact: Ultimate now scales purely with magical damage, removing guaranteed damage floor*
+
+**Passive Rebalance:**
+
+**✨ Sparkle Bell Mark (Passive)**
+- **Damage Multiplier**: Reduced from **200% (2x) → 125%** damage to marked enemies
+- **Stacking Formula**: Multiple marks now use **1 + (stacks × 0.25)** formula
+  - *1 stack = 125% damage, 2 stacks = 150% damage, 3 stacks = 175% damage*
+- **Updated Descriptions**: All passive and debuff tooltips now correctly display "125%" instead of "double damage"
+
+**Bug Fixes:**
+- **🐛 Fixed**: Strawberry Bell Burst not applying Sparkle Bell Mark to damaged enemies
+  - *Enhanced isDamageSpell detection to properly recognize "Bell" abilities*
+  - *Added comprehensive debugging and improved passive trigger reliability*
+
+**Developer Commentary**: 
+*These changes address Zoey's dominant position in the meta while preserving her unique kit identity. The ~39% damage reduction across her primary abilities, combined with the passive nerf from 200% to 125% marked damage, should bring her power level in line with other characters. Players can still achieve high damage through talent investments and proper mark management, but the baseline power is now more reasonable for healthy gameplay.*
+
+**Impact Summary**:
+- **Early Game**: Significantly reduced damage output requires more strategic ability usage
+- **Mid Game**: Talent investments become more important for maintaining damage relevance  
+- **Late Game**: Still capable of high damage through mark stacking and enhanced abilities
+- **Team Fights**: Reduced AoE oppression allows for more interactive combat scenarios
+
+---
+
 ## Patch 0.3 - Bug Fixes
 *Released: [Current Date]*
 
@@ -105,17 +159,6 @@
 - **Execute Attack (R)**: Reduced mana cost from **200 → 100**, reduced cooldown from **15 → 12** turns, **fixed cooldown reset mechanism**
 
 **Impact**: The increased proc rate on Butterfly Dagger makes Ayane more reliable in combat with better defensive utility. The reduced Butterfly Trail cooldown allows for more frequent team support, making her a better team player. Execute Attack becomes more accessible with lower costs while maintaining its high-risk/high-reward nature, and the fixed cooldown reset ensures the ability works as intended when securing kills.
-
-#### 🌟 Zoey - Reliability Improvements
-**Rationale**: Zoey's chance-based mechanics on her W and E abilities created frustrating RNG scenarios where abilities could completely fail, making her unreliable in competitive play. Removing fail chances makes her more consistent while maintaining her unique mechanics.
-
-**Changes:**
-- **Heart Pounce (W)**: Removed 50% failure chance - ability now always succeeds
-- **Sparkle Burst (E)**: Removed 50% hit chance per target - ability now hits all enemies
-- **Strawberry Bell Burst (Q)**: Cooldown reduced from **4 → 1** turn
-- **Base Stats**: Magical Damage reduced from **300 → 162**
-
-**Impact**: Zoey becomes significantly more reliable and viable in competitive scenarios. Players can now count on her abilities working consistently, while she retains her unique damage scaling and cooldown reduction mechanics. This change transforms her from a high-risk, high-reward character to a more balanced and dependable option.
 
 #### 🚜 Farmer Shoma - Balance Adjustments
 **Rationale**: Farmer Shoma needed adjustments to create better ability flow while reducing the power of his ultimate ability. The Q ability was underused due to its cooldown, while his ultimate was too powerful for its frequency.

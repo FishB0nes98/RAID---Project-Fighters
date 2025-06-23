@@ -1150,7 +1150,7 @@ const atlanteanChristieKick = new Ability(
     3, // Mana cost (ability points)
     1, // Cooldown
     kickEffect
-).setDescription('Strike the target 3 times with devastating kicks. Each strike has a 25% chance to hit 1-4 additional enemies for reduced damage. Costs 3 ability points.')
+).setDescription('Strike the target 3 times with devastating kicks, each dealing 112% Physical Damage. Each strike has a 25% chance to hit 1-4 additional enemies for 60% Physical Damage. Costs 3 ability points.')
  .setTargetType('enemy');
 
 // Set the doesNotEndTurn property
@@ -1161,7 +1161,7 @@ const atlanteanChristieCharmingKiss = new Ability(
     'atlantean_christie_charming_kiss',
     'Charming Kiss',
     'Icons/abilities/charming_kiss.png',
-    4, // Ability points cost
+    3, // Ability points cost
     8, // Cooldown
     charmingKissEffect
 ).setDescription('Blows an aquatic kiss at all enemies. Has 58% chance to hit each. Enemies hit get a debuff for 3 turns, making them take 75% more damage from Christie. When Christie hits enemies with this debuff, she gains back one Ability point.')

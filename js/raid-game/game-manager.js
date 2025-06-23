@@ -4260,6 +4260,16 @@ class GameManager {
                // Process AI effects at start of their turn WITH duration reduction
                this.gameManager.gameState.aiCharacters.forEach(aiChar => {
                    if (!aiChar.isDead()) {
+                       // 1. Trigger onTurnStart for passives (using the current turn number)
+                       if (aiChar.passiveHandler && typeof aiChar.passiveHandler.onTurnStart === 'function') {
+                           try {
+                               console.log(`[GameManager executeAITurn] Calling onTurnStart for ${aiChar.name} (Instance: ${aiChar.instanceId || aiChar.id}), Turn: ${this.gameManager.gameState.turn}`);
+                               aiChar.passiveHandler.onTurnStart(aiChar, this.gameManager.gameState.turn);
+                           } catch (e) {
+                               console.error(`Error in onTurnStart for ${aiChar.name}'s passive:`, e);
+                           }
+                       }
+                       
                        // Process buffs/debuffs, reduce duration=true, regenerate resources
                        aiChar.processEffects(true, true);
                        // Reduce ability cooldowns

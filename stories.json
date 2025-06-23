@@ -15,8 +15,16 @@
         "difficulty": 1,
         "type": "battle",
         "boss": "Schoolboy Siegfried",
+        "enemies": [
+          {
+            "characterId": "schoolboy_siegfried",
+            "modifications": {
+              "hpMultiplier": 0.22754
+            }
+          }
+        ],
         "isTutorial": true,
-        "backgroundImage": "images/stages/training_grounds.png",
+        "backgroundImage": "images/stages/school_rooftop.png",
         "backgroundMusic": "sounds/music/tutorial_theme.mp3"
       },
       {
@@ -31,7 +39,7 @@
         "isTutorial": true,
         "tutorialHighlights": ["hp-bar", "mana-bar"],
         "tutorialMessage": "Your HP and mana from the previous stage are preserved! Manage your resources wisely across multiple battles.",
-        "backgroundImage": "images/stages/training_grounds.png",
+        "backgroundImage": "images/stages/hell_stage1.png",
         "backgroundMusic": "sounds/music/tutorial_theme.mp3"
       },
       {
@@ -70,17 +78,13 @@
           { 
             "characterId": "farmer_nina",
             "modifications": {
-              "stats": {
-                "hp": { "operation": "multiply", "value": 0.7 }
-              }
+              "hpMultiplier": 0.7
             }
           },
           { 
             "characterId": "farmer_raiden",
             "modifications": {
-              "stats": {
-                "hp": { "operation": "multiply", "value": 0.7 }
-              }
+              "hpMultiplier": 0.7
             }
           }
         ],

@@ -3,7 +3,7 @@
     "name": "Training Grounds",
     "description": "Welcome to your first battle! Face Schoolboy Siegfried in a controlled environment to learn the combat basics.",
     "difficulty": 1,
-    "backgroundImage": "images/stages/training_grounds.png",
+    "backgroundImage": "images/stages/school_rooftop.png",
     "backgroundMusic": "sounds/music/tutorial_theme.mp3",
     "isTutorial": true,
     "enemies": [
@@ -11,7 +11,8 @@
             "characterId": "schoolboy_siegfried",
             "modifications": {
                 "stats": {
-                    "hp": 4200
+                    "hp": 2000,
+                    "mana": { "operation": "multiply", "value": 0.3 }
                 }
             }
         }

@@ -443,7 +443,16 @@ class FarmerRaidenPassive {
 
     // Called at the start of each turn for checking power growth
     onTurnStart(character, turn) {
-        if (!character) return;
+        console.log(`[FarmerRaidenPassive] onTurnStart called for ${character.name} at turn ${turn}`);
+        console.log(`[FarmerRaidenPassive] Character passiveHandler:`, character.passiveHandler);
+        console.log(`[FarmerRaidenPassive] Character powerGrowth talent:`, character.powerGrowth);
+        console.log(`[FarmerRaidenPassive] Character randomStormActivation talent:`, character.randomStormActivation);
+        console.log(`[FarmerRaidenPassive] Character lowHealthDodge talent:`, character.lowHealthDodge);
+        
+        if (!character) {
+            console.warn(`[FarmerRaidenPassive] onTurnStart called with null character`);
+            return;
+        }
         
         // Check if character has the powerGrowth talent enabled
         if (character.powerGrowth) {
@@ -819,12 +828,19 @@ class FarmerRaidenPassive {
 
     // Show visual effects for Zap passive
     showZapVFX(caster, target) {
+        console.log(`[FarmerRaidenPassive] showZapVFX called for ${caster.name} -> ${target.name}`);
+        
         // Get elements
         const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
         const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
         
+        console.log(`[FarmerRaidenPassive] casterElement:`, casterElement);
+        console.log(`[FarmerRaidenPassive] targetElement:`, targetElement);
+        
         if (!casterElement || !targetElement) {
             console.warn("Cannot show zap VFX: Elements not found");
+            console.warn(`caster.instanceId: ${caster.instanceId}, caster.id: ${caster.id}`);
+            console.warn(`target.instanceId: ${target.instanceId}, target.id: ${target.id}`);
             return;
         }
         
@@ -832,6 +848,8 @@ class FarmerRaidenPassive {
         const zapEffect = document.createElement('div');
         zapEffect.className = 'raiden-zap-effect';
         casterElement.appendChild(zapEffect);
+        
+        console.log(`[FarmerRaidenPassive] Created zap effect element:`, zapEffect);
         
         // Add lightning particles to the zap effect
         const numParticles = 6 + Math.floor(Math.random() * 4); // 6-9 particles
@@ -852,9 +870,12 @@ class FarmerRaidenPassive {
             zapEffect.appendChild(particle);
         }
         
+        console.log(`[FarmerRaidenPassive] Added ${numParticles} particles to zap effect`);
+        
         // Activate the zap effect
         setTimeout(() => {
             zapEffect.classList.add('active');
+            console.log(`[FarmerRaidenPassive] Added 'active' class to zap effect`);
         }, 50);
         
         // Create impact effect on target
@@ -863,29 +884,44 @@ class FarmerRaidenPassive {
             impactEffect.className = 'zap-impact-effect';
             targetElement.appendChild(impactEffect);
             
+            console.log(`[FarmerRaidenPassive] Created impact effect on target:`, impactEffect);
+            
             // Remove zap effects after animations complete
             setTimeout(() => {
                 zapEffect.remove();
                 impactEffect.remove();
-            }, 1000);
+                console.log(`[FarmerRaidenPassive] Removed zap and impact effects`);
+            }, 2000);
         }, 400); // Delay the impact effect
         
         // Check if this is a Chain Zap and add a connecting line effect
         if (caster.zapMultiTarget) {
+            console.log(`[FarmerRaidenPassive] Creating chain zap effect`);
             // Create container for the chain effect
             const chainContainer = document.createElement('div');
             chainContainer.className = 'zap-chain-effect';
-            document.querySelector('.battle-container').appendChild(chainContainer);
+            
+            // Try multiple selectors for the battle container
+            let battleContainer = document.querySelector('.battle-container');
+            if (!battleContainer) {
+                battleContainer = document.querySelector('.game-container');
+            }
+            if (!battleContainer) {
+                battleContainer = document.body;
+            }
+            
+            battleContainer.appendChild(chainContainer);
             
             // Get positions of the elements for drawing the connecting line
             const casterRect = casterElement.getBoundingClientRect();
             const targetRect = targetElement.getBoundingClientRect();
+            const containerRect = battleContainer.getBoundingClientRect();
             
-            // Calculate center points
-            const casterCenterX = casterRect.left + casterRect.width / 2;
-            const casterCenterY = casterRect.top + casterRect.height / 2;
-            const targetCenterX = targetRect.left + targetRect.width / 2;
-            const targetCenterY = targetRect.top + targetRect.height / 2;
+            // Calculate center points relative to the container
+            const casterCenterX = casterRect.left - containerRect.left + casterRect.width / 2;
+            const casterCenterY = casterRect.top - containerRect.top + casterRect.height / 2;
+            const targetCenterX = targetRect.left - containerRect.left + targetRect.width / 2;
+            const targetCenterY = targetRect.top - containerRect.top + targetRect.height / 2;
             
             // Calculate distance and angle
             const dx = targetCenterX - casterCenterX;
@@ -897,9 +933,11 @@ class FarmerRaidenPassive {
             const chainLine = document.createElement('div');
             chainLine.className = 'zap-chain-line';
             chainLine.style.width = `${distance}px`;
+            chainLine.style.position = 'absolute';
             chainLine.style.left = `${casterCenterX}px`;
             chainLine.style.top = `${casterCenterY}px`;
             chainLine.style.transform = `rotate(${angle}deg)`;
+            chainLine.style.transformOrigin = 'left center';
             
             // Add to container
             chainContainer.appendChild(chainLine);
@@ -907,7 +945,7 @@ class FarmerRaidenPassive {
             // Remove the chain effect after animation
             setTimeout(() => {
                 chainContainer.remove();
-            }, 1000);
+            }, 2000);
         }
     }
     
@@ -1256,4 +1294,16 @@ class FarmerRaidenPassive {
 }
 
 // Make the class globally available
-window.FarmerRaidenPassive = FarmerRaidenPassive; 
+window.FarmerRaidenPassive = FarmerRaidenPassive;
+
+// Register with PassiveFactory
+if (typeof window.PassiveFactory !== 'undefined' && typeof window.PassiveFactory.registerPassive === 'function') {
+    window.PassiveFactory.registerPassive('farmer_raiden_zap', FarmerRaidenPassive);
+    console.log("FarmerRaidenPassive registered with PassiveFactory");
+} else {
+    console.warn("PassiveFactory or its registerPassive method not defined/ready, FarmerRaidenPassive not registered.");
+    console.warn("typeof window.PassiveFactory:", typeof window.PassiveFactory);
+    if (window.PassiveFactory) {
+        console.warn("typeof window.PassiveFactory.registerPassive:", typeof window.PassiveFactory.registerPassive);
+    }
+} 
