@@ -8,6 +8,7 @@
     --primary: #7e57c2;
     --primary-dark: #5e35b1;
     --primary-light: #9575cd;
+    --secondary: #5460ff; /* Soft blue/purple accent */
     --accent: #ff9800;
     --accent-dark: #f57c00;
     --danger: #e53935;
@@ -1506,6 +1507,7 @@ body {
     padding: 0.5rem;
     border-radius: 50%;
     border: 2px solid var(--primary);
+    pointer-events: none;
 }
 
 .unlock-card .character-image-container {
