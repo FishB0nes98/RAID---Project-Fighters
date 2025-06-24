@@ -87,13 +87,25 @@
     border-radius: 50%;
     animation: bloomEffect 1.5s ease-out forwards;
     z-index: 10;
-    pointer-events: none; /* Ensure it doesn't block clicks */
+}
+
+.sprout-bloom-vfx.critical {
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.9) 0%, rgba(255, 165, 0, 0.7) 30%, rgba(144, 238, 144, 0.6) 60%, rgba(144, 238, 144, 0) 100%); /* Golden critical bloom */
+    animation: criticalBloomEffect 1.5s ease-out forwards;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.6);
 }
 
 @keyframes bloomEffect {
     0% { transform: scale(0); opacity: 0; }
     50% { transform: scale(1.2); opacity: 1; }
     100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes criticalBloomEffect {
+    0% { transform: scale(0); opacity: 0; }
+    30% { transform: scale(1.1); opacity: 1; }
+    60% { transform: scale(1.4); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
 }
 
 /* Placeholder for Healing Sprout buff icon in UI */
@@ -203,4 +215,1170 @@
     0%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
     50%  { opacity: 1; transform: translate(-50%, -15px) scale(1.05); }
     100% { opacity: 0; transform: translate(-50%, -35px) scale(0.9); }
+}
+
+/* Magical Damage Synergy VFX */
+.julia-magical-synergy-pulse {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,180,0.45) 0%, rgba(120,255,180,0.25) 60%, rgba(0,0,0,0) 100%);
+    box-shadow: 0 0 24px 8px #eaffb0, 0 0 48px 16px #aaffcc;
+    animation: juliaMagicalSynergyPulse 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
+    z-index: 20;
+}
+@keyframes juliaMagicalSynergyPulse {
+    0% { opacity: 0.7; transform: scale(0.7); }
+    60% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+.julia-magical-synergy-float {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    transform: translateX(-50%);
+    color: #baff70;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-shadow: 0 0 8px #fffbe0, 0 0 16px #aaffcc;
+    background: linear-gradient(90deg, #fffbe0 0%, #baff70 50%, #aaffcc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: juliaMagicalSynergyFloat 1.1s ease-out forwards, juliaMagicalSynergyShimmer 1.1s linear infinite;
+    z-index: 22;
+    pointer-events: none;
+    white-space: nowrap;
+}
+@keyframes juliaMagicalSynergyFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    60% { opacity: 1; transform: translateX(-50%) translateY(-18px) scale(1.08); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-36px) scale(0.95); }
+}
+@keyframes juliaMagicalSynergyShimmer {
+    0% { filter: brightness(1.1); }
+    50% { filter: brightness(1.4) drop-shadow(0 0 8px #fffbe0); }
+    100% { filter: brightness(1.1); }
+}
+
+/* Enhanced Mystic Reserve VFX */
+.julia-enhanced-mystic-reserve-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(138, 196, 255, 0.6) 0%, rgba(100, 149, 237, 0.4) 40%, rgba(70, 130, 180, 0.2) 70%, rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 30px 12px #8ac4ff, 0 0 60px 24px #6495ed, 0 0 90px 36px #4682b4;
+    animation: juliaEnhancedMysticReservePulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 25;
+}
+
+@keyframes juliaEnhancedMysticReservePulse {
+    0% { opacity: 0; transform: scale(0.5); }
+    30% { opacity: 1; transform: scale(1.2); }
+    70% { opacity: 0.8; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.8); }
+}
+
+.julia-enhanced-mystic-reserve-float {
+    position: absolute;
+    left: 50%;
+    top: 15%;
+    transform: translateX(-50%);
+    color: #8ac4ff;
+    font-weight: bold;
+    font-size: 1.3em;
+    text-shadow: 0 0 10px #6495ed, 0 0 20px #4682b4, 0 0 30px #1e90ff;
+    background: linear-gradient(135deg, #8ac4ff 0%, #6495ed 30%, #4682b4 60%, #1e90ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: juliaEnhancedMysticReserveFloat 1.5s ease-out forwards, juliaEnhancedMysticReserveShimmer 1.5s linear infinite;
+    z-index: 27;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes juliaEnhancedMysticReserveFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) translateY(-25px) scale(1.1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-50px) scale(0.9); }
+}
+
+@keyframes juliaEnhancedMysticReserveShimmer {
+    0% { filter: brightness(1.2) drop-shadow(0 0 5px #8ac4ff); }
+    25% { filter: brightness(1.5) drop-shadow(0 0 10px #6495ed); }
+    50% { filter: brightness(1.8) drop-shadow(0 0 15px #4682b4); }
+    75% { filter: brightness(1.5) drop-shadow(0 0 10px #1e90ff); }
+    100% { filter: brightness(1.2) drop-shadow(0 0 5px #8ac4ff); }
+}
+
+.julia-enhanced-mystic-reserve-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 26;
+}
+
+.julia-enhanced-mystic-reserve-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #8ac4ff 0%, #6495ed 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 6px #8ac4ff, 0 0 12px #6495ed;
+    animation: juliaEnhancedMysticReserveParticleFloat 2s ease-out forwards;
+}
+
+@keyframes juliaEnhancedMysticReserveParticleFloat {
+    0% { 
+        opacity: 0; 
+        transform: translate(0, 0) scale(0.5); 
+    }
+    20% { 
+        opacity: 1; 
+        transform: translate(var(--particle-x, 20px), var(--particle-y, -30px)) scale(1); 
+    }
+    80% { 
+        opacity: 0.8; 
+        transform: translate(calc(var(--particle-x, 20px) * 1.5), calc(var(--particle-y, -30px) * 1.5)) scale(1.2); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(calc(var(--particle-x, 20px) * 2), calc(var(--particle-y, -30px) * 2)) scale(0.8); 
+    }
+}
+
+.julia-enhanced-mystic-reserve-aura {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(138, 196, 255, 0.3) 90deg, transparent 180deg, rgba(100, 149, 237, 0.3) 270deg, transparent 360deg);
+    animation: juliaEnhancedMysticReserveAura 3s linear infinite;
+    z-index: 24;
+    pointer-events: none;
+}
+
+@keyframes juliaEnhancedMysticReserveAura {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Allied Healing Sprouts VFX */
+.julia-allied-sprouts-game-start {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1000;
+    background: radial-gradient(circle at center, rgba(144, 238, 144, 0.3) 0%, rgba(76, 175, 80, 0.2) 40%, rgba(0, 0, 0, 0) 70%);
+    animation: juliaAlliedSproutsGameStart 2s ease-out forwards;
+}
+
+@keyframes juliaAlliedSproutsGameStart {
+    0% { opacity: 0; transform: scale(0.5); }
+    30% { opacity: 1; transform: scale(1.2); }
+    70% { opacity: 0.8; transform: scale(1.5); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+.julia-allied-sprouts-float {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 2em;
+    text-shadow: 0 0 15px #66BB6A, 0 0 30px #81C784, 0 0 45px #A5D6A7;
+    background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 25%, #81C784 50%, #A5D6A7 75%, #C8E6C9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: juliaAlliedSproutsFloat 2s ease-out forwards, juliaAlliedSproutsShimmer 2s linear infinite;
+    z-index: 1001;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes juliaAlliedSproutsFloat {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
+
+@keyframes juliaAlliedSproutsShimmer {
+    0% { filter: brightness(1.2) drop-shadow(0 0 10px #4CAF50); }
+    25% { filter: brightness(1.5) drop-shadow(0 0 15px #66BB6A); }
+    50% { filter: brightness(1.8) drop-shadow(0 0 20px #81C784); }
+    75% { filter: brightness(1.5) drop-shadow(0 0 15px #A5D6A7); }
+    100% { filter: brightness(1.2) drop-shadow(0 0 10px #4CAF50); }
+}
+
+.julia-allied-sprouts-particles {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.julia-allied-sprouts-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #4CAF50 0%, #66BB6A 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4CAF50, 0 0 16px #66BB6A;
+    animation: juliaAlliedSproutsParticleFloat 2.5s ease-out forwards;
+}
+
+@keyframes juliaAlliedSproutsParticleFloat {
+    0% { 
+        opacity: 0; 
+        transform: translate(0, 0) scale(0.5); 
+    }
+    20% { 
+        opacity: 1; 
+        transform: translate(var(--particle-x, 30px), var(--particle-y, -40px)) scale(1); 
+    }
+    80% { 
+        opacity: 0.8; 
+        transform: translate(calc(var(--particle-x, 30px) * 1.8), calc(var(--particle-y, -40px) * 1.8)) scale(1.3); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(calc(var(--particle-x, 30px) * 2.5), calc(var(--particle-y, -40px) * 2.5)) scale(0.8); 
+    }
+}
+
+.julia-allied-sprouts-application {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.6) 0%, rgba(102, 187, 106, 0.4) 40%, rgba(129, 199, 132, 0.2) 70%, rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 25px 10px #4CAF50, 0 0 50px 20px #66BB6A, 0 0 75px 30px #81C784;
+    animation: juliaAlliedSproutsApplication 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 30;
+}
+
+@keyframes juliaAlliedSproutsApplication {
+    0% { opacity: 0; transform: scale(0.3); }
+    40% { opacity: 1; transform: scale(1.3); }
+    80% { opacity: 0.7; transform: scale(1.6); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+.julia-allied-sprouts-application-float {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-shadow: 0 0 8px #66BB6A, 0 0 16px #81C784;
+    background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 30%, #81C784 60%, #A5D6A7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: juliaAlliedSproutsApplicationFloat 1.5s ease-out forwards, juliaAlliedSproutsApplicationShimmer 1.5s linear infinite;
+    z-index: 32;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes juliaAlliedSproutsApplicationFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    60% { opacity: 1; transform: translateX(-50%) translateY(-20px) scale(1.05); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.9); }
+}
+
+@keyframes juliaAlliedSproutsApplicationShimmer {
+    0% { filter: brightness(1.3) drop-shadow(0 0 6px #4CAF50); }
+    33% { filter: brightness(1.6) drop-shadow(0 0 10px #66BB6A); }
+    66% { filter: brightness(1.9) drop-shadow(0 0 14px #81C784); }
+    100% { filter: brightness(1.3) drop-shadow(0 0 6px #4CAF50); }
+}
+
+.julia-allied-sprouts-application-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 31;
+}
+
+.julia-allied-sprouts-application-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, #4CAF50 0%, #66BB6A 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 4px #4CAF50, 0 0 8px #66BB6A;
+    animation: juliaAlliedSproutsApplicationParticleFloat 1.5s ease-out forwards;
+}
+
+@keyframes juliaAlliedSproutsApplicationParticleFloat {
+    0% { 
+        opacity: 0; 
+        transform: translate(0, 0) scale(0.3); 
+    }
+    30% { 
+        opacity: 1; 
+        transform: translate(var(--particle-x, 15px), var(--particle-y, -25px)) scale(1); 
+    }
+    70% { 
+        opacity: 0.7; 
+        transform: translate(calc(var(--particle-x, 15px) * 1.5), calc(var(--particle-y, -25px) * 1.5)) scale(1.2); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(calc(var(--particle-x, 15px) * 2), calc(var(--particle-y, -25px) * 2)) scale(0.6); 
+    }
+}
+
+/* Critical Strike Mastery VFX */
+.julia-critical-mastery-pulse {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, rgba(255, 165, 0, 0.3) 40%, rgba(255, 69, 0, 0.2) 70%, rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 30px 12px #ffd700, 0 0 60px 24px #ffa500, 0 0 90px 36px #ff4500;
+    animation: juliaCriticalMasteryPulse 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 25;
+}
+
+@keyframes juliaCriticalMasteryPulse {
+    0% { opacity: 0; transform: scale(0.4); }
+    40% { opacity: 1; transform: scale(1.3); }
+    80% { opacity: 0.7; transform: scale(1.6); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+.julia-critical-mastery-float {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-shadow: 0 0 10px #ffa500, 0 0 20px #ff4500, 0 0 30px #ff6347;
+    background: linear-gradient(135deg, #ffd700 0%, #ffa500 30%, #ff4500 60%, #ff6347 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: juliaCriticalMasteryFloat 1.2s ease-out forwards, juliaCriticalMasteryShimmer 1.2s linear infinite;
+    z-index: 27;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes juliaCriticalMasteryFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    60% { opacity: 1; transform: translateX(-50%) translateY(-20px) scale(1.1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.9); }
+}
+
+@keyframes juliaCriticalMasteryShimmer {
+    0% { filter: brightness(1.3) drop-shadow(0 0 8px #ffd700); }
+    25% { filter: brightness(1.6) drop-shadow(0 0 12px #ffa500); }
+    50% { filter: brightness(1.9) drop-shadow(0 0 16px #ff4500); }
+    75% { filter: brightness(1.6) drop-shadow(0 0 12px #ff6347); }
+    100% { filter: brightness(1.3) drop-shadow(0 0 8px #ffd700); }
+}
+
+.julia-critical-mastery-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 26;
+}
+
+.julia-critical-mastery-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: radial-gradient(circle, #ffd700 0%, #ffa500 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ffd700, 0 0 16px #ffa500;
+    animation: juliaCriticalMasteryParticleFloat 1.5s ease-out forwards;
+}
+
+@keyframes juliaCriticalMasteryParticleFloat {
+    0% { 
+        opacity: 0; 
+        transform: translate(0, 0) scale(0.4); 
+    }
+    30% { 
+        opacity: 1; 
+        transform: translate(var(--particle-x, 25px), var(--particle-y, -35px)) scale(1); 
+    }
+    70% { 
+        opacity: 0.8; 
+        transform: translate(calc(var(--particle-x, 25px) * 1.6), calc(var(--particle-y, -35px) * 1.6)) scale(1.3); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(calc(var(--particle-x, 25px) * 2.2), calc(var(--particle-y, -35px) * 2.2)) scale(0.7); 
+    }
+}
+
+.julia-critical-mastery-aura {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(255, 215, 0, 0.4) 90deg, transparent 180deg, rgba(255, 165, 0, 0.4) 270deg, transparent 360deg);
+    animation: juliaCriticalMasteryAura 2s linear infinite;
+    z-index: 24;
+    pointer-events: none;
+}
+
+@keyframes juliaCriticalMasteryAura {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Spirit Mastery VFX Styles */
+.julia-spirit-mastery-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(138, 43, 226, 0) 70%);
+    border-radius: 50%;
+    animation: juliaSpiritMasteryPulse 2.5s ease-out forwards;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes juliaSpiritMasteryPulse {
+    0% { transform: scale(0); opacity: 0; }
+    30% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.julia-spirit-mastery-float {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #8a2be2;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.8), 0 0 10px rgba(138, 43, 226, 0.6);
+    animation: juliaSpiritMasteryFloat 2.5s ease-out forwards;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 15;
+}
+
+@keyframes juliaSpiritMasteryFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.9);
+    }
+}
+
+@keyframes juliaSpiritMasteryShimmer {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.julia-spirit-mastery-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.julia-spirit-mastery-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #8a2be2 0%, #9370db 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(138, 43, 226, 0.8);
+    animation: juliaSpiritMasteryParticleFloat 2.5s ease-out forwards;
+}
+
+@keyframes juliaSpiritMasteryParticleFloat {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--particle-x), var(--particle-y)) scale(0.5);
+    }
+}
+
+.julia-spirit-mastery-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(138, 43, 226, 0.6);
+    border-radius: 50%;
+    animation: juliaSpiritMasteryAura 2.5s ease-out forwards;
+    z-index: 11;
+    pointer-events: none;
+}
+
+@keyframes juliaSpiritMasteryAura {
+    0% { 
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.8);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.julia-spirit-mastery-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 13;
+}
+
+.julia-spirit-mastery-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: linear-gradient(45deg, #8a2be2, #9370db, #8a2be2);
+    border-radius: 50%;
+    box-shadow: 0 0 3px rgba(138, 43, 226, 0.9);
+    animation: juliaSpiritMasterySparkle 2.5s ease-out forwards;
+}
+
+@keyframes juliaSpiritMasterySparkle {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0) rotate(0deg);
+    }
+    25% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(90deg);
+    }
+    75% {
+        opacity: 1;
+        transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(1.2) rotate(270deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(0) rotate(360deg);
+    }
+}
+
+/* Nature's Resilience VFX Styles */
+.julia-natures-resilience-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(34, 139, 34, 0.3) 0%, rgba(50, 205, 50, 0.2) 30%, rgba(34, 139, 34, 0) 70%);
+    border-radius: 50%;
+    animation: juliaNaturesResiliencePulse 3s ease-out forwards;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes juliaNaturesResiliencePulse {
+    0% { transform: scale(0); opacity: 0; }
+    20% { transform: scale(1.1); opacity: 1; }
+    80% { transform: scale(1.3); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.julia-natures-resilience-hp-float {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #32cd32;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 5px rgba(50, 205, 50, 0.8), 0 0 10px rgba(50, 205, 50, 0.6);
+    animation: juliaNaturesResilienceHPFloat 3s ease-out forwards;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 15;
+}
+
+.julia-natures-resilience-mana-float {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #4169e1;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 5px rgba(65, 105, 225, 0.8), 0 0 10px rgba(65, 105, 225, 0.6);
+    animation: juliaNaturesResilienceManaFloat 3s ease-out forwards;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 15;
+}
+
+@keyframes juliaNaturesResilienceHPFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px) scale(1.1);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-25px) scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.9);
+    }
+}
+
+@keyframes juliaNaturesResilienceManaFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    40% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1.1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px) scale(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-45px) scale(0.9);
+    }
+}
+
+@keyframes juliaNaturesResilienceShimmer {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.julia-natures-resilience-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.julia-natures-resilience-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #32cd32 0%, #228b22 50%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(50, 205, 50, 0.8);
+    animation: juliaNaturesResilienceParticleFloat 3s ease-out forwards;
+}
+
+@keyframes juliaNaturesResilienceParticleFloat {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--particle-x), var(--particle-y)) scale(0.6);
+    }
+}
+
+.julia-natures-resilience-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90px;
+    height: 90px;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(34, 139, 34, 0.6);
+    border-radius: 50%;
+    animation: juliaNaturesResilienceAura 3s ease-out forwards;
+    z-index: 11;
+    pointer-events: none;
+}
+
+@keyframes juliaNaturesResilienceAura {
+    0% { 
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.8);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -50%) rotate(120deg) scale(1.1);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%) rotate(240deg) scale(1.3);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.6);
+        opacity: 0;
+    }
+}
+
+.julia-natures-resilience-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 13;
+}
+
+.julia-natures-resilience-sparkle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: linear-gradient(45deg, #32cd32, #228b22, #32cd32);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(50, 205, 50, 0.9);
+    animation: juliaNaturesResilienceSparkle 3s ease-out forwards;
+}
+
+@keyframes juliaNaturesResilienceSparkle {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(90deg);
+    }
+    60% {
+        opacity: 1;
+        transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(1.3) rotate(270deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(0) rotate(360deg);
+    }
+}
+
+/* --- Healing Surge VFX Styles --- */
+.julia-healing-surge-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, rgba(255, 182, 193, 0) 70%);
+    border-radius: 50%;
+    animation: juliaHealingSurgePulse 3.5s ease-out forwards;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes juliaHealingSurgePulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    20% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+.julia-healing-surge-base-float {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #90EE90;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 10px rgba(144, 238, 144, 0.8);
+    animation: juliaHealingSurgeBaseFloat 3s ease-out forwards;
+    pointer-events: none;
+    z-index: 12;
+}
+
+@keyframes juliaHealingSurgeBaseFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-40px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px);
+    }
+}
+
+.julia-healing-surge-bonus-float {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #FFD700;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+    animation: juliaHealingSurgeBonusFloat 3.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 12;
+}
+
+@keyframes juliaHealingSurgeBonusFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0) scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px) scale(1.1);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-45px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-70px) scale(0.9);
+    }
+}
+
+.julia-healing-surge-aura {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: conic-gradient(from 0deg, rgba(255, 182, 193, 0.3), rgba(255, 215, 0, 0.3), rgba(255, 182, 193, 0.3));
+    border-radius: 50%;
+    animation: juliaHealingSurgeAura 3s linear infinite;
+    pointer-events: none;
+    z-index: 11;
+}
+
+@keyframes juliaHealingSurgeAura {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.julia-healing-surge-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255, 182, 193, 0.3) 0%, rgba(255, 182, 193, 0) 60%);
+    border-radius: 50%;
+    animation: juliaHealingSurgeWave 3.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 9;
+}
+
+@keyframes juliaHealingSurgeWave {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+.julia-healing-surge-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 13;
+}
+
+.julia-healing-surge-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #FFD700;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: juliaHealingSurgeSparkle 2.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes juliaHealingSurgeSparkle {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(180deg);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(var(--sparkle-x, 20px), var(--sparkle-y, -30px)) scale(0.8) rotate(360deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--sparkle-x, 20px), var(--sparkle-y, -30px)) scale(0) rotate(720deg);
+    }
+}
+
+/* Healing Surge damage penalty VFX */
+.julia-healing-surge-damage-penalty {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, rgba(255, 0, 0, 0) 70%);
+    border-radius: 50%;
+    animation: juliaHealingSurgeDamagePenalty 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes juliaHealingSurgeDamagePenalty {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+.julia-healing-surge-penalty-text {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #FF6B6B;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 8px rgba(255, 107, 107, 0.8);
+    animation: juliaHealingSurgePenaltyText 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 12;
+}
+
+@keyframes juliaHealingSurgePenaltyText {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-25px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px);
+    }
+}
+
+/* Nature's Fury VFX */
+.natures-fury-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.natures-fury-aura {
+    position: absolute;
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    background: radial-gradient(circle, rgba(34, 139, 34, 0.8) 0%, rgba(50, 205, 50, 0.6) 30%, rgba(255, 215, 0, 0.4) 60%, transparent 100%);
+    border-radius: 50%;
+    animation: naturesFuryAura 2s ease-out forwards;
+    filter: blur(3px);
+}
+
+.natures-fury-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    animation: naturesFuryParticles 2s ease-out forwards;
+}
+
+.natures-fury-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: linear-gradient(45deg, #32CD32, #FFD700, #228B22);
+    border-radius: 50%;
+    animation: naturesFuryParticleFloat 2s ease-out forwards;
+}
+
+.natures-fury-sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #FFD700 0%, #32CD32 50%, transparent 100%);
+    border-radius: 50%;
+    animation: naturesFurySparkle 1.5s ease-out forwards;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+.natures-fury-power-surge {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: conic-gradient(from 0deg, #32CD32, #FFD700, #228B22, #32CD32);
+    border-radius: 50%;
+    animation: naturesFuryPowerSurge 1.5s ease-out forwards;
+    filter: blur(2px);
+}
+
+.natures-fury-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: naturesFuryText 2s ease-out forwards;
+    z-index: 1001;
+}
+
+@keyframes naturesFuryAura {
+    0% { 
+        transform: scale(0); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.2); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1.5); 
+        opacity: 0; 
+    }
+}
+
+@keyframes naturesFuryParticles {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes naturesFuryParticleFloat {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(-60px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(0);
+    }
+}
+
+@keyframes naturesFurySparkle {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes naturesFuryPowerSurge {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes naturesFuryText {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0;
+    }
 } 

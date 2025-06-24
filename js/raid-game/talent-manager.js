@@ -486,8 +486,10 @@ class TalentManager {
         
         // For Schoolgirl Julia: update ability descriptions to reflect new talents
         if (character.id === 'schoolgirl_julia' && typeof window.updateJuliaAbilityDescriptions === 'function') {
-            console.log('[TalentManager] Updating Julia ability descriptions');
-            window.updateJuliaAbilityDescriptions(character);
+            console.log('[TalentManager] Updating Julia ability and passive descriptions');
+            setTimeout(() => {
+                window.updateJuliaAbilityDescriptions(character);
+            }, 100);
         }
         
         // Get talent definitions for more detailed event
@@ -665,6 +667,13 @@ class TalentManager {
                 const manaIncrease = effect.value;
                 character.stats.currentMana = (character.stats.currentMana || character.stats.mana || 0) + manaIncrease;
                 console.log(`[TalentManager] Increased current mana by ${manaIncrease} due to maxMana talent`);
+                
+                // Trigger VFX for Julia's Enhanced Mystic Reserve talent
+                if (character.id === 'schoolgirl_julia' && manaIncrease === 1000 && typeof window.showEnhancedMysticReserveVFX === 'function') {
+                    setTimeout(() => {
+                        window.showEnhancedMysticReserveVFX(character);
+                    }, 100);
+                }
             } else if (effect.operation === 'set') {
                 // For set operations, give full mana
                 character.stats.currentMana = newMaxMana;
@@ -677,6 +686,15 @@ class TalentManager {
             }
             
             console.log(`[TalentManager] After mana modification - Current: ${character.stats.currentMana}, Max: ${newMaxMana}`);
+        }
+        
+        // Special handling for critChance increases - trigger VFX for Julia's Critical Strike Mastery
+        if (statName === 'critChance' && character.id === 'schoolgirl_julia' && effect.operation === 'add' && effect.value === 0.10) {
+            if (typeof window.showCriticalStrikeMasteryVFX === 'function') {
+                setTimeout(() => {
+                    window.showCriticalStrikeMasteryVFX(character);
+                }, 100);
+            }
         }
         
         // Special handling for HP increases - give the player the extra HP immediately
@@ -845,6 +863,30 @@ class TalentManager {
                 window.updateSiegfriedAbilityDescriptions(character);
                 console.log(`[TalentManager] Updated Siegfried ability descriptions after mana cost reduction`);
             }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Handle Julia's Healing Sprout Critical talent ---
+        if (property === 'healingSproutCriticalChance' && character.id === 'schoolgirl_julia') {
+            console.log(`[TalentManager] Applied Healing Sprout Critical talent to ${character.name}: ${Math.round(value * 100)}% chance`);
+            
+            // Update the Sprout Planting ability description
+            const sproutAbility = character.abilities.find(a => a.id === 'schoolgirl_julia_w');
+            if (sproutAbility && typeof sproutAbility.generateDescription === 'function') {
+                sproutAbility.description = sproutAbility.generateDescription();
+                console.log(`[TalentManager] Updated Sprout Planting description for Healing Sprout Critical talent`);
+                
+                // Trigger UI update
+                document.dispatchEvent(new CustomEvent('abilityDescriptionUpdated', {
+                    detail: { character: character }
+                }));
+            }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Handle Julia's Nature's Fury talent ---
+        if (property === 'naturesFuryTurn10' && character.id === 'schoolgirl_julia') {
+            console.log(`[TalentManager] Applied Nature's Fury talent to ${character.name}`);
         }
         // --- END NEW ---
 
@@ -1138,6 +1180,30 @@ class TalentManager {
             }
             // Add other specific checks if needed
             
+            // Special handling for Julia's Spirit Mastery talent - trigger VFX for R ability cooldown reduction
+            if (character.id === 'schoolgirl_julia' && effect.abilityId === 'schoolgirl_julia_r' && effect.property === 'cooldown' && effect.operation === 'subtract' && effect.value === 2) {
+                console.log(`[TalentManager] Julia's Spirit Mastery talent detected - R ability cooldown reduced by ${effect.value} turns`);
+                
+                // Trigger VFX for Spirit Mastery
+                if (typeof window.showSpiritMasteryVFX === 'function') {
+                    window.showSpiritMasteryVFX(character);
+                }
+                
+                // Add log entry
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(`${character.name}'s Spirit Mastery reduces Spirits Strength cooldown by an additional 2 turns!`, 'talent-effect utility');
+                }
+            }
+            
+            // Special handling for Julia's Nature's Resilience talent - trigger VFX for damage restoration
+            if (character.id === 'schoolgirl_julia' && effect.property === 'naturesResiliencePercent' && effect.value === 0.01) {
+                console.log(`[TalentManager] Julia's Nature's Resilience talent detected - 1% HP/Mana restoration on damage`);
+                
+                // Add log entry
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(`${character.name} gains Nature's Resilience! Restores 1% HP and mana when damaged.`, 'talent-effect healing');
+                }
+            }
         } else {
             console.warn(`[TalentManager] Ability ${effect.abilityId} not found on character ${character.name}.`);
         }

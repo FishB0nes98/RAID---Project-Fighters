@@ -15,7 +15,8 @@
             "parents": [],
             "children": [
                 "sprout_swiftness",
-                "healing_kick_mana_flow"
+                "healing_kick_mana_flow",
+                "critical_strike_mastery"
             ],
             "position": {
                 "x": 1000,
@@ -56,7 +57,8 @@
                 "value": 0.15
             },
             "parents": [
-                "sprout_swiftness"
+                "sprout_swiftness",
+                "critical_strike_mastery"
             ],
             "children": [
                 "spirit_quickness",
@@ -77,11 +79,13 @@
                 "value": 1
             },
             "parents": [
-                "flourishing_spirits"
+                "flourishing_spirits",
+                "healing_kick_double_strike"
             ],
             "children": [
                 "sprout_fertility",
-                "spirit_purification"
+                "spirit_purification",
+                "healing_kick_double_strike"
             ],
             "position": {
                 "x": 830,
@@ -102,10 +106,33 @@
             "parents": [
                 "flourishing_spirits"
             ],
+            "children": [
+                "enhanced_mystic_reserve",
+                "magical_damage_synergy"
+            ],
+            "position": {
+                "x": 490,
+                "y": 280
+            }
+        },
+        "enhanced_mystic_reserve": {
+            "id": "enhanced_mystic_reserve",
+            "name": "Enhanced Mystic Reserve",
+            "description": "Increases Julia's maximum Mana by an additional 1000.",
+            "icon": "Icons/talents/protective_bond.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "maxMana",
+                "value": 1000,
+                "operation": "add"
+            },
+            "parents": [
+                "mystic_reserve"
+            ],
             "children": [],
             "position": {
-                "x": 640,
-                "y": 410
+                "x": 210,
+                "y": 340
             }
         },
         "sprout_fertility": {
@@ -121,9 +148,52 @@
             "parents": [
                 "spirit_quickness"
             ],
-            "children": [],
+            "children": [
+                "allied_healing_sprouts",
+                "healing_sprout_critical"
+            ],
             "position": {
                 "x": 830,
+                "y": 710
+            }
+        },
+        "allied_healing_sprouts": {
+            "id": "allied_healing_sprouts",
+            "name": "Allied Healing Sprouts",
+            "description": "At game start, all allies gain a Healing Sprout buff that blooms after 10 turns.",
+            "icon": "Icons/talents/heartbreaking_mark.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "alliedHealingSproutsAtStart",
+                "value": true
+            },
+            "parents": [
+                "sprout_fertility"
+            ],
+            "children": [
+            ],
+            "position": {
+                "x": 830,
+                "y": 860
+            },
+            "powerful": true
+        },
+        "healing_sprout_critical": {
+            "id": "healing_sprout_critical",
+            "name": "Healing Sprout Critical",
+            "description": "Healing Sprout has 25% chance to crit heal instead.",
+            "icon": "Icons/talents/critical.png",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingSproutCriticalChance",
+                "value": 0.25
+            },
+            "parents": [
+                "sprout_fertility"
+            ],
+            "children": [],
+            "position": {
+                "x": 930,
                 "y": 710
             }
         },
@@ -140,11 +210,79 @@
             "parents": [
                 "spirit_quickness"
             ],
-            "children": [],
+            "children": [
+                "healing_power_blossom",
+                "spirit_strength_doublecast"
+            ],
             "position": {
                 "x": 640,
                 "y": 570
             }
+        },
+        "healing_power_blossom": {
+            "id": "healing_power_blossom",
+            "name": "Healing Power Blossom",
+            "description": "Increases Julia's Healing Power by 14%.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "healingPower",
+                "value": 0.14,
+                "operation": "add"
+            },
+            "parents": [
+                "spirit_purification"
+            ],
+            "children": [
+                "magical_damage_synergy"
+            ],
+            "position": {
+                "x": 490,
+                "y": 460
+            }
+        },
+        "spirit_strength_doublecast": {
+            "id": "spirit_strength_doublecast",
+            "name": "Spirit Strength Doublecast",
+            "description": "Spirits Strength has a 18% chance to trigger twice when used.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "spiritStrengthDoublecastChance",
+                "value": 0.18
+            },
+            "parents": [
+                "spirit_purification"
+            ],
+            "children": [
+                "magical_damage_synergy"
+            ],
+            "position": {
+                "x": 490,
+                "y": 650
+            }
+        },
+        "magical_damage_synergy": {
+            "id": "magical_damage_synergy",
+            "name": "Magical Damage Synergy",
+            "description": "Every turn, increases Julia's Magical Damage by the same amount as her Physical Damage.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "custom_effect",
+                "property": "magicalDamageSynergy",
+                "value": true
+            },
+            "parents": [
+                "healing_power_blossom",
+                "spirit_strength_doublecast",
+                "enhanced_mystic_reserve"
+            ],
+            "children": [],
+            "position": {
+                "x": 210,
+                "y": 560
+            },
+            "powerful": true
         },
         "healing_kick_mana_flow": {
             "id": "healing_kick_mana_flow",
@@ -162,7 +300,10 @@
             "children": [
                 "natural_regeneration"
             ],
-            "position": { "x": 1170, "y": 260 }
+            "position": {
+                "x": 1170,
+                "y": 260
+            }
         },
         "natural_regeneration": {
             "id": "natural_regeneration",
@@ -184,10 +325,280 @@
                 }
             ],
             "parents": [
-                "healing_kick_mana_flow"
+                "healing_kick_mana_flow",
+                "critical_strike_mastery"
+            ],
+            "children": [
+                "healing_kick_double_strike",
+                "spirits_strength_quickcast",
+                "natures_resilience"
+            ],
+            "position": {
+                "x": 1170,
+                "y": 410
+            }
+        },
+        "healing_kick_double_strike": {
+            "id": "healing_kick_double_strike",
+            "name": "Double Healing Kick",
+            "description": "Healing Kick triggers twice, striking enemies two times and doubling its healing potential.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingKickTriggersTwice",
+                "value": true
+            },
+            "parents": [
+                "natural_regeneration",
+                "spirit_quickness"
+            ],
+            "children": [
+                "natures_might",
+                "spirit_quickness"
+            ],
+            "position": {
+                "x": 1170,
+                "y": 570
+            }
+        },
+        "spirits_strength_quickcast": {
+            "id": "spirits_strength_quickcast",
+            "name": "Quickened Spirits",
+            "description": "Reduces Spirits Strength cooldown by 2 turns.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolgirl_julia_r",
+                    "property": "cooldown",
+                    "value": 2,
+                    "operation": "subtract"
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolgirl_julia_r",
+                    "property": "baseCooldown",
+                    "value": 2,
+                    "operation": "subtract"
+                }
+            ],
+            "parents": [
+                "natural_regeneration"
+            ],
+            "children": [
+                "healing_empowerment_potency",
+                "spirit_mastery"
+            ],
+            "position": {
+                "x": 1350,
+                "y": 570
+            }
+        },
+        "healing_empowerment_potency": {
+            "id": "healing_empowerment_potency",
+            "name": "Empowered Healing",
+            "description": "Healing Empowerment now grants an additional +5 Physical Damage each time it triggers (total +10).",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "juliaPassiveExtraDamage",
+                "value": 5
+            },
+            "parents": [
+                "spirits_strength_quickcast"
+            ],
+            "children": [
+                "pushback_destruction"
+            ],
+            "position": {
+                "x": 1350,
+                "y": 710
+            }
+        },
+        "natures_might": {
+            "id": "natures_might",
+            "name": "Nature's Might",
+            "description": "Increases Julia's Physical Damage by 42.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "physicalDamage",
+                "value": 42,
+                "operation": "add"
+            },
+            "parents": [
+                "healing_kick_double_strike"
+            ],
+            "children": [
+                "floral_fury",
+                "natures_fury"
+            ],
+            "position": {
+                "x": 1170,
+                "y": 710
+            }
+        },
+        "floral_fury": {
+            "id": "floral_fury",
+            "name": "Floral Fury",
+            "description": "Healing Kick now strikes a third time. The third strike has a 100% critical chance.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingKickTripleStrike",
+                "value": true
+            },
+            "parents": [
+                "natures_might"
             ],
             "children": [],
-            "position": { "x": 1170, "y": 410 }
+            "position": {
+                "x": 1170,
+                "y": 860
+            },
+            "powerful": true
+        },
+        "pushback_destruction": {
+            "id": "pushback_destruction",
+            "name": "Pushback Destruction",
+            "description": "Pushback Attack now deals 500% Physical Damage.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_julia_e",
+                "property": "damageMultiplier",
+                "value": 5,
+                "operation": "set"
+            },
+            "parents": [
+                "healing_empowerment_potency"
+            ],
+            "children": [],
+            "position": {
+                "x": 1350,
+                "y": 860
+            },
+            "powerful": true
+        },
+        "critical_strike_mastery": {
+            "id": "critical_strike_mastery",
+            "name": "Critical Strike Mastery",
+            "description": "Increases Julia's critical chance by 10%.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "value": 0.1,
+                "operation": "add"
+            },
+            "parents": [
+                "pushback_mastery"
+            ],
+            "children": [
+                "flourishing_spirits",
+                "natural_regeneration"
+            ],
+            "position": {
+                "x": 1000,
+                "y": 410
+            }
+        },
+        "spirit_mastery": {
+            "id": "spirit_mastery",
+            "name": "Spirit Mastery",
+            "description": "Reduces Spirits Strength cooldown by an additional 2 turns.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolgirl_julia_r",
+                    "property": "cooldown",
+                    "value": 2,
+                    "operation": "subtract"
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolgirl_julia_r",
+                    "property": "baseCooldown",
+                    "value": 2,
+                    "operation": "subtract"
+                }
+            ],
+            "parents": [
+                "spirits_strength_quickcast"
+            ],
+            "children": [],
+            "position": {
+                "x": 1550,
+                "y": 570
+            }
+        },
+        "natures_resilience": {
+            "id": "natures_resilience",
+            "name": "Nature's Resilience",
+            "description": "When Julia is damaged, restore 1% of her HP and mana.",
+            "icon": "Icons/talents/heart_destroyer.webp",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "naturesResiliencePercent",
+                "value": 0.01
+            },
+            "parents": [
+                "natural_regeneration"
+            ],
+            "children": [
+                "healing_surge"
+            ],
+            "position": {
+                "x": 1550,
+                "y": 410
+            }
+        },
+        "healing_surge": {
+            "id": "healing_surge",
+            "name": "Healing Surge",
+            "description": "Heals on Julia are 75% more powerful but she takes 35% more damage.",
+            "icon": "Icons/talents/empowered_shot.webp",
+            "effect": [
+                {
+                    "type": "modify_character_property",
+                    "property": "healingSurgeBonus",
+                    "value": 0.75
+                },
+                {
+                    "type": "modify_character_property",
+                    "property": "healingSurgeDamagePenalty",
+                    "value": 0.35
+                }
+            ],
+            "parents": [
+                "natures_resilience"
+            ],
+            "children": [],
+            "position": {
+                "x": 1750,
+                "y": 410
+            }
+        },
+        "natures_fury": {
+            "id": "natures_fury",
+            "name": "Nature's Fury",
+            "description": "At turn 10, Julia doubles her Physical Damage.",
+            "icon": "Icons/talents/damage.png",
+            "effect": {
+                "type": "modify_character_property",
+                "property": "naturesFuryTurn10",
+                "value": true
+            },
+            "parents": [
+                "natures_might"
+            ],
+            "children": [],
+            "position": {
+                "x": 1080,
+                "y": 710
+            },
+            "powerful": true
         }
     }
 }

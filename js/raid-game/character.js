@@ -2609,6 +2609,18 @@ class Character {
         // --- END Healing Mana Flow ---
         updateCharacterUI(this); // Add UI update call here
         
+        // --- NEW: Julia Spirits Strength cooldown reduction when healed ---
+        if (actualHealAmount > 0 && this.id === 'schoolgirl_julia') {
+            const spiritsStrengthAbility = this.abilities?.find(ab => ab.id === 'schoolgirl_julia_r');
+            if (spiritsStrengthAbility && spiritsStrengthAbility.currentCooldown > 0) {
+                spiritsStrengthAbility.reduceCooldown();
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(`${this.name}'s Spirits Strength cooldown is reduced by 1 due to healing.`, 'talent-effect utility');
+                }
+            }
+        }
+        // --- END NEW ---
+        
         return { healAmount: Math.floor(actualHealAmount), isCritical: isCritical }; // Return object
     }
 
@@ -3527,6 +3539,35 @@ class Character {
                 this.passiveHandler.onTurnStart(this, currentTurn);
             } catch (error) {
                 console.error(`Error executing onTurnStart passive for ${this.name}:`, error);
+            }
+        }
+        
+        // --- Magical Damage Synergy Talent (Julia) ---
+        if (this.id === 'schoolgirl_julia' && this.magicalDamageSynergy) {
+            // Only trigger at the start of her turn (shouldReduceDuration === false)
+            if (!shouldReduceDuration) {
+                const physical = this.stats.physicalDamage || 0;
+                if (physical > 0) {
+                    this.stats.magicalDamage = (this.stats.magicalDamage || 0) + physical;
+                    // VFX: golden-green pulse and floating text
+                    const charElement = document.getElementById(`character-${this.instanceId || this.id}`);
+                    if (charElement) {
+                        // Pulse effect
+                        const pulse = document.createElement('div');
+                        pulse.className = 'julia-magical-synergy-pulse';
+                        charElement.appendChild(pulse);
+                        setTimeout(() => pulse.remove(), 1200);
+                        // Floating text
+                        const floatText = document.createElement('div');
+                        floatText.className = 'julia-magical-synergy-float';
+                        floatText.textContent = `+${physical} Magical Damage`;
+                        charElement.appendChild(floatText);
+                        setTimeout(() => floatText.remove(), 1200);
+                    }
+                    // Log entry
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`${this.name}'s Magical Damage Synergy increases her Magical Damage by ${physical}!`, 'talent-effect damage');
+                }
             }
         }
         

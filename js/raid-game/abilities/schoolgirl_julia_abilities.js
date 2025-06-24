@@ -32,6 +32,14 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
 
     log(`${caster.name} uses Healing Kick, striking all enemies!`);
 
+    // --- NEW: Initialize / Increment strike counter for Healing Kick ---
+    if (caster.__healingKickStrikesConducted == null) {
+        caster.__healingKickStrikesConducted = 1;
+    } else {
+        caster.__healingKickStrikesConducted++;
+    }
+    // --- END NEW ---
+
     // Calculate damage based on 200% of Physical Damage
     const damageAmount = Math.floor(caster.stats.physicalDamage * 2.0);
     const damageType = 'physical';
@@ -194,6 +202,33 @@ const schoolgirlJuliaHealingKickEffect = (caster, target) => { // Target param i
         });
     }
 
+    // --- NEW TALENT: Healing Kick Double Strike ---
+    // --- TALENT STRIKE CHAIN (Double / Triple) ---
+    const requiredHits = caster.healingKickTripleStrike ? 3 : (caster.healingKickTriggersTwice ? 2 : 1);
+    if (caster.__healingKickStrikesConducted < requiredHits) {
+        const nextHitNumber = caster.__healingKickStrikesConducted + 1; // 2 for second, 3 for third
+        setTimeout(() => {
+            try {
+                let boostedCrit = false;
+                if (requiredHits === 3 && nextHitNumber === 3) {
+                    // Guarantee critical for the third strike
+                    boostedCrit = true;
+                    caster.__originalCritChance = caster.stats.critChance;
+                    caster.stats.critChance = 1;
+                }
+                schoolgirlJuliaHealingKickEffect(caster, target);
+                if (boostedCrit) {
+                    caster.stats.critChance = caster.__originalCritChance;
+                    delete caster.__originalCritChance;
+                }
+            } finally {}
+        }, 150);
+    } else {
+        // Reset counter after completing all required hits
+        caster.__healingKickStrikesConducted = 0;
+    }
+    // --- END TALENT STRIKE CHAIN ---
+
     // Play sound for Julia Q (already played earlier)
     // const playSoundJuliaQ = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
     // playSoundJuliaQ('sounds/juliaa1.mp3'); // Sound moved up
@@ -272,9 +307,44 @@ const schoolgirlJuliaSproutPlantingEffect = (caster, target) => {
         const baseHeal = 1250;
         const healAmount = Math.floor(baseHeal * (1 + (caster.stats.healingPower || 0)));
 
-        const healResult = buffedCharacter.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_w' });
+        // --- NEW: Check for Healing Sprout Critical talent ---
+        let isCriticalHeal = false;
+        let finalHealAmount = healAmount;
+        
+        if (caster.healingSproutCriticalChance && Math.random() < caster.healingSproutCriticalChance) {
+            // Apply critical heal with 1.5x multiplier (standard crit multiplier)
+            finalHealAmount = Math.floor(healAmount * 1.5);
+            isCriticalHeal = true;
+            
+            // Log the critical heal
+            log(`🌱✨ ${caster.name}'s Healing Sprout blooms with critical healing!`, 'critical-heal');
+            
+            // Dispatch critical heal event for statistics tracking
+            const critHealEvent = new CustomEvent('criticalHeal', {
+                detail: {
+                    source: caster,
+                    target: buffedCharacter,
+                    healAmount: finalHealAmount,
+                    isCritical: true,
+                    abilityId: 'schoolgirl_julia_w'
+                }
+            });
+            document.dispatchEvent(critHealEvent);
+        }
+        // --- END NEW ---
+
+        const healResult = buffedCharacter.heal(finalHealAmount, caster, { 
+            abilityId: 'schoolgirl_julia_w',
+            isCritical: isCriticalHeal // Pass critical flag to heal method
+        });
         const actualHeal = healResult.healAmount; // Extract healAmount from result object
-        log(`${buffedCharacter.name} is healed for ${actualHeal} HP.`);
+        
+        // Log the heal with critical indicator if applicable
+        if (isCriticalHeal) {
+            log(`${buffedCharacter.name} is critically healed for ${actualHeal} HP!`, 'critical-heal');
+        } else {
+            log(`${buffedCharacter.name} is healed for ${actualHeal} HP.`);
+        }
 
         // Trigger Julia's passive if applicable (heal dealt by Julia)
         if (actualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
@@ -287,6 +357,12 @@ const schoolgirlJuliaSproutPlantingEffect = (caster, target) => {
         if (healedElement) {
              const bloomVfx = document.createElement('div');
              bloomVfx.className = 'sprout-bloom-vfx'; // Add CSS for this
+             
+             // Add critical class if it's a critical heal
+             if (isCriticalHeal) {
+                 bloomVfx.classList.add('critical');
+             }
+             
              healedElement.appendChild(bloomVfx);
              setTimeout(() => bloomVfx.remove(), 1500);
         }
@@ -324,18 +400,37 @@ schoolgirlJuliaW.generateDescription = function () {
     const base = Ability.prototype.generateDescription.call(this);
     const extras = [];
     if (this.doesNotEndTurn === true) extras.push('Does not end your turn.');
-    if (this.bloomsAfterOneTurn) extras.push('Blooms after 1 turn.');
-    if (extras.length > 0) {
-        return base + '\n<span class="talent-effect utility">Talent: ' + extras.join(' ') + '</span>';
+    
+    // Check for dynamic duration based on talent
+    let duration = 2; // Default duration
+    if (window.gameManager && window.gameManager.stageManager && window.gameManager.stageManager.playerCharacters) {
+        const julia = window.gameManager.stageManager.playerCharacters.find(char => char.id === 'schoolgirl_julia');
+        if (julia && julia.sproutBloomsAfterOneTurn) {
+            duration = 1;
+            extras.push('Blooms after 1 turn.');
+        }
+        
+        // Add critical heal talent effect to description
+        if (julia && julia.healingSproutCriticalChance) {
+            const critChance = Math.round(julia.healingSproutCriticalChance * 100);
+            extras.push(`${critChance}% chance to crit heal.`);
+        }
     }
-    return base;
+    
+    // Update the base description with correct duration
+    let updatedBase = base.replace(/for \d+ turns/, `for ${duration} turns`);
+    
+    if (extras.length > 0) {
+        return updatedBase + '\n<span class="talent-effect healing">Talent: ' + extras.join(' ') + '</span>';
+    }
+    return updatedBase;
 };
 
 // Ensure flag exists
 schoolgirlJuliaW.bloomsAfterOneTurn = false;
 
 schoolgirlJuliaW
-    .setDescription('Plants a healing sprout on an ally for ' + schoolgirlJuliaW.duration + ' turns. When the sprout expires, it heals the target for 1250 (+100% Healing Power) HP.')
+    .setDescription('Plants a healing sprout on an ally for 2 turns. When the sprout expires, it heals the target for 1250 (+100% Healing Power) HP.')
     .setTargetType('ally');
 
 // --- Ability Factory Integration ---
@@ -536,8 +631,10 @@ const schoolgirlJuliaPushbackEffect = (caster, target) => {
     }
     // --- End Pushback Attack VFX ---
 
-    // Calculate damage (150% of Physical Damage)
-    const damageAmount = Math.floor(caster.stats.physicalDamage * 1.5);
+    // Calculate damage using dynamic multiplier (default 150%, can be increased by talents)
+    const abilityInstance = caster.abilities.find(a => a.id === 'schoolgirl_julia_e') || {};
+    const dmgMultiplier = abilityInstance.damageMultiplier || 1.5;
+    const damageAmount = Math.floor(caster.stats.physicalDamage * dmgMultiplier);
 
     // Apply damage
     const result = target.applyDamage(damageAmount, 'physical', caster, { abilityId: 'schoolgirl_julia_e' });
@@ -552,7 +649,6 @@ const schoolgirlJuliaPushbackEffect = (caster, target) => {
     caster.applyLifesteal(result.damage);
 
     // Determine stun chance from ability instance (supports talent mods)
-    const abilityInstance = caster.abilities.find(a => a.id === 'schoolgirl_julia_e');
     const stunChance = (abilityInstance && typeof abilityInstance.stunChance === 'number') ? abilityInstance.stunChance : 0.40;
 
     // Apply stun effect based on current stun chance
@@ -611,19 +707,26 @@ const schoolgirlJuliaE = new Ability(
     schoolgirlJuliaPushbackEffect
 );
 
-// --- Dynamic Stun Chance & Description Support ---
+// After ability creation, set default damage multiplier property
+schoolgirlJuliaE.damageMultiplier = 1.5; // 150% base scaling, moddable by talents
 // Base stun chance (40%) before talents
 schoolgirlJuliaE.stunChance = 0.40;
 
-// Custom generateDescription that inserts the current stun chance percentage
+// Custom generateDescription that inserts the current stun chance and damage multiplier percentages
 schoolgirlJuliaE.generateDescription = function () {
     this.stunChancePercent = Math.round((this.stunChance || 0) * 100);
-    return Ability.prototype.generateDescription.call(this);
+    this.damageMultiplierPercent = Math.round((this.damageMultiplier || 1.5) * 100);
+    let desc = `Deals ${this.damageMultiplierPercent}% physical damage to the target and has an ${this.stunChancePercent}% chance to stun it for 2 turns.`;
+    // Only show the talent line if the 500% multiplier is active (Pushback Destruction talent)
+    if (this.damageMultiplier && this.damageMultiplier >= 5) {
+        desc += '\n<span class="talent-effect damage">Pushback Destruction: Pushback Attack now deals 500% Physical Damage.</span>';
+    }
+    return desc;
 };
 
 // Set base description with placeholder and target type
 schoolgirlJuliaE
-    .setDescription('Deals 150% physical damage to the target and has an {stunChancePercent}% chance to stun it for 2 turns.')
+    .setDescription('Deals {damageMultiplierPercent}% physical damage to the target and has an {stunChancePercent}% chance to stun it for 2 turns.')
     .setTargetType('enemy');
 
 // --- Ability Factory Integration ---
@@ -684,47 +787,74 @@ const schoolgirlJuliaSpiritsStrengthEffect = (caster, target) => { // Target par
     playSound('sounds/juliaa4.mp3', 0.9); // Use Julia's R sound
     playSound('sounds/julia_spirits.mp3', 0.8); // Add the second sound
 
-    // Apply heal to all alive allies (including the caster if they are alive)
-    alliesToHeal.forEach(ally => {
-        const healResult = ally.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_r' });
-        const actualHeal = healResult.healAmount; // Extract healAmount from result object
-        totalHealed += actualHeal;
-        log(`${ally.name} is healed for ${actualHeal} by Spirits Strength.`);
+    // --- Doublecast logic ---
+    let doublecastTriggered = false;
+    const doublecastChance = caster.spiritStrengthDoublecastChance || 0;
+    if (doublecastChance > 0 && Math.random() < doublecastChance) {
+        doublecastTriggered = true;
+    }
 
-        // Trigger passive if heal was successful and caster has the handler
-        if (actualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
-            caster.passiveHandler.onHealDealt(caster, ally, actualHeal);
-        }
+    // Helper to perform the full heal/VFX/log for one cast
+    function performSpiritStrengthCast(isDoublecast = false) {
+        let totalHealedThisCast = 0;
+        alliesToHeal.forEach(ally => {
+            const healResult = ally.heal(healAmount, caster, { abilityId: 'schoolgirl_julia_r' });
+            const actualHeal = healResult.healAmount; // Extract healAmount from result object
+            totalHealedThisCast += actualHeal;
+            log(`${ally.name} is healed for ${actualHeal} by Spirits Strength${isDoublecast ? ' (Doublecast!)' : ''}.`);
 
-        // --- Add Spirits Strength VFX to each ally ---
-        const allyElement = document.getElementById(`character-${ally.instanceId || ally.id}`);
-        if (allyElement) {
-             // Use existing heal VFX classes or create new ones
-             const spiritsHealVfx = document.createElement('div');
-             spiritsHealVfx.className = 'spirits-strength-heal-vfx'; // Add CSS for this
-             spiritsHealVfx.textContent = `+${actualHeal}`;
-             allyElement.appendChild(spiritsHealVfx);
-
-             const spiritsParticles = document.createElement('div');
-             spiritsParticles.className = 'spirits-strength-particles'; // Add CSS for this
-             allyElement.appendChild(spiritsParticles);
-
-             setTimeout(() => {
-                 allyElement.querySelectorAll('.spirits-strength-heal-vfx, .spirits-strength-particles').forEach(el => el.remove());
-             }, 1500); // Duration of VFX
-        }
-         // --- End Spirits Strength VFX ---
-
-        if (caster.spiritsStrengthCleansesDebuffs && ally.debuffs && ally.debuffs.length > 0) {
-            // Remove all debuffs
-            const debuffIds = ally.debuffs.map(d => d.id);
-            debuffIds.forEach(id => ally.removeDebuff(id));
-            if (typeof ally.showPurifyingResolveVFX === 'function') {
-                ally.showPurifyingResolveVFX();
+            // Trigger passive if heal was successful and caster has the handler
+            if (actualHeal > 0 && caster.passiveHandler && typeof caster.passiveHandler.onHealDealt === 'function') {
+                caster.passiveHandler.onHealDealt(caster, ally, actualHeal);
             }
-            log(`${ally.name}'s debuffs are cleansed by Spirits Strength!`, 'talent-effect positive');
-        }
-    });
+
+            // --- Add Spirits Strength VFX to each ally ---
+            const allyElement = document.getElementById(`character-${ally.instanceId || ally.id}`);
+            if (allyElement) {
+                 // Use existing heal VFX classes or create new ones
+                 const spiritsHealVfx = document.createElement('div');
+                 spiritsHealVfx.className = 'spirits-strength-heal-vfx'; // Add CSS for this
+                 spiritsHealVfx.textContent = `+${actualHeal}` + (isDoublecast ? ' ✦' : '');
+                 allyElement.appendChild(spiritsHealVfx);
+
+                 const spiritsParticles = document.createElement('div');
+                 spiritsParticles.className = 'spirits-strength-particles'; // Add CSS for this
+                 allyElement.appendChild(spiritsParticles);
+
+                 // Add a special pulse/glow for doublecast
+                 if (isDoublecast) {
+                    spiritsHealVfx.style.filter = 'drop-shadow(0 0 8px #f2c94c)';
+                    spiritsParticles.style.animation = 'spiritsStrengthPulse 1.5s ease-out 0s 2 alternate';
+                 }
+
+                 setTimeout(() => {
+                     allyElement.querySelectorAll('.spirits-strength-heal-vfx, .spirits-strength-particles').forEach(el => el.remove());
+                 }, 1500);
+            }
+             // --- End Spirits Strength VFX ---
+
+            if (caster.spiritsStrengthCleansesDebuffs && ally.debuffs && ally.debuffs.length > 0) {
+                // Remove all debuffs
+                const debuffIds = ally.debuffs.map(d => d.id);
+                debuffIds.forEach(id => ally.removeDebuff(id));
+                if (typeof ally.showPurifyingResolveVFX === 'function') {
+                    ally.showPurifyingResolveVFX();
+                }
+                log(`${ally.name}'s debuffs are cleansed by Spirits Strength!`, 'talent-effect positive');
+            }
+        });
+        return totalHealedThisCast;
+    }
+
+    // First cast
+    totalHealed += performSpiritStrengthCast(false);
+    // If doublecast triggers, do a second cast (with VFX and log)
+    if (doublecastTriggered) {
+        setTimeout(() => {
+            log(`<span class='talent-effect aoe'>Spirit Strength Doublecast triggers! Spirits Strength is cast again!</span>`);
+            performSpiritStrengthCast(true);
+        }, 400); // Delay for dramatic effect
+    }
 
     log(`Spirits Strength healed the team for a total of ${totalHealed}.`);
 
@@ -797,36 +927,732 @@ if (typeof window !== 'undefined') {
 
 // --- GenerateDescription for R ---
 schoolgirlJuliaR.generateDescription = function () {
-    const base = Ability.prototype.generateDescription.call(this);
-    const notes = [];
-    if (this.cleansesDebuffs) notes.push('Removes all debuffs from allies.');
-    if (notes.length > 0) {
-        return base + '\n<span class="talent-effect utility">Talent: ' + notes.join(' ') + '</span>';
+    let desc = 'Heals ALL allies for 1200 (+200% Magical Damage) HP. Cooldown reduced by 1 whenever Julia is healed.';
+    if (this.cleansesDebuffs) {
+        desc += '\n<span class="talent-effect utility">Spirit Purification: Removes all debuffs from allies.</span>';
     }
-    return base;
+    if (this.doublecastChance && this.doublecastChance > 0) {
+        const percent = Math.round(this.doublecastChance * 100);
+        desc += `\n<span class=\"talent-effect aoe\">Spirit Strength Doublecast: Spirits Strength has a ${percent}% chance to trigger twice when used.</span>`;
+    }
+    if (this.magicalDamageSynergy) {
+        desc += '\n<span class="talent-effect damage">Magical Damage Synergy: Every turn, Julia gains Magical Damage equal to her Physical Damage.</span>';
+    }
+    
+    // Add cooldown reduction info if talents are active
+    const hasQuickenedSpirits = this.caster && this.caster.hasTalent && this.caster.hasTalent('spirits_strength_quickcast');
+    const hasSpiritMastery = this.caster && this.caster.hasTalent && this.caster.hasTalent('spirit_mastery');
+    
+    if (hasQuickenedSpirits && hasSpiritMastery) {
+        desc += '\n<span class="talent-effect utility">Quickened Spirits + Spirit Mastery: Cooldown reduced by 4 turns total.</span>';
+    } else if (hasQuickenedSpirits) {
+        desc += '\n<span class="talent-effect utility">Quickened Spirits: Cooldown reduced by 2 turns.</span>';
+    } else if (hasSpiritMastery) {
+        desc += '\n<span class="talent-effect utility">Spirit Mastery: Cooldown reduced by 2 turns.</span>';
+    }
+    
+    return desc;
 };
 
 // flag
 schoolgirlJuliaR.cleansesDebuffs = false;
+schoolgirlJuliaR.doublecastChance = 0;
+schoolgirlJuliaR.magicalDamageSynergy = false;
 
 // --- Utility function to refresh Julia ability descriptions ---
 window.updateJuliaAbilityDescriptions = function(character) {
     if (!character || character.id !== 'schoolgirl_julia') return;
+
+    const greenifyNums = (str) => str.replace(/(\d+(?:\.\d+)?%?)/g, '<span style="color:#6fcf70;font-weight:bold;">$1</span>');
+
+    const dedupeTalentLines = (desc) => {
+        const lines = desc.split(/<br>|\n/);
+        const seen = new Set();
+        return lines.filter(l => {
+            const key = l.trim();
+            if (key.startsWith('<span') && key.includes('talent-effect')) {
+                if (seen.has(key)) return false;
+                seen.add(key);
+            }
+            return true;
+        }).join('<br>');
+    };
+
     character.abilities.forEach(ab => {
         if (ab.id === 'schoolgirl_julia_w') {
             ab.bloomsAfterOneTurn = !!character.sproutBloomsAfterOneTurn;
-        }
-        if (ab.id === 'schoolgirl_julia_r') {
+            ab.description = greenifyNums(dedupeTalentLines(ab.generateDescription()));
+            ab.baseDescription = ab.description;
+            
+            // Add allied healing sprouts info if applicable
+            if (character.hasTalent && character.hasTalent('allied_healing_sprouts')) {
+                ab.description += ` <span class="talent-effect aoe">Allied Healing Sprouts: At game start, all allies gain a Healing Sprout buff that blooms after 10 turns.</span>`;
+            }
+            
+            // Add critical heal talent info if applicable
+            if (character.healingSproutCriticalChance) {
+                const critChance = Math.round(character.healingSproutCriticalChance * 100);
+                ab.description += ` <span class="talent-effect critical">Critical Healing: ${critChance}% chance to crit heal instead.</span>`;
+            }
+        } else if (ab.id === 'schoolgirl_julia_r') {
             ab.cleansesDebuffs = !!character.spiritsStrengthCleansesDebuffs;
-        }
-        if (ab.id === 'schoolgirl_julia_q') {
+            ab.doublecastChance = character.spiritStrengthDoublecastChance || 0;
+            ab.magicalDamageSynergy = !!character.magicalDamageSynergy;
+            ab.description = greenifyNums(ab.generateDescription());
+            ab.baseDescription = ab.description;
+            
+            // Add Spirit Mastery info if applicable
+            if (character.hasTalent && character.hasTalent('spirit_mastery')) {
+                // The generateDescription method already handles this, but we can add additional info if needed
+                const hasQuickenedSpirits = character.hasTalent('spirits_strength_quickcast');
+                if (hasQuickenedSpirits) {
+                    ab.description += ` <span class="talent-effect utility">Spirit Mastery: Additional -2 turns cooldown reduction.</span>`;
+                }
+            }
+        } else if (ab.id === 'schoolgirl_julia_e') {
+            ab.stunChancePercent = Math.round((ab.stunChance || 0) * 100);
+            ab.damageMultiplierPercent = Math.round((ab.damageMultiplier || 1.5) * 100);
+            ab.description = greenifyNums(ab.generateDescription());
+            ab.baseDescription = ab.description;
+        } else if (ab.id === 'schoolgirl_julia_q') {
+            const colorize = (val) => `<span style=\"color:#6fcf70;font-weight:bold;\">${val}</span>`;
+            const parts = [];
+            const dmg = colorize('200%');
+            const healPct = colorize('40%');
+            if (character.healingKickTripleStrike) {
+                parts.push(`Deals ${dmg} Physical Damage to ALL enemies <span style=\"color:#a3e47d;font-weight:bold;\">three times</span>. The third strike is a <span style=\"color:#f2c94c;font-weight:bold;\">Guaranteed Critical Hit</span>.`);
+            } else if (character.healingKickTriggersTwice) {
+                parts.push(`Deals ${dmg} Physical Damage to ALL enemies <span style=\"color:#a3e47d;font-weight:bold;\">twice</span>.`);
+            } else {
+                parts.push(`Deals ${dmg} Physical Damage to ALL enemies.`);
+            }
+            parts.push(`Heals all allies (including self) for ${healPct} of the total damage dealt.`);
             if (character.healingKickRestoresManaPercent) {
                 const percent = Math.round(character.healingKickRestoresManaPercent * 100);
-                ab.description = 'Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 40% of the total damage dealt. Restores ' + percent + '% of the healing as Mana to each healed ally.';
-            } else {
-                ab.description = 'Deals 200% Physical Damage to ALL enemies. Heals all allies (including self) for 40% of the total damage dealt.';
+                parts.push(`Restores ${colorize(percent + '%')} of the healing as Mana to each healed ally.`);
             }
+            ab.description = parts.join(' ');
+            ab.baseDescription = ab.description;
         }
-        ab.description = (ab.id === 'schoolgirl_julia_q') ? ab.description : ab.generateDescription();
+        
+        // Add Nature's Fury effect to all abilities if the talent is active
+        if (character.naturesFuryTurn10 && character.naturesFuryApplied) {
+            ab.description += ` <span class="talent-effect damage">Nature's Fury: Physical Damage doubled at turn 10!</span>`;
+        }
     });
+
+    // --- Update Passive Description (Healing Empowerment) ---
+    if (character.passive && character.passive.id === 'schoolgirl_julia_passive') {
+        const baseGain = 5 + (character.juliaPassiveExtraDamage || 0);
+        const colorize = (val) => `<span style=\"color:#6fcf70;font-weight:bold;\">${val}</span>`;
+        character.passive.description = `Whenever Julia heals herself (including lifesteal) or heals an ally, she permanently gains +${colorize(baseGain)} Physical Damage.`;
+        
+        // Add enhanced mystic reserve info to passive description if applicable
+        if (character.hasTalent && character.hasTalent('enhanced_mystic_reserve')) {
+            character.passive.description += ` <span class="talent-effect resource">Enhanced Mystic Reserve: +1000 maximum Mana.</span>`;
+        }
+        
+        // Add allied healing sprouts info to passive description if applicable
+        if (character.hasTalent && character.hasTalent('allied_healing_sprouts')) {
+            character.passive.description += ` <span class="talent-effect aoe">Allied Healing Sprouts: At game start, all allies gain a Healing Sprout buff that blooms after 10 turns.</span>`;
+        }
+        
+        // Add critical strike mastery info to passive description if applicable
+        if (character.hasTalent && character.hasTalent('critical_strike_mastery')) {
+            character.passive.description += ` <span class="talent-effect damage">Critical Strike Mastery: +10% critical chance.</span>`;
+        }
+
+        // Add Healing Surge info to passive description if applicable
+        if (character.hasTalent && character.hasTalent('healing_surge')) {
+            character.passive.description += ` <span class="talent-effect healing">Healing Surge: Heals on Julia are 75% more powerful but she takes 35% more damage.</span>`;
+        }
+        
+        // If stats menu is open, ensure it refreshes to show updated description
+        if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.updateCharacterUI === 'function') {
+            window.gameManager.uiManager.updateCharacterUI(character);
+        }
+    }
+};
+
+// --- Enhanced Mystic Reserve VFX Function ---
+window.showEnhancedMysticReserveVFX = function(character) {
+    if (!character || character.id !== 'schoolgirl_julia') return;
+    
+    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!charElement) return;
+
+    // Create main VFX container
+    const vfxContainer = document.createElement('div');
+    vfxContainer.className = 'julia-enhanced-mystic-reserve-vfx';
+    charElement.appendChild(vfxContainer);
+
+    // Create floating text
+    const floatText = document.createElement('div');
+    floatText.className = 'julia-enhanced-mystic-reserve-float';
+    floatText.textContent = '+1000 MP';
+    charElement.appendChild(floatText);
+
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'julia-enhanced-mystic-reserve-particles';
+    charElement.appendChild(particleContainer);
+
+    // Create rotating aura
+    const aura = document.createElement('div');
+    aura.className = 'julia-enhanced-mystic-reserve-aura';
+    charElement.appendChild(aura);
+
+    // Create particles
+    const numParticles = 12;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'julia-enhanced-mystic-reserve-particle';
+        
+        // Randomize particle movement
+        const angle = (i / numParticles) * 360;
+        const distance = 30 + Math.random() * 20;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.setProperty('--particle-x', `${x}px`);
+        particle.style.setProperty('--particle-y', `${y}px`);
+        
+        // Randomize animation delay
+        particle.style.animationDelay = `${Math.random() * 0.5}s`;
+        
+        particleContainer.appendChild(particle);
+    }
+
+    // Cleanup after animations complete
+    setTimeout(() => {
+        vfxContainer.remove();
+        floatText.remove();
+        particleContainer.remove();
+        aura.remove();
+    }, 3000);
+
+    // Add log entry
+    if (window.gameManager && window.gameManager.addLogEntry) {
+        window.gameManager.addLogEntry(`${character.name}'s Enhanced Mystic Reserve grants +1000 maximum Mana!`, 'talent-effect resource');
+    }
+};
+
+// --- Allied Healing Sprouts VFX Functions ---
+window.showAlliedHealingSproutsGameStartVFX = function() {
+    // Create main game start VFX container
+    const gameStartVfx = document.createElement('div');
+    gameStartVfx.className = 'julia-allied-sprouts-game-start';
+    document.body.appendChild(gameStartVfx);
+
+    // Create floating text
+    const floatText = document.createElement('div');
+    floatText.className = 'julia-allied-sprouts-float';
+    floatText.textContent = 'Allied Healing Sprouts';
+    document.body.appendChild(floatText);
+
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'julia-allied-sprouts-particles';
+    document.body.appendChild(particleContainer);
+
+    // Create particles
+    const numParticles = 20;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'julia-allied-sprouts-particle';
+        
+        // Randomize particle movement
+        const angle = (i / numParticles) * 360;
+        const distance = 50 + Math.random() * 30;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.setProperty('--particle-x', `${x}px`);
+        particle.style.setProperty('--particle-y', `${y}px`);
+        
+        // Randomize animation delay
+        particle.style.animationDelay = `${Math.random() * 0.8}s`;
+        
+        particleContainer.appendChild(particle);
+    }
+
+    // Cleanup after animations complete
+    setTimeout(() => {
+        gameStartVfx.remove();
+        floatText.remove();
+        particleContainer.remove();
+    }, 3000);
+
+    // Add log entry
+    if (window.gameManager && window.gameManager.addLogEntry) {
+        window.gameManager.addLogEntry(`Julia's Allied Healing Sprouts talent activates! All allies gain Healing Sprout buffs.`, 'talent-effect aoe');
+    }
+};
+
+window.showAlliedHealingSproutsApplicationVFX = function(character) {
+    if (!character) return;
+    
+    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!charElement) return;
+
+    // Create application VFX container
+    const applicationVfx = document.createElement('div');
+    applicationVfx.className = 'julia-allied-sprouts-application';
+    charElement.appendChild(applicationVfx);
+
+    // Create floating text
+    const floatText = document.createElement('div');
+    floatText.className = 'julia-allied-sprouts-application-float';
+    floatText.textContent = 'Healing Sprout';
+    charElement.appendChild(floatText);
+
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'julia-allied-sprouts-application-particles';
+    charElement.appendChild(particleContainer);
+
+    // Create particles
+    const numParticles = 8;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'julia-allied-sprouts-application-particle';
+        
+        // Randomize particle movement
+        const angle = (i / numParticles) * 360;
+        const distance = 20 + Math.random() * 15;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.setProperty('--particle-x', `${x}px`);
+        particle.style.setProperty('--particle-y', `${y}px`);
+        
+        // Randomize animation delay
+        particle.style.animationDelay = `${Math.random() * 0.3}s`;
+        
+        particleContainer.appendChild(particle);
+    }
+
+    // Cleanup after animations complete
+    setTimeout(() => {
+        applicationVfx.remove();
+        floatText.remove();
+        particleContainer.remove();
+    }, 2000);
+};
+
+// --- Game Start Logic for Allied Healing Sprouts ---
+window.applyAlliedHealingSproutsAtGameStart = function() {
+    if (!window.gameManager || !window.gameManager.gameState) return;
+    
+    // Find Julia in the player team
+    const julia = window.gameManager.gameState.playerCharacters.find(char => char.id === 'schoolgirl_julia');
+    if (!julia || !julia.alliedHealingSproutsAtStart) return;
+    
+    // Show game start VFX
+    window.showAlliedHealingSproutsGameStartVFX();
+    
+    // Apply Healing Sprout to all player allies (including Julia herself)
+    const allies = window.gameManager.gameState.playerCharacters.filter(char => !char.isDead());
+    
+    allies.forEach(ally => {
+        // Create the Healing Sprout buff with 10-turn duration
+        const alliedSproutBuff = new Effect(
+            'julia_allied_healing_sprout',
+            'Allied Healing Sprout',
+            'Icons/abilities/sprout_planting.jfif',
+            10, // 10-turn duration
+            (character) => {
+                // Optional: effect each turn
+            },
+            false
+        ).setDescription('A healing sprout that will bloom after 10 turns, restoring health.');
+
+        // Define the onRemove function (called when buff expires or is removed)
+        alliedSproutBuff.onRemove = (buffedCharacter) => {
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`The Allied Healing Sprout on ${buffedCharacter.name} blooms!`);
+            }
+
+            // Calculate heal amount based on Julia's healingPower
+            const baseHeal = 1250;
+            const healAmount = Math.floor(baseHeal * (1 + (julia.stats.healingPower || 0)));
+
+            const healResult = buffedCharacter.heal(healAmount, julia, { abilityId: 'julia_allied_healing_sprout' });
+            const actualHeal = healResult.healAmount;
+            
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`${buffedCharacter.name} is healed for ${actualHeal} HP by Allied Healing Sprout.`);
+            }
+
+            // Trigger Julia's passive if applicable
+            if (actualHeal > 0 && julia.passiveHandler && typeof julia.passiveHandler.onHealDealt === 'function') {
+                julia.passiveHandler.onHealDealt(julia, buffedCharacter, actualHeal);
+            }
+
+            // Show sprout bloom VFX
+            const healedElement = document.getElementById(`character-${buffedCharacter.instanceId || buffedCharacter.id}`);
+            if (healedElement) {
+                const bloomVfx = document.createElement('div');
+                bloomVfx.className = 'sprout-bloom-vfx';
+                healedElement.appendChild(bloomVfx);
+                setTimeout(() => bloomVfx.remove(), 1500);
+            }
+
+            // Play sound effect
+            if (window.gameManager && window.gameManager.playSound) {
+                window.gameManager.playSound('sounds/juliaa2.mp3');
+            }
+        };
+
+        // Apply the buff to the ally
+        ally.addBuff(alliedSproutBuff.clone());
+        
+        // Show application VFX
+        window.showAlliedHealingSproutsApplicationVFX(ally);
+        
+        // Update UI
+        if (window.gameManager && window.gameManager.uiManager) {
+            window.gameManager.uiManager.updateCharacterUI(ally);
+        }
+    });
+    
+    if (window.gameManager && window.gameManager.addLogEntry) {
+        window.gameManager.addLogEntry(`Allied Healing Sprouts applied to ${allies.length} allies!`, 'talent-effect aoe');
+    }
+};
+
+// --- GameStart Event Listener for Allied Healing Sprouts ---
+document.addEventListener('GameStart', () => {
+    // Delay slightly to ensure all characters are fully loaded
+    setTimeout(() => {
+        if (typeof window.applyAlliedHealingSproutsAtGameStart === 'function') {
+            window.applyAlliedHealingSproutsAtGameStart();
+        }
+    }, 500);
+});
+
+// --- Critical Strike Mastery VFX Function ---
+window.showCriticalStrikeMasteryVFX = function(character) {
+    if (!character || character.id !== 'schoolgirl_julia') return;
+    
+    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!charElement) return;
+
+    // Create main VFX container
+    const vfxContainer = document.createElement('div');
+    vfxContainer.className = 'julia-critical-mastery-pulse';
+    charElement.appendChild(vfxContainer);
+
+    // Create floating text
+    const floatText = document.createElement('div');
+    floatText.className = 'julia-critical-mastery-float';
+    floatText.textContent = '+10% Crit';
+    charElement.appendChild(floatText);
+
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'julia-critical-mastery-particles';
+    charElement.appendChild(particleContainer);
+
+    // Create rotating aura
+    const aura = document.createElement('div');
+    aura.className = 'julia-critical-mastery-aura';
+    charElement.appendChild(aura);
+
+    // Create particles
+    const numParticles = 10;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'julia-critical-mastery-particle';
+        
+        // Randomize particle movement
+        const angle = (i / numParticles) * 360;
+        const distance = 25 + Math.random() * 20;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.setProperty('--particle-x', `${x}px`);
+        particle.style.setProperty('--particle-y', `${y}px`);
+        
+        // Randomize animation delay
+        particle.style.animationDelay = `${Math.random() * 0.4}s`;
+        
+        particleContainer.appendChild(particle);
+    }
+
+    // Cleanup after animations complete
+    setTimeout(() => {
+        vfxContainer.remove();
+        floatText.remove();
+        particleContainer.remove();
+        aura.remove();
+    }, 2000);
+
+    // Add log entry
+    if (window.gameManager && window.gameManager.addLogEntry) {
+        window.gameManager.addLogEntry(`${character.name}'s Critical Strike Mastery grants +10% critical chance!`, 'talent-effect damage');
+    }
+};
+
+// --- Spirit Mastery VFX Function ---
+window.showSpiritMasteryVFX = function(character) {
+    if (!character || character.id !== 'schoolgirl_julia') return;
+    
+    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!charElement) return;
+
+    // Create main VFX container
+    const vfxContainer = document.createElement('div');
+    vfxContainer.className = 'julia-spirit-mastery-pulse';
+    charElement.appendChild(vfxContainer);
+
+    // Create floating text
+    const floatText = document.createElement('div');
+    floatText.className = 'julia-spirit-mastery-float';
+    floatText.textContent = '-2 CD';
+    charElement.appendChild(floatText);
+
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'julia-spirit-mastery-particles';
+    charElement.appendChild(particleContainer);
+
+    // Create rotating aura
+    const aura = document.createElement('div');
+    aura.className = 'julia-spirit-mastery-aura';
+    charElement.appendChild(aura);
+
+    // Create spirit energy particles
+    const numParticles = 12;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'julia-spirit-mastery-particle';
+        
+        // Randomize particle movement
+        const angle = (i / numParticles) * 360;
+        const distance = 30 + Math.random() * 25;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.setProperty('--particle-x', `${x}px`);
+        particle.style.setProperty('--particle-y', `${y}px`);
+        
+        // Randomize animation delay
+        particle.style.animationDelay = `${Math.random() * 0.5}s`;
+        
+        particleContainer.appendChild(particle);
+    }
+
+    // Create cooldown reduction sparkles
+    const sparkleContainer = document.createElement('div');
+    sparkleContainer.className = 'julia-spirit-mastery-sparkles';
+    charElement.appendChild(sparkleContainer);
+
+    // Create sparkles
+    const numSparkles = 8;
+    for (let i = 0; i < numSparkles; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'julia-spirit-mastery-sparkle';
+        
+        // Randomize sparkle position
+        const angle = (i / numSparkles) * 360;
+        const distance = 20 + Math.random() * 15;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        sparkle.style.setProperty('--sparkle-x', `${x}px`);
+        sparkle.style.setProperty('--sparkle-y', `${y}px`);
+        
+        // Randomize animation delay
+        sparkle.style.animationDelay = `${Math.random() * 0.3}s`;
+        
+        sparkleContainer.appendChild(sparkle);
+    }
+
+    // Cleanup after animations complete
+    setTimeout(() => {
+        vfxContainer.remove();
+        floatText.remove();
+        particleContainer.remove();
+        aura.remove();
+        sparkleContainer.remove();
+    }, 2500);
+
+    // Add log entry
+    if (window.gameManager && window.gameManager.addLogEntry) {
+        window.gameManager.addLogEntry(`${character.name}'s Spirit Mastery reduces Spirits Strength cooldown by an additional 2 turns!`, 'talent-effect utility');
+    }
+};
+
+// --- Nature's Resilience VFX Function ---
+window.showNaturesResilienceVFX = function(character, damageAmount, healAmount, manaAmount) {
+    if (!character || character.id !== 'schoolgirl_julia') return;
+    
+    const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+    if (!charElement) return;
+
+    // Create main VFX container
+    const vfxContainer = document.createElement('div');
+    vfxContainer.className = 'julia-natures-resilience-pulse';
+    charElement.appendChild(vfxContainer);
+
+    // Create floating text for HP restoration
+    const hpFloatText = document.createElement('div');
+    hpFloatText.className = 'julia-natures-resilience-hp-float';
+    hpFloatText.textContent = `+${healAmount} HP`;
+    charElement.appendChild(hpFloatText);
+
+    // Create floating text for mana restoration
+    const manaFloatText = document.createElement('div');
+    manaFloatText.className = 'julia-natures-resilience-mana-float';
+    manaFloatText.textContent = `+${manaAmount} MP`;
+    charElement.appendChild(manaFloatText);
+
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'julia-natures-resilience-particles';
+    charElement.appendChild(particleContainer);
+
+    // Create rotating aura
+    const aura = document.createElement('div');
+    aura.className = 'julia-natures-resilience-aura';
+    charElement.appendChild(aura);
+
+    // Create nature energy particles
+    const numParticles = 15;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'julia-natures-resilience-particle';
+        
+        // Randomize particle movement
+        const angle = (i / numParticles) * 360;
+        const distance = 35 + Math.random() * 30;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        particle.style.setProperty('--particle-x', `${x}px`);
+        particle.style.setProperty('--particle-y', `${y}px`);
+        
+        // Randomize animation delay
+        particle.style.animationDelay = `${Math.random() * 0.6}s`;
+        
+        particleContainer.appendChild(particle);
+    }
+
+    // Create resilience sparkles
+    const sparkleContainer = document.createElement('div');
+    sparkleContainer.className = 'julia-natures-resilience-sparkles';
+    charElement.appendChild(sparkleContainer);
+
+    // Create sparkles
+    const numSparkles = 10;
+    for (let i = 0; i < numSparkles; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'julia-natures-resilience-sparkle';
+        
+        // Randomize sparkle position
+        const angle = (i / numSparkles) * 360;
+        const distance = 25 + Math.random() * 20;
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = Math.sin(angle * Math.PI / 180) * distance;
+        
+        sparkle.style.setProperty('--sparkle-x', `${x}px`);
+        sparkle.style.setProperty('--sparkle-y', `${y}px`);
+        
+        // Randomize animation delay
+        sparkle.style.animationDelay = `${Math.random() * 0.4}s`;
+        
+        sparkleContainer.appendChild(sparkle);
+    }
+
+    // Cleanup after animations complete
+    setTimeout(() => {
+        vfxContainer.remove();
+        hpFloatText.remove();
+        manaFloatText.remove();
+        particleContainer.remove();
+        aura.remove();
+        sparkleContainer.remove();
+    }, 3000);
+
+    // Add log entry
+    if (window.gameManager && window.gameManager.addLogEntry) {
+        window.gameManager.addLogEntry(`${character.name}'s Nature's Resilience restores ${healAmount} HP and ${manaAmount} mana after taking damage!`, 'talent-effect healing');
+    }
+};
+
+// --- Global VFX function for Nature's Fury talent ---
+window.showNaturesFuryVFX = function(julia, oldDamage, newDamage) {
+    console.log(`[Nature's Fury VFX] Creating VFX for ${julia.name}: ${oldDamage} -> ${newDamage}`);
+    
+    const characterElement = document.getElementById(`character-${julia.instanceId || julia.id}`);
+    if (!characterElement) {
+        console.warn(`[Nature's Fury VFX] Character element not found for ${julia.name}`);
+        return;
+    }
+    
+    // Create main VFX container
+    const vfxContainer = document.createElement('div');
+    vfxContainer.className = 'natures-fury-vfx';
+    characterElement.appendChild(vfxContainer);
+    
+    // Create expanding aura
+    const aura = document.createElement('div');
+    aura.className = 'natures-fury-aura';
+    vfxContainer.appendChild(aura);
+    
+    // Create power surge effect
+    const powerSurge = document.createElement('div');
+    powerSurge.className = 'natures-fury-power-surge';
+    vfxContainer.appendChild(powerSurge);
+    
+    // Create particles container
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'natures-fury-particles';
+    vfxContainer.appendChild(particlesContainer);
+    
+    // Create floating particles
+    for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'natures-fury-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 0.5 + 's';
+        particlesContainer.appendChild(particle);
+    }
+    
+    // Create sparkles
+    for (let i = 0; i < 8; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'natures-fury-sparkle';
+        sparkle.style.left = Math.random() * 100 + '%';
+        sparkle.style.top = Math.random() * 100 + '%';
+        sparkle.style.animationDelay = Math.random() * 1 + 's';
+        vfxContainer.appendChild(sparkle);
+    }
+    
+    // Create power text
+    const powerText = document.createElement('div');
+    powerText.className = 'natures-fury-text';
+    powerText.textContent = 'NATURE\'S FURY!';
+    vfxContainer.appendChild(powerText);
+    
+    // Create damage increase text
+    setTimeout(() => {
+        const damageText = document.createElement('div');
+        damageText.className = 'natures-fury-text';
+        damageText.style.top = '60%';
+        damageText.style.fontSize = '14px';
+        damageText.textContent = `+${newDamage - oldDamage} Physical Damage!`;
+        vfxContainer.appendChild(damageText);
+    }, 500);
+    
+    // Clean up VFX after animation completes
+    setTimeout(() => {
+        if (vfxContainer && vfxContainer.parentNode) {
+            vfxContainer.parentNode.removeChild(vfxContainer);
+        }
+    }, 3000);
+    
+    console.log(`[Nature's Fury VFX] VFX created successfully for ${julia.name}`);
 }; 

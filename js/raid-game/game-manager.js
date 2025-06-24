@@ -507,6 +507,14 @@ class GameManager {
                 }
             });
 
+            // Add event listener for ability description updates
+            document.addEventListener('abilityDescriptionUpdated', (event) => {
+                if (event.detail && event.detail.character) {
+                    console.log(`[GameManager] Ability description update detected, updating character UI`);
+                    this.uiManager.updateCharacterUI(event.detail.character);
+                }
+            });
+
             // REMOVE THIS DUPLICATE INITIALIZATION
             // this.uiManager = new UIManager(this);
             // await this.uiManager.initialize();
@@ -522,6 +530,202 @@ class GameManager {
         } catch (error) {
             console.error('Failed to initialize game manager:', error);
             return false;
+        }
+    }
+
+    // Called when a stage is loaded
+    onStageLoaded(stage, gameState) {
+        console.log('Stage loaded:', stage.name);
+        this.gameState = gameState;
+        
+        // Initialize actedCharacters array
+        this.actedCharacters = [];
+        
+        // Initialize tutorial if this is a tutorial stage
+        this.initializeTutorial(stage);
+        
+        // Load stage background and music
+        this.loadStageBackground(stage);
+        this.playStageMusic(stage);
+        
+        // --- STATISTICS TRACKING: Initialize statistics for the stage ---
+        if (window.statisticsManager) {
+            window.statisticsManager.reset();
+            // Initialize all characters in the statistics manager
+            [...gameState.playerCharacters, ...gameState.aiCharacters].forEach(character => {
+                window.statisticsManager.initializeCharacter(character);
+            });
+            window.statisticsManager.setCurrentTurn(gameState.turn || 1);
+            console.log("[GameManager] Statistics tracking initialized for stage");
+        }
+        // --- END STATISTICS TRACKING ---
+
+        // Update UI
+        this.uiManager.renderCharacters(gameState.playerCharacters, gameState.aiCharacters);
+        this.uiManager.updateTurnCounter(gameState.turn);
+        this.uiManager.updatePhase(gameState.phase);
+        this.uiManager.clearBattleLog();
+                    // Test the battle log
+            this.testBattleLog();
+            
+            this.uiManager.addLogEntry(`Battle started in ${stage.name}!`, 'system');
+            this.uiManager.addLogEntry(`Player's turn`, 'player-turn');
+        
+        // --- ENHANCED: Comprehensive UI update after complete character loading ---
+        console.log('[GameManager] Starting comprehensive UI update after complete character loading...');
+        setTimeout(() => {
+            try {
+                // Update UI for all player characters with full ability refreshing
+                gameState.playerCharacters.forEach(character => {
+                    if (character) {
+                        console.log(`[GameManager] Updating UI for player character: ${character.name}`);
+                        
+                        // Update character UI
+                        if (this.uiManager && typeof this.uiManager.updateCharacterUI === 'function') {
+                            this.uiManager.updateCharacterUI(character);
+                        }
+                        
+                        // Update character abilities and descriptions immediately
+                        this.updateCharacterAbilities(character);
+                    }
+                });
+                
+                // Update UI for all AI characters with full ability refreshing
+                gameState.aiCharacters.forEach(character => {
+                    if (character) {
+                        console.log(`[GameManager] Updating UI for AI character: ${character.name}`);
+                        
+                        // Update character UI
+                        if (this.uiManager && typeof this.uiManager.updateCharacterUI === 'function') {
+                            this.uiManager.updateCharacterUI(character);
+                        }
+                        
+                        // Update character abilities and descriptions immediately
+                        this.updateCharacterAbilities(character);
+                    }
+                });
+                
+                console.log('[GameManager] ✓ All character UIs updated after complete loading');
+            } catch (error) {
+                console.error('[GameManager] Error during comprehensive UI update:', error);
+            }
+        }, 150); // Slightly longer delay to ensure all character loading is complete
+        // --- END NEW ---
+        
+        // Initialize volume slider
+        this.initializeVolumeControl();
+        
+        
+        // Now that game state is loaded, set up event handlers
+        this.uiManager.setupEventHandlers();
+        
+        // Start the game
+        this.isGameRunning = true;
+        
+        // Update UI with stage modifiers
+        this.uiManager.createStageModifiersIndicator();
+        
+        // Initialize stage modifier VFX
+        if (window.stageModifiersRegistry) {
+            window.stageModifiersRegistry.initializeVFX(this.stageManager);
+            // Process stage start modifiers (like Small Space)
+            console.log('[GameManager] Processing stage start modifiers...');
+            window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'stageStart');
+        }
+
+        // Display stage modification messages (HP/damage/speed multipliers)
+        if (this.stageManager && typeof this.stageManager.displayStageModificationMessages === 'function') {
+            this.stageManager.displayStageModificationMessages();
+        }
+        
+        // --- NEW: Trigger Talents Panel Update ---
+        if (window.talentsPanelManager && typeof window.talentsPanelManager.loadTalentsForCurrentGame === 'function') {
+            console.log("[GameManager] Triggering Talents Panel update after stage load...");
+            window.talentsPanelManager.loadTalentsForCurrentGame().catch(err => {
+                console.error("[GameManager] Error triggering talents panel update:", err);
+            });
+        }
+        // --- END NEW ---
+
+        // NEW: Emit stageLoaded and gameStateReady events to trigger character post-load hooks
+        // This will enable talents like Farmer Shoma's Nurturing Aura
+        setTimeout(() => {
+            // First emit a gameStateReady event for more explicit hook
+            const gameStateReadyEvent = new CustomEvent('gameStateReady', {
+                detail: { 
+                    gameState: this.gameState,
+                    playerCharacters: this.gameState.playerCharacters,
+                    aiCharacters: this.gameState.aiCharacters
+                },
+                bubbles: true
+            });
+            document.dispatchEvent(gameStateReadyEvent);
+            console.log('[GameManager] Emitted gameStateReady event');
+            
+            // Then emit standard stageLoaded event
+            const stageLoadedEvent = new CustomEvent('stageLoaded', {
+                detail: { 
+                    stage: stage,
+                    gameState: this.gameState 
+                },
+                bubbles: true
+            });
+            document.dispatchEvent(stageLoadedEvent);
+            console.log('[GameManager] Emitted stageLoaded event');
+
+            // --- >>> THIS IS WHERE 'GameStart' SHOULD BE DISPATCHED <<< ---
+            const gameStartEvent = new CustomEvent('GameStart', {
+                detail: {
+                    stage: stage,
+                    gameState: this.gameState
+                }
+            });
+            document.dispatchEvent(gameStartEvent);
+            console.log("[GameManager] Dispatched GameStart event.");
+            
+            // Initialize the controller manager AFTER game state is ready and UI is set
+            if (this.controllerManager) {
+                // Just refresh current cursors if needed
+                if (this.controllerManager.selectedElement === null) {
+                    this.controllerManager.selectInitialElement();
+                }
+                console.log('[GameManager] Controller Manager already initialized, refreshing selection.');
+            } else {
+                console.warn('[GameManager] Controller Manager not initialized in initialize(), creating now as fallback.');
+                this.controllerManager = new ControllerManager(this);
+                this.controllerManager.initialize();
+            }
+
+            // Update ability descriptions and images after everything is loaded
+            this.updateAllAbilityDescriptionsAndImages();
+            
+        }, 0); // Use setTimeout to ensure all initial rendering/setup is complete
+    }
+
+    /**
+     * Updates ability descriptions and images for all characters after everything is loaded
+     */
+    updateAllAbilityDescriptionsAndImages() {
+        console.log('[GameManager] Updating ability descriptions and images for all characters...');
+        
+        try {
+            // Update player characters
+            if (this.gameState && this.gameState.playerCharacters) {
+                this.gameState.playerCharacters.forEach(character => {
+                    this.updateCharacterAbilities(character);
+                });
+            }
+            
+            // Update AI characters
+            if (this.gameState && this.gameState.aiCharacters) {
+                this.gameState.aiCharacters.forEach(character => {
+                    this.updateCharacterAbilities(character);
+                });
+            }
+            
+            console.log('[GameManager] ✓ Ability descriptions and images updated for all characters');
+        } catch (error) {
+            console.error('[GameManager] Error updating ability descriptions and images:', error);
         }
     }
 
@@ -2190,6 +2394,19 @@ class GameManager {
                            }
                        }
                    });
+               }
+           }
+           // --- Julia Nature's Fury turn 10 effect ---
+           if (this.gameState && this.gameState.playerCharacters) {
+               const julia = this.gameState.playerCharacters.find(c => c.id === 'schoolgirl_julia');
+               if (julia && julia.naturesFuryTurn10 && !julia.naturesFuryApplied && !julia.isDead() && this.gameState.turn === 10) {
+                   console.log(`[Nature's Fury] Triggering Nature's Fury effect for ${julia.name}!`);
+                   const oldPD = julia.stats.physicalDamage;
+                   julia.stats.physicalDamage = Math.floor(julia.stats.physicalDamage * 2);
+                   julia.naturesFuryApplied = true;
+                   this.addLogEntry(`${julia.name}'s Nature's Fury awakens! Physical Damage doubled!`, 'talent-effect damage');
+                   if (window.showNaturesFuryVFX) window.showNaturesFuryVFX(julia, oldPD, julia.stats.physicalDamage);
+                   if (this.uiManager && typeof this.uiManager.updateCharacterUI === 'function') this.uiManager.updateCharacterUI(julia);
                }
            }
        }
