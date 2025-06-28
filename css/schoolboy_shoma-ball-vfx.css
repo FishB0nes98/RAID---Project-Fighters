@@ -66,6 +66,55 @@
     }
 }
 
+/* Enhanced Grass Ball VFX - Verdant Recovery Talent */
+@keyframes enhancedGrassAuraPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+}
+
+@keyframes enhancementTextFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        font-size: 14px;
+    }
+    50% {
+        transform: translateX(-50%) translateY(-20px);
+        opacity: 1;
+        font-size: 16px;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-40px);
+        opacity: 0;
+        font-size: 12px;
+    }
+}
+
+@keyframes enhancedGrassParticleFloat {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-30px) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-60px) scale(0.2);
+        opacity: 0;
+    }
+}
+
 /* Fire Ball VFX */
 .fire-ball-vfx {
     position: absolute;
@@ -161,6 +210,63 @@
     100% { 
         opacity: 0; 
         transform: scale(1.2);
+    }
+}
+
+/* Fire Ball Burn VFX - Scorching Flames Talent */
+.fire-ball-burn-aura {
+    animation: fireBallBurnPulse 1s ease-in-out infinite;
+}
+
+@keyframes fireBallBurnPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+}
+
+@keyframes burnDamageTextFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        font-size: 12px;
+    }
+    50% {
+        transform: translateX(-50%) translateY(-15px);
+        opacity: 1;
+        font-size: 14px;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-30px);
+        opacity: 0;
+        font-size: 10px;
+    }
+}
+
+@keyframes fireBurnParticleFloat {
+    0% {
+        transform: translateY(0) translateX(0) scale(0);
+        opacity: 1;
+    }
+    25% {
+        transform: translateY(-10px) translateX(5px) scale(1);
+        opacity: 0.8;
+    }
+    75% {
+        transform: translateY(-20px) translateX(-5px) scale(0.8);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(-40px) translateX(10px) scale(0);
+        opacity: 0;
     }
 }
 
@@ -428,4 +534,3127 @@
         opacity: 0;
         transform: translate(-50%, -15px); /* Fade out upwards */
     }
-} 
+}
+
+/* ===== DEBUFF HUNTER VFX STYLES ===== */
+
+.debuff-hunter-focus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    border: 3px solid #ff6b35;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, rgba(255, 107, 53, 0.1) 60%, transparent 100%);
+    animation: hunterFocusPulse 1.5s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.debuff-hunter-focus::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    transform: translate(-50%, -50%);
+    border: 2px solid #ff8c42;
+    border-radius: 50%;
+    animation: hunterFocusRipple 1.5s ease-out;
+}
+
+.debuff-hunter-focus::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    border: 1px solid #ffad73;
+    border-radius: 50%;
+    animation: hunterFocusRipple 1.5s ease-out 0.2s;
+}
+
+.debuff-hunter-laser {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        #ff6b35 20%, 
+        #ff4444 50%, 
+        #ff6b35 80%, 
+        transparent 100%);
+    box-shadow: 
+        0 0 8px #ff6b35,
+        0 0 16px #ff4444,
+        0 0 24px rgba(255, 107, 53, 0.5);
+    animation: hunterLaserPulse 1.5s ease-out;
+    z-index: 5;
+    pointer-events: none;
+    transform-origin: left center;
+}
+
+.debuff-hunter-laser::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 107, 53, 0.3) 20%, 
+        rgba(255, 68, 68, 0.3) 50%, 
+        rgba(255, 107, 53, 0.3) 80%, 
+        transparent 100%);
+    filter: blur(4px);
+}
+
+.debuff-hunter-laser::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-left: 8px solid #ff4444;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    transform: translateY(-50%);
+    filter: drop-shadow(0 0 4px #ff6b35);
+}
+
+.debuff-vulnerability-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, 
+        rgba(255, 107, 53, 0.3) 0%, 
+        rgba(255, 68, 68, 0.2) 50%, 
+        transparent 70%);
+    border: 2px solid #ff6b35;
+    border-radius: 8px;
+    animation: vulnerabilityPulse 1.5s ease-out;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.debuff-vulnerability-highlight::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    right: 10%;
+    bottom: 10%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 107, 53, 0.2) 2px,
+        rgba(255, 107, 53, 0.2) 4px
+    );
+    border-radius: 6px;
+    animation: vulnerabilityPattern 1.5s ease-out;
+}
+
+.debuff-hunter-bonus-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff4444;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 
+        0 0 4px #ff6b35,
+        0 0 8px rgba(255, 107, 53, 0.5),
+        1px 1px 2px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(255, 68, 68, 0.9));
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid #ff6b35;
+    animation: hunterBonusText 1.5s ease-out;
+    z-index: 15;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.debuff-hunter-bonus-text::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(135deg, 
+        rgba(255, 107, 53, 0.3), 
+        rgba(255, 68, 68, 0.3));
+    border-radius: 16px;
+    z-index: -1;
+    filter: blur(6px);
+}
+
+/* ===== DEBUFF HUNTER ANIMATIONS ===== */
+
+@keyframes hunterFocusPulse {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+        border-color: transparent;
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.0);
+        border-color: #ff6b35;
+    }
+    60% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.1);
+        border-color: #ff4444;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.3);
+        border-color: transparent;
+    }
+}
+
+@keyframes hunterFocusRipple {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    30% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes hunterLaserPulse {
+    0% {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scaleX(0.3);
+    }
+    40% {
+        opacity: 1;
+        transform: scaleX(1.0);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scaleX(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1.0);
+    }
+}
+
+@keyframes vulnerabilityPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+        border-color: transparent;
+    }
+    25% {
+        opacity: 0.8;
+        transform: scale(1.0);
+        border-color: #ff6b35;
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+        border-color: #ff4444;
+    }
+    75% {
+        opacity: 0.7;
+        transform: scale(1.02);
+        border-color: #ff6b35;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.0);
+        border-color: transparent;
+    }
+}
+
+@keyframes vulnerabilityPattern {
+    0% {
+        opacity: 0;
+        transform: rotate(0deg);
+    }
+    30% {
+        opacity: 0.6;
+        transform: rotate(5deg);
+    }
+    60% {
+        opacity: 0.8;
+        transform: rotate(-3deg);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes hunterBonusText {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    40% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1.0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px) scale(0.95);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-25px) scale(0.8);
+    }
+}
+
+/* ===== HOMERUN VFX STYLES ===== */
+
+.homerun-energy-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.8) 0%, 
+        rgba(255, 165, 0, 0.6) 40%, 
+        rgba(255, 140, 0, 0.3) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: homerunEnergyBurst 2s ease-out;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.homerun-energy-burst::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    border: 3px solid #ffd700;
+    border-radius: 50%;
+    animation: homerunRipple 2s ease-out;
+}
+
+.homerun-energy-burst::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140px;
+    height: 140px;
+    transform: translate(-50%, -50%);
+    border: 2px solid #ffa500;
+    border-radius: 50%;
+    animation: homerunRipple 2s ease-out 0.3s;
+}
+
+.homerun-speed-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 11;
+}
+
+.homerun-speed-lines::before,
+.homerun-speed-lines::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    top: 25%;
+    animation: homerunSpeedLine 1.5s ease-out;
+}
+
+.homerun-speed-lines::before {
+    left: -30px;
+    animation-delay: 0.2s;
+}
+
+.homerun-speed-lines::after {
+    right: -30px;
+    top: 75%;
+    animation-delay: 0.5s;
+}
+
+.homerun-dodge-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, 
+        rgba(173, 216, 230, 0.4) 0%, 
+        rgba(135, 206, 235, 0.3) 50%, 
+        transparent 70%);
+    border-radius: 8px;
+    animation: homerunDodgeGlow 2s ease-out;
+    z-index: 9;
+    pointer-events: none;
+}
+
+.homerun-mastery-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(
+        from 0deg,
+        rgba(255, 215, 0, 0.6),
+        rgba(255, 165, 0, 0.4),
+        rgba(255, 215, 0, 0.6),
+        rgba(255, 165, 0, 0.4),
+        rgba(255, 215, 0, 0.6)
+    );
+    border-radius: 50%;
+    animation: homerunMasteryRotate 2.5s linear infinite;
+    z-index: 13;
+    pointer-events: none;
+}
+
+.homerun-mastery-aura::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    background: radial-gradient(circle, 
+        rgba(255, 215, 0, 0.8) 0%, 
+        rgba(255, 165, 0, 0.4) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: homerunMasteryPulse 2.5s ease-in-out infinite;
+}
+
+.homerun-power-surge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent, 
+        rgba(255, 215, 0, 0.3), 
+        transparent, 
+        rgba(255, 165, 0, 0.3), 
+        transparent);
+    animation: homerunPowerSurge 1.5s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.homerun-mastery-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 
+        0 0 6px #ffa500,
+        0 0 12px rgba(255, 215, 0, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(135deg, 
+        rgba(255, 215, 0, 0.9), 
+        rgba(255, 165, 0, 0.9));
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: 2px solid #ffd700;
+    animation: homerunMasteryText 2.5s ease-out;
+    z-index: 16;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.homerun-mastery-text::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    background: linear-gradient(135deg, 
+        rgba(255, 215, 0, 0.4), 
+        rgba(255, 165, 0, 0.4));
+    border-radius: 21px;
+    z-index: -1;
+    filter: blur(8px);
+}
+
+/* ===== HOMERUN ANIMATIONS ===== */
+
+@keyframes homerunEnergyBurst {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    25% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.0);
+    }
+    70% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes homerunRipple {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    30% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2.0);
+    }
+}
+
+@keyframes homerunSpeedLine {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+@keyframes homerunDodgeGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.0);
+    }
+}
+
+@keyframes homerunMasteryRotate {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes homerunMasteryPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1.0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes homerunPowerSurge {
+    0% {
+        opacity: 0;
+        background-position: -200% 0;
+    }
+    50% {
+        opacity: 1;
+        background-position: 0% 0;
+    }
+    100% {
+        opacity: 0;
+        background-position: 200% 0;
+    }
+}
+
+@keyframes homerunMasteryText {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.2);
+    }
+    90% {
+        opacity: 1;
+        transform: translateY(-30px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8);
+    }
+}
+
+/* Power Boink VFX */
+.power-boink-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    background: radial-gradient(circle, 
+        rgba(255, 100, 0, 0.6) 0%, 
+        rgba(255, 150, 0, 0.4) 40%, 
+        rgba(255, 200, 0, 0.2) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: powerBoinkAuraPulse 1.5s ease-out;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.power-boink-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 100, 0.8) 0%, 
+        rgba(255, 150, 0, 0.6) 30%, 
+        rgba(255, 100, 0, 0.4) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: powerBoinkBurst 1.2s ease-out;
+    pointer-events: none;
+    z-index: 11;
+}
+
+.power-boink-burst::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.6) 0%, 
+        rgba(255, 200, 0, 0.3) 50%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: powerBoinkShockwave 1.0s ease-out;
+}
+
+.power-boink-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff6600;
+    text-shadow: 0 0 8px rgba(255, 255, 100, 0.8),
+                 0 0 12px rgba(255, 150, 0, 0.6),
+                 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: powerBoinkTextFloat 1.5s ease-out;
+    pointer-events: none;
+    z-index: 12;
+    white-space: nowrap;
+}
+
+.power-boink-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    background: linear-gradient(45deg, 
+        #ffff00 0%, 
+        #ff9900 50%, 
+        #ff6600 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 200, 0, 0.8);
+    animation: powerBoinkParticleFloat 1.2s ease-out var(--delay, 0s);
+    transform: rotate(var(--angle, 0deg));
+    pointer-events: none;
+    z-index: 11;
+}
+
+@keyframes powerBoinkAuraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    20% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    60% {
+        opacity: 0.6;
+        transform: scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.4);
+    }
+}
+
+@keyframes powerBoinkBurst {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+    70% {
+        opacity: 0.7;
+        transform: scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.0);
+    }
+}
+
+@keyframes powerBoinkShockwave {
+    0% {
+        opacity: 0.8;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+}
+
+@keyframes powerBoinkTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1.1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-40px) scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scale(0.9);
+    }
+}
+
+@keyframes powerBoinkParticleFloat {
+    0% {
+        opacity: 0;
+        transform: rotate(var(--angle, 0deg)) translateX(0px) scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: rotate(var(--angle, 0deg)) translateX(40px) scale(1.0);
+    }
+    70% {
+        opacity: 0.8;
+        transform: rotate(var(--angle, 0deg)) translateX(60px) scale(0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(var(--angle, 0deg)) translateX(80px) scale(0.3);
+    }
+}
+
+@keyframes powerBoinkStrengthParticles {
+    0% {
+        opacity: 1;
+        transform: scale(0.5) translateY(0);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) translateY(-20px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-40px);
+    }
+}
+
+/* Power Boink Impact Effect */
+.power-boink-impact {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    background: radial-gradient(circle, 
+        rgba(255, 100, 0, 0.8) 0%, 
+        rgba(255, 150, 0, 0.6) 40%, 
+        rgba(255, 200, 0, 0.3) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: powerBoinkImpact 1s ease-out;
+    z-index: 15;
+    pointer-events: none;
+}
+
+@keyframes powerBoinkImpact {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    60% {
+        opacity: 0.8;
+        transform: scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+/* Enhanced Water Ball Splash VFX - Tidal Devastation */
+.enhanced-water-splash-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(0,150,255,0.4) 0%, rgba(0,200,255,0.2) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: tidalDevastationPulse 1.2s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes tidalDevastationPulse {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1.3);
+        opacity: 0.8;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+}
+
+/* Heavy Ball Mastery VFX */
+.heavy-ball-mastery-glow {
+    position: absolute;
+    top: -5px; left: -5px; right: -5px; bottom: -5px;
+    background: linear-gradient(45deg, 
+        rgba(150,150,150,0.3) 0%, 
+        rgba(200,200,200,0.5) 25%, 
+        rgba(255,255,255,0.3) 50%, 
+        rgba(200,200,200,0.5) 75%, 
+        rgba(150,150,150,0.3) 100%);
+    border-radius: 50%;
+    animation: heavyBallMasteryGlow 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes heavyBallMasteryGlow {
+    0% {
+        transform: scale(0.9) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1) rotate(180deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0.9) rotate(360deg);
+        opacity: 0.3;
+    }
+}
+
+/* Talent activation indicators */
+.talent-activation-flash {
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    background: radial-gradient(circle, rgba(255,215,0,0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: talentActivationFlash 0.8s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+@keyframes talentActivationFlash {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Enhanced particle systems for MOBA-style effects */
+.moba-particle-burst {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #ffff00, #ffd700);
+    border-radius: 50%;
+    animation: mobaParticleBurst 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes mobaParticleBurst {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.5) rotate(90deg);
+        opacity: 0.8;
+    }
+    75% {
+        transform: scale(1) rotate(270deg);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.2) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* ===== INFERNAL MAGIC VFX - Fire Ball Magical Scaling ===== */
+.infernal-magic-aura {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.4) 0%, rgba(255, 100, 0, 0.3) 40%, rgba(139, 0, 139, 0.2) 70%, transparent 100%);
+    border-radius: 50%;
+    animation: infernalMagicAuraPulse 2s ease-in-out;
+    pointer-events: none;
+    z-index: 95;
+}
+
+.infernal-magic-burst {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 80px; height: 80px;
+    margin: -40px 0 0 -40px;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(255, 165, 0, 0.6) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: infernalMagicBurst 1.5s ease-out;
+    pointer-events: none;
+    z-index: 96;
+}
+
+.infernal-magic-flames {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 0, 0, 0.3) 0px,
+        rgba(255, 100, 0, 0.2) 10px,
+        rgba(139, 0, 139, 0.1) 20px,
+        transparent 30px
+    );
+    animation: infernalMagicFlames 1.8s linear;
+    pointer-events: none;
+    z-index: 94;
+}
+
+.infernal-magic-text {
+    position: absolute;
+    top: -30px; left: 50%;
+    transform: translateX(-50%);
+    color: #ff4500;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: infernalMagicTextFloat 2.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.infernal-magic-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 93;
+}
+
+.infernal-particle {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: radial-gradient(circle, #ff4500, #ff6500);
+    border-radius: 50%;
+    animation: infernalParticleFloat 2s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes infernalMagicAuraPulse {
+    0% { opacity: 0; transform: scale(0.5); }
+    30% { opacity: 0.8; transform: scale(1.1); }
+    60% { opacity: 0.6; transform: scale(1.3); }
+    100% { opacity: 0; transform: scale(1.6); }
+}
+
+@keyframes infernalMagicBurst {
+    0% { opacity: 1; transform: scale(0.2) rotate(0deg); }
+    50% { opacity: 0.9; transform: scale(1.0) rotate(180deg); }
+    100% { opacity: 0; transform: scale(1.8) rotate(360deg); }
+}
+
+@keyframes infernalMagicFlames {
+    0% { opacity: 0; transform: rotate(0deg) scale(0.8); }
+    25% { opacity: 0.7; transform: rotate(90deg) scale(1.0); }
+    50% { opacity: 0.9; transform: rotate(180deg) scale(1.2); }
+    75% { opacity: 0.5; transform: rotate(270deg) scale(1.1); }
+    100% { opacity: 0; transform: rotate(360deg) scale(0.9); }
+}
+
+@keyframes infernalMagicTextFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0px); color: #ff4500; }
+    25% { opacity: 0.9; transform: translateX(-50%) translateY(-10px); color: #ff6500; }
+    50% { opacity: 0.8; transform: translateX(-50%) translateY(-20px); color: #ff8c00; }
+    75% { opacity: 0.4; transform: translateX(-50%) translateY(-30px); color: #ffa500; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); color: #ffff00; }
+}
+
+@keyframes infernalParticleFloat {
+    0% { opacity: 1; transform: translateY(0px) scale(1) rotate(0deg); }
+    25% { opacity: 0.8; transform: translateY(-15px) scale(1.3) rotate(90deg); }
+    50% { opacity: 0.6; transform: translateY(-30px) scale(1.1) rotate(180deg); }
+    75% { opacity: 0.3; transform: translateY(-45px) scale(0.9) rotate(270deg); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0.7) rotate(360deg); }
+}
+
+/* ===== TSUNAMI FORCE VFX - Water Ball Magical Scaling ===== */
+.tsunami-force-aura {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(0, 150, 255, 0.4) 0%, rgba(0, 100, 200, 0.3) 40%, rgba(100, 200, 255, 0.2) 70%, transparent 100%);
+    border-radius: 50%;
+    animation: tsunamiForcePulse 2.2s ease-in-out;
+    pointer-events: none;
+    z-index: 95;
+}
+
+.tsunami-force-wave {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    margin: -50px 0 0 -50px;
+    border: 3px solid rgba(0, 150, 255, 0.8);
+    border-radius: 50%;
+    animation: tsunamiForceWave 2s ease-out;
+    pointer-events: none;
+    z-index: 96;
+}
+
+.tsunami-force-magic-ripple {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 30%,
+        rgba(0, 150, 255, 0.3) 35%,
+        transparent 40%,
+        rgba(100, 200, 255, 0.2) 45%,
+        transparent 50%
+    );
+    animation: tsunamiMagicRipple 1.8s linear infinite;
+    pointer-events: none;
+    z-index: 94;
+}
+
+.tsunami-force-text {
+    position: absolute;
+    top: -35px; left: 50%;
+    transform: translateX(-50%);
+    color: #0096ff;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: tsunamiForceTextFloat 2.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.tsunami-force-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 93;
+}
+
+.tsunami-particle {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: radial-gradient(circle, #0096ff, #64c8ff);
+    border-radius: 50%;
+    animation: tsunamiParticleFloat 2s ease-out forwards;
+    pointer-events: none;
+}
+
+.tsunami-force-magical-swirl {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 120px; height: 120px;
+    margin: -60px 0 0 -60px;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(0, 150, 255, 0.3) 30%,
+        rgba(100, 200, 255, 0.4) 60%,
+        transparent 90%,
+        transparent
+    );
+    border-radius: 50%;
+    animation: tsunamiMagicalSwirl 2.5s linear;
+    pointer-events: none;
+    z-index: 92;
+}
+
+@keyframes tsunamiForcePulse {
+    0% { opacity: 0; transform: scale(0.6); }
+    25% { opacity: 0.9; transform: scale(1.0); }
+    50% { opacity: 0.7; transform: scale(1.4); }
+    75% { opacity: 0.4; transform: scale(1.7); }
+    100% { opacity: 0; transform: scale(2.0); }
+}
+
+@keyframes tsunamiForceWave {
+    0% { opacity: 1; transform: scale(0.3); border-width: 3px; }
+    30% { opacity: 0.8; transform: scale(0.8); border-width: 2px; }
+    60% { opacity: 0.5; transform: scale(1.2); border-width: 1px; }
+    100% { opacity: 0; transform: scale(1.8); border-width: 0px; }
+}
+
+@keyframes tsunamiMagicRipple {
+    0% { transform: rotate(0deg) scale(0.8); opacity: 0.3; }
+    25% { transform: rotate(90deg) scale(1.0); opacity: 0.6; }
+    50% { transform: rotate(180deg) scale(1.2); opacity: 0.8; }
+    75% { transform: rotate(270deg) scale(1.1); opacity: 0.4; }
+    100% { transform: rotate(360deg) scale(0.9); opacity: 0.1; }
+}
+
+@keyframes tsunamiForceTextFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0px); color: #0096ff; }
+    25% { opacity: 0.9; transform: translateX(-50%) translateY(-10px); color: #32a8ff; }
+    50% { opacity: 0.8; transform: translateX(-50%) translateY(-20px); color: #64baff; }
+    75% { opacity: 0.4; transform: translateX(-50%) translateY(-30px); color: #96ccff; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); color: #c8deff; }
+}
+
+@keyframes tsunamiParticleFloat {
+    0% { opacity: 1; transform: translateY(0px) scale(1) rotate(0deg); }
+    25% { opacity: 0.8; transform: translateY(-15px) scale(1.2) rotate(45deg); }
+    50% { opacity: 0.6; transform: translateY(-30px) scale(1.1) rotate(90deg); }
+    75% { opacity: 0.3; transform: translateY(-45px) scale(0.9) rotate(135deg); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0.7) rotate(180deg); }
+}
+
+@keyframes tsunamiMagicalSwirl {
+    0% { transform: rotate(0deg) scale(0.8); opacity: 0.2; }
+    25% { transform: rotate(90deg) scale(1.0); opacity: 0.5; }
+    50% { transform: rotate(180deg) scale(1.2); opacity: 0.7; }
+    75% { transform: rotate(270deg) scale(1.1); opacity: 0.4; }
+    100% { transform: rotate(360deg) scale(0.9); opacity: 0; }
+}
+
+/* Arcane Mastery VFX */
+.arcane-mastery-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.arcane-mastery-aura {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    width: calc(100% + 40px);
+    height: calc(100% + 40px);
+    border: 3px solid transparent;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, 
+        rgba(138, 43, 226, 0.8), 
+        rgba(75, 0, 130, 0.8), 
+        rgba(138, 43, 226, 0.8), 
+        rgba(75, 0, 130, 0.8), 
+        rgba(138, 43, 226, 0.8)
+    );
+    animation: arcaneMasteryRotate 3s linear infinite;
+    z-index: 1001;
+}
+
+.arcane-mastery-symbols {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1002;
+}
+
+.arcane-symbol {
+    position: absolute;
+    color: #e6e6fa;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+    animation: arcaneSymbolFloat 4s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+.arcane-symbol:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+.arcane-symbol:nth-child(2) { top: 20%; right: 20%; animation-delay: 0.5s; }
+.arcane-symbol:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 1s; }
+.arcane-symbol:nth-child(4) { bottom: 20%; right: 20%; animation-delay: 1.5s; }
+.arcane-symbol:nth-child(5) { top: 50%; left: 10%; animation-delay: 2s; }
+.arcane-symbol:nth-child(6) { top: 50%; right: 10%; animation-delay: 2.5s; }
+
+.arcane-mastery-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1003;
+}
+
+.arcane-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #e6e6fa 0%, #9370db 50%, transparent 100%);
+    border-radius: 50%;
+    animation: arcaneParticleFloat 6s linear infinite;
+}
+
+.arcane-particle:nth-child(1) { top: 30%; left: 30%; animation-delay: 0s; }
+.arcane-particle:nth-child(2) { top: 40%; right: 25%; animation-delay: 1s; }
+.arcane-particle:nth-child(3) { bottom: 35%; left: 35%; animation-delay: 2s; }
+.arcane-particle:nth-child(4) { bottom: 25%; right: 40%; animation-delay: 3s; }
+.arcane-particle:nth-child(5) { top: 60%; left: 15%; animation-delay: 4s; }
+.arcane-particle:nth-child(6) { top: 15%; right: 60%; animation-delay: 5s; }
+
+.arcane-mastery-floating-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #e6e6fa;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+    z-index: 1004;
+    animation: arcaneFloatingText 2s ease-out forwards;
+    white-space: nowrap;
+}
+
+@keyframes arcaneMasteryRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes arcaneSymbolFloat {
+    0%, 100% { 
+        transform: translateY(0px) scale(1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translateY(-10px) scale(1.2);
+        opacity: 1;
+    }
+}
+
+@keyframes arcaneParticleFloat {
+    0% {
+        transform: translateY(0px) translateX(0px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) translateX(20px);
+        opacity: 0;
+    }
+}
+
+@keyframes arcaneFloatingText {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0px);
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+/* Compassionate Resonance VFX */
+.compassionate-resonance-beam {
+    position: fixed;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(255, 182, 193, 0.8) 0%, 
+        rgba(255, 105, 180, 0.9) 25%, 
+        rgba(255, 20, 147, 1) 50%, 
+        rgba(255, 105, 180, 0.9) 75%, 
+        rgba(255, 182, 193, 0.8) 100%);
+    border-radius: 2px;
+    box-shadow: 
+        0 0 10px rgba(255, 20, 147, 0.8),
+        0 0 20px rgba(255, 105, 180, 0.6),
+        0 0 30px rgba(255, 182, 193, 0.4);
+    animation: compassionateResonanceBeam 2.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.compassionate-resonance-beam::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent 100%);
+    border-radius: 4px;
+    animation: compassionateResonanceShimmer 0.5s ease-in-out infinite alternate;
+}
+
+.compassionate-resonance-beam::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.6) 50%, 
+        transparent 100%);
+    border-radius: 2px;
+    animation: compassionateResonancePulse 0.3s ease-in-out infinite;
+}
+
+.compassionate-resonance-healing-aura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, 
+        rgba(255, 182, 193, 0.4) 0%, 
+        rgba(255, 105, 180, 0.3) 30%, 
+        rgba(255, 20, 147, 0.2) 60%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: compassionateResonanceAura 2.5s ease-out forwards;
+    pointer-events: none;
+}
+
+.compassionate-resonance-heal-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff1493;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(255, 20, 147, 0.8);
+    animation: compassionateResonanceTextFloat 2.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+.compassionate-resonance-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #ff1493, #ff69b4);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 20, 147, 0.8);
+    animation: compassionateResonanceParticleFloat 2.5s ease-out forwards;
+    pointer-events: none;
+}
+
+.compassionate-resonance-particle:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+.compassionate-resonance-particle:nth-child(2) { top: 80%; left: 70%; animation-delay: 0.2s; }
+.compassionate-resonance-particle:nth-child(3) { top: 50%; left: 10%; animation-delay: 0.4s; }
+.compassionate-resonance-particle:nth-child(4) { top: 30%; left: 90%; animation-delay: 0.6s; }
+.compassionate-resonance-particle:nth-child(5) { top: 70%; left: 50%; animation-delay: 0.8s; }
+.compassionate-resonance-particle:nth-child(6) { top: 10%; left: 60%; animation-delay: 1s; }
+
+@keyframes compassionateResonanceBeam {
+    0% {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    80% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
+}
+
+@keyframes compassionateResonanceShimmer {
+    0% {
+        opacity: 0.3;
+        transform: translateX(-100%);
+    }
+    100% {
+        opacity: 0.8;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes compassionateResonancePulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes compassionateResonanceAura {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes compassionateResonanceTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+@keyframes compassionateResonanceParticleFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.5);
+    }
+}
+
+/* Boink Burn VFX Animations */
+@keyframes boinkBurnPulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes boinkBurnTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+@keyframes boinkBurnParticleFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.3);
+    }
+}
+
+@keyframes boinkBurnImpact {
+    0% {
+        opacity: 0.6;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* Tidal Echo VFX Animations */
+@keyframes tidalEchoPulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes tidalEchoWaves {
+    0% {
+        opacity: 0.8;
+        transform: scale(0.5);
+        border: 3px solid #2196f3;
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.5);
+        border: 2px solid #64b5f6;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.5);
+        border: 1px solid #90caf9;
+    }
+}
+
+@keyframes tidalEchoTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-25px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-35px);
+    }
+}
+
+@keyframes tidalEchoParticleFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.2);
+    }
+}
+
+@keyframes tidalEchoRipple {
+    0% {
+        opacity: 1;
+        width: 0;
+        height: 0;
+    }
+    50% {
+        opacity: 0.7;
+        width: 100px;
+        height: 100px;
+    }
+    100% {
+        opacity: 0;
+        width: 200px;
+        height: 200px;
+    }
+}
+
+/* Devastating Power VFX Animations */
+@keyframes devastatingPowerAuraPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes devastatingPowerSurge {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes devastatingPowerTextFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,0,0,0.8);
+    }
+    20% {
+        opacity: 1;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(255,0,0,1);
+    }
+    80% {
+        opacity: 1;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,0,0.9);
+    }
+    100% {
+        transform: translateX(-50%) translateY(-60px);
+        opacity: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 5px rgba(255,0,0,0.5);
+    }
+}
+
+@keyframes devastatingPowerMultiplierFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+        scale: 0.8;
+    }
+    30% {
+        opacity: 1;
+        scale: 1.2;
+    }
+    70% {
+        opacity: 1;
+        scale: 1.1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-80px);
+        opacity: 0;
+        scale: 1;
+    }
+}
+
+@keyframes devastatingPowerParticleFloat {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(50px, -100px) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes devastatingPowerShockwave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.8;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+@keyframes devastatingPowerImpact {
+    0% {
+        transform: scale(0);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes devastatingPowerDamageTextFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+        scale: 0.8;
+    }
+    20% {
+        opacity: 1;
+        scale: 1.1;
+    }
+    80% {
+        opacity: 1;
+        scale: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-40px);
+        opacity: 0;
+        scale: 0.9;
+    }
+}
+
+/* Devastating Power VFX Elements */
+.devastating-power-aura {
+    position: absolute;
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    background: radial-gradient(circle, rgba(255,0,0,0.6) 0%, rgba(255,100,0,0.4) 30%, rgba(255,200,0,0.2) 60%, transparent 100%);
+    border-radius: 50%;
+    animation: devastatingPowerAuraPulse 1.5s ease-in-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.devastating-power-surge {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,200,0,0.6) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: devastatingPowerSurge 0.8s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.devastating-power-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff0000;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,0,0,0.8);
+    animation: devastatingPowerTextFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.devastating-power-multiplier {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff6600;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: devastatingPowerMultiplierFloat 2.5s ease-out forwards;
+    animation-delay: 0.3s;
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.devastating-power-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, #ff0000, #ff6600, #ffcc00);
+    border-radius: 50%;
+    animation: devastatingPowerParticleFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.devastating-power-shockwave {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: devastatingPowerShockwave 1.2s ease-out;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.devastating-power-impact {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(255,0,0,0.6) 0%, rgba(255,100,0,0.4) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: devastatingPowerImpact 1s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.devastating-power-damage-text {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff0000;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: devastatingPowerDamageTextFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+@keyframes devastatingPowerAuraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes devastatingPowerSurge {
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+@keyframes devastatingPowerTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+        font-size: 12px;
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+        font-size: 16px;
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px);
+        font-size: 18px;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px);
+        font-size: 14px;
+    }
+}
+
+@keyframes devastatingPowerMultiplierFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+        font-size: 10px;
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-15px);
+        font-size: 14px;
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-35px);
+        font-size: 16px;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-55px);
+        font-size: 12px;
+    }
+}
+
+@keyframes devastatingPowerParticleFloat {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.5) translateY(-20px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-40px);
+    }
+}
+
+@keyframes devastatingPowerShockwave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+@keyframes devastatingPowerImpact {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes devastatingPowerDamageTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+        font-size: 12px;
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+        font-size: 14px;
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-25px);
+        font-size: 16px;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px);
+        font-size: 12px;
+    }
+}
+
+/* Devastating Power VFX - MOBA Style Effects */
+.devastating-power-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.devastating-power-aura {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle, rgba(255,0,0,0.6) 0%, rgba(255,100,0,0.4) 30%, rgba(255,200,0,0.2) 60%, transparent 100%);
+    border-radius: 50%;
+    animation: devastatingPowerAuraPulse 1.5s ease-in-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.devastating-power-surge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,200,0,0.6) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: devastatingPowerSurge 0.8s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.devastating-power-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff0000;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,0,0,0.8);
+    animation: devastatingPowerTextFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.devastating-power-multiplier {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff6600;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: devastatingPowerMultiplierFloat 2.5s ease-out forwards;
+    animation-delay: 0.3s;
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.devastating-power-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, #ff0000, #ff6600, #ffcc00);
+    border-radius: 50%;
+    left: calc(20% + (var(--particle-index) * 10%));
+    top: calc(20% + (var(--particle-index) * 8%));
+    animation: devastatingPowerParticleFloat 2s ease-out forwards;
+    animation-delay: calc(var(--particle-index) * 0.1s);
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.devastating-power-shockwave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: devastatingPowerShockwave 1.2s ease-out;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.devastating-power-impact {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255,0,0,0.6) 0%, rgba(255,100,0,0.4) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: devastatingPowerImpact 1s ease-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Healing Mastery VFX */
+@keyframes healingMasteryPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes healingMasteryTextFloat {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+    20% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+    80% { transform: translateX(-50%) translateY(-20px); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+}
+
+@keyframes healingMasteryParticleFloat {
+    0% { transform: scale(0); opacity: 1; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0) translateY(-50px); opacity: 0; }
+}
+
+/* Grass Growth Initial VFX */
+@keyframes grassGrowthInitialPulse {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes grassGrowthInitialTextFloat {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+    20% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+    80% { transform: translateX(-50%) translateY(-20px); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+}
+
+@keyframes grassGrowthParticleGrow {
+    0% { transform: scale(0) translateY(20px); opacity: 0; }
+    50% { transform: scale(1) translateY(-10px); opacity: 1; }
+    100% { transform: scale(0) translateY(-30px); opacity: 0; }
+}
+
+/* Grass Growth Bloom VFX */
+@keyframes grassGrowthBloomPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.3); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes grassGrowthBloomTextFloat {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+    20% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+    80% { transform: translateX(-50%) translateY(-20px); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+}
+
+@keyframes grassGrowthBloomParticleFloat {
+    0% { transform: scale(0) translateY(20px); opacity: 0; }
+    50% { transform: scale(1.2) translateY(-10px); opacity: 1; }
+    100% { transform: scale(0) translateY(-40px); opacity: 0; }
+}
+
+@keyframes grassSproutGrow {
+    0% { height: 0; opacity: 0; }
+    50% { height: 20px; opacity: 1; }
+    100% { height: 20px; opacity: 0; }
+}
+
+/* Magical Empowerment VFX */
+@keyframes magicalEmpowermentPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes magicalEmpowermentTextFloat {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+    20% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+    80% { transform: translateX(-50%) translateY(-20px); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+}
+
+@keyframes magicalEmpowermentParticleFloat {
+    0% { transform: scale(0); opacity: 1; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0) translateY(-50px); opacity: 0; }
+}
+
+@keyframes magicalEnergySwirl {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    50% { transform: scale(1) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+@keyframes magicalRuneFloat {
+    0% { transform: translateY(0) scale(0); opacity: 0; }
+    25% { transform: translateY(-10px) scale(1); opacity: 1; }
+    75% { transform: translateY(-20px) scale(1); opacity: 1; }
+    100% { transform: translateY(-30px) scale(0); opacity: 0; }
+}
+
+/* Elemental Juggling VFX */
+.elemental-juggling-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    animation: elementalAuraPulse 1.4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1200;
+}
+
+.elemental-orb {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    animation: elementalOrbSpin 1.4s linear infinite;
+    transform-origin: 50% 120%; /* anchor for rotation */
+}
+
+/* Position the orbs based on index (using CSS var) */
+.elemental-orb {
+    --angle: calc(var(--orb-index) * 90deg);
+    transform: rotate(var(--angle)) translateY(-32px);
+}
+
+@keyframes elementalAuraPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+@keyframes elementalOrbSpin {
+    0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+}
+
+/* Debuff Resonance VFX Animations */
+@keyframes debuffResonancePulse {
+    0%, 100% { 
+        opacity: 0.3; 
+        transform: scale(1); 
+        background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,165,0,0.2) 50%, transparent 100%);
+    }
+    50% { 
+        opacity: 0.6; 
+        transform: scale(1.1); 
+        background: radial-gradient(circle, rgba(255,215,0,0.5) 0%, rgba(255,165,0,0.3) 50%, transparent 100%);
+    }
+}
+
+@keyframes debuffResonanceTextFloat {
+    0% { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(0px); 
+        color: #ffd700;
+    }
+    20% { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(-10px); 
+        color: #ffa500;
+    }
+    80% { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(-20px); 
+        color: #ffd700;
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-30px); 
+        color: #ffa500;
+    }
+}
+
+@keyframes debuffResonanceParticleFloat {
+    0% { 
+        opacity: 1; 
+        transform: translateY(0px) scale(1); 
+    }
+    50% { 
+        opacity: 0.8; 
+        transform: translateY(-20px) scale(1.2); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateY(-40px) scale(0.8); 
+    }
+}
+
+@keyframes debuffResonanceShield {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.8); 
+        border-color: rgba(255,215,0,0.3);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.1); 
+        border-color: rgba(255,215,0,0.8);
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(1.3); 
+        border-color: rgba(255,215,0,0.2);
+    }
+}
+
+/* Boink Taunt VFX */
+@keyframes boinkTauntBeamPulse {
+    0% {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+    30% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    70% {
+        opacity: 1;
+        transform: scaleX(1);
+        box-shadow: 0 0 15px #ff6b35;
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
+}
+
+@keyframes boinkTauntAuraPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+}
+
+@keyframes boinkTauntTextFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        font-size: 16px;
+    }
+    50% {
+        transform: translateX(-50%) translateY(-10px);
+        opacity: 1;
+        font-size: 18px;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-30px);
+        opacity: 0;
+        font-size: 16px;
+    }
+}
+
+/* Debuff Cleansing VFX */
+@keyframes debuffCleansingAuraPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    30% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    60% {
+        transform: scale(1.3);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes debuffCleansingTextFloat {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        font-size: 16px;
+    }
+    30% {
+        transform: translateX(-50%) translateY(-15px);
+        opacity: 1;
+        font-size: 18px;
+    }
+    70% {
+        transform: translateX(-50%) translateY(-25px);
+        opacity: 1;
+        font-size: 18px;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-40px);
+        opacity: 0;
+        font-size: 16px;
+    }
+}
+
+@keyframes debuffCleansingParticleFloat {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(-10px) scale(1);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-30px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+@keyframes debuffCleansingWave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    50% {
+        width: 150px;
+        height: 150px;
+        opacity: 0.8;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+/* Enhanced MOBA-style Debuff Cleansing VFX */
+.debuff-cleansing-aura {
+    position: absolute;
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(173,216,230,0.7) 20%, rgba(135,206,235,0.5) 40%, rgba(100,149,237,0.3) 60%, transparent 100%);
+    border-radius: 50%;
+    animation: debuffCleansingAuraPulse 3s ease-in-out;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 60px rgba(135,206,235,0.6);
+}
+
+.debuff-cleansing-text {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,255,255,0.8);
+    animation: debuffCleansingTextFloat 3s ease-out forwards;
+    pointer-events: none;
+    z-index: 1001;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.debuff-cleansing-particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle, #ffffff, #87ceeb, #4682b4);
+    border-radius: 50%;
+    animation: debuffCleansingParticleFloat 3s ease-out forwards;
+    pointer-events: none;
+    z-index: 1002;
+    box-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px rgba(135,206,235,0.7);
+}
+
+.debuff-cleansing-wave {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    border: 3px solid rgba(255,255,255,0.9);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: debuffCleansingWave 2.5s ease-out;
+    pointer-events: none;
+    z-index: 999;
+    box-shadow: 0 0 20px rgba(255,255,255,0.6);
+}
+
+/* New MOBA-style cleanse effects */
+.debuff-cleansing-burst {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(135,206,235,0.8) 30%, transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: debuffCleansingBurst 2s ease-out;
+    pointer-events: none;
+    z-index: 998;
+}
+
+.debuff-cleansing-rings {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    border: 2px solid rgba(255,255,255,0.8);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: debuffCleansingRings 2.5s ease-out;
+    pointer-events: none;
+    z-index: 997;
+}
+
+.debuff-cleansing-rings::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border: 2px solid rgba(135,206,235,0.6);
+    border-radius: 50%;
+    animation: debuffCleansingRingsInner 2.5s ease-out;
+}
+
+.debuff-cleansing-sparkles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1003;
+}
+
+.debuff-cleansing-sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #ffffff, #87ceeb);
+    border-radius: 50%;
+    animation: debuffCleansingSparkle 2s ease-out forwards;
+    box-shadow: 0 0 10px rgba(255,255,255,0.8);
+}
+
+/* Enhanced animations */
+@keyframes debuffCleansingAuraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    80% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+@keyframes debuffCleansingTextFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.8);
+        filter: blur(2px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1.1);
+        filter: blur(0px);
+    }
+    60% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.9);
+        filter: blur(1px);
+    }
+}
+
+@keyframes debuffCleansingParticleFloat {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.2) rotate(180deg);
+    }
+    60% {
+        opacity: 0.8;
+        transform: scale(1) rotate(360deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(720deg) translateY(-100px);
+    }
+}
+
+@keyframes debuffCleansingWave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+        border-width: 3px;
+    }
+    50% {
+        width: 200px;
+        height: 200px;
+        opacity: 0.8;
+        border-width: 2px;
+    }
+    100% {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+        border-width: 1px;
+    }
+}
+
+@keyframes debuffCleansingBurst {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    30% {
+        width: 150px;
+        height: 150px;
+        opacity: 0.9;
+    }
+    100% {
+        width: 250px;
+        height: 250px;
+        opacity: 0;
+    }
+}
+
+@keyframes debuffCleansingRings {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    50% {
+        width: 180px;
+        height: 180px;
+        opacity: 0.8;
+    }
+    100% {
+        width: 280px;
+        height: 280px;
+        opacity: 0;
+    }
+}
+
+@keyframes debuffCleansingRingsInner {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    60% {
+        width: 160px;
+        height: 160px;
+        opacity: 0.7;
+    }
+    100% {
+        width: 260px;
+        height: 260px;
+        opacity: 0;
+    }
+}
+
+@keyframes debuffCleansingSparkle {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.5) rotate(90deg);
+    }
+    60% {
+        opacity: 0.8;
+        transform: scale(1) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(360deg) translateY(-80px);
+    }
+}
+
+/* Resilient Spirit Talent VFX */
+.resilient-spirit-aura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 165, 0, 0.2) 50%, transparent 100%);
+    pointer-events: none;
+    z-index: 10;
+    animation: resilientSpiritAuraPulse 2s ease-out;
+}
+
+.resilient-spirit-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 11;
+}
+
+.resilient-spirit-particles::before,
+.resilient-spirit-particles::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border-radius: 50%;
+    animation: resilientSpiritParticleFloat 2s ease-out;
+}
+
+.resilient-spirit-particles::before {
+    top: 30%;
+    left: 20%;
+    animation-delay: 0.2s;
+}
+
+.resilient-spirit-particles::after {
+    top: 70%;
+    right: 20%;
+    animation-delay: 0.4s;
+}
+
+.resilient-spirit-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #FFD700;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 12;
+    animation: resilientSpiritTextFloat 2s ease-out;
+}
+
+.resilient-spirit-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 165, 0, 0.2) 30%, transparent 70%);
+    pointer-events: none;
+    z-index: 9;
+    animation: resilientSpiritBurst 2s ease-out;
+}
+
+@keyframes resilientSpiritAuraPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes resilientSpiritParticleFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.5);
+    }
+}
+
+@keyframes resilientSpiritTextFloat {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    70% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+@keyframes resilientSpiritBurst {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Grass Ball Flow VFX */
+.grass-ball-flow-vfx {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.grass-ball-flow-aura {
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    background: radial-gradient(circle, rgba(34,139,34,0.3) 0%, rgba(50,205,50,0.2) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: grassBallFlowAuraPulse 2s ease-in-out;
+}
+
+.grass-ball-flow-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #32cd32, #228b22);
+    border-radius: 50%;
+    animation: grassBallFlowParticleFloat 2s ease-out forwards;
+    animation-delay: calc(var(--particle-index) * 0.2s);
+}
+
+.grass-ball-flow-particle:nth-child(1) { top: 20%; left: 30%; }
+.grass-ball-flow-particle:nth-child(2) { top: 80%; left: 70%; }
+.grass-ball-flow-particle:nth-child(3) { top: 50%; left: 10%; }
+.grass-ball-flow-particle:nth-child(4) { top: 30%; left: 90%; }
+.grass-ball-flow-particle:nth-child(5) { top: 70%; left: 50%; }
+.grass-ball-flow-particle:nth-child(6) { top: 10%; left: 60%; }
+
+.grass-ball-flow-text {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #32cd32;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: grassBallFlowTextFloat 2s ease-out forwards;
+    z-index: 1001;
+}
+
+@keyframes grassBallFlowAuraPulse {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+@keyframes grassBallFlowParticleFloat {
+    0% { 
+        transform: translateY(0) scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateY(-20px) scale(1.2); 
+        opacity: 0.8; 
+    }
+    100% { 
+        transform: translateY(-40px) scale(0.8); 
+        opacity: 0; 
+    }
+}
+
+@keyframes grassBallFlowTextFloat {
+    0% { 
+        transform: translateX(-50%) translateY(0); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: translateX(-50%) translateY(-10px); 
+        opacity: 1; 
+    }
+    80% { 
+        transform: translateX(-50%) translateY(-20px); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateX(-50%) translateY(-30px); 
+        opacity: 0; 
+    }
+}
+
+/* Grass Ball Bounce VFX */
+.grass-ball-bounce-beam {
+    position: fixed;
+    height: 4px;
+    background: linear-gradient(90deg, #32cd32, #228b22, #32cd32);
+    border-radius: 2px;
+    z-index: 9999;
+    pointer-events: none;
+    animation: grassBallBounceBeamPulse 1.5s ease-in-out;
+    box-shadow: 0 0 10px #32cd32;
+}
+
+.grass-ball-bounce-healing-aura {
+    position: absolute;
+    top: -5px; left: -5px; right: -5px; bottom: -5px;
+    background: radial-gradient(circle, rgba(34,139,34,0.4) 0%, rgba(50,205,50,0.2) 50%, transparent 100%);
+    border-radius: 50%;
+    animation: grassBallBounceAuraPulse 2s ease-in-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.grass-ball-bounce-text {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #32cd32;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: grassBallBounceTextFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.grass-ball-bounce-heal-text {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #00ff00;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: grassBallBounceHealTextFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.grass-ball-bounce-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #32cd32, #228b22);
+    border-radius: 50%;
+    left: 30%;
+    top: 30%;
+    animation: grassBallBounceParticleFloat 2s ease-out forwards;
+    pointer-events: none;
+}
+
+.grass-ball-bounce-particle:nth-child(1) { left: 20%; top: 20%; animation-delay: 0s; }
+.grass-ball-bounce-particle:nth-child(2) { left: 80%; top: 20%; animation-delay: 0.1s; }
+.grass-ball-bounce-particle:nth-child(3) { left: 20%; top: 80%; animation-delay: 0.2s; }
+.grass-ball-bounce-particle:nth-child(4) { left: 80%; top: 80%; animation-delay: 0.3s; }
+.grass-ball-bounce-particle:nth-child(5) { left: 50%; top: 10%; animation-delay: 0.4s; }
+.grass-ball-bounce-particle:nth-child(6) { left: 10%; top: 50%; animation-delay: 0.5s; }
+.grass-ball-bounce-particle:nth-child(7) { left: 90%; top: 50%; animation-delay: 0.6s; }
+.grass-ball-bounce-particle:nth-child(8) { left: 50%; top: 90%; animation-delay: 0.7s; }
+
+.grass-ball-bounce-indicator {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #228b22;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    animation: grassBallBounceIndicatorFloat 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1002;
+}
+
+@keyframes grassBallBounceBeamPulse {
+    0% { opacity: 0; transform: scaleX(0); }
+    20% { opacity: 1; transform: scaleX(1); }
+    80% { opacity: 1; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(0); }
+}
+
+@keyframes grassBallBounceAuraPulse {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+@keyframes grassBallBounceTextFloat {
+    0% { 
+        transform: translateX(-50%) translateY(0); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: translateX(-50%) translateY(-10px); 
+        opacity: 1; 
+    }
+    80% { 
+        transform: translateX(-50%) translateY(-20px); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateX(-50%) translateY(-30px); 
+        opacity: 0; 
+    }
+}
+
+@keyframes grassBallBounceHealTextFloat {
+    0% { 
+        transform: translateX(-50%) translateY(0); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: translateX(-50%) translateY(-15px); 
+        opacity: 1; 
+    }
+    80% { 
+        transform: translateX(-50%) translateY(-25px); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateX(-50%) translateY(-35px); 
+        opacity: 0; 
+    }
+}
+
+@keyframes grassBallBounceParticleFloat {
+    0% { 
+        transform: translateY(0) scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateY(-15px) scale(1.2); 
+        opacity: 0.8; 
+    }
+    100% { 
+        transform: translateY(-30px) scale(0.8); 
+        opacity: 0; 
+    }
+}
+
+@keyframes grassBallBounceIndicatorFloat {
+    0% { 
+        transform: translateX(-50%) translateY(0) scale(0.8); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: translateX(-50%) translateY(-10px) scale(1.2); 
+        opacity: 1; 
+    }
+    80% { 
+        transform: translateX(-50%) translateY(-20px) scale(1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateX(-50%) translateY(-30px) scale(0.8); 
+        opacity: 0; 
+    }
+}

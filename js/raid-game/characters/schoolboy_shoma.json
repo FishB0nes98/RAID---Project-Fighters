@@ -29,6 +29,7 @@
             "targetType": "enemy",
             "description": "Deals 125% physical damage to the target. Has a 40% chance to stun the target for 2 turns.",
             "icon": "Icons/abilities/boink.jfif",
+            "doesNotEndTurn": false,
             "debuffEffect": {
                 "debuffId": "stun",
                 "name": "Stunned",
@@ -50,6 +51,7 @@
             "targetType": "enemy",
             "description": "Throws a ball at target. Select a ball type at the start of battle.",
             "icon": "Icons/abilities/ball_throw.jfif",
+            "doesNotEndTurn": false,
             "placeholderAbility": true
         },
         {
@@ -61,6 +63,7 @@
             "targetType": "ally_or_self",
             "description": "Gives himself or an ally 85% dodge chance for 3 turns.",
             "icon": "Icons/abilities/catch.jfif",
+            "doesNotEndTurn": false,
             "buffEffect": {
                 "buffId": "dodge_boost",
                 "name": "Dodge Boost",
@@ -79,6 +82,7 @@
             "targetType": "self",
             "description": "Gives himself 100% dodge chance for 3 turns, resets all his cooldowns to 0, and allows him to choose a different ball type.",
             "icon": "Icons/abilities/homerun.jfif",
+            "doesNotEndTurn": false,
             "buffEffect": {
                 "buffId": "homerun_buff",
                 "name": "Homerun",
@@ -95,5 +99,46 @@
         "id": "ball_selection",
         "name": "Ball Master",
         "description": "At the start of the game, Schoolboy Shoma can choose from 4 types of balls (Grass, Fire, Heavy, or Water). The chosen ball will be used for the Ball Throw ability for the entire game."
+    },
+    "talentProperties": {
+        "debuffHunterDamageBonus": 0,
+        "ballThrowCritBonus": 0,
+        "elementalBurstStacks": {
+            "current": 0,
+            "max": 3,
+            "critBonus": 0
+        },
+        "grandSlamMastery": {
+            "active": false,
+            "damageBonus": 0,
+            "critBonus": 0
+        },
+        "powerBoinkEnabled": false,
+        "efficientBoinkEnabled": false,
+        "enhancedGrassBallEnabled": false,
+        "healingMasteryEnabled": false,
+        "grassGrowthEnabled": false,
+        "magicalEmpowermentEnabled": false,
+        "heavyBallCooldownMasteryEnabled": false,
+        "fireBallBurnEnabled": false,
+        "waterBallSplashPowerEnabled": false,
+        "fireBallMagicalScalingEnabled": false,
+        "waterBallMagicalScalingEnabled": false,
+        "arcaneMasteryEnabled": false,
+        "compassionateResonanceEnabled": false,
+        "waterBallDoubleCastEnabled": false,
+        "boinkBurnEnabled": false,
+        "devastatingPowerEnabled": false,
+        "ballFollowupEnabled": false,
+        "ballFollowupRemaining": 0,
+        "heavyBallBounceEnabled": false,
+        "debuffResonanceEnabled": false,
+        "homerunMasteryEnabled": false,
+        "boinkTauntEnabled": false,
+        "debuffCleansingEnabled": false,
+        "debuffCleansingTurnCounter": 0,
+        "resilientSpiritEnabled": false,
+        "grassBallFlowEnabled": false,
+        "grassBallBounceEnabled": false
     }
 } 

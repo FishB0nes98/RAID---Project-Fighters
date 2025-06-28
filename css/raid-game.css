@@ -3187,6 +3187,73 @@ img {
     /* background-image: url('../Icons/effects/ability_disabled.png'); */ 
 }
 
+/* Colorful ability description text styling */
+.damage-value {
+    color: #ff4444;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(255, 68, 68, 0.5);
+}
+
+.utility-value {
+    color: #4488ff;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(68, 136, 255, 0.5);
+}
+
+.duration-value {
+    color: #ff8844;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(255, 136, 68, 0.5);
+}
+
+.healing-value {
+    color: #44ff44;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(68, 255, 68, 0.5);
+}
+
+.talent-effect {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    margin: 0 2px;
+    display: inline-block;
+}
+
+.talent-effect.damage {
+    background: linear-gradient(135deg, #ff6b6b, #ff5252);
+    color: #ffffff;
+    border: 1px solid #ff3030;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+}
+
+.talent-effect.utility {
+    background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+    color: #ffffff;
+    border: 1px solid #1976d2;
+    box-shadow: 0 0 8px rgba(79, 195, 247, 0.4);
+}
+
+.talent-effect.healing {
+    background: linear-gradient(135deg, #66bb6a, #4caf50);
+    color: #ffffff;
+    border: 1px solid #2e7d32;
+    box-shadow: 0 0 8px rgba(102, 187, 106, 0.4);
+}
+
+.talent-effect.resource {
+    background: linear-gradient(135deg, #ab47bc, #8e24aa);
+    color: #ffffff;
+    border: 1px solid #6a1b9a;
+    box-shadow: 0 0 8px rgba(171, 71, 188, 0.4);
+}
+
+.talent-effect:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
 /* Style for a disabled ability */
 .ability.disabled {
     filter: grayscale(100%);
@@ -4979,13 +5046,14 @@ img {
 
 /* Enhanced Level and XP Section Styling */
 .level-xp-section {
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
-    border: 2px solid rgba(52, 152, 219, 0.3);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(155, 89, 182, 0.15));
+    border: 2px solid rgba(52, 152, 219, 0.4);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 18px;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(5px);
 }
 
 .level-xp-section::before {
@@ -4994,75 +5062,187 @@ img {
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #3498db, #9b59b6, #3498db);
-    animation: levelXPGlow 3s ease-in-out infinite;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #f39c12, #3498db);
+    animation: levelXPGlow 4s ease-in-out infinite;
+}
+
+.character-level-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
 }
 
 .character-level-info {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    color: #f39c12;
-    text-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
-    margin-bottom: 12px;
-    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.character-level-info::before {
-    position: absolute;
-    left: -30px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
-    animation: levelStarPulse 2s ease-in-out infinite;
-}
-
-.character-xp-info {
-    font-size: 14px;
-    color: #ecf0f1;
-    text-align: center;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.xp-bar-container {
-    height: 12px;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 20px;
-    margin: 8px 0;
-    overflow: hidden;
-    border: 1px solid rgba(52, 152, 219, 0.4);
-    position: relative;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.xp-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12);
-    border-radius: 20px;
-    transition: width 0.5s ease;
+.level-badge {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    border: 2px solid #d68910;
+    border-radius: 25px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
     position: relative;
     overflow: hidden;
 }
 
-.xp-bar::before {
+.level-badge::before {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: xpShimmer 2s linear infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: levelBadgeShimmer 3s ease-in-out infinite;
+}
+
+.level-icon {
+    font-size: 24px;
+    margin-right: 12px;
+    animation: levelStarPulse 2s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.level-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.level-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.level-number {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.character-xp-info {
+    margin-top: 8px;
+}
+
+.xp-progress-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.xp-progress-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.xp-current {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.xp-divider {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.xp-needed {
+    color: #3498db;
+    font-weight: bold;
+}
+
+.xp-label {
+    color: #ecf0f1;
+    font-weight: 600;
+}
+
+.xp-percentage {
+    color: #f39c12;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.xp-fallback .xp-progress-text {
+    color: #95a5a6;
+    font-style: italic;
+}
+
+.xp-bar-container {
+    height: 14px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 25px;
+    margin: 8px 0;
+    overflow: hidden;
+    border: 2px solid rgba(52, 152, 219, 0.5);
+    position: relative;
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #2ecc71, #3498db, #f39c12);
+    border-radius: 25px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
+}
+
+.xp-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: xpShimmer 2.5s linear infinite;
 }
 
 .character-total-xp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: rgba(155, 89, 182, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.total-xp-icon {
+    font-size: 16px;
+    animation: totalXPGlow 3s ease-in-out infinite;
+}
+
+.total-xp-text {
     font-size: 12px;
-    color: #95a5a6;
-    text-align: center;
-    font-style: italic;
-    margin-top: 6px;
+    color: #bdc3c7;
+    font-weight: 600;
+}
+
+.total-xp-number {
+    font-size: 14px;
+    color: #9b59b6;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(155, 89, 182, 0.5);
 }
 
 /* Enhanced Ability Details Styling */
@@ -5138,7 +5318,7 @@ img {
 /* Animation Keyframes */
 @keyframes levelXPGlow {
     0%, 100% {
-        opacity: 0.5;
+        opacity: 0.6;
         transform: translateX(-100%);
     }
     50% {
@@ -5149,12 +5329,21 @@ img {
 
 @keyframes levelStarPulse {
     0%, 100% {
-        transform: translateY(-50%) scale(1);
-        opacity: 0.7;
+        transform: scale(1);
+        opacity: 0.8;
     }
     50% {
-        transform: translateY(-50%) scale(1.2);
+        transform: scale(1.2);
         opacity: 1;
+    }
+}
+
+@keyframes levelBadgeShimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
     }
 }
 
@@ -5164,6 +5353,17 @@ img {
     }
     100% {
         left: 100%;
+    }
+}
+
+@keyframes totalXPGlow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
     }
 }
 
@@ -5205,6 +5405,61 @@ img {
     color: white;
     z-index: 1001;
     max-width: 250px;
+    pointer-events: none;
+}
+
+/* Character Inventory Display in Stats Menu */
+.character-inventory-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.character-inventory-display {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.inventory-slot-display {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #444;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.inventory-slot-display:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(1.05);
+}
+
+.inventory-slot-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Item tooltip styling */
+.item-tooltip {
+    position: fixed;
+    background: rgba(20, 20, 20, 0.95);
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    font-size: 12px;
+    max-width: 250px;
+    z-index: 10000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
     pointer-events: none;
 }
 

@@ -1,0 +1,63 @@
+{
+    "id": "necromatic_corrupted_bear",
+    "name": "Necromatic Corrupted Bear",
+    "description": "A massive bear corrupted by necromantic energies, its eyes glowing with malevolent intent.",
+    "isAI": true,
+    "image": "images/characters/necromatic_corrupted_bear.png",
+    "stats": {
+        "hp": 8000,
+        "currentHp": 8000,
+        "mana": 200,
+        "currentMana": 200,
+        "physicalDamage": 250,
+        "magicalDamage": 100,
+        "armor": 50,
+        "magicalShield": 30,
+        "speed": 80,
+        "critChance": 0.1,
+        "critDamage": 1.5,
+        "lifesteal": 0,
+        "hpPerTurn": 50,
+        "manaPerTurn": 20
+    },
+    "abilities": [
+        {
+            "id": "maul",
+            "name": "Maul",
+            "description": "Deals 1000 physical damage to a single target with a 50% chance to stun for 2 turns.",
+            "type": "custom",
+            "functionName": "maul",
+            "fixedDamage": 1000,
+            "damageType": "physical",
+            "manaCost": 50,
+            "icon": "icons/abilities/maul.png",
+            "cooldown": 2,
+            "targetType": "enemy"
+        },
+        {
+            "id": "bear_charge",
+            "name": "Bear Charge",
+            "description": "Charges onto the target dealing 750 damage with a 25% chance to stun for 1 turn.",
+            "type": "custom",
+            "functionName": "bear_charge",
+            "fixedDamage": 750,
+            "damageType": "physical",
+            "manaCost": 20,
+            "icon": "icons/abilities/bear_charge.png",
+            "cooldown": 2,
+            "targetType": "enemy"
+        },
+        {
+            "id": "heart_rip",
+            "name": "Heart Rip",
+            "description": "Deals 8% of target's max HP damage and applies permanent bleeding (120 damage/turn).",
+            "type": "custom",
+            "functionName": "heart_rip",
+            "manaCost": 80,
+            "icon": "icons/abilities/heart_rip.png",
+            "cooldown": 4,
+            "targetType": "enemy"
+        }
+    ],
+    "tags": ["Beast", "Undead"]
+}

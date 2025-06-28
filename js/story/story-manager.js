@@ -40,8 +40,16 @@ class StoryManager {
     async initializeXPManager() {
         try {
             if (typeof CharacterXPManager !== 'undefined') {
+                // Create local instance
                 this.characterXPManager = new CharacterXPManager();
                 await this.characterXPManager.initialize();
+                
+                // Also make it globally available if not already set
+                if (!window.characterXPManager) {
+                    window.characterXPManager = this.characterXPManager;
+                    console.log('[StoryManager] CharacterXPManager made globally available');
+                }
+                
                 console.log('[StoryManager] CharacterXPManager initialized');
             }
         } catch (error) {
@@ -58,6 +66,18 @@ class StoryManager {
     async checkStoryAvailability(storyId) {
         try {
             console.log(`[StoryManager] Checking availability for story: ${storyId}`);
+            
+            // Check if this is an event story
+            if (this.currentStory && this.currentStory.isEvent) {
+                console.log(`[StoryManager] Story ${storyId} is an event story`);
+                
+                // For event stories, check if they're globally available
+                if (this.currentStory.eventType === 'temporary') {
+                    // Temporary events are always available when they exist
+                    console.log(`[StoryManager] Event story ${storyId} is temporarily available`);
+                    return;
+                }
+            }
             
             // Check global story availability settings
             let isGloballyAvailable = null;
@@ -127,6 +147,76 @@ class StoryManager {
                 throw new Error(`Unable to verify story availability. Please try again later.`);
             }
         }
+    }
+
+    /**
+     * Check if a character is allowed in the current story
+     * @param {string} characterId - The character ID to check
+     * @returns {boolean} - True if character is allowed
+     */
+    isCharacterAllowedInStory(characterId) {
+        if (!this.currentStory || !this.currentStory.requirements) {
+            return true; // No restrictions
+        }
+
+        const requirements = this.currentStory.requirements;
+        
+        // Check allowedCharacters restriction
+        if (requirements.allowedCharacters && Array.isArray(requirements.allowedCharacters)) {
+            return requirements.allowedCharacters.includes(characterId);
+        }
+
+        // Check tag restrictions
+        if (requirements.tags && Array.isArray(requirements.tags) && requirements.tags.length > 0) {
+            // This would require character registry lookup - for now, allow all
+            // TODO: Implement tag-based filtering when character registry is available
+            return true;
+        }
+
+        return true; // No restrictions found
+    }
+
+    /**
+     * Get allowed characters for the current story
+     * @returns {Array} - Array of allowed character IDs
+     */
+    getAllowedCharactersForStory() {
+        if (!this.currentStory || !this.currentStory.requirements) {
+            return []; // No restrictions, all characters allowed
+        }
+
+        const requirements = this.currentStory.requirements;
+        
+        if (requirements.allowedCharacters && Array.isArray(requirements.allowedCharacters)) {
+            return requirements.allowedCharacters;
+        }
+
+        return []; // No specific restrictions
+    }
+
+    /**
+     * Check if the current story is an event story
+     * @returns {boolean} - True if it's an event story
+     */
+    isEventStory() {
+        return this.currentStory && this.currentStory.isEvent === true;
+    }
+
+    /**
+     * Get event story information
+     * @returns {Object|null} - Event story info or null if not an event
+     */
+    getEventStoryInfo() {
+        if (!this.isEventStory()) {
+            return null;
+        }
+
+        return {
+            isEvent: true,
+            eventType: this.currentStory.eventType || 'temporary',
+            title: this.currentStory.title,
+            description: this.currentStory.description
+        };
     }
 
     /**
@@ -233,7 +323,12 @@ class StoryManager {
                  this.applyTeamStateFromProgress(); // Apply current HP/Mana
             }
 
-            // 8. Check for and process last battle result from Firebase
+            // 8. Initialize and apply inventory system
+            console.log("[StoryManager] Initializing inventory system...");
+            await this.initializeInventorySystem();
+            await this.applyInventoriesToTeam();
+
+            // 9. Check for and process last battle result from Firebase
             console.log("[StoryManager] Processing last battle result...");
             const battleResultProcessed = await this.processLastBattleResult();
             console.log("[StoryManager] Battle result processing finished. Processed:", battleResultProcessed);
@@ -264,28 +359,23 @@ class StoryManager {
      */
     async loadTeamData(teamObjects) {
         const teamDataPromises = teamObjects.map(async (teamMember) => {
-            const charId = teamMember.id; // Extract the ID from the object
+            const charId = teamMember.id; // Extract the ID from the team member object
             if (!charId) {
                 console.error('Character object missing ID:', teamMember);
                 return null;
             }
-
+            
             try {
-                // --- NEW: Load enhanced character stats from Firebase first ---
-                let characterData = null;
-                const userId = this.userId;
+                let characterData;
                 
-                if (userId) {
+                // --- NEW: Check if this character has enhanced stats in Firebase ---
+                if (this.userId) {
                     try {
-                        // Try to load from users/{userId}/Raid/{characterId}/stats first
-                        const enhancedStatsRef = firebaseDatabase.ref(`users/${userId}/Raid/${charId}/stats`);
-                        const enhancedSnapshot = await enhancedStatsRef.once('value');
-                        
-                        if (enhancedSnapshot.exists()) {
-                            console.log(`[StoryManager] Found enhanced stats for ${charId} in Firebase`);
-                            const enhancedStats = enhancedSnapshot.val();
+                        const enhancedStatsSnapshot = await firebaseDatabase.ref(`users/${this.userId}/characterStats/${charId}`).once('value');
+                        if (enhancedStatsSnapshot.exists()) {
+                            const enhancedStats = enhancedStatsSnapshot.val();
                             
-                            // Load base character data for other properties (abilities, name, etc.)
+                            // Load the base character data and merge with enhanced stats
                             const response = await fetch(`js/raid-game/characters/${charId}.json`);
                             if (!response.ok) {
                                 throw new Error(`Failed to load base data for character ${charId}`);
@@ -326,6 +416,32 @@ class StoryManager {
                     characterData.avatarImage = characterData.image; // Fallback to character's image
                     console.warn(`Avatar image not found in registry for ${charId}, using default.`);
                 }
+                
+                // **NEW: Load character XP and level data from Firebase**
+                if (window.characterXPManager && window.characterXPManager.initialized) {
+                    try {
+                        const xpData = await window.characterXPManager.loadCharacterXP(charId, this.userId);
+                        if (xpData) {
+                            characterData.level = xpData.level;
+                            characterData.experience = xpData.experience;
+                            console.log(`[StoryManager] Loaded XP data for ${charId}: Level ${xpData.level} (${xpData.experience} XP)`);
+                        } else {
+                            // Default values if no XP data found
+                            characterData.level = 1;
+                            characterData.experience = 0;
+                            console.log(`[StoryManager] No XP data found for ${charId}, using defaults: Level 1 (0 XP)`);
+                        }
+                    } catch (error) {
+                        console.warn(`[StoryManager] Failed to load XP data for ${charId}:`, error);
+                        characterData.level = 1;
+                        characterData.experience = 0;
+                    }
+                } else {
+                    console.warn(`[StoryManager] CharacterXPManager not available for ${charId}, using default level 1`);
+                    characterData.level = 1;
+                    characterData.experience = 0;
+                }
+                // **END NEW XP Loading**
                 
                 // Initialize with full HP/Mana - saved state applied separately after progress fetch
                 characterData.currentHP = characterData.stats.hp;
@@ -409,6 +525,18 @@ class StoryManager {
                 firstTimeCompletionReward: stage.firstTimeCompletionReward || false,
                 maxSelections: stage.maxSelections || 1, // For ally_selection stages
                 description_detail: stage.description_detail || null, // For ally_selection stages
+                // Add missing properties for battle stages
+                enemies: stage.enemies || null,
+                loot: stage.loot || null,
+                modifiers: stage.modifiers || null,
+                backgroundImage: stage.backgroundImage || null,
+                backgroundMusic: stage.backgroundMusic || null,
+                objectives: stage.objectives || null,
+                isTutorial: stage.isTutorial || false,
+                tutorialHighlights: stage.tutorialHighlights || null,
+                tutorialMessage: stage.tutorialMessage || null,
+                healingEffect: stage.healingEffect || null,
+                recruitEffect: stage.recruitEffect || null,
                 index: index,
                 // A stage is completed if its index is less than the current active index.
                 isCompleted: index < this.storyProgress.currentStageIndex, 
@@ -466,6 +594,16 @@ class StoryManager {
             description_detail: stage.description_detail || null, // For ally_selection stages
             healingEffect: stage.healingEffect || null, // For healing_and_recruit stages
             recruitEffect: stage.recruitEffect || null, // For healing_and_recruit stages
+            // Add missing properties for battle stages
+            enemies: stage.enemies || null,
+            loot: stage.loot || null,
+            modifiers: stage.modifiers || null,
+            backgroundImage: stage.backgroundImage || null,
+            backgroundMusic: stage.backgroundMusic || null,
+            objectives: stage.objectives || null,
+            isTutorial: stage.isTutorial || false,
+            tutorialHighlights: stage.tutorialHighlights || null,
+            tutorialMessage: stage.tutorialMessage || null,
             index: currentStageIndex,
             // Use storyProgress to determine completion status accurately
             isCompleted: currentStageIndex < this.storyProgress.completedStages, 
@@ -2458,6 +2596,121 @@ class StoryManager {
             console.error(`[StoryManager] Error recruiting character ${characterId}:`, error);
             // Should we roll back changes? For now, just re-throw.
             throw error; // Re-throw the error for the UI layer to handle
+        }
+    }
+
+    /**
+     * Initialize the inventory system for story mode
+     */
+    async initializeInventorySystem() {
+        console.log('[StoryManager] Initializing inventory system...');
+        
+        try {
+            // Initialize item registry
+            if (typeof ItemRegistry !== 'undefined') {
+                window.ItemRegistry = new ItemRegistry();
+                console.log('[StoryManager] Item registry initialized');
+            } else {
+                console.warn('[StoryManager] ItemRegistry class not found');
+                return;
+            }
+
+            // Initialize global inventory
+            if (typeof GlobalInventory !== 'undefined') {
+                window.GlobalInventory = new GlobalInventory();
+                console.log('[StoryManager] Global inventory initialized');
+            } else {
+                console.warn('[StoryManager] GlobalInventory class not found');
+                return;
+            }
+
+            // Initialize character inventories map
+            if (typeof Map !== 'undefined') {
+                window.CharacterInventories = new Map();
+                console.log('[StoryManager] Character inventories map initialized');
+            }
+
+            // Initialize inventory integration manager
+            if (typeof InventoryIntegrationManager !== 'undefined') {
+                await window.InventoryIntegrationManager.initialize();
+                console.log('[StoryManager] Inventory integration manager initialized');
+            } else {
+                console.warn('[StoryManager] InventoryIntegrationManager class not found');
+            }
+
+            console.log('[StoryManager] Inventory system initialization complete');
+        } catch (error) {
+            console.error('[StoryManager] Error initializing inventory system:', error);
+        }
+    }
+
+    /**
+     * Apply inventory items to all team members
+     */
+    async applyInventoriesToTeam() {
+        console.log('[StoryManager] Applying inventories to team members...');
+        
+        try {
+            if (!window.InventoryIntegrationManager) {
+                console.warn('[StoryManager] InventoryIntegrationManager not available');
+                return;
+            }
+
+            if (!this.playerTeam || this.playerTeam.length === 0) {
+                console.log('[StoryManager] No team members to apply inventories to');
+                return;
+            }
+
+            // Apply inventory items to all team members
+            await window.InventoryIntegrationManager.applyInventoriesToCharacters(this.playerTeam);
+            
+            console.log('[StoryManager] Successfully applied inventories to all team members');
+        } catch (error) {
+            console.error('[StoryManager] Error applying inventories to team:', error);
+        }
+    }
+
+    /**
+     * Save character inventory to Firebase
+     * @param {string} characterId - The character ID
+     * @param {Object} inventory - The inventory data to save
+     */
+    async saveCharacterInventory(characterId, inventory) {
+        if (!this.userId || !characterId || !inventory) {
+            console.warn('[StoryManager] Cannot save character inventory: missing data');
+            return;
+        }
+
+        try {
+            const inventoryRef = firebaseDatabase.ref(`users/${this.userId}/characterInventories/${characterId}`);
+            await inventoryRef.set(inventory.serialize());
+            console.log(`[StoryManager] Saved inventory for character ${characterId}`);
+        } catch (error) {
+            console.error(`[StoryManager] Error saving inventory for ${characterId}:`, error);
+        }
+    }
+
+    /**
+     * Load character inventory from Firebase
+     * @param {string} characterId - The character ID
+     * @returns {Object|null} The character's inventory or null if not found
+     */
+    async loadCharacterInventory(characterId) {
+        if (!this.userId || !characterId) {
+            console.warn('[StoryManager] Cannot load character inventory: missing data');
+            return null;
+        }
+
+        try {
+            if (window.InventoryIntegrationManager) {
+                return await window.InventoryIntegrationManager.loadCharacterInventory(characterId);
+            } else {
+                console.warn('[StoryManager] InventoryIntegrationManager not available');
+                return null;
+            }
+        } catch (error) {
+            console.error(`[StoryManager] Error loading inventory for ${characterId}:`, error);
+            return null;
         }
     }
 }

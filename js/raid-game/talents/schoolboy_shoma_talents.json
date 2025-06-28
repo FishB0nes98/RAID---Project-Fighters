@@ -1,0 +1,615 @@
+{
+    "talentTree": {
+        "debuff_hunter": {
+            "id": "debuff_hunter",
+            "name": "Debuff Hunter",
+            "description": "Shoma deals <span class=\"talent-effect damage\">25% more damage</span> to targets with at least 1 debuff, exploiting their weakened state.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 1,
+            "root": true,
+            "cost": 1,
+            "position": {
+                "x": 860,
+                "y": 240
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "debuffHunterDamageBonus",
+                "value": 0.25
+            },
+            "parents": [],
+            "children": [
+                "power_boink",
+                "efficient_boink"
+            ]
+        },
+        "power_boink": {
+            "id": "power_boink",
+            "name": "Power Boink",
+            "description": "Boink now scales with <span class=\"talent-effect damage\">85% additional Physical Damage</span>, making it a devastating attack that grows with Shoma's strength.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 2,
+            "cost": 1,
+            "position": {
+                "x": 640,
+                "y": 360
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "powerBoinkEnabled",
+                "value": true
+            },
+            "parents": [
+                "debuff_hunter"
+            ],
+            "children": [
+                "enhanced_grass_ball",
+                "heavy_ball_cooldown_mastery",
+                "fire_ball_burn",
+                "water_ball_splash_power"
+            ]
+        },
+        "efficient_boink": {
+            "id": "efficient_boink",
+            "name": "Efficient Boink",
+            "description": "Boink <span class=\"talent-effect utility\">costs no mana</span>, allowing Shoma to use his signature move without resource constraints.",
+            "icon": "Icons/talents/default.png",
+            "tier": 2,
+            "cost": 1,
+            "position": {
+                "x": 1080,
+                "y": 360
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "efficientBoinkEnabled",
+                "value": true
+            },
+            "parents": [
+                "debuff_hunter"
+            ],
+            "children": [
+                "enhanced_grass_ball",
+                "heavy_ball_cooldown_mastery",
+                "fire_ball_burn",
+                "water_ball_splash_power"
+            ]
+        },
+        "enhanced_grass_ball": {
+            "id": "enhanced_grass_ball",
+            "name": "Verdant Recovery",
+            "description": "Grass Ball <span class=\"talent-effect healing\">heals 250% more</span> on targets with at least 1 buff, drawing power from positive energy.",
+            "icon": "Icons/talents/healing.png",
+            "tier": 3,
+            "cost": 1,
+            "position": {
+                "x": 520,
+                "y": 480
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "enhancedGrassBallEnabled",
+                "value": true
+            },
+            "parents": [
+                "power_boink",
+                "efficient_boink"
+            ],
+            "children": [
+                "healing_mastery",
+                "grass_growth"
+            ]
+        },
+        "healing_mastery": {
+            "id": "healing_mastery",
+            "name": "Healing Mastery",
+            "description": "Shoma's <span class=\"talent-effect healing\">healing power increased by 20%</span>, making all his healing abilities more potent.",
+            "icon": "Icons/talents/healing.png",
+            "tier": 4,
+            "cost": 1,
+            "position": {
+                "x": 360,
+                "y": 420
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "healingMasteryEnabled",
+                "value": true
+            },
+            "parents": [
+                "enhanced_grass_ball"
+            ],
+            "children": [
+                "magical_empowerment"
+            ]
+        },
+        "grass_growth": {
+            "id": "grass_growth",
+            "name": "Grass Growth",
+            "description": "Grass Ball applies <span class=\"talent-effect healing\">Grass Growth buff</span>. After 2 turns, the target is healed by <span class=\"healing-value\">2% of their max HP</span> with a growing grass visual effect.",
+            "icon": "Icons/talents/healing.png",
+            "tier": 4,
+            "cost": 1,
+            "position": {
+                "x": 360,
+                "y": 550
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "grassGrowthEnabled",
+                "value": true
+            },
+            "parents": [
+                "enhanced_grass_ball"
+            ],
+            "children": [
+                "magical_empowerment",
+                "grass_ball_flow"
+            ]
+        },
+        "grass_ball_flow": {
+            "id": "grass_ball_flow",
+            "name": "Grass Ball Flow",
+            "description": "Using Grass Ball <span class=\"talent-effect utility\">does not end your turn</span>, allowing Shoma to maintain his healing rhythm and continue supporting allies.",
+            "icon": "Icons/talents/utility.png",
+            "tier": 5,
+            "cost": 1,
+            "position": {
+                "x": 360,
+                "y": 680
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "grassBallFlowEnabled",
+                "value": true
+            },
+            "parents": [
+                "grass_growth"
+            ],
+            "children": [
+                "grass_ball_bounce"
+            ]
+        },
+        "grass_ball_bounce": {
+            "id": "grass_ball_bounce",
+            "name": "Healing Cascade",
+            "description": "Grass Ball has a <span class=\"talent-effect healing\">75% chance to heal each other ally</span> after the initial heal. Creates a <span class=\"talent-effect healing\">healing cascade</span> that can reach multiple allies simultaneously.",
+            "icon": "Icons/talents/healing.png",
+            "tier": 6,
+            "cost": 1,
+            "position": {
+                "x": 360,
+                "y": 810
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "grassBallBounceEnabled",
+                "value": true
+            },
+            "parents": [
+                "grass_ball_flow"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "magical_empowerment": {
+            "id": "magical_empowerment",
+            "name": "Magical Empowerment",
+            "description": "Grass Ball grants targets <span class=\"talent-effect damage\">+30% Magical Damage for 3 turns</span>, empowering their magical abilities with nature's energy.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 5,
+            "cost": 1,
+            "position": {
+                "x": 200,
+                "y": 490
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "magicalEmpowermentEnabled",
+                "value": true
+            },
+            "parents": [
+                "healing_mastery",
+                "grass_growth"
+            ],
+            "children": [
+                "elemental_juggling"
+            ]
+        },
+        "elemental_juggling": {
+            "id": "elemental_juggling",
+            "name": "Elemental Juggling",
+            "description": "Using any Ball ability <span class=\"talent-effect utility\">does not end your turn</span>, allowing Shoma to immediately select another Ball and unleash devastating combos.",
+            "icon": "Icons/talents/utility.png",
+            "tier": 6,
+            "cost": 1,
+            "position": {
+                "x": 50,
+                "y": 490
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "ballFollowupEnabled",
+                "value": true
+            },
+            "parents": [
+                "magical_empowerment"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "heavy_ball_cooldown_mastery": {
+            "id": "heavy_ball_cooldown_mastery",
+            "name": "Heavy Ball Mastery",
+            "description": "Heavy Ball <span class=\"talent-effect utility\">cooldown reduced to 1</span>, allowing for relentless pressure.",
+            "icon": "Icons/talents/default.png",
+            "tier": 3,
+            "cost": 1,
+            "position": {
+                "x": 750,
+                "y": 470
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "heavyBallCooldownMasteryEnabled",
+                "value": true
+            },
+            "parents": [
+                "power_boink",
+                "efficient_boink"
+            ],
+            "children": [
+                "heavy_ball_bounce"
+            ]
+        },
+        "fire_ball_burn": {
+            "id": "fire_ball_burn",
+            "name": "Scorching Flames",
+            "description": "Fire Ball applies <span class=\"talent-effect damage\">Burn debuff for 3 turns</span> dealing <span class=\"damage-value\">20 damage/turn</span>. <span class=\"talent-effect damage\">Stacks infinitely</span>.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 3,
+            "cost": 1,
+            "position": {
+                "x": 980,
+                "y": 480
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "fireBallBurnEnabled",
+                "value": true
+            },
+            "parents": [
+                "power_boink",
+                "efficient_boink"
+            ],
+            "children": [
+                "fire_ball_magical_scaling"
+            ]
+        },
+        "fire_ball_magical_scaling": {
+            "id": "fire_ball_magical_scaling",
+            "name": "Infernal Magic",
+            "description": "Fire Ball now scales with <span class=\"talent-effect damage\">100% of Shoma's Magical Damage</span>, creating devastating magical infernos.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 4,
+            "cost": 1,
+            "position": {
+                "x": 980,
+                "y": 600
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "fireBallMagicalScalingEnabled",
+                "value": true
+            },
+            "parents": [
+                "fire_ball_burn"
+            ],
+            "children": [
+                "arcane_mastery"
+            ]
+        },
+        "water_ball_splash_power": {
+            "id": "water_ball_splash_power",
+            "name": "Tidal Devastation",
+            "description": "Water Ball <span class=\"talent-effect damage\">splash damage increased by 300</span>, creating devastating waves.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 3,
+            "cost": 1,
+            "position": {
+                "x": 1200,
+                "y": 480
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "waterBallSplashPowerEnabled",
+                "value": true
+            },
+            "parents": [
+                "power_boink",
+                "efficient_boink"
+            ],
+            "children": [
+                "water_ball_magical_scaling"
+            ]
+        },
+        "water_ball_magical_scaling": {
+            "id": "water_ball_magical_scaling",
+            "name": "Tsunami Force",
+            "description": "Water Ball now scales with <span class=\"talent-effect damage\">100% of Shoma's Magical Damage</span>, unleashing devastating magical tsunamis.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 4,
+            "cost": 1,
+            "position": {
+                "x": 1200,
+                "y": 600
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "waterBallMagicalScalingEnabled",
+                "value": true
+            },
+            "parents": [
+                "water_ball_splash_power"
+            ],
+            "children": [
+                "arcane_mastery"
+            ]
+        },
+        "arcane_mastery": {
+            "id": "arcane_mastery",
+            "name": "Arcane Mastery",
+            "description": "Shoma gains <span class=\"talent-effect damage\">+125 Magical Damage</span>, amplifying the power of his magical abilities and scaling talents.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 5,
+            "cost": 1,
+            "position": {
+                "x": 1090,
+                "y": 720
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "arcaneMasteryEnabled",
+                "value": true
+            },
+            "parents": [
+                "fire_ball_magical_scaling",
+                "water_ball_magical_scaling"
+            ],
+            "children": [
+                "compassionate_resonance"
+            ]
+        },
+        "compassionate_resonance": {
+            "id": "compassionate_resonance",
+            "name": "Compassionate Resonance",
+            "description": "When Shoma deals damage, he <span class=\"talent-effect healing\">heals a random ally for 50% of the damage dealt</span>, creating a harmonious balance between destruction and restoration.",
+            "icon": "Icons/talents/healing.png",
+            "tier": 6,
+            "cost": 1,
+            "position": {
+                "x": 1090,
+                "y": 840
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "compassionateResonanceEnabled",
+                "value": true
+            },
+            "parents": [
+                "arcane_mastery"
+            ],
+            "children": [
+                "water_ball_double_cast",
+                "boink_burn"
+            ]
+        },
+        "water_ball_double_cast": {
+            "id": "water_ball_double_cast",
+            "name": "Tidal Echo",
+            "description": "Water Ball has a <span class=\"talent-effect damage\">50% chance to trigger twice</span> when used, creating devastating double waves of destruction.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 7,
+            "cost": 1,
+            "position": {
+                "x": 900,
+                "y": 960
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "waterBallDoubleCastEnabled",
+                "value": true
+            },
+            "parents": [
+                "compassionate_resonance"
+            ],
+            "children": [
+                "devastating_power"
+            ]
+        },
+        "boink_burn": {
+            "id": "boink_burn",
+            "name": "Burning Boink",
+            "description": "Boink applies <span class=\"talent-effect damage\">Burn debuff for 3 turns</span> dealing <span class=\"damage-value\">100 damage/turn</span>. <span class=\"talent-effect damage\">Stacks with other burns</span>.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 7,
+            "cost": 1,
+            "position": {
+                "x": 1280,
+                "y": 960
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "boinkBurnEnabled",
+                "value": true
+            },
+            "parents": [
+                "compassionate_resonance"
+            ],
+            "children": [
+                "devastating_power"
+            ]
+        },
+        "devastating_power": {
+            "id": "devastating_power",
+            "name": "Devastating Power",
+            "description": "Shoma deals <span class=\"talent-effect damage\">double damage from all sources</span>, becoming an unstoppable force of destruction that overwhelms all enemies.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 8,
+            "cost": 1,
+            "position": {
+                "x": 1090,
+                "y": 1080
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "devastatingPowerEnabled",
+                "value": true
+            },
+            "parents": [
+                "water_ball_double_cast",
+                "boink_burn"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "heavy_ball_bounce": {
+            "id": "heavy_ball_bounce",
+            "name": "Rebounding Impact",
+            "description": "Heavy Ball <span class=\"talent-effect damage\">bounces to an additional enemy</span> after the first hit, dealing the same damage and applying the debuff.",
+            "icon": "Icons/talents/damage.png",
+            "tier": 4,
+            "cost": 1,
+            "position": {
+                "x": 750,
+                "y": 720
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "heavyBallBounceEnabled",
+                "value": true
+            },
+            "parents": [
+                "heavy_ball_cooldown_mastery"
+            ],
+            "children": [
+                "debuff_resonance",
+                "homerun_mastery"
+            ]
+        },
+        "debuff_resonance": {
+            "id": "debuff_resonance",
+            "name": "Debuff Resonance",
+            "description": "Shoma gains <span class=\"talent-effect defense\">+5 Armor and +5 Magic Shield for each debuff all enemies have</span>. This bonus is permanent but disappears when enemies have no debuffs and stacks with multiple debuffs.",
+            "icon": "Icons/talents/default.png",
+            "tier": 5,
+            "cost": 1,
+            "position": {
+                "x": 600,
+                "y": 840
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "debuffResonanceEnabled",
+                "value": true
+            },
+            "parents": [
+                "heavy_ball_bounce"
+            ],
+            "children": [
+                "boink_taunt",
+                "debuff_cleansing"
+            ]
+        },
+        "boink_taunt": {
+            "id": "boink_taunt",
+            "name": "Boink Taunt",
+            "description": "Boink applies a <span class=\"talent-effect utility\">\"Boink\" debuff for 2 turns</span> that forces the target to attack Shoma instead of other allies, making him a protective tank through aggressive taunting.",
+            "icon": "Icons/abilities/boink.jfif",
+            "tier": 6,
+            "cost": 1,
+            "position": {
+                "x": 450,
+                "y": 960
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "boinkTauntEnabled",
+                "value": true
+            },
+            "parents": [
+                "debuff_resonance"
+            ],
+            "children": [
+                "resilient_spirit"
+            ]
+        },
+        "debuff_cleansing": {
+            "id": "debuff_cleansing",
+            "name": "Self-Purification",
+            "description": "Every 3 turns, Shoma <span class=\"talent-effect utility\">removes all debuffs from himself</span>, maintaining his fighting spirit and refusing to be held down by negative effects.",
+            "icon": "Icons/talents/utility.png",
+            "tier": 6,
+            "cost": 1,
+            "position": {
+                "x": 750,
+                "y": 960
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "debuffCleansingEnabled",
+                "value": true
+            },
+            "parents": [
+                "debuff_resonance"
+            ],
+            "children": [
+                "resilient_spirit"
+            ]
+        },
+        "resilient_spirit": {
+            "id": "resilient_spirit",
+            "name": "Resilient Spirit",
+            "description": "When Shoma takes damage, <span class=\"talent-effect utility\">Catch! and Homerun cooldowns are reduced by 1</span>, allowing him to recover and counter-attack more quickly when under pressure.",
+            "icon": "Icons/talents/utility.png",
+            "tier": 7,
+            "cost": 1,
+            "position": {
+                "x": 600,
+                "y": 1080
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "resilientSpiritEnabled",
+                "value": true
+            },
+            "parents": [
+                "boink_taunt",
+                "debuff_cleansing"
+            ],
+            "children": [],
+            "powerful": true
+        },
+        "homerun_mastery": {
+            "id": "homerun_mastery",
+            "name": "Homerun Mastery",
+            "description": "Homerun <span class=\"talent-effect utility\">does not end Shoma's turn</span>, allowing him to immediately use another ability after the powerful homerun buff.",
+            "icon": "Icons/talents/utility.png",
+            "tier": 5,
+            "cost": 1,
+            "position": {
+                "x": 900,
+                "y": 840
+            },
+            "effect": {
+                "type": "modify_character_property",
+                "property": "homerunMasteryEnabled",
+                "value": true
+            },
+            "parents": [
+                "heavy_ball_bounce"
+            ],
+            "children": []
+        }
+    }
+}

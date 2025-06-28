@@ -400,6 +400,13 @@ class Character {
             console.log(`[RecalcStats] Preserving desert heat mana regen: ${preservedStageValues.manaPerTurn} (original: ${preservedStageValues.originalManaPerTurn})`);
         }
         
+        // --- NEW: Preserve healingPower from talents ---
+        if (this.stats.healingPower !== undefined && this.stats.healingPower > 0) {
+            preservedStageValues.healingPower = this.stats.healingPower;
+            console.log(`[RecalcStats] Preserving talent healingPower: ${preservedStageValues.healingPower}`);
+        }
+        // --- END NEW ---
+        
         // Check if character has Firebase stats that should be preserved during base stat reset
         const hasFirebaseStats = this.hellEffects || this._firebaseStatsLoaded;
         
@@ -454,6 +461,13 @@ class Character {
             this.originalManaPerTurn = preservedStageValues.originalManaPerTurn;
             console.log(`[RecalcStats] Restored desert heat mana regen: ${this.stats.manaPerTurn}`);
         }
+        
+        // --- NEW: Restore healingPower from talents ---
+        if (preservedStageValues.healingPower !== undefined) {
+            this.stats.healingPower = preservedStageValues.healingPower;
+            console.log(`[RecalcStats] Restored talent healingPower: ${this.stats.healingPower}`);
+        }
+        // --- END NEW ---
         
         // Continue with the rest of the recalculation process...
         
@@ -805,6 +819,23 @@ class Character {
         }
         // <<< END NEW >>>
         
+        // === ITEM SYSTEM INTEGRATION ===
+        // Apply item bonuses from character inventory
+        if (this.itemBonuses && Object.keys(this.itemBonuses).length > 0) {
+            console.log(`[RecalcStats - Items] Applying item bonuses for ${this.name}:`, this.itemBonuses);
+            
+            Object.entries(this.itemBonuses).forEach(([stat, bonus]) => {
+                if (bonus !== 0 && this.stats.hasOwnProperty(stat)) {
+                    const originalValue = this.stats[stat];
+                    this.stats[stat] += bonus;
+                    console.log(`[RecalcStats - Items] Applied +${bonus} ${stat} to ${this.name}: ${originalValue} → ${this.stats[stat]}`);
+                } else if (bonus !== 0) {
+                    console.warn(`[RecalcStats - Items] Stat '${stat}' not found on character ${this.name}, ignoring bonus of ${bonus}`);
+                }
+            });
+        }
+        // <<< END ITEM SYSTEM >>>
+        
         // === TALENT PERSISTENCE SYSTEM ===
         // Talents should already be baked into baseStats via TalentManager.applyStatModification()
         // No need to reapply them during recalculateStats() as this would cause stacking
@@ -812,7 +843,7 @@ class Character {
             console.log(`[RecalcStats] Talent effects for ${this.name} are already in baseStats: ${this.appliedTalents.join(', ')}`);
             
             // Only update ability descriptions if needed, without reapplying stat modifications
-            if (this.id === 'schoolgirl_elphelt' && typeof window.updateElpheltAbilityDescriptionsForTalents === 'function') {
+            if (this.id === 'schoolboy_elphelt' && typeof window.updateElpheltAbilityDescriptionsForTalents === 'function') {
                 window.updateElpheltAbilityDescriptionsForTalents(this);
                 console.log(`[RecalcStats] Updated Elphelt ability descriptions for active talents`);
             }
@@ -846,6 +877,12 @@ class Character {
         // Update ability descriptions if talents affect them
         if (this.id === 'schoolboy_siegfried' && typeof window.updateSiegfriedAbilityDescriptions === 'function') {
             window.updateSiegfriedAbilityDescriptions(this);
+        }
+        
+        // === DEBUFF RESONANCE TALENT ===
+        // Apply Debuff Resonance bonuses for Schoolboy Shoma
+        if (this.id === 'schoolboy_shoma' && typeof window.applyDebuffResonance === 'function') {
+            window.applyDebuffResonance(this);
         }
     }
 
@@ -883,6 +920,12 @@ class Character {
         if (this.atlanteanBlessings && this.atlanteanBlessings.mana_efficiency && !this.isAI) {
             actualManaCost = Math.ceil(actualManaCost * 0.5); // 50% mana cost reduction
             console.log(`[Atlantean Blessing] ${this.name}'s ${ability.name} mana cost reduced from ${ability.manaCost} to ${actualManaCost}`);
+        }
+        
+        // --- NEW: Check for Efficient Boink talent ---
+        if (ability.id === 'boink' && this.hasTalent && this.hasTalent('efficient_boink')) {
+            actualManaCost = 0; // Boink costs no mana
+            console.log(`[Efficient Boink] ${this.name}'s Boink costs no mana due to talent`);
         }
         // --- END NEW ---
 
@@ -2228,14 +2271,6 @@ class Character {
                 // Log the damage increase
                 console.log(`[Debuff Exploitation] ${this.name} dealing ${Math.round(damageIncrease * 100)}% bonus damage (${debuffCount} debuffs) - ${originalDamage} → ${finalDamage}`);
                 
-                // Show VFX for Debuff Exploitation
-                if (window.showDebuffExploitationVFX && typeof window.showDebuffExploitationVFX === 'function') {
-                    window.showDebuffExploitationVFX(this, target, debuffCount, damageIncrease);
-                }
-                else if (window.gameManager && typeof window.gameManager.showFloatingText === 'function') {
-                    const elementId = this.instanceId || this.id;
-                    window.gameManager.showFloatingText(`character-${elementId}`, `+${Math.round(damageIncrease * 100)}% DMG (${debuffCount} debuffs)`, 'buff');
-                }
                 
                 // Add log entry
                 if (window.gameManager && window.gameManager.addLogEntry) {
@@ -3378,7 +3413,7 @@ class Character {
             // Recalculate stats after adding the debuff
             this.recalculateStats();
         }
-        updateCharacterUI(this);
+        updateCharacterUI(this); // Update UI after recalculating stats
     }
 
     removeBuff(buffId) {
@@ -3605,6 +3640,17 @@ class Character {
             }
         }
         // --- END Purifying Resolve ---
+        
+        // --- Self-Purification Talent (Shoma) ---
+        if (this.id === 'schoolboy_shoma' && this.hasTalent && this.hasTalent('debuff_cleansing')) {
+            // Process Shoma's debuff cleansing (every 3 turns)
+            if (typeof window.processShomaDebuffCleansing === 'function') {
+                window.processShomaDebuffCleansing(this);
+            } else {
+                console.warn('[Self-Purification] processShomaDebuffCleansing function not found');
+            }
+        }
+        // --- END Self-Purification ---
         
         // --- END Passive Hook ---
 
@@ -5003,6 +5049,28 @@ const CharacterFactory = {
             console.warn(`[CharFactory] CharacterXPManager not available, using default XP values for ${character.name}`);
         }
 
+        // Assign base stats for reference
+        character.baseStats = { ...charData.stats };
+
+        // Initialize current HP/Mana
+        character.stats.currentHp = character.stats.maxHp;
+        character.stats.currentMana = character.stats.maxMana;
+
+        // Copy talentProperties from JSON file if they exist (for characters like schoolboy_shoma)
+        if (charData.talentProperties) {
+            character.talentProperties = { ...charData.talentProperties };
+            console.log(`[CharacterFactory] Copied talentProperties for ${character.name}:`, character.talentProperties);
+        }
+
+        // Dispatch character creation event for passive auto-initialization
+        try {
+            document.dispatchEvent(new CustomEvent('character:created', {
+                detail: { character: character }
+            }));
+        } catch (error) {
+            console.warn('Could not dispatch character:created event:', error);
+        }
+
         console.log(`[CharFactory] Finished creating character ${character.name} (talent application deferred).`, character);
         return character;
     },
@@ -5289,6 +5357,12 @@ const CharacterFactory = {
             return AtlanteanChristiePassive;
         }
         // --- ADD ATLANTEAN CHRISTIE PASSIVE END ---
+        // --- ADD TALKING NECROMATIC TREE PASSIVE ---
+        else if (passiveId === 'forest_corruption' && typeof TalkingNecromaticTreePassive !== 'undefined') {
+            console.log('[CharacterFactory] Found TalkingNecromaticTreePassive class for passive:', passiveId);
+            return TalkingNecromaticTreePassive;
+        }
+        // --- ADD TALKING NECROMATIC TREE PASSIVE END ---
         // Add other hardcoded checks here if necessary
         return null;
     },
@@ -5461,6 +5535,12 @@ const AbilityFactory = {
         // Initialize current HP/Mana
         character.stats.currentHp = character.stats.maxHp;
         character.stats.currentMana = character.stats.maxMana;
+
+        // Copy talentProperties from JSON file if they exist (for characters like schoolboy_shoma)
+        if (charData.talentProperties) {
+            character.talentProperties = { ...charData.talentProperties };
+            console.log(`[CharacterFactory] Copied talentProperties for ${character.name}:`, character.talentProperties);
+        }
 
         // Dispatch character creation event for passive auto-initialization
         try {

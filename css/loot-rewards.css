@@ -1,0 +1,449 @@
+/**
+ * Loot Rewards CSS for Project Fighters
+ * Styles for the loot rewards modal and animations
+ */
+
+/* Modal Base Styles */
+.loot-rewards-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.loot-rewards-modal.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loot-rewards-modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loot-rewards-modal.hiding {
+    opacity: 0;
+    visibility: visible;
+}
+
+/* Backdrop */
+.loot-rewards-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(20, 20, 50, 0.8));
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+/* Container */
+.loot-rewards-container {
+    position: relative;
+    background: linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(50, 50, 80, 0.95));
+    border-radius: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 215, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    max-width: 90vw;
+    max-height: 90vh;
+    min-width: 600px;
+    min-height: 400px;
+    padding: 30px;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.loot-rewards-modal.visible .loot-rewards-container {
+    transform: scale(1);
+}
+
+/* Header */
+.loot-rewards-header {
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.loot-rewards-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.5),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
+    margin: 0 0 10px 0;
+    animation: titlePulse 2s infinite alternate;
+}
+
+.loot-rewards-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+}
+
+@keyframes titlePulse {
+    0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8); }
+    100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.8); }
+}
+
+/* Content */
+.loot-rewards-content {
+    margin-bottom: 30px;
+}
+
+.loot-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    min-height: 200px;
+    align-items: start;
+}
+
+/* Loot Item Cards */
+.loot-item-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(40, 40, 70, 0.9), rgba(60, 60, 90, 0.9));
+    border-radius: 15px;
+    border: 2px solid transparent;
+    padding: 20px;
+    text-align: center;
+    overflow: hidden;
+    transform: translateY(50px) scale(0.8);
+    opacity: 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.loot-item-card.animate-in {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.loot-item-card.hover-effect {
+    transform: translateY(-5px) scale(1.05);
+}
+
+/* Rarity-specific borders and glows */
+.loot-item-card.rarity-common {
+    border-color: rgba(156, 156, 156, 0.5);
+    box-shadow: 0 5px 15px rgba(156, 156, 156, 0.2);
+}
+
+.loot-item-card.rarity-rare {
+    border-color: rgba(74, 171, 245, 0.5);
+    box-shadow: 0 5px 15px rgba(74, 171, 245, 0.3);
+}
+
+.loot-item-card.rarity-epic {
+    border-color: rgba(163, 53, 238, 0.5);
+    box-shadow: 0 5px 15px rgba(163, 53, 238, 0.3);
+}
+
+.loot-item-card.rarity-legendary {
+    border-color: rgba(255, 191, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(255, 191, 0, 0.4);
+    animation: legendaryGlow 2s infinite alternate;
+}
+
+@keyframes legendaryGlow {
+    0% { box-shadow: 0 5px 15px rgba(255, 191, 0, 0.4), 0 0 20px rgba(255, 191, 0, 0.2); }
+    100% { box-shadow: 0 5px 15px rgba(255, 191, 0, 0.6), 0 0 30px rgba(255, 191, 0, 0.4); }
+}
+
+/* Item Image Container */
+.loot-item-image-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.loot-item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.loot-item-card:hover .loot-item-image {
+    transform: scale(1.1);
+}
+
+.loot-item-quantity {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, #ff6b35, #ff8e53);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Item Info */
+.loot-item-info {
+    margin-bottom: 10px;
+}
+
+.loot-item-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.loot-item-rarity {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.loot-item-rarity {
+    color: #9ca3af; /* Common - gray */
+}
+
+.loot-item-card.rarity-rare .loot-item-rarity {
+    color: #4dabf5; /* Rare - blue */
+}
+
+.loot-item-card.rarity-epic .loot-item-rarity {
+    color: #a335ee; /* Epic - purple */
+}
+
+.loot-item-card.rarity-legendary .loot-item-rarity {
+    color: #ffbf00; /* Legendary - gold */
+}
+
+.loot-item-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Glow Effect */
+.loot-item-glow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    border-radius: 15px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.loot-item-card:hover .loot-item-glow {
+    opacity: 1;
+}
+
+/* Rarity Effects */
+.rarity-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Legendary Effects */
+.legendary-effect {
+    background: radial-gradient(circle at center, transparent 30%, rgba(255, 191, 0, 0.1) 100%);
+}
+
+.legendary-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ffbf00;
+    border-radius: 50%;
+    animation: sparkle 1.5s infinite linear;
+    box-shadow: 0 0 6px #ffbf00;
+}
+
+.legendary-sparkle:nth-child(1) {
+    top: 20%;
+    left: 30%;
+    animation-delay: 0s;
+}
+
+.legendary-sparkle:nth-child(2) {
+    top: 70%;
+    left: 70%;
+    animation-delay: 0.5s;
+}
+
+.legendary-sparkle:nth-child(3) {
+    top: 40%;
+    left: 80%;
+    animation-delay: 1s;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+/* Epic Effects */
+.epic-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(163, 53, 238, 0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: epicPulse 2s infinite;
+}
+
+@keyframes epicPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.3; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+}
+
+/* Rare Effects */
+.rare-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(74, 171, 245, 0.4), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Footer */
+.loot-rewards-footer {
+    text-align: center;
+}
+
+.loot-claim-button {
+    background: linear-gradient(135deg, #ff6b35, #ff8e53);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.loot-claim-button:hover {
+    background: linear-gradient(135deg, #ff8e53, #ffab73);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+}
+
+.loot-claim-button:active {
+    transform: translateY(0);
+}
+
+/* Floating Notifications */
+.loot-notification {
+    position: fixed;
+    background: linear-gradient(135deg, rgba(30, 30, 60, 0.95), rgba(50, 50, 80, 0.95));
+    border-radius: 15px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: scale(0) translateY(50px);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.loot-notification.animate-in {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.loot-notification.animate-out {
+    transform: scale(0.8) translateY(-50px);
+    opacity: 0;
+}
+
+.loot-notification-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.loot-notification-text {
+    color: white;
+}
+
+.loot-notification-name {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.loot-notification-type {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .loot-rewards-container {
+        min-width: 90vw;
+        padding: 20px;
+    }
+    
+    .loot-rewards-title {
+        font-size: 2rem;
+    }
+    
+    .loot-items-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .loot-item-card {
+        padding: 15px;
+    }
+    
+    .loot-item-image {
+        width: 60px;
+        height: 60px;
+    }
+} 

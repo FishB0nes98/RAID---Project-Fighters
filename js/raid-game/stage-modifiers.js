@@ -318,6 +318,83 @@ class StageModifiersRegistry {
             }
         });
 
+        // Double Damage Modifier
+        this.registerModifier({
+            id: 'double_damage',
+            name: 'Double Damage',
+            description: 'The battlefield pulses with raw power! All physical and magical damage is doubled for all characters.',
+            icon: '⚔️💥',
+            vfx: {
+                type: 'double_damage',
+                particles: true,
+                animation: 'power_surge'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                const allCharacters = [
+                    ...gameManager.gameState.playerCharacters,
+                    ...gameManager.gameState.aiCharacters
+                ];
+
+                allCharacters.forEach(character => {
+                    // Store original values
+                    character.stageModifiers = character.stageModifiers || {};
+                    character.stageModifiers.originalPhysicalDamage = character.stats.physicalDamage;
+                    character.stageModifiers.originalMagicalDamage = character.stats.magicalDamage;
+                    
+                    // Double the damage
+                    character.stats.physicalDamage *= 2;
+                    character.stats.magicalDamage *= 2;
+                    
+                    // Also update base stats to ensure persistence
+                    if (character.baseStats) {
+                        character.baseStats.physicalDamage = character.baseStats.physicalDamage || character.stats.physicalDamage / 2;
+                        character.baseStats.magicalDamage = character.baseStats.magicalDamage || character.stats.magicalDamage / 2;
+                        character.baseStats.physicalDamage *= 2;
+                        character.baseStats.magicalDamage *= 2;
+                    }
+                    
+                    // Create power surge VFX
+                    this.createDoubleDamageVFX(character);
+                });
+
+                gameManager.addLogEntry(
+                    `⚔️💥 Raw power surges through the battlefield! All damage is doubled!`, 
+                    'stage-effect dramatic'
+                );
+                
+                // Create screen-wide VFX
+                this.createDoubleDamageScreenVFX();
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                const allCharacters = [
+                    ...gameManager.gameState.playerCharacters,
+                    ...gameManager.gameState.aiCharacters
+                ];
+
+                allCharacters.forEach(character => {
+                    if (character.stageModifiers) {
+                        // Restore original values
+                        if (character.stageModifiers.originalPhysicalDamage !== undefined) {
+                            character.stats.physicalDamage = character.stageModifiers.originalPhysicalDamage;
+                        }
+                        if (character.stageModifiers.originalMagicalDamage !== undefined) {
+                            character.stats.magicalDamage = character.stageModifiers.originalMagicalDamage;
+                        }
+                        
+                        // Also restore base stats
+                        if (character.baseStats) {
+                            character.baseStats.physicalDamage = character.stageModifiers.originalPhysicalDamage;
+                            character.baseStats.magicalDamage = character.stageModifiers.originalMagicalDamage;
+                        }
+                        
+                        // Clean up stored values
+                        delete character.stageModifiers.originalPhysicalDamage;
+                        delete character.stageModifiers.originalMagicalDamage;
+                    }
+                });
+            }
+        });
+
         // Cleansing Winds Modifier
         this.registerModifier({
             id: 'cleansing_winds',
@@ -1551,6 +1628,126 @@ class StageModifiersRegistry {
         });
 
         console.log('[StageModifiers] Registered dark_current modifier successfully');
+
+        // ==== POWER OF LOVE MODIFIER ====
+        this.registerModifier({
+            id: 'power_of_love',
+            name: 'Power of Love',
+            description: 'When there are only two player characters, their stats are combined, amplifying their strength through their bond.',
+            icon: '💖',
+            vfx: {
+                type: 'power_of_love',
+                particles: true,
+                animation: 'heart_aura'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                const playerCharacters = gameManager.gameState.playerCharacters;
+
+                if (playerCharacters.length === 2) {
+                    const [char1, char2] = playerCharacters;
+
+                    if (char1.isDead() || char2.isDead()) {
+                        return; // Don't apply if one is already dead.
+                    }
+
+                    // Prevent applying the buff multiple times
+                    if (char1.stageModifiers?.powerOfLoveApplied) {
+                        return;
+                    }
+
+                    gameManager.addLogEntry(
+                        `💖 The Power of Love binds ${char1.name} and ${char2.name}! Their stats are combined!`,
+                        'stage-effect dramatic'
+                    );
+
+                    const statsToCombine = [
+                        'maxHp', 'maxMana', 'physicalDamage', 'magicalDamage', 'armor', 'magicalShield',
+                        'speed', 'critChance', 'critDamage', 'lifesteal', 'hpPerTurn', 'manaPerTurn'
+                    ];
+
+                    // Store original stats to revert on stage end
+                    char1.stageModifiers = char1.stageModifiers || {};
+                    char2.stageModifiers = char2.stageModifiers || {};
+                    char1.stageModifiers.powerOfLoveOriginalStats = { ...char1.stats };
+                    char2.stageModifiers.powerOfLoveOriginalStats = { ...char2.stats };
+
+                    const combinedStats = {};
+                    statsToCombine.forEach(stat => {
+                        const val1 = char1.stats[stat] || 0;
+                        const val2 = char2.stats[stat] || 0;
+                        combinedStats[stat] = val1 + val2;
+                    });
+
+                    const combinedCurrentHp = (char1.stats.currentHp || 0) + (char2.stats.currentHp || 0);
+                    const combinedCurrentMana = (char1.stats.currentMana || 0) + (char2.stats.currentMana || 0);
+
+                    // Apply combined stats to both characters
+                    [char1, char2].forEach(char => {
+                        Object.assign(char.stats, combinedStats);
+                        char.stats.currentHp = combinedCurrentHp;
+                        char.stats.currentMana = combinedCurrentMana;
+
+                        char.stats.currentHp = Math.min(char.stats.currentHp, char.stats.maxHp);
+                        char.stats.currentMana = Math.min(char.stats.currentMana, char.stats.maxMana);
+
+                        if (char.baseStats) {
+                            Object.assign(char.baseStats, combinedStats);
+                        }
+                        
+                        char.stageModifiers.powerOfLoveApplied = true;
+
+                        if (gameManager.uiManager) {
+                            gameManager.uiManager.updateCharacterUI(char);
+                        }
+                    });
+
+                    this.createPowerOfLoveVFX(char1);
+                    this.createPowerOfLoveVFX(char2);
+                }
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                const playerCharacters = gameManager.gameState.playerCharacters;
+                playerCharacters.forEach(char => {
+                    if (char.stageModifiers && char.stageModifiers.powerOfLoveOriginalStats) {
+                        Object.assign(char.stats, char.stageModifiers.powerOfLoveOriginalStats);
+                        if (char.baseStats) {
+                            Object.assign(char.baseStats, char.stageModifiers.powerOfLoveOriginalStats);
+                        }
+                        delete char.stageModifiers.powerOfLoveOriginalStats;
+                        delete char.stageModifiers.powerOfLoveApplied;
+                        if (gameManager.uiManager) {
+                            gameManager.uiManager.updateCharacterUI(char);
+                        }
+                    }
+                });
+            }
+        });
+
+        console.log('[StageModifiers] Registered power_of_love modifier successfully');
+    }
+
+    createPowerOfLoveVFX(character) {
+        const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!charElement) return;
+
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'power-of-love-vfx';
+        
+        for (let i = 0; i < 15; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'heart-particle';
+            heart.textContent = '💖';
+            heart.style.left = (Math.random() * 80 + 10) + '%';
+            heart.style.top = (Math.random() * 80 + 10) + '%';
+            heart.style.animationDelay = (Math.random() * 1.5) + 's';
+            heart.style.animationDuration = (1 + Math.random()) + 's';
+            vfxContainer.appendChild(heart);
+        }
+
+        const artContainer = charElement.querySelector('.character-art-container') || charElement;
+        artContainer.appendChild(vfxContainer);
+
+        setTimeout(() => vfxContainer.remove(), 2500);
     }
 
     // Helper method to apply draft mode effect to all characters
@@ -1824,6 +2021,9 @@ class StageModifiersRegistry {
                 break;
             case 'dark_current':
                 this.createDarkCurrentVFX(modifier);
+                break;
+            case 'power_of_love':
+                // VFX is handled directly onStageStart, so no separate environment VFX needed here.
                 break;
 
             default:
@@ -6212,6 +6412,281 @@ class StageModifiersRegistry {
         }, 2500);
 
         console.log(`[StageModifiers] Created dark current drain VFX for ${character.name} (-${manaDrained} mana)`);
+    }
+
+    createDoubleDamageVFX(character) {
+        const characterElement = this.getCharacterElement(character);
+        if (!characterElement) return;
+
+        // Create power surge particles around character
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'double-damage-character-vfx';
+        vfxContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        `;
+        
+        // Create power particles
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'power-particle';
+            const symbols = ['⚔️', '💥', '⚡', '💪'];
+            particle.textContent = symbols[i % symbols.length];
+            particle.style.cssText = `
+                position: absolute;
+                font-size: 20px;
+                animation: doubleDamageParticle 3s ease-out;
+                animation-delay: ${i * 0.2}s;
+            `;
+            
+            const angle = (i / 6) * 360;
+            particle.style.setProperty('--angle', angle + 'deg');
+            vfxContainer.appendChild(particle);
+        }
+
+        // Create power glow
+        const powerGlow = document.createElement('div');
+        powerGlow.className = 'power-glow';
+        powerGlow.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(255, 100, 100, 0.3) 0%, rgba(255, 255, 100, 0.2) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: doubleDamagePowerGlow 3s ease-out;
+        `;
+        vfxContainer.appendChild(powerGlow);
+
+        // Create damage multiplier text
+        const multiplierText = document.createElement('div');
+        multiplierText.className = 'damage-multiplier';
+        multiplierText.textContent = '×2 DAMAGE';
+        multiplierText.style.cssText = `
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff6666;
+            text-shadow: 
+                0 0 8px rgba(255, 100, 100, 0.8),
+                0 0 16px rgba(255, 50, 50, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: doubleDamageText 3s ease-out;
+        `;
+        vfxContainer.appendChild(multiplierText);
+        
+        characterElement.appendChild(vfxContainer);
+
+        // Add CSS animations if not already added
+        if (!document.getElementById('double-damage-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'double-damage-styles';
+            styleSheet.textContent = `
+                @keyframes doubleDamageParticle {
+                    0% {
+                        transform: rotate(var(--angle)) translateX(20px) scale(0.5);
+                        opacity: 0;
+                    }
+                    30% {
+                        transform: rotate(var(--angle)) translateX(40px) scale(1.2);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: rotate(var(--angle)) translateX(80px) scale(0.3);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes doubleDamagePowerGlow {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(0.5); 
+                        opacity: 0; 
+                    }
+                    50% { 
+                        transform: translate(-50%, -50%) scale(1.5); 
+                        opacity: 0.8; 
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(2); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes doubleDamageText {
+                    0% { 
+                        transform: translateX(-50%) scale(0.8); 
+                        opacity: 0; 
+                    }
+                    20% { 
+                        transform: translateX(-50%) scale(1.3); 
+                        opacity: 1; 
+                    }
+                    80% { 
+                        transform: translateX(-50%) scale(1); 
+                        opacity: 1; 
+                    }
+                    100% { 
+                        transform: translateX(-50%) scale(0.9) translateY(-20px); 
+                        opacity: 0; 
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+
+        // Remove after animation
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                vfxContainer.parentNode.removeChild(vfxContainer);
+            }
+        }, 4000);
+    }
+
+    createDoubleDamageScreenVFX() {
+        // Create screen-wide power surge effect
+        const screenVFX = document.createElement('div');
+        screenVFX.className = 'double-damage-screen-vfx';
+        screenVFX.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        `;
+
+        // Create power waves
+        for (let i = 0; i < 3; i++) {
+            const wave = document.createElement('div');
+            wave.className = 'power-wave';
+            wave.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 200px;
+                height: 200px;
+                border: 3px solid rgba(255, 100, 100, 0.6);
+                border-radius: 50%;
+                animation: doubleDamagePowerWave 2s ease-out;
+                animation-delay: ${i * 0.3}s;
+            `;
+            screenVFX.appendChild(wave);
+        }
+
+        // Create power text
+        const powerText = document.createElement('div');
+        powerText.className = 'power-text';
+        powerText.textContent = 'DOUBLE DAMAGE ACTIVATED';
+        powerText.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6666;
+            text-shadow: 
+                0 0 20px rgba(255, 100, 100, 0.8),
+                0 0 40px rgba(255, 50, 50, 0.6),
+                4px 4px 8px rgba(0, 0, 0, 0.8);
+            animation: doubleDamagePowerText 3s ease-out;
+            text-align: center;
+        `;
+        screenVFX.appendChild(powerText);
+
+        // Create floating particles
+        const particleContainer = document.createElement('div');
+        particleContainer.className = 'power-particles';
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'screen-particle';
+            const symbols = ['⚔️', '💥', '⚡', '💪'];
+            particle.textContent = symbols[i % symbols.length];
+            particle.style.cssText = `
+                position: absolute;
+                font-size: 24px;
+                left: ${10 + (i * 10)}%;
+                top: ${20 + Math.random() * 60}%;
+                animation: doubleDamageScreenParticle 4s ease-out;
+                animation-delay: ${i * 0.2}s;
+            `;
+            particleContainer.appendChild(particle);
+        }
+        screenVFX.appendChild(particleContainer);
+
+        // Add CSS animations for screen effects
+        if (!document.getElementById('double-damage-screen-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'double-damage-screen-styles';
+            styleSheet.textContent = `
+                @keyframes doubleDamagePowerWave {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0.2);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(3);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes doubleDamagePowerText {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(0.5); 
+                        opacity: 0; 
+                    }
+                    20% { 
+                        transform: translate(-50%, -50%) scale(1.2); 
+                        opacity: 1; 
+                    }
+                    80% { 
+                        transform: translate(-50%, -50%) scale(1); 
+                        opacity: 1; 
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(0.8); 
+                        opacity: 0; 
+                    }
+                }
+                
+                @keyframes doubleDamageScreenParticle {
+                    0% {
+                        transform: scale(0.5) rotate(0deg);
+                        opacity: 0;
+                    }
+                    30% {
+                        transform: scale(1.3) rotate(180deg);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: scale(0.3) rotate(360deg) translateY(-100px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+
+        document.body.appendChild(screenVFX);
+
+        // Remove after animation
+        setTimeout(() => {
+            if (screenVFX.parentNode) {
+                screenVFX.parentNode.removeChild(screenVFX);
+            }
+        }, 4000);
     }
 }
 

@@ -1,0 +1,50 @@
+.maul-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.maul-claw-marks {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    animation: maul-animation 0.5s ease-out forwards;
+}
+
+.maul-claw-marks::before,
+.maul-claw-marks::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    background: red;
+    border-radius: 5px;
+    transform: rotate(-45deg);
+}
+
+.maul-claw-marks::before {
+    left: 30px;
+    box-shadow: 20px 0 0 red, 40px 0 0 red;
+}
+
+@keyframes maul-animation {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}

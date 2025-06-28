@@ -131,7 +131,7 @@
             "image": "Icons/characters/Atlantean Kotal Kahn.png",
             "rarity": "legendary",
             "type": "fighter",
-            "tags": ["Atlantean", "Healer", "Tank"],
+            "tags": ["Atlantean", "Support", "Tank"],
             "description": "The noble ruler of ancient Atlantis, blessed with the power of the ocean depths. His mastery over water and light magic makes him a formidable ally in the fight to save his homeland.",
             "playerunlocked": false,
             "ingameimage": "Loading Screen/Atlantean Kotal Kahn.png"
@@ -839,6 +839,30 @@
             "playerunlocked": false,
             "isHidden": true,
             "ingameimage": "Loading Screen/Shadow Assassin Female.png"
+        },
+        {
+            "id": "talking_necromatic_tree",
+            "name": "Talking Necromatic Tree",
+            "image": "Icons/characters/Talking Necromatic Tree.png",
+            "rarity": "epic",
+            "type": "enemy",
+            "tags": ["Forest", "Necromatic", "Magical"],
+            "description": "An ancient tree corrupted by dark magic, its branches whisper with malevolent intent.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/Talking Necromatic Tree.png"
+        },
+        {
+            "id": "necromatic_corrupted_bear",
+            "name": "Necromatic Corrupted Bear",
+            "image": "Icons/characters/Necromatic Corrupted Bear.png",
+            "rarity": "epic",
+            "type": "enemy",
+            "tags": ["Forest", "Necromatic", "Physical"],
+            "description": "A massive bear corrupted by dark magic, its fur is matted with shadow and its eyes glow with malevolent energy.",
+            "playerunlocked": false,
+            "isHidden": true,
+            "ingameimage": "Loading Screen/necromatic_corrupted_bear.png"
         }
     ]
 } 

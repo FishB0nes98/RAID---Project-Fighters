@@ -1,14 +1,14 @@
 {
   "id": "cleansing_winds_challenge",
-  "name": "Cleansing Winds Challenge",
-  "description": "Face five formidable opponents in a mystical battlefield where cleansing winds sweep away all magical effects every 3rd turn! Bridget, Farmer Raiden, Infernal Ibuki, Atlantean Kagome, and Zoey await in this ultimate test of strategy. Choose your 5 strongest fighters wisely!",
+  "name": "Double Damage Challenge",
+  "description": "Face five powerful opponents in an arena where raw power surges through the battlefield! All damage is doubled for everyone. Zoey, Schoolgirl Julia, Schoolgirl Elphelt, Renée, and Infernal Ibuki await your challenge. Choose your 5 strongest fighters wisely!",
   "difficulty": 8,
   "type": "weekly_challenge",
   "backgroundImage": "images/stages/burning_school_gym.png",
   "backgroundMusic": "sounds/music/epic_battle_theme.mp3",
   "enemies": [
     {
-      "characterId": "bridget",
+      "characterId": "zoey",
       "level": 7,
       "modifications": {
         "hpMultiplier": 1.4,
@@ -17,7 +17,7 @@
       }
     },
     {
-      "characterId": "farmer_raiden",
+      "characterId": "schoolgirl_julia",
       "level": 7,
       "modifications": {
         "hpMultiplier": 1.3,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "characterId": "infernal_ibuki",
+      "characterId": "schoolgirl_elphelt",
       "level": 7,
       "modifications": {
         "hpMultiplier": 1.2,
@@ -35,7 +35,7 @@
       }
     },
     {
-      "characterId": "atlantean_kagome",
+      "characterId": "renée",
       "level": 7,
       "modifications": {
         "hpMultiplier": 1.5,
@@ -44,7 +44,7 @@
       }
     },
     {
-      "characterId": "zoey",
+      "characterId": "infernal_ibuki",
       "level": 7,
       "modifications": {
         "hpMultiplier": 1.3,
@@ -57,16 +57,16 @@
     "minPlayers": 5,
     "maxPlayers": 5,
     "requiredTypes": ["any"],
-    "excludeCharacters": ["bridget", "farmer_raiden", "infernal_ibuki", "atlantean_kagome", "zoey"]
+    "excludeCharacters": ["zoey", "schoolgirl_julia", "schoolgirl_elphelt", "renée", "infernal_ibuki"]
   },
   "modifiers": [
     {
-      "id": "cleansing_winds"
+      "id": "double_damage"
     }
   ],
   "stageEffects": [
     {
-      "id": "cleansing_winds"
+      "id": "double_damage"
     }
   ],
   "objectives": {

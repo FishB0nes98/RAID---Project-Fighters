@@ -1,0 +1,14 @@
+{
+  "id": "corrupted_bear_encounter",
+  "name": "Corrupted Bear Encounter",
+  "description": "As you venture deeper into the mystical forest, you encounter a scene of dark corruption. Two ancient trees whisper with malevolent intent while a massive bear, its fur matted with shadow and eyes glowing with dark energy, stands between them. The forest's peaceful magic has been twisted by some unknown force.",
+  "difficulty": 3,
+  "type": "battle",
+  "enemies": [
+    { "characterId": "talking_necromatic_tree" },
+    { "characterId": "necromatic_corrupted_bear" },
+    { "characterId": "talking_necromatic_tree" }
+  ],
+  "backgroundImage": "images/stages/mystical_forest.png",
+  "backgroundMusic": "sounds/music/forest_ambient.mp3"
+} 

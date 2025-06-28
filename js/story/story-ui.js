@@ -61,6 +61,9 @@ class StoryUI {
         this.handleStageNodeClick = this.handleStageNodeClick.bind(this);
         // Bind others in setupEventHandlers if needed
         this.characterUnlockInProgress = false; // Prevent multiple unlock actions
+        
+        // Initialize character registry cache
+        this.characterRegistry = null;
     }
 
     /**
@@ -136,6 +139,14 @@ class StoryUI {
 
         // Setup main event handlers
         this.setupEventHandlers();
+
+        // Initialize inventory system for story mode (async, but don't block UI)
+        this.initializeInventorySystem().catch(error => {
+            console.error('[StoryUI] Error during inventory initialization:', error);
+        });
+
+        // Setup inventory event handlers
+        this.setupInventoryEventHandlers();
 
         // Set global reference for inline events
         window.storyUI = this;
@@ -234,6 +245,43 @@ class StoryUI {
         this.storyTitleElement.textContent = storyInfo.title;
         this.storyDescriptionElement.textContent = storyInfo.description;
         
+        // Add event story indicator if applicable
+        const eventInfo = this.storyManager.getEventStoryInfo();
+        if (eventInfo) {
+            // Create event indicator
+            const eventIndicator = document.createElement('div');
+            eventIndicator.className = 'event-story-indicator';
+            eventIndicator.innerHTML = `
+                <div class="event-badge">
+                    <span class="event-icon">🎭</span>
+                    <span class="event-text">EVENT STORY</span>
+                </div>
+                <div class="event-type">${eventInfo.eventType === 'temporary' ? 'Temporary Event' : 'Special Event'}</div>
+            `;
+            
+            // Insert after title
+            this.storyTitleElement.parentNode.insertBefore(eventIndicator, this.storyTitleElement.nextSibling);
+        }
+        
+        // Add character restrictions info if applicable
+        const allowedCharacters = this.storyManager.getAllowedCharactersForStory();
+        if (allowedCharacters.length > 0) {
+            const restrictionIndicator = document.createElement('div');
+            restrictionIndicator.className = 'character-restriction-indicator';
+            restrictionIndicator.innerHTML = `
+                <div class="restriction-badge">
+                    <span class="restriction-icon">👥</span>
+                    <span class="restriction-text">RESTRICTED CHARACTERS</span>
+                </div>
+                <div class="allowed-characters">
+                    Only ${allowedCharacters.length} character${allowedCharacters.length > 1 ? 's' : ''} allowed: ${allowedCharacters.join(', ')}
+                </div>
+            `;
+            
+            // Insert after description
+            this.storyDescriptionElement.parentNode.insertBefore(restrictionIndicator, this.storyDescriptionElement.nextSibling);
+        }
+        
         this.updateProgressIndicator();
     }
 
@@ -259,6 +307,11 @@ class StoryUI {
             const characterCard = document.createElement('div');
             characterCard.className = 'character-card';
             
+            // Mark dead characters
+            if (character.currentHP <= 0) {
+                characterCard.classList.add('is-dead');
+            }
+            
             // Character avatar
             const avatar = document.createElement('img');
             avatar.className = 'character-avatar';
@@ -278,7 +331,7 @@ class StoryUI {
             // Create level display
             const levelSpan = document.createElement('span');
             levelSpan.className = 'character-level';
-            levelSpan.textContent = `Lv.${character.level || 1} `;
+            levelSpan.textContent = `Lv.${character.level || 1}`;
             
             // Create name text
             const nameText = document.createElement('span');
@@ -351,10 +404,26 @@ class StoryUI {
                 });
             }
             
+            // Character actions
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'character-actions';
+            
+            const inventoryBtn = document.createElement('button');
+            inventoryBtn.className = 'character-inventory-btn';
+            inventoryBtn.textContent = '🎒';
+            inventoryBtn.title = 'Manage Inventory';
+            inventoryBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openCharacterInventory(character.id);
+            });
+            
+            actionsDiv.appendChild(inventoryBtn);
+            
             // Assemble the component
             infoDiv.appendChild(nameSpan);
             infoDiv.appendChild(statsDiv);
             infoDiv.appendChild(tagsDiv);
+            infoDiv.appendChild(actionsDiv);
             
             characterCard.appendChild(avatar);
             characterCard.appendChild(infoDiv);
@@ -755,8 +824,15 @@ class StoryUI {
         const storyTitle = this.storyManager.currentStory?.title;
         const isHellStory = storyTitle === "To The Hell We Go";
         
+        // Check if this is an event story for special styling
+        const isEventStory = this.storyManager.isEventStory();
+        
         if (isHellStory) {
             nodeElement.classList.add('hellish-node');
+        }
+        
+        if (isEventStory) {
+            nodeElement.classList.add('event-story');
         }
         
         // Set position
@@ -823,7 +899,14 @@ class StoryUI {
         nodeElement.appendChild(statusElement);
         
         // Add click handler
-        nodeElement.addEventListener('click', () => this.handleStageNodeClick(stage));
+        nodeElement.addEventListener('click', () => {
+            // Ensure stage has index property
+            const stageWithIndex = {
+                ...stage,
+                index: stage.index || parseInt(nodeElement.dataset.stageIndex)
+            };
+            this.handleStageNodeClick(stageWithIndex);
+        });
         
         return nodeElement;
     }
@@ -842,12 +925,19 @@ class StoryUI {
         const storyTitle = this.storyManager.currentStory?.title;
         const isHellStory = storyTitle === "To The Hell We Go";
         
+        // Check if this is an event story for special styling
+        const isEventStory = this.storyManager.isEventStory();
+        
         if (isCompleted) {
             segment.classList.add('completed');
         }
         
         if (isHellStory) {
             segment.classList.add('hellish-path');
+        }
+        
+        if (isEventStory) {
+            segment.classList.add('event-path');
         }
         
         // Calculate path position and dimensions
@@ -873,6 +963,9 @@ class StoryUI {
         }
         if (isHellStory) {
             arrow.classList.add('hellish-arrow');
+        }
+        if (isEventStory) {
+            arrow.classList.add('event-arrow');
         }
         segment.appendChild(arrow);
         
@@ -910,6 +1003,10 @@ class StoryUI {
             return;
         }
 
+        // Get the full stage data from the story manager
+        const fullStageData = this.storyManager.getAllStages()[stage.index];
+        console.log('[StoryUI] Full stage data from story manager:', fullStageData);
+
         // Reset UI elements
         this.stageChoicesContainer.classList.add('hidden');
         this.stageRecruitContainer.classList.add('hidden');
@@ -918,31 +1015,31 @@ class StoryUI {
         switch (stage.type) {
             case 'battle':
             case 'boss':
-                this.showStageDetails(stage);
+                await this.showStageDetails(fullStageData);
                 break;
             case 'choice':
-                this.showStageDetails(stage); // Show base details
-                this.renderStageChoices(stage.choices); // Render choices
+                await this.showStageDetails(fullStageData); // Show base details
+                this.renderStageChoices(fullStageData.choices); // Render choices
                 break;
             case 'recruit':
-                this.showStageDetails(stage); // Show base details
-                await this.renderRecruitmentOffers(stage); // Render recruitment offers
+                await this.showStageDetails(fullStageData); // Show base details
+                await this.renderRecruitmentOffers(fullStageData); // Render recruitment offers
                 break;
             case 'character_unlock':
-                this.showStageDetails(stage); // Show base details
-                await this.renderCharacterUnlockOffers(stage); // Render character unlock offers
+                await this.showStageDetails(fullStageData); // Show base details
+                await this.renderCharacterUnlockOffers(fullStageData); // Render character unlock offers
                 break;
             case 'ally_selection':
-                this.showStageDetails(stage); // Show base details - custom demonic interface is rendered inside showStageDetails
+                await this.showStageDetails(fullStageData); // Show base details - custom demonic interface is rendered inside showStageDetails
                 // Note: No additional renderAllySelection call - demonic interface handles everything
                 break;
             case 'healing_and_recruit':
-                this.showStageDetails(stage); // Show base details
+                await this.showStageDetails(fullStageData); // Show base details
                 // Don't process effects here - wait for user to click "Continue Journey"
                 break;
             default:
                 console.error("Unknown stage type:", stage.type);
-                this.showStageDetails(stage); // Default to showing details
+                await this.showStageDetails(fullStageData); // Default to showing details
         }
     }
 
@@ -950,115 +1047,102 @@ class StoryUI {
      * Show the stage details panel
      * @param {Object} stage - The stage data
      */
-    showStageDetails(stage) {
-        // Populate common stage details
-        this.stageNameElement.textContent = stage.name;
-        this.stageDifficultyElement.textContent = stage.difficulty ? `Difficulty: ${stage.difficulty}` : 'Non-Combat'; // Show difficulty or 'Non-Combat'
-        this.stageDescriptionElement.textContent = stage.description;
-        
-        // Set stage image - use a placeholder if none available or for non-battle stages
-        let imagePath = 'images/stages/default.jpg'; // Default image
-        
-        // Determine if this is a combat stage (battle, boss, or has enemies)
-        const isCombatStage = stage.type === 'battle' || stage.type === 'boss' || 
-                             stage.boss || stage.enemies || 
-                             (!stage.type && stage.difficulty); // If no type but has difficulty, assume battle
-        
-        if (isCombatStage) {
-            // Try to load specific image for combat stages
-            // Assuming stage.id is something like 'storyid_stagename'
-            // We might need a better way to determine the image filename
-            const potentialImageName = stage.id ? `${stage.id}.jpg` : 'default.jpg';
-            imagePath = `images/stages/${potentialImageName}`;
-        }
-        
-        this.stageImageElement.src = imagePath;
-        this.stageImageElement.onerror = () => {
-            this.stageImageElement.src = 'images/stages/default.jpg'; // Fallback on error
-        };
-        
-        // Get the stage actions container for hiding/showing
-        const stageActionsContainer = this.stageDetailsElement.querySelector('.stage-actions');
-        
-        // Reset visibility states
-        this.enemyListElement.parentElement.classList.remove('hidden');
-        this.rewardListElement.parentElement.classList.remove('hidden');
-        this.stageChoicesContainer.classList.add('hidden');
-        this.stageRecruitContainer.classList.add('hidden');
-        this.startStageButton.classList.remove('hidden'); // Default to visible
-        this.startStageButton.disabled = false; // Default to enabled
-        this.startStageButton.textContent = 'Begin Battle'; // Default text
-        if (this.closeDetailsButton) this.closeDetailsButton.classList.remove('hidden'); // Default to visible
-        if (stageActionsContainer) stageActionsContainer.classList.remove('hidden'); // Default to visible
-        
-        // Handle stage type specifics
-        if (stage.type === 'choice') {
-            this.enemyListElement.parentElement.classList.add('hidden');
-            this.rewardListElement.parentElement.classList.add('hidden');
-            this.startStageButton.classList.add('hidden'); // Hide start button
-            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden'); // Hide close button for choices
-            if (stageActionsContainer) stageActionsContainer.classList.add('hidden'); // Hide entire actions container
-            this.stageChoicesContainer.classList.remove('hidden');
-            this.renderStageChoices(stage.choices); // Render choices
-        } else if (stage.type === 'recruit') {
-            this.enemyListElement.parentElement.classList.add('hidden');
-            this.rewardListElement.parentElement.classList.add('hidden');
-            // Always hide start button for recruitment stages (recruitment is handled by clicking character cards)
-            this.startStageButton.classList.add('hidden');
-            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden'); // Hide close button for recruitment
-            if (stageActionsContainer) stageActionsContainer.classList.add('hidden'); // Hide entire actions container
-            this.stageRecruitContainer.classList.remove('hidden');
-            this.renderRecruitmentOffers(stage); // Render recruitment offers
-        } else if (stage.type === 'character_unlock') {
-            console.log('[StoryUI] Handling character_unlock stage type');
-            this.enemyListElement.parentElement.classList.add('hidden');
-            this.rewardListElement.parentElement.classList.add('hidden');
-            this.startStageButton.classList.add('hidden'); // Hide start button
-            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden'); // Hide close button for character unlock
-            if (stageActionsContainer) stageActionsContainer.classList.add('hidden'); // Hide entire actions container
-            this.stageRecruitContainer.classList.remove('hidden');
-            console.log('[StoryUI] About to call renderCharacterUnlockOffers');
-            this.renderCharacterUnlockOffers(stage); // Render character unlock offers
-        } else if (stage.type === 'ally_selection') {
-            console.log('[StoryUI] Handling ally_selection stage type');
-            this.enemyListElement.parentElement.classList.add('hidden');
-            this.rewardListElement.parentElement.classList.add('hidden');
-            this.stageRecruitContainer.classList.add('hidden'); // Hide recruit container
-            this.startStageButton.classList.remove('hidden'); // Keep start button visible
-            this.startStageButton.textContent = 'Call for Reinforcements'; // Change button text
-            this.startStageButton.disabled = false;
-            if (this.closeDetailsButton) this.closeDetailsButton.classList.remove('hidden'); // Keep close button
-            if (stageActionsContainer) stageActionsContainer.classList.remove('hidden'); // Keep actions container
+    async showStageDetails(stage) {
+        const detailsPanel = document.getElementById('stage-details');
+        const stageName = document.getElementById('stage-name');
+        const stageDifficulty = document.getElementById('stage-difficulty');
+        const stageImage = document.getElementById('stage-image');
+        const stageDescription = document.getElementById('stage-description');
+        const enemyList = document.getElementById('enemy-list');
+        const rewardList = document.getElementById('reward-list');
+        const choicesContainer = document.getElementById('stage-choices-container');
+        const recruitContainer = document.getElementById('stage-recruit-container');
+        const stageActions = document.querySelector('.stage-actions');
+
+        // Check if this is a battle stage
+        const isBattleStage = stage.type === 'battle' || (stage.enemies && stage.enemies.length > 0);
+
+        // Always show stage header
+        stageName.textContent = stage.name;
+        stageDifficulty.textContent = `Difficulty: ${stage.difficulty || 'Unknown'}`;
+
+        if (isBattleStage) {
+            // Simplified view for battle stages - only enemies and loot
             
-            // Create a custom ally selection interface in the description area
-            this.renderDemonicAllyInterface(stage);
-            // Note: Continue to show the details panel but skip other rendering
-        } else if (stage.type === 'healing_and_recruit') {
-            console.log('[StoryUI] Handling healing_and_recruit stage type');
-            this.enemyListElement.parentElement.classList.add('hidden');
-            this.rewardListElement.parentElement.classList.add('hidden');
-            this.startStageButton.classList.remove('hidden'); // Keep start button visible
-            this.startStageButton.textContent = 'Continue Journey'; // Change button text
-            this.startStageButton.disabled = false;
-            if (this.closeDetailsButton) this.closeDetailsButton.classList.remove('hidden'); // Keep close button
-            if (stageActionsContainer) stageActionsContainer.classList.remove('hidden'); // Keep actions container
-        } else if (isCombatStage) {
-            // This is a combat stage (battle, boss, or has enemies/difficulty)
-            // Populate enemies and rewards for battle stages
-            this.renderEnemyList(this.getMockEnemiesForStage(stage));
-            this.renderRewardList(this.getMockRewardsForStage(stage));
+            // Hide stage image, description, choices, and recruit sections
+            document.querySelector('.stage-image-container').style.display = 'none';
+            stageDescription.style.display = 'none';
+            choicesContainer.classList.add('hidden');
+            recruitContainer.classList.add('hidden');
+            
+            // Show enemies section
+            document.querySelector('.stage-enemies').style.display = 'block';
+            await this.renderBattleEnemyList(stage.enemies || []);
+            
+            // Show loot section
+            document.querySelector('.stage-rewards').style.display = 'block';
+            this.renderLootTable(stage);
+            
         } else {
-            // Unknown stage type - assume non-combat and hide action buttons for safety
-            this.enemyListElement.parentElement.classList.add('hidden');
-            this.rewardListElement.parentElement.classList.add('hidden');
-            this.startStageButton.classList.add('hidden');
-            if (this.closeDetailsButton) this.closeDetailsButton.classList.add('hidden');
-            if (stageActionsContainer) stageActionsContainer.classList.add('hidden');
-            console.warn('[StoryUI] Unknown stage type:', stage.type, 'for stage:', stage.name);
+            // Full view for non-combat stages
+            
+            // Show all sections
+            document.querySelector('.stage-image-container').style.display = 'block';
+            stageDescription.style.display = 'block';
+            
+            // Set stage image and description
+            stageImage.src = stage.backgroundImage || 'images/stages/default.png';
+            stageDescription.textContent = stage.description || 'No description available.';
+
+            // Handle choices for choice stages
+            if (stage.choices && stage.choices.length > 0) {
+                this.renderStageChoices(stage.choices);
+                choicesContainer.classList.remove('hidden');
+            } else {
+                choicesContainer.classList.add('hidden');
+            }
+
+            // Handle recruitment for recruit stages
+            if (stage.type === 'recruit' || stage.recruitTag || stage.specificCharacters) {
+                this.renderRecruitmentOffers(stage);
+                recruitContainer.classList.remove('hidden');
+            } else if (stage.type === 'ally_selection') {
+                this.renderAllySelection(stage);
+                recruitContainer.classList.remove('hidden');
+            } else if (stage.type === 'character_unlock') {
+                this.renderCharacterUnlockOffers(stage);
+                recruitContainer.classList.remove('hidden');
+        } else if (stage.type === 'healing_and_recruit') {
+                this.handleHealingAndRecruitStage(stage);
+                recruitContainer.classList.remove('hidden');
+        } else {
+                recruitContainer.classList.add('hidden');
+            }
+
+            // Hide enemies and rewards for non-combat stages
+            document.querySelector('.stage-enemies').style.display = 'none';
+            document.querySelector('.stage-rewards').style.display = 'none';
         }
-        
-        // Show details panel
-        this.stageDetailsElement.classList.add('visible');
+
+        // Show appropriate action button
+        const startButton = document.getElementById('start-stage-button');
+        if (isBattleStage) {
+            startButton.textContent = 'Begin Battle';
+            startButton.style.display = 'block';
+        } else if (stage.type === 'choice') {
+            startButton.style.display = 'none'; // Choices have their own buttons
+        } else if (stage.type === 'recruit' || stage.type === 'ally_selection' || stage.type === 'character_unlock') {
+            startButton.style.display = 'none'; // Recruitment has its own buttons
+        } else {
+            startButton.textContent = 'Continue';
+            startButton.style.display = 'block';
+        }
+
+        // Show/hide stage modifiers section
+        this.renderStageModifiers(stage);
+
+        // Show the panel
+        detailsPanel.classList.add('visible');
     }
 
     /**
@@ -1515,6 +1599,139 @@ class StoryUI {
     }
 
     /**
+     * Render stage modifiers section with descriptions
+     * @param {Object} stage - The stage data
+     */
+    renderStageModifiers(stage) {
+        const modifiersSection = document.getElementById('stage-modifiers-section');
+        const modifiersList = document.getElementById('stage-modifiers-list');
+        
+        if (!modifiersSection || !modifiersList) {
+            console.warn('[StoryUI] Stage modifiers section not found in DOM');
+            return;
+        }
+
+        // Clear existing content
+        modifiersList.innerHTML = '';
+
+        // Get stage modifiers from either 'modifiers' or 'stageEffects' properties
+        const stageModifiers = stage.modifiers || stage.stageEffects || [];
+
+        if (!stageModifiers || stageModifiers.length === 0) {
+            // Hide section if no modifiers
+            modifiersSection.style.display = 'none';
+            return;
+        }
+
+        // Show section and populate with modifiers
+        modifiersSection.style.display = 'block';
+
+        stageModifiers.forEach(modifier => {
+            this.createStageModifierItem(modifier, modifiersList);
+        });
+    }
+
+    /**
+     * Create a stage modifier item element with proper styling and description
+     * @param {Object} modifier - The modifier data
+     * @param {HTMLElement} container - The container to append the modifier to
+     */
+    createStageModifierItem(modifier, container) {
+        // Get modifier definition from stage modifiers registry if available
+        let modifierData = modifier;
+        if (window.stageModifiersRegistry && typeof window.stageModifiersRegistry.getModifier === 'function') {
+            const registeredModifier = window.stageModifiersRegistry.getModifier(modifier.id || modifier.name);
+            if (registeredModifier) {
+                modifierData = { ...modifier, ...registeredModifier };
+            }
+        }
+
+        // Create modifier item element
+        const modifierItem = document.createElement('div');
+        modifierItem.className = 'stage-modifier-item';
+        modifierItem.dataset.modifierId = modifierData.id || modifierData.name;
+
+        // Determine modifier type based on ID and effects
+        const modifierType = this.determineModifierType(modifierData);
+        modifierItem.setAttribute('data-modifier-type', modifierType);
+
+        // Create icon container
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'stage-modifier-icon';
+        iconContainer.textContent = modifierData.icon || '⭐';
+
+        // Create content container
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'stage-modifier-content';
+
+        // Create modifier name
+        const nameElement = document.createElement('div');
+        nameElement.className = 'stage-modifier-name';
+        nameElement.textContent = modifierData.name || modifierData.id || 'Unknown Modifier';
+
+        // Create modifier description
+        const descriptionElement = document.createElement('div');
+        descriptionElement.className = 'stage-modifier-description';
+        descriptionElement.textContent = modifierData.description || 'No description available';
+
+        // Create modifier type label
+        const typeElement = document.createElement('div');
+        typeElement.className = 'stage-modifier-type';
+        typeElement.textContent = modifierType;
+
+        // Assemble the modifier item
+        contentContainer.appendChild(nameElement);
+        contentContainer.appendChild(descriptionElement);
+        contentContainer.appendChild(typeElement);
+
+        modifierItem.appendChild(iconContainer);
+        modifierItem.appendChild(contentContainer);
+
+        // Add hover tooltip for modifier details
+        this.addStageModifierTooltip(modifierItem, modifierData);
+
+        // Add to container
+        container.appendChild(modifierItem);
+
+        console.log(`[StoryUI] Added stage modifier: ${modifierData.name} (${modifierType})`);
+    }
+
+    /**
+     * Determine modifier type based on ID and effects for proper styling
+     * @param {Object} modifier - The modifier data
+     * @returns {string} - The modifier type ('damage', 'healing', 'utility', 'debuff', 'mixed')
+     */
+    determineModifierType(modifier) {
+        const id = (modifier.id || modifier.name || '').toLowerCase();
+        
+        // Check for damage types
+        if (id.includes('burning') || id.includes('damage') || id.includes('toxic') || 
+            id.includes('fire') && !id.includes('heal')) {
+            return 'damage';
+        }
+        
+        // Check for healing types
+        if (id.includes('heal') || id.includes('rain') || id.includes('wind') || 
+            id.includes('medicine') || id.includes('pack_healing')) {
+            return 'healing';
+        }
+        
+        // Check for mixed types (like healing fire)
+        if ((id.includes('fire') && id.includes('heal')) || id.includes('power_of_love')) {
+            return 'mixed';
+        }
+        
+        // Check for debuff types
+        if (id.includes('smoke') || id.includes('space') || id.includes('frozen') || 
+            id.includes('dark') || id.includes('disable')) {
+            return 'debuff';
+        }
+        
+        // Default to utility for everything else
+        return 'utility';
+    }
+
+    /**
      * Render the enemy list in the stage details panel
      * @param {Array} enemies - Array of enemy data
      */
@@ -1576,6 +1793,966 @@ class StoryUI {
             
             this.rewardListElement.appendChild(rewardElement);
         });
+    }
+
+    /**
+     * Render enemies for battle stages using Loading Screen images (9:16 format)
+     * @param {Array} enemies - Array of enemy data from stage
+     */
+    async renderBattleEnemyList(enemies) {
+        const enemyList = document.getElementById('enemy-list');
+        enemyList.innerHTML = '';
+        
+        if (!enemies || enemies.length === 0) {
+            enemyList.innerHTML = '<p>No enemies found for this stage.</p>';
+            return;
+        }
+        
+        // Process enemies sequentially to maintain order
+        for (const enemy of enemies) {
+            const enemyElement = document.createElement('div');
+            enemyElement.className = 'battle-enemy-preview';
+            
+            const enemyImageContainer = document.createElement('div');
+            enemyImageContainer.className = 'battle-enemy-image-container';
+            
+            const enemyImage = document.createElement('img');
+            enemyImage.className = 'battle-enemy-image';
+            
+            // Use character ID to find Loading Screen image
+            const characterId = enemy.characterId;
+            const loadingScreenFilename = await this.getLoadingScreenImageName(characterId);
+            const loadingScreenPath = `Loading Screen/${loadingScreenFilename}`;
+            
+            enemyImage.src = loadingScreenPath;
+            enemyImage.alt = characterId;
+            enemyImage.onerror = () => {
+                // Fallback to default enemy image
+                enemyImage.src = 'Icons/default-icon.jpg';
+            };
+            
+            const enemyName = document.createElement('div');
+            enemyName.className = 'battle-enemy-name';
+            enemyName.textContent = this.formatCharacterName(characterId);
+            
+            // Add modifications info if present
+            if (enemy.modifications) {
+                const modificationsElement = document.createElement('div');
+                modificationsElement.className = 'battle-enemy-modifications';
+                
+                const modsList = [];
+                if (enemy.modifications.hpMultiplier && enemy.modifications.hpMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.hpMultiplier * 100)}% HP`);
+                }
+                if (enemy.modifications.damageMultiplier && enemy.modifications.damageMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.damageMultiplier * 100)}% Damage`);
+                }
+                
+                if (modsList.length > 0) {
+                    modificationsElement.textContent = modsList.join(', ');
+                    enemyElement.appendChild(modificationsElement);
+                }
+            }
+            
+            enemyImageContainer.appendChild(enemyImage);
+            enemyElement.appendChild(enemyImageContainer);
+            enemyElement.appendChild(enemyName);
+            
+            enemyList.appendChild(enemyElement);
+        }
+    }
+
+    /**
+     * Render the loot table for battle stages
+     * @param {Object} stage - Stage data containing loot information
+     */
+    renderLootTable(stage) {
+        const rewardList = document.getElementById('reward-list');
+        rewardList.innerHTML = '';
+        
+        // Check if stage has loot defined
+        if (!stage.loot) {
+            rewardList.innerHTML = '<p>No loot defined for this stage.</p>';
+            return;
+        }
+        
+        const lootContainer = document.createElement('div');
+        lootContainer.className = 'loot-table-container';
+        
+        // Handle new format: stage.loot.items (with dropChance system)
+        if (stage.loot.items && stage.loot.items.length > 0) {
+            // Separate guaranteed (dropChance 1.0) from random items
+            const guaranteedItems = stage.loot.items.filter(item => item.dropChance >= 1.0);
+            const randomItems = stage.loot.items.filter(item => item.dropChance < 1.0);
+            
+            // Render guaranteed items
+            if (guaranteedItems.length > 0) {
+                const guaranteedSection = document.createElement('div');
+                guaranteedSection.className = 'loot-section guaranteed-loot';
+                
+                const guaranteedTitle = document.createElement('h4');
+                guaranteedTitle.textContent = 'Guaranteed Rewards';
+                guaranteedTitle.className = 'loot-section-title';
+                guaranteedSection.appendChild(guaranteedTitle);
+                
+                const guaranteedGrid = document.createElement('div');
+                guaranteedGrid.className = 'loot-grid';
+                
+                guaranteedItems.forEach(item => {
+                    const lootItem = this.createLootItemElement(item, 'guaranteed');
+                    guaranteedGrid.appendChild(lootItem);
+                });
+                
+                guaranteedSection.appendChild(guaranteedGrid);
+                lootContainer.appendChild(guaranteedSection);
+            }
+            
+            // Render random items
+            if (randomItems.length > 0) {
+                const randomSection = document.createElement('div');
+                randomSection.className = 'loot-section random-loot';
+                
+                const randomTitle = document.createElement('h4');
+                randomTitle.textContent = 'Possible Rewards';
+                randomTitle.className = 'loot-section-title';
+                randomSection.appendChild(randomTitle);
+                
+                const randomGrid = document.createElement('div');
+                randomGrid.className = 'loot-grid';
+                
+                randomItems.forEach(item => {
+                    const lootItem = this.createLootItemElement(item, 'random');
+                    randomGrid.appendChild(lootItem);
+                });
+                
+                randomSection.appendChild(randomGrid);
+                lootContainer.appendChild(randomSection);
+            }
+        }
+        
+        // Handle legacy format: stage.loot.guaranteed and stage.loot.random
+        else {
+            // Render guaranteed loot
+            if (stage.loot.guaranteed && stage.loot.guaranteed.length > 0) {
+                const guaranteedSection = document.createElement('div');
+                guaranteedSection.className = 'loot-section guaranteed-loot';
+                
+                const guaranteedTitle = document.createElement('h4');
+                guaranteedTitle.textContent = 'Guaranteed Rewards';
+                guaranteedTitle.className = 'loot-section-title';
+                guaranteedSection.appendChild(guaranteedTitle);
+                
+                const guaranteedGrid = document.createElement('div');
+                guaranteedGrid.className = 'loot-grid';
+                
+                stage.loot.guaranteed.forEach(item => {
+                    const lootItem = this.createLootItemElement(item, 'guaranteed');
+                    guaranteedGrid.appendChild(lootItem);
+                });
+                
+                guaranteedSection.appendChild(guaranteedGrid);
+                lootContainer.appendChild(guaranteedSection);
+            }
+            
+            // Render random loot
+            if (stage.loot.random && stage.loot.random.length > 0) {
+                const randomSection = document.createElement('div');
+                randomSection.className = 'loot-section random-loot';
+                
+                const randomTitle = document.createElement('h4');
+                randomTitle.textContent = 'Possible Rewards';
+                randomTitle.className = 'loot-section-title';
+                randomSection.appendChild(randomTitle);
+                
+                const randomGrid = document.createElement('div');
+                randomGrid.className = 'loot-grid';
+                
+                stage.loot.random.forEach(item => {
+                    const lootItem = this.createLootItemElement(item, 'random');
+                    randomGrid.appendChild(lootItem);
+                });
+                
+                randomSection.appendChild(randomGrid);
+                lootContainer.appendChild(randomSection);
+            }
+        }
+        
+        // If no loot sections were added, show default message
+        if (lootContainer.children.length === 0) {
+            lootContainer.innerHTML = '<p>No specific loot defined for this stage.</p>';
+        }
+        
+        rewardList.appendChild(lootContainer);
+    }
+
+    /**
+     * Create a loot item element for display
+     * @param {Object} item - Loot item data
+     * @param {string} type - 'guaranteed' or 'random'
+     * @returns {HTMLElement} - Loot item element
+     */
+    createLootItemElement(item, type) {
+        const lootElement = document.createElement('div');
+        lootElement.className = `loot-item ${type}`;
+        
+        const lootImage = document.createElement('img');
+        lootImage.className = 'loot-item-image';
+        
+        // Try to get item image from item system
+        if (window.ItemRegistry) {
+            try {
+                const itemData = window.ItemRegistry.getItem(item.itemId);
+                if (itemData && itemData.icon) {
+                    lootImage.src = itemData.icon;
+                } else {
+                    lootImage.src = `items/${item.itemId}.webp`;
+                }
+            } catch (error) {
+                lootImage.src = `items/${item.itemId}.webp`;
+            }
+        } else {
+            lootImage.src = `items/${item.itemId}.webp`;
+        }
+        
+        lootImage.alt = item.itemId;
+        lootImage.onerror = () => {
+            lootImage.src = 'Icons/default-icon.jpg';
+        };
+        
+        const lootName = document.createElement('div');
+        lootName.className = 'loot-item-name';
+        lootName.textContent = this.formatItemName(item.itemId);
+        
+        const lootQuantity = document.createElement('div');
+        lootQuantity.className = 'loot-item-quantity';
+        
+        // Add appropriate class based on item type (use type parameter for legacy format)
+        if (type === 'guaranteed' || item.dropChance >= 1.0) {
+            lootQuantity.classList.add('guaranteed');
+        } else {
+            lootQuantity.classList.add('random');
+        }
+        
+        // Handle both old format (quantity) and new format (quantityMin/quantityMax) with better formatting
+        if (item.quantity && item.quantity > 1) {
+            lootQuantity.innerHTML = `<span class="quantity-icon multiple"></span>${item.quantity} items`;
+        } else if (item.quantityMin !== undefined && item.quantityMax !== undefined) {
+            if (item.quantityMin === item.quantityMax) {
+                if (item.quantityMin > 1) {
+                    lootQuantity.innerHTML = `<span class="quantity-icon multiple"></span>${item.quantityMin} items`;
+                } else {
+                    lootQuantity.innerHTML = `<span class="quantity-icon single"></span>1 item`;
+                }
+            } else {
+                lootQuantity.innerHTML = `<span class="quantity-icon range"></span>${item.quantityMin}-${item.quantityMax} items`;
+            }
+        } else {
+            // Single item case
+            lootQuantity.innerHTML = `<span class="quantity-icon single"></span>1 item`;
+        }
+        
+        // Add drop chance for random loot
+        if (type === 'random' && item.dropChance) {
+            const dropChance = document.createElement('div');
+            dropChance.className = 'loot-item-chance';
+            dropChance.textContent = `${Math.round(item.dropChance * 100)}%`;
+            lootElement.appendChild(dropChance);
+        }
+        
+        lootElement.appendChild(lootImage);
+        lootElement.appendChild(lootName);
+        if (lootQuantity.innerHTML) {
+            lootElement.appendChild(lootQuantity);
+        }
+        
+        // Add hover tooltip for item details
+        this.addLootItemTooltip(lootElement, item);
+        
+        return lootElement;
+    }
+
+    /**
+     * Add hover tooltip to loot item element
+     * @param {HTMLElement} element - The loot item element
+     * @param {Object} item - The item data
+     */
+    addLootItemTooltip(element, item) {
+        console.log('Adding tooltip to element:', element, 'with item:', item);
+        
+        element.addEventListener('mouseenter', (event) => {
+            console.log('Mouse entered loot item, showing tooltip');
+            this.showLootItemTooltip(event, item);
+        });
+        
+        element.addEventListener('mouseleave', () => {
+            console.log('Mouse left loot item, hiding tooltip');
+            this.hideLootItemTooltip();
+        });
+        
+        element.addEventListener('mousemove', (event) => {
+            this.updateLootItemTooltipPosition(event);
+        });
+    }
+
+    /**
+     * Show tooltip with item information
+     * @param {Event} event - Mouse event
+     * @param {Object} item - Item data
+     */
+    showLootItemTooltip(event, item) {
+        console.log('showLootItemTooltip called with:', { event, item });
+        
+        this.hideLootItemTooltip(); // Hide any existing tooltip
+        
+        // Get item data from ItemRegistry if available
+        let itemData = null;
+        if (window.ItemRegistry) {
+            console.log('ItemRegistry found, attempting to get item:', item.itemId);
+            try {
+                itemData = window.ItemRegistry.getItem(item.itemId);
+                console.log('Item data retrieved:', itemData);
+            } catch (error) {
+                console.warn(`Could not find item data for ${item.itemId}:`, error);
+            }
+        } else {
+            console.warn('ItemRegistry not available on window');
+        }
+        
+        // Fallback: create basic item data if none found
+        if (!itemData) {
+            console.log('Creating fallback item data');
+            itemData = {
+                name: this.formatItemName(item.itemId),
+                description: `A ${this.formatItemName(item.itemId)} that modifies character stats.`,
+                rarity: 'common',
+                stats: this.getBasicItemStats(item.itemId)
+            };
+        }
+        
+        const tooltip = document.createElement('div');
+        tooltip.className = 'loot-item-tooltip';
+        tooltip.id = 'loot-item-tooltip';
+        
+        // Item name and rarity
+        const itemName = itemData ? itemData.name : this.formatItemName(item.itemId);
+        const itemRarity = itemData ? itemData.rarity : 'common';
+        
+        console.log('Creating tooltip with:', { itemName, itemRarity, itemData });
+        
+        tooltip.innerHTML = `
+            <div class="tooltip-header ${itemRarity}">
+                <h4>${itemName}</h4>
+                <span class="rarity-badge ${itemRarity}">${itemRarity.charAt(0).toUpperCase() + itemRarity.slice(1)}</span>
+            </div>
+            <div class="tooltip-content">
+                ${itemData ? `<p class="item-description">${itemData.description}</p>` : ''}
+                ${this.renderItemStats(itemData)}
+                ${this.renderItemDropInfo(item)}
+            </div>
+        `;
+        
+        console.log('Appending tooltip to body:', tooltip);
+        document.body.appendChild(tooltip);
+        
+        // Position tooltip immediately
+        this.updateLootItemTooltipPosition(event);
+        console.log('Tooltip should now be visible');
+    }
+
+    /**
+     * Render item stats for tooltip
+     * @param {Object} itemData - Item data from registry
+     * @returns {string} - HTML string for stats
+     */
+    renderItemStats(itemData) {
+        if (!itemData) return '';
+        
+        // Use statBonuses from the Item object (item-system.js structure)
+        const stats = itemData.statBonuses || itemData.stats || {};
+        const hasStats = Object.values(stats).some(value => value && value !== 0);
+        
+        // Debug: console.log('renderItemStats - stats found:', stats, 'hasStats:', hasStats);
+        
+        if (!hasStats) return '';
+        
+        let statsHtml = '<div class="item-stats"><h5>Stat Modifications:</h5><p class="stat-explanation">Equipping this item will modify your character\'s stats:</p><ul>';
+        
+        Object.entries(stats).forEach(([stat, value]) => {
+            if (value && value !== 0) {
+                const statName = this.formatStatName(stat);
+                const prefix = value > 0 ? '+' : '';
+                const changeText = value > 0 ? 'increased' : 'decreased';
+                statsHtml += `<li><span class="stat-name">${statName}:</span> <span class="stat-value ${value > 0 ? 'positive' : 'negative'}">${prefix}${value}</span> <span class="stat-change-indicator">(${changeText})</span></li>`;
+            }
+        });
+        
+        statsHtml += '</ul></div>';
+        return statsHtml;
+    }
+
+    /**
+     * Render drop information for tooltip
+     * @param {Object} item - Item drop data
+     * @returns {string} - HTML string for drop info
+     */
+    renderItemDropInfo(item) {
+        let dropInfo = '<div class="drop-info">';
+        
+        // Drop chance
+        if (item.dropChance !== undefined) {
+            if (item.dropChance >= 1.0) {
+                dropInfo += '<p class="drop-chance guaranteed">Guaranteed Drop</p>';
+            } else {
+                dropInfo += `<p class="drop-chance">Drop Chance: ${Math.round(item.dropChance * 100)}%</p>`;
+            }
+        }
+        
+        // Quantity info
+        if (item.quantity && item.quantity > 1) {
+            dropInfo += `<p class="quantity-info">Quantity: ${item.quantity}</p>`;
+        } else if (item.quantityMin !== undefined && item.quantityMax !== undefined) {
+            if (item.quantityMin === item.quantityMax) {
+                if (item.quantityMin > 1) {
+                    dropInfo += `<p class="quantity-info">Quantity: ${item.quantityMin}</p>`;
+                }
+            } else {
+                dropInfo += `<p class="quantity-info">Quantity: ${item.quantityMin}-${item.quantityMax}</p>`;
+            }
+        }
+        
+        dropInfo += '</div>';
+        return dropInfo;
+    }
+
+    /**
+     * Format stat names for display
+     * @param {string} statName - Raw stat name
+     * @returns {string} - Formatted stat name
+     */
+    formatStatName(statName) {
+        const statMap = {
+            'physicalDamage': 'Physical Damage',
+            'magicalDamage': 'Magical Damage',
+            'armor': 'Armor',
+            'magicalShield': 'Magical Shield',
+            'hp': 'Health',
+            'mana': 'Mana',
+            'speed': 'Speed',
+            'critChance': 'Critical Chance',
+            'critMultiplier': 'Critical Multiplier',
+            'dodgeChance': 'Dodge Chance',
+            'hpPerTurn': 'HP Regeneration',
+            'manaPerTurn': 'Mana Regeneration'
+        };
+        
+        return statMap[statName] || statName;
+    }
+
+    /**
+     * Update tooltip position
+     * @param {Event} event - Mouse event
+     */
+    updateLootItemTooltipPosition(event) {
+        const tooltip = document.getElementById('loot-item-tooltip');
+        if (!tooltip) {
+            console.warn('Tooltip not found for positioning');
+            return;
+        }
+        
+        // Get dimensions without toggling visibility (CSS handles that now)
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        let x = event.clientX + 15;
+        let y = event.clientY + 15;
+        
+        // Adjust if tooltip would go off-screen horizontally
+        if (x + tooltipRect.width > viewportWidth) {
+            x = event.clientX - tooltipRect.width - 15;
+        }
+        
+        // Adjust if tooltip would go off-screen vertically
+        if (y + tooltipRect.height > viewportHeight) {
+            y = event.clientY - tooltipRect.height - 15;
+        }
+        
+        // Ensure tooltip stays within viewport bounds
+        x = Math.max(10, Math.min(x, viewportWidth - tooltipRect.width - 10));
+        y = Math.max(10, Math.min(y, viewportHeight - tooltipRect.height - 10));
+        
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+        
+        console.log('Tooltip positioned at:', { x, y, width: tooltipRect.width, height: tooltipRect.height });
+    }
+
+    /**
+     * Get basic item stats for fallback when ItemRegistry is not available
+     * @param {string} itemId - Item identifier
+     * @returns {Object} - Basic stats object
+     */
+    getBasicItemStats(itemId) {
+        // Provide fallback stats based on item name
+        const stats = {};
+        
+        if (itemId.includes('rifle') || itemId.includes('weapon') || itemId.includes('sword')) {
+            stats.physicalDamage = 25;
+        }
+        if (itemId.includes('gloves') || itemId.includes('magic') || itemId.includes('wand')) {
+            stats.magicalDamage = 25;
+        }
+        if (itemId.includes('armor') || itemId.includes('shield')) {
+            stats.armor = 15;
+            stats.magicalShield = 15;
+        }
+        if (itemId.includes('boots') || itemId.includes('speed')) {
+            stats.speed = 10;
+        }
+        
+        return stats;
+    }
+
+    /**
+     * Hide the loot item tooltip
+     */
+    hideLootItemTooltip() {
+        const tooltip = document.getElementById('loot-item-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    }
+
+    /**
+     * Add hover tooltip to stage modifier element
+     * @param {HTMLElement} element - The stage modifier element
+     * @param {Object} modifier - The modifier data
+     */
+    addStageModifierTooltip(element, modifier) {
+        element.addEventListener('mouseenter', (event) => {
+            this.showStageModifierTooltip(event, modifier);
+        });
+        
+        element.addEventListener('mouseleave', () => {
+            this.hideStageModifierTooltip();
+        });
+        
+        element.addEventListener('mousemove', (event) => {
+            this.updateStageModifierTooltipPosition(event);
+        });
+    }
+
+    /**
+     * Show tooltip with stage modifier information
+     * @param {Event} event - Mouse event
+     * @param {Object} modifier - Modifier data
+     */
+    showStageModifierTooltip(event, modifier) {
+        this.hideStageModifierTooltip(); // Hide any existing tooltip
+        
+        // Get enhanced modifier data from stage modifiers registry if available
+        let modifierData = modifier;
+        if (window.stageModifiersRegistry && typeof window.stageModifiersRegistry.getModifier === 'function') {
+            const registeredModifier = window.stageModifiersRegistry.getModifier(modifier.id || modifier.name);
+            if (registeredModifier) {
+                modifierData = { ...modifier, ...registeredModifier };
+            }
+        }
+        
+        const tooltip = document.createElement('div');
+        tooltip.className = 'stage-modifier-tooltip';
+        tooltip.id = 'stage-modifier-tooltip';
+        
+        // Modifier name and type
+        const modifierName = modifierData.name || this.formatModifierName(modifierData.id);
+        const modifierType = this.determineModifierType(modifierData);
+        const modifierIcon = modifierData.icon || '⭐';
+        
+        // Create tooltip content
+        const tooltipContent = `
+            <div class="tooltip-header stage-modifier-header">
+                <div class="modifier-icon-large">${modifierIcon}</div>
+                <div class="modifier-title-section">
+                    <h3 class="modifier-name">${modifierName}</h3>
+                    <div class="modifier-type-badge ${modifierType}">${modifierType.toUpperCase()}</div>
+                </div>
+            </div>
+            <div class="tooltip-body">
+                ${this.renderModifierDescription(modifierData)}
+                ${this.renderModifierEffects(modifierData)}
+                ${this.renderModifierTiming(modifierData)}
+            </div>
+        `;
+        
+        tooltip.innerHTML = tooltipContent;
+        document.body.appendChild(tooltip);
+        
+        // Position tooltip immediately
+        this.updateStageModifierTooltipPosition(event);
+    }
+
+    /**
+     * Render modifier description for tooltip
+     * @param {Object} modifier - Modifier data
+     * @returns {string} - HTML string for description
+     */
+    renderModifierDescription(modifier) {
+        if (!modifier.description) return '';
+        
+        return `
+            <div class="modifier-description">
+                <h5>Description:</h5>
+                <p>${modifier.description}</p>
+            </div>
+        `;
+    }
+
+    /**
+     * Render modifier effects for tooltip
+     * @param {Object} modifier - Modifier data
+     * @returns {string} - HTML string for effects
+     */
+    renderModifierEffects(modifier) {
+        if (!modifier.effect && !this.hasKnownEffects(modifier)) return '';
+        
+        let effectsHtml = '<div class="modifier-effects"><h5>Effects:</h5><ul>';
+        
+        const effect = modifier.effect || {};
+        const modifierId = modifier.id?.toLowerCase() || '';
+        
+        // Handle configured effect values
+        if (effect.value !== undefined) {
+            const effectType = this.getEffectType(modifier);
+            let valueText = effect.value;
+            
+            // Format different types of values
+            if (effectType === 'damage' || effectType === 'healing') {
+                valueText = `${effect.value} ${effectType}`;
+            } else if (effectType === 'percentage') {
+                valueText = `${Math.round(effect.value * 100)}%`;
+            } else if (effectType === 'speed_reduction') {
+                valueText = `${Math.round(effect.value * 100)}% speed reduction`;
+            } else if (effectType === 'stat_value') {
+                valueText = `${effect.value}`;
+            }
+            
+            effectsHtml += `<li><span class="effect-value">${valueText}</span></li>`;
+        } else {
+            // Handle known default effects when no specific value is configured
+            const defaultEffect = this.getDefaultEffectForModifier(modifierId);
+            if (defaultEffect) {
+                effectsHtml += `<li><span class="effect-value">${defaultEffect}</span></li>`;
+            }
+        }
+        
+        // Show target information
+        if (effect.target) {
+            const targetText = this.formatTargetType(effect.target);
+            effectsHtml += `<li><span class="effect-target">Affects: ${targetText}</span></li>`;
+        } else {
+            // Default targets for known modifiers
+            const defaultTarget = this.getDefaultTargetForModifier(modifierId);
+            if (defaultTarget) {
+                effectsHtml += `<li><span class="effect-target">Affects: ${defaultTarget}</span></li>`;
+            }
+        }
+        
+        // Show damage type
+        if (effect.damageType) {
+            effectsHtml += `<li><span class="effect-damage-type">Damage Type: ${effect.damageType}</span></li>`;
+        }
+        
+        // Show effect type
+        if (effect.type) {
+            const typeText = this.formatEffectType(effect.type);
+            effectsHtml += `<li><span class="effect-type">Type: ${typeText}</span></li>`;
+        }
+        
+        effectsHtml += '</ul></div>';
+        return effectsHtml;
+    }
+
+    /**
+     * Check if modifier has known effects even without effect object
+     * @param {Object} modifier - Modifier data
+     * @returns {boolean} - Whether modifier has known effects
+     */
+    hasKnownEffects(modifier) {
+        const knownModifiers = [
+            'burning_ground', 'healing_wind', 'its_raining_man', 'frozen_ground',
+            'toxic_miasma', 'atlantean_purification', 'smoke_cloud', 'healing_fire',
+            'carried_medicines', 'small_space', 'desert_heat', 'pack_healing'
+        ];
+        return knownModifiers.includes(modifier.id?.toLowerCase());
+    }
+
+    /**
+     * Get default effect for known modifiers
+     * @param {string} modifierId - Modifier ID
+     * @returns {string} - Default effect description
+     */
+    getDefaultEffectForModifier(modifierId) {
+        const defaults = {
+            'burning_ground': '150 fire damage per turn',
+            'healing_wind': '1% max HP healing per turn',
+            'its_raining_man': '100 HP healing per turn',
+            'frozen_ground': '25% speed reduction',
+            'toxic_miasma': '75 poison damage per turn',
+            'smoke_cloud': '21% miss chance for abilities',
+            'healing_fire': '50% of heal amount as fire damage',
+            'carried_medicines': '10% max mana every 5 turns',
+            'small_space': 'Dodge chance set to 0%',
+            'desert_heat': '50% crit chance, 50 HP/mana regen',
+            'pack_healing': 'Full HP restore on enemy death',
+            'atlantean_purification': 'Remove all debuffs per turn'
+        };
+        return defaults[modifierId];
+    }
+
+    /**
+     * Get default target for known modifiers
+     * @param {string} modifierId - Modifier ID
+     * @returns {string} - Default target description
+     */
+    getDefaultTargetForModifier(modifierId) {
+        const targets = {
+            'burning_ground': 'Player Characters',
+            'healing_wind': 'All Characters',
+            'its_raining_man': 'Player Characters',
+            'frozen_ground': 'All Characters',
+            'toxic_miasma': 'All Characters',
+            'smoke_cloud': 'Player Abilities',
+            'healing_fire': 'Player Characters',
+            'carried_medicines': 'Player Characters',
+            'small_space': 'All Characters',
+            'desert_heat': 'All Characters',
+            'pack_healing': 'Enemy Characters',
+            'atlantean_purification': 'All Characters'
+        };
+        return targets[modifierId];
+    }
+
+    /**
+     * Format effect type for display
+     * @param {string} effectType - Effect type
+     * @returns {string} - Formatted effect type
+     */
+    formatEffectType(effectType) {
+        const typeMap = {
+            'turn_start_damage': 'Turn Start Damage',
+            'turn_start_heal': 'Turn Start Healing',
+            'stat_override': 'Stat Override',
+            'stat_modifier': 'Stat Modifier',
+            'ability_modifier': 'Ability Modifier',
+            'passive_effect': 'Passive Effect'
+        };
+        return typeMap[effectType] || effectType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    /**
+     * Render modifier timing for tooltip
+     * @param {Object} modifier - Modifier data
+     * @returns {string} - HTML string for timing
+     */
+    renderModifierTiming(modifier) {
+        const timingInfo = [];
+        
+        if (modifier.onStageStart) {
+            timingInfo.push('Stage Start');
+        }
+        if (modifier.onTurnStart) {
+            timingInfo.push('Each Turn Start');
+        }
+        if (modifier.onTurnEnd) {
+            timingInfo.push('Each Turn End');
+        }
+        if (modifier.onStageEnd) {
+            timingInfo.push('Stage End');
+        }
+        
+        if (timingInfo.length === 0) return '';
+        
+        return `
+            <div class="modifier-timing">
+                <h5>Triggers:</h5>
+                <p>${timingInfo.join(', ')}</p>
+            </div>
+        `;
+    }
+
+    /**
+     * Get effect type for proper formatting
+     * @param {Object} modifier - Modifier data
+     * @returns {string} - Effect type
+     */
+    getEffectType(modifier) {
+        const id = (modifier.id || '').toLowerCase();
+        const effect = modifier.effect || {};
+        
+        // Check effect type first
+        if (effect.type === 'stat_override' || effect.type === 'stat_modifier') {
+            return 'stat_value';
+        }
+        
+        // Check based on modifier ID
+        if (id.includes('burn') || id.includes('toxic') || (id.includes('damage') && !id.includes('heal'))) {
+            return 'damage';
+        }
+        if (id.includes('heal') || id.includes('rain') || id.includes('wind') || id.includes('medicine')) {
+            return 'healing';
+        }
+        if (id.includes('frozen') || id.includes('speed')) {
+            return 'speed_reduction';
+        }
+        if (id.includes('desert_heat') || id.includes('crit')) {
+            return 'stat_value';
+        }
+        
+        // Check effect value for percentage detection
+        if (effect.value !== undefined && effect.value > 0 && effect.value < 1) {
+            return 'percentage';
+        }
+        
+        return 'value';
+    }
+
+    /**
+     * Format target type for display
+     * @param {string} target - Target type
+     * @returns {string} - Formatted target
+     */
+    formatTargetType(target) {
+        const targetMap = {
+            'all': 'All Characters',
+            'players': 'Player Characters',
+            'enemies': 'Enemy Characters',
+            'allies': 'Allies'
+        };
+        
+        return targetMap[target] || target;
+    }
+
+    /**
+     * Format modifier name for display
+     * @param {string} modifierId - Modifier identifier
+     * @returns {string} - Formatted name
+     */
+    formatModifierName(modifierId) {
+        if (!modifierId) return 'Unknown Modifier';
+        
+        return modifierId
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    /**
+     * Update stage modifier tooltip position
+     * @param {Event} event - Mouse event
+     */
+    updateStageModifierTooltipPosition(event) {
+        const tooltip = document.getElementById('stage-modifier-tooltip');
+        if (!tooltip) {
+            return;
+        }
+        
+        // Get dimensions without toggling visibility (CSS handles that now)
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        let x = event.clientX + 15;
+        let y = event.clientY + 15;
+        
+        // Adjust if tooltip would go off-screen horizontally
+        if (x + tooltipRect.width > viewportWidth) {
+            x = event.clientX - tooltipRect.width - 15;
+        }
+        
+        // Adjust if tooltip would go off-screen vertically
+        if (y + tooltipRect.height > viewportHeight) {
+            y = event.clientY - tooltipRect.height - 15;
+        }
+        
+        // Ensure tooltip stays within viewport bounds
+        x = Math.max(10, Math.min(x, viewportWidth - tooltipRect.width - 10));
+        y = Math.max(10, Math.min(y, viewportHeight - tooltipRect.height - 10));
+        
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+    }
+
+    /**
+     * Hide the stage modifier tooltip
+     */
+    hideStageModifierTooltip() {
+        const tooltip = document.getElementById('stage-modifier-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    }
+
+    /**
+     * Get Loading Screen image name for a character ID
+     * @param {string} characterId - Character identifier
+     * @returns {string} - Image filename
+     */
+    async getLoadingScreenImageName(characterId) {
+        try {
+            // Load character registry if not already cached
+            if (!this.characterRegistry) {
+                const response = await fetch('js/raid-game/character-registry.json');
+                if (response.ok) {
+                    const registryData = await response.json();
+                    this.characterRegistry = {};
+                    registryData.characters.forEach(char => {
+                        this.characterRegistry[char.id] = char;
+                    });
+                } else {
+                    console.warn('[StoryUI] Failed to load character registry, using fallback');
+                    return `${characterId}.png`;
+                }
+            }
+
+            // Look up character in registry
+            const character = this.characterRegistry[characterId];
+            if (character && character.ingameimage) {
+                // Extract filename from the ingameimage path (e.g., "Loading Screen/Schoolboy Siegfried.png" -> "Schoolboy Siegfried.png")
+                return character.ingameimage.replace('Loading Screen/', '');
+            }
+
+            // Fallback to formatted character ID
+            return this.formatCharacterName(characterId) + '.png';
+        } catch (error) {
+            console.error('[StoryUI] Error getting Loading Screen image:', error);
+            return `${characterId}.png`;
+        }
+    }
+
+    /**
+     * Format character name for display
+     * @param {string} characterId - Character identifier
+     * @returns {string} - Formatted name
+     */
+    formatCharacterName(characterId) {
+        // Convert character ID to readable name
+        return characterId
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    /**
+     * Format item name for display
+     * @param {string} itemId - Item identifier
+     * @returns {string} - Formatted name
+     */
+    formatItemName(itemId) {
+        // Convert item ID to readable name
+        return itemId
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
     }
 
     /**
@@ -3515,5 +4692,258 @@ class StoryUI {
             this.showPopupMessage('❌ Error processing stage effects. Please try again.', 'error', 3000);
             throw error; // Re-throw to be handled by startCurrentStage
         }
+    }
+
+    /**
+     * Open character inventory management
+     * @param {string} characterId - The character ID
+     */
+    async openCharacterInventory(characterId) {
+        console.log(`[StoryUI] Opening inventory for character: ${characterId}`);
+        
+        try {
+            // Verify inventory system is ready
+            const systemReady = !!(window.ItemRegistry && window.GlobalInventory && window.CharacterInventories);
+            if (!systemReady) {
+                console.error('[StoryUI] Inventory system not ready!');
+                this.showPopupMessage('❌ Inventory system not ready. Please wait a moment and try again.', 'error', 3000);
+                return;
+            }
+
+            if (!window.InventoryUIManager) {
+                console.error('[StoryUI] InventoryUIManager class not found!');
+                this.showPopupMessage('❌ Inventory manager not loaded. Please refresh the page.', 'error', 3000);
+                return;
+            }
+
+            // Initialize inventory UI manager if needed - use a single global instance
+            if (!window.storyInventoryUIManager) {
+                console.log('[StoryUI] Creating new InventoryUIManager instance for story mode');
+                window.storyInventoryUIManager = new InventoryUIManager();
+                console.log('[StoryUI] InventoryUIManager instance created successfully');
+            } else {
+                console.log('[StoryUI] Using existing InventoryUIManager instance');
+                
+                // Only reinitialize if there's an actual issue (missing modal or tooltip)
+                const modalExists = document.getElementById('inventory-modal') && window.storyInventoryUIManager.modal;
+                const tooltipExists = document.getElementById('item-tooltip') && window.storyInventoryUIManager.tooltip;
+                
+                if (!modalExists || !tooltipExists) {
+                    console.log('[StoryUI] Modal or tooltip missing, reinitializing InventoryUIManager');
+                    if (typeof window.storyInventoryUIManager.reinitialize === 'function') {
+                        window.storyInventoryUIManager.reinitialize();
+                        console.log('[StoryUI] InventoryUIManager reinitialized');
+                    }
+                } else {
+                    console.log('[StoryUI] InventoryUIManager is ready, no reinitialization needed');
+                }
+            }
+
+            // Verify the instance was created successfully
+            if (!window.storyInventoryUIManager) {
+                throw new Error('Failed to create InventoryUIManager instance');
+            }
+
+            // Open the inventory modal for this character
+            console.log(`[StoryUI] Opening modal for character: ${characterId}`);
+            await window.storyInventoryUIManager.openModal(characterId);
+            
+            console.log('[StoryUI] Character inventory modal opened successfully');
+            
+        } catch (error) {
+            console.error('[StoryUI] Error opening character inventory:', error);
+            this.showPopupMessage(`❌ Failed to open inventory: ${error.message}`, 'error', 4000);
+        }
+    }
+
+    /**
+     * Open global inventory management
+     */
+    async openGlobalInventory() {
+        console.log('[StoryUI] Opening global inventory');
+        
+        try {
+            // Verify inventory system is ready
+            const systemReady = !!(window.ItemRegistry && window.GlobalInventory && window.CharacterInventories);
+            if (!systemReady) {
+                console.error('[StoryUI] Inventory system not ready!');
+                this.showPopupMessage('❌ Inventory system not ready. Please wait a moment and try again.', 'error', 3000);
+                return;
+            }
+
+            if (!window.InventoryUIManager) {
+                console.error('[StoryUI] InventoryUIManager class not found!');
+                this.showPopupMessage('❌ Inventory manager not loaded. Please refresh the page.', 'error', 3000);
+                return;
+            }
+
+            // Initialize inventory UI manager if needed - use a single global instance
+            if (!window.storyInventoryUIManager) {
+                console.log('[StoryUI] Creating new InventoryUIManager instance for global inventory');
+                window.storyInventoryUIManager = new InventoryUIManager();
+                console.log('[StoryUI] InventoryUIManager instance created successfully');
+            } else {
+                console.log('[StoryUI] Using existing InventoryUIManager instance for global inventory');
+                
+                // Only reinitialize if there's an actual issue (missing modal or tooltip)
+                const modalExists = document.getElementById('inventory-modal') && window.storyInventoryUIManager.modal;
+                const tooltipExists = document.getElementById('item-tooltip') && window.storyInventoryUIManager.tooltip;
+                
+                if (!modalExists || !tooltipExists) {
+                    console.log('[StoryUI] Modal or tooltip missing, reinitializing InventoryUIManager');
+                    if (typeof window.storyInventoryUIManager.reinitialize === 'function') {
+                        window.storyInventoryUIManager.reinitialize();
+                        console.log('[StoryUI] InventoryUIManager reinitialized');
+                    }
+                } else {
+                    console.log('[StoryUI] InventoryUIManager is ready, no reinitialization needed');
+                }
+            }
+
+            // Verify the instance was created successfully
+            if (!window.storyInventoryUIManager) {
+                throw new Error('Failed to create InventoryUIManager instance');
+            }
+
+            // Open the global inventory modal
+            console.log('[StoryUI] Opening global inventory modal');
+            await window.storyInventoryUIManager.openGlobalInventoryModal();
+            
+            console.log('[StoryUI] Global inventory modal opened successfully');
+            
+        } catch (error) {
+            console.error('[StoryUI] Error opening global inventory:', error);
+            this.showPopupMessage(`❌ Failed to open global inventory: ${error.message}`, 'error', 4000);
+        }
+    }
+
+    /**
+     * Initialize inventory system for story mode
+     */
+    async initializeInventorySystem() {
+        console.log('[StoryUI] Initializing inventory system for story mode');
+        
+        try {
+            // Ensure Firebase auth is ready
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                await new Promise((resolve) => {
+                    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                        unsubscribe();
+                        console.log('[StoryUI] Firebase auth state:', user ? 'authenticated' : 'not authenticated');
+                        resolve();
+                    });
+                });
+            }
+
+            // Verify that the global instances were already created by story.html
+            const inventorySystemStatus = {
+                ItemRegistry: !!window.ItemRegistry,
+                GlobalInventory: !!window.GlobalInventory,
+                CharacterInventories: !!window.CharacterInventories,
+                InventoryIntegrationManager: !!window.InventoryIntegrationManager
+            };
+            
+            console.log('[StoryUI] Inventory system status check:', inventorySystemStatus);
+
+            // If global instances don't exist, story.html initialization failed
+            if (!inventorySystemStatus.ItemRegistry || !inventorySystemStatus.GlobalInventory || !inventorySystemStatus.CharacterInventories) {
+                console.error('[StoryUI] Critical inventory system components missing! This suggests story.html initialization failed.');
+                console.log('[StoryUI] Attempting emergency initialization...');
+                
+                // Emergency fallback initialization
+                if (!window.ItemRegistry && typeof ItemRegistry !== 'undefined') {
+                    window.ItemRegistry = new ItemRegistry();
+                    console.log('[StoryUI] Emergency: Created ItemRegistry');
+                }
+                if (!window.GlobalInventory && typeof GlobalInventory !== 'undefined') {
+                    window.GlobalInventory = new GlobalInventory();
+                    console.log('[StoryUI] Emergency: Created GlobalInventory');
+                }
+                if (!window.CharacterInventories) {
+                    window.CharacterInventories = new Map();
+                    console.log('[StoryUI] Emergency: Created CharacterInventories');
+                }
+            } else {
+                console.log('[StoryUI] ✓ All core inventory system components are properly initialized');
+            }
+
+            // Initialize inventory integration manager
+            if (window.InventoryIntegrationManager) {
+                console.log('[StoryUI] Initializing InventoryIntegrationManager...');
+                await window.InventoryIntegrationManager.initialize();
+                console.log('[StoryUI] ✓ Inventory integration manager initialized');
+            } else {
+                console.warn('[StoryUI] InventoryIntegrationManager not found - this is optional');
+            }
+
+            // Final verification
+            const finalStatus = !!(window.ItemRegistry && window.GlobalInventory && window.CharacterInventories);
+            console.log('[StoryUI] Final inventory system status:', finalStatus ? '✓ Ready' : '✗ Failed');
+            
+            if (!finalStatus) {
+                throw new Error('Inventory system initialization failed - critical components missing');
+            }
+
+        } catch (error) {
+            console.error('[StoryUI] Error initializing inventory system:', error);
+            throw error; // Re-throw to be handled by caller
+        }
+    }
+
+    /**
+     * Update character stats after inventory changes
+     */
+    async updateCharacterStatsAfterInventoryChange() {
+        console.log('[StoryUI] Updating character stats after inventory change');
+        
+        try {
+            // Apply inventory items to all team members
+            if (window.InventoryIntegrationManager && this.storyManager.playerTeam) {
+                await window.InventoryIntegrationManager.applyInventoriesToCharacters(this.storyManager.playerTeam);
+                
+                // Re-render the team display to show updated stats
+                this.renderPlayerTeam();
+                
+                console.log('[StoryUI] Character stats updated successfully');
+            }
+        } catch (error) {
+            console.error('[StoryUI] Error updating character stats:', error);
+        }
+    }
+
+    /**
+     * Setup inventory management event handlers
+     */
+    setupInventoryEventHandlers() {
+        // Team inventory management button
+        const teamInventoryBtn = document.getElementById('team-inventory-button');
+        if (teamInventoryBtn) {
+            teamInventoryBtn.addEventListener('click', () => {
+                this.showTeamInventoryManager();
+            });
+        }
+
+        // Global inventory button
+        const globalInventoryBtn = document.getElementById('global-inventory-button');
+        if (globalInventoryBtn) {
+            globalInventoryBtn.addEventListener('click', () => {
+                this.openGlobalInventory();
+            });
+        }
+    }
+
+    /**
+     * Show team inventory manager with all characters
+     */
+    showTeamInventoryManager() {
+        console.log('[StoryUI] Showing team inventory manager');
+        
+        if (!this.storyManager.playerTeam || this.storyManager.playerTeam.length === 0) {
+            this.showPopupMessage('❌ No team members to manage inventory for.', 'error', 3000);
+            return;
+        }
+
+        // Show popup with character selection for inventory management
+        this.showPopupMessage(`📦 Click on any character's inventory button (🎒) to manage their equipment.`, 'info', 4000);
     }
 } 

@@ -5,8 +5,8 @@
     "stats": {
         "physicalDamage": 120,
         "magicalDamage": 0,
-        "armor": 12,
-        "magicalShield": 20,
+        "armor": 22,
+        "magicalShield": 35,
         "hp": 9340,
         "hpPerTurn": 0,
         "mana": 2570,
@@ -21,15 +21,15 @@
         {
             "id": "pounce",
             "name": "Pounce",
-            "description": "Deals 50% AD damage and has a 85% chance to stun the target for 2 turns.",
+            "description": "Deals 50% AD damage and has a 47% chance to stun the target for 2 turns.",
             "manaCost": 50,
-            "cooldown": 2,
+            "cooldown": 1,
             "icon": "Icons/abilities/pounce.jpeg",
             "debuffEffect": {
                 "debuffId": "stun",
                 "name": "Stunned",
                 "duration": 2,
-                "chance": 0.85,
+                "chance": 0.47,
                 "effects": { "cantAct": true }
             }
         },
@@ -38,7 +38,7 @@
             "name": "Thick Fur",
             "description": "Increases Armor and Magic Shield by 20 for 10 turns.",
             "manaCost": 100,
-            "cooldown": 18,
+            "cooldown": 14,
             "icon": "Icons/abilities/thick_fur.jpeg"
         },
         {
@@ -52,8 +52,8 @@
         {
             "id": "carrot_power_up",
             "name": "Carrot Power Up",
-            "description": "Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target's active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.",
-            "manaCost": 155,
+            "description": "Heals the target for 27% of missing health (minimum 2% of max HP) and reduces target's active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.",
+            "manaCost": 90,
             "cooldown": 15,
             "icon": "Icons/abilities/carrot_power_up.webp"
         }

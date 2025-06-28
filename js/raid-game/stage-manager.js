@@ -1900,6 +1900,7 @@ class StageManager {
             enemies: enemies,
             objectives: stageInfo.objectives || null, // Copy objectives including winConditions
             modifiers: stageInfo.modifiers || [],
+            loot: stageInfo.loot || null, // Copy loot configuration from story stage
             backgroundImage: stageInfo.backgroundImage || 'images/stages/default.jpg',
             backgroundMusic: stageInfo.backgroundMusic || null,
             isTutorial: stageInfo.isTutorial || false,

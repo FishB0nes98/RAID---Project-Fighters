@@ -291,14 +291,21 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                 delete window.ballSelectionControllerState;
             }
             
-            document.body.removeChild(modalContainer);
-            document.head.removeChild(styleElement);
+            // Safely remove modal container
+            if (modalContainer && modalContainer.parentNode) {
+                modalContainer.parentNode.removeChild(modalContainer);
+            }
+            
+            // Safely remove style element
+            if (styleElement && styleElement.parentNode) {
+                styleElement.parentNode.removeChild(styleElement);
+            }
             
             // Remove the global function
             delete window.shomaSelectBall;
             
-            // Call the callback to continue the game
-            if (onSelectionComplete) onSelectionComplete();
+            // Call the callback to continue the game with the selected ball ID
+            if (onSelectionComplete) onSelectionComplete(ballId);
         };
 
         // Also add traditional event listeners as backup
@@ -330,11 +337,18 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                         delete window.ballSelectionControllerState;
                     }
                     
-                    document.body.removeChild(modalContainer);
-                    document.head.removeChild(styleElement);
+                    // Safely remove modal container
+                    if (modalContainer && modalContainer.parentNode) {
+                        modalContainer.parentNode.removeChild(modalContainer);
+                    }
+                    
+                    // Safely remove style element
+                    if (styleElement && styleElement.parentNode) {
+                        styleElement.parentNode.removeChild(styleElement);
+                    }
                     
                     // Call the callback to continue the game
-                    if (onSelectionComplete) onSelectionComplete();
+                    if (onSelectionComplete) onSelectionComplete(selectedBallId);
                 }
             });
         });
@@ -367,11 +381,14 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
                 delete window.ballSelectionControllerState;
             }
             
-            if (document.body.contains(modalContainer)) {
-                document.body.removeChild(modalContainer);
+            // Safely remove modal container
+            if (modalContainer && modalContainer.parentNode) {
+                modalContainer.parentNode.removeChild(modalContainer);
             }
-            if (document.head.contains(styleElement)) {
-                document.head.removeChild(styleElement);
+            
+            // Safely remove style element
+            if (styleElement && styleElement.parentNode) {
+                styleElement.parentNode.removeChild(styleElement);
             }
             
             // Remove the global function
@@ -380,7 +397,7 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
             }
             
             // Call the callback to continue the game
-            if (onSelectionComplete) onSelectionComplete();
+            if (onSelectionComplete) onSelectionComplete('fire_ball');
         }, 60000); // 60 seconds timeout
         
         // Clear the timeout if a selection is made
@@ -391,7 +408,7 @@ function showBallSelectionForShoma(shomaCharacter, onSelectionComplete) {
         };
     } catch (error) {
         console.error('Error showing ball selection:', error);
-        if (onSelectionComplete) onSelectionComplete();
+        if (onSelectionComplete) onSelectionComplete('fire_ball'); // Default to fire ball on error
     }
 }
 
@@ -654,12 +671,107 @@ function enableControllerSupport(modalContainer) {
 }
 
 /**
- * Process the ball selection and modify Schoolboy Shoma's abilities accordingly
+ * Generates a description for the ball throw ability based on the selected ball type
+ * @param {string} ballType - The type of ball ('grass_ball', 'fire_ball', 'heavy_ball', 'water_ball')
+ * @param {Character} character - The character using the ability
+ * @returns {string} The generated description
+ */
+function generateBallDescription(ballType, character) {
+    try {
+        let baseDescription = '';
+        let talentEffects = '';
+        
+        switch (ballType) {
+            case 'grass_ball':
+                baseDescription = 'Throw a Grass Ball that heals the target for 300 HP.';
+                if (character.hasTalent && character.hasTalent('enhanced_grass_ball')) {
+                    talentEffects += ' <span class="talent-effect healing">Verdant Recovery:</span> Heals 250% more on buffed targets.';
+                }
+                if (character.hasTalent && character.hasTalent('healing_mastery')) {
+                    talentEffects += ' <span class="talent-effect healing">Healing Mastery:</span> +20% healing power.';
+                }
+                if (character.hasTalent && character.hasTalent('grass_growth')) {
+                    talentEffects += ' <span class="talent-effect healing">Grass Growth:</span> Applies delayed healing buff (2% max HP after 2 turns).';
+                }
+                if (character.hasTalent && character.hasTalent('magical_empowerment')) {
+                    talentEffects += ' <span class="talent-effect damage">Magical Empowerment:</span> Grants +30% Magical Damage for 3 turns.';
+                }
+                break;
+                
+            case 'fire_ball':
+                baseDescription = 'Throw a Fire Ball that deals 600 + 2% target max HP magical damage.';
+                if (character.hasTalent && character.hasTalent('fire_ball_burn')) {
+                    talentEffects += ' <span class="talent-effect damage">Scorching Flames:</span> Applies Burn for 3 turns.';
+                }
+                if (character.hasTalent && character.hasTalent('fire_ball_magical_scaling')) {
+                    talentEffects += ' <span class="talent-effect damage">Infernal Magic:</span> Scales with 100% Magical Damage.';
+                }
+                if (character.hasTalent && character.hasTalent('devastating_power')) {
+                    talentEffects += ' <span class="talent-effect damage">Devastating Power:</span> All damage is doubled.';
+                }
+                break;
+                
+            case 'heavy_ball':
+                baseDescription = 'Throw a Heavy Ball that deals 400 physical damage and reduces the target\'s overall damage output by 20% for 2 turns.';
+                if (character.hasTalent && character.hasTalent('heavy_ball_cooldown_mastery')) {
+                    talentEffects += ' <span class="talent-effect utility">Heavy Ball Mastery:</span> Cooldown reduced to 1.';
+                }
+                if (character.hasTalent && character.hasTalent('heavy_ball_bounce')) {
+                    talentEffects += ' <span class="talent-effect damage">Rebounding Impact:</span> Bounces to an additional enemy.';
+                }
+                if (character.hasTalent && character.hasTalent('devastating_power')) {
+                    talentEffects += ' <span class="talent-effect damage">Devastating Power:</span> All damage is doubled.';
+                }
+                break;
+                
+            case 'water_ball':
+                baseDescription = 'Throw a Water Ball that deals 350 physical damage to the target and 200 splash damage to 2 other enemies.';
+                if (character.hasTalent && character.hasTalent('water_ball_splash_power')) {
+                    talentEffects += ' <span class="talent-effect damage">Tidal Devastation:</span> Splash damage increased by 300.';
+                }
+                if (character.hasTalent && character.hasTalent('water_ball_magical_scaling')) {
+                    talentEffects += ' <span class="talent-effect damage">Tsunami Force:</span> Scales with 100% Magical Damage.';
+                }
+                if (character.hasTalent && character.hasTalent('water_ball_double_cast')) {
+                    talentEffects += ' <span class="talent-effect damage">Tidal Echo:</span> 50% chance to trigger twice.';
+                }
+                if (character.hasTalent && character.hasTalent('devastating_power')) {
+                    talentEffects += ' <span class="talent-effect damage">Devastating Power:</span> All damage is doubled.';
+                }
+                break;
+                
+            default:
+                baseDescription = 'Throw a ball with various effects depending on the type selected.';
+                break;
+        }
+        
+        // Add Compassionate Resonance effect if active
+        if (character.hasTalent && character.hasTalent('compassionate_resonance')) {
+            talentEffects += ' <span class="talent-effect healing">Compassionate Resonance:</span> Heals random ally for 50% of damage dealt.';
+        }
+        
+        // Elemental Juggling talent (does not end turn after using a ball)
+        if ((character.hasTalent && character.hasTalent('elemental_juggling')) || character.ballFollowupEnabled) {
+            talentEffects += ' <span class="talent-effect utility">Elemental Juggling:</span> Using Ball abilities does <strong>NOT</strong> end your turn.';
+        }
+        
+        return baseDescription + talentEffects;
+        
+    } catch (error) {
+        console.error('Error generating ball description:', error);
+        return 'Throw a ball with various effects.';
+    }
+}
+
+/**
+ * Sets up the selected ball type for Schoolboy Shoma
  * @param {Character} shomaCharacter - The Schoolboy Shoma character instance
- * @param {String} ballId - The ID of the selected ball
+ * @param {string} ballId - The ball type to select
  */
 function selectBall(shomaCharacter, ballId) {
     try {
+        console.log(`[Ball Selection] Setting up ${ballId} for ${shomaCharacter.name}`);
+        
         // Find the Ball Throw ability - it might be ball_throw or ball_throw_* if already selected once
         const ballThrowIndex = shomaCharacter.abilities.findIndex(ability => 
             ability.id === 'ball_throw' || ability.id.startsWith('ball_throw_')
@@ -676,250 +788,652 @@ function selectBall(shomaCharacter, ballId) {
         // Get the icon based on ball type
         const ballIcon = getIconForBallType(ballId);
         
-        // Define the ball effects based on type
-        switch (ballId) {
-            case 'grass_ball':
-                // Grass Ball - Healing effect
-                ballThrowAbility.id = 'ball_throw_grass';
-                ballThrowAbility.name = 'Grass Ball Throw';
-                ballThrowAbility.description = 'Heals ally for 500 + 2% of target\'s max HP. Scales with Healing Power.';
-                ballThrowAbility.type = 'heal';
-                ballThrowAbility.targetType = 'ally';
-                ballThrowAbility.healAmount = undefined;
-                ballThrowAbility.damageType = undefined;
-                ballThrowAbility.fixedDamage = undefined;
-                ballThrowAbility.icon = ballIcon;
-                
-                // Replace the default effect with a healing effect
-                ballThrowAbility.effect = function(caster, target) {
-                    // Check if target is valid
-                    if (!target || !target.stats || typeof target.stats.maxHp === 'undefined') {
-                        console.error('No valid target or target missing maxHp for grass ball effect');
-                        return;
-                    }
-                    
-                    // Play the ball throw animation
-                    showBallThrowAnimation('grass_ball', caster, target);
-                    
-                    // Calculate heal amount: 500 base + 2% of target's max HP
-                    const baseHeal = 500;
-                    const percentHpHeal = Math.floor(target.stats.maxHp * 0.02);
-                    const totalHealAmount = baseHeal + percentHpHeal;
-                    
-                    // Apply healing
-                    const healResult = target.heal(totalHealAmount, caster, { abilityId: 'ball_throw_grass' });
-                    
-                    // Updated log entry
-                    let logMessage = `${caster.name} used Grass Ball on ${target.name}, healing for ${healResult.healAmount} HP (${baseHeal} + ${percentHpHeal} from max HP).`;
-                    if (healResult.isCritical) {
-                        logMessage += " (Critical Heal!)";
-                    }
-                    addLogEntry(logMessage, healResult.isCritical ? 'critical heal' : 'heal');
-                    
-                    // Play Grass Ball sound
-                    const playSoundGrass = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
-                    playSoundGrass('sounds/shoma_grassball.mp3');
-                    
-                    // Add Grass Ball VFX
-                    const targetElement = document.getElementById(`character-${target.id || target.instanceId}`);
-                    if (targetElement) {
-                        // Create grass ball VFX elements
-                        const grassBallVfx = document.createElement('div');
-                        grassBallVfx.className = 'grass-ball-vfx';
-                        targetElement.appendChild(grassBallVfx);
-                        
-                        const grassParticles = document.createElement('div');
-                        grassParticles.className = 'grass-ball-particles';
-                        targetElement.appendChild(grassParticles);
+        // Update the ability with the new ball type
+        ballThrowAbility.id = `ball_throw_${ballId}`;
+        ballThrowAbility.icon = ballIcon;
+        ballThrowAbility.ballType = ballId;
+        
+        // Initialize Elemental Juggling talent properties
+        const hasElementalJuggling = shomaCharacter.hasTalent && shomaCharacter.hasTalent('elemental_juggling');
+        if (hasElementalJuggling) {
+            shomaCharacter.ballFollowupEnabled = true;
+            console.log(`[Elemental Juggling] Initialized for ${shomaCharacter.name}`);
+        } else {
+            shomaCharacter.ballFollowupEnabled = false;
+            // Ensure ballFollowupRemaining is reset when talent is not active
+            shomaCharacter.ballFollowupRemaining = 0;
+        }
+        
+        // Elemental Juggling – prepare follow-up tracking ONLY if talent is active
+        if (hasElementalJuggling && shomaCharacter.ballFollowupEnabled) {
+            // Initialise remaining follow-up only if not already in a combo
+            if (!shomaCharacter.ballFollowupRemaining || shomaCharacter.ballFollowupRemaining <= 0) {
+                shomaCharacter.ballFollowupRemaining = 1; // one extra ball this turn
+                console.log(`[Elemental Juggling] Set follow-up remaining to 1 for ${shomaCharacter.name}`);
+            }
+        } else {
+            // Ensure no follow-ups if talent is not active
+            shomaCharacter.ballFollowupRemaining = 0;
+            console.log(`[Elemental Juggling] No follow-ups available for ${shomaCharacter.name} (talent not active)`);
+        }
+        
+        // Set up the ability effect based on ball type
+        ballThrowAbility.effect = (caster, target) => {
+            return executeBallThrow(caster, target, ballId);
+        };
 
-                        // Critical Heal Indicator
-                        if (healResult.isCritical) {
-                            const critHealText = document.createElement('div');
-                            critHealText.className = 'crit-heal-vfx';
-                            critHealText.textContent = `CRIT HEAL!`;
-                            targetElement.appendChild(critHealText);
-                            setTimeout(() => critHealText.remove(), 1000);
-                        }
-                        
-                        // Remove VFX after animation completes
-                        setTimeout(() => {
-                            const vfxElements = targetElement.querySelectorAll('.grass-ball-vfx, .grass-ball-particles');
-                            vfxElements.forEach(el => el.remove());
-                        }, 1000);
+        // Apply Heavy Ball Mastery talent: cooldown reduction
+        if (ballId === 'heavy_ball') {
+            const hasHeavyBallMastery = shomaCharacter.hasTalent && shomaCharacter.hasTalent('heavy_ball_cooldown_mastery');
+            ballThrowAbility.cooldown = hasHeavyBallMastery ? 1 : 3;
+            ballThrowAbility.currentCooldown = 0; // reset after selection to avoid leftover longer cooldown
+            console.log(`[Heavy Ball Mastery] Set Heavy Ball cooldown to ${ballThrowAbility.cooldown} for ${shomaCharacter.name}`);
+        }
+        
+        // Set the correct target type based on ball type
+        if (ballId === 'grass_ball') {
+            ballThrowAbility.targetType = 'ally_or_self'; // Grass ball can target allies and self
+        } else {
+            ballThrowAbility.targetType = 'enemy'; // Other balls target enemies
+        }
+        
+        // Update ability description
+        ballThrowAbility.description = generateBallDescription(ballId, shomaCharacter);
+        
+        console.log(`[Ball Selection] Successfully set up ${ballId} for ${shomaCharacter.name}`);
+        
+        // Update the UI to reflect the new ball
+        refreshAbilityIcon(shomaCharacter, ballThrowIndex);
+        
+        // Also refresh the ability description in the UI
+        refreshAbilityDescription(shomaCharacter, ballThrowIndex);
+        
+        // Force a full character UI update to ensure everything is refreshed
+        refreshCharacterUI(shomaCharacter);
+        
+        // Add a delayed refresh to ensure UI updates after modal cleanup
+        setTimeout(() => {
+            refreshAbilityIcon(shomaCharacter, ballThrowIndex);
+            refreshAbilityDescription(shomaCharacter, ballThrowIndex);
+            refreshCharacterUI(shomaCharacter);
+            console.log(`[Ball Selection] Delayed UI refresh completed for ${ballId}`);
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error selecting ball:', error);
+    }
+}
+
+/**
+ * Executes the ball throw ability with the specified ball type
+ * @param {Character} caster - The character using the ability
+ * @param {Character} target - The target character
+ * @param {string} ballType - The type of ball being thrown
+ */
+function executeBallThrow(caster, target, ballType) {
+    try {
+        console.log(`[Ball Throw] ${caster.name} using ${ballType} on ${target.name}`);
+        
+        // Get the main target (for water ball splash calculations)
+        const mainTarget = target;
+        
+        // Helper to manage Elemental Juggling follow-up logic
+        // This only applies to Ball abilities, not other abilities like Boink or buffs
+        function prepareFollowUpResult(resultObj = {}) {
+            const res = resultObj || {};
+
+            // Check if Elemental Juggling talent is active AND this is specifically a Ball ability
+            const hasElementalJuggling = caster.hasTalent && caster.hasTalent('elemental_juggling');
+            const isBallAbility = true; // This function is only called for Ball abilities
+            const followupsRemaining = caster.ballFollowupRemaining || 0;
+            
+            // Check for Grass Ball Flow talent (specifically for Grass Ball)
+            const hasGrassBallFlow = caster.hasTalent && caster.hasTalent('grass_ball_flow');
+            const isGrassBall = ballType === 'grass_ball';
+            
+            console.log(`[Elemental Juggling Debug] hasElementalJuggling: ${hasElementalJuggling}, isBallAbility: ${isBallAbility}, followupsRemaining: ${followupsRemaining}`);
+            console.log(`[Grass Ball Flow Debug] hasGrassBallFlow: ${hasGrassBallFlow}, isGrassBall: ${isGrassBall}`);
+            console.log(`[Elemental Juggling Debug] Condition check: ${hasElementalJuggling} && ${isBallAbility} && ${followupsRemaining} > 0 = ${hasElementalJuggling && isBallAbility && followupsRemaining > 0}`);
+            console.log(`[Grass Ball Flow Debug] Condition check: ${hasGrassBallFlow} && ${isGrassBall} = ${hasGrassBallFlow && isGrassBall}`);
+            
+            if (hasElementalJuggling && isBallAbility && followupsRemaining > 0) {
+                // Consume one queued follow-up
+                caster.ballFollowupRemaining--;
+
+                // Re-open ball selection shortly after current animation finishes
+                setTimeout(() => {
+                    if (typeof showBallSelectionForShoma === 'function') {
+                        showBallSelectionForShoma(caster);
                     }
-                };
-                break;
+                }, 150);
+            } else if (hasGrassBallFlow && isGrassBall) {
+                // Grass Ball Flow talent prevents turn ending for Grass Ball specifically
+                if (window.gameManager) {
+                    window.gameManager.preventTurnEndFlag = true;
+                    console.log(`[Grass Ball Flow] ${caster.name}'s turn continues after Grass Ball!`);
+                    
+                    // Add battle log entry
+                    if (window.gameManager.addLogEntry) {
+                        window.gameManager.addLogEntry(
+                            `${caster.name}'s Grass Ball Flow maintains healing rhythm!`,
+                            'system-update'
+                        );
+                    }
+                }
+            } else {
+                // Normal turn ending - ensure turn ends properly
+                if (window.gameManager) {
+                    window.gameManager.preventTurnEndFlag = false;
+                    console.log(`[Ball Throw] Normal turn ending for ${caster.name} (Elemental Juggling: ${hasElementalJuggling}, Grass Ball Flow: ${hasGrassBallFlow}, Follow-ups: ${followupsRemaining})`);
+                }
+            }
+
+            return res;
+        }
+        
+        // Define the ball effects based on type
+        switch (ballType) {
+            case 'grass_ball':
+                console.log(`[Grass Ball] Healing ${target.name} with Grass Ball`);
+                
+                // Calculate base healing
+                let grassHealAmount = 300;
+                
+                // Check for Healing Mastery talent (healingPower stat is handled by the healing system)
+                const hasHealingMastery = caster.hasTalent && caster.hasTalent('healing_mastery');
+                if (hasHealingMastery) {
+                    console.log(`[Healing Mastery] Active - healingPower: ${caster.stats.healingPower} (20% increase)`);
+                    
+                    // Show Healing Mastery VFX
+                    if (window.showHealingMasteryVFX && typeof window.showHealingMasteryVFX === 'function') {
+                        window.showHealingMasteryVFX(caster, target);
+                    }
+                }
+                
+                // Check for Enhanced Grass Ball talent (250% more healing on buffed targets)
+                const hasEnhancedGrassBall = caster.hasTalent && caster.hasTalent('enhanced_grass_ball');
+                if (hasEnhancedGrassBall && target.buffs && target.buffs.length > 0) {
+                    grassHealAmount = Math.floor(grassHealAmount * 3.5); // 250% more = 350% total
+                    console.log(`[Enhanced Grass Ball] Target has buffs, increased healing to ${grassHealAmount}`);
+                    
+                    // Show enhanced grass ball VFX
+                    if (window.showEnhancedGrassballVFX && typeof window.showEnhancedGrassballVFX === 'function') {
+                        window.showEnhancedGrassballVFX(caster, target);
+                    }
+                    
+                    // Add battle log entry
+                    if (window.gameManager && window.gameManager.addLogEntry) {
+                        window.gameManager.addLogEntry(
+                            `${caster.name}'s Verdant Recovery draws power from ${target.name}'s buffs!`,
+                            'talent-effect'
+                        );
+                    }
+                }
+                
+                // Apply healing
+                const healResult = target.heal(grassHealAmount, caster, { abilityId: 'ball_throw_grass' });
+                
+                // Check for Grass Growth talent (delayed healing buff)
+                const hasGrassGrowth = caster.hasTalent && caster.hasTalent('grass_growth');
+                if (hasGrassGrowth) {
+                    console.log(`[Grass Growth] Applying delayed healing buff to ${target.name}`);
+                    
+                    // Create Grass Growth buff
+                    const grassGrowthBuff = {
+                        id: 'grass_growth',
+                        name: 'Grass Growth',
+                        duration: 2,
+                        source: 'grass_growth',
+                        description: 'Growing grass will heal you for 2% of max HP',
+                        onTurnStart: function(character) {
+                            console.log(`[Grass Growth] onTurnStart triggered for ${character.name}`);
+                            
+                            // Calculate healing amount (2% of max HP)
+                            const healAmount = Math.floor(character.stats.maxHp * 0.02);
+                            
+                            // Apply healing with caster's healing power
+                            const delayedHealResult = character.heal(healAmount, caster, { 
+                                abilityId: 'grass_growth_heal',
+                                isPassiveHealing: true 
+                            });
+                            
+                            // Show Grass Growth VFX
+                            if (window.showGrassGrowthVFX && typeof window.showGrassGrowthVFX === 'function') {
+                                window.showGrassGrowthVFX(character, healAmount);
+                            }
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `🌱 Grass Growth heals ${character.name} for ${delayedHealResult.healAmount} HP!`,
+                                    'talent-effect'
+                                );
+                            }
+                        }
+                    };
+                    
+                    target.addBuff(grassGrowthBuff);
+                    
+                    // Show initial Grass Growth VFX
+                    if (window.showGrassGrowthInitialVFX && typeof window.showGrassGrowthInitialVFX === 'function') {
+                        window.showGrassGrowthInitialVFX(caster, target);
+                    }
+                    
+                    // Add battle log entry
+                    if (window.gameManager && window.gameManager.addLogEntry) {
+                        window.gameManager.addLogEntry(
+                            `🌱 Grass Growth applied to ${target.name}! Will heal in 2 turns.`,
+                            'talent-effect'
+                        );
+                    }
+                }
+                
+                // Check for Magical Empowerment talent (+30% magical damage for 3 turns)
+                const hasMagicalEmpowerment = caster.hasTalent && caster.hasTalent('magical_empowerment');
+                if (hasMagicalEmpowerment) {
+                    console.log(`[Magical Empowerment] Applying magical damage buff to ${target.name}`);
+                    
+                    // Create Magical Empowerment buff
+                    const magicalEmpowermentBuff = {
+                        id: 'magical_empowerment',
+                        name: 'Magical Empowerment',
+                        duration: 3,
+                        source: 'magical_empowerment',
+                        description: '+30% Magical Damage from nature\'s energy',
+                        statModifiers: [{
+                            stat: 'magicalDamage',
+                            value: Math.floor(target.stats.magicalDamage * 0.3),
+                            operation: 'add'
+                        }],
+                        onApplied: function(character) {
+                            console.log(`[Magical Empowerment] Applied to ${character.name}`);
+                            
+                            // Show Magical Empowerment VFX
+                            if (window.showMagicalEmpowermentVFX && typeof window.showMagicalEmpowermentVFX === 'function') {
+                                window.showMagicalEmpowermentVFX(caster, character);
+                            }
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `✨ ${character.name} is empowered with +30% Magical Damage!`,
+                                    'talent-effect'
+                                );
+                            }
+                        },
+                        onRemoved: function(character) {
+                            console.log(`[Magical Empowerment] Removed from ${character.name}`);
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `✨ ${character.name}'s Magical Empowerment fades.`,
+                                    'system'
+                                );
+                            }
+                        }
+                    };
+                    
+                    target.addBuff(magicalEmpowermentBuff);
+                }
+                
+                // Track ability usage
+                if (window.statisticsManager) {
+                    window.statisticsManager.recordHealingDone(caster, target, healResult.healAmount, healResult.isCritical, 'ball_throw_grass', 'direct');
+                }
+                
+                // Check for Healing Cascade talent (bouncing to other allies)
+                const hasGrassBallBounce = caster.hasTalent && caster.hasTalent('grass_ball_bounce');
+                if (hasGrassBallBounce) {
+                    console.log(`[Healing Cascade] Checking for bounces after healing ${target.name}`);
+                    
+                    // Get all allies (excluding the original target)
+                    const allies = [];
+                    if (window.gameManager && window.gameManager.gameState) {
+                        if (caster.isAI) {
+                            allies.push(...window.gameManager.gameState.aiCharacters.filter(char => 
+                                char !== caster && char !== target && !char.isDead()
+                            ));
+                        } else {
+                            allies.push(...window.gameManager.gameState.playerCharacters.filter(char => 
+                                char !== caster && char !== target && !char.isDead()
+                            ));
+                        }
+                    }
+                    
+                    if (allies.length > 0) {
+                        // Check 75% chance for each ally independently
+                        executeGrassBallBounceToAllies(caster, allies, [target]); // Pass already healed targets
+                    }
+                }
+                
+                // Elemental Juggling VFX
+                if (caster.ballFollowupEnabled && window.showElementalJugglingVFX) {
+                    window.showElementalJugglingVFX(caster);
+                }
+                
+                // Grass Ball Flow VFX
+                const hasGrassBallFlow = caster.hasTalent && caster.hasTalent('grass_ball_flow');
+                if (hasGrassBallFlow && window.showGrassBallFlowVFX) {
+                    window.showGrassBallFlowVFX(caster);
+                }
+                
+                return prepareFollowUpResult(healResult);
                 
             case 'fire_ball':
-                // Fire Ball - Damage effect
-                ballThrowAbility.id = 'ball_throw_fire';
-                ballThrowAbility.name = 'Fire Ball Throw';
-                ballThrowAbility.description = 'Deals 600 + 2% target max HP as magic damage';
-                ballThrowAbility.type = 'damage';
-                ballThrowAbility.targetType = 'enemy';
-                ballThrowAbility.damageType = 'magical';
-                ballThrowAbility.fixedDamage = undefined;
-                ballThrowAbility.icon = ballIcon;
+                console.log(`[Fire Ball] Dealing magical damage to ${target.name} with Fire Ball`);
                 
-                // Add custom effect to ensure damage is applied correctly
-                ballThrowAbility.effect = function(caster, target) {
-                    // Check if target is valid
-                    if (!target || !target.stats || typeof target.stats.maxHp === 'undefined') {
-                        console.error('No valid target or target missing maxHp for fire ball effect');
-                        return;
+                // Calculate base damage
+                let fireBallDamage = 600 + (target.stats.maxHp * 0.02); // Base damage + 2% target max HP
+                
+                // Apply Fire Ball Magical Scaling talent
+                const hasFireBallMagicalScaling = caster.hasTalent && caster.hasTalent('fire_ball_magical_scaling');
+                if (hasFireBallMagicalScaling) {
+                    const magicalDamageBonus = caster.stats.magicalDamage;
+                    fireBallDamage += magicalDamageBonus;
+                    console.log(`[Infernal Magic] Added ${magicalDamageBonus} magical damage (100% of ${caster.stats.magicalDamage})`);
+                    
+                    // Show Infernal Magic VFX
+                    if (window.showInfernalMagicVFX) {
+                        window.showInfernalMagicVFX(caster, target);
                     }
                     
-                    // Play the ball throw animation
-                    showBallThrowAnimation('fire_ball', caster, target);
+                    addLogEntry(`🔥 Infernal Magic activated! Enhanced with magical power!`, 'talent-activation');
+                }
+                
+                // Apply Devastating Power talent
+                const hasDevastatingPowerFire = caster.hasTalent && caster.hasTalent('devastating_power');
+                if (hasDevastatingPowerFire) {
+                    const originalFireDamage = fireBallDamage;
+                    fireBallDamage *= 2;
+                    console.log(`[Devastating Power] Doubled fire damage: ${originalFireDamage} → ${fireBallDamage}`);
                     
-                    // Calculate damage: 600 base + 2% of target's max HP
-                    const baseDamage = 600;
-                    const percentHpDamage = Math.floor(target.stats.maxHp * 0.02);
-                    const totalDamage = baseDamage + percentHpDamage;
-                    
-                    // Apply damage as magical
-                    const result = target.applyDamage(totalDamage, 'magical', caster, { abilityId: 'ball_throw_fire' });
-                    
-                    addLogEntry(`${caster.name} used Fire Ball on ${target.name} for ${result.damage} magical damage (${baseDamage} + ${percentHpDamage} from max HP).`);
-                    
-                    // Play Fire Ball sound
-                    const playSoundFire = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
-                    playSoundFire('sounds/shoma_fireball.mp3');
-                    
-                    // Add Fire Ball VFX
-                    const targetElement = document.getElementById(`character-${target.id || target.instanceId}`);
-                    if (targetElement) {
-                        // Create fire ball VFX elements
-                        const fireBallVfx = document.createElement('div');
-                        fireBallVfx.className = 'fire-ball-vfx';
-                        targetElement.appendChild(fireBallVfx);
-                        
-                        const fireFlames = document.createElement('div');
-                        fireFlames.className = 'fire-ball-flames';
-                        targetElement.appendChild(fireFlames);
-                        
-                        const fireImpact = document.createElement('div');
-                        fireImpact.className = 'fire-ball-impact';
-                        targetElement.appendChild(fireImpact);
-                        
-                        // Remove VFX after animation completes
-                        setTimeout(() => {
-                            const vfxElements = targetElement.querySelectorAll('.fire-ball-vfx, .fire-ball-flames, .fire-ball-impact');
-                            vfxElements.forEach(el => el.remove());
-                        }, 1000);
+                    // Show Devastating Power VFX
+                    if (window.showDevastatingPowerVFX) {
+                        window.showDevastatingPowerVFX(caster, target, originalFireDamage, fireBallDamage);
                     }
                     
-                    // Check if target died from this damage
-                    if (target.isDead()) {
-                        addLogEntry(`${target.name} has been defeated!`);
+                    addLogEntry(`💥 Devastating Power activated! Fire damage doubled!`, 'talent-activation');
+                }
+                
+                const fireBallResult = target.applyDamage(fireBallDamage, 'magical', caster, { abilityId: 'ball_throw_fire' });
+                
+                // Handle Compassionate Resonance talent
+                if (caster.hasTalent && caster.hasTalent('compassionate_resonance')) {
+                    const fireResonanceHeal = Math.floor(fireBallResult.damage * 0.5);
+                    if (fireResonanceHeal > 0) {
+                        healRandomAlly(caster, fireResonanceHeal, 'compassionate_resonance');
                     }
-                };
-                break;
+                }
+                
+                let fireBallLogMessage = `${caster.name} used Fire Ball on ${target.name}, dealing ${fireBallResult.damage} magical damage`;
+                if (hasFireBallMagicalScaling) {
+                    fireBallLogMessage += ` (Enhanced with Infernal Magic)`;
+                }
+                if (hasDevastatingPowerFire) {
+                    fireBallLogMessage += ` (Doubled by Devastating Power)`;
+                }
+                fireBallLogMessage += `.`;
+                addLogEntry(fireBallLogMessage);
+                
+                // Apply Fire Ball Burn talent
+                const hasFireBallBurn = caster.hasTalent && caster.hasTalent('fire_ball_burn');
+                if (hasFireBallBurn) {
+                    const burnDebuff = {
+                        id: 'fire_ball_burn',
+                        name: 'Fire Ball Burn',
+                        duration: 3,
+                        damagePerTurn: 20,
+                        source: 'fire_ball_burn',
+                        description: 'Burning damage from Fire Ball attack',
+                        onTurnStart: function(character) {
+                            console.log(`[Fire Ball Burn] onTurnStart triggered for ${character.name}, dealing ${this.damagePerTurn} damage`);
+                            
+                            let burnDamage = this.damagePerTurn;
+                            
+                            // Apply Devastating Power to burn damage if active
+                            if (caster.hasTalent && caster.hasTalent('devastating_power')) {
+                                burnDamage *= 2;
+                                console.log(`[Devastating Power] Burn damage doubled: ${this.damagePerTurn} → ${burnDamage}`);
+                            }
+                            
+                            const damageResult = character.applyDamage(burnDamage, 'magical', null, { abilityId: 'fire_ball_burn_dot' });
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(`${character.name} takes ${damageResult.damage} burn damage from Fire Ball!`, 'debuff');
+                            }
+                            
+                            // Show burn damage VFX
+                            if (window.showFireBallBurnVFX) {
+                                window.showFireBallBurnVFX(character, burnDamage);
+                            }
+                        }
+                    };
+                    
+                    target.addDebuff(burnDebuff);
+                    console.log(`[Fire Ball Burn] Applied burn to ${target.name} for 3 turns (20 damage/turn)`);
+                    addLogEntry(`🔥 Scorching Flames activated! ${target.name} is burning! (20 damage/turn for 3 turns)`, 'talent-activation');
+                }
+                
+                // Play Fire Ball sound
+                const playSoundFire = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+                playSoundFire('sounds/shoma_fire2.mp3');
+                
+                // Track ability usage
+                if (window.statisticsManager) {
+                    window.statisticsManager.recordDamageDealt(caster, target, Math.floor(fireBallDamage), false, 'ball_throw_fire', 'ability');
+                }
+                
+                // Elemental Juggling VFX
+                if (caster.ballFollowupEnabled && window.showElementalJugglingVFX) {
+                    window.showElementalJugglingVFX(caster);
+                }
+                
+                return prepareFollowUpResult({ damage: Math.floor(fireBallDamage), isCritical: false });
                 
             case 'heavy_ball':
-                // Heavy Ball - Debuff effect
-                ballThrowAbility.id = 'ball_throw_heavy';
-                ballThrowAbility.name = 'Heavy Ball Throw'; 
-                ballThrowAbility.description = 'Deals 200 damage and reduces the target\'s damage by 20% for 4 turns.';
-                ballThrowAbility.type = 'damage';
-                ballThrowAbility.targetType = 'enemy';
-                ballThrowAbility.damageType = 'physical';
-                ballThrowAbility.fixedDamage = 200;
-                ballThrowAbility.icon = ballIcon;
+                console.log(`[Heavy Ball] Dealing physical damage to ${target.name} with Heavy Ball`);
                 
-                // Add custom effect to ensure debuff is applied correctly
-                ballThrowAbility.effect = function(caster, target) {
-                    // Check if target is valid
-                    if (!target) {
-                        console.error('No valid target for heavy ball effect');
-                        return;
+                // Calculate base damage
+                let heavyBallDamage = 400;
+                
+                // Apply Devastating Power talent
+                const hasDevastatingPowerHeavy = caster.hasTalent && caster.hasTalent('devastating_power');
+                if (hasDevastatingPowerHeavy) {
+                    const originalHeavyDamage = heavyBallDamage;
+                    heavyBallDamage *= 2;
+                    console.log(`[Devastating Power] Doubled heavy damage: ${originalHeavyDamage} → ${heavyBallDamage}`);
+                    
+                    // Show Devastating Power VFX
+                    if (window.showDevastatingPowerVFX) {
+                        window.showDevastatingPowerVFX(caster, target, originalHeavyDamage, heavyBallDamage);
                     }
                     
-                    // Play the ball throw animation
-                    showBallThrowAnimation('heavy_ball', caster, target);
-                    
-                    // Apply some base damage
-                    const damageAmount = 200;
-                    const result = target.applyDamage(damageAmount, 'physical', caster, { abilityId: 'ball_throw_heavy' });
-                    
-                    addLogEntry(`${caster.name} used Heavy Ball on ${target.name} for ${result.damage} physical damage.`);
-                    
-                    // Apply the debuff effect (damage reduction)
-                    const debuff = {
+                    addLogEntry(`💥 Devastating Power activated! Heavy damage doubled!`, 'talent-activation');
+                }
+                
+                const heavyResult = target.applyDamage(heavyBallDamage, 'physical', caster, { abilityId: 'ball_throw_heavy' });
+                
+                // Handle Compassionate Resonance talent
+                if (caster.hasTalent && caster.hasTalent('compassionate_resonance')) {
+                    const heavyResonanceHeal = Math.floor(heavyResult.damage * 0.5);
+                    if (heavyResonanceHeal > 0) {
+                        healRandomAlly(caster, heavyResonanceHeal, 'compassionate_resonance');
+                    }
+                }
+                
+                let heavyLogMessage = `${caster.name} used Heavy Ball on ${target.name}, dealing ${heavyResult.damage} physical damage`;
+                if (hasDevastatingPowerHeavy) {
+                    heavyLogMessage += ` (Doubled by Devastating Power)`;
+                }
+                heavyLogMessage += `.`;
+                addLogEntry(heavyLogMessage);
+                
+                // Factory function to create the correct Heavy Ball debuff instance
+                const createHeavyBallDebuff = () => {
+                    return {
                         id: 'heavy_ball_debuff',
-                        name: 'Heavy Ball Damage Reduction',
-                        icon: 'Icons/abilities/heavyball.jfif',
-                        duration: 4,
-                        isDebuff: true,
+                        name: 'Heavy Ball Debuff',
+                        duration: 2,
+                        icon: getIconForBallType('heavy_ball'),
+                        source: 'heavy_ball',
+                        description: 'Damage output reduced by 20%',
                         effects: { damageReductionPercent: 0.20 },
-                        description: 'Damage dealt reduced by 20%.'
+                        onApply: function(character) {
+                            console.log(`[Heavy Ball Debuff] ${character.name}'s outgoing damage reduced by 20% for 2 turns`);
+                        },
+                        onRemove: function(character) {
+                            console.log(`[Heavy Ball Debuff] Damage reduction expired for ${character.name}`);
+                        }
                     };
-                    target.addDebuff(debuff);
-                    addLogEntry(`${target.name} is affected by Heavy Ball, reducing their damage by 20% for 4 turns.`);
-                    
-                    // Play Heavy Ball sound
-                    const playSoundHeavy = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
-                    playSoundHeavy('sounds/shoma_heavyball.mp3');
-                    
-                    // Add Heavy Ball VFX
-                    const targetElement = document.getElementById(`character-${target.id || target.instanceId}`);
-                    if (targetElement) {
-                        // Create heavy ball VFX elements
-                        const heavyBallVfx = document.createElement('div');
-                        heavyBallVfx.className = 'heavy-ball-vfx';
-                        targetElement.appendChild(heavyBallVfx);
-                        
-                        const heavyImpact = document.createElement('div');
-                        heavyImpact.className = 'heavy-ball-impact';
-                        targetElement.appendChild(heavyImpact);
-                        
-                        const heavyWaves = document.createElement('div');
-                        heavyWaves.className = 'heavy-ball-waves';
-                        targetElement.appendChild(heavyWaves);
-                        
-                        // Remove VFX after animation completes
-                        setTimeout(() => {
-                            const vfxElements = targetElement.querySelectorAll('.heavy-ball-vfx, .heavy-ball-impact, .heavy-ball-waves');
-                            vfxElements.forEach(el => el.remove());
-                        }, 1000);
-                    }
                 };
-                break;
+
+                // Apply debuff to primary target
+                target.addDebuff(createHeavyBallDebuff());
+                addLogEntry(`${target.name}'s damage output reduced by 20% for 2 turns.`);
+
+                // Play Heavy Ball sound
+                const playSoundHeavy = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+                playSoundHeavy('sounds/shoma_heavy2.mp3');
+                
+                // Track ability usage
+                if (window.statisticsManager) {
+                    window.statisticsManager.recordDamageDealt(caster, target, heavyBallDamage, false, 'ball_throw_heavy', 'ability');
+                }
+                
+                // Elemental Juggling VFX
+                if (caster.ballFollowupEnabled && window.showElementalJugglingVFX) {
+                    window.showElementalJugglingVFX(caster);
+                }
+                
+                // Handle Rebounding Impact (Heavy Ball Bounce) talent
+                const hasHeavyBallBounce = caster.hasTalent && caster.hasTalent('heavy_ball_bounce');
+                if (hasHeavyBallBounce) {
+                    // Gather enemy characters (opposite team of caster) excluding original target and dead characters
+                    let enemies = [];
+                    if (window.gameManager && window.gameManager.gameState) {
+                        if (caster.isAI) {
+                            enemies = window.gameManager.gameState.playerCharacters;
+                        } else {
+                            enemies = window.gameManager.gameState.aiCharacters;
+                        }
+                    }
+                    const possibleTargets = enemies.filter(ch => ch !== target && !ch.isDead());
+                    if (possibleTargets.length > 0) {
+                        const secondaryTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                        console.log(`[Heavy Ball Bounce] Bouncing to secondary target: ${secondaryTarget.name}`);
+                        // Show ball animation towards new target
+                        showBallThrowAnimation('heavy_ball', caster, secondaryTarget);
+                        // Apply damage
+                        const secondaryResult = secondaryTarget.applyDamage(heavyBallDamage, 'physical', caster, { abilityId: 'ball_throw_heavy_bounce' });
+                        // Apply same debuff (new independent instance)
+                        secondaryTarget.addDebuff(createHeavyBallDebuff());
+                        // Log entry
+                        addLogEntry(`${secondaryTarget.name} is hit by the rebounding Heavy Ball, taking ${secondaryResult.damage} physical damage and suffering Reduced Damage debuff!`);
+                        // Stats tracking
+                        if (window.statisticsManager) {
+                            window.statisticsManager.recordDamageDealt(caster, secondaryTarget, heavyBallDamage, false, 'ball_throw_heavy_bounce', 'ability');
+                        }
+                    }
+                }
+                
+                return prepareFollowUpResult(heavyResult);
                 
             case 'water_ball':
-                // Water Ball - Multi-target damage
-                ballThrowAbility.id = 'ball_throw_water';
-                ballThrowAbility.name = 'Water Ball Throw';
-                ballThrowAbility.description = 'Deals 550 damage to main target and 180 to all other enemies.';
-                ballThrowAbility.type = 'damage';
-                ballThrowAbility.targetType = 'enemy';
-                ballThrowAbility.damageType = 'physical';
-                ballThrowAbility.fixedDamage = undefined;
-                ballThrowAbility.cooldown = 2;
-                ballThrowAbility.icon = ballIcon;
+                console.log(`[Water Ball] Dealing AoE damage with Water Ball`);
                 
-                // Replace the default effect with a multi-target damage effect
-                ballThrowAbility.effect = function(caster, mainTarget) {
-                    // Check if we have a valid main target
-                    if (!mainTarget) {
-                        console.error('No valid main target for water ball effect');
-                        return;
-                    }
-                    
+                // Check for Water Ball Double Cast talent
+                const hasWaterBallDoubleCast = caster.hasTalent && caster.hasTalent('water_ball_double_cast');
+                
+                // Define the water ball attack function
+                const executeWaterBallAttack = (isSecondCast = false) => {
                     // Play the ball throw animation (using mainTarget)
                     showBallThrowAnimation('water_ball', caster, mainTarget);
                     
                     // Apply damage to main target
-                    const damage = 550;
+                    let damage = 550;
+                    
+                    // Apply Tsunami Force talent (100% magical damage scaling)
+                    const hasWaterBallMagicalScaling = caster.hasTalent && caster.hasTalent('water_ball_magical_scaling');
+                    if (hasWaterBallMagicalScaling) {
+                        const magicalDamageBonus = caster.stats.magicalDamage;
+                        damage += magicalDamageBonus;
+                        console.log(`[Tsunami Force] Added ${magicalDamageBonus} magical damage to main target (100% of ${caster.stats.magicalDamage})`);
+                        
+                        // Show Tsunami Force VFX
+                        if (window.showTsunamiForceVFX) {
+                            window.showTsunamiForceVFX(caster, mainTarget);
+                        }
+                    }
+                    
+                    // Apply Devastating Power talent
+                    const hasDevastatingPowerWater = caster.hasTalent && caster.hasTalent('devastating_power');
+                    if (hasDevastatingPowerWater) {
+                        const originalDamage = damage;
+                        damage *= 2;
+                        console.log(`[Devastating Power] Doubled water damage: ${originalDamage} → ${damage}`);
+                        
+                        // Show Devastating Power VFX
+                        if (window.showDevastatingPowerVFX) {
+                            window.showDevastatingPowerVFX(caster, mainTarget, originalDamage, damage);
+                        }
+                        
+                        addLogEntry(`💥 Devastating Power activated! Water damage doubled!`, 'talent-activation');
+                    }
+                    
                     const result = mainTarget.applyDamage(damage, 'physical', caster, { abilityId: 'ball_throw_water' });
-                    addLogEntry(`${caster.name} used Water Ball on ${mainTarget.name}, dealing ${result.damage} damage.`);
+                    
+                    // Handle Compassionate Resonance talent
+                    if (caster.hasTalent && caster.hasTalent('compassionate_resonance')) {
+                        const waterResonanceHeal = Math.floor(result.damage * 0.5);
+                        if (waterResonanceHeal > 0) {
+                            healRandomAlly(caster, waterResonanceHeal, 'compassionate_resonance');
+                        }
+                    }
+                    
+                    let waterLogMessage = `${caster.name} used Water Ball on ${mainTarget.name}, dealing ${result.damage} damage`;
+                    if (hasWaterBallMagicalScaling) {
+                        waterLogMessage += ` (Enhanced with magical tsunami force)`;
+                    }
+                    if (hasDevastatingPowerWater) {
+                        waterLogMessage += ` (Doubled by Devastating Power)`;
+                    }
+                    if (isSecondCast) {
+                        waterLogMessage += ` (Tidal Echo triggered!)`;
+                    }
+                    waterLogMessage += `.`;
+                    addLogEntry(waterLogMessage);
                     
                     // Play Water Ball sound
                     const playSoundWater = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
                     playSoundWater('sounds/shoma_water2.mp3');
                     
                     // Apply splash damage to all other enemies
-                    const splashDamage = 180;
+                    let splashDamage = 180;
+                    
+                    // Check for Water Ball Splash Power talent
+                    const hasWaterBallSplashPower = caster.hasTalent && caster.hasTalent('water_ball_splash_power');
+                    if (hasWaterBallSplashPower) {
+                        splashDamage += 300; // Increase splash damage by 300
+                        addLogEntry(`🌊 Tidal Devastation activated! Enhanced splash damage!`, 'talent-activation');
+                    }
+                    
+                    // Apply Tsunami Force talent to splash damage too
+                    if (hasWaterBallMagicalScaling) {
+                        const magicalSplashBonus = caster.stats.magicalDamage;
+                        splashDamage += magicalSplashBonus;
+                        console.log(`[Tsunami Force] Added ${magicalSplashBonus} magical damage to splash (100% of ${caster.stats.magicalDamage})`);
+                        addLogEntry(`🌀 Tsunami Force enhances splash with magical power!`, 'talent-activation');
+                    }
+                    
+                    // Apply Devastating Power to splash damage too
+                    if (hasDevastatingPowerWater) {
+                        const originalSplashDamage = splashDamage;
+                        splashDamage *= 2;
+                        console.log(`[Devastating Power] Doubled splash damage: ${originalSplashDamage} → ${splashDamage}`);
+                    }
+                    
                     const gameManager = window.gameManager;
                     
                     if (gameManager && gameManager.gameState && gameManager.gameState.aiCharacters) {
@@ -962,10 +1476,36 @@ function selectBall(shomaCharacter, ballId) {
                         addLogEntry(`${mainTarget.name} has been defeated!`);
                     }
                 };
-                break;
+                
+                // Execute the first attack
+                executeWaterBallAttack(false);
+                
+                // Check for double cast
+                if (hasWaterBallDoubleCast && Math.random() < 0.5) {
+                    console.log(`[Tidal Echo] Water Ball double cast triggered!`);
+                    
+                    // Show Tidal Echo VFX
+                    if (window.showTidalEchoVFX) {
+                        window.showTidalEchoVFX(caster, mainTarget);
+                    }
+                    
+                    addLogEntry(`🌊 Tidal Echo activated! Water Ball casts twice!`, 'talent-activation');
+                    
+                    // Execute the second attack after a short delay
+                    setTimeout(() => {
+                        executeWaterBallAttack(true);
+                    }, 500);
+                }
+                
+                // Elemental Juggling VFX (trigger once per primary cast)
+                if (caster.ballFollowupEnabled && window.showElementalJugglingVFX) {
+                    window.showElementalJugglingVFX(caster);
+                }
+                
+                return prepareFollowUpResult({ success: true });
                 
             default:
-                console.error(`Unknown ball type selected: ${ballId}`);
+                console.error(`Unknown ball type selected: ${ballType}`);
                 return;
         }
         
@@ -975,9 +1515,19 @@ function selectBall(shomaCharacter, ballId) {
         // Use the dedicated function to refresh the ability icon
         refreshAbilityIcon(shomaCharacter, ballThrowIndex);
         
-        // Log the selection
-        console.log(`Schoolboy Shoma selected ${ballThrowAbility.name}`);
-        addLogEntry(`Schoolboy Shoma equipped the ${ballThrowAbility.name}!`);
+        // Apply Arcane Mastery talent bonus if active
+        if (shomaCharacter.hasTalent && shomaCharacter.hasTalent('arcane_mastery')) {
+            const arcaneMasteryBonus = 125;
+            shomaCharacter.stats.magicalDamage = (shomaCharacter.stats.magicalDamage || 0) + arcaneMasteryBonus;
+            shomaCharacter.baseStats.magicalDamage = (shomaCharacter.baseStats.magicalDamage || 0) + arcaneMasteryBonus;
+            console.log(`[Arcane Mastery] Applied +${arcaneMasteryBonus} magical damage to ${shomaCharacter.name}. New magical damage: ${shomaCharacter.stats.magicalDamage}`);
+            
+            // Show Arcane Mastery VFX
+            showArcaneMasteryVFX(shomaCharacter);
+        }
+        
+        console.log(`Schoolboy Shoma ball selection completed: ${ballType}`);
+        if (onSelectionComplete) onSelectionComplete();
         
     } catch (error) {
         console.error('Error selecting ball:', error);
@@ -1074,6 +1624,108 @@ function refreshAbilityIcon(character, abilityIndex) {
         
     } catch (error) {
         console.error('Error refreshing ability icon:', error);
+    }
+}
+
+/**
+ * Refreshes the ability description in the UI
+ * @param {Character} character - The character whose ability to refresh
+ * @param {number} abilityIndex - The index of the ability to refresh
+ */
+function refreshAbilityDescription(character, abilityIndex) {
+    try {
+        const characterId = character.id || character.instanceId;
+        const ability = character.abilities[abilityIndex];
+        
+        if (!ability) {
+            console.warn(`No ability found for index ${abilityIndex}`);
+            return;
+        }
+        
+        // Find all possible description elements and update them
+        const selectors = [
+            `#character-${characterId} .ability[data-index="${abilityIndex}"] .ability-description`,
+            `#character-${characterId} .ability[data-ability-id="${ability.id}"] .ability-description`,
+            `#character-${characterId} .abilities .ability:nth-child(${abilityIndex + 1}) .ability-description`,
+            `#character-${characterId} .ability-${abilityIndex} .ability-description`,
+            `#character-${characterId} .ability[data-index="${abilityIndex}"] .ability-tooltip`,
+            `#character-${characterId} .ability[data-ability-id="${ability.id}"] .ability-tooltip`
+        ];
+        
+        let updated = false;
+        selectors.forEach(selector => {
+            try {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    if (element) {
+                        element.innerHTML = ability.description || '';
+                        updated = true;
+                        console.log(`Updated description via selector: ${selector}`);
+                    }
+                });
+            } catch (selectorError) {
+                // Silently continue to next selector
+            }
+        });
+        
+        if (!updated) {
+            console.warn(`Could not find ability description element to update for character ${characterId}`);
+        }
+        
+    } catch (error) {
+        console.error('Error refreshing ability description:', error);
+    }
+}
+
+/**
+ * Forces a complete refresh of the character's UI
+ * @param {Character} character - The character whose UI to refresh
+ */
+function refreshCharacterUI(character) {
+    try {
+        const characterId = character.id || character.instanceId;
+        
+        // Try multiple UI update methods
+        if (window.gameManager && window.gameManager.uiManager) {
+            if (window.gameManager.uiManager.updateCharacterUI) {
+                window.gameManager.uiManager.updateCharacterUI(character);
+                console.log(`Updated character UI via uiManager.updateCharacterUI for ${characterId}`);
+                return;
+            } else if (window.gameManager.uiManager.updateAllCharacterUIs) {
+                window.gameManager.uiManager.updateAllCharacterUIs();
+                console.log(`Updated character UI via uiManager.updateAllCharacterUIs for ${characterId}`);
+                return;
+            }
+        }
+        
+        // Try global update functions
+        if (typeof window.updateCharacterUI === 'function') {
+            window.updateCharacterUI(character);
+            console.log(`Updated character UI via global updateCharacterUI for ${characterId}`);
+            return;
+        }
+        
+        // Try to trigger a custom event for UI refresh
+        const refreshEvent = new CustomEvent('characterUIRefresh', {
+            detail: { character: character, characterId: characterId }
+        });
+        document.dispatchEvent(refreshEvent);
+        console.log(`Dispatched characterUIRefresh event for ${characterId}`);
+        
+        // As a last resort, try to find and update the character element directly
+        const characterElement = document.getElementById(`character-${characterId}`);
+        if (characterElement) {
+            // Force a reflow by temporarily changing and restoring a style
+            const originalDisplay = characterElement.style.display;
+            characterElement.style.display = 'none';
+            setTimeout(() => {
+                characterElement.style.display = originalDisplay;
+                console.log(`Forced character element reflow for ${characterId}`);
+            }, 10);
+        }
+        
+    } catch (error) {
+        console.error('Error refreshing character UI:', error);
     }
 }
 
@@ -1214,60 +1866,527 @@ function showBallThrowAnimation(ballType, caster, target) {
     }
 }
 
-// Register an event handler for when Schoolboy Shoma loads into a stage
-/* REMOVE THIS BLOCK:
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Schoolboy Shoma ball selection script loaded');
-
+/**
+ * Shows the Arcane Mastery VFX when the talent is active
+ * @param {Object} character - The character with Arcane Mastery talent
+ */
+function showArcaneMasteryVFX(character) {
     try {
-        // Make sure StageManager exists
-        if (typeof StageManager === 'undefined') {
-            console.error('StageManager not defined - ball selection cannot be initialized');
+        const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!characterElement) {
+            console.error('Character element not found for Arcane Mastery VFX');
             return;
         }
 
-        // Hook into the StageManager's loadPlayerCharacters method
-        const originalLoadPlayerCharacters = StageManager.prototype.loadPlayerCharacters;
+        // Create the main VFX container
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'arcane-mastery-vfx';
+        characterElement.appendChild(vfxContainer);
 
-        StageManager.prototype.loadPlayerCharacters = async function(playerTeam) {
-            try {
-                // Call the original method first
-                await originalLoadPlayerCharacters.call(this, playerTeam);
+        // Create the rotating aura
+        const aura = document.createElement('div');
+        aura.className = 'arcane-mastery-aura';
+        vfxContainer.appendChild(aura);
 
-                // Check if Schoolboy Shoma is in the player team
-                const shomaCharacter = this.gameState.playerCharacters.find(char => char.id === 'schoolboy_shoma');
-                if (shomaCharacter) {
-                    console.log('Schoolboy Shoma detected in player team, showing ball selection');
+        // Create arcane symbols
+        const symbolsContainer = document.createElement('div');
+        symbolsContainer.className = 'arcane-mastery-symbols';
+        vfxContainer.appendChild(symbolsContainer);
 
-                    // Use a promise with timeout to make the game wait for ball selection
-                    // but not forever if something goes wrong
-                    await Promise.race([
-                        new Promise(resolve => {
-                            // Small delay to ensure the UI is fully loaded
-                            setTimeout(() => {
-                                try {
-                                    showBallSelectionForShoma(shomaCharacter, resolve);
-                                } catch (err) {
-                                    console.error('Error showing ball selection:', err);
-                                    resolve(); // Resolve anyway to prevent game from hanging
-                                }
-                            }, 500);
-                        }),
-                        // Safety timeout to prevent infinite waiting
-                        new Promise(resolve => setTimeout(resolve, 10000))
-                    ]);
+        const arcaneSymbols = ['★', '✦', '✧', '✩', '✪', '✫'];
+        arcaneSymbols.forEach(symbol => {
+            const symbolElement = document.createElement('div');
+            symbolElement.className = 'arcane-symbol';
+            symbolElement.textContent = symbol;
+            symbolsContainer.appendChild(symbolElement);
+        });
 
-                    console.log('Ball selection completed or timed out');
-                }
-            } catch (error) {
-                console.error('Error in loadPlayerCharacters override:', error);
-                // Don't rethrow - we want the game to continue even if ball selection fails
+        // Create floating particles
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = 'arcane-mastery-particles';
+        vfxContainer.appendChild(particlesContainer);
+
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'arcane-particle';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Create floating text
+        const floatingText = document.createElement('div');
+        floatingText.className = 'arcane-mastery-floating-text';
+        floatingText.textContent = '+125 MAGICAL DMG';
+        vfxContainer.appendChild(floatingText);
+
+        // Add battle log entry
+        addLogEntry(`✨ Arcane Mastery activated! ${character.name} gains +125 Magical Damage!`, 'talent-activation');
+
+        // Remove VFX after animation completes
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                vfxContainer.parentNode.removeChild(vfxContainer);
             }
-        };
+        }, 3000);
 
-        console.log('Schoolboy Shoma ball selection script initialized');
     } catch (error) {
-        console.error('Failed to initialize Schoolboy Shoma ball selection:', error);
+        console.error('Error showing Arcane Mastery VFX:', error);
     }
-});
-*/ 
+}
+
+/**
+ * Shows the Tidal Echo VFX when the water ball double cast talent triggers
+ * @param {Object} caster - The character with Tidal Echo talent
+ * @param {Object} target - The target of the water ball
+ */
+function showTidalEchoVFX(caster, target) {
+    try {
+        const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
+        const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+        
+        if (!casterElement || !targetElement) {
+            console.error('Character elements not found for Tidal Echo VFX');
+            return;
+        }
+
+        // Create the main VFX container
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'tidal-echo-vfx';
+        vfxContainer.style.cssText = `
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 1000;
+        `;
+        targetElement.appendChild(vfxContainer);
+
+        // Create tidal echo aura
+        const echoAura = document.createElement('div');
+        echoAura.className = 'tidal-echo-aura';
+        echoAura.style.cssText = `
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, rgba(33,150,243,0.4) 0%, rgba(33,150,243,0.2) 50%, transparent 100%);
+            border-radius: 50%;
+            animation: tidalEchoPulse 1.5s ease-in-out;
+        `;
+        vfxContainer.appendChild(echoAura);
+
+        // Create echo waves
+        const echoWaves = document.createElement('div');
+        echoWaves.className = 'tidal-echo-waves';
+        echoWaves.style.cssText = `
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            animation: tidalEchoWaves 2s ease-out;
+        `;
+        vfxContainer.appendChild(echoWaves);
+
+        // Create floating echo text
+        const echoText = document.createElement('div');
+        echoText.className = 'tidal-echo-text';
+        echoText.textContent = 'TIDAL ECHO!';
+        echoText.style.cssText = `
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #2196f3;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            animation: tidalEchoTextFloat 2s ease-out forwards;
+            z-index: 1001;
+        `;
+        vfxContainer.appendChild(echoText);
+
+        // Create echo particles
+        for (let i = 0; i < 12; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'tidal-echo-particle';
+            particle.style.cssText = `
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: radial-gradient(circle, #2196f3, #64b5f6);
+                border-radius: 50%;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: tidalEchoParticleFloat ${2 + Math.random() * 0.5}s ease-out forwards;
+                animation-delay: ${Math.random() * 0.3}s;
+            `;
+            vfxContainer.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) particle.parentNode.removeChild(particle);
+            }, 2500);
+        }
+
+        // Create echo ripple effect
+        const echoRipple = document.createElement('div');
+        echoRipple.className = 'tidal-echo-ripple';
+        echoRipple.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 3px solid #2196f3;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: tidalEchoRipple 1.5s ease-out;
+        `;
+        vfxContainer.appendChild(echoRipple);
+
+        // Remove VFX after animation completes
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                vfxContainer.parentNode.removeChild(vfxContainer);
+            }
+        }, 2500);
+
+    } catch (error) {
+        console.error('Error showing Tidal Echo VFX:', error);
+    }
+}
+
+/**
+ * Heal a random ally when Compassionate Resonance talent is active
+ * @param {Character} caster - The character with the talent
+ * @param {number} healAmount - Amount to heal (50% of damage dealt)
+ * @param {string} source - Source of the healing
+ */
+function healRandomAlly(caster, healAmount, source = 'compassionate_resonance') {
+    try {
+        // Get all allies (excluding the caster)
+        const allies = [];
+        
+        if (window.gameManager && window.gameManager.gameState) {
+            // If caster is AI, allies are other AI characters
+            if (caster.isAI) {
+                allies.push(...window.gameManager.gameState.aiCharacters.filter(char => 
+                    char !== caster && !char.isDead()
+                ));
+            } else {
+                // If caster is player, allies are other player characters
+                allies.push(...window.gameManager.gameState.playerCharacters.filter(char => 
+                    char !== caster && !char.isDead()
+                ));
+            }
+        }
+        
+        if (allies.length === 0) {
+            console.log(`[Compassionate Resonance] No valid allies found for ${caster.name}`);
+            return;
+        }
+        
+        // Select a random ally
+        const randomAlly = allies[Math.floor(Math.random() * allies.length)];
+        
+        // Apply healing
+        const healResult = randomAlly.heal(healAmount, caster, { abilityId: source });
+        
+        // Add battle log entry
+        if (window.gameManager && window.gameManager.addLogEntry) {
+            let logMessage = `✨ Compassionate Resonance! ${caster.name}'s damage resonates with ${randomAlly.name}, healing for ${healResult.healAmount} HP`;
+            if (healResult.isCritical) {
+                logMessage += " (Critical Heal!)";
+            }
+            window.gameManager.addLogEntry(logMessage, healResult.isCritical ? 'critical heal' : 'heal');
+        }
+        
+        // Show Compassionate Resonance VFX
+        showCompassionateResonanceVFX(caster, randomAlly, healAmount);
+        
+        console.log(`[Compassionate Resonance] ${caster.name} healed ${randomAlly.name} for ${healResult.healAmount} HP`);
+        
+    } catch (error) {
+        console.error('[Compassionate Resonance] Error healing random ally:', error);
+    }
+}
+
+/**
+ * Show Compassionate Resonance VFX
+ * @param {Character} caster - The character with the talent
+ * @param {Character} target - The ally being healed
+ * @param {number} healAmount - Amount being healed
+ */
+function showCompassionateResonanceVFX(caster, target, healAmount) {
+    try {
+        const casterElement = document.getElementById(`character-${caster.id || caster.instanceId}`);
+        const targetElement = document.getElementById(`character-${target.id || target.instanceId}`);
+        
+        if (!casterElement || !targetElement) {
+            console.error('[Compassionate Resonance VFX] Could not find character elements');
+            return;
+        }
+        
+        // Create resonance beam between caster and target
+        const resonanceBeam = document.createElement('div');
+        resonanceBeam.className = 'compassionate-resonance-beam';
+        document.body.appendChild(resonanceBeam);
+        
+        // Position beam
+        const casterRect = casterElement.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        const angle = Math.atan2(targetRect.top - casterRect.top, targetRect.left - casterRect.left);
+        const distance = Math.hypot(targetRect.left - casterRect.left, targetRect.top - casterRect.top);
+        
+        resonanceBeam.style.left = `${casterRect.left + casterRect.width/2}px`;
+        resonanceBeam.style.top = `${casterRect.top + casterRect.height/2}px`;
+        resonanceBeam.style.width = `${distance}px`;
+        resonanceBeam.style.transform = `rotate(${angle}rad)`;
+        resonanceBeam.style.transformOrigin = '0 50%';
+        
+        // Create healing aura on target
+        const healingAura = document.createElement('div');
+        healingAura.className = 'compassionate-resonance-healing-aura';
+        targetElement.appendChild(healingAura);
+        
+        // Create floating heal text
+        const healText = document.createElement('div');
+        healText.className = 'compassionate-resonance-heal-text';
+        healText.textContent = `+${healAmount} RESONANCE`;
+        targetElement.appendChild(healText);
+        
+        // Create resonance particles
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'compassionate-resonance-particle';
+            particle.style.animationDelay = `${i * 0.2}s`;
+            targetElement.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) particle.parentNode.removeChild(particle);
+            }, 3000);
+        }
+        
+        // Cleanup
+        setTimeout(() => {
+            if (resonanceBeam.parentNode) resonanceBeam.parentNode.removeChild(resonanceBeam);
+            if (healingAura.parentNode) healingAura.parentNode.removeChild(healingAura);
+            if (healText.parentNode) healText.parentNode.removeChild(healText);
+        }, 2500);
+        
+    } catch (error) {
+        console.error('[Compassionate Resonance VFX] Error showing VFX:', error);
+    }
+}
+
+/**
+ * Execute Grass Ball bounce to all allies with 75% chance each
+ * @param {Character} caster - The character using Grass Ball
+ * @param {Array} availableAllies - Array of allies that can be bounced to
+ * @param {Array} healedTargets - Array of targets already healed (to avoid duplicates)
+ */
+function executeGrassBallBounceToAllies(caster, availableAllies, healedTargets) {
+    console.log(`[Healing Cascade] Checking 75% chance for each of ${availableAllies.length} allies`);
+    
+    // Filter out already healed targets
+    const eligibleAllies = availableAllies.filter(ally => !healedTargets.includes(ally));
+    
+    if (eligibleAllies.length === 0) {
+        console.log(`[Healing Cascade] No eligible allies for bouncing`);
+        return;
+    }
+    
+    let bounceCount = 0;
+    
+    // Check each eligible ally with 75% chance
+    eligibleAllies.forEach((ally, index) => {
+        const bounceRoll = Math.random();
+        console.log(`[Healing Cascade] Ally ${index + 1} (${ally.name}) bounce roll: ${bounceRoll} (need < 0.75 for bounce)`);
+        
+        if (bounceRoll < 0.75) {
+            bounceCount++;
+            console.log(`[Healing Cascade] Bounce #${bounceCount} successful! Healing ${ally.name}`);
+            
+            // Calculate healing amount (same as original Grass Ball)
+            let grassHealAmount = 300;
+            
+            // Apply Healing Mastery talent (same as original Grass Ball)
+            const hasHealingMastery = caster.hasTalent && caster.hasTalent('healing_mastery');
+            if (hasHealingMastery) {
+                grassHealAmount = Math.floor(grassHealAmount * 1.2); // +20% healing
+                console.log(`[Healing Cascade] Healing Mastery active for bounce #${bounceCount}`);
+            }
+            
+            // Apply Enhanced Grass Ball talent (250% more healing on buffed targets) - same as original
+            const hasEnhancedGrassBall = caster.hasTalent && caster.hasTalent('enhanced_grass_ball');
+            if (hasEnhancedGrassBall && ally.buffs && ally.buffs.length > 0) {
+                grassHealAmount = Math.floor(grassHealAmount * 3.5); // 250% more = 350% total
+                console.log(`[Healing Cascade] Enhanced Grass Ball active for bounce #${bounceCount} - increased healing to ${grassHealAmount}`);
+            }
+            
+            // Apply healing with small delay for visual effect
+            setTimeout(() => {
+                const bounceHealResult = ally.heal(grassHealAmount, caster, { 
+                    abilityId: `ball_throw_grass_bounce_${bounceCount}`,
+                    isBounceHeal: true,
+                    bounceNumber: bounceCount
+                });
+                
+                // Track ability usage
+                if (window.statisticsManager) {
+                    window.statisticsManager.recordHealingDone(caster, ally, bounceHealResult.healAmount, bounceHealResult.isCritical, `ball_throw_grass_bounce_${bounceCount}`, 'direct');
+                }
+                
+                // Show bounce VFX
+                if (window.showGrassBallBounceVFX) {
+                    window.showGrassBallBounceVFX(caster, ally, bounceCount, grassHealAmount);
+                }
+                
+                // Add battle log entry
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    let bounceMessage = `🌱 Healing Cascade bounces to ${ally.name} (Bounce #${bounceCount})! +${bounceHealResult.healAmount} HP`;
+                    if (bounceHealResult.isCritical) {
+                        bounceMessage += " (Critical Heal!)";
+                    }
+                    window.gameManager.addLogEntry(bounceMessage, bounceHealResult.isCritical ? 'critical heal' : 'heal');
+                }
+                
+                // Apply Grass Growth talent to bounce target
+                const hasGrassGrowth = caster.hasTalent && caster.hasTalent('grass_growth');
+                if (hasGrassGrowth) {
+                    console.log(`[Healing Cascade] Applying Grass Growth to bounce target ${ally.name}`);
+                    
+                    // Create Grass Growth buff
+                    const grassGrowthBuff = {
+                        id: 'grass_growth',
+                        name: 'Grass Growth',
+                        duration: 2,
+                        source: 'grass_growth',
+                        description: 'Growing grass will heal you for 2% of max HP',
+                        onTurnStart: function(character) {
+                            console.log(`[Grass Growth] onTurnStart triggered for ${character.name} (bounce target)`);
+                            
+                            // Calculate healing amount (2% of max HP)
+                            const healAmount = Math.floor(character.stats.maxHp * 0.02);
+                            
+                            // Apply healing with caster's healing power
+                            const delayedHealResult = character.heal(healAmount, caster, { 
+                                abilityId: 'grass_growth_heal',
+                                isPassiveHealing: true 
+                            });
+                            
+                            // Show Grass Growth VFX
+                            if (window.showGrassGrowthVFX && typeof window.showGrassGrowthVFX === 'function') {
+                                window.showGrassGrowthVFX(character, healAmount);
+                            }
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `🌱 Grass Growth heals ${character.name} for ${delayedHealResult.healAmount} HP!`,
+                                    'talent-effect'
+                                );
+                            }
+                        }
+                    };
+                    
+                    ally.addBuff(grassGrowthBuff);
+                    
+                    // Show initial Grass Growth VFX
+                    if (window.showGrassGrowthInitialVFX && typeof window.showGrassGrowthInitialVFX === 'function') {
+                        window.showGrassGrowthInitialVFX(caster, ally);
+                    }
+                }
+                
+                // Apply Magical Empowerment talent to bounce target
+                const hasMagicalEmpowerment = caster.hasTalent && caster.hasTalent('magical_empowerment');
+                if (hasMagicalEmpowerment) {
+                    console.log(`[Healing Cascade] Applying Magical Empowerment to bounce target ${ally.name}`);
+                    
+                    // Create Magical Empowerment buff
+                    const magicalEmpowermentBuff = {
+                        id: 'magical_empowerment',
+                        name: 'Magical Empowerment',
+                        duration: 3,
+                        source: 'magical_empowerment',
+                        description: '+30% Magical Damage from nature\'s energy',
+                        statModifiers: [{
+                            stat: 'magicalDamage',
+                            value: Math.floor(ally.stats.magicalDamage * 0.3),
+                            operation: 'add'
+                        }],
+                        onApplied: function(character) {
+                            console.log(`[Magical Empowerment] Applied to ${character.name} (bounce target)`);
+                            
+                            // Show Magical Empowerment VFX
+                            if (window.showMagicalEmpowermentVFX && typeof window.showMagicalEmpowermentVFX === 'function') {
+                                window.showMagicalEmpowermentVFX(caster, character);
+                            }
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `✨ ${character.name} is empowered with +30% Magical Damage!`,
+                                    'talent-effect'
+                                );
+                            }
+                        },
+                        onRemoved: function(character) {
+                            console.log(`[Magical Empowerment] Removed from ${character.name} (bounce target)`);
+                            
+                            // Add battle log entry
+                            if (window.gameManager && window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `✨ ${character.name}'s Magical Empowerment fades.`,
+                                    'system'
+                                );
+                            }
+                        }
+                    };
+                    
+                    ally.addBuff(magicalEmpowermentBuff);
+                }
+                
+            }, index * 200); // Stagger bounces by 200ms for visual effect
+        } else {
+            console.log(`[Healing Cascade] Bounce to ${ally.name} failed (roll: ${bounceRoll})`);
+        }
+    });
+    
+    // Add summary battle log entry
+    if (bounceCount > 0) {
+        setTimeout(() => {
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(
+                    `🌱 Healing Cascade completed! ${bounceCount} additional ally${bounceCount > 1 ? 'ies' : ''} healed.`,
+                    'system-update'
+                );
+            }
+        }, (eligibleAllies.length * 200) + 500); // Wait for all bounces to complete
+    } else {
+        console.log(`[Healing Cascade] No bounces occurred`);
+        
+        // Add battle log entry for no bounces
+        if (window.gameManager && window.gameManager.addLogEntry) {
+            window.gameManager.addLogEntry(
+                `🌱 Healing Cascade attempted but no bounces occurred.`,
+                'system'
+            );
+        }
+    }
+}
+
+// Expose globally
+window.executeGrassBallBounceToAllies = executeGrassBallBounceToAllies;
+
+// Register global functions for external access
+window.selectBall = selectBall;
+window.executeBallThrow = executeBallThrow;
+window.generateBallDescription = generateBallDescription;
+window.addLogEntry = addLogEntry;
+window.showBallSelectionForShoma = showBallSelectionForShoma;
+window.getIconForBallType = getIconForBallType;
+window.refreshAbilityIcon = refreshAbilityIcon;
+window.refreshAbilityDescription = refreshAbilityDescription;
+window.refreshCharacterUI = refreshCharacterUI;
+window.showBallThrowAnimation = showBallThrowAnimation;
+window.showArcaneMasteryVFX = showArcaneMasteryVFX;
+window.showTidalEchoVFX = showTidalEchoVFX;
+window.healRandomAlly = healRandomAlly;
+window.showCompassionateResonanceVFX = showCompassionateResonanceVFX;
+
+console.log('Schoolboy Shoma ball selection module loaded'); 

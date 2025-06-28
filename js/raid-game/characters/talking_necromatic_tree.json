@@ -1,0 +1,56 @@
+{
+  "id": "talking_necromatic_tree",
+  "name": "Talking Necromatic Tree",
+  "image": "Icons/characters/Talking Necromatic Tree.png",
+  "rarity": "epic",
+  "type": "enemy",
+  "tags": ["Forest", "Necromatic", "Magical"],
+  "description": "An ancient tree corrupted by dark magic, its branches whisper with malevolent intent.",
+  "playerunlocked": false,
+  "isHidden": true,
+  "ingameimage": "Loading Screen/Talking Necromatic Tree.png",
+  "stats": {
+    "hp": 8500,
+    "mana": 1200,
+    "physicalDamage": 180,
+    "magicalDamage": 320,
+    "armor": 25,
+    "magicalShield": 35,
+    "speed": 85,
+    "critChance": 0.15,
+    "critMultiplier": 1.8,
+    "dodgeChance": 0.08,
+    "hpRegen": 45,
+    "manaRegen": 60
+  },
+  "abilities": [
+    {
+      "id": "healing_roots",
+      "name": "Healing Roots",
+      "description": "The tree extends its roots to heal an ally, restoring 800 HP with natural magic.",
+      "healing": 800,
+      "manaCost": 10,
+      "cooldown": 1,
+      "icon": "icons/abilities/healing_roots.png",
+      "targetType": "ally",
+      "type": "custom",
+      "functionName": "healing_roots"
+    },
+    {
+      "id": "hollowing_scream",
+      "name": "Hollowing Scream",
+      "description": "The tree emits a terrifying scream that removes a buff from all enemies.",
+      "manaCost": 60,
+      "cooldown": 4,
+      "icon": "icons/abilities/hollowing_scream.png",
+      "targetType": "enemy",
+      "type": "custom",
+      "functionName": "hollowing_scream"
+    }
+  ],
+  "passive": {
+    "id": "forest_corruption",
+    "name": "Forest Corruption",
+    "description": "The tree's presence corrupts the forest around it, gaining mana regeneration when allies are nearby."
+  }
+} 

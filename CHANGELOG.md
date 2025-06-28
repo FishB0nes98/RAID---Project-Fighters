@@ -1,5 +1,82 @@
 # Project Fighters - Changelog
 
+## Patch 0.5 - Schoolboy Shoma Talent System Expansion
+*Released: [Current Date]*
+
+### New Features
+
+#### ⚾ Schoolboy Shoma - Advanced Talent Tree
+**Rationale**: Schoolboy Shoma's talent tree was limited to just the Debuff Hunter talent. This expansion adds two powerful new Boink enhancement talents that branch from the root, giving players meaningful choices in how they develop Shoma's signature ability.
+
+**New Talents Added:**
+
+**🔥 Power Boink** (Tier 2 - Connected to Debuff Hunter)
+- **Effect**: Boink now scales with **85% additional Physical Damage**
+- **Visual Enhancement**: Stunning power aura VFX with energy burst, floating "POWER BOINK!" text, and radial strength particles
+- **Impact**: Transforms Boink from a utility ability into a devastating damage dealer that scales with Shoma's Physical Damage stat
+
+**⚡ Efficient Boink** (Tier 2 - Connected to Debuff Hunter)
+- **Effect**: Boink **costs no mana**
+- **Visual Enhancement**: Updated UI displays show "0 mana" cost with proper crossed-out original cost styling
+- **Impact**: Allows unlimited Boink usage, enabling aggressive playstyles without mana constraints
+
+**Technical Features:**
+- **Smart Ability Descriptions**: Boink's tooltip dynamically updates to show all active talent effects in a clean, organized format
+- **Enhanced VFX System**: Power Boink features particle-based visual effects with golden energy bursts, power auras, and floating combat text
+- **Complete Integration**: Both talents work seamlessly with existing systems including battle statistics, AI targeting, and controller support
+- **Stacking Compatibility**: Power Boink stacks multiplicatively with Debuff Hunter for massive damage against debuffed targets
+
+**Developer Commentary**: 
+*These talents provide meaningful branching choices for Shoma players. Power Boink appeals to damage-focused builds and scales naturally with character progression, while Efficient Boink enables spam-heavy playstyles and resource-free aggression. Both talents enhance Shoma's signature ability in distinct ways, allowing players to customize their approach based on team composition and preferred playstyle.*
+
+**Balance Considerations**:
+- Power Boink provides significant damage scaling but requires investment in Physical Damage stats
+- Efficient Boink removes resource constraints but doesn't increase damage output
+- Both talents require the Debuff Hunter prerequisite, ensuring players invest in the character's core identity first
+
+---
+
+## Patch 0.4 - Farmer Alice Balance Changes
+*Released: [Current Date]*
+
+### Character Balance Changes
+
+#### 🐰 Farmer Alice - Defensive & Utility Buffs
+**Rationale**: Farmer Alice needed improvements to her defensive capabilities and ability accessibility. Her base defensive stats were too low for a tank character, and her abilities needed better cooldown management and healing output to fulfill her support role effectively.
+
+**Base Stat Changes:**
+- **Armor**: Increased from **12 → 22** (+83% increase)
+- **Magic Shield**: Increased from **20 → 35** (+75% increase)
+- *Impact: Significantly improved survivability against both physical and magical damage, making Alice a more reliable frontline tank*
+
+**Ability Changes:**
+
+**🐾 Pounce (Q)**
+- **Cooldown**: Reduced from **2 → 1 turn**
+- **Stun Chance**: Reduced from **85% → 47%**
+- *Impact: Much more frequent crowd control with reduced reliability. The 1-turn cooldown allows Alice to be more disruptive while the stun chance reduction prevents oppressive lockdown scenarios*
+
+**🛡️ Thick Fur (W)**
+- **Cooldown**: Reduced from **18 → 14 turns**
+- *Impact: More frequent access to defensive buffs, improving Alice's tanking consistency and team protection uptime*
+
+**🥕 Carrot Power Up (R)**
+- **Healing**: Increased from **21% → 27%** of missing health
+- **Mana Cost**: Reduced from **155 → 90** mana
+- **Power Carrots Talent**: Updated to heal **27%** of maximum HP (was 21%)
+- *Impact: Significantly more accessible healing ability with improved output. The mana cost reduction makes it much easier to use consistently, while the healing increase provides better support value*
+
+**Developer Commentary**: 
+*These changes transform Farmer Alice from a niche tank into a more reliable frontline protector. The defensive stat buffs address her core weakness of being too fragile for a tank character, while the ability changes improve her utility and support capabilities. The Pounce changes create a more dynamic playstyle with frequent but less oppressive crowd control, while Carrot Power Up becomes a much more accessible and effective healing tool.*
+
+**Impact Summary**:
+- **Early Game**: Much better survivability with improved base stats
+- **Mid Game**: More frequent ability usage creates better combat flow
+- **Late Game**: Enhanced healing output and defensive buffs provide stronger team support
+- **Team Fights**: More reliable tanking and support capabilities without being oppressive
+
+---
+
 ## Patch 0.4 - Zoey Balance Overhaul
 *Released: [Current Date]*
 
@@ -352,6 +429,48 @@ The Heavy Ball buff specifically addresses feedback that the debuff duration was
 - Updated ability cooldowns in character JSON files
 - Modified Heavy Ball debuff duration and description text
 - Updated ball selection UI to reflect new Heavy Ball duration
+
+---
+
+## [Latest Updates]
+
+### ✨ New Features - Consumable Item System
+
+**Advanced Training Stage - New Consumable Items:**
+- **Infernal Cinder** - Crafting material with 75% drop chance, drops 1-4 quantity
+- **Mana Sack** - Consumable item that restores 500 mana when used, 100% drop chance, drops 1-3 quantity, 5-turn cooldown
+
+**Consumable System Features:**
+- ✅ Enhanced Item class with consumable support (effect functions, cooldown management)
+- ✅ CharacterInventory now supports item stacking for consumables
+- ✅ New consumable window UI with draggable interface
+- ✅ Character icons show which character owns each consumable item
+- ✅ Consumable usage directly from the consumable window
+- ✅ Visual cooldown indicators and disabled states
+- ✅ Turn-based cooldown reduction system
+- ✅ Battle log integration for consumable usage
+- ✅ Firebase integration for persistent character inventories
+
+**Implementation Details:**
+- New consumable button (🧪) added to quick action bar
+- Modern, responsive UI with animations and visual feedback
+- Support for quantity ranges in loot tables
+- Backward compatibility with existing inventory data
+- Proper error handling and user feedback
+
+**Technical Components Added:**
+- Enhanced `Item.setConsumableEffect()` and `Item.useConsumable()` methods
+- `CharacterInventory.useConsumableItem()` for inventory integration
+- `InventoryUIManager.createConsumableWindow()` for UI management
+- Updated `LootManager` with Advanced Training stage loot configuration
+- Automatic cooldown reduction in `GameManager.endPlayerTurn()`
+
+**Usage:**
+1. Complete Advanced Training stage to receive items
+2. Click the 🧪 button in the quick action bar during battle
+3. View all player characters' consumable items in one window
+4. Click "Use" to consume items (respects cooldowns)
+5. Items stack automatically in character inventories
 
 ---
 

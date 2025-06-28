@@ -1052,33 +1052,41 @@ class FarmerChamChamPassive {
             const elementId = character.instanceId || character.id;
             const charElement = document.getElementById(`character-${elementId}`);
             if (!charElement) return;
-            
+
+            // Ensure damageIncrease is a number
+            let percent = 0;
+            if (typeof damageIncrease === 'number') {
+                percent = damageIncrease * 100;
+            } else if (damageIncrease && typeof damageIncrease.valueOf === 'function') {
+                percent = Number(damageIncrease.valueOf()) * 100;
+            } else {
+                percent = 0;
+            }
+
             // Create container for the effect
             const vfxContainer = document.createElement('div');
             vfxContainer.className = 'debuff-exploitation-vfx';
             charElement.appendChild(vfxContainer);
-            
+
             // Create the text element showing the damage bonus
             const bonusText = document.createElement('div');
             bonusText.className = 'debuff-exploitation-text';
-            bonusText.textContent = `+${Math.round(damageIncrease * 100)}% DMG (${debuffCount} DEBUFFS)`;
+            bonusText.textContent = `+${Math.round(percent)}% DMG (${debuffCount} DEBUFFS)`;
             vfxContainer.appendChild(bonusText);
-            
+
             // Create a pulsing glow effect
             const glowEffect = document.createElement('div');
             glowEffect.className = 'debuff-exploitation-glow';
             vfxContainer.appendChild(glowEffect);
-            
+
             // Remove the effect after animation completes
             setTimeout(() => {
-                if (vfxContainer.parentNode === charElement) {
-                    vfxContainer.remove();
-                }
+                vfxContainer.remove();
             }, 2000);
-            
+
             // Play sound if possible
             if (window.gameManager && typeof window.gameManager.playSound === 'function') {
-                window.gameManager.playSound('sounds/damage_up.mp3', 0.5);
+                window.gameManager.playSound('sounds/buff_applied.mp3', 0.7);
             }
         } catch (error) {
             console.error('Error showing Debuff Exploitation VFX:', error);
@@ -1629,17 +1637,4 @@ window.showLastingProtectionVFX = function(character, buffName, originalDuration
         const elementId = character.instanceId || character.id;
         window.gameManager.showFloatingText(`character-${elementId}`, `+${newDuration - originalDuration} Turn`, 'buff');
     }
-}; 
-
-// Register VFX handler for Debuff Exploitation in the global scope
-window.showDebuffExploitationVFX = function(character, target, debuffCount, damageIncrease) {
-    // Check if character has a passive handler with the showDebuffExploitationVFX method
-    if (character.passiveHandler && typeof character.passiveHandler.showDebuffExploitationVFX === 'function') {
-        character.passiveHandler.showDebuffExploitationVFX(character, target, debuffCount, damageIncrease);
-    }
-    // If no passive handler, fallback to a basic floating text
-    else if (window.gameManager && typeof window.gameManager.showFloatingText === 'function') {
-        const elementId = character.instanceId || character.id;
-        window.gameManager.showFloatingText(`character-${elementId}`, `+${Math.round(damageIncrease * 100)}% DMG (${debuffCount} debuffs)`, 'buff');
-    }
-}; 
+};

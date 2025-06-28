@@ -113,7 +113,7 @@
         "talent_alice_6": {
             "id": "talent_alice_6",
             "name": "Power Carrots",
-            "description": "Carrot Power-up heals 21% of the target's maximum HP instead of missing HP.",
+            "description": "Carrot Power-up heals 27% of the target's maximum HP instead of missing HP.",
             "icon": "Icons/talents/power_carrots.webp",
             "effect": {
                 "type": "modify_ability",

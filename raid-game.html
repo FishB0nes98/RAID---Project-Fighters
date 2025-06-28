@@ -165,6 +165,7 @@
     <link rel="stylesheet" href="css/atlantean_shinnok_abilities.css">
     <link rel="stylesheet" href="css/raid-game/vfx/atlantean_kagome_vfx.css">
     <link rel="stylesheet" href="css/raid-game/vfx/shadowfin_abilities.css">
+    <link rel="stylesheet" href="css/loot-rewards.css">
     <link rel="stylesheet" href="css/farmer_alice_abilities.css">
     <link rel="stylesheet" href="css/farmer_shoma_abilities.css">
     <link rel="stylesheet" href="css/schoolgirl_kokoro_abilities.css">
@@ -231,7 +232,10 @@
     <link rel="stylesheet" href="css/raid-game/vfx/abyssal_smash.css">
     <link rel="stylesheet" href="css/raid-game/vfx/tidal_splash.css">
     <link rel="stylesheet" href="css/raid-game/vfx/abyssal_regen.css">
-<link rel="stylesheet" href="css/raid-game/passives/atlantean_kagome_passive.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/maul.css">
+    <link rel="stylesheet" href="css/raid-game/passives/atlantean_kagome_passive.css">
+    <link rel="stylesheet" href="css/raid-game/vfx/necromatic_characters_vfx.css">
+    <link rel="stylesheet" href="css/raid-game/passives/talking_necromatic_tree_passive.css">
     
     <!-- Quest Completion Styles -->
     <style>
@@ -696,6 +700,8 @@
             <button id="qab-talents" class="quick-action-btn" title="Toggle Talents">⭐</button>
             <button id="qab-log" class="quick-action-btn" title="Toggle Battle Log">📋</button>
             <button id="qab-stats" class="quick-action-btn" title="Toggle Statistics">📊</button>
+            <button id="qab-inventory" class="quick-action-btn" title="Global Inventory">🎒</button>
+            <button id="qab-consumables" class="quick-action-btn" title="Consumable Items">🧪</button>
         </div>
     </div>
 
@@ -714,6 +720,18 @@
     <script src="js/raid-game/character-xp-manager.js"></script>
     <script src="js/raid-game/ability-modifier.js"></script>
     <script src="js/raid-game/talent-manager.js"></script>
+    
+    <!-- Inventory System Scripts -->
+    <script src="js/raid-game/item-system.js"></script>
+    <script src="js/raid-game/inventory-integration.js"></script>
+    <script src="js/raid-game/inventory-ui-manager.js"></script>
+    
+    <!-- Loot System Scripts -->
+    <script src="js/raid-game/loot-manager.js"></script>
+    <script src="js/raid-game/loot-ui-manager.js"></script>
+    
+    <!-- Inventory System CSS -->
+    <link rel="stylesheet" href="css/inventory-system.css">
     
     <!-- Skin System Scripts -->
     <script src="js/skins/skin-registry.js"></script>
@@ -840,6 +858,9 @@
     <script src="js/raid-game/abilities/shadow_assassin_abilities.js"></script>
     <script src="js/raid-game/abilities/assassin_stealth_abilities.js"></script>
     <script src="js/raid-game/abilities/octopus_assassin_abilities.js"></script>
+    <script src="js/raid-game/abilities/talking_necromatic_tree_abilities.js"></script>
+    <script src="js/raid-game/abilities/necromatic_corrupted_bear_abilities.js"></script>
+    <script src="js/raid-game/vfx/necromatic_characters_vfx.js"></script>
 
     <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
@@ -854,6 +875,7 @@
 
     <script src="js/raid-game/passives/atlantean_sub_zero_passive.js"></script>
     <script src="js/raid-game/passives/atlantean_zasalamel_passive.js"></script>
+    <script src="js/raid-game/passives/talking_necromatic_tree_passive.js"></script>
 
     <script>
         // Function to hide loading screen
@@ -2082,6 +2104,37 @@
                         setupPageUnloadConfirmation();
                         setupDebugKeys();
 
+                        // Initialize Inventory System
+                        if (typeof ItemRegistry !== 'undefined' && typeof GlobalInventory !== 'undefined') {
+                            window.ItemRegistry = new ItemRegistry();
+                            window.GlobalInventory = new GlobalInventory();
+                            window.CharacterInventories = new Map();
+                            
+                            // Initialize inventory UI manager for raid game
+                            if (typeof InventoryUIManager !== 'undefined') {
+                                window.inventoryUIManager = new InventoryUIManager();
+                            }
+                            
+                            // Initialize inventory integration manager
+                            if (typeof InventoryIntegrationManager !== 'undefined') {
+                                window.InventoryIntegrationManager = new InventoryIntegrationManager();
+                                await window.InventoryIntegrationManager.initialize();
+                                console.log('[RAID-GAME] Inventory system initialized');
+                            }
+                        }
+
+                        // Initialize Loot System
+                        if (typeof LootManager !== 'undefined') {
+                            window.LootManager = new LootManager();
+                            console.log('[RAID-GAME] Loot system initialized');
+                        }
+
+                        // Initialize Loot UI Manager
+                        if (typeof LootUIManager !== 'undefined') {
+                            window.LootUIManager = new LootUIManager();
+                            console.log('[RAID-GAME] Loot UI system initialized');
+                        }
+
                         // Initialize the talent manager if available
                         if (window.talentManager) {
                             await window.talentManager.initialize();
@@ -2213,6 +2266,22 @@
                 }
             });
             document.getElementById('qab-stats').addEventListener('click', () => clickIfExists('show-statistics-button'));
+            document.getElementById('qab-inventory').addEventListener('click', () => {
+                // Open global inventory modal
+                if (window.inventoryUIManager) {
+                    window.inventoryUIManager.openGlobalInventoryModal();
+                } else {
+                    console.warn('InventoryUIManager not available');
+                }
+            });
+            document.getElementById('qab-consumables').addEventListener('click', () => {
+                // Open consumable items window
+                if (window.inventoryUIManager) {
+                    window.inventoryUIManager.createConsumableWindow();
+                } else {
+                    console.warn('InventoryUIManager not available');
+                }
+            });
         });
     </script>
 </body>

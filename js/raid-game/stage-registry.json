@@ -414,8 +414,8 @@
     {
       "id": "cleansing_winds_challenge",
       "path": "js/raid-game/stages/cleansing_winds_challenge.json",
-      "name": "Cleansing Winds Challenge",
-      "description": "Face five formidable opponents in a mystical battlefield where cleansing winds sweep away all magical effects every 3rd turn! Bridget, Farmer Raiden, Infernal Ibuki, Atlantean Kagome, and Zoey await in this ultimate test of strategy. Choose your 5 strongest fighters wisely!",
+      "name": "Double Damage Challenge",
+      "description": "Face five powerful opponents in an arena where raw power surges through the battlefield! All damage is doubled for everyone. Zoey, Schoolgirl Julia, Schoolgirl Elphelt, Renée, and Infernal Ibuki await your challenge. Choose your 5 strongest fighters wisely!",
       "difficulty": 8,
       "type": "weekly_challenge",
       "backgroundImage": "images/stages/burning_school_gym.png",
@@ -507,6 +507,18 @@
       "path": "js/raid-game/stages/draft_mode_stage.json",
       "playerunlocked": true,
       "isDraftMode": true
+    },
+    {
+      "id": "corrupted_bear_encounter",
+      "name": "Corrupted Bear Encounter",
+      "description": "As you venture deeper into the mystical forest, you encounter a scene of dark corruption. Two ancient trees whisper with malevolent intent while a massive bear, its fur matted with shadow and eyes glowing with dark energy, stands between them. The forest's peaceful magic has been twisted by some unknown force.",
+      "difficulty": 3,
+      "type": "story",
+      "storyTitle": "A Date in the Forest",
+      "backgroundImage": "images/stages/mystical_forest.png",
+      "backgroundMusic": "sounds/music/forest_ambient.mp3",
+      "unlockRequirements": [],
+      "path": "js/raid-game/stages/corrupted_bear_encounter.json"
     }
   ]
 }

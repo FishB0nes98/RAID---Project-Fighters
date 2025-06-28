@@ -1791,16 +1791,16 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
         let healAmount;
         
         if (useMaxHpInstead) {
-            // Power Carrots talent: Use 21% of max HP
-            healAmount = Math.floor(currentTarget.stats.maxHp * 0.21);
+            // Power Carrots talent: Use 27% of max HP
+            healAmount = Math.floor(currentTarget.stats.maxHp * 0.27);
             if (currentTarget === target) { // Only log once for the main target
                 log(`${caster.name}'s Power Carrots talent enhances the healing!`, 'talent-effect');
             }
         } else {
-            // Default behavior: 21% of missing health
+            // Default behavior: 27% of missing health
             const missingHealth = currentTarget.stats.maxHp - currentTarget.stats.currentHp;
             // Calculate healing, with a minimum amount based on max HP (2% of max HP) even if at full health
-            healAmount = Math.max(Math.floor(missingHealth * 0.21), Math.floor(currentTarget.stats.maxHp * 0.02));
+            healAmount = Math.max(Math.floor(missingHealth * 0.27), Math.floor(currentTarget.stats.maxHp * 0.02));
         }
         
         // Apply healing with statistics tracking
@@ -1881,11 +1881,11 @@ const pounceAbility = new Ability(
     'Pounce',
     'Icons/abilities/pounce.webp',
     50, // Mana cost
-    2,  // Cooldown in turns
+    1,  // Cooldown in turns
     pounceAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-pounceAbility.baseDescription = 'Deals 50% AD damage and has a 85% chance to stun the target for 2 turns.';
+pounceAbility.baseDescription = 'Deals 50% AD damage and has a 47% chance to stun the target for 2 turns.';
 // Set default amount property to prevent NaN issues
 pounceAbility.amount = 0.5;
 // Add debuffEffect property for stun functionality
@@ -1893,7 +1893,7 @@ pounceAbility.debuffEffect = {
     debuffId: "stun",
     name: "Stunned",
     duration: 2,
-    chance: 0.85,
+    chance: 0.47,
     effects: { cantAct: true }
 };
 pounceAbility.generateDescription = function() {
@@ -1938,7 +1938,7 @@ const thickFurAbility = new Ability(
     'Thick Fur',
     'Icons/abilities/thick_fur.webp',
     100, // Mana cost
-    18,  // Cooldown in turns
+    14,  // Cooldown in turns
     thickFurAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
@@ -1993,19 +1993,19 @@ const carrotPowerUpAbility = new Ability(
     'carrot_power_up',
     'Carrot Power Up',
     'Icons/abilities/carrot_power_up.webp',
-    155, // Mana cost
+    90, // Mana cost
     15,  // Cooldown in turns
     carrotPowerUpAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-carrotPowerUpAbility.baseDescription = 'Heals the target for 21% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.';
+carrotPowerUpAbility.baseDescription = 'Heals the target for 27% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.';
 carrotPowerUpAbility.generateDescription = function() {
     console.log(`[Alice] Generating description for carrot_power_up. Base: "${this.baseDescription}"`);
     let desc = this.baseDescription;
     
     // Add talent modifications here
     if (this.useMaxHpInstead) {
-        desc = desc.replace('21% of missing health', '<span class="talent-effect">21% of maximum health</span>');
+        desc = desc.replace('27% of missing health', '<span class="talent-effect">27% of maximum health</span>');
     }
     
     // Add Bunny Brigade talent text

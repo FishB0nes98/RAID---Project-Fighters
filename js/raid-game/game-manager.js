@@ -194,6 +194,146 @@ class GameManager {
         });
         
         console.log('[GameManager] Debug cheat codes initialized. Type "uhm" quickly to activate enemy low HP cheat.');
+        
+        // Inventory debug commands
+        window.testInventoryInGame = () => {
+            console.log('[Debug] Testing inventory system...');
+            console.log('[Debug] ItemRegistry available:', !!window.ItemRegistry);
+            console.log('[Debug] InventoryIntegrationManager available:', !!window.InventoryIntegrationManager);
+            console.log('[Debug] Player characters:', this.playerCharacters?.map(c => c.name));
+            
+            if (this.playerCharacters && this.playerCharacters.length > 0) {
+                const character = this.playerCharacters[0];
+                console.log(`[Debug] Testing with character: ${character.name}`);
+                
+                // Try to load inventory
+                if (window.InventoryIntegrationManager) {
+                    window.InventoryIntegrationManager.loadCharacterInventory(character.id).then(inventory => {
+                        console.log('[Debug] Character inventory loaded:', inventory);
+                        if (inventory) {
+                            console.log('[Debug] Inventory items:', inventory.getAllItems());
+                        }
+                    });
+                }
+            }
+        };
+        
+        window.addTestItemToFirstCharacter = (itemId = 'golden_arrow') => {
+            if (this.playerCharacters && this.playerCharacters.length > 0) {
+                const character = this.playerCharacters[0];
+                console.log(`[Debug] Adding ${itemId} to ${character.name}`);
+                
+                if (window.InventoryIntegrationManager) {
+                    window.InventoryIntegrationManager.loadCharacterInventory(character.id).then(inventory => {
+                        if (inventory) {
+                            const success = inventory.addItem(itemId);
+                            console.log(`[Debug] Item added: ${success !== false}`);
+                            if (success !== false) {
+                                console.log('[Debug] New inventory:', inventory.getAllItems());
+                                // Apply the inventory to the character
+                                window.InventoryIntegrationManager.applyCharacterInventory(character);
+                            }
+                        }
+                    });
+                } else {
+                    console.error('[Debug] InventoryIntegrationManager not available');
+                }
+            } else {
+                console.log('[Debug] No player characters available');
+            }
+        };
+        
+        // Add global inventory access command
+        window.openGlobalInventory = () => {
+            if (window.inventoryUIManager) {
+                window.inventoryUIManager.openGlobalInventoryModal();
+                console.log('[Debug] Global inventory opened');
+            } else {
+                console.error('[Debug] InventoryUIManager not available');
+            }
+        };
+        
+        // Add hotkey for global inventory (TAB + I)
+        let tabPressed = false;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                tabPressed = true;
+                e.preventDefault();
+            }
+            
+            if (tabPressed && e.key.toLowerCase() === 'i') {
+                window.openGlobalInventory();
+                tabPressed = false;
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'Tab') {
+                tabPressed = false;
+            }
+        });
+        
+        window.resetCharacterInventory = async (characterId) => {
+            console.log(`[Debug] Resetting inventory for character: ${characterId}`);
+            
+            if (window.InventoryIntegrationManager && firebase.auth().currentUser) {
+                try {
+                    // Create a fresh inventory
+                    const newInventory = new CharacterInventory(characterId, 6);
+                    
+                    // Store in memory
+                    window.CharacterInventories.set(characterId, newInventory);
+                    
+                    // Save to Firebase
+                    const user = firebase.auth().currentUser;
+                    const inventoryRef = firebase.database().ref(`users/${user.uid}/characterInventories/${characterId}`);
+                    await inventoryRef.set(newInventory.serialize());
+                    
+                    console.log(`[Debug] Inventory reset successfully for ${characterId}`);
+                    
+                    // Find and reapply to character if they're in the current game
+                    const character = this.playerCharacters?.find(c => c.id === characterId);
+                    if (character) {
+                        await window.InventoryIntegrationManager.applyCharacterInventory(character);
+                        console.log(`[Debug] Applied reset inventory to ${character.name}`);
+                    }
+                } catch (error) {
+                    console.error(`[Debug] Failed to reset inventory for ${characterId}:`, error);
+                }
+            }
+        };
+        
+        window.fixAllCharacterInventories = async () => {
+            console.log('[Debug] Fixing all character inventories...');
+            
+            if (this.playerCharacters) {
+                for (const character of this.playerCharacters) {
+                    await window.resetCharacterInventory(character.id);
+                }
+                console.log('[Debug] All character inventories fixed!');
+            }
+        };
+
+        // Add emergency blur clear function accessible globally
+        window.clearAllBlur = () => {
+            console.log('[Debug] Emergency blur clear activated!');
+            GameManager.clearAllBlurEffects();
+        };
+
+        // Add Ctrl+Shift+C hotkey for emergency blur clear
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
+                e.preventDefault();
+                console.log('[Debug] Hotkey blur clear activated (Ctrl+Shift+C)!');
+                GameManager.clearAllBlurEffects();
+            }
+        });
+
+        console.log('[GameManager] Debug commands available:');
+        console.log('- Type "uhm" quickly to activate enemy low HP cheat');
+        console.log('- Press Ctrl+Shift+C to clear all backdrop blur effects');
+        console.log('- Type window.clearAllBlur() in console for emergency blur clear');
     }
 
     /**
@@ -461,6 +601,13 @@ class GameManager {
                 console.log('[GameManager] Statistics manager initialized');
             } else {
                 console.warn('[GameManager] StatisticsManager not found');
+            }
+
+            // --- Check Inventory Integration Manager (initialized in HTML) ---
+            if (window.InventoryIntegrationManager) {
+                console.log('[GameManager] InventoryIntegrationManager available');
+            } else {
+                console.warn('[GameManager] InventoryIntegrationManager not found');
             }
             
             // Create and initialize stage manager
@@ -1588,6 +1735,12 @@ class GameManager {
                 this.preventTurnEndFlag = true; // CRITICAL: Force the flag to true
             }
             
+            // CRITICAL FIX: Boink should ALWAYS end the turn, regardless of other flags
+            if (this.gameState.selectedAbility.id === 'boink') {
+                console.log("[DEBUG MANAGER] Boink ability used - forcing turn to end");
+                this.preventTurnEndFlag = false; // CRITICAL: Force Boink to end the turn
+            }
+            
             // Only mark character as acted if turn shouldn't be prevented
             if (!this.preventTurnEndFlag) {
                 // Mark character as having acted this turn
@@ -1611,7 +1764,7 @@ class GameManager {
             }
             
             // Reset preventTurnEndFlag after use
-            if (this.preventTurnEndFlag && this.gameState.selectedAbility.id !== 'ayane_q') {
+            if (this.preventTurnEndFlag && this.gameState.selectedAbility.id !== 'ayane_q' && this.gameState.selectedAbility.id !== 'boink') {
                 this.preventTurnEndFlag = false;
             }
             
@@ -1806,6 +1959,8 @@ class GameManager {
                         console.error(`Error in Blessed Restoration for ${char.name}:`, e);
                     }
                 }
+
+                // Consumable cooldowns are now reduced in endAITurn() alongside ability cooldowns
             }
         });
 
@@ -1896,6 +2051,19 @@ class GameManager {
 
         // Start AI turn with a delay - use aiManager instead of calling our own method
         setTimeout(() => this.aiManager.executeAITurn(), this.turnDelay);
+    }
+
+    /**
+     * Refresh consumable UI if the consumable window is currently open
+     */
+    refreshConsumableUI() {
+        // Check if consumable window exists and is visible
+        const consumableWindow = document.getElementById('consumable-window');
+        if (consumableWindow && window.inventoryUIManager) {
+            // Refresh the consumable items display
+            window.inventoryUIManager.loadConsumableItems();
+            console.log('[GameManager] Refreshed consumable UI for cooldown changes');
+        }
     }
 
 
@@ -2277,11 +2445,26 @@ class GameManager {
                    // 2. Process effects (apply buffs/debuffs, NO duration reduction, NO regeneration - already done at end of player turn)
                    char.processEffects(false, false); // false, false -> Apply effects, don't reduce duration, don't regenerate
 
-                   // 4. Reduce ability cooldowns
-                   char.abilities.forEach(ability => ability.reduceCooldown());
+                                  // 4. Reduce ability cooldowns
+               char.abilities.forEach(ability => ability.reduceCooldown());
 
-                   // 5. Update UI
-                   this.uiManager.updateCharacterUI(char); // Use this.uiManager
+               // 5. Reduce consumable cooldowns (same as abilities - turn-based)
+               if (char.consumableCooldowns) {
+                   Object.keys(char.consumableCooldowns).forEach(itemId => {
+                       if (char.consumableCooldowns[itemId] > 0) {
+                           char.consumableCooldowns[itemId]--;
+                           if (char.consumableCooldowns[itemId] <= 0) {
+                               delete char.consumableCooldowns[itemId];
+                               console.log(`[GameManager] ${char.name}'s ${itemId} consumable cooldown expired`);
+                           }
+                       }
+                   });
+                   // Refresh consumable UI if window is open
+                   this.refreshConsumableUI();
+               }
+
+               // 6. Update UI
+               this.uiManager.updateCharacterUI(char); // Use this.uiManager
                }
            });
            // --- END Player Start-of-Turn Processing ---
@@ -2414,6 +2597,11 @@ class GameManager {
 
        // Check if the game is over
        checkGameOver() {
+           if (this.isGameOver) {
+               console.log('[GameManager] checkGameOver: Game is already over, skipping.');
+               return true; // Game is already over, so return true
+           }
+
            let gameOver = false;
            let isVictory = false;
            const urlParams = new URLSearchParams(window.location.search); // Get URL params here
@@ -2495,6 +2683,7 @@ class GameManager {
            }
            
            if (gameOver) {
+               this.isGameOver = true; // Set the flag to prevent this from running again
                 // --- DEBUG LOGGING ---
                 console.log(`[GameManager] checkGameOver: Game Over detected. Victory: ${isVictory}`);
                 console.log('[GameManager] Attempting to save battle result and award XP...');
@@ -3034,6 +3223,9 @@ class GameManager {
                                     survived: !char.isDead()
                                 }))
                             );
+
+                            // Process stage completion loot for story battles
+                            await this.processStageCompletionLoot(`${storyId}_${stageIndex}`, userId);
                         }
                         
                         return true; // Indicate success
@@ -3097,6 +3289,9 @@ class GameManager {
                                     survived: !char.isDead()
                                 }))
                             );
+
+                            // Process stage completion loot for standalone battles
+                            await this.processStageCompletionLoot(stageId, userId);
                         }
 
                         // Process stage rewards for victory
@@ -3142,6 +3337,68 @@ class GameManager {
                 console.error(`[GameManager] Error during saveBattleResultToFirebase setup:`, error);
                 throw error; // Re-throw to be caught by checkGameOver
            }
+       }
+
+       /**
+        * Process stage completion loot rewards
+        */
+       async processStageCompletionLoot(stageId, userId) {
+           console.log(`[GameManager] Processing stage completion loot for stage: ${stageId}, user: ${userId}`);
+
+           try {
+               // Check if loot manager is available
+               if (!window.LootManager) {
+                   console.warn('[GameManager] LootManager not available, skipping loot processing');
+                   return;
+               }
+
+               // Process loot through the loot manager
+               const awardedLoot = await window.LootManager.processStageCompletionLoot(stageId, userId);
+
+               if (awardedLoot && awardedLoot.length > 0) {
+                   console.log(`[GameManager] ✅ Loot awarded for stage ${stageId}:`, awardedLoot);
+                   
+                   // Refresh inventory UI to show new items
+                   if (window.inventoryUIManager) {
+                       await window.inventoryUIManager.loadGlobalInventory();
+                       console.log('[GameManager] Refreshed global inventory after loot award');
+                   }
+                   
+                   // Show loot rewards UI if available
+                   if (window.LootUIManager) {
+                       // Add a short delay to ensure other UI elements (like XP rewards) are shown first
+                       setTimeout(() => {
+                           window.LootUIManager.showLootRewards(awardedLoot, () => {
+                               console.log('[GameManager] Loot rewards claimed by player');
+                           });
+                       }, 2000); // 2 second delay after XP rewards
+                   } else {
+                       // Fallback to simple notification
+                       this.showLootNotification(awardedLoot);
+                   }
+               } else {
+                   console.log(`[GameManager] No loot awarded for stage: ${stageId}`);
+               }
+
+           } catch (error) {
+               console.error('[GameManager] Error processing stage completion loot:', error);
+           }
+       }
+
+       /**
+        * Show a simple loot notification (fallback)
+        */
+       showLootNotification(lootItems) {
+           if (!lootItems || lootItems.length === 0) return;
+
+           const lootNames = lootItems.map(item => {
+               const itemData = window.ItemRegistry?.getItem(item.itemId);
+               const name = itemData?.name || item.itemId;
+               const quantity = item.quantity > 1 ? ` x${item.quantity}` : '';
+               return `${name}${quantity}`;
+           }).join(', ');
+
+           this.showRewardNotification('loot', `Items Obtained: ${lootNames}`, 'You received loot items!');
        }
 
        /**
@@ -3191,6 +3448,9 @@ class GameManager {
                                break;
                            case 'experience':
                                console.log(`[GameManager] Experience rewards not yet implemented: ${reward.value}`);
+                               break;
+                          case 'random_character':
+                               await this.grantRandomCharacterReward(userId, reward);
                                break;
                            case 'item':
                                console.log(`[GameManager] Item rewards not yet implemented: ${reward.value}`);
@@ -3262,22 +3522,77 @@ class GameManager {
        async grantRandomCharacterReward(userId, reward) {
            try {
                console.log('[GameManager] Granting random character reward...');
+
+               // Helper to get ISO week number
+               const getYearAndWeek = () => {
+                   const date = new Date();
+                   date.setHours(0, 0, 0, 0);
+                   date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+                   const week1 = new Date(date.getFullYear(), 0, 4);
+                   return {
+                       year: date.getFullYear(),
+                       week: 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7)
+                   };
+               };
+
+               const { year, week } = getYearAndWeek();
+               const weeklyRewardId = `weekly_${year}_${week}`;
+               const rewardClaimedRef = firebaseDatabase.ref(`users/${userId}/weeklyRewards/${weeklyRewardId}/randomCharacterClaimed`);
+               const rewardSnapshot = await rewardClaimedRef.once('value');
+
+               if (rewardSnapshot.val() === true) {
+                   console.log(`[GameManager] Weekly random character for ${weeklyRewardId} already claimed.`);
+                   this.showRewardNotification('info', 'Already Claimed', 'You have already received the weekly character reward. Try again next week!');
+                   return;
+               }
                
                // Use QuestManager's character ownership checking if available
                if (window.questManager && window.questManager.initialized) {
                    const unownedCharacters = await window.questManager.getUnownedCharacters();
                    
-                   // Filter out farmer characters for Farm Showdown stage
-                   const excludedFarmers = ['farmer_alice', 'farmer_cham_cham', 'farmer_nina', 'farmer_raiden', 'farmer_shoma'];
-                   const availableCharacters = unownedCharacters.filter(charId => !excludedFarmers.includes(charId));
+                   // Weekly challenge reward character pool - specific list provided by user
+                   const weeklyChallengeCharacters = [
+                       'atlantean_christie', 'atlantean_kotal_kahn', 'atlantean_kagome', 'atlantean_sub_zero_playable',
+                       'bridget', 'zoey', 'farmer_alice', 'farmer_raiden', 'farmer_shoma', 'farmer_nina',
+                       'infernal_ibuki', 'schoolboy_shoma', 'schoolboy_siegfried', 'schoolgirl_elphelt',
+                       'schoolgirl_julia', 'schoolgirl_ayane', 'schoolgirl_kokoro'
+                   ];
                    
-                   console.log(`[GameManager] Filtered characters (excluding farmers): ${availableCharacters.length} available`);
+                   // Filter to only include characters from the weekly challenge pool that the player doesn't own
+                   const availableCharacters = weeklyChallengeCharacters.filter(charId => 
+                       unownedCharacters.includes(charId)
+                   );
+                   
+                   console.log(`[GameManager] Weekly challenge characters available: ${availableCharacters.length} out of ${weeklyChallengeCharacters.length} total`);
                    console.log(`[GameManager] Available characters: ${availableCharacters.join(', ')}`);
                    
                    if (availableCharacters.length === 0) {
-                       console.log('[GameManager] Player owns all non-farmer characters, granting alternative reward');
-                       this.showRewardNotification('info', 'You already own all available non-farmer characters! Here are some bonus talent points instead.');
-                       // TODO: Implement talent point alternative reward
+                       console.log('[GameManager] Player owns all weekly challenge characters, granting alternative reward');
+                       
+                       // Award talent points to a random character from the player's team
+                       if (this.gameState && this.gameState.playerCharacters && this.gameState.playerCharacters.length > 0) {
+                           // Select a random character from the player's team
+                           const randomTeamCharacter = this.gameState.playerCharacters[Math.floor(Math.random() * this.gameState.playerCharacters.length)];
+                           const talentPointsToAward = 3; // Award 3 talent points as alternative reward
+                           
+                           try {
+                               // Award talent points using the talent manager
+                               if (typeof window.talentManager !== 'undefined' && window.talentManager.addTalentPoints) {
+                                   await window.talentManager.addTalentPoints(randomTeamCharacter.id, talentPointsToAward, userId);
+                                   console.log(`[GameManager] ✅ Awarded ${talentPointsToAward} talent points to ${randomTeamCharacter.name} as alternative reward`);
+                                   this.showRewardNotification('info', `${talentPointsToAward} Talent Points`, `Awarded to ${randomTeamCharacter.name} as you already own all weekly challenge characters!`);
+                               } else {
+                                   console.warn('[GameManager] TalentManager not available for alternative reward');
+                                   this.showRewardNotification('info', 'Alternative Reward', 'You already own all weekly challenge characters! No additional rewards available.');
+                               }
+                           } catch (error) {
+                               console.error('[GameManager] Error awarding talent points as alternative reward:', error);
+                               this.showRewardNotification('info', 'Alternative Reward', 'You already own all weekly challenge characters! No additional rewards available.');
+                           }
+                       } else {
+                           console.warn('[GameManager] No player characters available for alternative reward');
+                           this.showRewardNotification('info', 'Alternative Reward', 'You already own all weekly challenge characters! No additional rewards available.');
+                       }
                        return;
                    }
                    
@@ -3292,6 +3607,8 @@ class GameManager {
                        const characterName = window.questManager.getCharacterDisplayName(randomCharacterId);
                        console.log(`[GameManager] ✅ Random character ${characterName} granted successfully!`);
                        this.showRewardNotification('character', characterName, reward.message);
+                       // Mark the reward as claimed for the week
+                       await rewardClaimedRef.set(true);
                    } else {
                        throw new Error('Failed to grant random character reward');
                    }
@@ -3639,7 +3956,7 @@ class GameManager {
                    </div>
                    
                    <div class="xp-display-actions">
-                       <button class="xp-continue-btn" onclick="this.closest('.xp-rewards-display').remove()">
+                       <button class="xp-continue-btn" id="xp-continue-btn">
                            Continue
                        </button>
                    </div>
@@ -3648,11 +3965,128 @@ class GameManager {
            
            document.body.appendChild(xpDisplay);
            
+           // Proper cleanup function for the XP display modal
+           const cleanupXPDisplay = () => {
+               console.log('[GameManager] Cleaning up XP display modal...');
+               
+               // Remove the show class to trigger fade-out transition
+               xpDisplay.classList.remove('show');
+               
+               // Wait for transition to complete, then remove element
+               setTimeout(() => {
+                   if (xpDisplay && xpDisplay.parentNode) {
+                       xpDisplay.remove();
+                       console.log('[GameManager] XP display modal removed');
+                   }
+                   
+                   // Force clear any lingering backdrop blur effects
+                   this.clearBackdropEffects();
+               }, 400); // Match the CSS transition duration
+           };
+           
+           // Set up the continue button click handler
+           const continueBtn = xpDisplay.querySelector('#xp-continue-btn');
+           if (continueBtn) {
+               continueBtn.addEventListener('click', cleanupXPDisplay);
+           }
+           
+           // Also allow clicking the backdrop to close
+           const backdrop = xpDisplay.querySelector('.xp-display-backdrop');
+           if (backdrop) {
+               backdrop.addEventListener('click', cleanupXPDisplay);
+           }
+           
+           // Add ESC key listener for closing
+           const escapeHandler = (e) => {
+               if (e.key === 'Escape') {
+                   cleanupXPDisplay();
+                   document.removeEventListener('keydown', escapeHandler);
+               }
+           };
+           document.addEventListener('keydown', escapeHandler);
+           
            // Animate in
            setTimeout(() => {
                xpDisplay.classList.add('show');
                this.animateXPNumbers(xpDisplay);
            }, 100);
+       }
+
+       /**
+        * Force clear any lingering backdrop effects that might cause blur
+        */
+       clearBackdropEffects() {
+           // Remove any lingering backdrop elements from various modals
+           const backdrops = [
+               '.xp-display-backdrop',
+               '.loot-rewards-backdrop', 
+               '.loot-display-backdrop',
+               '.character-stats-backdrop',
+               '.game-over-backdrop',
+               '.tutorial-backdrop',
+               '.modal-backdrop'
+           ];
+           
+           backdrops.forEach(selector => {
+               const elements = document.querySelectorAll(selector);
+               elements.forEach(element => {
+                   if (element && element.parentNode) {
+                       element.remove();
+                   }
+               });
+           });
+           
+           // Also remove any modals that might be stuck with show classes
+           const modals = document.querySelectorAll('.xp-rewards-display, .loot-rewards-modal');
+           modals.forEach(modal => {
+               if (modal.classList.contains('show') || modal.classList.contains('visible')) {
+                   modal.classList.remove('show', 'visible');
+                   modal.classList.add('hidden');
+               }
+           });
+           
+           // Force repaint to clear any lingering backdrop-filter effects
+           document.body.style.transform = 'translateZ(0)';
+           requestAnimationFrame(() => {
+               document.body.style.transform = '';
+               // Also force a style recalculation
+               document.body.offsetHeight;
+           });
+           
+           console.log('[GameManager] All backdrop effects cleared');
+       }
+
+       /**
+        * Global function to clear all possible UI blur effects - can be called from anywhere
+        */
+       static clearAllBlurEffects() {
+           // Remove all backdrop elements
+           const allBackdrops = document.querySelectorAll('[class*="backdrop"], [class*="-backdrop"]');
+           allBackdrops.forEach(element => {
+               if (element && element.parentNode) {
+                   element.remove();
+               }
+           });
+           
+           // Remove show/visible classes from all modals
+           const allModals = document.querySelectorAll('[class*="modal"], [class*="-display"], [class*="-popup"]');
+           allModals.forEach(modal => {
+               modal.classList.remove('show', 'visible');
+               if (!modal.classList.contains('hidden')) {
+                   modal.classList.add('hidden');
+               }
+           });
+           
+           // Force complete style recalculation
+           document.body.style.transform = 'translateZ(0)';
+           document.body.style.filter = 'none';
+           requestAnimationFrame(() => {
+               document.body.style.transform = '';
+               document.body.style.filter = '';
+               document.body.offsetHeight; // Force reflow
+           });
+           
+           console.log('[GameManager] Emergency blur cleanup completed');
        }
 
        /**
@@ -3994,8 +4428,8 @@ class GameManager {
            this.uiManager.updateEndTurnButton();
 
            console.log(`${character.name} (instanceId: ${character.instanceId}) has been removed from the game state.`);
-           // Check for game over after removing the character
-           this.checkGameOver();
+           // Check for game over after removing the character - REMOVED DUPLICATE CALL
+           // this.checkGameOver();
 
            // <<< Dispatch CharacterDied event >>>
            const deathEvent = new CustomEvent('CharacterDied', {
@@ -4655,9 +5089,60 @@ class GameManager {
             return true;
         };
 
+        // Check for general forced targeting from debuffs (like Boink Taunt)
+        const checkForcedTargetingFromDebuffs = (caster, target) => {
+            if (caster && caster.debuffs) {
+                const forcedTargetingDebuff = caster.debuffs.find(debuff => 
+                    debuff.effects && debuff.effects.forcedTargeting
+                );
+                
+                if (forcedTargetingDebuff) {
+                    const forcedTargetId = forcedTargetingDebuff.effects.forcedTargeting;
+                    const forcedTargetCharacter = forcedTargetingDebuff.effects.forcedTargetingCharacter;
+                    
+                    console.log(`[AI Forced Targeting] ${caster.name} has forced targeting debuff "${forcedTargetingDebuff.name}" forcing attack on ${forcedTargetCharacter ? forcedTargetCharacter.name : forcedTargetId}`);
+                    
+                    // Only allow targeting the forced target or self/allies for non-damage abilities
+                    if (target === forcedTargetCharacter || (target.instanceId || target.id) === forcedTargetId) {
+                        console.log(`[AI Forced Targeting] ${caster.name} can target ${target.name} (forced target)`);
+                        return true; // Allow forced target
+                    } else {
+                        // Allow self-targeting for support abilities
+                        if (target === caster) {
+                            console.log(`[AI Forced Targeting] ${caster.name} can target self`);
+                            return true;
+                        }
+                        
+                        // Allow targeting allies for support abilities (but they should prefer forced target for damage)
+                        const targetTeam = target.isAI ? 'ai' : 'player';
+                        const casterTeam = caster.isAI ? 'ai' : 'player';
+                        
+                        if (targetTeam === casterTeam) {
+                            console.log(`[AI Forced Targeting] ${caster.name} can target ally ${target.name} for support`);
+                            return true;
+                        }
+                        
+                        console.log(`[AI Forced Targeting] ${caster.name} blocked from targeting ${target.name} - must target ${forcedTargetCharacter ? forcedTargetCharacter.name : forcedTargetId}`);
+                        return false; // Block this target
+                    }
+                }
+            }
+            return true; // No forced targeting, allow normally
+        };
+        
+        // Update isTargetableByCharacter to include forced targeting check
+        const enhancedIsTargetableByCharacter = (target, caster) => {
+            // First check all existing logic
+            const basicTargetable = isTargetableByCharacter(target, caster);
+            if (!basicTargetable) return false;
+            
+            // Then check forced targeting from debuffs
+            return checkForcedTargetingFromDebuffs(caster, target);
+        };
+
         // Smart ability selection: Prioritize healing if allies need it
-        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => isTargetableByCharacter(c, aiChar));
-        const allAIChars = this.gameManager.gameState.aiCharacters.filter(c => isTargetableByCharacter(c, aiChar));
+        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => enhancedIsTargetableByCharacter(c, aiChar));
+        const allAIChars = this.gameManager.gameState.aiCharacters.filter(c => enhancedIsTargetableByCharacter(c, aiChar));
            
            // Check if any allies need healing (below 70% HP)
            const injuredAllies = allAIChars.filter(ally => ally !== aiChar && ally.stats.currentHp < ally.stats.maxHp * 0.7);
@@ -4785,7 +5270,58 @@ class GameManager {
             return true;
         };
         
-        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => isTargetableByCharacter(c, aiChar));
+        // Check for general forced targeting from debuffs (like Boink Taunt) for Infernal Raiden
+        const checkForcedTargetingFromDebuffs = (caster, target) => {
+            if (caster && caster.debuffs) {
+                const forcedTargetingDebuff = caster.debuffs.find(debuff => 
+                    debuff.effects && debuff.effects.forcedTargeting
+                );
+                
+                if (forcedTargetingDebuff) {
+                    const forcedTargetId = forcedTargetingDebuff.effects.forcedTargeting;
+                    const forcedTargetCharacter = forcedTargetingDebuff.effects.forcedTargetingCharacter;
+                    
+                    console.log(`[AI Forced Targeting - Infernal Raiden] ${caster.name} has forced targeting debuff "${forcedTargetingDebuff.name}" forcing attack on ${forcedTargetCharacter ? forcedTargetCharacter.name : forcedTargetId}`);
+                    
+                    // Only allow targeting the forced target or self/allies for non-damage abilities
+                    if (target === forcedTargetCharacter || (target.instanceId || target.id) === forcedTargetId) {
+                        console.log(`[AI Forced Targeting - Infernal Raiden] ${caster.name} can target ${target.name} (forced target)`);
+                        return true; // Allow forced target
+                    } else {
+                        // Allow self-targeting for support abilities
+                        if (target === caster) {
+                            console.log(`[AI Forced Targeting - Infernal Raiden] ${caster.name} can target self`);
+                            return true;
+                        }
+                        
+                        // Allow targeting allies for support abilities (but they should prefer forced target for damage)
+                        const targetTeam = target.isAI ? 'ai' : 'player';
+                        const casterTeam = caster.isAI ? 'ai' : 'player';
+                        
+                        if (targetTeam === casterTeam) {
+                            console.log(`[AI Forced Targeting - Infernal Raiden] ${caster.name} can target ally ${target.name} for support`);
+                            return true;
+                        }
+                        
+                        console.log(`[AI Forced Targeting - Infernal Raiden] ${caster.name} blocked from targeting ${target.name} - must target ${forcedTargetCharacter ? forcedTargetCharacter.name : forcedTargetId}`);
+                        return false; // Block this target
+                    }
+                }
+            }
+            return true; // No forced targeting, allow normally
+        };
+        
+        // Update isTargetableByCharacter to include forced targeting check
+        const enhancedIsTargetableByCharacter = (target, caster) => {
+            // First check all existing logic
+            const basicTargetable = isTargetableByCharacter(target, caster);
+            if (!basicTargetable) return false;
+            
+            // Then check forced targeting from debuffs
+            return checkForcedTargetingFromDebuffs(caster, target);
+        };
+        
+        const allPlayerChars = this.gameManager.gameState.playerCharacters.filter(c => enhancedIsTargetableByCharacter(c, aiChar));
            
            // Get available abilities
            const availableAbilities = aiChar.abilities.filter(ability =>
@@ -5587,6 +6123,15 @@ class GameManager {
             playerContainer.innerHTML = '';
             aiContainer.innerHTML = '';
             
+            // Apply inventories to player characters before rendering
+            if (window.InventoryIntegrationManager) {
+                playerCharacters.forEach(character => {
+                    window.InventoryIntegrationManager.applyCharacterInventory(character).catch(error => {
+                        console.warn(`Failed to apply inventory to ${character.name}:`, error);
+                    });
+                });
+            }
+            
             // Render player characters (Filter out dead ones)
             playerCharacters
                 .filter(character => !character.isDead())
@@ -5636,10 +6181,15 @@ class GameManager {
                         const manaCostDiv = document.createElement('div');
                         manaCostDiv.className = 'ability-cost';
                         
-                        // Calculate actual mana cost considering atlantean blessing
+                        // Calculate actual mana cost considering atlantean blessing and talents
                         let actualManaCost = ability.manaCost;
                         if (character.atlanteanBlessings && character.atlanteanBlessings.mana_efficiency && !character.isAI) {
                             actualManaCost = Math.ceil(ability.manaCost * 0.5); // 50% reduction
+                        }
+                        
+                        // Check for Efficient Boink talent
+                        if (ability.id === 'boink' && character.hasTalent && character.hasTalent('efficient_boink')) {
+                            actualManaCost = 0; // Boink costs no mana
                         }
                         
                         // Show reduced cost if different from base cost
@@ -6980,7 +7530,7 @@ class GameManager {
     }
 
     // Show character stats context menu
-    showCharacterStatsMenu(character, x, y) {
+    async showCharacterStatsMenu(character, x, y) {
         // Hide the menu if it's already visible
         if (this.characterStatsMenu.style.display === 'block') {
             this.characterStatsMenu.style.display = 'none';
@@ -7002,40 +7552,126 @@ class GameManager {
         nameHeader.classList.add('stats-menu-header');
         this.characterStatsMenu.appendChild(nameHeader);
 
-        // Add level and XP information
+        // Add level and XP information with enhanced display and proper data loading
         const levelXPSection = document.createElement('div');
         levelXPSection.classList.add('stats-menu-section', 'level-xp-section');
-        
+
+        // First, ensure we have proper XP data by loading from CharacterXPManager
+        let xpData = null;
+        try {
+            if (window.characterXPManager && window.characterXPManager.initialized) {
+                xpData = await window.characterXPManager.loadCharacterXP(character.id);
+                if (xpData) {
+                    // Update character object with fresh data from Firebase
+                    character.setExperienceAndLevel(xpData.experience, xpData.level);
+                    console.log(`[UIManager] Refreshed XP data for ${character.name}: Level ${xpData.level} (${xpData.experience} XP)`);
+                }
+            }
+        } catch (error) {
+            console.warn(`[UIManager] Error loading XP data for ${character.name}:`, error);
+        }
+
+        // Create enhanced level display
+        const levelContainer = document.createElement('div');
+        levelContainer.classList.add('character-level-container');
+
         const levelDiv = document.createElement('div');
         levelDiv.classList.add('character-level-info');
-        levelDiv.textContent = `Level ${character.level || 1}`;
-        levelXPSection.appendChild(levelDiv);
-        
-        // Add XP progress information
+
+        // Create level badge with icon
+        const levelBadge = document.createElement('div');
+        levelBadge.classList.add('level-badge');
+        levelBadge.innerHTML = `
+            <div class="level-icon">⭐</div>
+            <div class="level-text">
+                <span class="level-label">Level</span>
+                <span class="level-number">${character.level || 1}</span>
+            </div>
+        `;
+        levelDiv.appendChild(levelBadge);
+
+        levelContainer.appendChild(levelDiv);
+        levelXPSection.appendChild(levelContainer);
+
+        // Add XP progress information with enhanced display
         if (character.getXPProgress) {
-            const xpProgress = character.getXPProgress();
-            const xpDiv = document.createElement('div');
-            xpDiv.classList.add('character-xp-info');
-            xpDiv.textContent = `XP: ${xpProgress.progressXP} / ${xpProgress.progressNeeded} (${Math.floor(xpProgress.progressPercentage)}%)`;
-            levelXPSection.appendChild(xpDiv);
-            
-            // Add XP progress bar
-            const xpBarContainer = document.createElement('div');
-            xpBarContainer.classList.add('xp-bar-container');
-            
-            const xpBar = document.createElement('div');
-            xpBar.classList.add('xp-bar');
-            xpBar.style.width = `${xpProgress.progressPercentage}%`;
-            
-            xpBarContainer.appendChild(xpBar);
-            levelXPSection.appendChild(xpBarContainer);
-            
-            const totalXPDiv = document.createElement('div');
-            totalXPDiv.classList.add('character-total-xp');
-            totalXPDiv.textContent = `Total XP: ${character.experience || 0}`;
-            levelXPSection.appendChild(totalXPDiv);
+            try {
+                const xpProgress = character.getXPProgress();
+                
+                // XP Progress Info
+                const xpInfoDiv = document.createElement('div');
+                xpInfoDiv.classList.add('character-xp-info');
+                
+                const progressBar = document.createElement('div');
+                progressBar.classList.add('xp-progress-container');
+                
+                // Current progress text
+                const progressText = document.createElement('div');
+                progressText.classList.add('xp-progress-text');
+                progressText.innerHTML = `
+                    <span class="xp-current">${Math.max(0, xpProgress.progressXP)}</span>
+                    <span class="xp-divider">/</span>
+                    <span class="xp-needed">${xpProgress.progressNeeded}</span>
+                    <span class="xp-label">XP</span>
+                    <span class="xp-percentage">(${Math.floor(Math.max(0, xpProgress.progressPercentage))}%)</span>
+                `;
+                
+                // Progress bar
+                const xpBarContainer = document.createElement('div');
+                xpBarContainer.classList.add('xp-bar-container');
+                
+                const xpBar = document.createElement('div');
+                xpBar.classList.add('xp-bar');
+                xpBar.style.width = `${Math.max(0, Math.min(100, xpProgress.progressPercentage))}%`;
+                
+                // Add shimmer effect
+                const xpShimmer = document.createElement('div');
+                xpShimmer.classList.add('xp-shimmer');
+                xpBar.appendChild(xpShimmer);
+                
+                xpBarContainer.appendChild(xpBar);
+                
+                progressBar.appendChild(progressText);
+                progressBar.appendChild(xpBarContainer);
+                xpInfoDiv.appendChild(progressBar);
+                
+                // Total XP display
+                const totalXPDiv = document.createElement('div');
+                totalXPDiv.classList.add('character-total-xp');
+                totalXPDiv.innerHTML = `
+                    <span class="total-xp-icon">💎</span>
+                    <span class="total-xp-text">Total XP: </span>
+                    <span class="total-xp-number">${character.experience || 0}</span>
+                `;
+                xpInfoDiv.appendChild(totalXPDiv);
+                
+                levelXPSection.appendChild(xpInfoDiv);
+                
+            } catch (xpError) {
+                console.warn(`[UIManager] Error calculating XP progress for ${character.name}:`, xpError);
+                
+                // Fallback display
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.classList.add('character-xp-info', 'xp-fallback');
+                fallbackDiv.innerHTML = `
+                    <div class="xp-progress-text">
+                        <span class="xp-label">Experience data unavailable</span>
+                    </div>
+                `;
+                levelXPSection.appendChild(fallbackDiv);
+            }
+        } else {
+            // Fallback if getXPProgress method doesn't exist
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.classList.add('character-xp-info', 'xp-fallback');
+            fallbackDiv.innerHTML = `
+                <div class="xp-progress-text">
+                    <span class="xp-label">XP: ${character.experience || 0}</span>
+                </div>
+            `;
+            levelXPSection.appendChild(fallbackDiv);
         }
-        
+
         this.characterStatsMenu.appendChild(levelXPSection);
 
         // Get base stats and buff-modified stats
@@ -7160,10 +7796,15 @@ class GameManager {
                 if (ability.manaCost !== undefined) {
                     const manaCost = document.createElement('span');
                     
-                    // Calculate actual mana cost considering atlantean blessing
+                    // Calculate actual mana cost considering atlantean blessing and talents
                     let actualManaCost = ability.manaCost;
                     if (character.atlanteanBlessings && character.atlanteanBlessings.mana_efficiency && !character.isAI) {
                         actualManaCost = Math.ceil(ability.manaCost * 0.5); // 50% reduction
+                    }
+                    
+                    // Check for Efficient Boink talent
+                    if (ability.id === 'boink' && character.hasTalent && character.hasTalent('efficient_boink')) {
+                        actualManaCost = 0; // Boink costs no mana
                     }
                     
                     // Show reduced cost if different from base cost
@@ -7396,6 +8037,29 @@ class GameManager {
         
         this.characterStatsMenu.appendChild(debuffsSection);
         
+        // Character Inventory section
+        const inventorySection = document.createElement('div');
+        inventorySection.classList.add('stats-menu-section', 'character-inventory-section');
+        
+        const inventoryHeader = document.createElement('h3');
+        inventoryHeader.textContent = 'Equipment';
+        inventoryHeader.classList.add('stats-menu-subheader');
+        inventorySection.appendChild(inventoryHeader);
+        
+        // Create inventory grid for character items
+        const inventoryGrid = document.createElement('div');
+        inventoryGrid.classList.add('character-inventory-display');
+        inventoryGrid.style.display = 'grid';
+        inventoryGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        inventoryGrid.style.gap = '8px';
+        inventoryGrid.style.marginTop = '10px';
+        
+        // Load and display character's equipped items
+        this.loadCharacterInventoryForStats(character, inventoryGrid);
+        
+        inventorySection.appendChild(inventoryGrid);
+        this.characterStatsMenu.appendChild(inventorySection);
+        
         // Close button
         const closeButton = document.createElement('button');
         closeButton.textContent = 'Close';
@@ -7438,6 +8102,289 @@ class GameManager {
         
         // Show the menu
         this.characterStatsMenu.style.display = 'block';
+    }
+    
+    // Load character inventory for stats display
+    async loadCharacterInventoryForStats(character, inventoryGrid) {
+        try {
+            // Load character's inventory from the integration manager
+            const inventoryManager = window.InventoryIntegrationManager;
+            if (!inventoryManager) {
+                console.warn('InventoryIntegrationManager not available');
+                inventoryGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 10px;">Inventory system not loaded</div>';
+                return;
+            }
+            
+            const characterInventory = await inventoryManager.loadCharacterInventory(character.id);
+            
+            // Create 6 slots for character inventory display
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot-display';
+                slot.style.cssText = `
+                    width: 50px;
+                    height: 50px;
+                    border: 2px solid #444;
+                    border-radius: 8px;
+                    background: rgba(0, 0, 0, 0.2);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                    cursor: help;
+                `;
+                
+                // Get item slot data at this index
+                const itemSlot = characterInventory ? characterInventory.getItem(i) : null;
+                
+                if (itemSlot && itemSlot.itemId && window.ItemRegistry) {
+                    const item = window.ItemRegistry.getItem(itemSlot.itemId);
+                    if (item) {
+                        // Create item image
+                        const itemImg = document.createElement('img');
+                        itemImg.src = item.image;
+                        itemImg.alt = item.name;
+                        itemImg.style.cssText = `
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            border-radius: 6px;
+                        `;
+                        
+                        // Add rarity border color
+                        const rarityColors = {
+                            'common': '#22c55e',
+                            'rare': '#3b82f6', 
+                            'epic': '#a855f7',
+                            'legendary': '#f59e0b'
+                        };
+                        slot.style.borderColor = rarityColors[item.rarity] || '#444';
+                        
+                        slot.appendChild(itemImg);
+                        
+                        // Add quantity indicator if item has quantity > 1
+                        if (itemSlot.quantity > 1) {
+                            const quantityIndicator = document.createElement('div');
+                            quantityIndicator.style.cssText = `
+                                position: absolute;
+                                bottom: 2px;
+                                right: 2px;
+                                background: rgba(0, 0, 0, 0.8);
+                                color: white;
+                                font-size: 10px;
+                                padding: 1px 3px;
+                                border-radius: 3px;
+                                pointer-events: none;
+                            `;
+                            quantityIndicator.textContent = itemSlot.quantity;
+                            slot.appendChild(quantityIndicator);
+                        }
+                        
+                        // Add tooltip on hover
+                        console.log('[Tooltip] Setting up tooltip for item:', item.name, 'on slot:', slot);
+                        this.addItemTooltip(slot, item);
+                    }
+                } else {
+                    // Empty slot
+                    slot.innerHTML = '<div style="color: #666; font-size: 12px;">Empty</div>';
+                }
+                
+                inventoryGrid.appendChild(slot);
+            }
+            
+        } catch (error) {
+            console.error('Failed to load character inventory for stats:', error);
+            inventoryGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b; padding: 10px;">Failed to load inventory</div>';
+        }
+    }
+    
+    // Add item tooltip for inventory display
+    addItemTooltip(element, item) {
+        console.log('[Tooltip] Adding tooltip for item:', item);
+        
+        // Remove any existing listeners to avoid duplicates
+        element.removeEventListener('mouseenter', element._tooltipEnterHandler);
+        element.removeEventListener('mouseleave', element._tooltipLeaveHandler);
+        
+        // Create and store handler functions
+        element._tooltipEnterHandler = (e) => {
+            console.log('[Tooltip] Mouse enter detected for item:', item.name);
+            console.log('[Tooltip] Event target:', e.target);
+            console.log('[Tooltip] Current target:', e.currentTarget);
+            try {
+                this.showItemTooltip(e, item);
+            } catch (error) {
+                console.error('[Tooltip] Error showing tooltip:', error);
+            }
+        };
+        
+        element._tooltipLeaveHandler = () => {
+            console.log('[Tooltip] Mouse leave detected');
+            try {
+                this.hideItemTooltip();
+            } catch (error) {
+                console.error('[Tooltip] Error hiding tooltip:', error);
+            }
+        };
+        
+        element.addEventListener('mouseenter', element._tooltipEnterHandler);
+        element.addEventListener('mouseleave', element._tooltipLeaveHandler);
+        
+        console.log('[Tooltip] Event listeners attached to element:', element);
+    }
+    
+    // Show item tooltip
+    showItemTooltip(event, item) {
+        console.log('[Tooltip] showItemTooltip called with:', { event, item });
+        
+        // Hide any existing tooltips
+        this.hideItemTooltip();
+        
+        // Get the element from the event
+        const element = event.currentTarget || event.target;
+        if (!element) {
+            console.warn('[Tooltip] No element found for item tooltip');
+            return;
+        }
+        
+        console.log('[Tooltip] Element found:', element);
+        
+        // Create tooltip element
+        const tooltip = document.createElement('div');
+        tooltip.className = 'item-tooltip';
+        tooltip.style.cssText = `
+            position: fixed;
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-size: 12px;
+            max-width: 250px;
+            z-index: 10000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            display: block;
+            visibility: visible;
+        `;
+        console.log('[Tooltip] Created tooltip element with styles');
+        
+        // Item header with rarity color
+        const rarityColors = {
+            'common': '#22c55e',
+            'rare': '#3b82f6', 
+            'epic': '#a855f7',
+            'legendary': '#f59e0b'
+        };
+        
+        const header = document.createElement('div');
+        header.style.cssText = `
+            font-weight: bold;
+            color: ${rarityColors[item.rarity] || '#fff'};
+            margin-bottom: 8px;
+            font-size: 14px;
+        `;
+        header.textContent = item.name;
+        tooltip.appendChild(header);
+        
+        // Item description
+        if (item.description) {
+            const desc = document.createElement('div');
+            desc.style.cssText = `
+                color: #ccc;
+                margin-bottom: 8px;
+                line-height: 1.3;
+            `;
+            desc.textContent = item.description;
+            tooltip.appendChild(desc);
+        }
+        
+        // Item rarity
+        const rarity = document.createElement('div');
+        rarity.style.cssText = `
+            color: ${rarityColors[item.rarity] || '#fff'};
+            font-weight: bold;
+            text-transform: capitalize;
+            margin-bottom: 8px;
+        `;
+        rarity.textContent = item.rarity;
+        tooltip.appendChild(rarity);
+        
+        // Stat bonuses
+        if (item.statBonuses && Object.keys(item.statBonuses).length > 0) {
+            const statsHeader = document.createElement('div');
+            statsHeader.style.cssText = `
+                color: #4ade80;
+                font-weight: bold;
+                margin-bottom: 4px;
+            `;
+            statsHeader.textContent = 'Stat Bonuses:';
+            tooltip.appendChild(statsHeader);
+            
+            Object.entries(item.statBonuses).forEach(([stat, bonus]) => {
+                const statDiv = document.createElement('div');
+                statDiv.style.cssText = `
+                    color: #4ade80;
+                    margin-left: 8px;
+                    font-size: 11px;
+                `;
+                const statName = item.formatStatName ? item.formatStatName(stat) : stat;
+                const prefix = bonus > 0 ? '+' : '';
+                statDiv.textContent = `${prefix}${bonus} ${statName}`;
+                tooltip.appendChild(statDiv);
+            });
+        }
+        
+        // Position tooltip
+        document.body.appendChild(tooltip);
+        console.log('[Tooltip] Tooltip added to DOM');
+        
+        const rect = element.getBoundingClientRect();
+        console.log('[Tooltip] Element rect:', rect);
+        
+        // Force a reflow to ensure tooltip dimensions are calculated
+        tooltip.offsetHeight;
+        const tooltipRect = tooltip.getBoundingClientRect();
+        console.log('[Tooltip] Tooltip rect:', tooltipRect);
+        
+        let left = rect.right + 10;
+        let top = rect.top;
+        
+        // Adjust if tooltip would go off screen
+        if (left + tooltipRect.width > window.innerWidth) {
+            left = rect.left - tooltipRect.width - 10;
+        }
+        
+        if (top + tooltipRect.height > window.innerHeight) {
+            top = window.innerHeight - tooltipRect.height - 10;
+        }
+        
+        console.log('[Tooltip] Final position:', { left, top });
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+        
+        // Force visibility and ensure it's on top
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'none';
+        tooltip.style.display = 'block';
+        
+        console.log('[Tooltip] Final tooltip styles:', tooltip.style.cssText);
+        
+        // Store reference
+        this.itemTooltip = tooltip;
+        console.log('[Tooltip] Tooltip setup complete. Tooltip element in DOM:', document.body.contains(tooltip));
+    }
+    
+    // Hide item tooltip
+    hideItemTooltip() {
+        console.log('[Tooltip] hideItemTooltip called, current tooltip:', this.itemTooltip);
+        if (this.itemTooltip) {
+            this.itemTooltip.remove();
+            this.itemTooltip = null;
+            console.log('[Tooltip] Tooltip removed');
+        } else {
+            console.log('[Tooltip] No tooltip to remove');
+        }
     }
 
     // Create auto-select button

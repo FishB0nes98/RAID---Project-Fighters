@@ -38,6 +38,22 @@
             "chance": 1.0
         }
     ],
+    "loot": {
+        "items": [
+            {
+                "itemId": "mana_sack",
+                "dropChance": 1.0,
+                "quantityMin": 1,
+                "quantityMax": 3
+            },
+            {
+                "itemId": "infernal_cinder",
+                "dropChance": 0.75,
+                "quantityMin": 1,
+                "quantityMax": 4
+            }
+        ]
+    },
     "maxTurns": 20,
     "victoryConditions": [
         "defeat_all_enemies"

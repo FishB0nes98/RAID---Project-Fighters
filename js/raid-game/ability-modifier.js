@@ -61,6 +61,16 @@
                 if (character && character.abilities) {
                     character.abilities.forEach(ability => {
                         applyStoredModifications(ability);
+                        
+                        // Special handling for Schoolboy Shoma's Boink ability
+                        if (character.id === 'schoolboy_shoma' && ability.id === 'boink') {
+                            // Attach the generateDescription function if it doesn't exist
+                            if (!ability.generateDescription && typeof window.generateBoinkDescription === 'function') {
+                                ability.generateDescription = window.generateBoinkDescription;
+                                ability.character = character;
+                                console.log(`[AbilityModifier] Attached generateDescription to Boink ability for ${character.name}`);
+                            }
+                        }
                     });
                 }
                 
@@ -359,4 +369,54 @@
     
     // Log that the ability modifier is initialized
     console.log('Ability Modifier initialized - Talent ability modifications will be applied');
+    
+    // Add event listener for ability description updates
+    document.addEventListener('abilityDescriptionUpdated', function(event) {
+        if (event.detail && event.detail.character) {
+            const character = event.detail.character;
+            console.log(`[AbilityModifier] Received abilityDescriptionUpdated event for ${character.name}`);
+            
+            // Force UI update with a delay to ensure the description changes are applied
+            setTimeout(() => {
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                    console.log(`[AbilityModifier] Updated UI for ${character.name} after description change`);
+                }
+            }, 50);
+        }
+    });
+    
+    // Add event listener specifically for Shoma's talent application
+    document.addEventListener('talent_applied', function(event) {
+        if (event.detail && event.detail.character && event.detail.character.id === 'schoolboy_shoma') {
+            const character = event.detail.character;
+            console.log(`[AbilityModifier] Talent applied to Shoma: ${event.detail.talentId}`);
+            
+            // Find and update Boink ability
+            const boinkAbility = character.abilities.find(a => a.id === 'boink');
+            if (boinkAbility) {
+                // Ensure generateDescription function is attached
+                if (!boinkAbility.generateDescription && typeof window.generateBoinkDescription === 'function') {
+                    boinkAbility.generateDescription = window.generateBoinkDescription;
+                    boinkAbility.character = character;
+                }
+                
+                // Regenerate description
+                if (typeof boinkAbility.generateDescription === 'function') {
+                    const oldDescription = boinkAbility.description;
+                    boinkAbility.description = boinkAbility.generateDescription();
+                    console.log(`[AbilityModifier] Updated Boink description due to talent: ${event.detail.talentId}`);
+                    console.log(`  Old: ${oldDescription}`);
+                    console.log(`  New: ${boinkAbility.description}`);
+                }
+            }
+            
+            // Force UI update
+            setTimeout(() => {
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                }
+            }, 100);
+        }
+    });
 })(); 

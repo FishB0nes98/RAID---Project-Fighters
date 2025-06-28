@@ -892,7 +892,8 @@ class QuestManager {
             const allRewardCharacters = [
                 'schoolgirl_julia', 'schoolgirl_kokoro', 'schoolgirl_ayane', 'schoolgirl_elphelt',
                 'schoolboy_siegfried', 'farmer_nina', 'farmer_alice', 'farmer_shoma', 'farmer_raiden',
-                'bridget', 'zoey'
+                'bridget', 'zoey', 'atlantean_christie', 'atlantean_kotal_kahn', 'atlantean_kagome', 
+                'atlantean_sub_zero_playable', 'infernal_ibuki'
             ];
 
             // Filter out owned characters

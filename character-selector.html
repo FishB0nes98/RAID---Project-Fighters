@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Nunito:wght@400;600;700&display=swap">
     <!-- New: Reuse raid-game styles for unified quest panel -->
     <link rel="stylesheet" href="css/raid-game.css">
+    <!-- Inventory System Styles -->
+    <link rel="stylesheet" href="css/inventory-system.css">
     <!-- Selector-specific overrides -->
     <style id="selector-overrides">
       /* Restore scrolling and normal body dimensions */
@@ -198,14 +200,14 @@
             border: none;
             padding: 12px 20px;
             border-radius: var(--radius-md);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: var(--elevation-2);
+            box-shadow: var(--elevation-1);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-family: 'Montserrat', sans-serif;
             position: relative;
             overflow: hidden;
@@ -229,123 +231,59 @@
 
         .changelog-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .changelog-icon {
-            width: 16px;
-            height: 16px;
-            display: inline-block;
-        }
-
-        /* Version Badge */
-        .version-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            padding: 4px 6px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-            animation: pulse-badge 2s infinite;
-        }
-
-        @keyframes pulse-badge {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Changelog Modal */
-        .changelog-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .changelog-modal.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .changelog-content {
-            background: linear-gradient(135deg, #1a1c2a 0%, #23253a 100%);
-            border-radius: var(--radius-lg);
-            padding: 0;
-            max-width: 800px;
-            max-height: 90vh;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-light);
-            overflow: hidden;
-            position: relative;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .changelog-modal.show .changelog-content {
-            transform: scale(1);
-        }
-
-        .changelog-header {
+        /* Event Story Styling */
+        .story-container.event-story {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px 30px;
-            color: white;
+            border: 2px solid #ff6b9d;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
-        .changelog-header::before {
-            content: '';
+        .story-container.event-story:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+        }
+
+        .story-container.event-story.selected {
+            border-color: #ff6b9d;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.5);
+        }
+
+        .story-container.event-story .story-title {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .story-container.event-story .story-description {
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Event Badge */
+        .event-badge {
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .changelog-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .changelog-version {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 4px 12px;
+            top: -10px;
+            right: -5px;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+            padding: 0.25rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+            animation: eventBadgeGlow 2s infinite;
+            z-index: 10;
         }
 
-        .changelog-subtitle {
-            margin: 8px 0 0 0;
-            font-size: 1rem;
-            opacity: 0.9;
-            font-weight: 400;
+        @keyframes eventBadgeGlow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3); }
+            50% { box-shadow: 0 2px 12px rgba(255, 107, 157, 0.6); }
         }
 
         .changelog-close {
@@ -2867,6 +2805,264 @@
             background: var(--primary-light);
             transform: translateY(-1px);
         }
+        /* Changelog Modal Styles */
+.changelog-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 9999 !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.changelog-modal.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.changelog-content {
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.changelog-modal.show .changelog-content {
+    transform: scale(1);
+}
+
+.changelog-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    position: relative;
+}
+
+.changelog-title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.changelog-version {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.changelog-subtitle {
+    margin: 0.5rem 0 0 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.changelog-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.changelog-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.changelog-body {
+    padding: 1.5rem;
+}
+
+.changelog-section {
+    margin-bottom: 2rem;
+}
+
+.changelog-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem 0;
+    font-size: 1.3rem;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 0.5rem;
+}
+
+.notes-icon {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.character-changes {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary);
+}
+
+.character-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.character-emoji {
+    font-size: 1.2rem;
+}
+
+.character-rationale {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.change-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.change-item {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-sm);
+    border-left: 3px solid var(--accent);
+}
+
+.change-arrow {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.change-highlight {
+    color: var(--accent-success);
+    font-weight: 600;
+}
+
+.developer-notes {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.developer-notes h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.developer-notes p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.developer-notes p:last-child {
+    margin-bottom: 0;
+}
+
+/* Changelog Button Styles */
+.changelog-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none;
+    border-radius: var(--border-radius-md);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.changelog-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.changelog-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.version-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .changelog-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .changelog-header {
+        padding: 1rem;
+    }
+    
+    .changelog-title {
+        font-size: 1.5rem;
+    }
+    
+    .changelog-body {
+        padding: 1rem;
+    }
+    
+    .changelog-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .character-name {
+        font-size: 1rem;
+    }
+} 
+        
 
         /* Overrides for Character Selector */
         body { height: auto !important; overflow-y: auto !important; }
@@ -3030,10 +3226,105 @@
     <!-- New Quest UI Manager -->
     <script src="js/raid-game/quest-ui-manager.js"></script>
     
+    <!-- Inventory System -->
+    <script src="js/raid-game/item-system.js"></script>
+    <script src="js/raid-game/inventory-ui-manager.js"></script>
+    <script src="js/raid-game/inventory-integration.js"></script>
+    
     <!-- Controller Support -->
     <script src="js/character-selector-controller.js"></script>
 
     <script>
+        // Initialize Inventory System Global Variables
+        console.log('[CharacterSelector] Creating ItemRegistry...');
+        window.ItemRegistry = new ItemRegistry();
+        console.log('[CharacterSelector] ItemRegistry created successfully');
+        
+        console.log('[CharacterSelector] Creating GlobalInventory...');
+        window.GlobalInventory = new GlobalInventory();
+        console.log('[CharacterSelector] GlobalInventory created successfully');
+        
+        console.log('[CharacterSelector] Creating CharacterInventories Map...');
+        window.CharacterInventories = new Map();
+        console.log('[CharacterSelector] CharacterInventories Map created successfully');
+        
+        // Admin Console Commands for Inventory Testing
+        window.addItemToCharacter = function(characterId, itemId) {
+            console.log(`[Admin] Adding item ${itemId} to character ${characterId}`);
+            
+            if (!window.CharacterInventories.has(characterId)) {
+                window.CharacterInventories.set(characterId, new CharacterInventory(characterId, 6));
+            }
+            
+            const inventory = window.CharacterInventories.get(characterId);
+            const success = inventory.addItem(itemId);
+            
+            if (success !== -1) {
+                console.log(`[Admin] Item added to slot ${success}`);
+                // Refresh UI if modal is open
+                if (window.inventoryUIManager && window.inventoryUIManager.currentCharacterId === characterId) {
+                    window.inventoryUIManager.renderCharacterInventory();
+                }
+            } else {
+                console.log(`[Admin] Failed to add item - inventory might be full`);
+            }
+        };
+        
+        window.addItemToGlobal = function(itemId) {
+            console.log(`[Admin] Adding item ${itemId} to global inventory`);
+            window.GlobalInventory.addItem(itemId);
+            
+            // Refresh UI if modal is open
+            if (window.inventoryUIManager) {
+                window.inventoryUIManager.renderGlobalInventory();
+            }
+        };
+        
+        window.listAvailableItems = function() {
+            console.log('[Admin] Available items:');
+            window.ItemRegistry.getAllItems().forEach(item => {
+                console.log(`- ${item.id}: ${item.name} (${item.rarity})`);
+            });
+        };
+        
+        window.viewCharacterInventory = function(characterId) {
+            if (!window.CharacterInventories.has(characterId)) {
+                console.log(`[Admin] No inventory found for character ${characterId}`);
+                return;
+            }
+            
+            const inventory = window.CharacterInventories.get(characterId);
+            console.log(`[Admin] ${characterId} inventory:`, inventory.getAllItems());
+        };
+        
+        window.viewGlobalInventory = function() {
+            console.log('[Admin] Global inventory:', window.GlobalInventory.getAllItems());
+        };
+        
+        window.clearCharacterInventory = function(characterId) {
+            if (window.CharacterInventories.has(characterId)) {
+                const inventory = window.CharacterInventories.get(characterId);
+                for (let i = 0; i < 6; i++) {
+                    inventory.removeItem(i);
+                }
+                console.log(`[Admin] Cleared inventory for ${characterId}`);
+                
+                // Refresh UI if modal is open
+                if (window.inventoryUIManager && window.inventoryUIManager.currentCharacterId === characterId) {
+                    window.inventoryUIManager.renderCharacterInventory();
+                }
+            }
+        };
+        
+        window.testInventorySystem = function() {
+            console.log('[Admin] Testing inventory system...');
+            window.listAvailableItems();
+            window.addItemToGlobal('golden_arrow');
+            window.addItemToGlobal('jade_dagger');
+            window.viewGlobalInventory();
+            console.log('[Admin] Test completed. Try opening a character inventory modal.');
+        };
+        
         document.addEventListener('DOMContentLoaded', async () => {
             let selectedCharacters = [];
             let selectedStory = null;
@@ -3144,9 +3435,14 @@
                 // Firebase Auth Check
                 firebaseAuth.onAuthStateChanged(async (user) => {
                     if (user) {
-                        console.log("User logged in:", user.uid);
+                                                    console.log("User logged in:", user.uid);
                         const userId = user.uid;
                         currentUserId = userId; // Set global user ID
+                        
+                        // Initialize inventory system
+                        if (window.InventoryIntegrationManager) {
+                            await window.InventoryIntegrationManager.initialize();
+                        }
                         // Fetch user data (including owned characters)
                         try {
                             const snapshot = await firebaseDatabase.ref(`users/${userId}/ownedCharacters`).once('value');
@@ -3201,8 +3497,8 @@
                                 console.log("Fetched owned stories:", ownedStories);
                             } else {
                                 console.log("No owned stories found for user, using defaults from story registry.");
-                                // Use playerunlocked from stories as defaults
-                                ownedStories = allStories.filter(s => s.playerunlocked).map(s => getStoryId(s));
+                                // Use playerunlocked from stories as defaults, plus event stories
+                                ownedStories = allStories.filter(s => s.playerunlocked || s.isEvent === true || s.availableForEveryone === true).map(s => getStoryId(s));
                             }
                             
                                         // Check global story availability settings (for remote control)
@@ -3279,7 +3575,7 @@
                             showTooltip("Error loading your user data.");
                             // Fallback: Use defaults from registries
                             ownedCharacters = allCharacters.filter(c => c.playerunlocked).map(c => c.id);
-                            ownedStories = allStories.filter(s => s.playerunlocked).map(s => getStoryId(s));
+                            ownedStories = allStories.filter(s => s.playerunlocked || s.isEvent === true || s.availableForEveryone === true).map(s => getStoryId(s));
                             ownedStages = allStages.filter(s => s.playerunlocked).map(s => s.id);
                         }
                         
@@ -3392,24 +3688,33 @@
                         id: 'cleansing_winds_challenge',
                         name: 'Cleansing Winds Challenge',
                         description: 'Face five formidable opponents in a mystical battlefield where cleansing winds sweep away all magical effects every 3rd turn! Defeat Bridget, Farmer Raiden, Infernal Ibuki, Atlantean Kagome, and Zoey with a team of 5 heroes.',
+                        name: 'Double Damage Challenge',
+                        description: 'Face five powerful opponents in an arena where raw power surges through the battlefield! All damage is doubled for everyone. Zoey, Schoolgirl Julia, Schoolgirl Elphelt, Renée, and Infernal Ibuki await your challenge. Choose your 5 strongest fighters wisely!',
                         difficulty: 8,
                         teamSize: 5,
                         enemies: ['bridget', 'farmer_raiden', 'infernal_ibuki', 'atlantean_kagome', 'zoey'],
+                        enemies: ['zoey', 'schoolgirl_julia', 'schoolgirl_elphelt', 'renée', 'infernal_ibuki'],
                         modifiers: [{
                             id: 'cleansing_winds',
                             name: 'Cleansing Winds',
-                            description: 'Every 3rd turn, mystical winds cleanse all buffs and debuffs from all characters!'
+                            description: 'Every 3rd turn, mystical winds cleanse all buffs and debuffs from all characters!',
+                            id: 'double_damage',
+                            name: 'Double Damage',
+                            description: 'All damage dealt by all characters is doubled.'
                         }],
-                        rewards: [{
-                            type: 'character',
-                            id: 'atlantean_kagome',
-                            name: 'Atlantean Kagome',
-                            icon: '🌊'
-                        }],
+                        rewards: [
+                            {
+                                type: 'random_character',
+                                value: 'tier_2',
+                                name: 'Random Character',
+                                icon: '❓'
+                            }
+                        ],
                         timeRemaining: 'Resets in 6 days, 8 hours',
                         isAvailable: true
                     }
-                ];
+
+                ]             
 
                 // Assign UI Elements
                 characterGrid = document.getElementById('character-grid');
@@ -3996,7 +4301,8 @@
                         <div class="character-name">${character.name}</div>
                         <div class="character-tags">${tagElements}</div>
                         ${isOwned ? '<div class="character-xp"><div class="xp-bar-small"><div class="xp-fill-small" style="width: 0%"></div></div><div class="xp-text-small">0 / 1000 XP</div></div>' : ''}
-                         <button class="talents-button" data-char-id="${character.id}">Talents</button> 
+                         <button class="talents-button" data-char-id="${character.id}">Talents</button>
+                         <button class="inventory-button" data-char-id="${character.id}">Inventory</button> 
                     </div>
                 `;
                 
@@ -4026,6 +4332,19 @@
                         window.location.href = `talents.html?character=${character.id}`;
                     });
                 }
+
+                // Add click listener for the Inventory button
+                const inventoryButton = card.querySelector('.inventory-button');
+                if (inventoryButton) {
+                    inventoryButton.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent card selection click
+                        
+                        // Open inventory modal for this character
+                        if (window.inventoryUIManager) {
+                            window.inventoryUIManager.openModal(character.id);
+                        }
+                    });
+                }
                 
                 return card;
             }
@@ -4046,6 +4365,15 @@
                 // 1. Apply Story Requirements (if a story is selected)
                 if (currentSelectionMode === 'story' && selectedStory && selectedStory.requirements) {
                     const reqs = selectedStory.requirements;
+                    
+                    // Check allowedCharacters restriction
+                    if (reqs.allowedCharacters && Array.isArray(reqs.allowedCharacters)) {
+                        if (!reqs.allowedCharacters.includes(character.id)) {
+                            isRestricted = true;
+                            cardElement.title = `This character cannot be used in "${selectedStory.title}". Only specific characters are allowed.`;
+                        }
+                    }
+                    
                     // Check required tags
                     if (reqs.tags && reqs.tags.length > 0) {
                         const hasRequiredTag = reqs.tags.every(tag => character.tags && character.tags.includes(tag));
@@ -4164,10 +4492,24 @@
                         storyWrapper.className = 'story-container';
                         storyWrapper.dataset.storyTitle = story.title;
 
-                        // Check if story is owned
-                        const isOwned = ownedStories.includes(getStoryId(story));
+                        // Check if story is an event story
+                        const isEventStory = story.isEvent === true || story.title === "A Date in the Forest";
+                        if (isEventStory) {
+                            storyWrapper.classList.add('event-story');
+                        }
+
+                        // Check if story is owned - event stories are available for everyone
+                        const isOwned = isEventStory ? true : ownedStories.includes(getStoryId(story));
                         if (!isOwned) {
                             storyWrapper.classList.add('locked');
+                        }
+
+                        // Add event badge for event stories
+                        if (isEventStory) {
+                            const eventBadge = document.createElement('div');
+                            eventBadge.className = 'event-badge';
+                            eventBadge.textContent = 'Event';
+                            storyWrapper.appendChild(eventBadge);
                         }
 
                         const storyTitleEl = document.createElement('h3');
@@ -4248,6 +4590,14 @@
                     return;
                 }
                 
+                // Check story requirements for allowedCharacters
+                if (currentSelectionMode === 'story' && selectedStory && selectedStory.requirements && selectedStory.requirements.allowedCharacters) {
+                    if (!selectedStory.requirements.allowedCharacters.includes(character.id)) {
+                        showTooltip(`Character ${character.name} cannot be used in "${selectedStory.title}". Only specific characters are allowed.`);
+                        return;
+                    }
+                }
+                
                 // Check stage restrictions for excluded characters
                 if (currentSelectionMode === 'stage' && selectedStage && 
                     selectedStage.playerCharacterRestrictions && 
@@ -4284,8 +4634,11 @@
                 const newlySelectedStory = allStories.find(s => s.title === storyTitle);
                 if (!newlySelectedStory) return;
 
-                // Check if story is owned
-                const isOwned = ownedStories.includes(normalizeStoryId(storyTitle));
+                // Check if story is an event story
+                const isEventStory = newlySelectedStory.isEvent === true || newlySelectedStory.title === "A Date in the Forest";
+                
+                // Check if story is owned - event stories are available for everyone
+                const isOwned = isEventStory ? true : ownedStories.includes(normalizeStoryId(storyTitle));
                 if (!isOwned) {
                     showTooltip('You do not own this story.');
                     return;
@@ -7539,111 +7892,7 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
             </div>
         </div>
     </div>
-
-    <!-- Old Changelog Modal (v0.1.1) -->
-    <div class="changelog-modal" id="old-changelog-modal">
-        <div class="changelog-content">
-            <div class="changelog-header">
-                <h1 class="changelog-title">
-                    🚀 Patch Notes
-                    <span class="changelog-version">v0.2</span>
-                </h1>
-                <p class="changelog-subtitle">Schoolgirl Julia Balance Adjustments</p>
-                <button class="changelog-close" onclick="hideOldChangelog()">&times;</button>
-            </div>
-            
-            <div class="changelog-body">
-                <div class="changelog-section">
-                    <h3>
-                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                        </svg>
-                        Character Balance Changes
-                    </h3>
-                    
-                    <div class="character-changes julia">
-                        <div class="character-name">
-                            <span class="character-emoji">💚</span>
-                            <strong>Schoolgirl Julia - Healing Kick (Q) Nerf</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Julia's Healing Kick was significantly overpowered, providing excessive healing output that made encounters trivial. In testing, the ability healed 15.4k over 25 turns while dealing 8.1k damage, creating an unsustainable power level.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>Mana Cost:</strong> Increased <span class="change-arrow">60 → 80</span> mana
-                            </li>
-                            <li class="change-item">
-                                <strong>Cooldown:</strong> Increased <span class="change-arrow">1 → 2</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>Healing Efficiency:</strong> Reduced <span class="change-arrow">65% → 40%</span> of total damage dealt
-                            </li>
-                        </ul>
-                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
-                            <strong>Impact:</strong> These changes will require more strategic use of Julia's healing ability while still maintaining her role as a hybrid damage/support character. The increased mana cost and cooldown prevent spam usage, while the reduced healing efficiency brings her in line with other support characters.
-                        </div>
-                    </div>
-
-                    <div class="character-changes kokoro">
-                        <div class="character-name">
-                            <span class="character-emoji">💚</span>
-                            <strong>Schoolgirl Kokoro - Silencing Ring (W) Enhancement</strong>
-                        </div>
-                        <div class="character-rationale">
-                            <strong>Rationale:</strong> Silencing Ring was providing limited utility as a pure damage reduction debuff. Adding a damage-over-time component makes it more impactful and creates meaningful pressure on enemies.
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>DOT Effect:</strong> Now deals <span class="change-highlight">90 damage per turn</span> for the duration (6 turns)
-                            </li>
-                            <li class="change-item">
-                                <strong>Total Damage:</strong> Can deal up to <span class="change-highlight">540 damage</span> over full duration
-                            </li>
-                            <li class="change-item">
-                                <strong>Visual Effects:</strong> Added new DOT damage VFX with energy drain particles
-                            </li>
-                            <li class="change-item">
-                                <strong>Status Indicator:</strong> Removed persistent status icon for cleaner UI
-                            </li>
-                        </ul>
-                        <div style="font-size: 0.8rem; color: var(--neutral-400); margin-top: 8px; font-style: italic;">
-                            <strong>Impact:</strong> Silencing Ring now serves as both a damage mitigation tool and a significant damage source, making Kokoro more versatile in both support and offensive roles. The DOT effect provides consistent pressure while maintaining the original damage reduction utility.
-                        </div>
-                    </div>
-
-                    <div class="character-changes multiple">
-                        <div class="character-name">
-                            <span class="character-emoji">⚖️</span>
-                            <strong>Additional Balance Changes</strong>
-                        </div>
-                        <ul class="change-list">
-                            <li class="change-item">
-                                <strong>⚾ Schoolboy Shoma:</strong> Boink stun chance <span class="change-arrow">35% → 40%</span>, mana cost <span class="change-arrow">40 → 45</span>, Physical Damage <span class="change-arrow">210 → 220</span>
-                            </li>
-                            <li class="change-item">
-                                <strong>🛡️ Schoolboy Siegfried:</strong> Lion Protection cooldown <span class="change-arrow">10 → 6</span> turns, buff duration <span class="change-arrow">5 → 3</span> turns
-                            </li>
-                            <li class="change-item">
-                                <strong>🐰 Farmer Alice:</strong> Pounce stun chance <span class="change-arrow">65% → 85%</span>, duration <span class="change-arrow">4 → 1</span> turn. Bunny Bounce reworked for allies
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="developer-notes">
-                    <h3>
-                        <svg class="notes-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                        Developer Notes
-                    </h3>
-                    <p>This patch focuses primarily on balance adjustments, particularly addressing the overpowered nature of Schoolgirl Julia's healing ability. The changes aim to create more strategic decision-making around healing usage while maintaining character viability.</p>
-                    <p>Schoolgirl Kokoro's Silencing Ring enhancement transforms it from a purely defensive ability into a hybrid damage/support tool, making her more valuable in team compositions while maintaining her supportive identity.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 
     <script>
         // Changelog Modal Functions
@@ -7659,17 +7908,6 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
             document.body.style.overflow = ''; // Restore scrolling
         }
 
-        function showOldChangelog() {
-            const modal = document.getElementById('old-changelog-modal');
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        }
-
-        function hideOldChangelog() {
-            const modal = document.getElementById('old-changelog-modal');
-            modal.classList.remove('show');
-            document.body.style.overflow = ''; // Restore scrolling
-        }
 
         // Close modals when clicking outside
         document.getElementById('changelog-modal').addEventListener('click', function(e) {
@@ -7678,20 +7916,12 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
             }
         });
 
-        document.getElementById('old-changelog-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideOldChangelog();
-            }
-        });
 
         // Close modals with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 if (document.getElementById('changelog-modal').classList.contains('show')) {
                     hideChangelog();
-                }
-                if (document.getElementById('old-changelog-modal').classList.contains('show')) {
-                    hideOldChangelog();
                 }
             }
         });

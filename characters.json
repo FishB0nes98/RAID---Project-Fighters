@@ -83,7 +83,12 @@
     "name": "Zoey",
     "image": "Icons/characters/Zoey.png",
     "tags": ["Magical", "Carry", "Mew"]
+  },
+  {
+    "name": "Necromatic Corrupted Bear",
+    "image": "images/characters/necromatic_corrupted_bear.png",
+    "tags": ["Beast", "Undead", "AI Only"]
   }
 
   
-] 
+]  

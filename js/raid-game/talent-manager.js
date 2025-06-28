@@ -492,6 +492,12 @@ class TalentManager {
             }, 100);
         }
         
+        // For Schoolboy Shoma: update ability descriptions to reflect new talents
+        if (character.id === 'schoolboy_shoma' && typeof window.updateShomaAbilityDescriptions === 'function') {
+            console.log('[TalentManager] Updating Shoma ability descriptions');
+            window.updateShomaAbilityDescriptions(character);
+        }
+        
         // Get talent definitions for more detailed event
         const talentDefinitionsForEvent = await this.loadTalentDefinitions(character.id);
         if (talentDefinitionsForEvent) {
@@ -887,6 +893,51 @@ class TalentManager {
         // --- NEW: Handle Julia's Nature's Fury talent ---
         if (property === 'naturesFuryTurn10' && character.id === 'schoolgirl_julia') {
             console.log(`[TalentManager] Applied Nature's Fury talent to ${character.name}`);
+        }
+        // --- END NEW ---
+
+        // --- NEW: Handle Shoma's Healing Mastery talent ---
+        if (property === 'healingMasteryEnabled' && character.id === 'schoolboy_shoma') {
+            console.log(`[TalentManager] Applied Healing Mastery talent to ${character.name}: +20% healing power`);
+            
+            // Set healing power to 0.2 (20% increase)
+            character.stats.healingPower = 0.2;
+            
+            console.log(`[TalentManager] ${character.name} healing power set to: ${character.stats.healingPower} (20% increase)`);
+            console.log(`[TalentManager] ${character.name} stats after talent application:`, character.stats);
+            
+            // Update ability descriptions to reflect the healing power increase
+            if (typeof window.updateShomaAbilityDescriptions === 'function') {
+                window.updateShomaAbilityDescriptions(character);
+                console.log(`[TalentManager] Updated Shoma ability descriptions for Healing Mastery talent`);
+                
+                // Trigger UI update
+                document.dispatchEvent(new CustomEvent('abilityDescriptionUpdated', {
+                    detail: { character: character }
+                }));
+            }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Handle Shoma's Grass Growth talent ---
+        if (property === 'grassGrowthEnabled' && character.id === 'schoolboy_shoma') {
+            console.log(`[TalentManager] Applied Grass Growth talent to ${character.name}: Grass Ball applies delayed healing buff`);
+            
+            // Update ability descriptions to reflect the grass growth effect
+            if (typeof window.updateShomaAbilityDescriptions === 'function') {
+                window.updateShomaAbilityDescriptions(character);
+            }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Handle Shoma's Magical Empowerment talent ---
+        if (property === 'magicalEmpowermentEnabled' && character.id === 'schoolboy_shoma') {
+            console.log(`[TalentManager] Applied Magical Empowerment talent to ${character.name}: Grass Ball grants +30% magical damage buff`);
+            
+            // Update ability descriptions to reflect the magical empowerment effect
+            if (typeof window.updateShomaAbilityDescriptions === 'function') {
+                window.updateShomaAbilityDescriptions(character);
+            }
         }
         // --- END NEW ---
 

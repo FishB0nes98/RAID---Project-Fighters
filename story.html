@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roguelike Story Mode</title>
     <link rel="stylesheet" href="css/story.css">
+    <link rel="stylesheet" href="css/inventory-system.css">
+    <link rel="stylesheet" href="css/loot-rewards.css">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -54,6 +56,8 @@
                 <p id="story-description">Embark on an epic adventure through dangerous lands...</p>
             </div>
             <div class="controls">
+                <button id="team-inventory-button" class="control-button primary">Manage Team Equipment</button>
+                <button id="global-inventory-button" class="control-button primary">Global Inventory</button>
                 <button id="back-button" class="control-button secondary">Back to Selection</button>
             </div>
         </aside>
@@ -97,6 +101,14 @@
                 <h3>Rewards</h3>
                 <div id="reward-list" class="reward-list">
                     <!-- Reward previews will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Stage Modifiers Section -->
+            <div id="stage-modifiers-section" class="stage-info-section">
+                <h3>Stage Effects</h3>
+                <div id="stage-modifiers-list" class="stage-modifiers-list">
+                    <!-- Stage modifiers will be loaded here -->
                 </div>
             </div>
 
@@ -185,9 +197,19 @@
     <!-- Firebase Config -->
     <script src="js/firebase-config.js"></script>
 
+    <!-- Inventory System Scripts -->
+    <script src="js/raid-game/item-system.js"></script>
+    <script src="js/raid-game/inventory-integration.js"></script>
+    <script src="js/raid-game/inventory-ui-manager.js"></script>
+    
+    <!-- Loot System Scripts -->
+    <script src="js/raid-game/loot-manager.js"></script>
+    <script src="js/raid-game/loot-ui-manager.js"></script>
+
     <!-- Game Scripts -->
     <script src="js/raid-game/character.js"></script>
     <script src="js/raid-game/character-xp-manager.js"></script>
+    <script src="js/raid-game/stage-modifiers.js"></script>
     <script src="js/story/default-images.js"></script>
     <script src="js/story/story-manager.js"></script>
     <script src="js/story/story-ui.js"></script>
@@ -243,6 +265,76 @@
                         return;
                     }
 
+                    currentStep = "Initializing Inventory System";
+                    // Set story mode flag to prevent auto-initialization conflicts
+                    window.isStoryMode = true;
+                    
+                    // Initialize inventory system components with better error handling
+                    console.log('[Story] === INVENTORY SYSTEM INITIALIZATION ===');
+                    
+                    // Check if classes are available
+                    const classesAvailable = {
+                        ItemRegistry: typeof ItemRegistry !== 'undefined',
+                        GlobalInventory: typeof GlobalInventory !== 'undefined',
+                        CharacterInventory: typeof CharacterInventory !== 'undefined',
+                        InventoryUIManager: typeof InventoryUIManager !== 'undefined'
+                    };
+                    
+                    console.log('[Story] Class availability check:', classesAvailable);
+                    
+                    // Create ItemRegistry
+                    if (classesAvailable.ItemRegistry) {
+                        if (!window.ItemRegistry) {
+                            window.ItemRegistry = new ItemRegistry();
+                            console.log('[Story] ✓ ItemRegistry created successfully');
+                        } else {
+                            console.log('[Story] ✓ ItemRegistry already exists');
+                        }
+                    } else {
+                        console.error('[Story] ✗ ItemRegistry class not found! Check if item-system.js loaded correctly.');
+                        throw new Error('ItemRegistry class not available');
+                    }
+                    
+                    // Create GlobalInventory
+                    if (classesAvailable.GlobalInventory) {
+                        if (!window.GlobalInventory) {
+                            window.GlobalInventory = new GlobalInventory();
+                            console.log('[Story] ✓ GlobalInventory created successfully');
+                        } else {
+                            console.log('[Story] ✓ GlobalInventory already exists');
+                        }
+                    } else {
+                        console.error('[Story] ✗ GlobalInventory class not found! Check if item-system.js loaded correctly.');
+                        throw new Error('GlobalInventory class not available');
+                    }
+                    
+                    // Create CharacterInventories Map
+                    if (!window.CharacterInventories) {
+                        window.CharacterInventories = new Map();
+                        console.log('[Story] ✓ CharacterInventories Map created successfully');
+                    } else {
+                        console.log('[Story] ✓ CharacterInventories Map already exists');
+                    }
+                    
+                    // Verify all instances are properly created
+                    const inventorySystemReady = !!(window.ItemRegistry && window.GlobalInventory && window.CharacterInventories);
+                    console.log('[Story] Inventory system ready:', inventorySystemReady);
+                    
+                    if (!inventorySystemReady) {
+                        throw new Error('Inventory system initialization failed');
+                    }
+                    
+                    console.log('[Story] === INVENTORY SYSTEM INITIALIZED ===');
+                    
+                    currentStep = "Initializing Stage Modifiers Registry";
+                    // Initialize stage modifiers registry for stage details
+                    if (typeof StageModifiersRegistry !== 'undefined') {
+                        window.stageModifiersRegistry = new StageModifiersRegistry();
+                        console.log('[Story] ✓ Stage modifiers registry initialized');
+                    } else {
+                        console.warn('[Story] ⚠️ StageModifiersRegistry not available - stage modifiers will show basic info only');
+                    }
+
                     currentStep = "Initializing StoryManager/UI Instances";
                     window.storyManager = new StoryManager(userId);
                     window.storyUI = new StoryUI(window.storyManager);
@@ -266,6 +358,125 @@
                     currentStep = "Hiding Loading Screen";
                     hideLoadingScreen();
 
+                    // Add console test functions for debugging inventory system
+                    window.testInventorySystem = function() {
+                        console.log('=== INVENTORY SYSTEM TEST ===');
+                        console.log('ItemRegistry:', !!window.ItemRegistry);
+                        console.log('GlobalInventory:', !!window.GlobalInventory);
+                        console.log('CharacterInventories:', !!window.CharacterInventories);
+                        console.log('InventoryUIManager:', !!window.InventoryUIManager);
+                        console.log('storyInventoryUIManager:', !!window.storyInventoryUIManager);
+                        console.log('InventoryIntegrationManager:', !!window.InventoryIntegrationManager);
+                        
+                        if (window.GlobalInventory) {
+                            console.log('Global inventory items:', window.GlobalInventory.getAllItems());
+                        }
+                        
+                        if (window.CharacterInventories) {
+                            console.log('Character inventories size:', window.CharacterInventories.size);
+                        }
+                        
+                        console.log('Test complete. Try: testOpenCharacterInventory("schoolboy_siegfried")');
+                    };
+                    
+                    window.testOpenCharacterInventory = function(characterId = 'schoolboy_siegfried') {
+                        console.log('Testing character inventory open for:', characterId);
+                        if (window.storyUI) {
+                            window.storyUI.openCharacterInventory(characterId);
+                        } else {
+                            console.error('Story UI not found');
+                        }
+                    };
+                    
+                    window.testOpenGlobalInventory = function() {
+                        console.log('Testing global inventory open');
+                        if (window.storyUI) {
+                            window.storyUI.openGlobalInventory();
+                        } else {
+                            console.error('Story UI not found');
+                        }
+                    };
+                    
+                    console.log('✅ Story initialization complete!');
+                    // Add debug function to inspect inventory system status
+                    window.debugInventorySystem = function() {
+                        console.log('=== INVENTORY SYSTEM DEBUG ===');
+                        
+                        const systemStatus = {
+                            ItemRegistry: {
+                                exists: !!window.ItemRegistry,
+                                instance: window.ItemRegistry,
+                                type: typeof window.ItemRegistry
+                            },
+                            GlobalInventory: {
+                                exists: !!window.GlobalInventory,
+                                instance: window.GlobalInventory,
+                                type: typeof window.GlobalInventory
+                            },
+                            CharacterInventories: {
+                                exists: !!window.CharacterInventories,
+                                instance: window.CharacterInventories,
+                                type: typeof window.CharacterInventories,
+                                isMap: window.CharacterInventories instanceof Map
+                            },
+                            InventoryUIManager: {
+                                class_exists: !!window.InventoryUIManager,
+                                instance_exists: !!window.storyInventoryUIManager,
+                                class_type: typeof window.InventoryUIManager,
+                                instance_type: typeof window.storyInventoryUIManager
+                            },
+                            storyMode: window.isStoryMode
+                        };
+                        
+                        console.log('System Status:', systemStatus);
+                        
+                        // Test creating instances if they don't exist
+                        if (typeof ItemRegistry !== 'undefined' && !window.ItemRegistry) {
+                            console.log('⚠️ ItemRegistry class available but no global instance!');
+                        }
+                        if (typeof GlobalInventory !== 'undefined' && !window.GlobalInventory) {
+                            console.log('⚠️ GlobalInventory class available but no global instance!');
+                        }
+                        
+                        return systemStatus;
+                    };
+                    
+                    console.log('🧪 Test functions available: testInventorySystem(), testOpenCharacterInventory(), testOpenGlobalInventory(), debugInventorySystem(), debugInventoryModal()');
+                    
+                    // Add debug function to inspect modal DOM
+                    window.debugInventoryModal = function() {
+                        console.log('=== INVENTORY MODAL DEBUG ===');
+                        
+                        const modal = document.getElementById('inventory-modal');
+                        console.log('Modal found:', !!modal);
+                        
+                        if (modal) {
+                            console.log('Modal classes:', modal.className);
+                            console.log('Modal visible:', modal.classList.contains('visible'));
+                            
+                            const characterGrid = document.getElementById('character-inventory-grid');
+                            const globalGrid = document.getElementById('global-inventory-grid');
+                            
+                            console.log('Character grid found:', !!characterGrid);
+                            console.log('Global grid found:', !!globalGrid);
+                            
+                            if (characterGrid) {
+                                console.log('Character grid children count:', characterGrid.children.length);
+                                console.log('Character grid innerHTML length:', characterGrid.innerHTML.length);
+                                console.log('Character grid HTML:', characterGrid.innerHTML);
+                            }
+                            
+                            if (globalGrid) {
+                                console.log('Global grid children count:', globalGrid.children.length);
+                                console.log('Global grid innerHTML length:', globalGrid.innerHTML.length);
+                            }
+                        }
+                        
+                        console.log('=== DEBUG COMPLETE ===');
+                    };
+                    
+                    console.log('🧪 Debug function available: debugInventoryModal()');
+
                 } catch (error) {
                     console.error('Failed to initialize story at step:', currentStep, error);
                     alert(`Failed to load story (Error during: ${currentStep}). Please check console and try again. Details: ${error.message}`);
@@ -273,6 +484,34 @@
                 }
             }
             // --- END NEW Function ---
+
+            // Test function to verify character level loading
+            window.testCharacterLevels = function() {
+                console.log('🧪 Testing character level loading...');
+                
+                if (!window.storyManager || !window.storyManager.playerTeam) {
+                    console.error('❌ Story manager or player team not available');
+                    return;
+                }
+                
+                const team = window.storyManager.playerTeam;
+                console.log(`📊 Testing ${team.length} characters:`);
+                
+                team.forEach(character => {
+                    console.log(`  - ${character.name}: Level ${character.level || 'NOT SET'} (${character.experience || 0} XP)`);
+                });
+                
+                // Test CharacterXPManager availability
+                if (window.characterXPManager && window.characterXPManager.initialized) {
+                    console.log('✅ CharacterXPManager is available and initialized');
+                } else {
+                    console.error('❌ CharacterXPManager not available or not initialized');
+                }
+                
+                console.log('🧪 Test complete!');
+            };
+            
+            console.log('🧪 Test function available: testCharacterLevels()');
         });
 
         // Global function to close the character selection modal

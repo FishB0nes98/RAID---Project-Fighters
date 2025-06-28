@@ -24,6 +24,14 @@
           }
         ],
         "isTutorial": true,
+        "loot": {
+          "guaranteed": [
+            {
+              "itemId": "long_sword",
+              "quantity": 1
+            }
+          ]
+        },
         "backgroundImage": "images/stages/school_rooftop.png",
         "backgroundMusic": "sounds/music/tutorial_theme.mp3"
       },
@@ -39,6 +47,22 @@
         "isTutorial": true,
         "tutorialHighlights": ["hp-bar", "mana-bar"],
         "tutorialMessage": "Your HP and mana from the previous stage are preserved! Manage your resources wisely across multiple battles.",
+        "loot": {
+          "items": [
+            {
+              "itemId": "mana_sack",
+              "dropChance": 1.0,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "infernal_cinder",
+              "dropChance": 0.75,
+              "quantityMin": 1,
+              "quantityMax": 4
+            }
+          ]
+        },
         "backgroundImage": "images/stages/hell_stage1.png",
         "backgroundMusic": "sounds/music/tutorial_theme.mp3"
       },
@@ -99,6 +123,23 @@
             }
           }
         ],
+                "loot": {
+          "guaranteedItems": 1,
+          "items": [
+            {
+              "itemId": "farmer_rifle",
+              "dropChance": 0.5,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "thunder_gloves", 
+              "dropChance": 0.5,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
         "isTutorial": true,
         "tutorialHighlights": ["stage-modifiers-indicator", "character-hp"],
         "tutorialMessage": "Stage modifiers can affect the entire battle! The Healing Farm Wind will restore 1% of each character's maximum HP at the start of every turn. Check the stage modifier indicator at the top of the screen.",
@@ -124,6 +165,42 @@
           }
         ],
         "tutorialReward": true
+      }
+    ]
+  },
+  {
+    "id": "a_date_in_the_forest",
+    "title": "A Date in the Forest",
+    "description": "A romantic adventure in the mystical forest where love and magic intertwine.",
+    "playerunlocked": true,
+    "isEvent": true,
+    "eventType": "temporary",
+    "availableForEveryone": true,
+    "requirements": {
+      "tags": [],
+      "teamSize": { "min": 2, "max": 2 },
+      "allowedCharacters": ["schoolboy_shoma", "schoolgirl_julia"]
+    },
+    "stages": [
+      {
+        "name": "Corrupted Bear Encounter",
+        "description": "As you venture deeper into the mystical forest, you encounter a scene of dark corruption. Two ancient trees whisper with malevolent intent while a massive bear, its fur matted with shadow and eyes glowing with dark energy, stands between them. The forest's peaceful magic has been twisted by some unknown force.",
+        "difficulty": 3,
+        "type": "battle",
+        "enemies": [
+          { "characterId": "talking_necromatic_tree" },
+          { "characterId": "necromatic_corrupted_bear" },
+          { "characterId": "talking_necromatic_tree" }
+        ],
+        "modifiers": [
+          {
+            "id": "power_of_love",
+            "name": "Power of Love",
+            "description": "If player has only 2 characters, their stats are combined"
+          }
+        ],
+        "backgroundImage": "images/stages/mystical_forest.png",
+        "backgroundMusic": "sounds/music/forest_ambient.mp3"
       }
     ]
   },
