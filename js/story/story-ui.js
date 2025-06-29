@@ -1999,25 +1999,48 @@ class StoryUI {
         lootImage.className = 'loot-item-image';
         
         // Try to get item image from item system
+        let imagePath = '';
         if (window.ItemRegistry) {
             try {
                 const itemData = window.ItemRegistry.getItem(item.itemId);
                 if (itemData && itemData.icon) {
-                    lootImage.src = itemData.icon;
+                    imagePath = itemData.icon;
                 } else {
-                    lootImage.src = `items/${item.itemId}.webp`;
+                    imagePath = `items/${item.itemId}.webp`;
                 }
             } catch (error) {
-                lootImage.src = `items/${item.itemId}.webp`;
+                imagePath = `items/${item.itemId}.webp`;
             }
         } else {
-            lootImage.src = `items/${item.itemId}.webp`;
+            imagePath = `items/${item.itemId}.webp`;
         }
         
         lootImage.alt = item.itemId;
-        lootImage.onerror = () => {
-            lootImage.src = 'Icons/default-icon.jpg';
+        
+        // Load image with .webp and .png fallback
+        const img = new Image();
+        img.onload = () => {
+            lootImage.src = imagePath;
         };
+        img.onerror = () => {
+            console.warn(`[StoryUI] Failed to load item image: ${imagePath}. Attempting .png fallback.`);
+            const pngPath = imagePath.replace(/\.webp$/, '.png');
+            if (pngPath !== imagePath) {
+                const pngImg = new Image();
+                pngImg.onload = () => {
+                    lootImage.src = pngPath;
+                };
+                pngImg.onerror = () => {
+                    console.error(`[StoryUI] Failed to load item image: ${pngPath}. Using default icon.`);
+                    lootImage.src = 'Icons/default-icon.jpg';
+                };
+                pngImg.src = pngPath;
+            } else {
+                console.error(`[StoryUI] Item image is not a .webp, no .png fallback possible. Using default icon.`);
+                lootImage.src = 'Icons/default-icon.jpg';
+            }
+        };
+        img.src = imagePath;
         
         const lootName = document.createElement('div');
         lootName.className = 'loot-item-name';
@@ -4946,4 +4969,4 @@ class StoryUI {
         // Show popup with character selection for inventory management
         this.showPopupMessage(`📦 Click on any character's inventory button (🎒) to manage their equipment.`, 'info', 4000);
     }
-} 
+}

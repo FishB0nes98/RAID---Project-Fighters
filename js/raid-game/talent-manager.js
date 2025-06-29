@@ -423,12 +423,15 @@ class TalentManager {
             
             // After all individual updates, dispatch a general update event
             console.log(`[TalentManager] Dispatching special bridget_talents_applied event`);
-            document.dispatchEvent(new CustomEvent('bridget_talents_applied', {
-                detail: {
-                    character: character,
-                    talentIds: selectedTalentIds
-                }
-            }));
+            setTimeout(() => {
+                const event = new CustomEvent('bridget_talents_applied', {
+                    detail: {
+                        character: character,
+                        talentIds: selectedTalentIds
+                    }
+                });
+                document.dispatchEvent(event);
+            }, 100);
         }
         
         // For Zoey: Force-update ability descriptions to ensure they reflect talent changes
@@ -450,12 +453,15 @@ class TalentManager {
             
             // After all individual updates, dispatch a general update event
             console.log(`[TalentManager] Dispatching special zoey_talents_applied event`);
-            document.dispatchEvent(new CustomEvent('zoey_talents_applied', {
-                detail: {
-                    character: character,
-                    talentIds: selectedTalentIds
-                }
-            }));
+            setTimeout(() => {
+                const event = new CustomEvent('zoey_talents_applied', {
+                    detail: {
+                        character: character,
+                        talentIds: selectedTalentIds
+                    }
+                });
+                document.dispatchEvent(event);
+            }, 100);
         }
         
         // For Siegfried: Force-update ability descriptions to ensure they reflect talent changes
@@ -1190,15 +1196,35 @@ class TalentManager {
             }
             
             // --- IMPORTANT: Regenerate description AFTER modification --- 
+            let descriptionChanged = false;
             if (typeof abilityToModify.generateDescription === 'function') {
+                const oldDescription = abilityToModify.description;
                 try {
                     abilityToModify.generateDescription(); // Generate description right after direct modification
-                    console.log(`  - Regenerated description for ${effect.abilityId} after direct talent application.`);
+                    if (oldDescription !== abilityToModify.description) {
+                        console.log(`  - Regenerated description for ${effect.abilityId} after direct talent application.`);
+                        descriptionChanged = true;
+                    }
                 } catch (error) {
                     console.error(`[TalentManager] Error regenerating description for ability ${effect.abilityId}:`, error);
                 }
             }
             // --- END DESCRIPTION REGENERATION ---
+
+            // Dispatch an event to notify that the ability was modified
+            if (descriptionChanged || property === 'cooldown' || property === 'manaCost') { // Include manaCost as it's a common display property
+                const abilityModifiedEvent = new CustomEvent('abilityModified', {
+                    detail: {
+                        abilityId: abilityToModify.id,
+                        property: property,
+                        newValue: abilityToModify[property],
+                        character: character,
+                        ability: abilityToModify
+                    },
+                    bubbles: true
+                });
+                document.dispatchEvent(abilityModifiedEvent);
+            }
             
             // Apply side effects specific to certain ability modifications
             if (effect.abilityId === 'farmer_boomerang' && effect.property === 'extraHitsChance') {
@@ -1513,4 +1539,4 @@ window.talentManager = talentManager;
 //         // Apply specific talent IDs (used when testing)
 //         return await talentManager.applyTalentsToCharacter(character, selectedTalentIds);
 //     }
-// }; 
+// };

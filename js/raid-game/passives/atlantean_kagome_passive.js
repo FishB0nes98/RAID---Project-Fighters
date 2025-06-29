@@ -4,10 +4,16 @@
  */
 
 class AtlanteanKagomePassive {
-    constructor() {
+    constructor(character) {
+        this.character = character;
         this.id = 'atlantean_kagome_passive';
         this.name = 'Atlantean Blessing';
         this.description = 'Heals HP equal to 15% of missing mana at the start of each turn.';
+    }
+
+    initialize() {
+        console.log(`[AtlanteanKagomePassive] Initialized for ${this.character.name}`);
+        // Add passive logic here (e.g., stat modifications, event listeners)
     }
 
     /**
@@ -309,4 +315,9 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = AtlanteanKagomePassive;
 }
 
-console.log('[Atlantean Kagome Passive] Loaded Atlantean Blessing passive with 15% mana-to-health conversion and statistics tracking'); 
+console.log('[Atlantean Kagome Passive] Loaded Atlantean Blessing passive with 15% mana-to-health conversion and statistics tracking');
+
+// Register for global access
+if (typeof window !== 'undefined') {
+    window.AtlanteanKagomePassive = AtlanteanKagomePassive;
+} 

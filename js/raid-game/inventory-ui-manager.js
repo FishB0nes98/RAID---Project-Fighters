@@ -123,6 +123,14 @@ class InventoryUIManager {
                 this.closeModal();
             }
         };
+
+        // Add drop listeners to global inventory grid for endless functionality
+        const globalGrid = this.modal.querySelector('#global-inventory-grid');
+        if (globalGrid) {
+            globalGrid.addEventListener('dragover', this.handleDragOver.bind(this));
+            globalGrid.addEventListener('dragleave', this.handleDragLeave.bind(this));
+            globalGrid.addEventListener('drop', this.handleDrop.bind(this));
+        }
         
         // Store reference for cleanup
         this.escapeHandler = escapeHandler;
@@ -462,17 +470,38 @@ class InventoryUIManager {
      * Save character inventory to storage
      */
     async saveCharacterInventory() {
-        if (!this.currentCharacterId || !this.currentCharacterInventory) return;
+        if (!this.currentCharacterId || !this.currentCharacterInventory) {
+            console.warn('⚠️ Cannot save character inventory - missing character ID or inventory');
+            return;
+        }
 
         try {
             if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
                 const user = firebase.auth().currentUser;
                 const inventoryRef = firebase.database().ref(`users/${user.uid}/characterInventories/${this.currentCharacterId}`);
-                await inventoryRef.set(this.currentCharacterInventory.serialize());
-                console.log('Character inventory saved successfully');
+                const serializedData = this.currentCharacterInventory.serialize();
+                
+                // Validate data before sending to Firebase
+                const hasUndefinedValues = JSON.stringify(serializedData).includes('undefined');
+                if (hasUndefinedValues) {
+                    console.error('❌ [SaveCharacter] Data contains undefined values!', serializedData);
+                    throw new Error('Cannot save data with undefined values to Firebase');
+                }
+                
+                console.log(`💾 [SaveCharacter] Saving inventory for ${this.currentCharacterId}:`, serializedData);
+                await inventoryRef.set(serializedData);
+                console.log('✅ Character inventory saved successfully to Firebase');
+                
+                // Verify what was actually saved
+                const savedData = await inventoryRef.once('value');
+                console.log('🔍 [SaveCharacter] Verification - Data in Firebase after save:', savedData.val());
+                
+            } else {
+                console.warn('⚠️ No Firebase auth available - character inventory not saved');
             }
         } catch (error) {
-            console.error('Failed to save character inventory:', error);
+            console.error('❌ Failed to save character inventory:', error);
+            console.error('❌ Character inventory state:', this.currentCharacterInventory?.items);
         }
     }
 
@@ -575,17 +604,32 @@ class InventoryUIManager {
                 const user = firebase.auth().currentUser;
                 const globalRef = firebase.database().ref(`users/${user.uid}/globalInventory`);
                 
+                // Get the actual internal items and serialized data for comparison
+                const internalItems = window.GlobalInventory.items;
+                const serializedItems = window.GlobalInventory.serialize();
+                
                 // Use consistent format with loot manager
                 const serializedData = {
-                    items: window.GlobalInventory.serialize(),
+                    items: serializedItems,
                     lastUpdated: Date.now()
                 };
                 
+                console.log('💾 [SaveInventory] Internal GlobalInventory.items:', internalItems);
+                console.log('💾 [SaveInventory] Serialized items:', serializedItems);
+                console.log('💾 [SaveInventory] Final data being saved to Firebase:', serializedData);
+                
                 await globalRef.set(serializedData);
-                console.log('Global inventory saved successfully with new format');
+                console.log('✅ Global inventory saved successfully to Firebase');
+                
+                // Verify what was actually saved
+                const savedData = await globalRef.once('value');
+                console.log('🔍 [SaveInventory] Verification - Data in Firebase after save:', savedData.val());
+                
+            } else {
+                console.warn('⚠️ No Firebase auth available - global inventory not saved');
             }
         } catch (error) {
-            console.error('Failed to save global inventory:', error);
+            console.error('❌ Failed to save global inventory:', error);
         }
     }
 
@@ -675,27 +719,31 @@ class InventoryUIManager {
             return;
         }
         
-        // Render actual items
-        items.forEach((itemId, index) => {
-            const item = window.ItemRegistry.getItem(itemId);
+        // Use the new getItemStacks method for proper stack display
+        const itemStacks = window.GlobalInventory.getItemStacks();
+        console.log(`🎨 [RenderGlobal] Rendering ${itemStacks.length} item stacks:`, itemStacks);
+        
+        itemStacks.forEach((stack, index) => {
+            const item = window.ItemRegistry.getItem(stack.itemId);
             if (item) {
-                console.log(`[InventoryUI] Creating slot for item ${index}:`, item);
+                console.log(`🎨 [RenderGlobal] Creating slot ${index} for ${stack.itemId} (qty: ${stack.quantity}):`, item);
                 const slot = this.createInventorySlot(index, 'global');
                 this.populateSlot(slot, item, index, 'global');
                 grid.appendChild(slot);
             } else {
-                console.warn(`[InventoryUI] Item not found in registry: ${itemId}`);
+                console.warn(`❌ [RenderGlobal] Item not found in registry: ${stack.itemId}`);
             }
         });
 
         // Add empty slots to make grid look better (max 8 additional)
-        const emptySlots = Math.max(0, Math.min(8, 12 - items.length));
+        const uniqueItemCount = itemStacks.length;
+        const emptySlots = Math.max(0, Math.min(8, 12 - uniqueItemCount));
         for (let i = 0; i < emptySlots; i++) {
             const slot = this.createInventorySlot(items.length + i, 'global', true);
             grid.appendChild(slot);
         }
         
-        console.log(`[InventoryUI] Global inventory rendered with ${grid.children.length} total slots (${items.length} items + ${emptySlots} empty)`);
+        console.log(`[InventoryUI] Global inventory rendered with ${grid.children.length} total slots (${uniqueItemCount} unique items + ${emptySlots} empty)`);
     }
 
     /**
@@ -743,9 +791,25 @@ class InventoryUIManager {
         itemElement.dataset.index = index;
         itemElement.dataset.type = type;
         
+        // Get quantity based on inventory type
+        let quantity = 1;
+        if (type === 'character') {
+            const itemSlot = this.currentCharacterInventory.getItem(index);
+            quantity = itemSlot ? itemSlot.quantity || 1 : 1;
+        } else if (type === 'global') {
+            // For global inventory, get the actual stack quantity
+            const itemStacks = window.GlobalInventory.getItemStacks();
+            const stack = itemStacks[index];
+            quantity = stack ? stack.quantity : 1;
+        }
+        
+        // Show quantity badge for stackable items with quantity > 1
+        const quantityBadge = ((item.isConsumable || item.type === 'crafting') && quantity > 1) ? 
+            `<div class="item-quantity-badge">${quantity}</div>` : '';
+        
         itemElement.innerHTML = `
             <img src="${item.image}" alt="${item.name}" class="item-image" onerror="this.src='items/placeholder.png'">
-            <div class="item-name">${item.name}</div>
+            ${quantityBadge}
         `;
 
         // Add event listeners
@@ -754,7 +818,7 @@ class InventoryUIManager {
         itemElement.addEventListener('mouseenter', (e) => this.showTooltip(e, item));
         itemElement.addEventListener('mouseleave', () => this.hideTooltip());
         
-        console.log(`Added drag listeners to item ${item.name} at ${type}[${index}]`);
+        console.log(`Added drag listeners to item ${item.name} at ${type}[${index}] with quantity ${quantity}`);
 
         slot.appendChild(itemElement);
     }
@@ -850,6 +914,20 @@ class InventoryUIManager {
         e.preventDefault();
         const targetSlot = e.currentTarget;
         targetSlot.classList.remove('drag-over');
+
+        // Handle drop on the entire global inventory grid
+        if (targetSlot.id === 'global-inventory-grid') {
+            if (this.dragItem.type === 'character') {
+                const removedItem = this.currentCharacterInventory.removeItem(this.dragItem.index);
+                if (removedItem) {
+                    window.GlobalInventory.addItem(removedItem.itemId, removedItem.quantity);
+                    this.renderBothInventories();
+                    this.saveCharacterInventory();
+                    this.saveGlobalInventory();
+                }
+            }
+            return;
+        }
         
         const targetIndex = parseInt(targetSlot.dataset.index);
         const targetType = targetSlot.dataset.type;
@@ -859,10 +937,43 @@ class InventoryUIManager {
             target: { index: targetIndex, type: targetType }
         });
         
-        // Don't allow dropping on the same slot
+        // Don't allow dropping on the exact same slot unless we're stacking
         if (this.dragItem.type === targetType && this.dragItem.index === targetIndex) {
             console.log('Drop ignored - same slot');
             return;
+        }
+
+        // Check if this could be a stacking operation for different slots
+        if (this.dragItem.type === targetType) {
+            if (targetType === 'character') {
+                const sourceSlot = this.currentCharacterInventory.getItem(this.dragItem.index);
+                const targetSlot = this.currentCharacterInventory.getItem(targetIndex);
+                
+                // Same item type - check if it's stackable
+                const item = window.ItemRegistry?.getItem(sourceSlot.itemId);
+                if (item && (item.isConsumable || item.type === 'crafting')) {
+                    console.log('Stacking items:', sourceSlot.itemId, 'quantities:', sourceSlot.quantity, '+', targetSlot.quantity);
+                    // Stackable item - combine stacks
+                    targetSlot.quantity += sourceSlot.quantity;
+                    this.currentCharacterInventory.removeItem(this.dragItem.index); // Remove source stack
+                    this.renderCharacterInventory();
+                    this.saveCharacterInventory();
+                    console.log('Items stacked successfully');
+                    return;
+                }
+            } else if (targetType === 'global') {
+                // Check for global inventory stacking
+                const globalItems = window.GlobalInventory.getAllItems();
+                const sourceItemId = globalItems[this.dragItem.index];
+                const targetItemId = globalItems[targetIndex];
+                
+                if (sourceItemId && targetItemId && sourceItemId === targetItemId) {
+                    const item = window.ItemRegistry?.getItem(sourceItemId);
+                    if (item && (item.isConsumable || item.type === 'crafting')) {
+                        console.log('Allowing global inventory stacking operation');
+                    }
+                }
+            }
         }
         
         this.moveItem(this.dragItem, { index: targetIndex, type: targetType });
@@ -876,7 +987,7 @@ class InventoryUIManager {
     moveItem(source, target) {
         const sourceItem = source.itemId;
         
-        console.log(`Moving item ${sourceItem} from ${source.type}[${source.index}] to ${target.type}[${target.index}]`);
+        console.log(`🔄 Moving item ${sourceItem} from ${source.type}[${source.index}] to ${target.type}[${target.index}]`);
         
         if (source.type === 'global' && target.type === 'character') {
             // Moving from global to character inventory
@@ -887,31 +998,69 @@ class InventoryUIManager {
             });
             
             if (target.index < 6) { // Always allow if targeting a valid slot
-                console.log('Moving from global to character');
+                console.log('📦 Moving from global to character');
                 
-                // Remove from global
-                window.GlobalInventory.removeItem(source.index);
+                // Get the source stack info from global inventory
+                const itemStacks = window.GlobalInventory.getItemStacks();
+                const sourceStack = itemStacks[source.index];
+                
+                console.log('📊 Before move - Global stacks:', itemStacks);
+                console.log('📊 Source stack:', sourceStack);
+                
+                if (!sourceStack) {
+                    console.warn('❌ Source stack not found at index:', source.index);
+                    return;
+                }
+                
+                console.log(`🗑️ Removing 1 from global stack (${sourceStack.quantity} → ${sourceStack.quantity - 1})`);
+                
+                // Remove from global (quantity 1)
+                const removedItem = window.GlobalInventory.removeItem(source.index, 1);
+                console.log('🗑️ RemoveItem result:', removedItem);
+                
+                // Check stack after removal
+                const stacksAfterRemoval = window.GlobalInventory.getItemStacks();
+                console.log('📊 After removal - Global stacks:', stacksAfterRemoval);
                 
                 // Add to character (replace if slot is occupied)
                 const replacedItem = this.currentCharacterInventory.removeItem(target.index);
                 if (replacedItem) {
-                    console.log('Replacing existing item:', replacedItem);
-                    window.GlobalInventory.addItem(replacedItem.itemId);
+                    console.log('🔄 Replacing existing item:', replacedItem);
+                    window.GlobalInventory.addItem(replacedItem.itemId, replacedItem.quantity);
                 }
-                this.currentCharacterInventory.addItem(sourceItem, 1, target.index);
+                
+                console.log(`➕ Adding ${sourceStack.itemId} to character slot ${target.index}`);
+                const addResult = this.currentCharacterInventory.addItem(sourceStack.itemId, 1, target.index);
+                
+                if (!addResult) {
+                    console.error('❌ Failed to add item to character inventory! Rolling back...');
+                    // Roll back the global inventory removal
+                    window.GlobalInventory.addItem(sourceStack.itemId, 1);
+                    // Roll back the replaced item removal
+                    if (replacedItem) {
+                        this.currentCharacterInventory.addItem(replacedItem.itemId, replacedItem.quantity, target.index);
+                    }
+                    return;
+                }
+                
+                // Log final states before saving
+                const finalGlobalStacks = window.GlobalInventory.getItemStacks();
+                console.log('📊 Final global stacks before save:', finalGlobalStacks);
                 
                 this.renderBothInventories();
                 this.saveGlobalInventory();
                 this.saveCharacterInventory();
-                console.log('Move completed successfully');
+                console.log('✅ Move completed successfully');
             } else {
-                console.warn('Invalid target slot index:', target.index);
+                console.warn('❌ Invalid target slot index:', target.index);
             }
         } else if (source.type === 'character' && target.type === 'global') {
             console.log('Moving from character to global');
             // Moving from character to global inventory
-            this.currentCharacterInventory.removeItem(source.index);
-            window.GlobalInventory.addItem(sourceItem);
+            const removedItem = this.currentCharacterInventory.removeItem(source.index);
+            if (removedItem) {
+                window.GlobalInventory.addItem(removedItem.itemId, removedItem.quantity);
+            }
             
             this.renderBothInventories();
             this.saveGlobalInventory();
@@ -919,11 +1068,72 @@ class InventoryUIManager {
             console.log('Move completed successfully');
         } else if (source.type === 'character' && target.type === 'character') {
             console.log('Moving within character inventory');
-            // Moving within character inventory
+            
+            // Get the actual slot data to check for stacking
+            const sourceSlot = this.currentCharacterInventory.getItem(source.index);
+            const targetSlot = this.currentCharacterInventory.getItem(target.index);
+            
+            // Check if we can stack items
+            if (sourceSlot && targetSlot && sourceSlot.itemId === targetSlot.itemId) {
+                // Same item type - check if it's stackable
+                const item = window.ItemRegistry?.getItem(sourceSlot.itemId);
+                if (item && (item.isConsumable || item.type === 'crafting')) {
+                    console.log('Stacking items:', sourceSlot.itemId, 'quantities:', sourceSlot.quantity, '+', targetSlot.quantity);
+                    // Stackable item - combine stacks
+                    targetSlot.quantity += sourceSlot.quantity;
+                    this.currentCharacterInventory.removeItem(source.index); // Remove source stack
+                    this.renderCharacterInventory();
+                    this.saveCharacterInventory();
+                    console.log('Items stacked successfully');
+                    return;
+                }
+            }
+            
+            // Not stackable or different items - swap positions
             this.currentCharacterInventory.moveItem(source.index, target.index);
             this.renderCharacterInventory();
             this.saveCharacterInventory();
             console.log('Move completed successfully');
+        } else if (source.type === 'global' && target.type === 'global') {
+            console.log('Moving within global inventory');
+            
+            // Get the actual item stacks from global inventory
+            const itemStacks = window.GlobalInventory.getItemStacks();
+            const sourceStack = itemStacks[source.index];
+            const targetStack = itemStacks[target.index];
+            
+            // Check if we can stack items
+            if (sourceStack && targetStack && sourceStack.itemId === targetStack.itemId) {
+                const item = window.ItemRegistry?.getItem(sourceStack.itemId);
+                if (item && (item.isConsumable || item.type === 'crafting')) {
+                    console.log('Stacking global inventory items:', sourceStack.itemId);
+                    
+                    // Use the new stacking method
+                    if (window.GlobalInventory.stackItems(source.index, target.index)) {
+                        this.renderGlobalInventory();
+                        this.saveGlobalInventory();
+                        console.log('Global inventory items stacked successfully');
+                        return;
+                    }
+                }
+            }
+            
+            // Swap positions in global inventory if not stacking
+            // Since we're working with stacks now, we need to swap the actual stack objects
+            const sourceStackCopy = { ...sourceStack };
+            const targetStackCopy = { ...targetStack };
+            
+            // Get the internal items array and swap the stack objects directly
+            const internalItems = window.GlobalInventory.items;
+            if (internalItems[source.index] && internalItems[target.index]) {
+                const temp = internalItems[target.index];
+                internalItems[target.index] = internalItems[source.index];
+                internalItems[source.index] = temp;
+            }
+            
+            this.renderGlobalInventory();
+            this.saveGlobalInventory();
+            console.log('Global inventory move completed successfully');
         }
     }
 
@@ -1056,10 +1266,12 @@ class InventoryUIManager {
             return;
         }
 
-        globalItems.forEach((itemId, index) => {
-            const item = window.ItemRegistry.getItem(itemId);
+        // Use the new getItemStacks method for proper stack display
+        const itemStacks = window.GlobalInventory.getItemStacks();
+        itemStacks.forEach((stack, index) => {
+            const item = window.ItemRegistry.getItem(stack.itemId);
             if (item) {
-                const itemCard = this.createModernItemCard(item, index);
+                const itemCard = this.createModernItemCard(item, index, stack.quantity);
                 grid.appendChild(itemCard);
             }
         });
@@ -1068,12 +1280,16 @@ class InventoryUIManager {
     /**
      * Create modern item card
      */
-    createModernItemCard(item, index) {
+    createModernItemCard(item, index, quantity = 1) {
         const card = document.createElement('div');
         card.className = `modern-item-card rarity-${item.rarity}`;
         card.dataset.itemId = item.id;
         card.dataset.rarity = item.rarity;
         card.dataset.name = item.name.toLowerCase();
+        
+        // Show quantity badge for stackable items with quantity > 1
+        const quantityBadge = ((item.isConsumable || item.type === 'crafting') && quantity > 1) ? 
+            `<div class="item-quantity-badge">${quantity}</div>` : '';
         
         card.innerHTML = `
             <div class="item-card-glow"></div>
@@ -1081,6 +1297,7 @@ class InventoryUIManager {
                 <div class="item-image-container">
                     <img src="${item.image}" alt="${item.name}" class="modern-item-image">
                     <div class="rarity-gem rarity-${item.rarity}"></div>
+                    ${quantityBadge}
                 </div>
                 <div class="item-info">
                     <h4 class="item-name">${item.name}</h4>
@@ -1505,6 +1722,7 @@ class InventoryUIManager {
         }
         
         let html = '';
+        
         
         for (const [character, consumables] of consumablesByCharacter) {
             // Get character image from registry

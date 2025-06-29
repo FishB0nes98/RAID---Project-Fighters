@@ -1055,6 +1055,27 @@ class FarmerRaidenPassive {
             console.log(`[FarmerRaidenPassive] Delayed call to updatePassiveDescription for ${character.name}`);
             this.updatePassiveDescription(character);
         }, 500); // Delay of 500ms
+
+        // Retry logic with max attempts
+        const maxAttempts = 5;
+        let attempts = 0;
+
+        const tryInitialize = () => {
+            const characterElement = document.getElementById(`character-${this.character.id}`);
+            
+            if (characterElement) {
+                // Success: Element exists, proceed with passive setup
+                this.createPassiveIndicator(characterElement);
+            } else if (attempts < maxAttempts) {
+                // Retry after a short delay
+                attempts++;
+                setTimeout(tryInitialize, 300 * attempts); // Exponential backoff
+            } else {
+                console.warn(`[FarmerRaidenPassive] Could not find character element after ${maxAttempts} attempts. Skipping indicator.`);
+            }
+        };
+
+        tryInitialize();
     }
 
     // Update the passive description based on talents

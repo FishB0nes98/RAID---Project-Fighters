@@ -7,6 +7,8 @@ class LootUIManager {
     constructor() {
         this.isInitialized = false;
         this.currentLootDisplay = null;
+        this.modalElement = null; // Store reference to the modal
+        this.gridElement = null;  // Store reference to the grid inside the modal
         this.init();
     }
 
@@ -14,16 +16,23 @@ class LootUIManager {
      * Initialize the loot UI system
      */
     init() {
-        this.createLootRewardsModal();
+        this.createAndAttachModal(); // Call the new method
         this.isInitialized = true;
         console.log('[LootUIManager] Loot UI system initialized');
     }
 
     /**
-     * Create the loot rewards modal structure
+     * Creates the loot rewards modal structure, appends it to body, and stores references.
      */
-    createLootRewardsModal() {
-        // Create modal container
+    createAndAttachModal() {
+        // Remove any existing modal to prevent duplicates if called multiple times
+        const existingModal = document.getElementById('loot-rewards-modal');
+        if (existingModal) {
+            existingModal.remove();
+            console.log('[LootUIManager] createAndAttachModal: Removed existing modal.');
+        }
+
+        console.log('[LootUIManager] createAndAttachModal: Creating new modal structure...');
         const modal = document.createElement('div');
         modal.id = 'loot-rewards-modal';
         modal.className = 'loot-rewards-modal hidden';
@@ -47,11 +56,20 @@ class LootUIManager {
             <div class="loot-rewards-backdrop"></div>
         `;
 
-        // Add to body
         document.body.appendChild(modal);
+        console.log('[LootUIManager] createAndAttachModal: Modal appended to body.');
 
-        // Setup event listeners
+        // Store references directly
+        this.modalElement = modal;
+        this.gridElement = modal.querySelector('#loot-items-grid');
+
+        // Setup event listeners for this specific modal instance
         this.setupEventListeners(modal);
+        console.log('[LootUIManager] createAndAttachModal: Event listeners setup.');
+
+        if (!this.gridElement) {
+            console.error('[LootUIManager] CRITICAL: loot-items-grid not found within the created modal!');
+        }
     }
 
     /**
@@ -59,24 +77,25 @@ class LootUIManager {
      */
     setupEventListeners(modal) {
         const claimButton = modal.querySelector('#loot-claim-button');
-        const backdrop = modal.querySelector('.loot-rewards-backdrop');
+        // No need for backdrop event listener, as it's not used in this version.
+        // const backdrop = modal.querySelector('.loot-rewards-backdrop');
 
         // Claim button
         claimButton.addEventListener('click', () => {
             this.hideLootRewards();
         });
 
-        // Backdrop click
-        backdrop.addEventListener('click', () => {
-            this.hideLootRewards();
-        });
-
         // Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('visible')) {
-                this.hideLootRewards();
-            }
-        });
+        // Ensure this event listener is added only once globally or managed properly
+        // For simplicity, directly add to document and remove when modal is cleaned up
+        // or ensure it's not duplicated.
+        // Let's assume it's already handled by the global keydown listener on document.
+        // If not, it needs a proper management.
+        // For now, removing the direct `document.addEventListener` here to prevent duplicates
+        // if `createAndAttachModal` is called multiple times.
+        
+        // The modal will be hidden by the game manager after XP rewards are shown
+        // or by the claim button
     }
 
     /**
@@ -97,12 +116,21 @@ class LootUIManager {
 
         console.log('[LootUIManager] Showing loot rewards:', lootItems);
 
-        // Get modal elements
-        const modal = document.getElementById('loot-rewards-modal');
-        const grid = document.getElementById('loot-items-grid');
+        // Check if modal element is still in the DOM, if not, recreate and re-attach
+        if (!document.body.contains(this.modalElement)) {
+            console.warn('[LootUIManager] showLootRewards: Modal element not found in DOM, re-creating and re-attaching...');
+            this.createAndAttachModal(); // This will also re-assign modalElement and gridElement
+            // No need for setTimeout/await here after re-attaching, as references are direct.
+        }
+        
+        // Defensive check, should ideally not be hit if createAndAttachModal works correctly.
+        if (!this.gridElement) { 
+            console.error('[LootUIManager] showLootRewards: Grid element is still null, cannot display loot.');
+            return;
+        }
 
         // Clear previous loot
-        grid.innerHTML = '';
+        this.gridElement.innerHTML = '';
 
         // Store callback
         this.onClaimedCallback = onClaimed;
@@ -111,17 +139,17 @@ class LootUIManager {
         const lootDescriptions = window.LootManager.getFormattedLootDescription(lootItems);
         lootDescriptions.forEach((loot, index) => {
             const itemCard = this.createLootItemCard(loot, index);
-            grid.appendChild(itemCard);
+            this.gridElement.appendChild(itemCard);
         });
 
         // Show modal with animation
-        modal.classList.remove('hidden');
+        this.modalElement.classList.remove('hidden');
         requestAnimationFrame(() => {
-            modal.classList.add('visible');
+            this.modalElement.classList.add('visible');
         });
 
         // Play entrance animations for items
-        this.playLootItemAnimations(grid);
+        this.playLootItemAnimations(this.gridElement);
 
         // Store current display
         this.currentLootDisplay = { lootItems, onClaimed };
@@ -142,11 +170,11 @@ class LootUIManager {
             <div class="loot-item-glow"></div>
             <div class="loot-item-image-container">
                 <img src="${loot.image}" alt="${loot.name}" class="loot-item-image" />
-                ${loot.quantity > 1 ? `<div class="loot-item-quantity">x${loot.quantity}</div>` : ''}
             </div>
             <div class="loot-item-info">
                 <div class="loot-item-name">${loot.name}</div>
                 <div class="loot-item-rarity">${this.capitalizeFirst(loot.rarity)}</div>
+                ${loot.quantity > 1 ? `<div class="loot-item-quantity-display">x${loot.quantity}</div>` : ''}
             </div>
             <div class="loot-item-description">${loot.description}</div>
             ${this.createRarityEffects(loot.rarity)}
@@ -228,18 +256,17 @@ class LootUIManager {
      * Hide loot rewards with animation
      */
     hideLootRewards() {
-        const modal = document.getElementById('loot-rewards-modal');
-        if (!modal || !modal.classList.contains('visible')) return;
+        if (!this.modalElement || !this.modalElement.classList.contains('visible')) return;
 
         console.log('[LootUIManager] Hiding loot rewards modal...');
 
         // Play exit animation
-        modal.classList.remove('visible');
-        modal.classList.add('hiding');
+        this.modalElement.classList.remove('visible');
+        this.modalElement.classList.add('hiding');
 
         setTimeout(() => {
-            modal.classList.add('hidden');
-            modal.classList.remove('hiding');
+            this.modalElement.classList.add('hidden');
+            this.modalElement.classList.remove('hiding');
             
             // Clear current display
             this.currentLootDisplay = null;
@@ -254,7 +281,7 @@ class LootUIManager {
             }
             
             console.log('[LootUIManager] Loot rewards modal hidden');
-        }, 300);
+        }, 3000);
     }
 
     /**
@@ -353,12 +380,13 @@ class LootUIManager {
      * Clean up resources
      */
     cleanup() {
-        const modal = document.getElementById('loot-rewards-modal');
-        if (modal) {
-            modal.remove();
+        if (this.modalElement) {
+            this.modalElement.remove();
         }
         this.isInitialized = false;
         this.currentLootDisplay = null;
+        this.modalElement = null;
+        this.gridElement = null;
     }
 }
 
@@ -377,4 +405,4 @@ if (typeof window !== 'undefined') {
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { LootUIManager };
-} 
+}

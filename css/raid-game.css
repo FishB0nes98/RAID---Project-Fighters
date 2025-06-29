@@ -5988,6 +5988,12 @@ img {
     color: #e0c4ff; /* Light purple for passive */
 }
 
+.floating-text.bonus-damage {
+    color: #FFD700; /* Gold for bonus damage */
+    font-size: 22px;
+    text-shadow: 0 0 8px #FFD700, 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
 /* NEW: Style for talent bonus text in descriptions */
 .talent-bonus {
     color: #4caf50; /* Green color for positive talent effects */
@@ -8722,4 +8728,3 @@ img {
 .raid-game-context #show-statistics-button {
     display: none !important;
 }
-  

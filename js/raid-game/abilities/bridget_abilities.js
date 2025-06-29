@@ -2724,13 +2724,19 @@ if (window.AbilityFactory) {
         5,   // cooldown
         bridgetBubbleBeamBarrageEffect
     );
-    
-    // Set the target type to 'all_enemies'
+
+    // Explicitly set damageScaling with a default value
+    Object.defineProperty(bubbleBeamBarrageAbility, 'damageScaling', {
+        value: 1.25,
+        writable: true,
+        enumerable: true,
+        configurable: true
+    });
+
     bubbleBeamBarrageAbility.setTargetType('all_enemies');
     bubbleBeamBarrageAbility.baseDescription = 'Shoots between 3-7 bubble beams onto random enemies each dealing {damageScaling}% Magical Damage.';
     bubbleBeamBarrageAbility.setDescription(bubbleBeamBarrageAbility.baseDescription);
-    bubbleBeamBarrageAbility.damageScaling = 1.25; // 125%
-    
+
     // Add generateDescription method using the updateBubbleBeamDescription function
     bubbleBeamBarrageAbility.generateDescription = function() {
         return updateBubbleBeamDescription(this);

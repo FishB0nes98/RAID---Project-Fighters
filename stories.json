@@ -1050,7 +1050,41 @@
           ]
         },
               "backgroundImage": "images/stages/stage1_background.jpeg",
-      "backgroundMusic": "sounds/music/atlantis_depths.mp3"
+      "backgroundMusic": "sounds/music/atlantis_depths.mp3",
+      "loot": {
+        "items": [
+          {
+            "itemId": "piranha_scales",
+            "dropChance": 0.4,
+            "quantityMin": 1,
+            "quantityMax": 5
+          },
+          {
+            "itemId": "piranha_tooth",
+            "dropChance": 0.7,
+            "quantityMin": 1,
+            "quantityMax": 2
+          },
+          {
+            "itemId": "murky_water_vial",
+            "dropChance": 0.8,
+            "quantityMin": 1,
+            "quantityMax": 1
+          },
+          {
+            "itemId": "void_essence",
+            "dropChance": 0.02,
+            "quantityMin": 1,
+            "quantityMax": 1
+          },
+          {
+            "itemId": "shadow_essence",
+            "dropChance": 0.3,
+            "quantityMin": 1,
+            "quantityMax": 2
+          }
+        ]
+      }
     },
     {
       "name": "Atlantean Blessings",
@@ -1300,4 +1334,4 @@
     }
   ]
 }
-] 
+]

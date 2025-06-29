@@ -4,6 +4,7 @@
  */
 
 import { ShieldPotion, SmallShieldPotion, HealthPotion, PowerPotion, MagicalGrenade } from './potions/index.js';
+import { IceShard } from './crafting/ice_shard.js';
 import { BaseItem } from './base-item.js';
 
 // Potion types with spawn weights
@@ -12,7 +13,8 @@ const POTION_TYPES = [
     { type: 'small-shield-potion', weight: 40, class: SmallShieldPotion },
     { type: 'health-potion', weight: 40, class: HealthPotion },
     { type: 'power-potion', weight: 25, class: PowerPotion },
-    { type: 'magical-grenade', weight: 15, class: MagicalGrenade }
+    { type: 'magical-grenade', weight: 15, class: MagicalGrenade },
+    { type: 'ice_shard', weight: 20, class: IceShard }
 ];
 
 // Total spawn weight for probability calculation
@@ -41,7 +43,8 @@ class PotionSpawner {
             'small-shield-potion': new SmallShieldPotion().image,
             'health-potion': new HealthPotion().image,
             'power-potion': new PowerPotion().image,
-            'magical-grenade': new MagicalGrenade().image
+            'magical-grenade': new MagicalGrenade().image,
+            'ice_shard': new IceShard().image
         };
     }
     
@@ -287,4 +290,4 @@ class PotionSpawner {
     }
 }
 
-export { PotionSpawner }; 
+export { PotionSpawner };

@@ -73,12 +73,51 @@ class Item {
             character.itemBonuses = {};
         }
 
-        // Apply each stat bonus
+        // Apply each stat bonus with careful handling
         Object.entries(this.statBonuses).forEach(([stat, bonus]) => {
-            if (!character.itemBonuses[stat]) {
-                character.itemBonuses[stat] = 0;
+            // Special handling for HP and healing power
+            if (stat === 'hp' || stat === 'maxHp') {
+                // Preserve initial current HP while increasing max HP
+                const baseMaxHp = character.baseStats.maxHp || character.baseStats.hp || 0;
+                const initialCurrentHp = character.stats.currentHp || baseMaxHp;
+                
+                // Only apply if the bonus is significant
+                if (!character.itemBonuses[stat] || bonus > character.itemBonuses[stat]) {
+                    character.itemBonuses[stat] = bonus;
+                    
+                    // Increase max HP
+                    const newMaxHp = baseMaxHp + bonus;
+                    character.stats.maxHp = newMaxHp;
+                    
+                    // Preserve initial current HP percentage
+                    const currentHpPercentage = initialCurrentHp / baseMaxHp;
+                    character.stats.currentHp = Math.floor(newMaxHp * currentHpPercentage);
+                    
+                    console.log(`[Item] Applied max HP bonus: +${bonus}, new maxHp: ${newMaxHp}, initial currentHp: ${character.stats.currentHp}`);
+                }
+            } else if (stat === 'healingPower') {
+                // Prevent duplicate healing power bonuses
+                const currentHealingPower = character.stats.healingPower || 0;
+                const talentHealingPower = character.baseStats.healingPower || 0;
+                
+                // Only apply if the item bonus is greater than the current healing power
+                // and doesn't exceed a reasonable total
+                if (bonus > 0 && currentHealingPower < bonus + talentHealingPower) {
+                    const newHealingPower = Math.min(
+                        currentHealingPower + bonus, 
+                        talentHealingPower + bonus
+                    );
+                    
+                    character.stats.healingPower = newHealingPower;
+                    console.log(`[Item] Applied healing power bonus: +${bonus}, new healingPower: ${character.stats.healingPower}`);
+                }
+            } else {
+                // Default handling for other stats
+                if (!character.itemBonuses[stat]) {
+                    character.itemBonuses[stat] = 0;
+                }
+                character.itemBonuses[stat] += bonus;
             }
-            character.itemBonuses[stat] += bonus;
         });
 
         // Recalculate character stats
@@ -137,7 +176,12 @@ class Item {
             Object.entries(this.statBonuses).forEach(([stat, bonus]) => {
                 const statName = this.formatStatName(stat);
                 const prefix = bonus > 0 ? '+' : '';
-                description += `\n${prefix}${bonus} ${statName}`;
+                
+                // Format percentage stats correctly
+                const isPercentageStat = ['critChance', 'critMultiplier', 'dodgeChance', 'lifeSteal', 'healingPower'].includes(stat);
+                const displayValue = isPercentageStat ? `${Math.round(bonus * 100)}%` : bonus;
+                
+                description += `\n${prefix}${displayValue} ${statName}`;
             });
         }
         
@@ -160,7 +204,9 @@ class Item {
             critMultiplier: 'Critical Multiplier',
             dodgeChance: 'Dodge Chance',
             hpPerTurn: 'HP per Turn',
-            manaPerTurn: 'Mana per Turn'
+            manaPerTurn: 'Mana per Turn',
+            lifeSteal: 'Life Steal',
+            healingPower: 'Healing Power',
         };
         return statNames[stat] || stat;
     }
@@ -185,68 +231,6 @@ class ItemRegistry {
             'common',
             {
                 physicalDamage: 5
-            }
-        ));
-
-        // Golden Arrow - the first item as requested
-        this.registerItem(new Item(
-            'golden_arrow',
-            'Golden Arrow',
-            'A magnificent arrow crafted from pure gold, imbued with ancient magic that enhances both physical and magical combat abilities.',
-            'items/golden_arrow.webp',
-            'legendary',
-            {
-                physicalDamage: 50,
-                magicalDamage: 50
-            }
-        ));
-
-        // Add more items here as needed
-        this.registerItem(new Item(
-            'jade_dagger',
-            'Jade Dagger',
-            'A mystical dagger carved from precious jade.',
-            'items/jade_dagger.webp',
-            'rare',
-            {
-                physicalDamage: 30,
-                critChance: 5
-            }
-        ));
-
-        this.registerItem(new Item(
-            'amethyst_dragon_scale',
-            'Amethyst Dragon Scale',
-            'A protective scale from an ancient dragon.',
-            'items/amethyst_dragon_scale.webp',
-            'epic',
-            {
-                armor: 25,
-                magicalShield: 25
-            }
-        ));
-
-        this.registerItem(new Item(
-            'pearl_gun',
-            'Pearl Gun',
-            'A powerful weapon from the depths of the ocean.',
-            'items/pearl_gun.webp',
-            'epic',
-            {
-                physicalDamage: 40,
-                speed: 10
-            }
-        ));
-
-        this.registerItem(new Item(
-            'tridents_vow',
-            'Trident\'s Vow',
-            'A sacred trident that enhances magical abilities.',
-            'items/tridents_vow.webp',
-            'legendary',
-            {
-                magicalDamage: 60,
-                mana: 100
             }
         ));
 
@@ -334,6 +318,406 @@ class ItemRegistry {
         }, 5); // 5 turn cooldown
 
         this.registerItem(manaSack);
+
+        // ABYSSAL ITEMS
+        this.registerItem(new Item(
+            'abyssal_anchor',
+            'Abyssal Anchor',
+            'A heavy anchor forged in the depths of the abyss, providing exceptional protection. The dark metal seems to absorb incoming attacks.',
+            'items/abyssal_anchor.webp',
+            'rare',
+            {
+                armor: 10            // 10 flat armor points
+            }
+        ));
+
+        this.registerItem(new Item(
+            'abyssal_echo',
+            'Abyssal Echo',
+            'A mysterious resonance trapped within a crystalline structure. The echo whispers of ancient powers and forgotten crafting techniques.',
+            'items/abyssal_echo.png',
+            'rare',
+            {},
+            'crafting'
+        ));
+
+        // NEW CRAFTING AND EQUIPMENT ITEMS
+        this.registerItem(new Item(
+            'cursed_water_vial',
+            'Cursed Water Vial',
+            'A vial filled with dark, corrupted water from the depths. The liquid seems to pulse with malevolent energy, perfect for dark crafting rituals.',
+            'items/cursed_water_vial.png',
+            'uncommon',
+            {},
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'pearl_of_the_depths',
+            'Pearl of the Depths',
+            'A luminous pearl harvested from the deepest ocean trenches. Its gentle glow enhances healing magic and restorative abilities.',
+            'items/pearl_of_the_depths.webp',
+            'epic',
+            {
+                healingPower: 0.10    // 10% healing power increase
+            }
+        ));
+
+        this.registerItem(new Item(
+            'piranha_tooth',
+            'Piranha Tooth',
+            'A razor-sharp tooth from a ferocious piranha. Its deadly edge can be used in weapon crafting or as a component for enhanced damage.',
+            'items/piranha_tooth.png',
+            'common',
+            {
+                physicalDamage: 2
+            },
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'piranha_scales',
+            'Piranha Scales',
+            'Tough, iridescent scales from a piranha. These scales are highly valued for their durability and can be used in armor crafting.',
+            'items/piranha_scales.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'pearl_gun',
+            'Pearl Gun',
+            'An elegant firearm crafted with pearl inlays and enchanted with precision magic. Its shots have an uncanny ability to find their mark.',
+            'items/pearl_gun.webp',
+            'rare',
+            {
+                critChance: 0.20     // 20% crit chance
+            }
+        ));
+
+        // ATLANTEAN ITEMS
+        this.registerItem(new Item(
+            'atlantean_crown',
+            'Atlantean Crown',
+            'A magnificent crown worn by the rulers of lost Atlantis. Imbued with the power of the ocean depths, it enhances all aspects of combat prowess.',
+            'items/atlantean_crown.webp',
+            'epic',
+            {
+                physicalDamage: 10,
+                magicalDamage: 15,
+                armor: 5,
+                magicalShield: 5,
+                hp: 50,
+                mana: 50,
+                critChance: 0.05,    // 5% as decimal
+                critMultiplier: 0.05, // 5% as decimal  
+                dodgeChance: 0.05    // 5% as decimal
+            }
+        ));
+
+        this.registerItem(new Item(
+            'atlantean_trident_of_time',
+            'Atlantean Trident of Time',
+            'A legendary weapon that once belonged to the time-keepers of Atlantis. Its three prongs can pierce through reality itself, dealing devastating damage while draining life from enemies.',
+            'items/atlantean_trident_time.png',
+            'legendary',
+            {
+                physicalDamage: 295,
+                lifesteal: 0.10      // 10% as decimal
+            }
+        ));
+
+        this.registerItem(new Item(
+            'atlantis_teardrop',
+            'Atlantis Teardrop',
+            'A crystallized tear from the last queen of Atlantis, shed as her kingdom sank beneath the waves. Contains immense magical energy.',
+            'items/atlantis_teardrop.webp',
+            'epic',
+            {
+                mana: 325
+            }
+        ));
+
+        this.registerItem(new Item(
+            'tidal_charm',
+            'Tidal Charm',
+            'When you heal, a random ally is also healed for 25% of the original amount.',
+            'items/Tidal_Charm.png',
+            'rare',
+            {},
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'leviathans_fang',
+            "Leviathan's Fang",
+            'Your Q ability when used, it casts one additional time.',
+            'items/leviathans_fang.webp',
+            'legendary',
+            {},
+            'equipment'
+        ));
+
+        // NEWLY ADDED ITEMS
+        this.registerItem(new Item(
+            'murky_water_vial',
+            'Murky Water Vial',
+            'A vial of murky water, used for crafting.',
+            'items/Murky_Water_Vial.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'shadow_essence',
+            'Shadow Essence',
+            'A dark, swirling essence, used for crafting.',
+            'items/shadow_essence.png',
+            'rare',
+            {},
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'stormcallers_orb',
+            "Stormcaller's Orb",
+            'Increases Crit Damage by an additional 20%.',
+            'items/stormcallers_orb.webp',
+            'epic',
+            {
+                critMultiplier: 0.20 // 20% crit damage
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'tideborn_breastplate',
+            'Tideborn Breastplate',
+            'Heals 5% of the damage received.',
+            'items/tideborn_breastplate.webp',
+            'epic',
+            {}, // Removed healingPower stat bonus
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'water_elemental_crystal',
+            'Water Elemental Crystal',
+            '+22 Mana regen, +5 HP Regen',
+            'items/water_elemental_crystal.webp',
+            'rare',
+            {
+                manaPerTurn: 22,
+                hpPerTurn: 5
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'wavebreaker',
+            'Wavebreaker',
+            '+30 Physical Damage +150 HP',
+            'items/wavebreaker.webp',
+            'epic',
+            {
+                physicalDamage: 30,
+                hp: 150
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'void_essence',
+            'Void Essence',
+            'A dark, unstable essence, used for crafting.',
+            'items/Void_Essence.png',
+            'legendary',
+            {},
+            'crafting'
+        ));
+
+        // Ice Items
+        this.registerItem(new Item(
+            'ice_dagger',
+            'Ice Dagger',
+            '+25 AD. Gives your Q ability 10% chance to freeze the target for 2 turns.',
+            'items/ice_dagger.png',
+            'rare',
+            { physicalDamage: 25 },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'ice_flask',
+            'Ice Flask',
+            'A flask containing a chilling liquid. Used in ice-related crafting recipes.',
+            'items/ice_flask.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        const iceShard = new Item(
+            'ice_shard',
+            'Ice Shard',
+            'Throws an ice shard onto a random enemy dealing 200 Magical Damage and freezing it for 3 turns.',
+            'items/ice_shard.png',
+            'uncommon',
+            {},
+            'consumable'
+        );
+
+        iceShard.setConsumableEffect((character) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            const enemies = window.gameManager.gameState.aiCharacters.filter(enemy => !enemy.isDead());
+            if (enemies.length === 0) {
+                log('No enemies to target.', 'system');
+                return { success: false, message: 'No valid targets' };
+            }
+
+            const target = enemies[Math.floor(Math.random() * enemies.length)];
+            const damage = 200;
+            const freezeDuration = 3;
+
+            // Apply damage
+            const result = target.applyDamage(damage, 'magical', character, { abilityId: 'ice_shard' });
+            log(`${character.name} used Ice Shard on ${target.name}, dealing ${damage} magical damage!`, 'consumable-use');
+
+            // Only apply freeze if damage wasn't dodged
+            if (!result.isDodged) {
+                const existingFreeze = target.debuffs && target.debuffs.find(d => d.id === 'freeze');
+                if (!existingFreeze) {
+                    const freezeDebuff = {
+                        id: 'freeze',
+                        name: 'Frozen',
+                        icon: '❄️',
+                        duration: freezeDuration,
+                        maxDuration: freezeDuration,
+                        isDebuff: true,
+                        source: character.name,
+                        description: 'Frozen solid! Character is stunned for the duration.',
+                        type: 'stun', // This will prevent the character from acting
+                        onRemove: function(character) {
+                            if (window.AtlanteanSubZeroAbilities) {
+                                window.AtlanteanSubZeroAbilities.removeFreezeIndicator(character, false);
+                            }
+                        }
+                    };
+                    
+                    target.addDebuff(freezeDebuff, character);
+                    
+                    if (window.AtlanteanSubZeroAbilities && window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX) {
+                        window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX(target);
+                    }
+                    
+                    if (window.gameManager) {
+                        window.gameManager.addLogEntry(`❄️ ${target.name} is frozen solid!`, 'debuff');
+                    }
+                }
+            }
+
+            return { success: true, message: 'Used Ice Shard' };
+        }, 10); // 10 turn cooldown
+
+        this.registerItem(iceShard);
+
+        // New Items from Request
+        this.registerItem(new Item(
+            'icicle_spear',
+            'Icicle Spear',
+            '+180 Magical Damage. Your abilities have a 5% chance to freeze the target damaged.',
+            'items/icicle_spear.webp',
+            'legendary',
+            { magicalDamage: 180 },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'golden_arrow',
+            'Golden Arrow',
+            '+50 Physical & +50 Magical Damage. Your abilities now also scale with 20% of your magical Damage.',
+            'items/golden_arrow.webp',
+            'legendary',
+            { physicalDamage: 50, magicalDamage: 50 },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'golden_mask',
+            'Golden Mask',
+            '+10 Magic Resistance.',
+            'items/golden_mask.webp',
+            'common',
+            { magicalShield: 10 },
+            'equipment'
+        ));
+
+        // NEW ATLANTEAN ITEMS
+        this.registerItem(new Item(
+            'fish_scale_shoulderplate',
+            'Fish Scale Shoulderplate',
+            'Every turn 15% chance to be healed by 15% of your MaxHP/HP.',
+            'items/fish_scale_shoulderplate.webp',
+            'epic',
+            {
+                armor: 4,
+                magicalShield: 4
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'kotal_kahns_atlantean_dagger',
+            'Kotal Kahn\'s Atlantean Dagger',
+            'Legendary dagger that enhances healing and vitality.',
+            'items/kotal_kahns_atlantean_dagger.webp',
+            'legendary',
+            {
+                healingPower: 0.15,
+                hpPerTurn: 50,
+                hp: 400
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'leviathan_scale',
+            'Leviathan Scale',
+            'A massive scale from the legendary Leviathan, containing ancient oceanic power. Used in advanced crafting recipes.',
+            'items/leviathan_scale.webp',
+            'epic',
+            {},
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'mermaid_essence',
+            'Mermaid Essence',
+            'A concentrated essence of mermaid magic, enhancing life-stealing abilities.',
+            'items/mermaid_essence.webp',
+            'rare',
+            {
+                lifesteal: 0.08        // 8% lifesteal
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'seaborn_crown',
+            'Seaborn Crown',
+            'Your Heals place a buff on the healed target increasing their armor by 5.',
+            'items/seaborn_crown.webp',
+            'legendary',
+            {},
+            'equipment'
+        ));
     }
 
     /**
@@ -389,8 +773,8 @@ class CharacterInventory {
         const item = window.ItemRegistry?.getItem(itemId);
         if (!item) return false;
 
-        // For consumables, try to stack with existing items first
-        if (item.isConsumable) {
+        // For consumables and crafting materials, try to stack with existing items first
+        if (item.isConsumable || item.type === 'crafting') {
             for (let i = 0; i < this.maxSlots; i++) {
                 const slot = this.items[i];
                 if (slot && slot.itemId === itemId) {
@@ -403,9 +787,26 @@ class CharacterInventory {
 
         if (slotIndex !== null) {
             // Add to specific slot
-            if (slotIndex >= 0 && slotIndex < this.maxSlots && this.items[slotIndex] === null) {
-                this.items[slotIndex] = { itemId, quantity };
-                return true;
+            if (slotIndex >= 0 && slotIndex < this.maxSlots) {
+                if (this.items[slotIndex] === null || this.items[slotIndex] === undefined) {
+                    // Slot is empty, add item
+                    this.items[slotIndex] = { itemId, quantity };
+                    console.log(`📦 [CharacterInventory] Added ${itemId} (qty: ${quantity}) to slot ${slotIndex}`);
+                    return true;
+                } else {
+                    // Slot is occupied, try to stack if same item and stackable
+                    const existingSlot = this.items[slotIndex];
+                    if (existingSlot.itemId === itemId) {
+                        const item = window.ItemRegistry?.getItem(itemId);
+                        if (item && (item.isConsumable || item.type === 'crafting')) {
+                            existingSlot.quantity += quantity;
+                            console.log(`📦 [CharacterInventory] Stacked ${itemId}, new quantity: ${existingSlot.quantity}`);
+                            return true;
+                        }
+                    }
+                    console.warn(`📦 [CharacterInventory] Cannot add to occupied slot ${slotIndex}:`, existingSlot);
+                    return false;
+                }
             }
         } else {
             // Find first empty slot
@@ -581,10 +982,19 @@ class CharacterInventory {
         // Ensure items is always a proper array for Firebase
         const itemsArray = Array.isArray(this.items) ? [...this.items] : new Array(this.maxSlots).fill(null);
         
+        // Firebase doesn't allow undefined values - convert any undefined to null
+        const cleanedItems = itemsArray.map(item => item === undefined ? null : item);
+        
+        console.log(`📦 [CharacterInventory] Serializing ${this.characterId}:`, {
+            original: this.items,
+            cleaned: cleanedItems,
+            hasUndefined: itemsArray.some(item => item === undefined)
+        });
+        
         return {
             characterId: this.characterId,
             maxSlots: this.maxSlots,
-            items: itemsArray,
+            items: cleanedItems,
             // Add a marker to help with deserialization
             _isArray: true
         };
@@ -647,64 +1057,228 @@ class CharacterInventory {
 
 class GlobalInventory {
     constructor() {
-        this.items = []; // Array of item IDs
+        this.items = []; // Array of objects: { itemId: 'item_id', quantity: 1 } or for compatibility with old saves: just item ID strings
     }
 
     /**
-     * Add an item to global inventory
+     * Add an item to global inventory with stacking support
      * @param {string} itemId - The item ID to add
+     * @param {number} quantity - Quantity to add (default 1)
      */
-    addItem(itemId) {
-        console.log(`[GlobalInventory] DEBUG: Adding item "${itemId}" to global inventory. Stack trace:`, new Error().stack);
-        this.items.push(itemId);
+    addItem(itemId, quantity = 1) {
+        console.log(`[GlobalInventory] DEBUG: Adding item "${itemId}" (qty: ${quantity}) to global inventory`);
+        
+        const item = window.ItemRegistry?.getItem(itemId);
+        
+        // For consumables and crafting materials, try to stack with existing items
+        if (item && (item.isConsumable || item.type === 'crafting')) {
+            for (let i = 0; i < this.items.length; i++) {
+                const existing = this.items[i];
+                // Handle both new format (objects) and old format (strings)
+                const existingItemId = typeof existing === 'object' ? existing.itemId : existing;
+                
+                if (existingItemId === itemId) {
+                    // Found existing stack, add to it
+                    if (typeof existing === 'object') {
+                        existing.quantity += quantity;
+                    } else {
+                        // Convert old format to new format
+                        this.items[i] = { itemId: itemId, quantity: 1 + quantity };
+                    }
+                    console.log(`[GlobalInventory] Stacked ${quantity} ${itemId}. New quantity: ${this.items[i].quantity || (quantity + 1)}`);
+                    return;
+                }
+            }
+        }
+        
+        // No existing stack found or not stackable, add new entry
+        this.items.push({ itemId, quantity });
     }
 
     /**
-     * Remove an item from global inventory
-     * @param {number} index - The index of the item to remove
-     * @returns {string|null} The removed item ID or null
+     * Stack two items if they are the same consumable or crafting material
+     * @param {number} sourceIndex - Index of source item
+     * @param {number} targetIndex - Index of target item
+     * @returns {boolean} True if items were stacked
      */
-    removeItem(index) {
+    stackItems(sourceIndex, targetIndex) {
+        if (sourceIndex === targetIndex) return false;
+        
+        const sourceEntry = this.items[sourceIndex];
+        const targetEntry = this.items[targetIndex];
+        
+        if (!sourceEntry || !targetEntry) return false;
+        
+        // Handle both new format (objects) and old format (strings)
+        const sourceItemId = typeof sourceEntry === 'object' ? sourceEntry.itemId : sourceEntry;
+        const targetItemId = typeof targetEntry === 'object' ? targetEntry.itemId : targetEntry;
+        const sourceQuantity = typeof sourceEntry === 'object' ? sourceEntry.quantity : 1;
+        
+        if (sourceItemId === targetItemId) {
+            const item = window.ItemRegistry?.getItem(sourceItemId);
+            if (item && (item.isConsumable || item.type === 'crafting')) {
+                // Add source quantity to target
+                if (typeof targetEntry === 'object') {
+                    targetEntry.quantity += sourceQuantity;
+                } else {
+                    // Convert target to new format
+                    this.items[targetIndex] = { itemId: targetItemId, quantity: 1 + sourceQuantity };
+                }
+                
+                // Remove source entry
+                this.items.splice(sourceIndex, 1);
+                console.log(`[GlobalInventory] Stacked ${sourceQuantity} ${sourceItemId} into existing stack`);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Remove items from global inventory
+     * @param {number} index - The index of the item to remove
+     * @param {number} quantity - Quantity to remove (default 1, or all if quantity >= stack size)
+     * @returns {Object|null} The removed item info or null
+     */
+    removeItem(index, quantity = 1) {
+        console.log(`🗑️ [GlobalInventory] removeItem called: index=${index}, quantity=${quantity}`);
+        console.log(`🗑️ [GlobalInventory] Current items before removal:`, this.items);
+        
         if (index >= 0 && index < this.items.length) {
-            return this.items.splice(index, 1)[0];
+            const entry = this.items[index];
+            console.log(`🗑️ [GlobalInventory] Entry at index ${index}:`, entry);
+            
+            // Handle both new format (objects) and old format (strings)
+            if (typeof entry === 'object') {
+                console.log(`🗑️ [GlobalInventory] Current quantity: ${entry.quantity}, removing: ${quantity}`);
+                
+                if (entry.quantity <= quantity) {
+                    // Remove entire stack
+                    console.log(`🗑️ [GlobalInventory] Removing entire stack (${entry.quantity} <= ${quantity})`);
+                    const removedStack = this.items.splice(index, 1)[0];
+                    console.log(`🗑️ [GlobalInventory] Removed stack:`, removedStack);
+                    console.log(`🗑️ [GlobalInventory] Items after complete removal:`, this.items);
+                    return removedStack;
+                } else {
+                    // Remove partial quantity
+                    console.log(`🗑️ [GlobalInventory] Removing partial quantity (${entry.quantity} > ${quantity})`);
+                    const originalQuantity = entry.quantity;
+                    entry.quantity -= quantity;
+                    console.log(`🗑️ [GlobalInventory] Updated quantity: ${originalQuantity} → ${entry.quantity}`);
+                    console.log(`🗑️ [GlobalInventory] Items after partial removal:`, this.items);
+                    return { itemId: entry.itemId, quantity };
+                }
+            } else {
+                // Old format - remove the entire entry
+                console.log(`🗑️ [GlobalInventory] Old format entry, removing entire item`);
+                const removedItem = this.items.splice(index, 1)[0];
+                console.log(`🗑️ [GlobalInventory] Items after old format removal:`, this.items);
+                return { itemId: removedItem, quantity: 1 };
+            }
+        } else {
+            console.warn(`🗑️ [GlobalInventory] Invalid index: ${index} (length: ${this.items.length})`);
         }
         return null;
     }
 
     /**
-     * Get all items in global inventory
-     * @returns {Array<string>} Array of item IDs
+     * Get all items in global inventory (for display)
+     * @returns {Array<string>} Array of item IDs (expanded for display)
      */
     getAllItems() {
-        return [...this.items];
+        const expandedItems = [];
+        
+        this.items.forEach(entry => {
+            if (typeof entry === 'object') {
+                // New format: repeat itemId by quantity
+                for (let i = 0; i < entry.quantity; i++) {
+                    expandedItems.push(entry.itemId);
+                }
+            } else {
+                // Old format: just add the string
+                expandedItems.push(entry);
+            }
+        });
+        
+        return expandedItems;
+    }
+
+    /**
+     * Get item stacks (for UI display)
+     * @returns {Array<Object>} Array of {itemId, quantity} objects
+     */
+    getItemStacks() {
+        return this.items.map(entry => {
+            if (typeof entry === 'object') {
+                return { ...entry };
+            } else {
+                return { itemId: entry, quantity: 1 };
+            }
+        });
     }
 
     /**
      * Get item count by ID
      * @param {string} itemId - The item ID
-     * @returns {number} Number of this item in inventory
+     * @returns {number} Total quantity of this item in inventory
      */
     getItemCount(itemId) {
-        return this.items.filter(id => id === itemId).length;
+        let totalCount = 0;
+        
+        this.items.forEach(entry => {
+            if (typeof entry === 'object') {
+                if (entry.itemId === itemId) {
+                    totalCount += entry.quantity;
+                }
+            } else {
+                if (entry === itemId) {
+                    totalCount += 1;
+                }
+            }
+        });
+        
+        return totalCount;
     }
 
     /**
      * Serialize global inventory for saving
-     * @returns {Array<string>} Array of item IDs
+     * @returns {Array} Array of item stacks
      */
     serialize() {
-        return [...this.items];
+        // Convert all items to new format for saving
+        return this.items.map(entry => {
+            if (typeof entry === 'object') {
+                return { itemId: entry.itemId, quantity: entry.quantity };
+            } else {
+                return { itemId: entry, quantity: 1 };
+            }
+        });
     }
 
     /**
      * Deserialize global inventory from saved data
-     * @param {Array<string>} data - Array of item IDs
+     * @param {Array} data - Array of item IDs or stack objects
      */
     deserialize(data) {
         console.log('[GlobalInventory] DEBUG: deserialize() called with data:', data);
         console.log('[GlobalInventory] DEBUG: Current items before deserialize:', this.items);
         
-        this.items = data || [];
+        if (!Array.isArray(data)) {
+            this.items = [];
+            return;
+        }
+        
+        // Handle both old format (string arrays) and new format (object arrays)
+        this.items = data.map(entry => {
+            if (typeof entry === 'string') {
+                // Old format: convert to new format
+                return { itemId: entry, quantity: 1 };
+            } else if (entry && typeof entry === 'object' && entry.itemId) {
+                // New format: ensure quantity exists
+                return { itemId: entry.itemId, quantity: entry.quantity || 1 };
+            }
+            return null;
+        }).filter(entry => entry !== null);
         
         console.log('[GlobalInventory] DEBUG: Items after deserialize:', this.items);
     }
@@ -716,4 +1290,4 @@ class GlobalInventory {
 // Export classes for use in other files
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { Item, ItemRegistry, CharacterInventory, GlobalInventory };
-} 
+}

@@ -220,11 +220,15 @@
 }
 
 .item-image {
-    width: 50px;
-    height: 50px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 4px;
+    border-radius: 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .item-name {
@@ -406,6 +410,25 @@
     font-weight: 600;
 }
 
+/* Item Quantity Badge */
+.item-quantity-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(255, 215, 0, 0.95);
+    color: #000;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 8px;
+    min-width: 16px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+    line-height: 1;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
 /* Inventory Button */
 .inventory-button {
     padding: 6px 12px;
@@ -501,8 +524,12 @@
     }
     
     .item-image {
-        width: 40px;
-        height: 40px;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
     
     .inventory-title {
@@ -1474,9 +1501,6 @@
 
 .item-image {
     position: relative;
-    width: 40px;
-    height: 40px;
-    margin-right: 12px;
     border-radius: 4px;
     overflow: hidden;
     border: 1px solid rgba(108, 122, 137, 0.3);
@@ -1592,11 +1616,6 @@
         gap: 8px;
     }
     
-    .item-image {
-        align-self: center;
-        margin-right: 0;
-        margin-bottom: 4px;
-    }
     
     .item-info {
         margin-right: 0;

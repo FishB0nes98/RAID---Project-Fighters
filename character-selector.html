@@ -3230,6 +3230,7 @@
     <script src="js/raid-game/item-system.js"></script>
     <script src="js/raid-game/inventory-ui-manager.js"></script>
     <script src="js/raid-game/inventory-integration.js"></script>
+    <script type="module" src="items/game-integration.js"></script>
     
     <!-- Controller Support -->
     <script src="js/character-selector-controller.js"></script>
@@ -3315,7 +3316,7 @@
                 }
             }
         };
-        
+
         window.testInventorySystem = function() {
             console.log('[Admin] Testing inventory system...');
             window.listAvailableItems();
@@ -3323,6 +3324,290 @@
             window.addItemToGlobal('jade_dagger');
             window.viewGlobalInventory();
             console.log('[Admin] Test completed. Try opening a character inventory modal.');
+        };
+
+        window.addRequestedItems = function() {
+            console.log('[Admin] Adding requested items to global inventory...');
+            window.adminAddItemToGlobal('icicle_spear', 1);
+            window.adminAddItemToGlobal('golden_arrow', 1);
+            window.adminAddItemToGlobal('golden_mask', 1);
+            console.log('[Admin] Requested items added.');
+        }
+
+        // ===== ADMIN ONLY - GLOBAL INVENTORY MANAGEMENT =====
+        window.adminAddItemToGlobal = function(itemId, quantity = 1) {
+            console.log(`[ADMIN] Adding ${quantity}x ${itemId} to global inventory`);
+            
+            const item = window.ItemRegistry.getItem(itemId);
+            if (!item) {
+                console.error(`[ADMIN] Item "${itemId}" not found! Use listAvailableItems() to see valid items.`);
+                return false;
+            }
+            
+            // Add to GlobalInventory
+            window.GlobalInventory.addItem(itemId, quantity);
+            console.log(`[ADMIN] ✅ Successfully added ${quantity}x ${item.name} (${item.rarity}) to global inventory`);
+            
+            // CRITICAL: Sync userData with GlobalInventory before saving
+            if (window.userData) {
+                window.userData.globalInventory = window.GlobalInventory.serialize();
+                console.log(`[ADMIN] 🔄 Synced userData.globalInventory`);
+            }
+            
+            // Save to Firebase
+            if (window.saveUserData) {
+                window.saveUserData();
+                console.log(`[ADMIN] 💾 Saved to Firebase`);
+            } else {
+                console.warn(`[ADMIN] ⚠️ saveUserData function not available, trying direct save...`);
+                adminForceSave();
+            }
+            
+            // Refresh UI if modal is open
+            if (window.inventoryUIManager) {
+                window.inventoryUIManager.renderGlobalInventory();
+            }
+            
+            return true;
+        };
+
+        window.adminRemoveItemFromGlobal = function(itemId, quantity = 1) {
+            console.log(`[ADMIN] Removing ${quantity}x ${itemId} from global inventory`);
+            
+            const currentCount = window.GlobalInventory.getItemCount(itemId);
+            if (currentCount === 0) {
+                console.error(`[ADMIN] Item "${itemId}" not found in global inventory!`);
+                return false;
+            }
+            
+            if (currentCount < quantity) {
+                console.warn(`[ADMIN] Only ${currentCount}x ${itemId} available, removing all.`);
+                quantity = currentCount;
+            }
+            
+            // Find and remove from stacks
+            const stacks = window.GlobalInventory.getItemStacks();
+            let remainingToRemove = quantity;
+            
+            for (let i = stacks.length - 1; i >= 0 && remainingToRemove > 0; i--) {
+                if (stacks[i].itemId === itemId) {
+                    const removedFromStack = Math.min(remainingToRemove, stacks[i].quantity);
+                    window.GlobalInventory.removeItem(i, removedFromStack);
+                    remainingToRemove -= removedFromStack;
+                }
+            }
+            
+            const item = window.ItemRegistry.getItem(itemId);
+            console.log(`[ADMIN] ✅ Successfully removed ${quantity}x ${item?.name || itemId} from global inventory`);
+            
+            // Save to Firebase if available
+            if (window.saveUserData) {
+                window.saveUserData();
+                console.log(`[ADMIN] 💾 Saved to Firebase`);
+            }
+            
+            // Refresh UI if modal is open
+            if (window.inventoryUIManager) {
+                window.inventoryUIManager.renderGlobalInventory();
+            }
+            
+            return true;
+        };
+
+        window.adminClearGlobalInventory = function() {
+            console.log('[ADMIN] Clearing entire global inventory...');
+            
+            const itemCount = window.GlobalInventory.getAllItems().length;
+            window.GlobalInventory.items = [];
+            
+            console.log(`[ADMIN] ✅ Cleared ${itemCount} items from global inventory`);
+            
+            // Save to Firebase if available
+            if (window.saveUserData) {
+                window.saveUserData();
+                console.log(`[ADMIN] 💾 Saved to Firebase`);
+            }
+            
+            // Refresh UI if modal is open
+            if (window.inventoryUIManager) {
+                window.inventoryUIManager.renderGlobalInventory();
+            }
+        };
+
+        window.adminGiveAllItems = function(quantity = 1) {
+            console.log(`[ADMIN] Adding ${quantity} of each item to global inventory...`);
+            
+            const allItems = window.ItemRegistry.getAllItems();
+            let addedCount = 0;
+            
+            allItems.forEach(item => {
+                window.GlobalInventory.addItem(item.id, quantity);
+                addedCount++;
+            });
+            
+            console.log(`[ADMIN] ✅ Added ${quantity}x of ${addedCount} different items to global inventory`);
+            
+            // CRITICAL: Sync userData with GlobalInventory before saving
+            if (window.userData) {
+                window.userData.globalInventory = window.GlobalInventory.serialize();
+                console.log(`[ADMIN] 🔄 Synced userData.globalInventory with ${window.GlobalInventory.items.length} item stacks`);
+            }
+            
+            // Save to Firebase
+            if (window.saveUserData) {
+                window.saveUserData();
+                console.log(`[ADMIN] 💾 Saved to Firebase`);
+            } else {
+                console.warn(`[ADMIN] ⚠️ saveUserData function not available, trying direct save...`);
+                adminForceSave();
+            }
+            
+            // Refresh UI if modal is open
+            if (window.inventoryUIManager) {
+                window.inventoryUIManager.renderGlobalInventory();
+            }
+        };
+
+        window.adminListItemsByRarity = function(rarity = null) {
+            if (rarity) {
+                console.log(`[ADMIN] ${rarity.toUpperCase()} items:`);
+                const items = window.ItemRegistry.getItemsByRarity(rarity);
+                items.forEach(item => {
+                    const currentCount = window.GlobalInventory.getItemCount(item.id);
+                    console.log(`- ${item.id}: ${item.name} (owned: ${currentCount})`);
+                });
+            } else {
+                console.log('[ADMIN] Items by rarity:');
+                ['legendary', 'epic', 'rare', 'uncommon', 'common'].forEach(rarity => {
+                    const items = window.ItemRegistry.getItemsByRarity(rarity);
+                    if (items.length > 0) {
+                        console.log(`\n${rarity.toUpperCase()}:`);
+                        items.forEach(item => {
+                            const currentCount = window.GlobalInventory.getItemCount(item.id);
+                            console.log(`- ${item.id}: ${item.name} (owned: ${currentCount})`);
+                        });
+                    }
+                });
+            }
+        };
+
+        window.adminInventoryHelp = function() {
+            console.log(`
+=== ADMIN INVENTORY COMMANDS ===
+
+📦 GLOBAL INVENTORY:
+• adminAddItemToGlobal(itemId, quantity)    - Add items to global inventory
+• adminRemoveItemFromGlobal(itemId, quantity) - Remove items from global
+• adminClearGlobalInventory()               - Clear all global items
+• adminGiveAllItems(quantity)               - Add all items to global
+• viewGlobalInventory()                     - View current global inventory
+
+👥 CHARACTER INVENTORY:
+• addItemToCharacter(characterId, itemId)   - Add item to character
+• viewCharacterInventory(characterId)       - View character inventory
+• clearCharacterInventory(characterId)      - Clear character inventory
+
+📋 REFERENCE:
+• listAvailableItems()                      - List all available items
+• adminListItemsByRarity(rarity)           - List items by rarity
+• adminInventoryHelp()                     - Show this help
+
+🔧 DEBUGGING:
+• adminDebugSaving()                       - Debug saving mechanism
+• adminForceSave()                         - Force save to Firebase
+
+💡 EXAMPLES:
+adminAddItemToGlobal('atlantean_crown', 5)
+adminAddItemToGlobal('atlantean_trident_of_time')
+adminListItemsByRarity('legendary')
+adminGiveAllItems(3)
+            `);
+        };
+
+        window.addTidalCharmToGlobalInventory = function() {
+            console.log("[ADMIN] Attempting to add Tidal Charm to Global Inventory...");
+            const itemId = 'tidal_charm';
+            const item = window.ItemRegistry.getItem(itemId);
+
+            if (!item) {
+                console.error(`[ADMIN] Error: Item with ID '${itemId}' not found in the ItemRegistry.`);
+                console.log("[ADMIN] Please ensure 'tidal_charm' is registered correctly in 'js/raid-game/item-system.js'.");
+                window.listAvailableItems(); // Helper to show what is available
+                return;
+            }
+
+            console.log(`[ADMIN] Found item: ${item.name}`);
+            window.adminAddItemToGlobal(itemId, 1);
+        };
+
+        // ===== ADMIN DEBUGGING FUNCTIONS =====
+        window.adminDebugSaving = function() {
+            console.log('🔧 [ADMIN DEBUG] Checking save mechanism...');
+            
+            // Check if saveUserData function exists
+            console.log('saveUserData function exists:', typeof window.saveUserData === 'function');
+            
+            // Check current user auth state
+            if (window.auth && window.auth.currentUser) {
+                console.log('🔐 User authenticated:', window.auth.currentUser.uid);
+            } else {
+                console.warn('⚠️ No authenticated user found');
+            }
+            
+            // Check GlobalInventory state
+            console.log('📦 GlobalInventory items:', window.GlobalInventory.items);
+            console.log('📦 GlobalInventory serialized:', window.GlobalInventory.serialize());
+            
+            // Check if userData exists
+            if (window.userData) {
+                console.log('💾 Current userData.globalInventory:', window.userData.globalInventory);
+            } else {
+                console.warn('⚠️ No userData object found');
+            }
+            
+            // Check Firebase database reference
+            if (window.database) {
+                console.log('🔥 Firebase database connected');
+            } else {
+                console.warn('⚠️ No Firebase database connection');
+            }
+        };
+
+        window.adminForceSave = function() {
+            console.log('💾 [ADMIN] Force saving to Firebase...');
+            
+            try {
+                // Update userData with current inventory state
+                if (window.userData) {
+                    window.userData.globalInventory = window.GlobalInventory.serialize();
+                    console.log('📦 Updated userData.globalInventory:', window.userData.globalInventory);
+                }
+                
+                // Call saveUserData if it exists
+                if (typeof window.saveUserData === 'function') {
+                    window.saveUserData();
+                    console.log('✅ Called saveUserData()');
+                } else {
+                    console.error('❌ saveUserData function not found');
+                }
+                
+                // Alternative: Direct Firebase save if saveUserData doesn't work
+                if (window.auth && window.auth.currentUser && window.database) {
+                    const userId = window.auth.currentUser.uid;
+                    const userRef = window.database.ref(`users/${userId}`);
+                    
+                    userRef.child('globalInventory').set(window.GlobalInventory.serialize())
+                        .then(() => {
+                            console.log('✅ Direct Firebase save successful');
+                        })
+                        .catch((error) => {
+                            console.error('❌ Direct Firebase save failed:', error);
+                        });
+                }
+                
+            } catch (error) {
+                console.error('❌ Force save failed:', error);
+            }
         };
         
         document.addEventListener('DOMContentLoaded', async () => {
@@ -3443,6 +3728,7 @@
                         if (window.InventoryIntegrationManager) {
                             await window.InventoryIntegrationManager.initialize();
                         }
+                        
                         // Fetch user data (including owned characters)
                         try {
                             const snapshot = await firebaseDatabase.ref(`users/${userId}/ownedCharacters`).once('value');
@@ -7277,7 +7563,7 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
                     const debugFunctions = [
                         'debugViewQuestsInDatabase',
                         'debugAdd001TurnMaster',
-                        'debugAdd002VictoryStreak', 
+                        'debugAdd002VictoryStreak',
                         'debugAdd003FirstSteps',
                         'debugAdd004StorySeeker',
                         'debugAdd005DamageDealer',
@@ -7295,7 +7581,16 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
                         'debugRestoreOwnedCharacters',
                         'debugAddHealingQuest',
                         'debugAdd006HealingQuest',
-                        'debugAddSingleQuest'
+                        'debugAddSingleQuest',
+                        'adminAddItemToGlobal',
+                        'adminRemoveItemFromGlobal',
+                        'adminClearGlobalInventory',
+                        'adminGiveAllItems',
+                        'adminListItemsByRarity',
+                        'adminInventoryHelp',
+                        'adminDebugSaving',
+                        'adminForceSave',
+                        'addTidalCharmToGlobalInventory'
                     ];
 
                     // Store original functions and wrap them with admin check
@@ -7928,4 +8223,4 @@ Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to u
     </script>
 </body>
 </html> 
-</html> 
+</html>

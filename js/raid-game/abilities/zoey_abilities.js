@@ -367,144 +367,6 @@ window.zoeyGlowingLightArcEffect = function(casterOrData, targets, abilityInstan
     }
 };
 
-// Immediately patch Ability.prototype.use to add debugging and a fallback mechanism
-// This executes when the script loads
-(function() {
-    console.log('[Zoey Debug] Attempting to patch Ability.prototype.use');
-    
-    if (window.Ability && window.Ability.prototype && window.Ability.prototype.use) {
-        const originalUse = window.Ability.prototype.use;
-        
-        window.Ability.prototype.use = function(caster, targetOrTargets, actualManaCost, options = {}) {
-            // Check if the ability is one of Zoey's abilities
-            if (this.id === 'zoey_q' || this.id === 'zoey_w' || this.id === 'zoey_e') {
-                console.log(`[Zoey Debug] Intercepted use() call for ${this.id} ability`, this);
-                
-                // If effect is missing or not a function, attempt to fix it
-                if (!this.effect || typeof this.effect !== 'function') {
-                    console.log(`[Zoey Debug] Effect is not a function for ${this.id}, attempting to fix`, typeof this.effect);
-                    
-                    // Direct fix: Use the global function
-                    if (this.id === 'zoey_q' && window.zoeyStrawberryBellBurstEffect) {
-                        console.log('[Zoey Debug] Applying direct effect fix for Q ability using global reference');
-                        executeStrawberryBellBurst(caster, targetOrTargets, this);
-                        
-                        // Update cooldown and add event dispatch
-                        this.currentCooldown = this.cooldown;
-                        
-                        // Dispatch event
-                        const abilityUsedEvent = new CustomEvent('ability:used', {
-                            detail: {
-                                caster: caster,
-                                target: targetOrTargets,
-                                ability: this
-                            }
-                        });
-                        document.dispatchEvent(abilityUsedEvent);
-                        
-                        return true; // Indicate success
-                    }
-                    // Fix for Heart Pounce (W ability)
-                    else if (this.id === 'zoey_w' && window.zoeyHeartPounceEffect) {
-                        console.log('[Zoey Debug] Applying direct effect fix for W ability using global reference');
-                        executeHeartPounce(caster, targetOrTargets, this);
-                        
-                        // Update cooldown and add event dispatch
-                        this.currentCooldown = this.cooldown;
-                        
-                        // Dispatch event
-                        const abilityUsedEvent = new CustomEvent('ability:used', {
-                            detail: {
-                                caster: caster,
-                                target: targetOrTargets,
-                                ability: this
-                            }
-                        });
-                        document.dispatchEvent(abilityUsedEvent);
-                        
-                        return true; // Indicate success
-                    }
-                    // Fix for Sparkle Burst (E ability)
-                    else if (this.id === 'zoey_e' && window.zoeySparkleburstEffect) {
-                        console.log('[Zoey Debug] Applying direct effect fix for E ability using global reference');
-                        executeSparkleburst(caster, targetOrTargets, this);
-                        
-                        // Update cooldown and add event dispatch
-                        this.currentCooldown = this.cooldown;
-                        
-                        // Dispatch event
-                        const abilityUsedEvent = new CustomEvent('ability:used', {
-                            detail: {
-                                caster: caster,
-                                target: targetOrTargets,
-                                ability: this
-                            }
-                        });
-                        document.dispatchEvent(abilityUsedEvent);
-                        
-                        return true; // Indicate success
-                    }
-                    // Fix for Glowing Light Arc (R ability)
-                    else if (this.id === 'zoey_r' && window.zoeyGlowingLightArcEffect) {
-                        console.log('[Zoey Debug] Applying direct effect fix for R ability using global reference');
-                        executeGlowingLightArc(caster, targetOrTargets, this);
-                        
-                        // Update cooldown and add event dispatch
-                        this.currentCooldown = this.cooldown;
-                        
-                        // Dispatch event
-                        const abilityUsedEvent = new CustomEvent('ability:used', {
-                            detail: {
-                                caster: caster,
-                                target: targetOrTargets,
-                                ability: this
-                            }
-                        });
-                        document.dispatchEvent(abilityUsedEvent);
-                        
-                        return true; // Indicate success
-                    }
-                }
-            }
-            
-            // Call the original method if we didn't handle it
-            try {
-                return originalUse.call(this, caster, targetOrTargets, actualManaCost, options);
-            } catch (error) {
-                console.error(`[Zoey Debug] Error in original use() method for ${this.id}:`, error);
-                
-                // If this is Zoey's ability, try to recover
-                if (this.id === 'zoey_q') {
-                    console.log('[Zoey Debug] Attempting recovery for Zoey Q ability');
-                    executeStrawberryBellBurst(caster, targetOrTargets, this);
-                    return true;
-                }
-                else if (this.id === 'zoey_w') {
-                    console.log('[Zoey Debug] Attempting recovery for Zoey W ability');
-                    executeHeartPounce(caster, targetOrTargets, this);
-                    return true;
-                }
-                else if (this.id === 'zoey_e') {
-                    console.log('[Zoey Debug] Attempting recovery for Zoey E ability');
-                    executeSparkleburst(caster, targetOrTargets, this);
-                    return true;
-                }
-                else if (this.id === 'zoey_r') {
-                    console.log('[Zoey Debug] Attempting recovery for Zoey R ability');
-                    executeGlowingLightArc(caster, targetOrTargets, this);
-                    return true;
-                }
-                
-                return false;
-            }
-        };
-        
-        console.log('[Zoey Debug] Successfully patched Ability.prototype.use');
-    } else {
-        console.error('[Zoey Debug] Failed to patch Ability.prototype.use - Ability class not found');
-    }
-})();
-
 // Main execution function for Heart Pounce
 function executeHeartPounce(caster, target, abilityInstance) {
     console.log('[Heart Pounce] executeHeartPounce called with:', {
@@ -1884,156 +1746,178 @@ function updateGlowingLightArcDescription(ability, character = null) {
     return description;
 }
 
-// Register the abilities when the script loads
+// Global flag to prevent multiple registrations
+window.zoeyAbilitiesRegistered = false;
+
 function registerAbilities() {
-    console.log('[Zoey Abilities] Registering abilities...');
-    
-    // Method 1: Register using the AbilityFactory's registerAbilityEffect
-    if (window.AbilityFactory && typeof window.AbilityFactory.registerAbilityEffect === 'function') {
-        // Register Strawberry Bell Burst by function name (how the JSON refers to it)
-        window.AbilityFactory.registerAbilityEffect('zoeyStrawberryBellBurstEffect', window.zoeyStrawberryBellBurstEffect);
-        
-        // Also register by ability ID for redundancy
-        window.AbilityFactory.registerAbilityEffect('zoey_q', window.zoeyStrawberryBellBurstEffect);
-        
-        // Register Heart Pounce
-        window.AbilityFactory.registerAbilityEffect('zoeyHeartPounceEffect', window.zoeyHeartPounceEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_w', window.zoeyHeartPounceEffect);
-        
-        // Register Sparkle Burst
-        window.AbilityFactory.registerAbilityEffect('zoeySparkleburstEffect', window.zoeySparkleburstEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_e', window.zoeySparkleburstEffect);
-        
-        // Register Glowing Light Arc (R)
-        window.AbilityFactory.registerAbilityEffect('zoeyGlowingLightArcEffect', window.zoeyGlowingLightArcEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_r', window.zoeyGlowingLightArcEffect);
-        
-        console.log('[Zoey Abilities] Registered ability effect functions');
-    } else {
-        console.error('[Zoey Abilities] AbilityFactory or registerAbilityEffect not available');
+    // Prevent multiple registrations
+    if (window.zoeyAbilitiesRegistered) {
+        console.log('[Zoey Abilities] Registration already completed');
+        return;
     }
+
+    // Ensure AbilityFactory is available
+    if (!window.AbilityFactory || typeof window.AbilityFactory.registerAbilityEffect !== 'function') {
+        console.warn('[Zoey Abilities] AbilityFactory not ready');
+        return;
+    }
+
+    // Consolidated ability effect registration with enhanced safety checks
+    const abilityEffects = {
+        'zoeyStrawberryBellBurstEffect': window.zoeyStrawberryBellBurstEffect,
+        'zoey_q': window.zoeyStrawberryBellBurstEffect,
+        'zoeyHeartPounceEffect': window.zoeyHeartPounceEffect,
+        'zoey_w': window.zoeyHeartPounceEffect,
+        'zoeySparkleburstEffect': window.zoeySparkleburstEffect,
+        'zoey_e': window.zoeySparkleburstEffect,
+        'zoeyGlowingLightArcEffect': window.zoeyGlowingLightArcEffect,
+        'zoey_r': window.zoeyGlowingLightArcEffect
+    };
+
+    // Prevent multiple registrations with advanced checks
+    const registeredEffects = window.AbilityFactory.registeredEffects || {};
     
-    // Method 2: Create ability objects directly and register them
-    if (window.Ability && window.AbilityFactory) {
-        try {
-            // Strawberry Bell Burst (Q ability)
-            const qDescription = 'Zoey channels her Strawberry Bell to unleash a magical beam, dealing 200% magical damage to an enemy. This ability cannot critically strike.';
-            
-            // Create Q ability manually with baseDescription
-            const strawberryBellAbility = new window.Ability(
-                'zoey_q',
-                'Strawberry Bell Burst',
-                'Icons/abilities/strawberry_bell_burst.png',
-                90, // manaCost
-                4,  // cooldown
-                window.zoeyStrawberryBellBurstEffect // Use the global reference
-            );
-            
-            // Set the baseDescription and description
-            strawberryBellAbility.baseDescription = qDescription;
-            strawberryBellAbility.description = qDescription;
-            strawberryBellAbility.targetType = 'enemy';
-            
-            // Heart Pounce (W ability)
-            const wDescription = 'Zoey jumps onto an enemy. It has 50% chance to be successful. If successful, she deals 855 + (125% Magical damage) to the target. If it fails, Zoey receives a debuff that reduces her armor and magic shield to 0 for 5 turns.';
-            
-            // Create W ability manually
-            const heartPounceAbility = new window.Ability(
-                'zoey_w',
-                'Heart Pounce',
-                'Icons/abilities/heart_pounce.png',
-                55, // manaCost
-                5,  // cooldown
-                window.zoeyHeartPounceEffect // Use the global reference
-            );
-            
-            // Set the baseDescription and description
-            heartPounceAbility.baseDescription = wDescription;
-            heartPounceAbility.description = wDescription;
-            heartPounceAbility.updateDescription = updateHeartPounceDescription;
-            heartPounceAbility.generateDescription = () => {
-                console.log('[Zoey] Generating Heart Pounce description...');
-                return updateHeartPounceDescription(heartPounceAbility);
-            };
-            heartPounceAbility.targetType = 'enemy';
-            
-            // Sparkle Burst (E ability)
-            const eDescription = 'Zoey unleashes a burst of sparkles with 50% hit chance for each enemy. Deals 200% Magical Damage to all enemies hit. This ability\'s cooldown is reduced for each enemy hit.';
-            
-            // Create E ability manually
-            const sparkleburstAbility = new window.Ability(
-                'zoey_e',
-                'Sparkle Burst',
-                'Icons/abilities/sparkle_burst.png',
-                100, // manaCost
-                11,  // cooldown
-                window.zoeySparkleburstEffect // Use the global reference
-            );
-            
-            // Set the baseDescription and description
-            sparkleburstAbility.baseDescription = eDescription;
-            sparkleburstAbility.description = eDescription;
-            sparkleburstAbility.updateDescription = updateSparkleburstDescription;
-            sparkleburstAbility.generateDescription = () => {
-                console.log('[Zoey] Generating Sparkle Burst description...');
-                return updateSparkleburstDescription(sparkleburstAbility);
-            };
-            sparkleburstAbility.targetType = 'all_enemies';
-            
-            // Create Glowing Light Arc (R ability)
-            const rDescription = 'Zoey unleashes a glowing arc of light that deals 255 + 100% Magical Damage to all enemies with a 75% chance to hit each target. If it hits, it disables a random ability of the target for 2 turns.';
-            
-            // Create R ability manually
-            const glowingLightArcAbility = new window.Ability(
-                'zoey_r',
-                'Glowing Light Arc',
-                'Icons/abilities/glowing_light_arc.png',
-                120, // manaCost
-                8,   // cooldown
-                window.zoeyGlowingLightArcEffect // Use the global reference
-            );
-            
-            // Set the baseDescription and description
-            glowingLightArcAbility.baseDescription = rDescription;
-            glowingLightArcAbility.description = rDescription;
-            glowingLightArcAbility.updateDescription = updateGlowingLightArcDescription;
-            glowingLightArcAbility.generateDescription = () => {
-                console.log('[Zoey] Generating Glowing Light Arc description...');
-                return updateGlowingLightArcDescription(glowingLightArcAbility);
-            };
-            glowingLightArcAbility.targetType = 'all_enemies';
-            
-            // Add to registry directly
-            if (window.AbilityFactory.abilityRegistry) {
-                window.AbilityFactory.abilityRegistry['zoey_q'] = strawberryBellAbility;
-                window.AbilityFactory.abilityRegistry['zoey_w'] = heartPounceAbility;
-                window.AbilityFactory.abilityRegistry['zoey_e'] = sparkleburstAbility;
-                window.AbilityFactory.abilityRegistry['zoey_r'] = glowingLightArcAbility;
-                console.log('[Zoey Abilities] Created and registered ability objects');
-            }
-            
-            // Also directly add to registeredEffects
-            if (window.AbilityFactory.registeredEffects) {
-                window.AbilityFactory.registeredEffects['zoeyStrawberryBellBurstEffect'] = window.zoeyStrawberryBellBurstEffect;
-                window.AbilityFactory.registeredEffects['zoey_q'] = window.zoeyStrawberryBellBurstEffect;
-                window.AbilityFactory.registeredEffects['zoeyHeartPounceEffect'] = window.zoeyHeartPounceEffect;
-                window.AbilityFactory.registeredEffects['zoey_w'] = window.zoeyHeartPounceEffect;
-                window.AbilityFactory.registeredEffects['zoeySparkleburstEffect'] = window.zoeySparkleburstEffect;
-                window.AbilityFactory.registeredEffects['zoey_e'] = window.zoeySparkleburstEffect;
-                window.AbilityFactory.registeredEffects['zoeyGlowingLightArcEffect'] = window.zoeyGlowingLightArcEffect;
-                window.AbilityFactory.registeredEffects['zoey_r'] = window.zoeyGlowingLightArcEffect;
-            }
-        } catch (error) {
-            console.error('[Zoey Abilities] Failed to create ability objects:', error);
+    Object.entries(abilityEffects).forEach(([effectName, effectFunction]) => {
+        // Validate effect function
+        if (typeof effectFunction !== 'function') {
+            console.warn(`[Zoey Abilities] Invalid effect for ${effectName}`);
+            return;
         }
+
+        // Check if the effect is already registered
+        const existingEffect = registeredEffects[effectName];
+        
+        // Determine if registration is needed
+        const needsRegistration = 
+            !existingEffect || 
+            existingEffect !== effectFunction ||
+            // Additional check to ensure the effect is properly bound
+            (existingEffect.toString() !== effectFunction.toString());
+
+        if (needsRegistration) {
+            try {
+                // Unregister existing effect if different
+                if (existingEffect && existingEffect !== effectFunction) {
+                    console.log(`[Zoey Abilities] Replacing existing effect for ${effectName}`);
+                }
+
+                // Safe registration with error handling
+                window.AbilityFactory.registerAbilityEffect(effectName, effectFunction);
+                
+                // Update the registeredEffects cache
+                if (window.AbilityFactory.registeredEffects) {
+                    window.AbilityFactory.registeredEffects[effectName] = effectFunction;
+                }
+
+                console.log(`[Zoey Abilities] Registered/Updated ${effectName}`);
+            } catch (error) {
+                console.error(`[Zoey Abilities] Error registering ${effectName}:`, error);
+            }
+        } else {
+            console.log(`[Zoey Abilities] Effect ${effectName} already registered correctly`);
+        }
+    });
+
+    // Mark as registered to prevent future attempts
+    window.zoeyAbilitiesRegistered = true;
+}
+
+// Patch ability modification to prevent unnecessary overwrites
+async function patchAbilityModification() {
+    if (window.Character && window.Character.prototype.applyAbilityModification) {
+        const originalApplyAbilityModification = window.Character.prototype.applyAbilityModification;
+        
+        window.Character.prototype.applyAbilityModification = function(abilityId, property, operation, value) {
+            // Log the modification attempt
+            console.log(`[Zoey Abilities] Ability modification attempt: ${abilityId}, ${property}, ${operation}, ${value}`);
+            
+            // Check if this is a Zoey ability
+            const isZoeyAbility = ['zoey_q', 'zoey_w', 'zoey_e', 'zoey_r'].includes(abilityId);
+            
+            // If it's a Zoey ability, add extra logging and safety checks
+            if (isZoeyAbility) {
+                console.log(`[Zoey Abilities] Modifying Zoey ability: ${abilityId}`);
+                
+                // Additional validation
+                if (!this.abilities) {
+                    console.warn(`[Zoey Abilities] No abilities found for character`);
+                    return;
+                }
+                
+                const ability = this.abilities.find(a => a.id === abilityId);
+                if (!ability) {
+                    console.warn(`[Zoey Abilities] Ability ${abilityId} not found`);
+                    return;
+                }
+                
+                // Prevent unnecessary modifications
+                const currentValue = ability[property];
+                let newValue;
+                
+                switch(operation) {
+                    case 'set':
+                        newValue = value;
+                        break;
+                    case 'add':
+                        newValue = currentValue + value;
+                        break;
+                    case 'multiply':
+                        newValue = currentValue * value;
+                        break;
+                    case 'divide':
+                        newValue = currentValue / value;
+                        break;
+                    default:
+                        console.warn(`[Zoey Abilities] Unknown operation: ${operation}`);
+                        return;
+                }
+                
+                // Only modify if the value actually changes
+                if (newValue !== currentValue) {
+                    console.log(`[Zoey Abilities] Modifying ${abilityId}.${property} from ${currentValue} to ${newValue}`);
+                    
+                    // Call the original method
+                    originalApplyAbilityModification.call(this, abilityId, property, operation, value);
+                    
+                    // Regenerate description if possible
+                    if (typeof ability.generateDescription === 'function') {
+                        ability.generateDescription();
+                    }
+                } else {
+                    console.log(`[Zoey Abilities] Skipping modification - no change detected`);
+                }
+            } else {
+                // For non-Zoey abilities, use the original method
+                originalApplyAbilityModification.call(this, abilityId, property, operation, value);
+            }
+        };
     }
-    
-    // Log confirmation
-    console.log('[Zoey Abilities] Registration complete. Effect functions available:',
-                'Q:', !!window.zoeyStrawberryBellBurstEffect,
-                'W:', !!window.zoeyHeartPounceEffect,
-                'E:', !!window.zoeySparkleburstEffect,
-                'R:', !!window.zoeyGlowingLightArcEffect);
+}
+
+// Remove multiple event listeners and registration attempts
+document.removeEventListener('DOMContentLoaded', ensureAbilitiesRegistered);
+document.addEventListener('DOMContentLoaded', () => {
+    registerAbilities();
+    patchAbilityModification();
+});
+
+// Simplified ensure registration function
+function ensureAbilitiesRegistered() {
+    if (!window.zoeyAbilitiesRegistered) {
+        registerAbilities();
+        patchAbilityModification();
+    }
+}
+
+// Immediate registration attempt with safety
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        registerAbilities();
+        patchAbilityModification();
+    });
+} else {
+    registerAbilities();
+    patchAbilityModification();
 }
 
 // Set up a direct observer to reapply the ability effect if needed
@@ -2108,55 +1992,39 @@ function ensureAbilitiesRegistered() {
     
     // Register ability effects by function name
     if (typeof window.AbilityFactory.registerAbilityEffect === 'function') {
-        // Register Strawberry Bell Burst
-        window.AbilityFactory.registerAbilityEffect('zoeyStrawberryBellBurstEffect', window.zoeyStrawberryBellBurstEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_q', window.zoeyStrawberryBellBurstEffect);
+        // Use the new safe registration method
+        safeRegisterAbilityEffect('zoeyStrawberryBellBurstEffect', window.zoeyStrawberryBellBurstEffect);
+        safeRegisterAbilityEffect('zoey_q', window.zoeyStrawberryBellBurstEffect);
         
-        // Register Glowing Light Arc
-        window.AbilityFactory.registerAbilityEffect('zoeyGlowingLightArcEffect', window.zoeyGlowingLightArcEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_r', window.zoeyGlowingLightArcEffect);
+        safeRegisterAbilityEffect('zoeyGlowingLightArcEffect', window.zoeyGlowingLightArcEffect);
+        safeRegisterAbilityEffect('zoey_r', window.zoeyGlowingLightArcEffect);
         
-        // Register Heart Pounce
-        window.AbilityFactory.registerAbilityEffect('zoeyHeartPounceEffect', window.zoeyHeartPounceEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_w', window.zoeyHeartPounceEffect);
+        safeRegisterAbilityEffect('zoeyHeartPounceEffect', window.zoeyHeartPounceEffect);
+        safeRegisterAbilityEffect('zoey_w', window.zoeyHeartPounceEffect);
         
-        // Register Sparkle Burst
-        window.AbilityFactory.registerAbilityEffect('zoeySparkleburstEffect', window.zoeySparkleburstEffect);
-        window.AbilityFactory.registerAbilityEffect('zoey_e', window.zoeySparkleburstEffect);
-        
-        console.log('[Zoey Debug] Registered ability effect functions with AbilityFactory');
+        safeRegisterAbilityEffect('zoeySparkleburstEffect', window.zoeySparkleburstEffect);
+        safeRegisterAbilityEffect('zoey_e', window.zoeySparkleburstEffect);
     }
     
-    // Patch any existing abilities that might be loaded already
-    if (window.AbilityFactory.abilityRegistry) {
-        // Fix Q ability if it exists
-        if (window.AbilityFactory.abilityRegistry['zoey_q']) {
-            window.AbilityFactory.abilityRegistry['zoey_q'].effect = window.zoeyStrawberryBellBurstEffect;
-            console.log('[Zoey Debug] Fixed zoey_q in abilityRegistry');
-        }
-        
-        // Fix W ability if it exists
-        if (window.AbilityFactory.abilityRegistry['zoey_w']) {
-            window.AbilityFactory.abilityRegistry['zoey_w'].effect = window.zoeyHeartPounceEffect;
-            console.log('[Zoey Debug] Fixed zoey_w in abilityRegistry');
-        }
-        
-        // Fix E ability if it exists
-        if (window.AbilityFactory.abilityRegistry['zoey_e']) {
-            window.AbilityFactory.abilityRegistry['zoey_e'].effect = window.zoeySparkleburstEffect;
-            console.log('[Zoey Debug] Fixed zoey_e in abilityRegistry');
-        }
-    }
-    
-    // Also patch the registeredEffects if they exist
+    // Simplified patching of registeredEffects
     if (window.AbilityFactory.registeredEffects) {
-        window.AbilityFactory.registeredEffects['zoeyStrawberryBellBurstEffect'] = window.zoeyStrawberryBellBurstEffect;
-        window.AbilityFactory.registeredEffects['zoey_q'] = window.zoeyStrawberryBellBurstEffect;
-        window.AbilityFactory.registeredEffects['zoeyHeartPounceEffect'] = window.zoeyHeartPounceEffect;
-        window.AbilityFactory.registeredEffects['zoey_w'] = window.zoeyHeartPounceEffect;
-        window.AbilityFactory.registeredEffects['zoeySparkleburstEffect'] = window.zoeySparkleburstEffect;
-        window.AbilityFactory.registeredEffects['zoey_e'] = window.zoeySparkleburstEffect;
-        console.log('[Zoey Debug] Added abilities to registeredEffects');
+        const effectMappings = {
+            'zoeyStrawberryBellBurstEffect': window.zoeyStrawberryBellBurstEffect,
+            'zoey_q': window.zoeyStrawberryBellBurstEffect,
+            'zoeyHeartPounceEffect': window.zoeyHeartPounceEffect,
+            'zoey_w': window.zoeyHeartPounceEffect,
+            'zoeySparkleburstEffect': window.zoeySparkleburstEffect,
+            'zoey_e': window.zoeySparkleburstEffect,
+            'zoeyGlowingLightArcEffect': window.zoeyGlowingLightArcEffect,
+            'zoey_r': window.zoeyGlowingLightArcEffect
+        };
+        
+        Object.entries(effectMappings).forEach(([key, value]) => {
+            if (!window.AbilityFactory.registeredEffects[key] || 
+                window.AbilityFactory.registeredEffects[key] !== value) {
+                window.AbilityFactory.registeredEffects[key] = value;
+            }
+        });
     }
 }
 
@@ -2691,4 +2559,163 @@ window.zoeyGlowingLightArcEffect = function(caster, targets, ability) {
 // Expose description update functions globally for talent manager access
 window.updateHeartPounceDescription = updateHeartPounceDescription;
 window.updateSparkleburstDescription = updateSparkleburstDescription;
-window.updateGlowingLightArcDescription = updateGlowingLightArcDescription; 
+window.updateGlowingLightArcDescription = updateGlowingLightArcDescription;
+
+// Wrap the patching logic in a simple, minimal function
+(function() {
+    // Optional: Simple prototype patching if needed
+    if (typeof Ability !== 'undefined') {
+        const originalUse = Ability.prototype.use;
+        Ability.prototype.use = function(caster, targetOrTargets, actualManaCost, options = {}) {
+            // Check if this is a Zoey ability
+            if (this.id && this.id.startsWith('zoey_')) {
+                console.log(`[ZoeyAbilities] Using ability: ${this.id}`);
+            }
+            
+            // Call the original use method
+            return originalUse.call(this, caster, targetOrTargets, actualManaCost, options);
+        };
+    }
+})();
+
+(function() {
+    // Function to patch Ability.prototype.use
+    function patchAbilityPrototype() {
+        console.log('[Zoey Debug] Attempting to patch Ability.prototype.use');
+        
+        // Check if Ability class exists
+        if (typeof Ability !== 'undefined') {
+            // Store the original use method
+            const originalUse = Ability.prototype.use;
+            
+            // Patch the use method
+            Ability.prototype.use = function(caster, targetOrTargets, actualManaCost, options = {}) {
+                // Check if this is a Zoey ability
+                if (this.id && this.id.startsWith('zoey_')) {
+                    console.log(`[ZoeyAbilities] Using Zoey ability: ${this.id}`);
+                    
+                    // Optional: Add any Zoey-specific tracking or modifications
+                    if (!options.zoeyAbilityUsed) {
+                        options.zoeyAbilityUsed = true;
+                    }
+                }
+                
+                // Call the original use method with the modified options
+                return originalUse.call(this, caster, targetOrTargets, actualManaCost, options);
+            };
+            
+            console.log('[Zoey Debug] Successfully patched Ability.prototype.use');
+            return true;
+        } else {
+            console.log('[Zoey Debug] Failed to patch Ability.prototype.use - Ability class not found');
+            return false;
+        }
+    }
+
+    // Try to patch immediately
+    if (!patchAbilityPrototype()) {
+        // If failed, try again when the DOM is loaded
+        window.addEventListener('DOMContentLoaded', patchAbilityPrototype);
+    }
+})();
+
+// Optimized ability registration function
+function safeRegisterAbilityEffect(effectName, effectFunction) {
+    if (!window.AbilityFactory || typeof window.AbilityFactory.registerAbilityEffect !== 'function') {
+        console.warn(`[Zoey Abilities] AbilityFactory not ready for registering ${effectName}`);
+        return false;
+    }
+
+    // Only register if the effect doesn't already exist or is different
+    const existingEffect = window.AbilityFactory.registeredEffects?.[effectName];
+    if (!existingEffect || existingEffect !== effectFunction) {
+        window.AbilityFactory.registerAbilityEffect(effectName, effectFunction);
+        return true;
+    }
+    return false;
+}
+
+function ensureAbilitiesRegistered() {
+    // Consolidated and optimized registration
+    const registrations = [
+        { name: 'zoeyStrawberryBellBurstEffect', func: window.zoeyStrawberryBellBurstEffect, altName: 'zoey_q' },
+        { name: 'zoeyGlowingLightArcEffect', func: window.zoeyGlowingLightArcEffect, altName: 'zoey_r' },
+        { name: 'zoeyHeartPounceEffect', func: window.zoeyHeartPounceEffect, altName: 'zoey_w' },
+        { name: 'zoeySparkleburstEffect', func: window.zoeySparkleburstEffect, altName: 'zoey_e' }
+    ];
+
+    let registeredCount = 0;
+    registrations.forEach(reg => {
+        if (safeRegisterAbilityEffect(reg.name, reg.func)) {
+            registeredCount++;
+        }
+        if (safeRegisterAbilityEffect(reg.altName, reg.func)) {
+            registeredCount++;
+        }
+    });
+
+    if (registeredCount > 0) {
+        console.log(`[Zoey Debug] Registered ${registeredCount} ability effects`);
+    }
+
+    // Patch existing abilities if needed
+    if (window.AbilityFactory.abilityRegistry) {
+        const abilityPairs = [
+            { id: 'zoey_q', effect: window.zoeyStrawberryBellBurstEffect },
+            { id: 'zoey_w', effect: window.zoeyHeartPounceEffect },
+            { id: 'zoey_e', effect: window.zoeySparkleburstEffect },
+            { id: 'zoey_r', effect: window.zoeyGlowingLightArcEffect }
+        ];
+
+        abilityPairs.forEach(pair => {
+            const ability = window.AbilityFactory.abilityRegistry[pair.id];
+            if (ability && ability.effect !== pair.effect) {
+                ability.effect = pair.effect;
+            }
+        });
+    }
+}
+
+function safeRegisterAbilityEffect(effectName, effectFunction) {
+    if (!window.AbilityFactory || typeof window.AbilityFactory.registerAbilityEffect !== 'function') {
+        console.warn(`[Zoey Abilities] AbilityFactory not ready for registering ${effectName}`);
+        return false;
+    }
+    
+    // Use the new robust registration method
+    return window.AbilityFactory.registerAbilityEffect(effectName, effectFunction);
+}
+
+// Consolidated ability effect registration
+function registerZoeyAbilityEffects() {
+    const effectRegistrations = [
+        { name: 'zoeyStrawberryBellBurstEffect', func: window.zoeyStrawberryBellBurstEffect, altName: 'zoey_q' },
+        { name: 'zoeyGlowingLightArcEffect', func: window.zoeyGlowingLightArcEffect, altName: 'zoey_r' },
+        { name: 'zoeyHeartPounceEffect', func: window.zoeyHeartPounceEffect, altName: 'zoey_w' },
+        { name: 'zoeySparkleburstEffect', func: window.zoeySparkleburstEffect, altName: 'zoey_e' }
+    ];
+
+    let registrationSuccessCount = 0;
+    let registrationAttemptCount = 0;
+
+    effectRegistrations.forEach(reg => {
+        registrationAttemptCount++;
+        
+        // Try registering primary name
+        if (safeRegisterAbilityEffect(reg.name, reg.func)) {
+            registrationSuccessCount++;
+        }
+        
+        // Try registering alternate name if different
+        if (reg.altName && reg.altName !== reg.name) {
+            if (safeRegisterAbilityEffect(reg.altName, reg.func)) {
+                registrationSuccessCount++;
+            }
+        }
+    });
+
+    console.log(`[Zoey Abilities] Registered ${registrationSuccessCount} out of ${registrationAttemptCount} ability effects`);
+}
+
+// Call registration on script load
+registerZoeyAbilityEffects();

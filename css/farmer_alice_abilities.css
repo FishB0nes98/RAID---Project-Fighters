@@ -761,6 +761,35 @@
     }
 }
 
+/* Base VFX Container Styles */
+.vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows clicks to pass through to elements below */
+    overflow: hidden; /* Clip any overflowing VFX parts */
+    z-index: 5; /* Ensure VFX is on top of character but below UI */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Specific VFX Container Overrides */
+.pounce-caster-vfx-container,
+.pounce-impact-vfx-container,
+.bunny-bounce-caster-vfx,
+.bunny-bounce-enemy-vfx,
+.carrot-powerup-caster-vfx,
+.carrot-cd-vfx-container,
+.carrot-heal-vfx-container,
+.alice-shield-gain-vfx-container,
+.alice-talent-cd-reduction-vfx-container {
+    /* These can inherit most from .vfx-container or add specific positioning/sizing if needed */
+    /* For now, direct inheritance is fine as they are typically full-size overlays on the character */
+}
+
 /* Targeting indicators */
 .character.target-ally {
     box-shadow: 0 0 10px 3px rgba(0, 255, 0, 0.7);
@@ -1742,7 +1771,7 @@
     height: 100%;
     pointer-events: none;
     z-index: 100;
-    overflow: visible;
+    overflow: visible !important;
 }
 
 .bunny-brigade-vfx {
@@ -2159,4 +2188,4 @@
         opacity: 0.8;
         box-shadow: 0 0 15px 4px rgba(0, 160, 255, 0.7);
     }
-} 
+}

@@ -40,9 +40,13 @@ class SchoolgirlKokoroCharacter extends Character {
     updateAbilityDescriptions() {
         // Update Lesser Heal description
         const lesserHealAbility = this.abilities.find(a => a.id === 'lesser_heal');
-        if (lesserHealAbility && typeof lesserHealAbility.generateDescription === 'function') {
-            lesserHealAbility.updateCaster(this);
-            lesserHealAbility.description = lesserHealAbility.generateDescription();
+        if (lesserHealAbility) {
+            if (typeof lesserHealAbility.updateCaster === 'function') {
+                lesserHealAbility.updateCaster(this);
+            }
+            if (typeof lesserHealAbility.generateDescription === 'function') {
+                lesserHealAbility.description = lesserHealAbility.generateDescription();
+            }
         }
         
         // Update Silencing Ring description
@@ -2012,7 +2016,15 @@ const lesserHealAbility = new Ability(
     1,  // Cooldown in turns
     lesserHealEffect
 ).setDescription('Heals the selected ally or herself for 410HP.')
- .setTargetType('ally_or_self'); // Can target any ally including self
+ .setTargetType('ally_or_self');
+
+// Add updateCaster method immediately after creation
+lesserHealAbility.updateCaster = function(newCaster) {
+    this.caster = newCaster;
+    if (this.generateDescription) {
+        this.description = this.generateDescription();
+    }
+};
 
 // Override the target type based on talent modifications
 lesserHealAbility.getTargetType = function() {
@@ -2023,7 +2035,7 @@ lesserHealAbility.getTargetType = function() {
     return 'ally_or_self'; // Default behavior
 };
 
-// Override description generation to reflect talent changes
+// Move this before updateAbilityDescriptions is called
 lesserHealAbility.generateDescription = function() {
     // Get the caster to check for talents
     const caster = this.caster || window.gameManager?.gameState?.selectedCharacter;
@@ -2114,14 +2126,6 @@ lesserHealAbility.generateDescription = function() {
     }, 100);
     
     return description;
-};
-
-// Update description when caster changes
-lesserHealAbility.updateCaster = function(newCaster) {
-    this.caster = newCaster;
-    if (this.generateDescription) {
-        this.description = this.generateDescription();
-    }
 };
 
 // Create Silencing Ring ability

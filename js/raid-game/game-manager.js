@@ -218,9 +218,9 @@ class GameManager {
             }
         };
         
-        window.addTestItemToFirstCharacter = (itemId = 'golden_arrow') => {
-            if (this.playerCharacters && this.playerCharacters.length > 0) {
-                const character = this.playerCharacters[0];
+        window.addTestItemToFirstCharacter = (itemId = 'tidal_charm') => {
+            if (this.gameState.playerCharacters && this.gameState.playerCharacters.length > 0) {
+                const character = this.gameState.playerCharacters[0];
                 console.log(`[Debug] Adding ${itemId} to ${character.name}`);
                 
                 if (window.InventoryIntegrationManager) {
@@ -1190,16 +1190,38 @@ class GameManager {
         const backgroundElement = document.getElementById('stage-background');
         if (!backgroundElement) return;
         
-        let backgroundImage = '';
+        let backgroundImagePath = '';
         
         // Check if stage has a specific background
-        if (stage && stage.backgroundImage) { // <<< Directly use stage.backgroundImage
-            backgroundImage = stage.backgroundImage;
+        if (stage && stage.backgroundImage) {
+            backgroundImagePath = stage.backgroundImage;
         }
         
-        // Set background image if found, otherwise use default gradient
-        if (backgroundImage) {
-            backgroundElement.style.backgroundImage = `url(${backgroundImage})`;
+        if (backgroundImagePath) {
+            const img = new Image();
+            img.onload = () => {
+                backgroundElement.style.backgroundImage = `url(${backgroundImagePath})`;
+            };
+            img.onerror = () => {
+                console.warn(`[GameManager] Failed to load background image: ${backgroundImagePath}. Attempting .png fallback.`);
+                // Try .png fallback
+                const pngPath = backgroundImagePath.replace(/\.webp$/, '.png');
+                if (pngPath !== backgroundImagePath) {
+                    const pngImg = new Image();
+                    pngImg.onload = () => {
+                        backgroundElement.style.backgroundImage = `url(${pngPath})`;
+                    };
+                    pngImg.onerror = () => {
+                        console.error(`[GameManager] Failed to load background image: ${pngPath}. Using default gradient.`);
+                        backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
+                    };
+                    pngImg.src = pngPath;
+                } else {
+                    console.error(`[GameManager] Background image is not a .webp, no .png fallback possible. Using default gradient.`);
+                    backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
+                }
+            };
+            img.src = backgroundImagePath;
         } else {
             backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
         }
@@ -1693,6 +1715,55 @@ class GameManager {
             // Clear the temporary flag after use
             delete usedAbility._tempDoesNotEndTurn;
         }
+
+        // --- NEW: Handle Leviathan's Fang Proc ---
+        if (success && caster.leviathansFangProc) {
+            console.log(`[Leviathan's Fang] Proccing extra Q cast for ${caster.name}`);
+            caster.leviathansFangProc = false; // Consume the proc
+            
+            // Re-cast the same ability on the same target
+            // Use a timeout to allow the first ability's effects to resolve visually
+            setTimeout(() => {
+                this.addLogEntry(`Leviathan's Fang causes ${caster.name}'s ${ability.name} to strike again!`, 'item-effect');
+                caster.useAbility(abilityIndex, target, { ignoreCooldown: true });
+            }, 500);
+        }
+        // --- END NEW ---
+
+        // --- NEW: Handle Ice Dagger Proc ---
+        if (success && abilityIndex === 0) { // Assuming Q is the first ability
+            const inventory = window.CharacterInventories.get(caster.id);
+            if (inventory && inventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'ice_dagger')) {
+                if (Math.random() < 0.10) { // 10% chance
+                    const freezeDuration = 2;
+                    const existingFreeze = target.debuffs && target.debuffs.find(d => d.id === 'freeze');
+                    if (!existingFreeze) {
+                        const freezeDebuff = {
+                            id: 'freeze',
+                            name: 'Frozen',
+                            icon: '❄️',
+                            duration: freezeDuration,
+                            maxDuration: freezeDuration,
+                            isDebuff: true,
+                            source: 'Ice Dagger',
+                            description: `Frozen solid! Character is stunned for the duration.`,
+                            type: 'stun',
+                            onRemove: function(character) {
+                                if (window.AtlanteanSubZeroAbilities) {
+                                    window.AtlanteanSubZeroAbilities.removeFreezeIndicator(character, false);
+                                }
+                            }
+                        };
+                        target.addDebuff(freezeDebuff, caster);
+                        if (window.AtlanteanSubZeroAbilities && window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX) {
+                            window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX(target);
+                        }
+                        this.addLogEntry(`❄️ ${caster.name}'s Ice Dagger freezes ${target.name}!`, 'item-effect');
+                    }
+                }
+            }
+        }
+        // --- END NEW ---
         
         // --- NEW: Check if the ability itself is flagged to not end turn (permanent property) ---
         if (success && usedAbility && usedAbility.doesNotEndTurn === true) {
@@ -4019,8 +4090,6 @@ class GameManager {
            // Remove any lingering backdrop elements from various modals
            const backdrops = [
                '.xp-display-backdrop',
-               '.loot-rewards-backdrop', 
-               '.loot-display-backdrop',
                '.character-stats-backdrop',
                '.game-over-backdrop',
                '.tutorial-backdrop',
@@ -4037,7 +4106,7 @@ class GameManager {
            });
            
            // Also remove any modals that might be stuck with show classes
-           const modals = document.querySelectorAll('.xp-rewards-display, .loot-rewards-modal');
+           const modals = document.querySelectorAll('.xp-rewards-display');
            modals.forEach(modal => {
                if (modal.classList.contains('show') || modal.classList.contains('visible')) {
                    modal.classList.remove('show', 'visible');
@@ -6273,6 +6342,9 @@ class GameManager {
             charDiv.className = 'character character-slot';
             // Store the unique instanceId in a data attribute for easy retrieval
             charDiv.dataset.instanceId = elementId;
+            const charElement = document.createElement('div');
+            charElement.id = `character-${character.id}`;  // Ensure consistent ID format
+            
             // Also store the character ID for CSS targeting
             charDiv.dataset.characterId = character.id; 
             if (isAI) {
@@ -6427,9 +6499,11 @@ class GameManager {
             
             // --- MODIFIED: Check if element exists before proceeding --- 
             if (!charElement) {
-                // Log a warning instead of an error, as this can happen during initial load
-                console.warn(`[UIManager] updateCharacterUI: UI element not found for character: ${elementId}. Skipping update.`);
-                return; // Exit if element not found
+                // Check if it's a player character (ID contains '-player-')
+                if (character.id.includes('-player-')) {
+                } else {
+                }
+                return;
             }
             // --- END MODIFICATION ---
             
@@ -6924,7 +6998,6 @@ class GameManager {
             } else {
                 charElement.classList.remove('dead');
             }
-            // --- END NEW ---
         }
 
         // Highlight selected character
@@ -8811,4 +8884,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize the game manager
     await gameManager.initialize();
     console.log("Game manager initialized and ready");
-}); 
+});

@@ -1249,7 +1249,7 @@ const pounceAbilityEffect = (caster, target) => {
         console.log(`[Pounce Stun Debug] Stun roll successful! Applying stun.`);
         stunApplied = true; // Set flag for VFX addition
         const stunDebuff = new Effect(
-            'stun_debuff',
+            'stun', // Changed debuffId to 'stun'
             'Stunned',
             'Icons/debuffs/stun.png',
             ability.debuffEffect.duration || 1, // Duration of 1 turn if not specified
@@ -1422,9 +1422,9 @@ const thickFurAbilityEffect = (caster, target, options = {}) => {
             const casterElement = document.getElementById(`character-${caster.instanceId || caster.id}`);
             if (casterElement) {
                 // Create a container for the Restorative Fur healing effect
-                const healingVfxContainer = document.createElement('div');
-                healingVfxContainer.className = 'vfx-container restorative-fur-heal-vfx';
-                casterElement.appendChild(healingVfxContainer);
+            const healingVfxContainer = document.createElement('div');
+            healingVfxContainer.className = 'vfx-container restorative-fur-heal-vfx';
+            casterElement.appendChild(healingVfxContainer);
                 
                 // Add the healing amount text
                 const healingText = document.createElement('div');
@@ -1667,10 +1667,10 @@ const bunnyBounceAbilityEffect = (caster, target) => {
         
         // --- Enemy Target VFX ---
         const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
-        if (targetElement) {
-            const vfxContainer = document.createElement('div');
-            vfxContainer.className = 'vfx-container bunny-bounce-enemy-vfx';
-            targetElement.appendChild(vfxContainer);
+    if (targetElement) {
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'vfx-container bunny-bounce-enemy-vfx';
+        targetElement.appendChild(vfxContainer);
 
             targetElement.classList.add('bunny-bounce-impact');
 
@@ -1760,7 +1760,7 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
         const battleContainer = document.querySelector('.battle-container');
         if (battleContainer) {
             const brigadeVfxContainer = document.createElement('div');
-            brigadeVfxContainer.className = 'bunny-brigade-vfx-container';
+            brigadeVfxContainer.className = 'vfx-container bunny-brigade-vfx-container';
             battleContainer.appendChild(brigadeVfxContainer);
             
             const brigadeVfx = document.createElement('div');
@@ -1897,36 +1897,36 @@ pounceAbility.debuffEffect = {
     effects: { cantAct: true }
 };
 pounceAbility.generateDescription = function() {
-    console.log(`[Alice] Generating description for pounce. Base: "${this.baseDescription}"`);
+    // Get the base description from the Ability prototype's method
+    let generatedDesc = Ability.prototype.generateDescription.call(this);
+    console.log(`[Alice] Generating description for pounce. Base: "${generatedDesc}"`);
     
-    // Ensure amount is set with fallback to default
-    const damageAmount = this.amount !== undefined ? this.amount : 0.5;
-    
-    // Check if Hunter's Instinct talent is active
-    if (this.cooldownReductionEffect && damageAmount === 2.0 && !this.debuffEffect) {
-        // Using the Hunter's Instinct talent version
-        let description = `Deals <span class="talent-effect damage">${Math.round(damageAmount * 100)}% AD damage</span> and has a <span class="talent-effect utility">${Math.round(this.cooldownReductionEffect.chance * 100)}% chance to reduce a random Alice ability cooldown by ${this.cooldownReductionEffect.amount} turn</span>.`;
+    // Append Hunter's Instinct talent information
+    if (this.cooldownReductionEffect && this.cooldownReductionEffect.chance !== undefined) {
+        // Hunter's Instinct changes Pounce's damage and removes stun, replacing it with CDR
+        const damagePercent = Math.round((this.amount !== undefined ? this.amount : 0.5) * 100);
+        const cdChance = Math.round(this.cooldownReductionEffect.chance * 100);
+        const cdAmount = this.cooldownReductionEffect.amount || 1;
         
-        // Add Agile Hunter information if applicable
-        if (this.chanceToNotEndTurn) {
-            description += ` <span class="talent-effect utility">Has a ${Math.round(this.chanceToNotEndTurn * 100)}% chance not to end turn and reset Pounce's cooldown when used.</span>`;
-        }
-        
-        this.description = description;
-    } else {
-        // Using the base version or a different talent modification
-        this.description = this.baseDescription;
-        
-        // If only the amount was modified but it's not the Hunter's Instinct talent
-        if (damageAmount !== 0.5) {
-            this.description = this.description.replace('50%', `${Math.round(damageAmount * 100)}%`);
-        }
-        
-        // Add Agile Hunter information if applicable even in base version
-        if (this.chanceToNotEndTurn) {
-            this.description += ` <span class="talent-effect utility">Has a ${Math.round(this.chanceToNotEndTurn * 100)}% chance not to end turn and reset Pounce's cooldown when used.</span>`;
-        }
+        generatedDesc = `Deals <span class="talent-effect damage">${damagePercent}% AD damage</span> and has a <span class="talent-effect utility">${cdChance}% chance to reduce a random Alice ability cooldown by ${cdAmount} turn${cdAmount > 1 ? 's' : ''}</span>.`;
     }
+    
+    // Append Primal Strength talent (Max HP Scaling)
+    if (this.maxHpScaling && this.maxHpScaling > 0 && this.character) {
+        const hpPercent = Math.round(this.maxHpScaling * 100);
+        const maxHp = this.character.stats.maxHp || this.character.stats.hp || 0;
+        const maxHpDamage = Math.floor(maxHp * this.maxHpScaling);
+        
+        generatedDesc += ` <span class="talent-effect">Also deals ${hpPercent}% of your max HP as additional damage (currently +${maxHpDamage}).</span>`;
+    }
+    
+    // Append Agile Hunter talent information
+    if (this.chanceToNotEndTurn && this.chanceToNotEndTurn > 0) {
+        const chancePercent = Math.round(this.chanceToNotEndTurn * 100);
+        generatedDesc += ` <span class="talent-effect utility">Has a ${chancePercent}% chance not to end turn and reset Pounce's cooldown when used.</span>`;
+    }
+    
+    this.description = generatedDesc;
     console.log(`[Alice] Final pounce description: "${this.description}"`);
 };
 pounceAbility.generateDescription(); // Generate initial description
@@ -1944,25 +1944,25 @@ const thickFurAbility = new Ability(
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
 thickFurAbility.baseDescription = 'Increases Armor and Magic Shield by 20 for 10 turns.';
 thickFurAbility.generateDescription = function() {
-    console.log(`[Alice] Generating description for thick_fur. Base: "${this.baseDescription}"`);
-    let desc = this.baseDescription;
+    let generatedDesc = Ability.prototype.generateDescription.call(this);
+    console.log(`[Alice] Generating description for thick_fur. Base: "${generatedDesc}"`);
     
-    // Add removeAllDebuffs talent text
+    // Append Purifying Fur talent text
     if (this.removeAllDebuffs) {
-        desc += ` <span class="talent-effect">Removes all debuffs when activated.</span>`;
+        generatedDesc += ` <span class="talent-effect">Removes all debuffs when activated.</span>`;
     }
     
-    // Add healingPercent talent text
-    if (this.healingPercent) {
-        desc += ` <span class="talent-effect healing">Heals for ${Math.round(this.healingPercent * 100)}% of missing HP when activated.</span>`;
+    // Append Restorative Fur talent text
+    if (this.healingPercent && this.healingPercent > 0) {
+        generatedDesc += ` <span class="talent-effect healing">Heals for ${Math.round(this.healingPercent * 100)}% of missing HP when activated.</span>`;
     }
     
-    // Add doesNotEndTurn talent text
+    // Append Fur Coat Endurance talent text
     if (this.doesNotEndTurn) {
-        desc += ` <span class="talent-effect utility">Doesn't end Alice's turn when used.</span>`;
+        generatedDesc += ` <span class="talent-effect utility">Doesn't end Alice's turn when used.</span>`;
     }
     
-    this.description = desc;
+    this.description = generatedDesc;
     console.log(`[Alice] Final thick_fur description: "${this.description}"`);
 };
 thickFurAbility.generateDescription(); // Generate initial description
@@ -1980,10 +1980,10 @@ const bunnyBounceAbility = new Ability(
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
 bunnyBounceAbility.baseDescription = 'If used on an ally: Redirect every damage from that target to yourself. If used on an enemy: Deals 600% of Magic Shield as physical damage.';
 bunnyBounceAbility.generateDescription = function() {
-    console.log(`[Alice] Generating description for bunny_bounce. Base: "${this.baseDescription}"`);
-    this.description = this.baseDescription;
+    // Bunny Bounce currently has no talents modifying its description, so just use the base.
+    let generatedDesc = Ability.prototype.generateDescription.call(this);
+    this.description = generatedDesc;
     console.log(`[Alice] Final bunny_bounce description: "${this.description}"`);
-    // Add talent modifications here if Bunny Bounce gets talents later
 };
 bunnyBounceAbility.generateDescription(); // Generate initial description
 bunnyBounceAbility.setTargetType('any_except_self'); // Custom target type to allow targeting allies and enemies but not self
@@ -2000,25 +2000,27 @@ const carrotPowerUpAbility = new Ability(
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
 carrotPowerUpAbility.baseDescription = 'Heals the target for 27% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.';
 carrotPowerUpAbility.generateDescription = function() {
-    console.log(`[Alice] Generating description for carrot_power_up. Base: "${this.baseDescription}"`);
-    let desc = this.baseDescription;
+    let generatedDesc = Ability.prototype.generateDescription.call(this);
+    console.log(`[Alice] Generating description for carrot_power_up. Base: "${generatedDesc}"`);
     
-    // Add talent modifications here
+    // Append Power Carrots talent text
     if (this.useMaxHpInstead) {
-        desc = desc.replace('27% of missing health', '<span class="talent-effect">27% of maximum health</span>');
+        // Replace the "missing health" part with "maximum health"
+        generatedDesc = generatedDesc.replace('27% of missing health', '<span class="talent-effect">27% of maximum health</span>');
     }
     
-    // Add Bunny Brigade talent text
+    // Append Bunny Brigade talent text
     if (this.affectAllAllies) {
-        desc = desc.replace('Heals the target', '<span class="talent-effect aoe">Heals ALL allies</span>');
+        // Replace "Heals the target" with "Heals ALL allies"
+        generatedDesc = generatedDesc.replace('Heals the target', '<span class="talent-effect aoe">Heals ALL allies</span>');
         
-        // Also mention the reduced cooldown (should be 12 turns instead of 15)
-        if (this.cooldown === 12) {
-            desc += ' <span class="talent-effect">Cooldown reduced to 12 turns.</span>';
+        // Also mention the reduced cooldown if it's set by talent (e.g., to 12 turns instead of 15)
+        if (this.cooldown === 12) { // Assuming 12 is the talent-modified cooldown
+            generatedDesc += ' <span class="talent-effect">Cooldown reduced to 12 turns.</span>';
         }
     }
     
-    this.description = desc;
+    this.description = generatedDesc;
     console.log(`[Alice] Final carrot_power_up description: "${this.description}"`);
 };
 carrotPowerUpAbility.generateDescription(); // Generate initial description

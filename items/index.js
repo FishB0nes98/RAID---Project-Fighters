@@ -12,6 +12,24 @@ export { BaseItem } from './base-item.js';
 // Export potion classes
 export { ShieldPotion, PowerPotion } from './potions/index.js';
 
+// Export passive item classes
+export { TidalCharm } from './Tidal_Charm.js';
+export { LeviathansFang } from './Leviathans_Fang.js';
+export { StormcallersOrb } from './Stormcallers_Orb.js';
+export { TidebornBreastplate } from './Tideborn_Breastplate.js';
+export { WaterElementalCrystal } from './Water_Elemental_Crystal.js';
+export { Wavebreaker } from './Wavebreaker.js';
+
+// Export crafting materials
+export { MurkyWaterVial } from './crafting/Murky_Water_Vial.js';
+export { ShadowEssence } from './crafting/Shadow_Essence.js';
+export { VoidEssence } from './crafting/Void_Essence.js';
+export { IceFlask } from './crafting/ice_flask.js';
+export { IceShard } from './crafting/ice_shard.js';
+
+// Export passive item classes
+export { IceDagger } from './ice_dagger.js';
+
 // Initialize the item system for the game
 export function initItemSystem(game) {
     // Create inventory for the current player
@@ -181,4 +199,4 @@ function renderPowerBoostEffect(game, player) {
     
     // Restore context
     ctx.restore();
-} 
+}

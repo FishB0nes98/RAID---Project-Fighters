@@ -19,25 +19,23 @@ class Character {
             dodgeChance: stats.dodgeChance || 0,
             critChance: stats.critChance || 0,
             critDamage: stats.critDamage || 1.5,
-            healingPower: stats.healingPower || 0,
-            maxHp: stats.hp || 100,
+            speed: stats.speed || 0,
+            maxHp: stats.maxHp || stats.hp || 100,
+            currentHp: stats.currentHp || stats.hp || 100,
+            maxMana: stats.maxMana || stats.mana || 100,
+            currentMana: stats.currentMana || stats.mana || 100,
             hpPerTurn: stats.hpPerTurn || 0,
-            maxMana: stats.mana || 100,
-            manaPerTurn: stats.manaPerTurn || 0,
-            // Sunlight resource (optional)
-            ...(stats.maxSunlight !== undefined ? { maxSunlight: stats.maxSunlight } : {}),
-            ...(stats.currentSunlight !== undefined ? { currentSunlight: stats.currentSunlight } : {}),
+            manaPerTurn: stats.manaPerTurn || 0
         };
 
-        // Current stats including modifications
-        this.stats = {
-            ...this.baseStats, // Start with base stats
-            currentHp: stats.hp || 100, // Keep current HP/Mana separate
-            currentMana: stats.mana || 100,
-        };
-        // Ensure currentHp/Mana are not in baseStats if they were copied
-        delete this.baseStats.currentHp;
-        delete this.baseStats.currentMana;
+        // Only add currentSunlight for Kotal Kahn
+        if (id === 'atlantean_kotal_kahn') {
+            this.baseStats.currentSunlight = stats.currentSunlight || 0;
+            this.baseStats.maxSunlight = stats.maxSunlight || 100;
+        }
+
+        // Initialize stats with base stats
+        this.stats = { ...this.baseStats };
 
         // Shield system - NEW
         this.shield = 0; // Current shield amount
@@ -65,6 +63,25 @@ class Character {
         // Properties for Farmer Nina's talents
         this.enablePainIntoPower = false; // <-- NEW: Flag for Pain into Power talent
         this.critDamageFromTakingDamageBonus = 0; // <-- NEW: Bonus crit damage accumulated
+
+        // Initialize item bonuses
+        this.itemBonuses = {
+            physicalDamage: 0,
+            magicalDamage: 0,
+            armor: 0,
+            magicalShield: 0,
+            lifesteal: 0,
+            dodgeChance: 0,
+            critChance: 0,
+            critDamage: 0,
+            healingPower: 0,
+            hp: 0,
+            hpPerTurn: 0,
+            mana: 0,
+            manaPerTurn: 0,
+            maxSunlight: 0,
+            currentSunlight: 0,
+        };
     }
 
     // --- XP and Level System Methods ---
@@ -375,7 +392,9 @@ class Character {
         // Store current resources to preserve them
         const preservedCurrentHp = this.stats.currentHp;
         const preservedCurrentMana = this.stats.currentMana;
-        const preservedCurrentSunlight = this.stats.currentSunlight;
+        const preservedCurrentSunlight = this.id === 'atlantean_kotal_kahn' 
+            ? (Number.isFinite(this.stats.currentSunlight) ? this.stats.currentSunlight : 0)
+            : undefined;
         
         // Store stage modifier values BEFORE resetting stats
         const preservedStageValues = {};
@@ -464,8 +483,11 @@ class Character {
         
         // --- NEW: Restore healingPower from talents ---
         if (preservedStageValues.healingPower !== undefined) {
-            this.stats.healingPower = preservedStageValues.healingPower;
-            console.log(`[RecalcStats] Restored talent healingPower: ${this.stats.healingPower}`);
+            // Only restore if the preserved value is greater than the current value
+            if (preservedStageValues.healingPower > (this.stats.healingPower || 0)) {
+                this.stats.healingPower = preservedStageValues.healingPower;
+                console.log(`[RecalcStats] Restored talent healingPower: ${this.stats.healingPower}`);
+            }
         }
         // --- END NEW ---
         
@@ -519,7 +541,17 @@ class Character {
         // Set current HP and mana back to their preserved values
         this.stats.currentHp = preservedCurrentHp;
         this.stats.currentMana = preservedCurrentMana;
-        this.stats.currentSunlight = preservedCurrentSunlight;
+        
+        // Restore currentSunlight only for Kotal Kahn
+        if (this.id === 'atlantean_kotal_kahn' && preservedCurrentSunlight !== undefined) {
+            this.stats.currentSunlight = Math.min(
+                preservedCurrentSunlight, 
+                this.stats.maxSunlight || 100
+            );
+        } else {
+            delete this.stats.currentSunlight;
+            delete this.stats.maxSunlight;
+        }
         
         // <<< END NEW LOG >>>
         
@@ -700,7 +732,6 @@ class Character {
         // === Sunlight Sanitization ===
         // Prevent NaN values that cause Firebase write errors
         if (!Number.isFinite(this.stats.currentSunlight)) {
-            console.warn(`[RecalcStats] Non-finite currentSunlight for ${this.name}; resetting to 0.`);
             this.stats.currentSunlight = 0;
         }
 
@@ -825,12 +856,18 @@ class Character {
             console.log(`[RecalcStats - Items] Applying item bonuses for ${this.name}:`, this.itemBonuses);
             
             Object.entries(this.itemBonuses).forEach(([stat, bonus]) => {
-                if (bonus !== 0 && this.stats.hasOwnProperty(stat)) {
-                    const originalValue = this.stats[stat];
-                    this.stats[stat] += bonus;
-                    console.log(`[RecalcStats - Items] Applied +${bonus} ${stat} to ${this.name}: ${originalValue} → ${this.stats[stat]}`);
-                } else if (bonus !== 0) {
-                    console.warn(`[RecalcStats - Items] Stat '${stat}' not found on character ${this.name}, ignoring bonus of ${bonus}`);
+                if (bonus !== 0) {
+                    if (stat === 'critMultiplier') {
+                        // Special handling for critMultiplier: add to base critDamage
+                        this.stats.critDamage = (this.stats.critDamage || this.baseStats.critDamage || 1.5) + bonus;
+                        console.log(`[RecalcStats - Items] Applied +${bonus} ${stat} to ${this.name}: New critDamage → ${this.stats.critDamage}`);
+                    } else if (this.stats.hasOwnProperty(stat)) {
+                        const originalValue = this.stats[stat];
+                        this.stats[stat] += bonus;
+                        console.log(`[RecalcStats - Items] Applied +${bonus} ${stat} to ${this.name}: ${originalValue} → ${this.stats[stat]}`);
+                    } else {
+                        console.warn(`[RecalcStats - Items] Stat '${stat}' not found on character ${this.name}, ignoring bonus of ${bonus}`);
+                    }
                 }
             });
         }
@@ -894,7 +931,7 @@ class Character {
     }
 
     // Use an ability by its index
-    useAbility(index, target) {
+    useAbility(index, target, options = {}) {
         if (index < 0 || index >= this.abilities.length) {
             console.error(`Invalid ability index: ${index} for ${this.name}`);
             return false;
@@ -929,13 +966,23 @@ class Character {
         }
         // --- END NEW ---
 
+        // --- NEW: Check for Leviathan's Fang Item Effect ---
+        const casterInventory = window.CharacterInventories?.get(this.id);
+        if (casterInventory && casterInventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'leviathans_fang') && index === 0) {
+            console.log(`[Leviathan's Fang] ${this.name}'s Q ability will be cast an additional time.`);
+            // The actual double cast will be handled in the game manager after the first cast.
+            // We'll add a flag to the character object to indicate this.
+            this.leviathansFangProc = true;
+        }
+        // --- END NEW: Leviathan's Fang Item Effect ---
+
         // --- PRE-CHECKS (Modified for mana cost) ---
         if (ability.isDisabled) {
              const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
              log(`${this.name}'s ${ability.name} is disabled.`);
              return false;
         }
-        if (ability.currentCooldown > 0) {
+        if (ability.currentCooldown > 0 && !options.ignoreCooldown) {
             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
             log(`${ability.name} is on cooldown: ${ability.currentCooldown} turns remaining`);
             return false;
@@ -1854,6 +1901,31 @@ class Character {
         }
         // --- End Lifesteal Application ---
 
+        // --- NEW: Icicle Spear Effect ---
+        if (caster && !options.isItemEffect && actualDamageTaken > 0) { // Prevent item effects from triggering themselves and only on actual damage
+            const casterInventory = window.CharacterInventories?.get(caster.id);
+            if (casterInventory) {
+                const hasIcicleSpear = casterInventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'icicle_spear');
+                if (hasIcicleSpear && Math.random() < 0.05) { // 5% chance
+                    const freezeDuration = 1; // Freeze for 1 turn
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`❄️ ${caster.name}'s Icicle Spear freezes ${this.name}!`, 'item-effect');
+                    
+                    const freezeDebuff = new Effect(
+                        'freeze',
+                        'Frozen',
+                        '❄️',
+                        freezeDuration,
+                        null,
+                        true
+                    );
+                    freezeDebuff.effects = { cantAct: true };
+                    this.addDebuff(freezeDebuff);
+                }
+            }
+        }
+        // --- END NEW: Icicle Spear Effect ---
+
         // --- NEW: Dispatch damageDealt event ---
         if (caster && actualDamageTaken > 0) {
             const damageDealtEvent = new CustomEvent('damageDealt', {
@@ -1924,9 +1996,27 @@ class Character {
             }
         } else if (actualDamageTaken > 0) {
             // Added detailed check logging
-            console.log(`[Passive Debug] onDamageTaken check failed for ${this.name}. Has passiveHandler: ${!!this.passiveHandler}, Handler type: ${typeof this.passiveHandler}, Has onDamageTaken: ${!!this.passiveHandler?.onDamageTaken}, onDamageTaken type: ${typeof this.passiveHandler?.onDamageTaken}`); 
+            console.log(`[Passive Debug] onDamageTaken check failed for ${this.name}. Has passiveHandler: ${!!this.passiveHandler}, Handler type: ${typeof this.passiveHandler}, Has onDamageTaken: ${!!this.passiveHandler?.onDamageTaken}, onDamageTaken type: ${typeof this.passiveHandler?.onDamageTaken}`);
         }
         // --- END Passive Hook ---
+
+        // --- NEW: Tideborn Breastplate Effect (Heals 5% of damage received) ---
+        if (actualDamageTaken > 0 && !options.isItemEffect) { // Prevent infinite loops
+            // Check if the character has a CharacterInventory and the Tideborn Breastplate equipped
+            const characterInventory = window.CharacterInventories?.get(this.id);
+            if (characterInventory) {
+                const hasTidebornBreastplate = characterInventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'tideborn_breastplate');
+                if (hasTidebornBreastplate) {
+                    const healAmount = Math.floor(actualDamageTaken * 0.13); // 13% of damage received
+                    if (healAmount > 0) {
+                        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                        log(`🛡️ ${this.name}'s Tideborn Breastplate heals for ${healAmount} HP!`, 'item-effect');
+                        this.heal(healAmount, this, { isItemEffect: true, abilityId: 'tideborn_breastplate_proc' }); // Heal self, mark as item effect
+                    }
+                }
+            }
+        }
+        // --- END NEW: Tideborn Breastplate Effect ---
 
         // Remove Farmer Nina's hiding buff if she takes damage
         if (damage > 0 && this.id === 'farmer_nina') {
@@ -1987,9 +2077,9 @@ class Character {
                 }
             }
             // --- DEBUG: Log damage value just before setting textContent ---
-            console.log(`[VFX Debug - ${this.name}] Setting damage VFX text. Damage value: ${actualDamageTaken}, isCritical: ${isCritical}`);
+            console.log(`[VFX Debug - ${this.name}] Setting damage VFX text. Damage value: ${finalDamage}, isCritical: ${isCritical}`);
             // --- END DEBUG ---
-            damageVfx.textContent = `-${Math.round(actualDamageTaken)}`;
+            damageVfx.textContent = `-${Math.round(finalDamage)}`;
             damageCharElement.appendChild(damageVfx);
             
             // Add blood splatter VFX for physical damage
@@ -2507,6 +2597,39 @@ class Character {
             }
         }
         // --- END NEW: Guardian's Link Talent ---
+
+                // --- NEW: Tidal Charm Item Effect ---
+        if (caster && !options.isPassiveHealing) { // Don't trigger on passive/linked heals
+            const casterInventory = window.CharacterInventories?.get(caster.id);
+            if (casterInventory) {
+                const hasTidalCharm = casterInventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'tidal_charm');
+                if (hasTidalCharm) {
+                    const gameManager = window.gameManager;
+                    if (gameManager) {
+                        const allies = gameManager.getAllies(caster).filter(ally => 
+                            ally.id !== caster.id && // not the caster
+                            ally.id !== this.id && // not the original target
+                            !ally.isDead() // only living allies
+                        );
+
+                        if (allies.length > 0) {
+                            const randomAlly = allies[Math.floor(Math.random() * allies.length)];
+                            // Heal for 25% of the original base heal amount of the ability
+                            const charmHealAmount = Math.floor(amount * 0.25); 
+
+                            if (charmHealAmount > 0) {
+                                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                log(`🌊 ${caster.name}'s Tidal Charm releases a wave of healing energy!`, 'item-effect');
+                                // The heal on the random ally should not trigger another tidal charm effect.
+                                const healResult = randomAlly.heal(charmHealAmount, caster, { isPassiveHealing: true, abilityId: 'tidal_charm' });
+                                log(`${randomAlly.name} is healed for ${healResult.healAmount} by Tidal Charm!`, 'heal');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // --- END NEW: Tidal Charm ---
         
         // --- MODIFIED: Check options before playing VFX and add critical class --- 
         if (!options.suppressDefaultVFX) {
@@ -3654,6 +3777,28 @@ class Character {
         
         // --- END Passive Hook ---
 
+        // --- NEW: Fish Scale Shoulderplate Passive Effect (25% chance to heal 4% of max HP on turn start) ---
+        if (!shouldReduceDuration) { // Only trigger at turn start, not when reducing durations
+            const characterInventory = window.CharacterInventories?.get(this.id);
+            if (characterInventory) {
+                const hasFishScaleShoulderplate = characterInventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'fish_scale_shoulderplate');
+                if (hasFishScaleShoulderplate) {
+                    // 25% chance to trigger
+                    if (Math.random() < 0.15) {
+                        const maxHp = this.stats.maxHp || this.stats.hp || 0;
+                        const healAmount = Math.floor(maxHp * 0.04); // 4% of max HP
+                        
+                        if (healAmount > 0) {
+                            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                            log(`🐟 ${this.name}'s Fish Scale Shoulderplate glistens with healing energy!`, 'item-effect');
+                            this.heal(healAmount, this, { isItemEffect: true, abilityId: 'fish_scale_shoulderplate_proc' });
+                        }
+                    }
+                }
+            }
+        }
+        // --- END Fish Scale Shoulderplate ---
+
         // Process buffs first
         // Loop backwards to handle removals safely
         for (let i = this.buffs.length - 1; i >= 0; i--) {
@@ -4612,20 +4757,13 @@ class Ability {
      * @returns {string} The generated description string.
      */
     generateDescription() {
-        // Fallback: If baseDescription is somehow empty, try to use the current description as a base
-        // or set a default to avoid errors downstream.
-        if (!this.baseDescription) {
-            if (this.description) { // If a description exists (e.g. from JSON initial load)
-                console.warn(`[Ability.generateDescription] Missing baseDescription for ability "${this.id}". Using current description as base.`);
-                this.baseDescription = this.description;
-            } else {
-                console.warn(`[Ability.generateDescription] Missing baseDescription AND description for ability "${this.id}". Setting a default.`);
-                this.baseDescription = `Default description for ${this.name || this.id}.`;
-            }
+        // Ensure baseDescription is always a string.
+        if (typeof this.baseDescription !== 'string' || !this.baseDescription) {
+            this.baseDescription = this.description || `Default description for ${this.name || this.id}.`;
+            console.warn(`[Ability.generateDescription] baseDescription was invalid or empty for "${this.id}". Set to: "${this.baseDescription}"`);
         }
 
         let generatedDesc = this.baseDescription;
-        let talentEffectsHtml = '';
 
         // --- Placeholder Replacement --- 
         const placeholders = generatedDesc.match(/\{[a-zA-Z0-9_]+\}/g) || [];
@@ -4633,8 +4771,9 @@ class Ability {
             const propertyName = placeholder.slice(1, -1); // Remove {}
             let value = this[propertyName]; // Get value from the ability instance
 
-            if (value === undefined) {
-                console.warn(`[Ability.generateDescription] Property "${propertyName}" not found on ability "${this.id}" for description generation.`);
+            // Handle undefined or null values gracefully
+            if (value === undefined || value === null) {
+                console.warn(`[Ability.generateDescription] Property "${propertyName}" not found or is null/undefined on ability "${this.id}" for description generation.`);
                 value = `[${propertyName}]`; // Indicate missing value
             }
 
@@ -4642,39 +4781,31 @@ class Ability {
             if (typeof value === 'number' && (
                 propertyName.toLowerCase().includes('chance') ||
                 propertyName.toLowerCase().includes('modifier') ||
-                propertyName.toLowerCase().includes('percent')
+                propertyName.toLowerCase().includes('percent') ||
+                propertyName.toLowerCase().includes('multiplier') // Added multiplier for consistency
             )) {
-                if (value >= 0 && value <= 1) {
+                // Check if it's a decimal that should be converted to percentage
+                if (value >= 0 && value <= 1 && (propertyName.toLowerCase().includes('chance') || propertyName.toLowerCase().includes('percent') || propertyName.toLowerCase().includes('multiplier'))) {
                     value = `${Math.round(value * 100)}%`;
+                } else if (propertyName.toLowerCase().includes('damage')) {
+                    // For damage values, just round to nearest integer
+                    value = Math.round(value);
+                } else {
+                    // For other numbers, just use the value as is
+                    value = `${value}`;
                 }
+            } else if (typeof value === 'boolean') {
+                value = value ? 'Enabled' : 'Disabled'; // Example for boolean properties
+            } else {
+                value = String(value); // Convert any other type to string
             }
             generatedDesc = generatedDesc.replace(placeholder, value);
         });
 
-        // --- Append Talent Information --- 
-        // This is a generic spot. Character-specific abilities (like Renée's)
-        // should ideally have their own generateDescription methods that handle
-        // their specific talent texts. This generic one won't know about them.
-        // However, if a character-specific generateDescription is not attached, this will run.
-
-        // Example of how talent effects COULD be generically appended if stored on the ability
-        if (this.talentModifiers && typeof this.talentModifiers === 'object') {
-            for (const talentKey in this.talentModifiers) {
-                // This is a very basic example; actual formatting would be more complex
-                // and depend on how talent effects are structured.
-                 if (this.talentModifiers[talentKey] && talentKey !== 'toString') { // Added check for own property
-                    talentEffectsHtml += `\n<span class="talent-effect">Talent: ${talentKey} active.</span>`;
-                 }
-            }
-        }
-
-
-        // Combine base description and talent effects
-        const finalDescription = generatedDesc + talentEffectsHtml;
-
-        // Update the ability's description property
-        this.description = finalDescription;
-        return finalDescription;
+        // The ability's description property is updated by the custom generateDescription methods
+        // in character-specific ability files (e.g., farmer_alice_abilities.js) or by the factory.
+        // This base method just returns the processed string for extension.
+        return generatedDesc;
     }
 
     /**
@@ -4723,7 +4854,8 @@ class Ability {
             'effectFunctionName', 'isPlaceholder', 'placeholderAbility', 'unlockLevel', 
             'tags', 'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn', 
             // --- NEW: Ensure targeting-related flags are preserved ---
-            'canTargetEnemies', 'canTargetAllies'
+            'canTargetEnemies', 'canTargetAllies',
+            'debuffEffect' // ADDED: Ensure debuffEffect is copied during clone
         ];
         
         for (const prop of additionalProps) {
@@ -4805,7 +4937,7 @@ class Effect {
             cloned.currentStacks = this.currentStacks;
         }
 
-        // Copy any other custom properties
+        // Copy any custom properties
         if (this.originalStats) {
             cloned.originalStats = {...this.originalStats};
         }
@@ -5417,18 +5549,28 @@ const AbilityFactory = {
     // <<< NEW: Method to register custom effect functions >>>
     registerAbilityEffect(effectName, effectFunction) {
         if (!effectName || typeof effectName !== 'string') {
-            console.error('[AbilityFactory] Invalid effectName provided to registerAbilityEffect');
-            return;
+            console.warn('[AbilityFactory] Skipping registration: Invalid effectName');
+            return false;
         }
         if (!effectFunction || typeof effectFunction !== 'function') {
-            console.error(`[AbilityFactory] Invalid effectFunction provided for effectName '${effectName}'`);
-            return;
+            console.warn(`[AbilityFactory] Skipping registration: Invalid effect function for '${effectName}'`);
+            return false;
         }
+        
+        // Check if the existing effect is identical
         if (this.registeredEffects[effectName]) {
-            console.warn(`[AbilityFactory] Overwriting existing effect function for: '${effectName}'`);
+            const existingEffectString = this.registeredEffects[effectName].toString();
+            const newEffectString = effectFunction.toString();
+            
+            if (existingEffectString === newEffectString) {
+                // Identical function, no need to re-register
+                return true;
+            }
         }
+        
+        // Store the new effect, overwriting if different
         this.registeredEffects[effectName] = effectFunction;
-        console.log(`[AbilityFactory @ character.js] Registered custom effect: '${effectName}'`);
+        return true;
     },
 
     createIceBallEffect(abilityData) {
@@ -5699,7 +5841,8 @@ const AbilityFactory = {
             'debuffValue', 'chance', 'numProjectiles', 'aoeModifier', 'fixedDamage',
             'damageType', 'scalingStat', 'targetMaxHpMultiplier', 'effectFunctionName',
             'isPlaceholder', 'placeholderAbility', 'unlockLevel', 'tags',
-            'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn'
+            'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn',
+            'debuffEffect' // ADDED: Ensure debuffEffect is copied
         ];
 
         // Debug logging for blazing_lightning_ball specifically
@@ -5732,7 +5875,7 @@ const AbilityFactory = {
             console.log(`[AbilityFactory Debug] Final ability.doesNotEndTurn:`, ability.doesNotEndTurn);
         }
         
-        // Robustly set baseDescription and initial description
+        // Robustly set baseDescription
         if (abilityData.baseDescription) {
             ability.baseDescription = abilityData.baseDescription;
         } else if (abilityData.description) {
@@ -5743,8 +5886,8 @@ const AbilityFactory = {
             ability.baseDescription = `Default base for ${ability.name || ability.id}`;
         }
         
-        // Set initial description to be the base description
-        ability.description = ability.baseDescription;
+        // Set initial description by generating it
+        ability.description = ability.generateDescription();
 
         // --- END MODIFICATION ---
 
@@ -5757,29 +5900,24 @@ const AbilityFactory = {
         // However, the generic Ability.prototype.generateDescription is very basic.
         // Character-specific generateDescription methods are needed for talent text.
 
-        // Try to attach character-specific generateDescription if available
+        // After setting baseDescription, ensure the description is generated.
+        // Character-specific generateDescription methods are handled here if they exist.
         if (typeof window.getReneeAbilityGenerateDescription === 'function' && ability.id.startsWith('renee_')) {
             const customGenerateDescription = window.getReneeAbilityGenerateDescription(ability.id);
             if (customGenerateDescription) {
                 console.log(`[AbilityFactory] Attaching Renée-specific generateDescription to NEW ${ability.id}`);
                 ability.generateDescription = customGenerateDescription;
-                 // Call it once to initialize the description with potential talent text structure
-                ability.generateDescription();
+                // Call it once to initialize the description with potential talent text structure
+                ability.description = ability.generateDescription();
             } else {
-                console.warn(`[AbilityFactory] Could not get Renée-specific generateDescription for ${ability.id}`);
-                // If no custom one, and if a description was in abilityData, ensure it's processed.
-                 if (abilityData.description && typeof ability.setDescription === 'function') {
-                    ability.setDescription(abilityData.description); //This will use the (potentially generic) generateDescription
-                } else if (typeof ability.generateDescription === 'function') {
-                    ability.generateDescription();
-                }
+                console.warn(`[AbilityFactory] Could not get Renée-specific generateDescription for ${ability.id}. Using generic.`);
+                // Fallback to generic generateDescription if custom one not found
+                ability.description = ability.generateDescription();
             }
-        } else if (abilityData.description && typeof ability.setDescription === 'function') {
-            // For non-Renée abilities or if Renée's specific generator isn't found
-             ability.setDescription(abilityData.description);
-        } else if (typeof ability.generateDescription === 'function') {
-            // Fallback if no description in data but generateDescription exists
-            ability.generateDescription();
+        } else {
+            // For non-Renée abilities, just ensure generateDescription is called.
+            // It will use its internal logic to handle baseDescription.
+            ability.description = ability.generateDescription();
         }
 
 
@@ -5826,7 +5964,7 @@ const AbilityFactory = {
             } else {
                 console.error(`Custom ability function name '${customFunctionName || 'UNKNOWN'}' not found or not registered via AbilityFactory.registerAbilityEffect for ability ${abilityData.id}.`);
                 return (caster, target) => {
-                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
                     log(`Error: Configuration error for custom ability ${abilityData.name}. Missing or unregistered functionName: ${customFunctionName || 'Not specified'}.`);
                 };
             }
@@ -5894,6 +6032,26 @@ const AbilityFactory = {
             if (targetMaxHpMultiplier !== undefined) {
                 calculatedDamage += Math.floor((target.stats.maxHp || 0) * targetMaxHpMultiplier);
             }
+
+            // --- NEW: Golden Arrow Effect ---
+            const casterInventory = window.CharacterInventories?.get(caster.id);
+            if (casterInventory) {
+                const hasGoldenArrow = casterInventory.getAllItems().some(itemSlot => itemSlot && itemSlot.itemId === 'golden_arrow');
+                if (hasGoldenArrow) {
+                    const bonusDamage = Math.floor((caster.stats.magicalDamage || 0) * 0.20);
+                    if (bonusDamage > 0) {
+                        calculatedDamage += bonusDamage;
+                        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                        log(`🏹 ${caster.name}'s Golden Arrow adds ${bonusDamage} bonus damage!`, 'item-effect');
+                        
+                        // Show floating text for Golden Arrow bonus damage
+                        if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.showFloatingText === 'function') {
+                            window.gameManager.uiManager.showFloatingText(this.instanceId || this.id, `+${bonusDamage} Bonus DMG`, 'bonus-damage');
+                        }
+                    }
+                }
+            }
+            // --- END NEW: Golden Arrow Effect ---
 
             // --- Apply Talent Modifiers --- 
             let finalDamageAmount = calculatedDamage;
@@ -8898,4 +9056,3 @@ function addKnifeImpactScreenShake() {
         gameContainer.style.animation = '';
     }, 300);
 }
-  

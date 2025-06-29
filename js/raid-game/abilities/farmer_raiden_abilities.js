@@ -1424,7 +1424,7 @@ stormCircleAbility.generateDescription = function() {
     // Get the current cooldown, which might be modified by talents
     const cooldown = this.cooldown || 10;
     
-    let desc = `<span class="hit-chance">80% chance</span> to deal <span class="damage">1000 damage</span> to each enemy and <span class="debuff">stun them for 2 turns</span>.`;
+    let desc = `<span class="hit-chance">80% chance</span> to deal <span class="damage">1000 damage</span> to each enemy and <span class="debuff">stun them for 2 turns</span>."`;
     
     // Add talent indicator if cooldown is reduced
     if (cooldown < 10) {

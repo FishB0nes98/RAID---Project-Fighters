@@ -333,6 +333,9 @@ const farmerScratchEffect = (caster, target) => {
     }
     // --- End Cat Claws Talent ---
 
+    // --- NEW: Play base Scratch VFX ---
+    showScratchVFX(caster, target);
+
     // Frenzied Assault talent check
     if (scratchAbility && scratchAbility.frenziedAssaultChance) {
         const frenziedChance = scratchAbility.frenziedAssaultChance;
@@ -390,6 +393,30 @@ const farmerScratchEffect = (caster, target) => {
 
     return physResult;
 };
+
+// --- NEW: Function to show Scratch VFX ---
+function showScratchVFX(caster, target) {
+    const targetElementId = target.instanceId || target.id;
+    const targetElement = document.getElementById(`character-${targetElementId}`);
+    if (!targetElement) return;
+
+    const scratchVfx = document.createElement('div');
+    scratchVfx.className = 'farmer-scratch-vfx';
+    targetElement.appendChild(scratchVfx);
+
+    // Add impact stars
+    const impactStars = document.createElement('div');
+    impactStars.className = 'farmer-scratch-impact';
+    scratchVfx.appendChild(impactStars);
+
+    // Remove VFX after animation completes
+    setTimeout(() => {
+        if (scratchVfx.parentNode) {
+            scratchVfx.remove();
+        }
+    }, 800); // Duration matches CSS animation (e.g., cat-paw-scratch1/2 are 0.6s/0.7s, impact-star is 0.4s + 0.3s delay)
+}
+// --- END NEW ---
 
 // Helper function to create bleeding stack badge on the status icon
 function createBleedingStackBadge(character, stacks) {
@@ -1576,4 +1603,4 @@ if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbili
     window.definedAbilities.farmer_leap = farmerLeapAbility;
     window.definedAbilities.farmer_boomerang = farmerBoomerangAbility;
     window.definedAbilities.farmer_feral_strike = farmerFeralStrikeAbility;
-} 
+}

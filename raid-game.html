@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Graphics Acceleration and Performance Optimizations -->
+    <!-- Performance and Rendering Optimizations -->
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="format-detection" content="telephone=no">
@@ -12,10 +12,61 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     
+    <!-- Preload Critical Assets -->
+    <link rel="preload" href="js/raid-game/game-manager.js" as="script">
+    <link rel="preload" href="js/raid-game/character.js" as="script">
+    <link rel="preload" href="css/raid-game.css" as="style">
+    
+    <!-- Performance Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <title>Roguelike Raid Battle</title>
     
     <!-- Hardware Acceleration CSS -->
     <style>
+        /* Minimal critical CSS for initial render */
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Essential hardware acceleration */
+        .characters-container, 
+        .character-slot, 
+        .ability, 
+        .battle-log-container, 
+        .stage-background {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        /* Lazy loading placeholders */
+        img {
+            content-visibility: auto;
+            contain-intrinsic-size: 1px 1px;
+        }
+
+        /* Critical path rendering */
+        .game-container {
+            contain: layout style paint;
+            will-change: contents;
+        }
+
+        /* Optimize animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Performance-critical elements */
+        .hp-bar, .mana-bar, .shield-bar {
+            transform: translate3d(0, 0, 0);
+            will-change: width;
+        }
+        
         /* Enable GPU acceleration for the entire page */
         html {
             -webkit-transform: translateZ(0);
@@ -153,7 +204,16 @@
         }
     </style>
     
-    <link rel="stylesheet" href="css/raid-game.css">
+    <!-- Performance Optimizations -->
+    <link rel="preload" as="style" href="css/raid-game.css">
+    <link rel="stylesheet" href="css/raid-game.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="css/raid-game.css"></noscript>
+
+    <!-- Combine multiple CSS files -->
+    <link rel="preload" as="style" href="css/combined-abilities.css">
+    <link rel="stylesheet" href="css/combined-abilities.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="css/combined-abilities.css"></noscript>
+
     <link rel="stylesheet" href="css/statistics.css">
     <link rel="stylesheet" href="css/farmer_cham_cham.css">
     <link rel="stylesheet" href="css/schoolboy_shoma-ball-vfx.css">
@@ -725,6 +785,7 @@
     <script src="js/raid-game/item-system.js"></script>
     <script src="js/raid-game/inventory-integration.js"></script>
     <script src="js/raid-game/inventory-ui-manager.js"></script>
+    <script type="module" src="items/game-integration.js"></script>
     
     <!-- Loot System Scripts -->
     <script src="js/raid-game/loot-manager.js"></script>
@@ -778,6 +839,7 @@
     <script src="js/raid-game/passives/unstoppable_passive.js"></script>
     <script src="js/raid-game/passives/atlantean_kotal_kahn_passive.js"></script>
     <script src="js/raid-game/passives/atlantean_shinnok_passive.js"></script>
+    <script src="js/raid-game/passives/atlantean_kagome_passive.js"></script>
     <!-- Add other passive scripts here -->
 
     <!-- Factories -->
@@ -2285,4 +2347,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

@@ -93,6 +93,19 @@ window.SkinRegistry = {
             unlocked: false
         },
         
+        // Farmer Cham Cham Green
+        'farmer_cham_cham_green': {
+            id: 'farmer_cham_cham_green',
+            name: 'Farmer Cham Cham Green',
+            characterId: 'farmer_cham_cham',
+            description: 'A verdant green variant for the wild boomerang fighter, blending with nature.',
+            imagePath: 'Loading Screen/Farmer Cham Cham Green.png',
+            price: 1500,
+            rarity: 'common',
+            category: 'farmer',
+            unlocked: false
+        },
+        
         // Farmer Shoma Red
         'farmer_shoma_red': {
             id: 'farmer_shoma_red',
@@ -323,4 +336,4 @@ window.SkinRegistry = {
     }
 };
 
-console.log('[SkinRegistry] Skin registry loaded with', Object.keys(window.SkinRegistry.skins).length, 'skins'); 
+console.log('[SkinRegistry] Skin registry loaded with', Object.keys(window.SkinRegistry.skins).length, 'skins');

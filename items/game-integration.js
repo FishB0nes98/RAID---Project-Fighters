@@ -3,7 +3,7 @@
  * Integrates the item and inventory system with the Easter Egg Hunt game
  */
 
-import { initItemSystem, updateItemSystem, renderItemSystem } from './index.js';
+import { initItemSystem, updateItemSystem, renderItemSystem, IceDagger, IceFlask, IceShard } from './index.js';
 
 // Wait for the window to load
 window.addEventListener('load', () => {
@@ -141,3 +141,31 @@ function enhanceCombatSystem() {
         };
     }
 }
+
+// Admin function to give all ice items
+window.giveAllIceItems = function() {
+    const user = firebase.auth().currentUser;
+    if (!user || user.uid !== 'J1Wanf4kmFMTiG2xOLsvR9bsrYd2') {
+        console.log("You don't have permission to use this command.");
+        return;
+    }
+
+    if (typeof window.adminAddItemToGlobal === 'function') {
+        // We are in character-selector.html, use the global inventory
+        console.log('Adding ice items to global inventory...');
+        window.adminAddItemToGlobal('ice_dagger');
+        window.adminAddItemToGlobal('ice_flask');
+        window.adminAddItemToGlobal('ice_shard');
+        console.log('All ice items have been added to your global inventory.');
+    } else if (window.players && window.players[window.currentUser.uid] && window.players[window.currentUser.uid].inventory) {
+        // We are in raid-game.html, add to player's inventory
+        console.log('Adding ice items to player inventory...');
+        const player = window.players[window.currentUser.uid];
+        player.inventory.addItem(new IceDagger());
+        player.inventory.addItem(new IceFlask());
+        player.inventory.addItem(new IceShard());
+        console.log('All ice items have been added to your inventory.');
+    } else {
+        console.log('Could not find a valid inventory to add items to.');
+    }
+};

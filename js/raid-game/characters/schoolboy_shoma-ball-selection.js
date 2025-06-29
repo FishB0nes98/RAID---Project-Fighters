@@ -1919,7 +1919,7 @@ function showArcaneMasteryVFX(character) {
         vfxContainer.appendChild(floatingText);
 
         // Add battle log entry
-        addLogEntry(`✨ Arcane Mastery activated! ${character.name} gains +125 Magical Damage!`, 'talent-activation');
+        window.gameManager.addLogEntry(`✨ Arcane Mastery activated! ${character.name} gains +125 Magical Damage!`, 'talent-activation');
 
         // Remove VFX after animation completes
         setTimeout(() => {
@@ -2377,7 +2377,6 @@ window.executeGrassBallBounceToAllies = executeGrassBallBounceToAllies;
 window.selectBall = selectBall;
 window.executeBallThrow = executeBallThrow;
 window.generateBallDescription = generateBallDescription;
-window.addLogEntry = addLogEntry;
 window.showBallSelectionForShoma = showBallSelectionForShoma;
 window.getIconForBallType = getIconForBallType;
 window.refreshAbilityIcon = refreshAbilityIcon;

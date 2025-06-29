@@ -241,7 +241,6 @@ class StatisticsUIManager {
                 ` : ''}
                 ${topPerformers.mostEfficient ? `
                     <div class="performer-row">
-                        <span class="performer-icon">⭐</span>
                         <div class="performer-info">
                             <span class="performer-title">Most Efficient</span>
                             <span class="performer-name">${topPerformers.mostEfficient.name}</span>
