@@ -28,7 +28,7 @@ class AtlanteanSubZeroAbilities {
                             maxDuration: 3, // Always max duration
                             isDebuff: true,
                             source: caster.name,
-                            description: 'Frozen solid! Abilities have only 40% chance to succeed.',
+                            description: 'Frozen solid! Abilities have only 58% chance to succeed.',
                             effect: function(character) {
                                 // Freeze effect is handled in the ability usage logic
                             },
@@ -480,7 +480,7 @@ class AtlanteanSubZeroAbilities {
                             maxDuration: 5,
                             isDebuff: true,
                             source: caster.name,
-                            description: 'Frozen solid! Abilities have only 40% chance to succeed.',
+                            description: 'Frozen solid! Abilities have only 58% chance to succeed.',
                             onRemove(character) {
                                 if (window.AtlanteanSubZeroAbilities) {
                                     AtlanteanSubZeroAbilities.removeFreezeIndicator(character, false);
@@ -572,7 +572,7 @@ class AtlanteanSubZeroAbilities {
                 maxDuration: 2,
                 isDebuff: true,
                 source: target.name,
-                description: 'Frozen solid! Abilities have only 40% chance to succeed.',
+                description: 'Frozen solid! Abilities have only 58% chance to succeed.',
                 onRemove: function(character) {
                     if (window.AtlanteanSubZeroAbilities) {
                         AtlanteanSubZeroAbilities.removeFreezeIndicator(character, false);

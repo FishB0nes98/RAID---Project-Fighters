@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug: Kokoro Holy Skin VFX</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .debug-section {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .debug-log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #444;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .log-entry.info {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-left: 3px solid #007bff;
+        }
+        .log-entry.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 3px solid #28a745;
+        }
+        .log-entry.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-left: 3px solid #dc3545;
+        }
+        .log-entry.warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid #ffc107;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status-display {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Kokoro Holy Skin VFX Debug</h1>
+        
+        <div class="debug-section">
+            <h3>Debug Console</h3>
+            <div id="debug-log" class="debug-log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+            <button onclick="runDebugTests()">Run Debug Tests</button>
+            <button onclick="simulateHolyVFX()">Simulate Holy VFX</button>
+        </div>
+        
+        <div class="debug-section">
+            <h3>System Status</h3>
+            <div id="system-status" class="status-display">
+                Loading system status...
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>Actions</h3>
+            <button onclick="window.open('raid-game.html', '_blank')">Open Raid Game</button>
+            <button onclick="window.open('test-kokoro-holy-skin-complete.html', '_blank')">Run Full Test</button>
+            <button onclick="reloadScripts()">Reload Scripts</button>
+        </div>
+    </div>
+
+    <script>
+        const debugLog = document.getElementById('debug-log');
+        const systemStatus = document.getElementById('system-status');
+        
+        function logMessage(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            debugLog.appendChild(entry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        function clearLog() {
+            debugLog.innerHTML = '';
+        }
+        
+        function updateSystemStatus() {
+            let status = '';
+            
+            // Check if files exist
+            const files = [
+                'js/skins/skin-vfx-manager.js',
+                'js/skins/skin-registry.js',
+                'css/schoolgirl_kokoro_holy.css',
+                'js/raid-game/abilities/schoolgirl_kokoro_abilities.js'
+            ];
+            
+            status += 'File Status:\\n';
+            files.forEach(file => {
+                fetch(file)
+                    .then(response => {
+                        if (response.ok) {
+                            status += `✓ ${file}: EXISTS\\n`;
+                        } else {
+                            status += `✗ ${file}: NOT FOUND\\n`;
+                        }
+                        systemStatus.textContent = status;
+                    })
+                    .catch(error => {
+                        status += `✗ ${file}: ERROR - ${error.message}\\n`;
+                        systemStatus.textContent = status;
+                    });
+            });
+            
+            // Check window objects
+            status += '\\nWindow Objects:\\n';
+            status += `SkinRegistry: ${typeof window.SkinRegistry !== 'undefined' ? 'LOADED' : 'NOT LOADED'}\\n`;
+            status += `SkinVFXManager: ${typeof window.SkinVFXManager !== 'undefined' ? 'LOADED' : 'NOT LOADED'}\\n`;
+            status += `SkinManager: ${typeof window.SkinManager !== 'undefined' ? 'LOADED' : 'NOT LOADED'}\\n`;
+            
+            systemStatus.textContent = status;
+        }
+        
+        function runDebugTests() {
+            logMessage('Starting debug tests...', 'info');
+            
+            // Test 1: Check skin registry
+            if (typeof window.SkinRegistry !== 'undefined') {
+                const kokoroHolySkin = window.SkinRegistry.getSkin('schoolgirl_kokoro_holy');
+                if (kokoroHolySkin) {
+                    logMessage('✓ Skin Registry: Holy skin found', 'success');
+                    logMessage(`  - ID: ${kokoroHolySkin.id}`, 'info');
+                    logMessage(`  - Name: ${kokoroHolySkin.name}`, 'info');
+                    logMessage(`  - Character: ${kokoroHolySkin.characterId}`, 'info');
+                } else {
+                    logMessage('✗ Skin Registry: Holy skin NOT found', 'error');
+                }
+            } else {
+                logMessage('✗ Skin Registry: Not loaded', 'error');
+            }
+            
+            // Test 2: Check VFX manager
+            if (typeof window.SkinVFXManager !== 'undefined') {
+                logMessage('✓ SkinVFXManager: Loaded', 'success');
+                
+                // Check if skin mapping exists
+                if (window.SkinVFXManager.skinVFXMap && window.SkinVFXManager.skinVFXMap.has('schoolgirl_kokoro_holy')) {
+                    const mapping = window.SkinVFXManager.skinVFXMap.get('schoolgirl_kokoro_holy');
+                    logMessage('✓ VFX Manager: Holy skin mapping found', 'success');
+                    logMessage(`  - VFX Class: ${mapping.vfxClass}`, 'info');
+                    logMessage(`  - CSS File: ${mapping.cssFile}`, 'info');
+                } else {
+                    logMessage('✗ VFX Manager: Holy skin mapping NOT found', 'error');
+                }
+            } else {
+                logMessage('✗ SkinVFXManager: Not loaded', 'error');
+            }
+            
+            // Test 3: Check CSS file
+            fetch('css/schoolgirl_kokoro_holy.css')
+                .then(response => {
+                    if (response.ok) {
+                        logMessage('✓ CSS File: Loaded successfully', 'success');
+                        return response.text();
+                    } else {
+                        logMessage('✗ CSS File: Failed to load', 'error');
+                        return null;
+                    }
+                })
+                .then(cssContent => {
+                    if (cssContent) {
+                        if (cssContent.includes('schoolgirl-kokoro-holy')) {
+                            logMessage('✓ CSS Content: Contains holy skin classes', 'success');
+                        } else {
+                            logMessage('✗ CSS Content: Missing holy skin classes', 'error');
+                        }
+                        
+                        if (cssContent.includes('#ffd700')) {
+                            logMessage('✓ CSS Content: Contains gold colors', 'success');
+                        } else {
+                            logMessage('✗ CSS Content: Missing gold colors', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    logMessage(`✗ CSS File: Error - ${error.message}`, 'error');
+                });
+            
+            // Test 4: Check abilities file
+            fetch('js/raid-game/abilities/schoolgirl_kokoro_abilities.js')
+                .then(response => {
+                    if (response.ok) {
+                        logMessage('✓ Abilities File: Loaded successfully', 'success');
+                        return response.text();
+                    } else {
+                        logMessage('✗ Abilities File: Failed to load', 'error');
+                        return null;
+                    }
+                })
+                .then(jsContent => {
+                    if (jsContent) {
+                        if (jsContent.includes('schoolgirl_kokoro_holy')) {
+                            logMessage('✓ Abilities Code: Contains holy skin checks', 'success');
+                        } else {
+                            logMessage('✗ Abilities Code: Missing holy skin checks', 'error');
+                        }
+                        
+                        if (jsContent.includes('hasActiveSkin')) {
+                            logMessage('✓ Abilities Code: Contains VFX manager calls', 'success');
+                        } else {
+                            logMessage('✗ Abilities Code: Missing VFX manager calls', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    logMessage(`✗ Abilities File: Error - ${error.message}`, 'error');
+                });
+            
+            logMessage('Debug tests completed', 'info');
+        }
+        
+        function simulateHolyVFX() {
+            logMessage('Simulating holy VFX...', 'info');
+            
+            // Create a test VFX element
+            const testVFX = document.createElement('div');
+            testVFX.className = 'lesser-heal-vfx schoolgirl-kokoro-holy';
+            testVFX.innerHTML = '<div class="lesser-heal-number">+500</div>';
+            testVFX.style.position = 'fixed';
+            testVFX.style.top = '50%';
+            testVFX.style.left = '50%';
+            testVFX.style.transform = 'translate(-50%, -50%)';
+            testVFX.style.zIndex = '9999';
+            testVFX.style.pointerEvents = 'none';
+            
+            document.body.appendChild(testVFX);
+            
+            // Check if CSS is applied
+            const computedStyle = window.getComputedStyle(testVFX.querySelector('.lesser-heal-number'));
+            const backgroundColor = computedStyle.backgroundColor;
+            
+            if (backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'transparent') {
+                logMessage('✓ VFX Test: Holy skin CSS is applied', 'success');
+                logMessage(`  - Background Color: ${backgroundColor}`, 'info');
+            } else {
+                logMessage('✗ VFX Test: Holy skin CSS NOT applied', 'error');
+                logMessage('  - Check if CSS file is loaded in HTML', 'warning');
+            }
+            
+            // Remove test element after 3 seconds
+            setTimeout(() => {
+                testVFX.remove();
+                logMessage('VFX test element removed', 'info');
+            }, 3000);
+        }
+        
+        function reloadScripts() {
+            logMessage('Reloading scripts...', 'info');
+            
+            // Create script elements to reload
+            const scripts = [
+                'js/skins/skin-registry.js',
+                'js/skins/skin-vfx-manager.js'
+            ];
+            
+            scripts.forEach(scriptSrc => {
+                const script = document.createElement('script');
+                script.src = scriptSrc + '?t=' + Date.now(); // Add timestamp to bypass cache
+                script.onload = () => {
+                    logMessage(`✓ Reloaded: ${scriptSrc}`, 'success');
+                };
+                script.onerror = () => {
+                    logMessage(`✗ Failed to reload: ${scriptSrc}`, 'error');
+                };
+                document.head.appendChild(script);
+            });
+            
+            // Also reload CSS
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'css/schoolgirl_kokoro_holy.css?t=' + Date.now();
+            cssLink.onload = () => {
+                logMessage('✓ Reloaded: CSS file', 'success');
+            };
+            cssLink.onerror = () => {
+                logMessage('✗ Failed to reload: CSS file', 'error');
+            };
+            document.head.appendChild(cssLink);
+            
+            setTimeout(() => {
+                updateSystemStatus();
+            }, 1000);
+        }
+        
+        // Initialize
+        window.onload = function() {
+            logMessage('Debug tool initialized', 'info');
+            updateSystemStatus();
+        };
+        
+        // Load required scripts for debugging
+        const scriptSrc = [
+            'js/skins/skin-registry.js',
+            'js/skins/skin-vfx-manager.js'
+        ];
+        
+        scriptSrc.forEach(src => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => {
+                logMessage(`Loaded: ${src}`, 'success');
+                updateSystemStatus();
+            };
+            script.onerror = () => {
+                logMessage(`Failed to load: ${src}`, 'error');
+            };
+            document.head.appendChild(script);
+        });
+        
+        // Load CSS for testing
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = 'css/schoolgirl_kokoro_holy.css';
+        cssLink.onload = () => {
+            logMessage('Holy skin CSS loaded', 'success');
+        };
+        cssLink.onerror = () => {
+            logMessage('Failed to load holy skin CSS', 'error');
+        };
+        document.head.appendChild(cssLink);
+    </script>
+</body>
+</html>

@@ -10,7 +10,7 @@
         "hp": 6888,
         "hpPerTurn": 0,
         "mana": 2805,
-        "manaPerTurn": 0,
+        "manaPerTurn": 17,
         "lifesteal": 0,
         "dodgeChance": 0.01,
         "critChance": 0.08,
@@ -26,7 +26,7 @@
             "manaCost": 70,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 400 (100% AP) magical damage to an enemy.",
+            "description": "Deals 400 + 100% Magical Damage + 52% Physical Damage to an enemy.",
             "icon": "Icons/abilities/golden_arrow.png"
         },
         {
@@ -48,7 +48,7 @@
             "manaCost": 60,
             "cooldown": 5,
             "targetType": "self",
-            "description": "Kagome stuns herself for 4 turns, gains 200% magic shield and armor (for the duration as buff) and heals herself when ability is used by 1000HP.",
+            "description": "Kagome stuns herself for 4 turns, gains 200% magic shield and armor (for the duration as buff) and heals herself when ability is used by 2500HP.",
             "icon": "Icons/abilities/spiritwalk.png"
         },
         {

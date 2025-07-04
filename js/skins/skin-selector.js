@@ -85,6 +85,9 @@ class SkinSelector {
             'farmer_cham_cham': 'Farmer Cham Cham',
             'atlantean_kagome': 'Atlantean Kagome',
             'atlantean_christie': 'Atlantean Christie',
+            'atlantean_kotal_kahn': 'Atlantean Kotal Kahn',
+            'atlantean_sub_zero': 'Atlantean Sub Zero',
+            'atlantean_sub_zero_playable': 'Atlantean Sub Zero',
             'schoolboy_shoma': 'Schoolboy Shoma',
             'schoolboy_siegfried': 'Schoolboy Siegfried',
             'schoolgirl_julia': 'Schoolgirl Julia',
@@ -104,29 +107,32 @@ class SkinSelector {
     // Get basic character image from Loading Screen folder
     getBasicCharacterImage(characterId) {
         const imageNameMap = {
-            'farmer_nina': 'Farmer Nina',
-            'farmer_raiden': 'Farmer Raiden',
-            'farmer_alice': 'Farmer Alice',
-            'farmer_shoma': 'Farmer Shoma',
-            'farmer_cham_cham': 'Farmer Cham Cham',
-            'atlantean_kagome': 'Atlantean Kagome',
-            'atlantean_christie': 'Atlantean Christie',
-            'schoolboy_shoma': 'Schoolboy Shoma',
-            'schoolboy_siegfried': 'Schoolboy Siegfried',
-            'schoolgirl_julia': 'Schoolgirl Julia',
-            'schoolgirl_ayane': 'Schoolgirl Ayane',
-            'schoolgirl_elphelt': 'Schoolgirl Elphelt',
-            'schoolgirl_kokoro': 'Schoolgirl Kokoro',
-            'cham_cham': 'Cham Cham',
-            'ayane': 'Ayane',
-            'bridget': 'Bridget',
-            'renée': 'Renée',
-            'zoey': 'Zoey',
-            'infernal_ibuki': 'Infernal Ibuki'
+            'farmer_nina': 'Farmer Nina.png',
+            'farmer_raiden': 'Farmer Raiden.png',
+            'farmer_alice': 'Farmer Alice.png',
+            'farmer_shoma': 'Farmer Shoma.png',
+            'farmer_cham_cham': 'Farmer Cham Cham.png',
+            'atlantean_kagome': 'Atlantean Kagome.png',
+            'atlantean_christie': 'Atlantean Christie.png',
+            'atlantean_kotal_kahn': 'Atlantean Kotal Kahn.png',
+            'atlantean_sub_zero': 'Atlantean Sub Zero.png',
+            'atlantean_sub_zero_playable': 'Atlantean Sub Zero.png',
+            'schoolboy_shoma': 'Schoolboy Shoma.png',
+            'schoolboy_siegfried': 'Schoolboy Siegfried.png',
+            'schoolgirl_julia': 'Schoolgirl Julia.png',
+            'schoolgirl_ayane': 'Schoolgirl Ayane.png',
+            'schoolgirl_elphelt': 'Schoolgirl Elphelt.png',
+            'schoolgirl_kokoro': 'Schoolgirl Kokoro.png',
+            'cham_cham': 'Cham Cham.png',
+            'ayane': 'Ayane.png',
+            'bridget': 'Bridget.png',
+            'renée': 'Renée.png',
+            'zoey': 'Zoey.png',
+            'infernal_ibuki': 'Infernal Ibuki.png'
         };
         
-        const imageName = imageNameMap[characterId] || characterId;
-        return `Loading%20Screen/${encodeURIComponent(imageName)}.png`;
+        const imageName = imageNameMap[characterId] || (characterId + '.png');
+        return `Loading Screen/${imageName}`;
     }
 
     // Display characters in the grid

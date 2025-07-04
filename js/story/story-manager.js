@@ -265,8 +265,13 @@ class StoryManager {
             let currentTeamIds = [];
             let initialTeamObjects = [];
 
+            // Check if we have existing progress (saved team state)
+            const hasExistingProgress = this.storyProgress.lastTeamState && 
+                                       Object.keys(this.storyProgress.lastTeamState).length > 0;
+            console.log("[StoryManager] Has existing progress:", hasExistingProgress);
+
             // 4. Determine initial team based on progress or fallback
-            if (this.storyProgress.lastTeamState && Object.keys(this.storyProgress.lastTeamState).length > 0) {
+            if (hasExistingProgress) {
                 currentTeamIds = Object.keys(this.storyProgress.lastTeamState);
                 console.log("[StoryManager] Using team IDs from saved story progress:", currentTeamIds);
             } else {
@@ -276,13 +281,12 @@ class StoryManager {
                 console.log("[StoryManager] Fetched currentTeamSelection:", currentTeamIds);
             }
 
-            // --- Force initial characters if story defines them ---
-            if (Array.isArray(this.currentStory.forcedInitialCharacters) && this.currentStory.forcedInitialCharacters.length > 0) {
-                console.log('[StoryManager] Overriding team with forcedInitialCharacters:', this.currentStory.forcedInitialCharacters);
+            // --- Force initial characters if story defines them (only for NEW stories, not continued ones) ---
+            if (Array.isArray(this.currentStory.forcedInitialCharacters) && 
+                this.currentStory.forcedInitialCharacters.length > 0 && 
+                !hasExistingProgress) {
+                console.log('[StoryManager] New story - using forcedInitialCharacters:', this.currentStory.forcedInitialCharacters);
                 currentTeamIds = this.currentStory.forcedInitialCharacters.slice();
-
-                // Also clear any saved progress team state to avoid reintroducing old members
-                this.storyProgress.lastTeamState = {};
 
                 // Persist this enforced team to Firebase so UI reflects it
                 try {
@@ -291,6 +295,10 @@ class StoryManager {
                 } catch (err) {
                     console.warn('[StoryManager] Failed to save forcedInitialCharacters to Firebase:', err);
                 }
+            } else if (Array.isArray(this.currentStory.forcedInitialCharacters) && 
+                       this.currentStory.forcedInitialCharacters.length > 0 && 
+                       hasExistingProgress) {
+                console.log('[StoryManager] Continuing story - keeping saved team, ignoring forcedInitialCharacters');
             }
 
             // Build initialTeamObjects after final determination
@@ -304,6 +312,14 @@ class StoryManager {
                 this.playerTeam = await this.loadTeamData(initialTeamObjects);
                 console.log("[StoryManager] Player team data loaded.");
                 console.log('[StoryManager] Team immediately after loadTeamData:', JSON.parse(JSON.stringify(this.playerTeam.map(c => c.id))));
+                
+                // Ensure team data is saved to Firebase for consistency
+                try {
+                    await firebaseDatabase.ref(`users/${this.userId}/currentTeamSelection`).set(currentTeamIds);
+                    console.log('[StoryManager] Team selection synchronized with Firebase');
+                } catch (err) {
+                    console.warn('[StoryManager] Failed to synchronize team selection with Firebase:', err);
+                }
             } else {
                  console.warn("[StoryManager] No team IDs determined. Player team is empty.");
                  this.playerTeam = [];
@@ -1242,67 +1258,39 @@ class StoryManager {
 
     // --- Save Story Progress ---
     async saveStoryProgress() {
-        if (!this.userId || !this.storyId) {
-            console.error("Cannot save progress: Missing userId or story info.");
+        if (!this.storyId || !this.userId) {
+            console.error("Cannot save progress without storyId and userId.");
             return;
         }
 
-        const progressRef = firebaseDatabase.ref(`users/${this.userId}/storyProgress/${this.storyId}`);
-        try {
-            // Ensure lastTeamState is saved as an object { charId: { currentHP, currentMana, stats, hellEffects, permanentDebuffs, atlanteanBlessings } }
-            const teamStateToSave = this.playerTeam.reduce((acc, member) => {
-                const memberState = {
-                    currentHP: member.currentHP,
-                    currentMana: member.currentMana,
-                    // Include the full stats object to persist modifications
-                    stats: { ...member.stats }
-                };
-                
-                // Only include hell effects if they exist (Firebase doesn't allow undefined)
-                if (member.hellEffects && Object.keys(member.hellEffects).length > 0) {
-                    memberState.hellEffects = { ...member.hellEffects };
-                }
-                
-                // Only include permanent debuffs if they exist (Firebase doesn't allow undefined)  
-                if (member.permanentDebuffs && member.permanentDebuffs.length > 0) {
-                    memberState.permanentDebuffs = [...member.permanentDebuffs];
-                }
-                
-                // Only include permanent buffs if they exist (Firebase doesn't allow undefined)
-                if (member.permanentBuffs && member.permanentBuffs.length > 0) {
-                    memberState.permanentBuffs = [...member.permanentBuffs];
-                }
-                
-                // Only include atlantean blessings if they exist (Firebase doesn't allow undefined)
-                if (member.atlanteanBlessings && Object.keys(member.atlanteanBlessings).length > 0) {
-                    memberState.atlanteanBlessings = { ...member.atlanteanBlessings };
-                }
-                
-                // Debug logging for save
-                console.log(`[StoryManager] Saving ${member.id}:`, {
-                    currentHP: memberState.currentHP,
-                    maxHP: memberState.stats.hp,
-                    hellEffects: memberState.hellEffects || 'none',
-                    permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0,
-                    permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0,
-                    atlanteanBlessings: memberState.atlanteanBlessings || 'none'
-                });
-                
-                acc[member.id] = memberState;
-                return acc;
-            }, {}) || null;
-
-            const progressData = {
-                currentStageIndex: this.storyProgress.currentStageIndex,
-                completedStages: this.storyProgress.completedStages, // Save the highest index reached
-                lastTeamState: teamStateToSave
+        // Create a snapshot of the current team state
+        const teamStateToSave = {};
+        const teamIds = [];
+        this.playerTeam.forEach(character => {
+            teamIds.push(character.id);
+            teamStateToSave[character.id] = {
+                currentHP: character.currentHP,
+                currentMana: character.currentMana,
+                // NEW: Also save base stats in case they were modified
+                stats: character.stats 
             };
+        });
 
-            console.log(`[DEBUG] About to save to Firebase:`, JSON.stringify(progressData, null, 2));
-            await progressRef.set(progressData);
-            console.log(`Saved progress for story ${this.storyId}:`, progressData);
+        const progressToSave = {
+            currentStageIndex: this.storyProgress.currentStageIndex,
+            completedStages: this.storyProgress.completedStages,
+            lastTeamState: teamStateToSave, // Use the detailed snapshot
+            storyId: this.storyId,
+            lastUpdated: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        try {
+            const progressRef = firebaseDatabase.ref(`users/${this.userId}/storyProgress/${this.storyId}`);
+            await progressRef.set(progressToSave);
+            await firebaseDatabase.ref(`users/${this.userId}/currentTeamSelection`).set(teamIds);
+            console.log(`[StoryManager] Story progress saved for story ${this.storyId}`, progressToSave);
         } catch (error) {
-            console.error(`Error saving progress for story ${this.storyId}:`, error);
+            console.error(`[StoryManager] Failed to save story progress for ${this.storyId}:`, error);
         }
     }
 
@@ -2336,8 +2324,8 @@ class StoryManager {
 
             // Trigger event handler
             if (this.onStageCompleted) {
-                const completedStageId = this.getStageId(this.storyProgress.currentStageIndex - 1);
-                this.onStageCompleted(completedStageId, [], hasMoreStages);
+                const completedStageId = this.getStageId(this.storyProgress.currentStageIndex - 1); // Get ID of the recruit stage just finished
+                this.onStageCompleted(completedStageId, [], hasMoreStages); // Pass empty rewards for recruit stages
             }
 
             console.log(`[StoryManager] Ally selection successful. More stages: ${hasMoreStages}`);
@@ -2441,6 +2429,8 @@ class StoryManager {
                     name: registryEntry?.name || id,
                     image: registryEntry?.image || 'images/characters/default.png',
                     avatarImage: registryEntry?.image || 'images/characters/default.png', // For UI consistency
+                    description: registryEntry?.description || 'No description available',
+                    tags: registryEntry?.tags || [],
                     stats: baseStats
                 };
             });
@@ -2617,8 +2607,12 @@ class StoryManager {
 
             // Initialize global inventory
             if (typeof GlobalInventory !== 'undefined') {
-                window.GlobalInventory = new GlobalInventory();
-                console.log('[StoryManager] Global inventory initialized');
+                if (!window.GlobalInventory) {
+                    window.GlobalInventory = new GlobalInventory();
+                    console.log('[StoryManager] Global inventory initialized');
+                } else {
+                    console.log('[StoryManager] Global inventory already exists, skipping initialization');
+                }
             } else {
                 console.warn('[StoryManager] GlobalInventory class not found');
                 return;

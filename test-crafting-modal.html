@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crafting Modal Test - Project Fighters</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/crafting-modal.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #1a1c2a 0%, #2d1b3d 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .test-container {
+            text-align: center;
+            background: rgba(42, 35, 56, 0.7);
+            border: 2px solid rgba(139, 69, 19, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+        }
+        
+        .test-button {
+            background: linear-gradient(145deg, #cd853f, #daa520);
+            border: 2px solid #cd853f;
+            border-radius: 12px;
+            padding: 15px 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(145deg, #daa520, #ffd700);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .instructions {
+            margin: 20px 0;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .console-output {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔨 Crafting Modal Test</h1>
+        
+        <div class="instructions">
+            <p>This test page demonstrates the new crafting modal with lootbox opening functionality.</p>
+            <p><strong>Instructions:</strong></p>
+            <ol style="text-align: left; display: inline-block;">
+                <li>Click "Add Test Lootboxes" to populate your inventory</li>
+                <li>Click "Open Crafting Modal" to see the interface</li>
+                <li>Drag lootboxes from inventory to the drop zone</li>
+                <li>Click "Open Lootbox" to see the animated opening</li>
+                <li>View your rewards and continue</li>
+            </ol>
+        </div>
+        
+        <button class="test-button" onclick="addTestLootboxes()">Add Test Lootboxes</button>
+        <button class="test-button" onclick="openCraftingModal()">Open Crafting Modal</button>
+        <button class="test-button" onclick="viewInventory()">View Global Inventory</button>
+        <button class="test-button" onclick="clearInventory()">Clear Inventory</button>
+        
+        <div class="console-output" id="console-output">
+            <p>Console output will appear here...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- Game Scripts -->
+    <script src="js/raid-game/item-system.js"></script>
+    <script src="js/raid-game/crafting-modal.js"></script>
+    
+    <script>
+        // Initialize systems
+        console.log('Initializing test systems...');
+        
+        // Create global instances
+        window.ItemRegistry = new ItemRegistry();
+        window.GlobalInventory = new GlobalInventory();
+        
+        // Override console.log to show output in the page
+        const originalLog = console.log;
+        const outputElement = document.getElementById('console-output');
+        
+        function addToOutput(message) {
+            const p = document.createElement('p');
+            p.textContent = message;
+            p.style.margin = '2px 0';
+            outputElement.appendChild(p);
+            outputElement.scrollTop = outputElement.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog(...args);
+            addToOutput(args.join(' '));
+        };
+        
+        // Test functions
+        function addTestLootboxes() {
+            console.log('Adding test lootboxes...');
+            window.GlobalInventory.addItem('atlantean_treasure_chest', 5);
+            console.log('✅ Added 5 Atlantean Treasure Chests to global inventory');
+        }
+        
+        function openCraftingModal() {
+            console.log('Opening crafting modal...');
+            if (window.CraftingModal) {
+                window.CraftingModal.show();
+                console.log('✅ Crafting modal opened');
+            } else {
+                console.error('❌ CraftingModal not available');
+            }
+        }
+        
+        function viewInventory() {
+            console.log('Global Inventory Contents:');
+            const stacks = window.GlobalInventory.getItemStacks();
+            if (stacks.length === 0) {
+                console.log('  - Empty');
+            } else {
+                stacks.forEach((stack, index) => {
+                    const item = window.ItemRegistry.getItem(stack.itemId);
+                    console.log(`  ${index + 1}. ${item ? item.name : stack.itemId} x${stack.quantity}`);
+                });
+            }
+        }
+        
+        function clearInventory() {
+            console.log('Clearing global inventory...');
+            window.GlobalInventory.items = [];
+            console.log('✅ Global inventory cleared');
+        }
+        
+        // Initialize
+        console.log('Test page ready! ItemRegistry has ' + window.ItemRegistry.getAllItems().length + ' items loaded.');
+        console.log('Try adding test lootboxes and opening the crafting modal.');
+    </script>
+</body>
+</html>

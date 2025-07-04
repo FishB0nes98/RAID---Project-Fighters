@@ -468,6 +468,12 @@ class SchoolgirlKokoroCharacter extends Character {
             // Create healing effect
             const healVfx = document.createElement('div');
             healVfx.className = 'kokoro-heal-vfx';
+            
+            // Apply holy skin class if this character has the holy skin
+            if (window.SkinVFXManager && window.SkinVFXManager.hasActiveSkin && window.SkinVFXManager.hasActiveSkin(this, 'schoolgirl_kokoro_holy')) {
+                healVfx.classList.add('schoolgirl-kokoro-holy');
+            }
+            
             healVfx.innerHTML = `<span>+${healAmount} HP</span>`;
             characterElement.appendChild(healVfx);
             
@@ -1409,6 +1415,20 @@ const lesserHealEffect = (caster, target) => {
             healVfx.classList.add('critical-heal');
         }
         
+        // Apply holy skin class if caster has the holy skin
+        if (caster && window.SkinVFXManager && window.SkinVFXManager.hasActiveSkin && window.SkinVFXManager.hasActiveSkin(caster, 'schoolgirl_kokoro_holy')) {
+            healVfx.classList.add('schoolgirl-kokoro-holy');
+            // Add class to prevent VFX stacking
+            if (target === caster) {
+                targetElement.classList.add('q-healing-active');
+                setTimeout(() => {
+                    targetElement.classList.remove('q-healing-active');
+                }, 2000);
+            }
+        }
+        
+
+        
         // Create healing number display (using a div instead of a span to avoid default heal-vfx styling)
         const healNumber = document.createElement('div');
         healNumber.className = 'lesser-heal-number';
@@ -1823,7 +1843,7 @@ const circleHealEffect = (caster, target, options = {}) => {
             log(healMessage);
             
             // Show healing VFX for each ally (enhanced for Divine Resonance)
-            showCircleHealVFX(ally, actualHeal.healAmount, actualHeal.isCritical, isDivineResonanceEcho);
+            showCircleHealVFX(ally, actualHeal.healAmount, actualHeal.isCritical, isDivineResonanceEcho, caster);
         }
         
         // Check for Protective Healing talent (apply shield regardless of heal amount)
@@ -1899,7 +1919,7 @@ const circleHealEffect = (caster, target, options = {}) => {
 };
 
 // Show visual effect for Circle Heal
-function showCircleHealVFX(target, healAmount, isCritical = false, isDivineResonance = false) {
+function showCircleHealVFX(target, healAmount, isCritical = false, isDivineResonance = false, caster = null) {
     const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
     if (targetElement) {
         // Create main healing effect container
@@ -1911,6 +1931,20 @@ function showCircleHealVFX(target, healAmount, isCritical = false, isDivineReson
         if (isDivineResonance) {
             healVfx.classList.add('divine-resonance');
         }
+        
+        // Apply holy skin class if caster has the holy skin
+        if (caster && window.SkinVFXManager && window.SkinVFXManager.hasActiveSkin && window.SkinVFXManager.hasActiveSkin(caster, 'schoolgirl_kokoro_holy')) {
+            healVfx.classList.add('schoolgirl-kokoro-holy');
+            // Add class to prevent VFX stacking and apply holy glow effect
+            if (target === caster) {
+                targetElement.classList.add('q-healing-active');
+                setTimeout(() => {
+                    targetElement.classList.remove('q-healing-active');
+                }, 2500);
+            }
+        }
+        
+
         
         // Create healing number display
         const healNumber = document.createElement('div');

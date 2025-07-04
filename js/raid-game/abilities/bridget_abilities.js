@@ -1,6 +1,54 @@
 // Bridget Abilities and Passive Implementation
 
 /**
+ * Helper function to check if a character has the Atlantean Ghost skin
+ * @param {Object} character - The character object
+ * @returns {boolean} True if character has Atlantean Ghost skin selected
+ */
+function isBridgetAtlanteanGhost(character) {
+    if (!character || character.id !== 'bridget') return false;
+    
+    // Check if skin manager is available and initialized
+    if (!window.SkinManager || !window.SkinManager.initialized) return false;
+    
+    const selectedSkin = window.SkinManager.getSelectedSkin(character.id);
+    return selectedSkin === 'bridget_atlantean_ghost';
+}
+
+/**
+ * Apply Atlantean Ghost skin color styling to VFX elements
+ * @param {HTMLElement} element - The VFX element to style
+ * @param {Object} character - The character object
+ */
+function applyAtlanteanGhostSkin(element, character) {
+    if (isBridgetAtlanteanGhost(character)) {
+        element.classList.add('bridget-atlantean-ghost');
+    }
+}
+
+/**
+ * Get spectral colors for Atlantean Ghost skin
+ * @param {Object} character - The character object
+ * @returns {Object} Color object with spectral blue-green colors
+ */
+function getAtlanteanGhostColors(character) {
+    if (isBridgetAtlanteanGhost(character)) {
+        return {
+            primary: '#4dd0e1',    // Spectral blue-green
+            secondary: '#26c6da',  // Cyan
+            accent: '#00acc1',     // Dark cyan
+            shadow: '#0097a7'      // Darker cyan
+        };
+    }
+    return {
+        primary: '#4AF0FF',    // Original blue
+        secondary: '#0088FF',  // Original darker blue
+        accent: '#4AF0FF',
+        shadow: '#0088FF'
+    };
+}
+
+/**
  * Bridget Statistics Enhancement
  * Enhanced statistics tracking for all of Bridget's abilities to match comprehensive tracking systems
  */
@@ -313,7 +361,7 @@ let bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
             }
             
             // Show water impact VFX
-            showWaterImpactVFX(target, isCritical);
+            showWaterImpactVFX(target, isCritical, caster);
             
             // Log damage
             let message = `${target.name} takes ${damageResult.damage} magical damage from ${caster.name}'s Ribbon Wave Rush`;
@@ -439,6 +487,7 @@ function showWaterSourceVFX(caster) {
     // Create water source container
     const waterSourceVFX = document.createElement('div');
     waterSourceVFX.className = 'bridget-water-source-vfx';
+    applyAtlanteanGhostSkin(waterSourceVFX, caster);
     casterElement.appendChild(waterSourceVFX);
     
     // Create water circles/ripples
@@ -469,7 +518,7 @@ function showWaterSourceVFX(caster) {
 /**
  * Shows water impact VFX on the target when hit by Ribbon Wave Rush
  */
-function showWaterImpactVFX(target, isCritical = false) {
+function showWaterImpactVFX(target, isCritical = false, caster = null) {
     const targetId = target.instanceId || target.id;
     const targetElement = document.getElementById(`character-${targetId}`);
     
@@ -481,6 +530,8 @@ function showWaterImpactVFX(target, isCritical = false) {
     if (isCritical) {
         waterImpactVFX.classList.add('critical');
     }
+    // Apply skin based on caster (who cast the ability) if available, otherwise use target
+    applyAtlanteanGhostSkin(waterImpactVFX, caster || target);
     targetElement.appendChild(waterImpactVFX);
     
     // Create water splash
@@ -767,6 +818,7 @@ function showPassiveHealingVFX(character, healAmount) {
     // Create passive healing VFX container
     const passiveHealVFX = document.createElement('div');
     passiveHealVFX.className = 'bridget-passive-heal-vfx';
+    applyAtlanteanGhostSkin(passiveHealVFX, character);
     charElement.appendChild(passiveHealVFX);
     
     // Create healing circle
@@ -816,6 +868,7 @@ function createBubbleBeamProjectile(caster, target, index, isCritical = false, i
 
     const beamContainer = document.createElement('div');
     beamContainer.className = 'bridget-bubble-beam-container';
+    applyAtlanteanGhostSkin(beamContainer, caster);
     vfxContainer.appendChild(beamContainer);
 
     const projectile = document.createElement('div');
@@ -947,7 +1000,7 @@ function createBubbleBeamProjectile(caster, target, index, isCritical = false, i
             }, 100);
             
             // Show impact effect
-            showBubbleImpactVFX(target, isCritical);
+            showBubbleImpactVFX(target, isCritical, caster);
         }
     }
     
@@ -1180,6 +1233,7 @@ function showBubbleSourceVFX(caster) {
     // Create bubble source container
     const bubbleSourceVFX = document.createElement('div');
     bubbleSourceVFX.className = 'bridget-bubble-source-vfx';
+    applyAtlanteanGhostSkin(bubbleSourceVFX, caster);
     casterElement.appendChild(bubbleSourceVFX);
     
     // Create bubble glow
@@ -1217,45 +1271,51 @@ function showBubbleSourceVFX(caster) {
 /**
  * Shows bubble impact VFX on the target when hit by Bubble Beam Barrage
  */
-function showBubbleImpactVFX(target, isCritical = false) {
+function showBubbleImpactVFX(target, isCritical = false, caster = null) {
     const targetId = target.instanceId || target.id;
     const targetElement = document.getElementById(`character-${targetId}`);
     
     if (!targetElement) return;
     
-    // Create impact container
-    const bubbleImpactVFX = document.createElement('div');
-    bubbleImpactVFX.className = 'bridget-bubble-impact-vfx';
+    // Create damage VFX container
+    const damageVFX = document.createElement('div');
+    damageVFX.className = 'bridget-bubble-damage-vfx';
     if (isCritical) {
-        bubbleImpactVFX.classList.add('critical');
+        damageVFX.classList.add('critical');
     }
-    targetElement.appendChild(bubbleImpactVFX);
+    // Apply skin based on caster (who cast the ability) if available, otherwise use target
+    applyAtlanteanGhostSkin(damageVFX, caster || target);
+    targetElement.appendChild(damageVFX);
     
-    // Create bubble splash
-    const bubbleSplash = document.createElement('div');
-    bubbleSplash.className = 'bridget-bubble-splash';
-    bubbleImpactVFX.appendChild(bubbleSplash);
+    // Create bubble burst
+    const bubbleBurst = document.createElement('div');
+    bubbleBurst.className = 'bridget-bubble-burst';
+    damageVFX.appendChild(bubbleBurst);
     
-    // Create bubbles
-    const bubbleCount = isCritical ? 15 : 8;
-    for (let i = 0; i < bubbleCount; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'bridget-impact-bubble';
-        bubble.style.left = `${Math.random() * 100}%`;
-        bubble.style.top = `${Math.random() * 100}%`;
-        bubble.style.animationDuration = `${0.5 + Math.random() * 0.7}s`;
-        bubble.style.animationDelay = `${Math.random() * 0.3}s`;
-        bubble.style.width = `${5 + Math.random() * 10}px`;
-        bubble.style.height = bubble.style.width;
-        bubbleImpactVFX.appendChild(bubble);
+    // Create splash particles
+    const particleCount = isCritical ? 15 : 8;
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'bridget-bubble-damage-particle';
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        
+        // Calculate random angle for particle direction
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 5 + Math.random() * 20;
+        particle.style.setProperty('--moveX', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--moveY', `${Math.sin(angle) * distance}px`);
+        
+        particle.style.animationDuration = `${0.4 + Math.random() * 0.4}s`;
+        damageVFX.appendChild(particle);
     }
     
     // Remove VFX after animation completes
     setTimeout(() => {
-        if (bubbleImpactVFX.parentNode === targetElement) {
-            targetElement.removeChild(bubbleImpactVFX);
+        if (damageVFX.parentNode === targetElement) {
+            targetElement.removeChild(damageVFX);
         }
-    }, 1500);
+    }, 1000);
 }
 
 /**
@@ -4640,4 +4700,3 @@ bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
 // Note: Removed problematic const reassignments that were causing JavaScript errors
 // The battle log should now work properly without these function overrides
 
-        

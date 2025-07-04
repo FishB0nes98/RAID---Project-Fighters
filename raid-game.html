@@ -15,6 +15,7 @@
     <!-- Preload Critical Assets -->
     <link rel="preload" href="js/raid-game/game-manager.js" as="script">
     <link rel="preload" href="js/raid-game/character.js" as="script">
+    <script src="js/skins/skin-registry.js"></script>
     <link rel="preload" href="css/raid-game.css" as="style">
     
     <!-- Performance Hints -->
@@ -229,6 +230,7 @@
     <link rel="stylesheet" href="css/farmer_alice_abilities.css">
     <link rel="stylesheet" href="css/farmer_shoma_abilities.css">
     <link rel="stylesheet" href="css/schoolgirl_kokoro_abilities.css">
+    <link rel="stylesheet" href="css/schoolgirl_kokoro_holy.css">
     <link rel="stylesheet" href="css/schoolboy_siegfried_abilities.css">
     <link rel="stylesheet" href="css/schoolgirl_julia_abilities.css">
     <link rel="stylesheet" href="css/schoolgirl_ayane_abilities.css">
@@ -714,6 +716,7 @@
                     <span class="battle-log-title">⚔️ Battle Log</span>
                 </div>
                 <div class="battle-log-controls">
+                    <button id="toggle-reduction-messages-button" class="log-button" title="Toggle armor/shield reduction messages">🛡️</button>
                     <button id="clear-log-button" class="log-button" title="Clear log">🗑️</button>
                     <button id="toggle-log-button" class="log-button" title="Toggle log size">⬍</button>
                     <button id="close-log-button" class="log-button" title="Close battle log">✕</button>
@@ -797,6 +800,7 @@
     <!-- Skin System Scripts -->
     <script src="js/skins/skin-registry.js"></script>
     <script src="js/skins/skin-manager.js"></script>
+    <script src="js/skins/skin-vfx-manager.js"></script>
     <script src="js/raid-game/passive-factory.js"></script>
     <script src="js/raid-game/statistics-manager.js"></script>
     <script src="js/raid-game/quest-manager.js"></script>
@@ -848,6 +852,7 @@
 
     <!-- Controller Support -->
     <script src="js/raid-game/controller-manager.js"></script>
+    
 
     <!-- Weekly Challenge AI -->
     <script src="js/raid-game/weekly-challenge-ai.js"></script>
@@ -1206,6 +1211,7 @@
             const battleLogContainer = document.getElementById('battle-log-container');
             const battleLogHeader = document.getElementById('battle-log-header');
             const dragHandle = document.getElementById('battle-log-drag-handle');
+            const toggleReductionMessagesButton = document.getElementById('toggle-reduction-messages-button');
             const toggleLogButton = document.getElementById('toggle-log-button');
             const clearLogButton = document.getElementById('clear-log-button');
             const closeLogButton = document.getElementById('close-log-button');
@@ -1371,6 +1377,34 @@
             document.addEventListener('touchend', dragEnd);
             
             // Button functionality
+            if (toggleReductionMessagesButton) {
+                // Initialize button appearance based on current setting
+                const updateReductionToggleButton = () => {
+                    if (window.gameManager && window.gameManager.shouldShowReductionMessages()) {
+                        toggleReductionMessagesButton.style.opacity = '1';
+                        toggleReductionMessagesButton.title = 'Disable armor/shield reduction messages';
+                        toggleReductionMessagesButton.style.background = 'rgba(0, 255, 0, 0.2)'; // Green tint when enabled
+                    } else {
+                        toggleReductionMessagesButton.style.opacity = '0.5';
+                        toggleReductionMessagesButton.title = 'Enable armor/shield reduction messages';
+                        toggleReductionMessagesButton.style.background = 'rgba(255, 0, 0, 0.2)'; // Red tint when disabled
+                    }
+                };
+                
+                toggleReductionMessagesButton.addEventListener('click', () => {
+                    if (window.gameManager) {
+                        const newState = window.gameManager.toggleReductionMessages();
+                        updateReductionToggleButton();
+                        console.log(`[setupBattleLog] Reduction messages ${newState ? 'enabled' : 'disabled'}`);
+                    } else {
+                        addBattleLogMessage('⚠️ Game manager not available', 'system');
+                    }
+                });
+                
+                // Update button appearance when game manager is available
+                setTimeout(updateReductionToggleButton, 100);
+            }
+            
             if (clearLogButton) {
                 clearLogButton.addEventListener('click', () => {
                     const battleLog = document.getElementById('battle-log');
@@ -1509,6 +1543,29 @@
                 console.log('[DEBUG] Test messages added');
             };
             
+            // Add debug function to toggle reduction messages
+            window.toggleReductionMessages = () => {
+                if (window.gameManager) {
+                    const newState = window.gameManager.toggleReductionMessages();
+                    console.log(`[DEBUG] Reduction messages ${newState ? 'enabled' : 'disabled'}`);
+                    return newState;
+                } else {
+                    console.warn('[DEBUG] Game manager not available');
+                    return false;
+                }
+            };
+            
+            // Add debug function to test reduction messages
+            window.testReductionMessages = () => {
+                if (window.gameManager && window.gameManager.shouldShowReductionMessages()) {
+                    addBattleLogMessage("🛡️ Test armor reduction: Alice's armor reduces physical damage by 25% (100 → 75)", 'armor-reduction');
+                    addBattleLogMessage("✨ Test shield reduction: Bob's magical shield reduces magical damage by 30% (80 → 56)", 'shield-reduction');
+                    console.log('[DEBUG] Test reduction messages added (they are enabled)');
+                } else {
+                    console.log('[DEBUG] Reduction messages are disabled - no test messages shown');
+                }
+            };
+            
             // Add keyboard shortcut for battle log visibility (Ctrl+L)
             document.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.key === 'l') {
@@ -1535,9 +1592,12 @@
                 console.log('[setupBattleLog] Adding initial test messages...');
                 addBattleLogMessage('⚔️ Battle Log Initialized - Ready for Battle!', 'system');
                 addBattleLogMessage('📍 Battle log is working properly', 'system');
+                addBattleLogMessage('🛡️ Armor/Shield reduction messages are ON by default', 'system');
                 addBattleLogMessage('⌨️ Press Ctrl+L to toggle battle log visibility', 'system');
                 addBattleLogMessage('🔧 Type testBattleLog() in console to test messages', 'system');
                 addBattleLogMessage('🔄 Type resetBattleLogPosition() to reset position', 'system');
+                addBattleLogMessage('🛡️ Type toggleReductionMessages() to toggle reduction messages', 'system');
+                addBattleLogMessage('🧪 Type testReductionMessages() to test reduction display', 'system');
                 console.log('[setupBattleLog] Initial test messages added');
             }, 100);
             

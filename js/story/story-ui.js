@@ -168,6 +168,7 @@ class StoryUI {
         const retryButton = document.getElementById('retry-button');
         const quitButton = document.getElementById('quit-button');
         const newStoryButton = document.getElementById('new-story-button');
+        const craftingModalButton = document.getElementById('crafting-modal-button');
 
         if (backButton) backButton.addEventListener('click', () => this.backToSelection());
         else console.warn('Back button not found');
@@ -189,6 +190,9 @@ class StoryUI {
 
         if (newStoryButton) newStoryButton.addEventListener('click', async () => await this.newStory());
         else console.warn('New story button not found');
+
+        if (craftingModalButton) craftingModalButton.addEventListener('click', () => this.openCraftingModal());
+        else console.warn('Crafting modal button not found');
         
         console.log("[StoryUI] Event handlers set up.");
     }
@@ -4837,6 +4841,53 @@ class StoryUI {
         } catch (error) {
             console.error('[StoryUI] Error opening global inventory:', error);
             this.showPopupMessage(`❌ Failed to open global inventory: ${error.message}`, 'error', 4000);
+        }
+    }
+
+    /**
+     * Open crafting modal for lootbox opening
+     */
+    openCraftingModal() {
+        console.log('[StoryUI] Opening crafting modal');
+        
+        try {
+            // Check if user is authenticated
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                console.error('[StoryUI] User not authenticated');
+                this.showPopupMessage('❌ You must be logged in to use crafting features.', 'error', 3000);
+                return;
+            }
+
+            // Verify inventory system is ready
+            const systemReady = !!(window.ItemRegistry && window.GlobalInventory && window.CharacterInventories);
+            if (!systemReady) {
+                console.error('[StoryUI] Inventory system not ready!');
+                this.showPopupMessage('❌ Inventory system not ready. Please wait a moment and try again.', 'error', 3000);
+                return;
+            }
+
+            // Check if crafting modal functionality is available
+            if (window.CraftingModal && typeof window.CraftingModal.show === 'function') {
+                console.log('[StoryUI] Using CraftingModal instance');
+                window.CraftingModal.show();
+            } else if (typeof CraftingModal !== 'undefined') {
+                console.log('[StoryUI] Creating new CraftingModal instance');
+                // If there's a CraftingModal class, use it
+                if (!window.CraftingModal) {
+                    window.CraftingModal = new CraftingModal();
+                }
+                window.CraftingModal.show();
+            } else {
+                console.error('[StoryUI] CraftingModal not available');
+                this.showPopupMessage('❌ Crafting system not available. Please refresh the page.', 'error', 3000);
+            }
+            
+            console.log('[StoryUI] Crafting modal opened successfully');
+            
+        } catch (error) {
+            console.error('[StoryUI] Error opening crafting modal:', error);
+            this.showPopupMessage(`❌ Failed to open crafting interface: ${error.message}`, 'error', 4000);
         }
     }
 

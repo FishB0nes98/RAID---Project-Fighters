@@ -10,7 +10,7 @@
     "isHidden": true,
     "ingameimage": "Loading Screen/Frozen Soldier.png",
     "stats": {
-        "hp": 2800,
+        "hp": 1725,
         "mana": 80,
         "physicalDamage": 220,
         "magicalDamage": 50,

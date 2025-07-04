@@ -1051,4 +1051,55 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         window.characterSelectorController = new CharacterSelectorController();
     }, 1000);
-}); 
+});
+
+/**
+ * Controller for the Character Selector page.
+ * Handles user interactions, data loading, and administrative functions.
+ */
+
+// Ensure the global namespace for the controller
+window.characterSelectorController = {};
+
+/**
+ * Adds an item to the user's global inventory. This is an admin-only function.
+ * It correctly fetches the current inventory, adds the new item, and saves it back to Firebase.
+ *
+ * @param {string} itemId - The ID of the item to add.
+ * @param {number} [quantity=1] - The quantity of the item to add.
+ * @returns {boolean} - True if the item was added successfully, false otherwise.
+ */
+window.adminAddItemToGlobal = async function(itemId, quantity = 1) {
+    try {
+        const user = window.auth.currentUser;
+        if (!user) {
+            console.error('[Admin] User not logged in.');
+            return false;
+        }
+
+        const userRef = window.database.ref(`users/${user.uid}`);
+        const snapshot = await userRef.once('value');
+        const userData = snapshot.val() || {};
+        
+        const globalInventory = userData.globalInventory || [];
+        
+        const tempInventory = new GlobalInventory();
+        tempInventory.deserialize(globalInventory);
+        tempInventory.addItem(itemId, quantity);
+        
+        const updatedInventory = tempInventory.serialize();
+        
+        await window.database.ref(`users/${user.uid}/globalInventory`).set(updatedInventory);
+
+        // Manually update local global inventory instance if it exists
+        if (window.GlobalInventory) {
+            window.GlobalInventory.addItem(itemId, quantity);
+        }
+
+        console.log(`[Admin] Added ${quantity}x ${itemId} to global inventory for user ${user.uid}`);
+        return true;
+    } catch (error) {
+        console.error('[Admin] Error adding item to global inventory:', error);
+        return false;
+    }
+};

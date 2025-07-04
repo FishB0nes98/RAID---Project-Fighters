@@ -22,8 +22,13 @@ class InventoryIntegrationManager {
             return;
         }
 
-        // Load global inventory for the current user
-        await this.loadGlobalInventory();
+        // Only load global inventory if it hasn't been loaded yet
+        if (!window.GlobalInventory || !window.GlobalInventory.items || window.GlobalInventory.items.length === 0) {
+            console.log('Loading global inventory (not yet loaded)...');
+            await this.loadGlobalInventory();
+        } else {
+            console.log('Global inventory already loaded with', window.GlobalInventory.items.length, 'items - skipping duplicate load');
+        }
         
         this.initialized = true;
         console.log('Inventory Integration Manager initialized successfully');

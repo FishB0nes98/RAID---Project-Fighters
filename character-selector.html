@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="css/raid-game.css">
     <!-- Inventory System Styles -->
     <link rel="stylesheet" href="css/inventory-system.css">
+    <!-- Crafting System Styles -->
+    <link rel="stylesheet" href="css/crafting-modal.css">
     <!-- Selector-specific overrides -->
     <style id="selector-overrides">
       /* Restore scrolling and normal body dimensions */
@@ -3090,6 +3092,19 @@
                     </svg>
                     Skin Selector
                 </button>
+                <button class="nav-button" onclick="window.CraftingModal?.show()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4zM6.7 8.8c-.7.7-1.9.7-2.6 0-.7-.7-.7-1.9 0-2.6.7-.7 1.9-.7 2.6 0 .7.7.7 1.9 0 2.6z"/>
+                    </svg>
+                    Crafting
+                </button>
+                <button class="nav-button" onclick="window.location.href='item-database.html'">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        <path d="M9 16l2 2 4-4"/>
+                    </svg>
+                    Item Database
+                </button>
                 <button class="changelog-button" onclick="showChangelog()">
                     <svg class="changelog-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
@@ -3232,6 +3247,9 @@
     <script src="js/raid-game/inventory-integration.js"></script>
     <script type="module" src="items/game-integration.js"></script>
     
+    <!-- Crafting System -->
+    <script src="js/raid-game/crafting-modal.js"></script>
+    
     <!-- Controller Support -->
     <script src="js/character-selector-controller.js"></script>
 
@@ -3332,6 +3350,13 @@
             window.adminAddItemToGlobal('golden_arrow', 1);
             window.adminAddItemToGlobal('golden_mask', 1);
             console.log('[Admin] Requested items added.');
+        }
+
+        // Add some test lootboxes for crafting modal testing
+        window.addTestLootboxes = function() {
+            console.log('[Admin] Adding test lootboxes for crafting modal...');
+            window.adminAddItemToGlobal('atlantean_treasure_chest', 3);
+            console.log('[Admin] Test lootboxes added. Use crafting modal to open them!');
         }
 
         // ===== ADMIN ONLY - GLOBAL INVENTORY MANAGEMENT =====
@@ -3512,15 +3537,34 @@
 • adminListItemsByRarity(rarity)           - List items by rarity
 • adminInventoryHelp()                     - Show this help
 
-🔧 DEBUGGING:
+🔨 CRAFTING & LOOTBOXES:
+• addTestLootboxes()                       - Add Atlantean Treasure Chests for testing
+• window.CraftingModal.show()              - Open crafting modal
+
+�️ QUICK ADD COMMANDS:
+• addTidalCharmToGlobalInventory()         - Add Tidal Charm to global
+• addZasalamelScytheToGlobalInventory()    - Add Zasalamel Scythe to global
+• addShinnoksDarkMagicBubbleToGlobalInventory() - Add Shinnok's Dark Magic Bubble
+• addDeepSeaEssenceToGlobalInventory()     - Add Deep Sea Essence to global
+• addShadowDaggerToGlobalInventory()       - Add Shadow Dagger to global
+
+�🔧 DEBUGGING:
 • adminDebugSaving()                       - Debug saving mechanism
 • adminForceSave()                         - Force save to Firebase
+• adminTestShinnoksBuff(characterId)       - Test Shinnok's Dark Magic Bubble per-turn effect
+• adminCheckLifesteal(characterId)         - Debug lifesteal application
+• testShinnoksPerTurnEffect()              - Test per-turn magical damage increase
+• manuallyApplyShadowDaggerBuff()          - Test Shadow Dagger armor penetration effect
 
 💡 EXAMPLES:
 adminAddItemToGlobal('atlantean_crown', 5)
 adminAddItemToGlobal('atlantean_trident_of_time')
 adminListItemsByRarity('legendary')
 adminGiveAllItems(3)
+addZasalamelScytheToGlobalInventory()
+addShinnoksDarkMagicBubbleToGlobalInventory()
+addDeepSeaEssenceToGlobalInventory()
+addShadowDaggerToGlobalInventory()
             `);
         };
 
@@ -3530,14 +3574,92 @@ adminGiveAllItems(3)
             const item = window.ItemRegistry.getItem(itemId);
 
             if (!item) {
-                console.error(`[ADMIN] Error: Item with ID '${itemId}' not found in the ItemRegistry.`);
-                console.log("[ADMIN] Please ensure 'tidal_charm' is registered correctly in 'js/raid-game/item-system.js'.");
-                window.listAvailableItems(); // Helper to show what is available
+                console.error(`[ADMIN] Item '${itemId}' not found in ItemRegistry!`);
                 return;
             }
 
             console.log(`[ADMIN] Found item: ${item.name}`);
             window.adminAddItemToGlobal(itemId, 1);
+        };
+
+        // ===== ADMIN ONLY - ZASALAMEL SCYTHE =====
+        window.addZasalamelScytheToGlobalInventory = function() {
+            console.log("[ADMIN] Attempting to add Zasalamel Scythe to Global Inventory...");
+            const itemId = 'zasalamel_scythe';
+            const item = window.ItemRegistry.getItem(itemId);
+
+            if (!item) {
+                console.error(`[ADMIN] Item '${itemId}' not found in ItemRegistry!`);
+                console.log("[ADMIN] Available items:");
+                window.listAvailableItems();
+                return;
+            }
+
+            console.log(`[ADMIN] Found item: ${item.name} (${item.rarity})`);
+            console.log(`[ADMIN] Stats: +${item.statBonuses.physicalDamage} Physical Damage, +${Math.round(item.statBonuses.lifesteal * 100)}% Lifesteal`);
+            console.log(`[ADMIN] Special Effect: Q ability heals for 50% of damage dealt`);
+            window.adminAddItemToGlobal(itemId, 1);
+            console.log(`[ADMIN] Zasalamel Scythe added to global inventory!`);
+        };
+
+        // ===== ADMIN ONLY - SHINNOK'S DARK MAGIC BUBBLE =====
+        window.addShinnoksDarkMagicBubbleToGlobalInventory = function() {
+            console.log("[ADMIN] Attempting to add Shinnok's Dark Magic Bubble to Global Inventory...");
+            const itemId = 'shinnoks_dark_magic_bubble';
+            const item = window.ItemRegistry.getItem(itemId);
+
+            if (!item) {
+                console.error(`[ADMIN] Item '${itemId}' not found in ItemRegistry!`);
+                console.log("[ADMIN] Available items:");
+                window.listAvailableItems();
+                return;
+            }
+
+            console.log(`[ADMIN] Found item: ${item.name} (${item.rarity})`);
+            console.log(`[ADMIN] Stats: +${Math.round(item.statBonuses.lifesteal * 100)}% Lifesteal`);
+            console.log(`[ADMIN] Special Effect: Grants permanent buff with +2 magical damage every turn`);
+            window.adminAddItemToGlobal(itemId, 1);
+            console.log(`[ADMIN] Shinnok's Dark Magic Bubble added to global inventory!`);
+        };
+
+        // ===== ADMIN ONLY - DEEP SEA ESSENCE =====
+        window.addDeepSeaEssenceToGlobalInventory = function() {
+            console.log("[ADMIN] Attempting to add Deep Sea Essence to Global Inventory...");
+            const itemId = 'deep_sea_essence';
+            const item = window.ItemRegistry.getItem(itemId);
+
+            if (!item) {
+                console.error(`[ADMIN] Item '${itemId}' not found in ItemRegistry!`);
+                console.log("[ADMIN] Available items:");
+                window.listAvailableItems();
+                return;
+            }
+
+            console.log(`[ADMIN] Found item: ${item.name} (${item.rarity})`);
+            console.log(`[ADMIN] Type: ${item.type} (crafting material)`);
+            console.log(`[ADMIN] Description: ${item.description}`);
+            window.adminAddItemToGlobal(itemId, 1);
+            console.log(`[ADMIN] Deep Sea Essence added to global inventory!`);
+        };
+
+        // ===== ADMIN ONLY - SHADOW DAGGER =====
+        window.addShadowDaggerToGlobalInventory = function() {
+            console.log("[ADMIN] Attempting to add Shadow Dagger to Global Inventory...");
+            const itemId = 'shadow_dagger';
+            const item = window.ItemRegistry.getItem(itemId);
+
+            if (!item) {
+                console.error(`[ADMIN] Item '${itemId}' not found in ItemRegistry!`);
+                console.log("[ADMIN] Available items:");
+                window.listAvailableItems();
+                return;
+            }
+
+            console.log(`[ADMIN] Found item: ${item.name} (${item.rarity})`);
+            console.log(`[ADMIN] Stats: +${item.statBonuses.physicalDamage} Physical Damage`);
+            console.log(`[ADMIN] Special Effect: Random ability ignores 100% armor`);
+            window.adminAddItemToGlobal(itemId, 1);
+            console.log(`[ADMIN] Shadow Dagger added to global inventory!`);
         };
 
         // ===== ADMIN DEBUGGING FUNCTIONS =====
@@ -7500,7 +7622,14 @@ adminGiveAllItems(3)
 • adminGrantCharacter(characterId, userId?) - Grant character to user
 • adminShowStudentCharacterChoice() - Test character choice modal
 
-📝 NOTES:
+�️ INVENTORY MANAGEMENT:
+• adminInventoryHelp() - Show all inventory commands
+• addZasalamelScytheToGlobalInventory() - Add new Zasalamel Scythe item
+• addShinnoksDarkMagicBubbleToGlobalInventory() - Add new Shinnok's Dark Magic Bubble item
+• addTidalCharmToGlobalInventory() - Add Tidal Charm item
+• adminGiveAllItems(quantity) - Give all items to global inventory
+
+�📝 NOTES:
 • userId is optional - defaults to current user
 • Quest IDs: 'heal_100k' for healing quest
 • Student character IDs: '0'=Schoolboy Shoma, '7'=Schoolgirl Kokoro, '8'=Schoolboy Siegfried, 
@@ -7508,6 +7637,7 @@ adminGiveAllItems(3)
 
 Example: adminCompleteQuest('heal_100k') - Complete healing quest for yourself
 Example: adminGrantCharacter('8', 'someUserId') - Grant Schoolboy Siegfried to user
+Example: addZasalamelScytheToGlobalInventory() - Add Zasalamel Scythe to inventory
                         `);
                     };
 

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Kokoro Holy Skin Complete</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-status {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        .test-status.error {
+            border-left-color: #dc3545;
+        }
+        .test-status.warning {
+            border-left-color: #ffc107;
+        }
+        .test-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border-radius: 4px;
+        }
+        .test-item.pass {
+            border-left: 3px solid #28a745;
+        }
+        .test-item.fail {
+            border-left: 3px solid #dc3545;
+        }
+        .test-item.warning {
+            border-left: 3px solid #ffc107;
+        }
+        .details {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Kokoro Holy Skin Integration Test</h1>
+        
+        <div class="test-status" id="overall-status">
+            <h3>Overall Status: <span id="status-text">Running Tests...</span></h3>
+            <div id="status-details"></div>
+        </div>
+        
+        <div id="test-results"></div>
+        
+        <button onclick="runTests()">Run Tests</button>
+        <button onclick="openRaidGame()">Open Raid Game</button>
+    </div>
+
+    <script>
+        const testResults = [];
+        
+        function addTestResult(name, passed, message = '', details = '') {
+            testResults.push({
+                name,
+                passed,
+                message,
+                details
+            });
+        }
+        
+        function runTests() {
+            testResults.length = 0;
+            document.getElementById('status-text').textContent = 'Running Tests...';
+            document.getElementById('test-results').innerHTML = '';
+            
+            // Test 1: Check if holy skin CSS file exists
+            testCSSFileExists();
+            
+            // Test 2: Check if skin VFX manager exists
+            testSkinVFXManager();
+            
+            // Test 3: Check if abilities file has holy skin logic
+            testAbilitiesFileLogic();
+            
+            // Test 4: Check if HTML loads required files
+            testHTMLConfiguration();
+            
+            // Display results
+            displayResults();
+        }
+        
+        function testCSSFileExists() {
+            fetch('css/schoolgirl_kokoro_holy.css')
+                .then(response => {
+                    if (response.ok) {
+                        addTestResult('CSS File Exists', true, 'Holy skin CSS file is accessible');
+                        return response.text();
+                    } else {
+                        addTestResult('CSS File Exists', false, 'Holy skin CSS file not found');
+                        return null;
+                    }
+                })
+                .then(cssContent => {
+                    if (cssContent) {
+                        const hasHolyOverrides = cssContent.includes('schoolgirl-kokoro-holy') && 
+                                               cssContent.includes('d4af37') && 
+                                               cssContent.includes('ffd700');
+                        addTestResult('CSS Content Valid', hasHolyOverrides, 
+                            hasHolyOverrides ? 'CSS contains holy skin overrides' : 'CSS missing holy skin styling');
+                    }
+                    updateDisplay();
+                })
+                .catch(error => {
+                    addTestResult('CSS File Exists', false, 'Error loading CSS: ' + error.message);
+                    updateDisplay();
+                });
+        }
+        
+        function testSkinVFXManager() {
+            fetch('js/skins/skin-vfx-manager.js')
+                .then(response => {
+                    if (response.ok) {
+                        addTestResult('Skin VFX Manager Exists', true, 'Skin VFX Manager file is accessible');
+                        return response.text();
+                    } else {
+                        addTestResult('Skin VFX Manager Exists', false, 'Skin VFX Manager file not found');
+                        return null;
+                    }
+                })
+                .then(jsContent => {
+                    if (jsContent) {
+                        const hasHolyMapping = jsContent.includes('schoolgirl-kokoro-holy') && 
+                                             jsContent.includes('schoolgirl_kokoro') &&
+                                             jsContent.includes('hasActiveSkin');
+                        addTestResult('Skin VFX Manager Config', hasHolyMapping, 
+                            hasHolyMapping ? 'Skin VFX Manager has holy skin mapping' : 'Missing holy skin mapping');
+                    }
+                    updateDisplay();
+                })
+                .catch(error => {
+                    addTestResult('Skin VFX Manager Exists', false, 'Error loading Skin VFX Manager: ' + error.message);
+                    updateDisplay();
+                });
+        }
+        
+        function testAbilitiesFileLogic() {
+            fetch('js/raid-game/abilities/schoolgirl_kokoro_abilities.js')
+                .then(response => {
+                    if (response.ok) {
+                        addTestResult('Abilities File Exists', true, 'Kokoro abilities file is accessible');
+                        return response.text();
+                    } else {
+                        addTestResult('Abilities File Exists', false, 'Kokoro abilities file not found');
+                        return null;
+                    }
+                })
+                .then(jsContent => {
+                    if (jsContent) {
+                        const hasHolyLogic = jsContent.includes('SkinVFXManager.hasActiveSkin') && 
+                                           jsContent.includes('schoolgirl-kokoro-holy') &&
+                                           jsContent.includes('classList.add(\'schoolgirl-kokoro-holy\')');
+                        addTestResult('Abilities Holy Logic', hasHolyLogic, 
+                            hasHolyLogic ? 'Abilities file contains holy skin VFX logic' : 'Missing holy skin VFX logic');
+                        
+                        // Check for proper caster parameter usage
+                        const hasProperCasterLogic = jsContent.includes('hasActiveSkin(caster, \'schoolgirl-kokoro-holy\')');
+                        addTestResult('Caster Parameter Logic', hasProperCasterLogic, 
+                            hasProperCasterLogic ? 'Abilities check caster for holy skin' : 'Missing caster parameter logic');
+                    }
+                    updateDisplay();
+                })
+                .catch(error => {
+                    addTestResult('Abilities File Exists', false, 'Error loading abilities file: ' + error.message);
+                    updateDisplay();
+                });
+        }
+        
+        function testHTMLConfiguration() {
+            fetch('raid-game.html')
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        throw new Error('HTML file not found');
+                    }
+                })
+                .then(htmlContent => {
+                    const hasCSSLink = htmlContent.includes('href="css/schoolgirl_kokoro_holy.css"');
+                    addTestResult('HTML CSS Link', hasCSSLink, 
+                        hasCSSLink ? 'HTML includes holy skin CSS' : 'HTML missing holy skin CSS link');
+                    
+                    const hasVFXManagerScript = htmlContent.includes('src="js/skins/skin-vfx-manager.js"');
+                    addTestResult('HTML VFX Manager Script', hasVFXManagerScript, 
+                        hasVFXManagerScript ? 'HTML includes skin VFX manager script' : 'HTML missing skin VFX manager script');
+                    
+                    updateDisplay();
+                })
+                .catch(error => {
+                    addTestResult('HTML Configuration', false, 'Error loading HTML: ' + error.message);
+                    updateDisplay();
+                });
+        }
+        
+        function updateDisplay() {
+            // Small delay to ensure all async tests complete
+            setTimeout(displayResults, 100);
+        }
+        
+        function displayResults() {
+            const resultsContainer = document.getElementById('test-results');
+            const statusElement = document.getElementById('status-text');
+            const statusDetails = document.getElementById('status-details');
+            
+            if (testResults.length === 0) return;
+            
+            const passedTests = testResults.filter(test => test.passed).length;
+            const totalTests = testResults.length;
+            
+            // Update overall status
+            const allPassed = passedTests === totalTests;
+            statusElement.textContent = allPassed ? 'All Tests Passed!' : `${passedTests}/${totalTests} Tests Passed`;
+            statusDetails.innerHTML = allPassed ? 
+                'Holy skin implementation is ready for testing in-game.' : 
+                'Some issues detected. Please review the test results below.';
+            
+            // Update status container class
+            const statusContainer = document.getElementById('overall-status');
+            statusContainer.className = allPassed ? 'test-status' : 'test-status error';
+            
+            // Display individual test results
+            resultsContainer.innerHTML = testResults.map(test => `
+                <div class="test-item ${test.passed ? 'pass' : 'fail'}">
+                    <strong>${test.name}</strong>: ${test.passed ? 'PASS' : 'FAIL'}
+                    <div class="details">${test.message}</div>
+                    ${test.details ? `<div class="details">${test.details}</div>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function openRaidGame() {
+            window.open('raid-game.html', '_blank');
+        }
+        
+        // Run tests on page load
+        window.onload = function() {
+            setTimeout(runTests, 500);
+        };
+    </script>
+</body>
+</html>

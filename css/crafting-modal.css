@@ -1,0 +1,491 @@
+/**
+ * Crafting Modal Styles
+ * Modern crafting interface with lootbox opening functionality
+ */
+
+:root {
+    /* Crafting colors */
+    --craft-bg: linear-gradient(135deg, #1a1c2a 0%, #2d1b3d 100%);
+    --craft-border: rgba(139, 69, 19, 0.4);
+    --craft-accent: #cd853f;
+    --craft-hover: #daa520;
+    --craft-shadow: rgba(0, 0, 0, 0.6);
+    
+    /* Lootbox colors */
+    --lootbox-glow: #ffd700;
+    --lootbox-bg: rgba(255, 215, 0, 0.1);
+    --lootbox-border: rgba(255, 215, 0, 0.3);
+}
+
+/* Crafting Modal */
+.crafting-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 15000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s ease;
+}
+
+.crafting-modal.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.crafting-container {
+    background: var(--craft-bg);
+    border: 2px solid var(--craft-border);
+    border-radius: 20px;
+    padding: 40px;
+    width: 85%;
+    height: 85%;
+    max-width: 1600px;
+    max-height: 1000px;
+    box-shadow: 0 20px 60px var(--craft-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.crafting-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(139,69,19,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    pointer-events: none;
+    z-index: 1;
+}
+
+.crafting-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.crafting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--craft-border);
+}
+
+.crafting-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--craft-accent);
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.crafting-close {
+    background: linear-gradient(145deg, #8b4513, #a0522d);
+    border: 2px solid var(--craft-accent);
+    border-radius: 12px;
+    padding: 12px 24px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.crafting-close:hover {
+    background: linear-gradient(145deg, #a0522d, #cd853f);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Main Layout */
+.crafting-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 30px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Inventory Section */
+.crafting-inventory-section {
+    background: rgba(42, 35, 56, 0.7);
+    border: 1px solid rgba(139, 69, 19, 0.3);
+    border-radius: 15px;
+    padding: 25px;
+    overflow-y: auto;
+}
+
+.crafting-inventory-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--craft-accent);
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.crafting-inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.crafting-inventory-slot {
+    aspect-ratio: 1;
+    background: rgba(35, 37, 58, 0.8);
+    border: 2px solid rgba(139, 69, 19, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 80px;
+}
+
+.crafting-inventory-slot:hover {
+    border-color: var(--craft-accent);
+    background: rgba(45, 50, 70, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.crafting-inventory-slot.dragging {
+    opacity: 0.5;
+    transform: scale(0.9);
+}
+
+.crafting-inventory-slot img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.item-quantity {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 8px;
+    min-width: 16px;
+    text-align: center;
+}
+
+/* Lootbox Section */
+.lootbox-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.lootbox-opening-area {
+    background: var(--lootbox-bg);
+    border: 3px dashed var(--lootbox-border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.lootbox-opening-area.dragover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: var(--lootbox-glow);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    transform: scale(1.02);
+}
+
+.lootbox-drop-zone {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    color: #ffd700;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.lootbox-instructions {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.lootbox-preview {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.lootbox-preview.visible {
+    display: flex;
+}
+
+.lootbox-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 15px var(--lootbox-glow));
+}
+
+.lootbox-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--lootbox-glow);
+    margin: 0;
+}
+
+.open-lootbox-btn {
+    background: linear-gradient(145deg, #ffd700, #ffed4e);
+    border: 3px solid #ffa500;
+    border-radius: 15px;
+    padding: 15px 30px;
+    color: #8b4513;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.open-lootbox-btn:hover {
+    background: linear-gradient(145deg, #ffed4e, #ffd700);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+}
+
+.open-lootbox-btn:active {
+    transform: translateY(-1px);
+}
+
+/* Lootbox Opening Animation */
+.lootbox-opening {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.lootbox-opening.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.lootbox-animation-container {
+    position: relative;
+    text-align: center;
+}
+
+.lootbox-chest {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 30px;
+    position: relative;
+    animation: chest-glow 2s ease-in-out infinite;
+}
+
+.lootbox-chest img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px var(--lootbox-glow));
+}
+
+@keyframes chest-glow {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 30px var(--lootbox-glow)); }
+    50% { transform: scale(1.1); filter: drop-shadow(0 0 50px var(--lootbox-glow)); }
+}
+
+.lootbox-opening-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--lootbox-glow);
+    margin-bottom: 20px;
+    animation: text-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes text-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.lootbox-results {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: results-appear 0.8s ease-out;
+}
+
+.lootbox-results.visible {
+    display: flex;
+}
+
+@keyframes results-appear {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.lootbox-reward {
+    background: rgba(42, 35, 56, 0.9);
+    border: 2px solid var(--craft-accent);
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 300px;
+    animation: reward-bounce 0.6s ease-out;
+}
+
+@keyframes reward-bounce {
+    0% { transform: scale(0.8); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.lootbox-reward img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.lootbox-reward-info {
+    flex: 1;
+    text-align: left;
+}
+
+.lootbox-reward-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 5px 0;
+}
+
+.lootbox-reward-quantity {
+    color: var(--craft-accent);
+    font-weight: 500;
+}
+
+.lootbox-continue-btn {
+    background: linear-gradient(145deg, #8b4513, #a0522d);
+    border: 2px solid var(--craft-accent);
+    border-radius: 12px;
+    padding: 15px 30px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.lootbox-continue-btn:hover {
+    background: linear-gradient(145deg, #a0522d, #cd853f);
+    transform: translateY(-2px);
+}
+
+/* Rarity Border Colors */
+.rarity-common { border-color: var(--rarity-common) !important; }
+.rarity-uncommon { border-color: #6bddaa !important; }
+.rarity-rare { border-color: var(--rarity-rare) !important; }
+.rarity-epic { border-color: var(--rarity-epic) !important; }
+.rarity-legendary { border-color: var(--rarity-legendary) !important; }
+
+/* Scrollbar Styling */
+.crafting-inventory-section::-webkit-scrollbar,
+.crafting-inventory-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.crafting-inventory-section::-webkit-scrollbar-track,
+.crafting-inventory-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.crafting-inventory-section::-webkit-scrollbar-thumb,
+.crafting-inventory-grid::-webkit-scrollbar-thumb {
+    background: var(--craft-accent);
+    border-radius: 4px;
+}
+
+.crafting-inventory-section::-webkit-scrollbar-thumb:hover,
+.crafting-inventory-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--craft-hover);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .crafting-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+    }
+    
+    .lootbox-section {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .crafting-container {
+        width: 95%;
+        height: 95%;
+        padding: 20px;
+    }
+    
+    .crafting-title {
+        font-size: 1.8rem;
+    }
+    
+    .crafting-inventory-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+    
+    .lootbox-opening-area {
+        padding: 20px;
+        min-height: 150px;
+    }
+}

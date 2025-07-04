@@ -26,19 +26,25 @@ class AtlanteanKagomePassive {
             return;
         }
 
-        // Get mana values with proper fallbacks
-        const maxMana = character.stats.maxMana || character.stats.mana || 0;
-        const currentMana = character.stats.currentMana !== undefined ? character.stats.currentMana : (character.stats.mana || 0);
-        const missingMana = maxMana - currentMana;
+        // Get mana values with proper fallbacks and validation
+        const maxMana = Math.max(0, character.stats.maxMana || character.stats.mana || 0);
+        const currentMana = Math.max(0, character.stats.currentMana !== undefined ? character.stats.currentMana : (character.stats.mana || 0));
+        const missingMana = Math.max(0, maxMana - currentMana);
         
         // Debug logging
         console.log(`[Atlantean Passive Debug] ${character.name}: maxMana=${maxMana}, currentMana=${currentMana}, missingMana=${missingMana}`);
         
         if (missingMana > 0) {
             // Calculate heal amount: 15% of missing mana with healing power modifier
-            const baseHealAmount = missingMana * 0.15;
-            const healingPower = character.stats.healingPower || 0;
-            const healAmount = baseHealAmount * (1 + healingPower);
+            const baseHealAmount = Math.max(0, missingMana * 0.15);
+            const healingPower = Math.max(0, character.stats.healingPower || 0);
+            const healAmount = Math.max(0, baseHealAmount * (1 + healingPower));
+            
+            // Validate the heal amount before proceeding
+            if (healAmount <= 0 || !isFinite(healAmount)) {
+                console.warn(`[Atlantean Passive] Invalid heal amount calculated: ${healAmount} for ${character.name}`);
+                return;
+            }
             
             // Debug the calculation
             console.log(`[Atlantean Passive Debug] baseHealAmount=${baseHealAmount}, healingPower=${healingPower}, healAmount=${healAmount}`);
@@ -49,14 +55,14 @@ class AtlanteanKagomePassive {
                 source: 'passive'
             });
             
-            // Extract heal amount from the returned object
-            const actualHealAmount = healResult && typeof healResult === 'object' ? healResult.healAmount : healResult;
+            // Extract heal amount from the returned object - the heal method always returns an object
+            const actualHealAmount = healResult.healAmount || 0;
             
             // Debug the heal result
             console.log(`[Atlantean Passive Debug] healResult=`, healResult, `actualHealAmount=${actualHealAmount}`);
             
             // Ensure actualHealAmount is a valid number
-            const safeHealAmount = isNaN(actualHealAmount) ? 0 : actualHealAmount;
+            const safeHealAmount = Math.max(0, actualHealAmount || 0);
             
             // Log the passive effect
             const logFunction = window.gameManager ? 
@@ -80,7 +86,7 @@ class AtlanteanKagomePassive {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (charElement) {
             // Ensure heal amount is valid
-            const safeHealAmount = isNaN(healAmount) ? 0 : healAmount;
+            const safeHealAmount = Math.max(0, healAmount || 0);
             
             // Create healing VFX container
             const healContainer = document.createElement('div');
@@ -201,8 +207,8 @@ class AtlanteanKagomePassive {
      */
     trackPassiveStats(character, healAmount, missingMana) {
         // Ensure numbers are valid
-        const safeHealAmount = isNaN(healAmount) ? 0 : healAmount;
-        const safeMissingMana = isNaN(missingMana) ? 0 : missingMana;
+        const safeHealAmount = Math.max(0, healAmount || 0);
+        const safeMissingMana = Math.max(0, missingMana || 0);
         
         if (window.StatisticsManager && typeof window.StatisticsManager.recordHealingDone === 'function') {
             // Track healing done by the passive

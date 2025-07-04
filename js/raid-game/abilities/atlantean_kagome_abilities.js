@@ -126,9 +126,10 @@ const goldenArrowEffect = (caster, target) => {
     
     // Calculate damage
     const abilityPower = getAbilityPower(caster);
-    const baseDamage = 400 + abilityPower; // 400 + 100% Magical Damage
+    const physicalDamage = caster.stats.physicalDamage || 0;
+    const baseDamage = 400 + abilityPower + (physicalDamage * 0.52); // 400 + 100% Magical Damage + 52% Physical Damage
     
-    console.log("[KAGOME Q] Base damage calculated:", baseDamage, "Magical Damage:", abilityPower);
+    console.log("[KAGOME Q] Base damage calculated:", baseDamage, "Magical Damage:", abilityPower, "Physical Damage:", physicalDamage);
     
     // Apply damage to target
     const result = target.applyDamage(baseDamage, 'magical', caster, { abilityId: 'atlantean_kagome_q' });
@@ -437,8 +438,8 @@ const spiritwalkEffect = (caster, target) => {
         }, 4000);
     }
     
-    // 1. Heal for 1000 HP
-    const healAmount = 1000;
+    // 1. Heal for 2500 HP
+    const healAmount = 2500;
     const actualHealAmount = caster.heal(healAmount, caster, { abilityId: 'atlantean_kagome_e' });
     log(`${caster.name} heals for ${actualHealAmount} HP through Spiritwalk.`);
     
@@ -737,10 +738,10 @@ const kagomeQ = new Ability(
     'atlantean_kagome_q',
     'Golden Arrow',
     'Icons/abilities/golden_arrow.png',
-    70, // Mana cost
+    25, // Mana cost
     1,   // Cooldown
     goldenArrowEffect
-).setDescription('Deals 400 + 100% Magical Damage to an enemy.')
+).setDescription('Deals 400 + 100% Magical Damage + 52% Physical Damage to an enemy.')
  .setTargetType('enemy');
 
 const kagomeW = new Ability(
@@ -760,7 +761,7 @@ const kagomeE = new Ability(
     60, // Mana cost
     5,  // Cooldown in turns
     spiritwalkEffect
-).setDescription("Kagome stuns herself for 4 turns, gains 200% magic shield and armor (for the duration as buff) and heals herself when ability is used by 1000HP.")
+).setDescription("Kagome stuns herself for 4 turns, gains 200% magic shield and armor (for the duration as buff) and heals herself when ability is used by 2500HP.")
  .setTargetType('self');
 
 const kagomeR = new Ability(

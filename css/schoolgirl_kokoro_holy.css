@@ -1,0 +1,269 @@
+/* Schoolgirl Kokoro Holy Skin VFX */
+
+/* Lesser Heal VFX - Change from dark green to holy gold/white theme */
+.lesser-heal-vfx.schoolgirl-kokoro-holy .lesser-heal-number {
+    background-color: rgba(212, 175, 55, 0.9);
+    color: #fff5cc;
+    box-shadow: 0 0 15px #d4af37, inset 0 0 8px #ffef94;
+    border: 2px solid #ffd700;
+    text-shadow: 0 0 5px #ffd700;
+}
+
+.lesser-heal-vfx.schoolgirl-kokoro-holy .lesser-heal-number.critical {
+    background-color: rgba(255, 215, 0, 0.95);
+    color: #ffffff;
+    box-shadow: 
+        0 0 25px rgba(255, 215, 0, 0.9), 
+        0 0 35px rgba(255, 255, 255, 0.6),
+        inset 0 0 15px rgba(255, 255, 255, 0.4);
+    border: 3px solid #ffffff;
+    text-shadow: 
+        0 0 10px #ffd700,
+        0 0 15px #ffffff;
+}
+
+/* Holy aura effect for Lesser Heal */
+.lesser-heal-vfx.schoolgirl-kokoro-holy::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 215, 0, 0.4) 0%,
+        rgba(212, 175, 55, 0.3) 40%,
+        rgba(255, 255, 255, 0.2) 70%,
+        rgba(255, 215, 0, 0) 90%
+    );
+    z-index: 100;
+    animation: kokoro-holy-heal-aura 2s ease-out;
+}
+
+@keyframes kokoro-holy-heal-aura {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    80% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Holy leaf particles - change from emerald to gold */
+.lesser-heal-vfx.schoolgirl-kokoro-holy .emerald-leaf {
+    background-color: #ffd700;
+    box-shadow: 0 0 8px #ffd700, 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.lesser-heal-vfx.schoolgirl-kokoro-holy .emerald-leaf::before {
+    background-color: #ffef94;
+    box-shadow: 0 0 5px #ffef94;
+}
+
+/* Holy rune circles - change from emerald to gold */
+.lesser-heal-vfx.schoolgirl-kokoro-holy .emerald-rune-circle {
+    border-color: #ffd700;
+    background-color: rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* Circle Heal VFX - Change from dark green to holy gold/white theme */
+.circle-heal-vfx.schoolgirl-kokoro-holy .circle-heal-number {
+    background-color: rgba(212, 175, 55, 0.9);
+    color: #fff5cc;
+    box-shadow: 0 0 15px #d4af37, inset 0 0 8px #ffef94;
+    border: 2px solid #ffd700;
+    text-shadow: 0 0 5px #ffd700;
+}
+
+.circle-heal-vfx.schoolgirl-kokoro-holy .circle-heal-number.critical {
+    background-color: rgba(255, 215, 0, 0.95);
+    color: #ffffff;
+    box-shadow: 
+        0 0 25px rgba(255, 215, 0, 0.9), 
+        0 0 35px rgba(255, 255, 255, 0.6),
+        inset 0 0 15px rgba(255, 255, 255, 0.4);
+    border: 3px solid #ffffff;
+    text-shadow: 
+        0 0 10px #ffd700,
+        0 0 15px #ffffff;
+}
+
+/* Holy hexagon cells - change from dark green to gold */
+.circle-heal-vfx.schoolgirl-kokoro-holy .hexagon-cell {
+    background-color: rgba(212, 175, 55, 0.6);
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.circle-heal-vfx.schoolgirl-kokoro-holy .hexagon-cell.critical {
+    background-color: rgba(255, 215, 0, 0.8);
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+}
+
+/* Holy vine tendrils - change from dark green to gold */
+.circle-heal-vfx.schoolgirl-kokoro-holy .vine-tendril {
+    background-color: #d4af37;
+    box-shadow: 0 0 6px #d4af37;
+}
+
+/* Holy vine leaves - change from green to golden white */
+.circle-heal-vfx.schoolgirl-kokoro-holy .vine-leaf {
+    background-color: #ffef94;
+    box-shadow: 0 0 4px #ffef94;
+}
+
+/* Holy healing glyphs - change from green to gold */
+.circle-heal-vfx.schoolgirl-kokoro-holy .healing-glyph {
+    color: #ffd700;
+    text-shadow: 
+        0 0 8px #ffd700,
+        0 0 12px #ffffff;
+}
+
+/* Holy ground effect - change from green to gold */
+.circle-heal-vfx.schoolgirl-kokoro-holy .circle-heal-ground {
+    background: linear-gradient(to top, rgba(212, 175, 55, 0.7), transparent);
+}
+
+/* Passive healing VFX - change from pink to holy gold */
+.kokoro-heal-vfx.schoolgirl-kokoro-holy span {
+    background-color: rgba(212, 175, 55, 0.9);
+    color: #fff5cc;
+    box-shadow: 0 0 8px #d4af37;
+    border: 1px solid #ffd700;
+}
+
+/* Holy aura effect for Circle Heal */
+.circle-heal-vfx.schoolgirl-kokoro-holy::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 215, 0, 0.3) 0%,
+        rgba(212, 175, 55, 0.2) 40%,
+        rgba(255, 255, 255, 0.15) 70%,
+        rgba(255, 215, 0, 0) 90%
+    );
+    z-index: 100;
+    animation: kokoro-holy-circle-heal-aura 2.5s ease-out;
+}
+
+@keyframes kokoro-holy-circle-heal-aura {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    25% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    75% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Add holy light rays effect */
+.lesser-heal-vfx.schoolgirl-kokoro-holy::after,
+.circle-heal-vfx.schoolgirl-kokoro-holy::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    background: 
+        linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.3) 50%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, rgba(255, 255, 255, 0.3) 50%, transparent 55%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    animation: kokoro-holy-light-rays 2s ease-out;
+    z-index: 102;
+}
+
+@keyframes kokoro-holy-light-rays {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(90deg) scale(1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) rotate(180deg) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.2);
+    }
+}
+
+/* Add pulsing holy glow to character when receiving holy healing */
+.character-slot.q-healing-active .image-container {
+    animation: holy-healing-glow 2s ease-in-out;
+}
+
+@keyframes holy-healing-glow {
+    0% {
+        box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+    }
+    50% {
+        box-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.8),
+            0 0 40px rgba(255, 255, 255, 0.4),
+            inset 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        transform: scale(1);
+    }
+}
+
+/* Add holy filter and glow to ability icons when skin is active */
+.character-abilities[data-character-id="schoolgirl_kokoro"][data-skin-id="schoolgirl_kokoro_holy"] .ability-slot .ability-image {
+    filter: drop-shadow(0 0 5px #ffd700) sepia(30%) saturate(200%) brightness(110%);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), inset 0 0 8px rgba(255, 236, 179, 0.5);
+    transition: all 0.3s ease;
+}
+
+.character-abilities[data-character-id="schoolgirl_kokoro"][data-skin-id="schoolgirl_kokoro_holy"] .ability-slot:hover .ability-image {
+    animation: holy-pulse 1.5s infinite;
+}
+
+@keyframes holy-pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), inset 0 0 8px rgba(255, 236, 179, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 1), inset 0 0 12px rgba(255, 236, 179, 0.7);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), inset 0 0 8px rgba(255, 236, 179, 0.5);
+        transform: scale(1);
+    }
+}

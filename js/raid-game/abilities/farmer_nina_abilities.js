@@ -2176,17 +2176,43 @@ const farmer_ninaPiercingShotEffect = (caster, target) => {
     // Set damage source on target to track critical hit
     target.isDamageSource = caster;
     
-    // Store original armor value to restore later
-    const originalArmor = target.stats.armor;
+    // Check if this ability has Shadow Dagger enhancement (ignoreArmor modifier)
+    const piercingShotAbility = caster.abilities ? caster.abilities.find(a => a.id === 'farmer_nina_r') : null;
+    const hasShadowDaggerEnhancement = piercingShotAbility && 
+                                     piercingShotAbility.modifiers && 
+                                     piercingShotAbility.modifiers.ignoreArmor;
     
-    // Temporarily set target's armor to 0 to bypass it completely
-    target.stats.armor = 0;
+    let result;
     
-    // Apply damage (armor is already bypassed by setting it to 0)
-    const result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'farmer_nina_r' });
-    
-    // Restore original armor value
-    target.stats.armor = originalArmor;
+    if (hasShadowDaggerEnhancement) {
+        // Use the standard damage system with bypassArmor option (Shadow Dagger effect)
+        console.log(`[PiercingShot] Using Shadow Dagger enhancement - bypassing armor via damage system`);
+        result = target.applyDamage(baseDamage, 'physical', caster, { 
+            abilityId: 'farmer_nina_r', 
+            bypassArmor: true 
+        });
+        
+        // No need to log separately here - the Shadow Dagger wrapper will handle it
+    } else {
+        // Original Piercing Shot logic - manually bypass armor
+        console.log(`[PiercingShot] Using original piercing shot logic - temporarily setting armor to 0`);
+        
+        // Store original armor value to restore later
+        const originalArmor = target.stats.armor;
+        
+        // Temporarily set target's armor to 0 to bypass it completely
+        target.stats.armor = 0;
+        
+        // Apply damage (armor is already bypassed by setting it to 0)
+        result = target.applyDamage(baseDamage, 'physical', caster, { abilityId: 'farmer_nina_r' });
+        
+        // Restore original armor value
+        target.stats.armor = originalArmor;
+        
+        // Add explanation about armor piercing
+        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+        log(`${caster.name}'s Piercing Shot completely bypassed ${target.name}'s ${originalArmor} armor.`);
+    }
     
     // Clear damage source
     target.isDamageSource = null;
@@ -2197,9 +2223,6 @@ const farmer_ninaPiercingShotEffect = (caster, target) => {
     if (result.isCritical) {
         log("Critical Hit with Piercing Shot!");
     }
-    
-    // Add explanation about armor piercing
-    log(`${caster.name}'s Piercing Shot completely bypassed ${target.name}'s ${originalArmor} armor.`);
     
     // Apply lifesteal if any
     caster.applyLifesteal(result.damage);

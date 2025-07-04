@@ -1575,33 +1575,6 @@ class GameManager {
         console.log(`[DEBUG] Calling showValidTargets with targetType: ${ability.targetType}`);
         this.uiManager.showValidTargets(ability.targetType);
         
-        // Add log entry to guide the player to select their target
-        let targetingMessage = "";
-        switch(ability.targetType) {
-            case 'self':
-                targetingMessage = `${ability.name} selected. Click on yourself to cast this ability.`;
-                break;
-            case 'ally':
-                targetingMessage = `${ability.name} selected. Click on an ally to target them.`;
-                break;
-            case 'ally_or_self':
-                targetingMessage = `${ability.name} selected. Click on an ally or yourself to target them.`;
-                break;
-            case 'enemy':
-                targetingMessage = `${ability.name} selected. Click on an enemy to target them.`;
-                break;
-            case 'any':
-                targetingMessage = `${ability.name} selected. Click on any character to target them.`;
-                break;
-            case 'all_enemies':
-            case 'all_allies':
-                targetingMessage = `${ability.name} selected. Click on any valid target to cast this area effect.`;
-                break;
-            default:
-                targetingMessage = `${ability.name} selected. Click on a valid target to cast this ability.`;
-        }
-        this.uiManager.addLogEntry(targetingMessage, 'system');
-        console.log(`[DEBUG] Added targeting message: ${targetingMessage}`);
         
         // Dispatch event for tutorial progression
         const event = new CustomEvent('abilitySelected', {

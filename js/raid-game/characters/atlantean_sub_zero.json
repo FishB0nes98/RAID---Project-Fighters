@@ -10,7 +10,7 @@
     "isHidden": true,
     "ingameimage": "Loading Screen/Atlantean Sub Zero.png",
     "stats": {
-        "hp": 7291,
+        "hp": 4955,
         "mana": 3510,
         "physicalDamage": 240,
         "magicalDamage": 320,
@@ -21,7 +21,8 @@
         "critMultiplier": 1.8,
         "dodgeChance": 0.03,
         "hpPerTurn": 0,
-        "manaPerTurn": 0
+        "manaPerTurn": 0,
+        "lifesteal": 0.00
     },
     "abilities": [
         {

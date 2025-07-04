@@ -2,6 +2,57 @@
 window.SkinRegistry = {
     // Define all available skins
     skins: {
+        //Schoolgirl Kokoro Holy
+        'schoolgirl_kokoro_holy': {
+            id: 'schoolgirl_kokoro_holy',
+            name: 'Schoolgirl Kokoro Holy',
+            characterId: 'schoolgirl_kokoro',
+            description: 'A divine school uniform that enhances Kokoro\'s healing powers.',
+            imagePath: 'Loading Screen/Schoolgirl Kokoro Holy.png',
+            price: 1500,
+            rarity: 'epic',
+            category: 'schoolgirl',
+            unlocked: false
+        },
+        // Bridget Atlantean Ghost
+        'bridget_atlantean_ghost': {
+            id: 'bridget_atlantean_ghost',
+            name: 'Bridget Atlantean Ghost',
+            characterId: 'bridget',
+            description: 'A spectral Atlantean form that channels the ancient spirits of the deep sea.',
+            imagePath: 'Loading Screen/Bridget Atlantean Ghost.png',
+            price: 1500,
+            rarity: 'epic',
+            category: 'atlantean',
+            unlocked: false
+        },
+        
+        // Atlantean Kotal Kahn Dark Lord
+        'atlantean_kotal_kahn_dark_lord': {
+            id: 'atlantean_kotal_kahn_dark_lord',
+            name: 'Atlantean Kotal Kahn Dark Lord',
+            characterId: 'atlantean_kotal_kahn',
+            description: 'The corrupted form of the Atlantean ruler, embracing the dark powers of the abyss.',
+            imagePath: 'Loading Screen/Atlantean Kotal Kahn Dark Lord.png',
+            price: 1500,
+            rarity: 'legendary',
+            category: 'atlantean',
+            unlocked: false
+        },
+        
+        // Atlantean Sub Zero Dark Ice
+        'atlantean_sub_zero_dark_ice': {
+            id: 'atlantean_sub_zero_dark_ice',
+            name: 'Atlantean Sub Zero Dark Ice',
+            characterId: 'atlantean_sub_zero_playable',
+            description: 'A sinister ice master who has embraced the darker aspects of frozen magic.',
+            imagePath: 'Loading Screen/Atlantean Sub Zero Dark Ice.png',
+            price: 1500,
+            rarity: 'epic',
+            category: 'atlantean',
+            unlocked: false
+        },
+        
         // Atlantean Christie Silver
         'atlantean_christie_silver': {
             id: 'atlantean_christie_silver',

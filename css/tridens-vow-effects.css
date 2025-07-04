@@ -1,0 +1,69 @@
+/* Triden's Vow Effect Animations */
+.tridens-vow-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.tridens-vow-glow {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, rgba(0, 150, 255, 0.6) 50%, transparent 100%);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    animation: tridensVowPulse 0.8s ease-out;
+}
+
+.tridens-vow-text {
+    color: #00ffff;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    margin-top: 10px;
+    animation: tridensVowTextFloat 1.2s ease-out;
+}
+
+@keyframes tridensVowPulse {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes tridensVowTextFloat {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+}
+
+/* Item highlight when Triden's Vow is equipped */
+.tridens-vow-equipped {
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    border: 2px solid #00ffff !important;
+    animation: tridensVowEquippedGlow 2s infinite alternate;
+}
+
+@keyframes tridensVowEquippedGlow {
+    0% {
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+    }
+}

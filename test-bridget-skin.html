@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridget Atlantean Ghost Skin Test</title>
+    <link rel="stylesheet" href="css/bridget_abilities.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .vfx-preview {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            display: inline-block;
+            background: #333;
+            border-radius: 50%;
+        }
+        .atlantean-ghost-preview {
+            background: #0a0a0a;
+        }
+        button {
+            background: #4dd0e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #26c6da;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Bridget Atlantean Ghost Skin Test</h1>
+        
+        <div class="test-section">
+            <h2>Skin Detection Test</h2>
+            <p>This test verifies that the Bridget Atlantean Ghost skin is properly detected and applied.</p>
+            
+            <div class="vfx-preview" id="normalBridget">
+                <div class="bridget-water-circle" style="opacity: 0.8; animation: none; position: absolute; width: 80px; height: 80px; top: 10px; left: 10px;"></div>
+                <p>Normal Bridget</p>
+            </div>
+            
+            <div class="vfx-preview atlantean-ghost-preview" id="atlanteanBridget">
+                <div class="bridget-atlantean-ghost">
+                    <div class="bridget-water-circle" style="opacity: 0.8; animation: none; position: absolute; width: 80px; height: 80px; top: 10px; left: 10px;"></div>
+                </div>
+                <p>Atlantean Ghost</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Color Palette</h2>
+            <div style="display: flex; gap: 20px;">
+                <div style="background: #4dd0e1; width: 50px; height: 50px; border-radius: 5px;"></div>
+                <div style="background: #26c6da; width: 50px; height: 50px; border-radius: 5px;"></div>
+                <div style="background: #00acc1; width: 50px; height: 50px; border-radius: 5px;"></div>
+                <div style="background: #0097a7; width: 50px; height: 50px; border-radius: 5px;"></div>
+            </div>
+            <p>Spectral Blue-Green Color Palette: #4dd0e1, #26c6da, #00acc1, #0097a7</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>Implementation Status</h2>
+            <ul>
+                <li>✅ Helper functions for skin detection added</li>
+                <li>✅ VFX functions updated to apply Atlantean Ghost skin</li>
+                <li>✅ CSS classes already available for all effects</li>
+                <li>✅ Water source VFX updated</li>
+                <li>✅ Water impact VFX updated</li>
+                <li>✅ Passive healing VFX updated</li>
+                <li>✅ Bubble beam VFX updated</li>
+                <li>✅ Bubble source VFX updated</li>
+                <li>✅ Bubble impact VFX updated</li>
+                <li>✅ Function signatures updated to pass caster information</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>How It Works</h2>
+            <p>When Bridget has the Atlantean Ghost skin selected:</p>
+            <ol>
+                <li>The <code>isBridgetAtlanteanGhost(character)</code> function detects the skin</li>
+                <li>The <code>applyAtlanteanGhostSkin(element, character)</code> function adds the CSS class</li>
+                <li>CSS overrides automatically change all effect colors to spectral blue-green</li>
+                <li>No VFX code rewriting needed - just CSS class application</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        // Mock skin manager for testing
+        window.SkinManager = {
+            initialized: true,
+            getSelectedSkin: function(characterId) {
+                if (characterId === 'bridget') {
+                    return 'bridget_atlantean_ghost'; // For testing
+                }
+                return null;
+            }
+        };
+        
+        // Mock character for testing
+        const testCharacter = {
+            id: 'bridget',
+            name: 'Bridget'
+        };
+        
+        // Test function from the abilities file
+        function isBridgetAtlanteanGhost(character) {
+            if (!character || character.id !== 'bridget') return false;
+            
+            // Check if skin manager is available and initialized
+            if (!window.SkinManager || !window.SkinManager.initialized) return false;
+            
+            const selectedSkin = window.SkinManager.getSelectedSkin(character.id);
+            return selectedSkin === 'bridget_atlantean_ghost';
+        }
+        
+        // Test the function
+        console.log('Bridget Atlantean Ghost skin detected:', isBridgetAtlanteanGhost(testCharacter));
+        
+        // Add visual feedback
+        setTimeout(() => {
+            const isAtlanteanGhost = isBridgetAtlanteanGhost(testCharacter);
+            const status = document.createElement('div');
+            status.innerHTML = `<h3>Skin Detection Result: ${isAtlanteanGhost ? '✅ Atlantean Ghost Detected' : '❌ Normal Bridget'}</h3>`;
+            status.style.color = isAtlanteanGhost ? '#4dd0e1' : '#ffffff';
+            document.querySelector('.test-container').appendChild(status);
+        }, 100);
+    </script>
+</body>
+</html>

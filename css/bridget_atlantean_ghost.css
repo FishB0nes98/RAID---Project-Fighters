@@ -1,0 +1,320 @@
+/* Bridget Atlantean Ghost Skin - Spectral Deep Water VFX */
+/* This file overrides Bridget's base VFX with spectral deep water effects */
+/* Color palette: Deep oceanic blues, cyan, and ethereal glows */
+
+/* When Atlantean Ghost skin is active, apply these overrides */
+/* The .bridget-atlantean-ghost class is applied to the character element */
+
+/* Water Source VFX (Q ability - Ribbon Wave Rush) - Spectral Deep Water */
+.bridget-atlantean-ghost .bridget-water-source-vfx {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.6));
+}
+
+.bridget-atlantean-ghost .bridget-water-circle {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.4) 0%, rgba(0, 150, 200, 0.3) 50%, rgba(0, 80, 120, 0.2) 70%, rgba(0, 40, 80, 0) 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 200, 255, 0.2);
+}
+
+.bridget-atlantean-ghost .bridget-water-particle {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.9) 0%, rgba(0, 200, 255, 0.7) 50%, rgba(0, 150, 200, 0.5) 100%);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6), 0 0 3px rgba(0, 200, 255, 0.8);
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.4));
+}
+
+/* Water Impact VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .bridget-water-impact-vfx {
+    filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-water-splash {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.6) 0%, rgba(0, 200, 255, 0.4) 40%, rgba(0, 150, 200, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), inset 0 0 20px rgba(0, 200, 255, 0.3);
+}
+
+.bridget-atlantean-ghost .bridget-water-impact-vfx.critical .bridget-water-splash {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, rgba(100, 255, 255, 0.6) 30%, rgba(0, 220, 255, 0.4) 60%, rgba(0, 150, 200, 0) 100%);
+    box-shadow: 0 0 35px rgba(0, 255, 255, 0.7), inset 0 0 25px rgba(100, 255, 255, 0.5);
+}
+
+.bridget-atlantean-ghost .bridget-water-droplet {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.95) 0%, rgba(0, 200, 255, 0.8) 50%, rgba(0, 150, 200, 0.6) 100%);
+    box-shadow: 0 0 6px rgba(0, 255, 255, 0.7), 0 0 2px rgba(0, 200, 255, 0.9);
+    filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-water-impact-vfx.critical .bridget-water-droplet {
+    background: linear-gradient(135deg, rgba(100, 255, 255, 0.98) 0%, rgba(0, 255, 255, 0.9) 40%, rgba(0, 220, 255, 0.7) 100%);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 5px rgba(100, 255, 255, 0.9);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.7));
+}
+
+/* Passive Healing VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .bridget-passive-heal-vfx {
+    filter: drop-shadow(0 0 10px rgba(0, 255, 200, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-heal-circle {
+    background: radial-gradient(circle, rgba(0, 255, 200, 0.4) 0%, rgba(0, 200, 180, 0.3) 50%, rgba(0, 150, 160, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.3), inset 0 0 15px rgba(0, 200, 180, 0.2);
+}
+
+.bridget-atlantean-ghost .bridget-heal-text {
+    color: #00ffcc;
+    text-shadow: 0 0 8px rgba(0, 255, 200, 0.9), 0 0 15px rgba(0, 255, 200, 0.6), 0 0 25px rgba(0, 200, 180, 0.4);
+}
+
+.bridget-atlantean-ghost .bridget-heal-bubble {
+    background: linear-gradient(135deg, rgba(0, 255, 200, 0.8) 0%, rgba(0, 200, 180, 0.6) 50%, rgba(0, 150, 160, 0.4) 100%);
+    box-shadow: 0 0 12px rgba(0, 255, 200, 0.6), 0 0 6px rgba(0, 200, 180, 0.8);
+    filter: drop-shadow(0 0 5px rgba(0, 255, 200, 0.4));
+}
+
+/* Bubble Beam Barrage (W) VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .bridget-bubble-source-vfx {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-glow {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.4) 0%, rgba(0, 200, 255, 0.3) 50%, rgba(0, 150, 200, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), inset 0 0 20px rgba(0, 200, 255, 0.3);
+}
+
+.bridget-atlantean-ghost .bridget-bubble {
+    background: radial-gradient(circle, rgba(200, 255, 255, 0.95) 0%, rgba(0, 255, 255, 0.8) 30%, rgba(0, 200, 255, 0.6) 60%, rgba(0, 150, 200, 0.4) 100%);
+    box-shadow: 
+        inset 2px 2px 3px rgba(200, 255, 255, 0.8),
+        0 0 12px rgba(0, 255, 255, 0.5),
+        0 0 6px rgba(0, 200, 255, 0.7);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.4));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-impact-vfx {
+    filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-splash {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.5) 0%, rgba(0, 200, 255, 0.3) 50%, rgba(0, 150, 200, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 15px rgba(0, 200, 255, 0.3);
+}
+
+.bridget-atlantean-ghost .bridget-bubble-impact-vfx.critical .bridget-bubble-splash {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.7) 0%, rgba(100, 255, 255, 0.5) 30%, rgba(0, 220, 255, 0.3) 60%, rgba(0, 150, 200, 0) 100%);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(100, 255, 255, 0.4);
+}
+
+.bridget-atlantean-ghost .bridget-impact-bubble {
+    background: radial-gradient(circle, rgba(200, 255, 255, 0.95) 0%, rgba(0, 255, 255, 0.8) 30%, rgba(0, 200, 255, 0.6) 60%, rgba(0, 150, 200, 0.4) 100%);
+    box-shadow: 
+        inset 1px 1px 2px rgba(200, 255, 255, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.6),
+        0 0 5px rgba(0, 200, 255, 0.8);
+    filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-impact-vfx.critical .bridget-impact-bubble {
+    background: radial-gradient(circle, rgba(220, 255, 255, 0.98) 0%, rgba(100, 255, 255, 0.9) 30%, rgba(0, 255, 255, 0.7) 60%, rgba(0, 200, 255, 0.5) 100%);
+    box-shadow: 
+        inset 1px 1px 2px rgba(220, 255, 255, 0.9),
+        0 0 15px rgba(0, 255, 255, 0.8),
+        0 0 8px rgba(100, 255, 255, 0.9);
+    filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.7));
+}
+
+/* Bubble Beam Projectiles - Spectral Deep Water */
+.bridget-atlantean-ghost .bridget-bubble-projectile {
+    background: radial-gradient(circle, rgba(200, 255, 255, 0.98) 0%, rgba(0, 255, 255, 0.9) 30%, rgba(0, 200, 255, 0.7) 60%, rgba(0, 150, 200, 0.5) 100%);
+    box-shadow: 
+        inset 2px 2px 4px rgba(200, 255, 255, 0.8),
+        0 0 15px rgba(0, 255, 255, 0.6),
+        0 0 8px rgba(0, 200, 255, 0.8);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-projectile.critical {
+    background: radial-gradient(circle, rgba(220, 255, 255, 1) 0%, rgba(100, 255, 255, 0.95) 30%, rgba(0, 255, 255, 0.8) 60%, rgba(0, 220, 255, 0.6) 100%);
+    box-shadow: 
+        inset 2px 2px 4px rgba(220, 255, 255, 1),
+        0 0 20px rgba(0, 255, 255, 0.9),
+        0 0 12px rgba(100, 255, 255, 0.9);
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.8));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-projectile.healing-beam {
+    background: radial-gradient(circle, rgba(200, 255, 240, 0.98) 0%, rgba(0, 255, 200, 0.9) 30%, rgba(0, 200, 180, 0.7) 60%, rgba(0, 150, 160, 0.5) 100%);
+    box-shadow: 
+        inset 2px 2px 4px rgba(200, 255, 240, 0.8),
+        0 0 15px rgba(0, 255, 200, 0.6),
+        0 0 8px rgba(0, 200, 180, 0.8);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 200, 0.5));
+}
+
+.bridget-atlantean-ghost .bridget-bubble-trail {
+    background: radial-gradient(circle, rgba(100, 255, 255, 0.7) 0%, rgba(0, 255, 255, 0.5) 30%, rgba(0, 200, 255, 0.3) 60%, rgba(0, 150, 200, 0) 100%);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(0, 255, 255, 0.4));
+}
+
+/* Aqueous Renewal Talent VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .bridget-aqueous-renewal-vfx {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5));
+}
+
+.bridget-atlantean-ghost .aqueous-renewal-aura {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.6) 0%, rgba(0, 200, 255, 0.4) 50%, rgba(0, 150, 200, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 25px rgba(0, 200, 255, 0.3);
+}
+
+.bridget-atlantean-ghost .aqueous-renewal-text {
+    color: #00ffff;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.9), 0 0 15px rgba(0, 255, 255, 0.6), 0 0 25px rgba(0, 200, 255, 0.4);
+    background-color: rgba(0, 80, 120, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.bridget-atlantean-ghost .aqueous-renewal-particle {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.9) 0%, rgba(0, 200, 255, 0.7) 50%, rgba(0, 150, 200, 0.5) 100%);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6), 0 0 3px rgba(0, 200, 255, 0.8);
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.4));
+}
+
+/* Water Shield VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .water-shield-effect {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, rgba(0, 200, 255, 0.2) 50%, rgba(0, 150, 200, 0.1) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 25px rgba(0, 255, 255, 0.5),
+        inset 0 0 20px rgba(0, 200, 255, 0.3),
+        0 0 15px rgba(0, 150, 200, 0.4);
+    border: 2px solid rgba(0, 255, 255, 0.2);
+}
+
+/* Bubble Arsenal VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .bubble-arsenal-orbit .floating-bubble {
+    background: radial-gradient(circle, rgba(200, 255, 255, 0.95) 0%, rgba(0, 255, 255, 0.8) 30%, rgba(0, 200, 255, 0.6) 60%, rgba(0, 150, 200, 0.4) 100%);
+    box-shadow: 
+        0 0 12px rgba(0, 255, 255, 0.6),
+        inset 2px 2px 3px rgba(200, 255, 255, 0.8),
+        0 0 6px rgba(0, 200, 255, 0.8);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.4));
+}
+
+/* Wave Crush VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .wave-crush-source-aura {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.6) 0%, rgba(0, 200, 255, 0.4) 50%, rgba(0, 150, 200, 0.3) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 40px rgba(0, 255, 255, 0.7),
+        inset 0 0 30px rgba(0, 200, 255, 0.4),
+        0 0 25px rgba(0, 150, 200, 0.5);
+}
+
+.bridget-atlantean-ghost .wave-crush-impact-vfx .wave-crash-effect {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.7) 0%, rgba(0, 200, 255, 0.5) 40%, rgba(0, 150, 200, 0.3) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 200, 255, 0.4);
+}
+
+.bridget-atlantean-ghost .wave-crush-heal-aura {
+    background: radial-gradient(circle, rgba(0, 255, 200, 0.5) 0%, rgba(0, 200, 180, 0.3) 50%, rgba(0, 150, 160, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 200, 0.6),
+        inset 0 0 20px rgba(0, 200, 180, 0.3),
+        0 0 15px rgba(0, 150, 160, 0.4);
+}
+
+.bridget-atlantean-ghost .wave-crush-heal-aura.critical {
+    box-shadow: 
+        0 0 40px 20px rgba(0, 255, 200, 0.8),
+        0 0 60px 35px rgba(0, 200, 180, 0.6),
+        inset 0 0 25px rgba(0, 255, 200, 0.4);
+}
+
+/* Clam Protection and other buff VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .clam-protection-vfx {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.4) 0%, rgba(0, 200, 255, 0.3) 50%, rgba(0, 150, 200, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 25px rgba(0, 255, 255, 0.5),
+        inset 0 0 15px rgba(0, 200, 255, 0.3),
+        0 0 12px rgba(0, 150, 200, 0.4);
+}
+
+.bridget-atlantean-ghost .abyssal-mark-vfx {
+    background: radial-gradient(circle, rgba(0, 120, 150, 0.6) 0%, rgba(0, 100, 130, 0.4) 50%, rgba(0, 80, 120, 0.3) 70%, rgba(0, 60, 100, 0) 100%);
+    box-shadow: 
+        0 0 20px rgba(0, 120, 150, 0.7),
+        inset 0 0 15px rgba(0, 100, 130, 0.4),
+        0 0 10px rgba(0, 80, 120, 0.5);
+}
+
+.bridget-atlantean-ghost .fluid-evasion-vfx {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.5) 0%, rgba(0, 200, 255, 0.3) 50%, rgba(0, 150, 200, 0.2) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 25px rgba(0, 255, 255, 0.6),
+        inset 0 0 20px rgba(0, 200, 255, 0.3),
+        0 0 15px rgba(0, 150, 200, 0.4);
+}
+
+.bridget-atlantean-ghost .tidal-mastery-vfx {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.6) 0%, rgba(0, 200, 255, 0.4) 50%, rgba(0, 150, 200, 0.3) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.7),
+        inset 0 0 25px rgba(0, 200, 255, 0.4),
+        0 0 20px rgba(0, 150, 200, 0.5);
+}
+
+/* Echoing Bubble VFX - Spectral Deep Water */
+.bridget-atlantean-ghost .echoing-bubble-vfx {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.7) 0%, rgba(0, 200, 255, 0.5) 40%, rgba(0, 150, 200, 0.3) 70%, rgba(0, 80, 120, 0) 100%);
+    box-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.8),
+        inset 0 0 15px rgba(0, 200, 255, 0.5),
+        0 0 12px rgba(0, 150, 200, 0.6);
+}
+
+/* Additional spectral effects for enhanced depth */
+.bridget-atlantean-ghost .bridget-water-source-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, rgba(0, 200, 255, 0.05) 50%, rgba(0, 150, 200, 0) 100%);
+    animation: spectral-pulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes spectral-pulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
+/* Enhanced particle effects for more ethereal look */
+.bridget-atlantean-ghost .bridget-water-particle::after,
+.bridget-atlantean-ghost .bridget-heal-bubble::after,
+.bridget-atlantean-ghost .aqueous-renewal-particle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 200, 255, 0.1) 50%, rgba(0, 150, 200, 0) 100%);
+    border-radius: 50%;
+    animation: ethereal-glow 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ethereal-glow {
+    0%, 100% {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}

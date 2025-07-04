@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Database - Project Fighters</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/item-database.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Loading Item Database...</p>
+    </div>
+    <div class="database-container">
+        <!-- Header -->
+        <header class="database-header">
+            <div class="header-content">
+                <h1 class="database-title">
+                    <span class="title-icon">⚔️</span>
+                    Item Database
+                    <span class="title-subtitle">Project Fighters Arsenal</span>
+                </h1>
+                
+                <div class="header-actions">
+                    <div class="user-status" id="user-status">
+                        <div class="status-indicator" id="status-indicator">
+                            <span class="status-icon">👤</span>
+                            <span class="status-text" id="status-text">Not logged in</span>
+                        </div>
+                    </div>
+                    <button class="back-button" onclick="window.location.href='character-selector.html'">
+                        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        </svg>
+                        Back to Character Selector
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters & Search -->
+        <section class="database-filters">
+            <div class="filter-row">
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" id="item-search" placeholder="Search items by name or description..." class="search-input">
+                </div>
+                
+                <div class="stats-info">
+                    <span id="items-count" class="stats-count">0 Items</span>
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Rarity:</label>
+                    <div class="filter-buttons" id="rarity-filters">
+                        <button class="filter-btn active" data-rarity="all">All</button>
+                        <button class="filter-btn rarity-common" data-rarity="common">Common</button>
+                        <button class="filter-btn rarity-uncommon" data-rarity="uncommon">Uncommon</button>
+                        <button class="filter-btn rarity-rare" data-rarity="rare">Rare</button>
+                        <button class="filter-btn rarity-epic" data-rarity="epic">Epic</button>
+                        <button class="filter-btn rarity-legendary" data-rarity="legendary">Legendary</button>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Type:</label>
+                    <div class="filter-buttons" id="type-filters">
+                        <button class="filter-btn active" data-type="all">All</button>
+                        <button class="filter-btn" data-type="equipment">Equipment</button>
+                        <button class="filter-btn" data-type="consumable">Consumable</button>
+                        <button class="filter-btn" data-type="crafting">Crafting</button>
+                        <button class="filter-btn" data-type="lootbox">Lootbox</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Item Grid -->
+        <section class="database-content">
+            <div class="items-grid" id="items-grid">
+                <!-- Items will be populated here by JavaScript -->
+            </div>
+            
+            <div class="no-results" id="no-results">
+                <div class="no-results-icon">🔍</div>
+                <h3>No items found</h3>
+                <p>Try adjusting your search or filter criteria.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Item Detail Modal -->
+    <div class="modal" id="item-modal">
+        <div class="modal-backdrop" onclick="closeItemModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-item-name">Item Name</h2>
+                <button class="modal-close" onclick="closeItemModal()" title="Close modal">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-item-image">
+                    <img id="modal-item-img" src="" alt="">
+                    <div class="modal-item-rarity" id="modal-item-rarity"></div>
+                </div>
+                <div class="modal-item-details">
+                    <div class="item-description" id="modal-item-description"></div>
+                    <div class="item-stats" id="modal-item-stats"></div>
+                    <div class="item-meta" id="modal-item-meta"></div>
+                </div>
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <!-- Admin-only button - only visible for FishB0nes98 -->
+                <button class="admin-add-button hidden" id="admin-add-button" onclick="addItemToInventory()">
+                    <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add to Inventory
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- Game Scripts -->
+    <script src="js/raid-game/item-system.js"></script>
+    <script src="js/item-database.js"></script>
+</body>
+</html>

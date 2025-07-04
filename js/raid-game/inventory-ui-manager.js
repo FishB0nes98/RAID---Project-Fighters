@@ -1822,8 +1822,25 @@ class InventoryUIManager {
             console.error('Invalid inventory for character:', characterId, inventory);
             return;
         }
-        
-        // Use the consumable
+
+        // Get the item to check if it needs targeting
+        const item = window.ItemRegistry?.getItem(itemId);
+        if (!item) {
+            console.error('Item not found:', itemId);
+            return;
+        }
+
+        // Check if item needs targeting
+        if (item.needsTarget) {
+            // Close the consumable window first
+            this.closeConsumableWindow();
+            
+            // Enable targeting mode
+            this.enableTargetingMode(character, inventory, slotIndex, item);
+            return;
+        }
+
+        // Use the consumable (no targeting needed)
         const result = inventory.useConsumableItem(slotIndex, character);
         
         if (result.success) {
@@ -1849,6 +1866,204 @@ class InventoryUIManager {
                 window.gameManager.addLogEntry(`Failed to use item: ${result.message}`, 'error');
             }
         }
+    }
+
+    /**
+     * Enable targeting mode for consumable items
+     */
+    enableTargetingMode(character, inventory, slotIndex, item) {
+        // Store targeting data
+        this.targetingData = {
+            character: character,
+            inventory: inventory,
+            slotIndex: slotIndex,
+            item: item
+        };
+
+        // Show targeting instructions
+        if (window.gameManager?.addLogEntry) {
+            window.gameManager.addLogEntry(`Select a target for ${item.name}`, 'targeting');
+        }
+
+        // Enable targeting in the game UI
+        if (window.gameManager?.uiManager) {
+            window.gameManager.uiManager.showValidTargets(item.targetType || 'enemy');
+        }
+
+        // Set up targeting event listeners
+        this.setupTargetingListeners();
+    }
+
+    /**
+     * Setup event listeners for targeting mode
+     */
+    setupTargetingListeners() {
+        // Store the original click handler to restore later
+        this.originalTargetHandler = this.handleTargetClick.bind(this);
+        
+        // Add click listeners to all character elements
+        const characterElements = document.querySelectorAll('.character');
+        characterElements.forEach(element => {
+            element.addEventListener('click', this.originalTargetHandler);
+            element.style.cursor = 'crosshair';
+        });
+
+        // Add escape key listener to cancel targeting
+        this.escapeTargetingHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.cancelTargeting();
+            }
+        };
+        document.addEventListener('keydown', this.escapeTargetingHandler);
+    }
+
+    /**
+     * Handle target click during targeting mode
+     */
+    async handleTargetClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Find the clicked character
+        const characterElement = e.currentTarget;
+        const characterId = characterElement.id.replace('character-', '');
+        
+        // Find the character object
+        const allCharacters = [
+            ...(window.gameManager?.gameState?.playerCharacters || []),
+            ...(window.gameManager?.gameState?.aiCharacters || [])
+        ];
+        
+        const targetCharacter = allCharacters.find(c => 
+            (c.instanceId || c.id) === characterId
+        );
+
+        if (!targetCharacter) {
+            console.error('Target character not found:', characterId);
+            return;
+        }
+
+        // Validate the target
+        if (!this.validateConsumableTarget(targetCharacter)) {
+            return;
+        }
+
+        // Use the consumable with target
+        await this.useConsumableWithTarget(targetCharacter);
+        
+        // Clear targeting mode
+        this.clearTargetingMode();
+    }
+
+    /**
+     * Validate if a target is valid for the consumable
+     */
+    validateConsumableTarget(targetCharacter) {
+        if (!this.targetingData) return false;
+
+        const { character, item } = this.targetingData;
+        const targetType = item.targetType || 'enemy';
+
+        // Use the game manager's validation logic
+        if (window.gameManager?.validateTarget) {
+            // Temporarily set the selected character for validation
+            const originalSelected = window.gameManager.gameState.selectedCharacter;
+            window.gameManager.gameState.selectedCharacter = character;
+            
+            const isValid = window.gameManager.validateTarget(targetType, targetCharacter);
+            
+            // Restore original selection
+            window.gameManager.gameState.selectedCharacter = originalSelected;
+            
+            return isValid;
+        }
+
+        // Fallback validation
+        switch (targetType) {
+            case 'enemy':
+                return targetCharacter.isAI !== character.isAI;
+            case 'ally':
+                return targetCharacter.isAI === character.isAI;
+            case 'self':
+                return targetCharacter === character;
+            case 'any':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Use consumable with target
+     */
+    async useConsumableWithTarget(targetCharacter) {
+        if (!this.targetingData) return;
+
+        const { character, inventory, slotIndex, item } = this.targetingData;
+
+        // Use the consumable with target
+        const result = inventory.useConsumableItem(slotIndex, character, targetCharacter);
+        
+        if (result.success) {
+            // Save the updated inventory
+            await this.saveCharacterInventoryById(character.id, inventory);
+            
+            // Update character UIs if available
+            if (window.gameManager?.uiManager?.updateCharacterUI) {
+                window.gameManager.uiManager.updateCharacterUI(character);
+                window.gameManager.uiManager.updateCharacterUI(targetCharacter);
+            }
+            
+            // Show success message
+            if (window.gameManager?.addLogEntry) {
+                window.gameManager.addLogEntry(`${character.name} used ${item.name} on ${targetCharacter.name}!`, 'consumable-use');
+            }
+        } else {
+            // Show error message
+            console.warn('Failed to use consumable:', result.message);
+            if (window.gameManager?.addLogEntry) {
+                window.gameManager.addLogEntry(`Failed to use item: ${result.message}`, 'error');
+            }
+        }
+    }
+
+    /**
+     * Cancel targeting mode
+     */
+    cancelTargeting() {
+        if (window.gameManager?.addLogEntry) {
+            window.gameManager.addLogEntry('Targeting cancelled', 'info');
+        }
+        
+        this.clearTargetingMode();
+    }
+
+    /**
+     * Clear targeting mode
+     */
+    clearTargetingMode() {
+        // Remove event listeners
+        if (this.originalTargetHandler) {
+            const characterElements = document.querySelectorAll('.character');
+            characterElements.forEach(element => {
+                element.removeEventListener('click', this.originalTargetHandler);
+                element.style.cursor = '';
+            });
+        }
+
+        if (this.escapeTargetingHandler) {
+            document.removeEventListener('keydown', this.escapeTargetingHandler);
+        }
+
+        // Clear targeting highlighting
+        if (window.gameManager?.uiManager?.clearSelection) {
+            window.gameManager.uiManager.clearSelection();
+        }
+
+        // Clear targeting data
+        this.targetingData = null;
+        this.originalTargetHandler = null;
+        this.escapeTargetingHandler = null;
     }
 
     /**
@@ -1907,6 +2122,11 @@ class InventoryUIManager {
      * Close the consumable window
      */
     closeConsumableWindow() {
+        // Clear targeting mode if active
+        if (this.targetingData) {
+            this.clearTargetingMode();
+        }
+        
         const window = document.getElementById('consumable-window');
         if (window) {
             window.remove();

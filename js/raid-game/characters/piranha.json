@@ -23,11 +23,11 @@
             "name": "Piranha Bite",
             "type": "damage",
             "damageType": "physical",
-            "fixedDamage": 425,
+            "fixedDamage": 195,
             "targetType": "enemy",
             "manaCost": 45,
             "cooldown": 1,
-            "description": "Deals 425 physical damage to the target.",
+            "description": "Deals 195 physical damage to the target.",
             "icon": "Icons/abilities/bite.png"
         }
     ],

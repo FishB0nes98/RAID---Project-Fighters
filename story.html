@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/story.css">
     <link rel="stylesheet" href="css/inventory-system.css">
     <link rel="stylesheet" href="css/loot-rewards.css">
+    <link rel="stylesheet" href="css/crafting-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -58,6 +59,7 @@
             <div class="controls">
                 <button id="team-inventory-button" class="control-button primary">Manage Team Equipment</button>
                 <button id="global-inventory-button" class="control-button primary">Global Inventory</button>
+                <button id="crafting-modal-button" class="control-button primary">Crafting</button>
                 <button id="back-button" class="control-button secondary">Back to Selection</button>
             </div>
         </aside>
@@ -189,6 +191,8 @@
     </div>
     <!-- END NEW -->
 
+
+
     <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
@@ -205,6 +209,9 @@
     <!-- Loot System Scripts -->
     <script src="js/raid-game/loot-manager.js"></script>
     <script src="js/raid-game/loot-ui-manager.js"></script>
+    
+    <!-- Crafting Modal Script -->
+    <script src="js/raid-game/crafting-modal.js"></script>
 
     <!-- Game Scripts -->
     <script src="js/raid-game/character.js"></script>
@@ -326,6 +333,48 @@
                     
                     console.log('[Story] === INVENTORY SYSTEM INITIALIZED ===');
                     
+                    currentStep = "Loading User Inventory from Firebase";
+                    // Load user's saved inventory data from Firebase
+                    try {
+                        console.log('[Story] Loading user inventory from Firebase...');
+                        
+                        // Get user's data from Firebase
+                        const userRef = firebase.database().ref(`users/${userId}`);
+                        const snapshot = await userRef.once('value');
+                        const userData = snapshot.val();
+                        
+                        if (userData && userData.globalInventory) {
+                            console.log('[Story] Found saved global inventory:', userData.globalInventory);
+                            
+                            // Load the saved inventory data
+                            if (userData.globalInventory.items && Array.isArray(userData.globalInventory.items)) {
+                                // New format: {items: [...], lastUpdated: timestamp}
+                                console.log('[Story] Loading new format inventory with', userData.globalInventory.items.length, 'items');
+                                window.GlobalInventory.deserialize(userData.globalInventory.items);
+                                console.log('[Story] ✓ Loaded global inventory from Firebase (new format):', window.GlobalInventory.items.length, 'items');
+                            } else if (Array.isArray(userData.globalInventory)) {
+                                // Old format: direct array
+                                console.log('[Story] Loading old format inventory with', userData.globalInventory.length, 'items');
+                                window.GlobalInventory.items = userData.globalInventory;
+                                console.log('[Story] ✓ Loaded global inventory from Firebase (old format):', window.GlobalInventory.items.length, 'items');
+                            } else {
+                                console.log('[Story] ⚠️ Saved inventory format is not recognized, initializing empty inventory');
+                                window.GlobalInventory.items = [];
+                            }
+                        } else {
+                            console.log('[Story] ⚠️ No saved global inventory found, starting with empty inventory');
+                            window.GlobalInventory.items = [];
+                        }
+                        
+                        // Store userData globally for other systems to use
+                        window.userData = userData || {};
+                        
+                    } catch (error) {
+                        console.error('[Story] Error loading inventory from Firebase:', error);
+                        console.log('[Story] ⚠️ Continuing with empty inventory');
+                        window.GlobalInventory.items = [];
+                    }
+                    
                     currentStep = "Initializing Stage Modifiers Registry";
                     // Initialize stage modifiers registry for stage details
                     if (typeof StageModifiersRegistry !== 'undefined') {
@@ -342,6 +391,23 @@
                     currentStep = "Initializing UI Elements (storyUI.initialize)";
                     // Initialize UI FIRST to select DOM elements and set up handlers
                     window.storyUI.initialize(); 
+
+                    currentStep = "Setting up Crafting Modal Button";
+                    // Setup crafting modal button event listener
+                    const craftingButton = document.getElementById('crafting-modal-button');
+                    if (craftingButton) {
+                        craftingButton.addEventListener('click', () => {
+                            console.log('[Story] Crafting button clicked');
+                            if (window.storyUI && typeof window.storyUI.openCraftingModal === 'function') {
+                                window.storyUI.openCraftingModal();
+                            } else {
+                                console.error('[Story] StoryUI openCraftingModal method not available');
+                            }
+                        });
+                        console.log('[Story] ✓ Crafting button event listener added');
+                    } else {
+                        console.warn('[Story] ⚠️ Crafting button not found');
+                    }
 
                     currentStep = "Assigning StoryManager Callbacks";
                     // Assign callbacks AFTER UI is initialized
@@ -398,6 +464,50 @@
                     };
                     
                     console.log('✅ Story initialization complete!');
+                    
+                    // Add debug function to test crafting modal with some items
+                    window.testCraftingModal = function() {
+                        console.log('🧪 Testing crafting modal with sample items...');
+                        
+                        if (!window.GlobalInventory) {
+                            console.error('❌ GlobalInventory not available');
+                            return;
+                        }
+                        
+                        console.log('📦 Current global inventory before adding test items:', window.GlobalInventory.getAllItems());
+                        console.log('📦 Current global inventory items array:', window.GlobalInventory.items);
+                        
+                        // Add some test items including lootboxes
+                        window.GlobalInventory.addItem('atlantean_treasure_chest', 2);
+                        window.GlobalInventory.addItem('health_potion', 5);
+                        window.GlobalInventory.addItem('mana_potion', 3);
+                        
+                        console.log('✅ Added test items to global inventory');
+                        console.log('📦 Global inventory contents after adding:', window.GlobalInventory.getAllItems());
+                        console.log('📦 Global inventory items array after adding:', window.GlobalInventory.items);
+                        
+                        // Test opening the crafting modal
+                        if (window.storyUI && typeof window.storyUI.openCraftingModal === 'function') {
+                            window.storyUI.openCraftingModal();
+                        } else {
+                            console.error('❌ StoryUI openCraftingModal not available');
+                        }
+                    };
+                    
+                    // Add function to check current inventory status
+                    window.checkInventoryStatus = function() {
+                        console.log('=== INVENTORY STATUS CHECK ===');
+                        console.log('GlobalInventory exists:', !!window.GlobalInventory);
+                        if (window.GlobalInventory) {
+                            console.log('Items array:', window.GlobalInventory.items);
+                            console.log('Items count:', window.GlobalInventory.items.length);
+                            console.log('All items (expanded):', window.GlobalInventory.getAllItems());
+                            console.log('Item stacks:', window.GlobalInventory.getItemStacks());
+                        }
+                        console.log('UserData:', window.userData);
+                        console.log('=== END STATUS CHECK ===');
+                    };
+                    
                     // Add debug function to inspect inventory system status
                     window.debugInventorySystem = function() {
                         console.log('=== INVENTORY SYSTEM DEBUG ===');
@@ -441,7 +551,7 @@
                         return systemStatus;
                     };
                     
-                    console.log('🧪 Test functions available: testInventorySystem(), testOpenCharacterInventory(), testOpenGlobalInventory(), debugInventorySystem(), debugInventoryModal()');
+                    console.log('🧪 Test functions available: testInventorySystem(), testOpenCharacterInventory(), testOpenGlobalInventory(), debugInventorySystem(), debugInventoryModal(), testCraftingModal(), checkInventoryStatus()'); 
                     
                     // Add debug function to inspect modal DOM
                     window.debugInventoryModal = function() {
@@ -518,6 +628,24 @@
         function closeCharacterSelectionModal() {
             if (window.storyUI) {
                 window.storyUI.closeCharacterSelectionModal();
+            }
+        }
+
+        // Global function to close the crafting modal
+        function closeCraftingModal() {
+            if (window.CraftingModal && typeof window.CraftingModal.hide === 'function') {
+                window.CraftingModal.hide();
+            } else {
+                console.error('CraftingModal not available');
+            }
+        }
+
+        // Global function to open the crafting modal
+        function openCraftingModal() {
+            if (window.CraftingModal && typeof window.CraftingModal.show === 'function') {
+                window.CraftingModal.show();
+            } else {
+                console.error('CraftingModal not available');
             }
         }
 

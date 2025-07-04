@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Shard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .log {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #b8daff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ice Shard Consumable Test</h1>
+        <p>This page tests the Ice Shard consumable item functionality.</p>
+        
+        <div class="test-section">
+            <h3>1. Load Required Scripts</h3>
+            <button onclick="loadScripts()">Load Scripts</button>
+            <div id="script-status" class="status info">Click 'Load Scripts' to load required files</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Test Ice Shard Item</h3>
+            <button onclick="testIceShardItem()">Test Ice Shard</button>
+            <div id="ice-shard-status" class="status info">Click 'Test Ice Shard' to verify item creation</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Test Console Functions</h3>
+            <p>Open browser console and try these functions:</p>
+            <ul>
+                <li><code>testIceShard()</code> - Test if Ice Shard is properly loaded</li>
+                <li><code>giveIceShard("Character Name")</code> - Give Ice Shard to a character</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Output</h3>
+            <div id="console-log" class="log">Console output will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Override console.log to display in the page
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const logElement = document.getElementById('console-log');
+        
+        function addToLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logElement.textContent += logMessage;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog(args.join(' '), 'warn');
+        };
+        
+        async function loadScripts() {
+            const statusDiv = document.getElementById('script-status');
+            statusDiv.textContent = 'Loading scripts...';
+            statusDiv.className = 'status info';
+            
+            try {
+                // Load the item system script
+                await loadScript('js/raid-game/item-system.js');
+                
+                // Wait a bit for initialization
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                statusDiv.textContent = 'Scripts loaded successfully!';
+                statusDiv.className = 'status success';
+                
+                console.log('All scripts loaded successfully');
+            } catch (error) {
+                console.error('Error loading scripts:', error);
+                statusDiv.textContent = 'Error loading scripts: ' + error.message;
+                statusDiv.className = 'status error';
+            }
+        }
+        
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        function testIceShardItem() {
+            const statusDiv = document.getElementById('ice-shard-status');
+            
+            try {
+                // Test if ItemRegistry exists
+                if (!window.ItemRegistry) {
+                    throw new Error('ItemRegistry not found');
+                }
+                
+                // Test if Ice Shard item exists
+                const iceShard = window.ItemRegistry.getItem('ice_shard');
+                if (!iceShard) {
+                    throw new Error('Ice Shard item not found in registry');
+                }
+                
+                // Test item properties
+                const expectedProperties = {
+                    id: 'ice_shard',
+                    name: 'Ice Shard',
+                    isConsumable: true,
+                    needsTarget: true,
+                    targetType: 'enemy',
+                    cooldownTurns: 3
+                };
+                
+                let allPropertiesMatch = true;
+                const missingProperties = [];
+                
+                for (const [key, expectedValue] of Object.entries(expectedProperties)) {
+                    if (iceShard[key] !== expectedValue) {
+                        allPropertiesMatch = false;
+                        missingProperties.push(`${key}: expected ${expectedValue}, got ${iceShard[key]}`);
+                    }
+                }
+                
+                if (allPropertiesMatch) {
+                    statusDiv.textContent = 'Ice Shard item test passed! All properties correct.';
+                    statusDiv.className = 'status success';
+                    console.log('Ice Shard item test passed');
+                    console.log('Item properties:', iceShard);
+                } else {
+                    statusDiv.textContent = 'Ice Shard item test failed: ' + missingProperties.join(', ');
+                    statusDiv.className = 'status error';
+                    console.error('Ice Shard item test failed:', missingProperties);
+                }
+                
+            } catch (error) {
+                console.error('Error testing Ice Shard item:', error);
+                statusDiv.textContent = 'Error testing Ice Shard item: ' + error.message;
+                statusDiv.className = 'status error';
+            }
+        }
+        
+        // Load scripts automatically on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Ice Shard Test Page loaded');
+            loadScripts();
+        });
+    </script>
+</body>
+</html>

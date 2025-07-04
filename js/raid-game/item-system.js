@@ -11,12 +11,14 @@ class Item {
         this.image = image; // Path to item image
         this.rarity = rarity; // common, rare, epic, legendary
         this.statBonuses = statBonuses; // { physicalDamage: 50, magicalDamage: 50, ... }
-        this.type = type; // 'equipment', 'consumable', 'crafting'
+        this.type = type; // 'equipment', 'consumable', 'crafting', 'lootbox'
         
-        // Consumable-specific properties
+        // Type-specific properties
         this.isConsumable = type === 'consumable';
+        this.isLootbox = type === 'lootbox';
         this.effect = null; // Function to execute when consumed
         this.cooldownTurns = 0; // Cooldown in turns
+        this.lootTable = null; // For lootbox items - defines what items can be obtained
     }
 
     /**
@@ -31,11 +33,57 @@ class Item {
     }
 
     /**
+     * Set loot table for lootbox items
+     * @param {Array} lootTable - Array of {itemId, weight, quantity} objects
+     */
+    setLootTable(lootTable) {
+        this.lootTable = lootTable;
+        return this;
+    }
+
+    /**
+     * Open lootbox and generate random items
+     * @param {Character} character - The character opening the lootbox
+     * @returns {Object} Result object with success status, message, and generated items
+     */
+    openLootbox(character) {
+        if (!this.isLootbox || !this.lootTable) {
+            return { success: false, message: 'Item is not a lootbox or has no loot table' };
+        }
+
+        const generatedItems = [];
+        const totalWeight = this.lootTable.reduce((sum, entry) => sum + entry.weight, 0);
+        
+        // Generate only 1 item from the loot table
+        const roll = Math.random() * totalWeight;
+        let currentWeight = 0;
+        
+        for (const lootEntry of this.lootTable) {
+            currentWeight += lootEntry.weight;
+            if (roll <= currentWeight) {
+                const quantity = lootEntry.quantity || 1;
+                generatedItems.push({
+                    itemId: lootEntry.itemId,
+                    quantity: quantity
+                });
+                break;
+            }
+        }
+
+        return {
+            success: true,
+            message: `Opened ${this.name}`,
+            items: generatedItems
+        };
+    }
+
+    /**
      * Use consumable item (if it's consumable)
      * @param {Character} character - The character using the item
+     * @param {Character} target - The target character (for targeting consumables)
      * @returns {Object} Result object with success status and message
      */
-    useConsumable(character) {
+    useConsumable(character, target = null) {
         if (!this.isConsumable || !this.effect) {
             return { success: false, message: 'Item is not consumable' };
         }
@@ -49,7 +97,7 @@ class Item {
         }
 
         // Execute the consumable effect
-        const result = this.effect(character);
+        const result = this.effect(character, target);
         
         if (result.success) {
             // Set cooldown
@@ -124,6 +172,17 @@ class Item {
         if (character.recalculateStats) {
             character.recalculateStats('item_applied');
         }
+        
+        // Check for special item effects that need to be applied
+        if (this.id === 'shinnoks_dark_magic_bubble' && window.shinnoksDarkMagicBubbleHandler) {
+            // Apply Shinnok's Dark Magic Bubble buff immediately when item is equipped
+            window.shinnoksDarkMagicBubbleHandler.applyDarkMagicBuffToCharacter(character);
+        }
+        
+        if (this.id === 'shadow_dagger' && window.shadowDaggerHandler) {
+            // Apply Shadow Dagger armor penetration buff immediately when item is equipped
+            window.shadowDaggerHandler.applyShadowDaggerBuffToCharacter(character);
+        }
     }
 
     /**
@@ -171,6 +230,9 @@ class Item {
             if (this.cooldownTurns > 0) {
                 description += `\nCooldown: ${this.cooldownTurns} turns`;
             }
+        } else if (this.isLootbox) {
+            description += `\n\nType: Lootbox`;
+            description += `\nClick to open and discover treasures!`;
         } else if (Object.keys(this.statBonuses).length > 0) {
             description += '\n\nStat Bonuses:';
             Object.entries(this.statBonuses).forEach(([stat, bonus]) => {
@@ -178,7 +240,7 @@ class Item {
                 const prefix = bonus > 0 ? '+' : '';
                 
                 // Format percentage stats correctly
-                const isPercentageStat = ['critChance', 'critMultiplier', 'dodgeChance', 'lifeSteal', 'healingPower'].includes(stat);
+                const isPercentageStat = ['critChance', 'critMultiplier', 'dodgeChance', 'lifesteal', 'healingPower'].includes(stat);
                 const displayValue = isPercentageStat ? `${Math.round(bonus * 100)}%` : bonus;
                 
                 description += `\n${prefix}${displayValue} ${statName}`;
@@ -206,6 +268,7 @@ class Item {
             hpPerTurn: 'HP per Turn',
             manaPerTurn: 'Mana per Turn',
             lifeSteal: 'Life Steal',
+            lifesteal: 'Life Steal',  // Support both camelCase and lowercase
             healingPower: 'Healing Power',
         };
         return statNames[stat] || stat;
@@ -282,7 +345,7 @@ class ItemRegistry {
         );
 
         // Set consumable effect for Mana Sack
-        manaSack.setConsumableEffect((character) => {
+        manaSack.setConsumableEffect((character, target) => {
             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
             
             if (!character || character.isDead()) {
@@ -318,6 +381,98 @@ class ItemRegistry {
         }, 5); // 5 turn cooldown
 
         this.registerItem(manaSack);
+
+        // Ice Shard - Consumable Item (Target Enemy)
+        const iceShard = new Item(
+            'ice_shard',
+            'Ice Shard',
+            'A crystalline fragment of pure ice magic. When thrown at an enemy, it deals 250 damage and freezes them for 2 turns.',
+            'items/ice_shard.png',
+            'uncommon',
+            {},
+            'consumable'
+        );
+
+        // Set consumable effect for Ice Shard
+        iceShard.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            // Ice Shard requires a target
+            if (!target) {
+                return { success: false, message: 'Ice Shard requires a target', needsTarget: true, targetType: 'enemy' };
+            }
+
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            if (target.isDead()) {
+                return { success: false, message: 'Target is already dead' };
+            }
+
+            // Validate that target is an enemy
+            if (target.isAI === character.isAI) {
+                return { success: false, message: 'Ice Shard can only target enemies' };
+            }
+
+            // Apply damage first
+            const damage = 250;
+            const result = target.applyDamage(damage, 'magical', character, {
+                source: 'Ice Shard',
+                canDodge: true
+            });
+
+            log(`${character.name} throws an Ice Shard at ${target.name}!`, 'consumable-use');
+
+            // If damage wasn't dodged, apply freeze
+            if (!result.isDodged) {
+                // Apply freeze debuff for 2 turns
+                const freezeDebuff = {
+                    id: 'freeze',
+                    name: 'Freeze',
+                    icon: 'items/ice_shard.png',
+                    duration: 2,
+                    maxDuration: 2,
+                    isDebuff: true,
+                    source: character.name,
+                    description: 'Frozen solid! Abilities have only 58% chance to succeed.',
+                    effect: function(character) {
+                        // Freeze effect is handled in the ability usage logic
+                    },
+                    onRemove: function(character) {
+                        if (window.AtlanteanSubZeroAbilities) {
+                            // Natural expiry melt
+                            window.AtlanteanSubZeroAbilities.removeFreezeIndicator(character, false);
+                        }
+                    }
+                };
+                
+                target.addDebuff(freezeDebuff);
+                
+                // Show freeze VFX if available
+                if (window.AtlanteanSubZeroAbilities) {
+                    window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX(target);
+                }
+                
+                log(`💧 ${target.name} is frozen solid for 2 turns!`, 'debuff');
+            } else {
+                log(`${target.name} dodged the Ice Shard!`, 'dodge');
+            }
+
+            // Update character UIs
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(character);
+                updateCharacterUI(target);
+            }
+
+            return { success: true, message: `Ice Shard hit ${target.name} for ${damage} damage!` };
+        }, 8); // 3 turn cooldown
+
+        // Mark as targeting consumable
+        iceShard.needsTarget = true;
+        iceShard.targetType = 'enemy';
+
+        this.registerItem(iceShard);
 
         // ABYSSAL ITEMS
         this.registerItem(new Item(
@@ -470,194 +625,46 @@ class ItemRegistry {
             'crafting'
         ));
 
-        this.registerItem(new Item(
-            'shadow_essence',
-            'Shadow Essence',
-            'A dark, swirling essence, used for crafting.',
-            'items/shadow_essence.png',
+        // ATLANTEAN TREASURE CHEST - LOOTBOX
+        const atlanteanTreasureChest = new Item(
+            'atlantean_treasure_chest',
+            'Atlantean Treasure Chest',
+            'A treasure chest from the depths of Atlantis. What wonders does it hold?',
+            'items/atlantean_treasure_chest.webp',
             'rare',
             {},
-            'crafting'
-        ));
-
-        this.registerItem(new Item(
-            'stormcallers_orb',
-            "Stormcaller's Orb",
-            'Increases Crit Damage by an additional 20%.',
-            'items/stormcallers_orb.webp',
-            'epic',
-            {
-                critMultiplier: 0.20 // 20% crit damage
-            },
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'tideborn_breastplate',
-            'Tideborn Breastplate',
-            'Heals 5% of the damage received.',
-            'items/tideborn_breastplate.webp',
-            'epic',
-            {}, // Removed healingPower stat bonus
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'water_elemental_crystal',
-            'Water Elemental Crystal',
-            '+22 Mana regen, +5 HP Regen',
-            'items/water_elemental_crystal.webp',
-            'rare',
-            {
-                manaPerTurn: 22,
-                hpPerTurn: 5
-            },
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'wavebreaker',
-            'Wavebreaker',
-            '+30 Physical Damage +150 HP',
-            'items/wavebreaker.webp',
-            'epic',
-            {
-                physicalDamage: 30,
-                hp: 150
-            },
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'void_essence',
-            'Void Essence',
-            'A dark, unstable essence, used for crafting.',
-            'items/Void_Essence.png',
-            'legendary',
-            {},
-            'crafting'
-        ));
-
-        // Ice Items
-        this.registerItem(new Item(
-            'ice_dagger',
-            'Ice Dagger',
-            '+25 AD. Gives your Q ability 10% chance to freeze the target for 2 turns.',
-            'items/ice_dagger.png',
-            'rare',
-            { physicalDamage: 25 },
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'ice_flask',
-            'Ice Flask',
-            'A flask containing a chilling liquid. Used in ice-related crafting recipes.',
-            'items/ice_flask.png',
-            'common',
-            {},
-            'crafting'
-        ));
-
-        const iceShard = new Item(
-            'ice_shard',
-            'Ice Shard',
-            'Throws an ice shard onto a random enemy dealing 200 Magical Damage and freezing it for 3 turns.',
-            'items/ice_shard.png',
-            'uncommon',
-            {},
-            'consumable'
+            'lootbox'
         );
 
-        iceShard.setConsumableEffect((character) => {
-            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+        // Set the loot table for Atlantean Treasure Chest
+        atlanteanTreasureChest.setLootTable([
+            { itemId: 'cursed_water_vial', weight: 6, quantity: 1 },
+            { itemId: 'abyssal_echo', weight: 6, quantity: 1 },
+            { itemId: 'piranha_tooth', weight: 6, quantity: 1 },
+            { itemId: 'piranha_scales', weight: 6, quantity: 1 },
+            { itemId: 'murky_water_vial', weight: 6, quantity: 1 },
+            { itemId: 'deep_sea_essence', weight: 6, quantity: 1 },
+            { itemId: 'leviathan_scale', weight: 3, quantity: 1 },
+            { itemId: 'atlantean_treasure_chest', weight: 4, quantity: 2 },
+            { itemId: 'abyssal_anchor', weight: 3, quantity: 1 },
+            { itemId: 'pearl_gun', weight: 3, quantity: 1 },
+            { itemId: 'mermaid_essence', weight: 3, quantity: 1 },
+            { itemId: 'tidal_charm', weight: 3, quantity: 1 },
+            { itemId: 'tridens_vow', weight: 2, quantity: 1 },
+            { itemId: 'zasalamel_scythe', weight: 2, quantity: 1 },
+            { itemId: 'shinnoks_dark_magic_bubble', weight: 2, quantity: 1 },
+            { itemId: 'shadow_dagger', weight: 2, quantity: 1 },
+            { itemId: 'fish_scale_shoulderplate', weight: 1.5, quantity: 1 },
+            { itemId: 'atlantean_crown', weight: 1.5, quantity: 1 },
+            { itemId: 'atlantis_teardrop', weight: 1.5, quantity: 1 },
+            { itemId: 'pearl_of_the_depths', weight: 1.5, quantity: 1 },
+            { itemId: 'atlantean_trident_of_time', weight: 1, quantity: 1 },
+            { itemId: 'leviathans_fang', weight: 1, quantity: 1 },
+            { itemId: 'kotal_kahns_atlantean_dagger', weight: 1, quantity: 1 },
+            { itemId: 'seaborn_crown', weight: 1, quantity: 1 }
+        ]);
 
-            if (!character || character.isDead()) {
-                return { success: false, message: 'Character is dead or invalid' };
-            }
-
-            const enemies = window.gameManager.gameState.aiCharacters.filter(enemy => !enemy.isDead());
-            if (enemies.length === 0) {
-                log('No enemies to target.', 'system');
-                return { success: false, message: 'No valid targets' };
-            }
-
-            const target = enemies[Math.floor(Math.random() * enemies.length)];
-            const damage = 200;
-            const freezeDuration = 3;
-
-            // Apply damage
-            const result = target.applyDamage(damage, 'magical', character, { abilityId: 'ice_shard' });
-            log(`${character.name} used Ice Shard on ${target.name}, dealing ${damage} magical damage!`, 'consumable-use');
-
-            // Only apply freeze if damage wasn't dodged
-            if (!result.isDodged) {
-                const existingFreeze = target.debuffs && target.debuffs.find(d => d.id === 'freeze');
-                if (!existingFreeze) {
-                    const freezeDebuff = {
-                        id: 'freeze',
-                        name: 'Frozen',
-                        icon: '❄️',
-                        duration: freezeDuration,
-                        maxDuration: freezeDuration,
-                        isDebuff: true,
-                        source: character.name,
-                        description: 'Frozen solid! Character is stunned for the duration.',
-                        type: 'stun', // This will prevent the character from acting
-                        onRemove: function(character) {
-                            if (window.AtlanteanSubZeroAbilities) {
-                                window.AtlanteanSubZeroAbilities.removeFreezeIndicator(character, false);
-                            }
-                        }
-                    };
-                    
-                    target.addDebuff(freezeDebuff, character);
-                    
-                    if (window.AtlanteanSubZeroAbilities && window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX) {
-                        window.AtlanteanSubZeroAbilities.showFreezeApplicationVFX(target);
-                    }
-                    
-                    if (window.gameManager) {
-                        window.gameManager.addLogEntry(`❄️ ${target.name} is frozen solid!`, 'debuff');
-                    }
-                }
-            }
-
-            return { success: true, message: 'Used Ice Shard' };
-        }, 10); // 10 turn cooldown
-
-        this.registerItem(iceShard);
-
-        // New Items from Request
-        this.registerItem(new Item(
-            'icicle_spear',
-            'Icicle Spear',
-            '+180 Magical Damage. Your abilities have a 5% chance to freeze the target damaged.',
-            'items/icicle_spear.webp',
-            'legendary',
-            { magicalDamage: 180 },
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'golden_arrow',
-            'Golden Arrow',
-            '+50 Physical & +50 Magical Damage. Your abilities now also scale with 20% of your magical Damage.',
-            'items/golden_arrow.webp',
-            'legendary',
-            { physicalDamage: 50, magicalDamage: 50 },
-            'equipment'
-        ));
-
-        this.registerItem(new Item(
-            'golden_mask',
-            'Golden Mask',
-            '+10 Magic Resistance.',
-            'items/golden_mask.webp',
-            'common',
-            { magicalShield: 10 },
-            'equipment'
-        ));
+        this.registerItem(atlanteanTreasureChest);
 
         // NEW ATLANTEAN ITEMS
         this.registerItem(new Item(
@@ -691,7 +698,7 @@ class ItemRegistry {
             'leviathan_scale',
             'Leviathan Scale',
             'A massive scale from the legendary Leviathan, containing ancient oceanic power. Used in advanced crafting recipes.',
-            'items/leviathan_scale.webp',
+            'items/leviathan_scale.png',
             'epic',
             {},
             'crafting'
@@ -718,6 +725,316 @@ class ItemRegistry {
             {},
             'equipment'
         ));
+
+        // Zasalamel Scythe - Epic Item
+        this.registerItem(new Item(
+            'zasalamel_scythe',
+            'Zasalamel Scythe',
+            '+50 Physical Damage, +10% Lifesteal. Your Q ability also restores 50% of the damage it deals.',
+            'items/zasalamel_scythe.png',
+            'epic',
+            {
+                physicalDamage: 50,
+                lifesteal: 0.10     // 10% lifesteal (lowercase to match character stats)
+            },
+            'equipment'
+        ));
+
+        // Shinnok's Dark Magic Bubble - Epic Item
+        this.registerItem(new Item(
+            'shinnoks_dark_magic_bubble',
+            "Shinnok's Dark Magic Bubble",
+            '+20% Lifesteal. At the start of the game, grants a permanent buff that gives +2 magical damage every turn.',
+            'items/shinnoks_dark_magic_bubble.webp',
+            'epic',
+            {
+                lifesteal: 0.20     // 20% lifesteal
+            },
+            'equipment'
+        ));
+
+        // Deep Sea Essence - Crafting Material
+        this.registerItem(new Item(
+            'deep_sea_essence',
+            'Deep Sea Essence',
+            'A mystical essence harvested from the deepest trenches of the ocean. Pulsing with ancient marine magic, this rare material is essential for crafting the most powerful aquatic equipment.',
+            'items/deep_sea_essence.png',
+            'rare',
+            {},
+            'crafting'
+        ));
+
+
+        // Ice Dagger - Equipment Item
+        this.registerItem(new Item(
+            'ice_dagger',
+            'Ice Dagger',
+            'A razor-sharp dagger forged from eternal ice. Its blade never dulls and cuts through enemies with freezing precision, leaving frostbite in its wake.',
+            'items/ice_dagger.png',
+            'uncommon',
+            {
+                physicalDamage: 35,
+                critChance: 0.12
+            },
+            'equipment'
+        ));
+
+        // Ice Flask - Crafting Material
+        this.registerItem(new Item(
+            'ice_flask',
+            'Ice Flask',
+            'A specially crafted flask that can contain and preserve the essence of eternal ice. Used by master craftsmen to infuse equipment with freezing properties.',
+            'items/ice_flask.png',
+            'uncommon',
+            {},
+            'crafting'
+        ));
+
+        // Shadow Dagger - Epic Item
+        this.registerItem(new Item(
+            'shadow_dagger',
+            'Shadow Dagger',
+            '+25 Physical Damage. At game start, one of your random abilities gains the power to ignore 100% armor.',
+            'items/shadow_dagger.png',
+            'epic',
+            {
+                physicalDamage: 25
+            },
+            'equipment'
+        ));
+
+        // Cursed Shell - Crafting Material
+        this.registerItem(new Item(
+            'cursed_shell',
+            'Cursed Shell',
+            'A mysterious shell tainted with dark magic. Its surface pulses with an eerie glow, making it valuable for crafting cursed equipment.',
+            'items/underwater_cursed_shell.png',
+            'uncommon',
+            {},
+            'crafting'
+        ));
+
+        // Triden's Vow - Epic Item
+        this.registerItem(new Item(
+            'tridens_vow',
+            "Triden's Vow",
+            '+15% Crit Chance. Has 20% chance when you use an ability not to end your turn (doesn\'t call "acted").',
+            'items/tridents_vow.webp',
+            'epic',
+            {
+                critChance: 0.15    // 15% crit chance
+            },
+            'equipment'
+        ));
+
+        // Initialize special item effects after all items are registered
+        this.initializeSpecialItemEffects();
+    }
+
+    /**
+     * Initialize special item effects and handlers
+     */
+    initializeSpecialItemEffects() {
+        // Set up Triden's Vow special effect
+        this.setupTridensVowEffect();
+    }
+
+    /**
+     * Set up Triden's Vow special effect - 20% chance to not end turn
+     */
+    setupTridensVowEffect() {
+        // Check if already set up
+        if (window.tridensVowHandler) return;
+
+        const tridensVowHandler = {
+            // Check if a character has Triden's Vow equipped
+            hasItem: function(character) {
+                if (!character) return false;
+                
+                // Check in character's equippedItems array
+                if (character.equippedItems && Array.isArray(character.equippedItems)) {
+                    for (let i = 0; i < character.equippedItems.length; i++) {
+                        const item = character.equippedItems[i];
+                        if (item && item.id === 'tridens_vow') {
+                            return true;
+                        }
+                    }
+                }
+                
+                // Check in character's inventory
+                if (window.CharacterInventories && window.CharacterInventories.get) {
+                    const inventory = window.CharacterInventories.get(character.id);
+                    if (inventory) {
+                        const items = inventory.getAllItems();
+                        for (let i = 0; i < items.length; i++) {
+                            const slot = items[i];
+                            if (slot && slot.itemId === 'tridens_vow') {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                
+                // Check in character's items array (alternative structure)
+                if (character.items && Array.isArray(character.items)) {
+                    for (let i = 0; i < character.items.length; i++) {
+                        const item = character.items[i];
+                        if (item && (item.id === 'tridens_vow' || item.itemId === 'tridens_vow')) {
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            },
+
+            // Handle ability usage with Triden's Vow effect
+            onAbilityUsed: function(character, ability) {
+                const hasItem = this.hasItem(character);
+                if (!hasItem) return false;
+
+                // 20% chance to not end turn
+                const chance = 0.20;
+                const roll = Math.random();
+                
+                if (roll < chance) {
+                    // Show visual effect
+                    this.showTridensVowEffect(character);
+                    
+                    // Prevent turn from ending using the game manager
+                    if (window.gameManager) {
+                        try {
+                            // Set the prevent turn end flag
+                            window.gameManager.preventTurnEndFlag = true;
+                            
+                            // Remove character from acted list if present
+                            if (window.gameManager.actedCharacters && Array.isArray(window.gameManager.actedCharacters)) {
+                                const charIndex = window.gameManager.actedCharacters.indexOf(character.id);
+                                if (charIndex > -1) {
+                                    window.gameManager.actedCharacters.splice(charIndex, 1);
+                                }
+                                
+                                // Also try instance ID
+                                const instanceIndex = window.gameManager.actedCharacters.indexOf(character.instanceId);
+                                if (instanceIndex > -1) {
+                                    window.gameManager.actedCharacters.splice(instanceIndex, 1);
+                                }
+                            }
+                            
+                            // Reset character's hasActed flag if it exists
+                            if (character.hasActed !== undefined) {
+                                character.hasActed = false;
+                            }
+                            
+                            // Update UI to show character can act again
+                            if (window.gameManager.uiManager) {
+                                window.gameManager.uiManager.markCharacterAsActive(character);
+                                window.gameManager.uiManager.updateEndTurnButton();
+                            }
+                            
+                            // Add log entry
+                            if (window.gameManager.addLogEntry) {
+                                window.gameManager.addLogEntry(
+                                    `⚡ ${character.name}'s Triden's Vow allows another action!`,
+                                    'item-effect'
+                                );
+                            }
+                            
+                            return true; // Effect triggered
+                        } catch (error) {
+                            console.error('[Triden\'s Vow] Error applying effect:', error);
+                        }
+                    }
+                }
+                
+                return false; // Effect didn't trigger
+            },
+
+            // Show visual effect for Triden's Vow activation
+            showTridensVowEffect: function(character) {
+                try {
+                    // Find the character's visual element
+                    const characterElement = document.getElementById(`character-${character.instanceId}`) || 
+                                           document.getElementById(`character-${character.id}`) ||
+                                           document.querySelector(`[data-character-id="${character.id}"]`);
+                    
+                    if (characterElement) {
+                        // Create effect container
+                        const effectContainer = document.createElement('div');
+                        effectContainer.className = 'tridens-vow-effect';
+                        
+                        // Create glow effect
+                        const glowEffect = document.createElement('div');
+                        glowEffect.className = 'tridens-vow-glow';
+                        
+                        // Create text effect
+                        const textEffect = document.createElement('div');
+                        textEffect.className = 'tridens-vow-text';
+                        textEffect.textContent = 'Triden\'s Vow!';
+                        
+                        // Assemble effect
+                        effectContainer.appendChild(glowEffect);
+                        effectContainer.appendChild(textEffect);
+                        
+                        // Position relative to character
+                        characterElement.style.position = 'relative';
+                        characterElement.appendChild(effectContainer);
+                        
+                        // Remove effect after animation
+                        setTimeout(() => {
+                            if (effectContainer.parentNode) {
+                                effectContainer.parentNode.removeChild(effectContainer);
+                            }
+                        }, 1500);
+                    }
+                } catch (error) {
+                    console.error('[Triden\'s Vow] Error showing visual effect:', error);
+                }
+            }
+        };
+
+        // Store globally for access
+        window.tridensVowHandler = tridensVowHandler;
+
+        // Hook into the game's ability usage system
+        const setupAbilityHook = () => {
+            // Method 1: Listen for AbilityUsed event (capitalized)
+            document.addEventListener('AbilityUsed', (event) => {
+                if (event.detail && event.detail.caster && event.detail.ability) {
+                    tridensVowHandler.onAbilityUsed(event.detail.caster, event.detail.ability);
+                }
+            });
+            
+            // Method 2: Hook into Character.useAbility if available
+            const checkForCharacterSystem = () => {
+                if (window.Character && window.Character.prototype && window.Character.prototype.useAbility) {
+                    if (!window.Character.prototype.useAbility._tridensVowHooked) {
+                        const originalUseAbility = window.Character.prototype.useAbility;
+                        
+                        window.Character.prototype.useAbility = function(abilityIndex, target) {
+                            const result = originalUseAbility.call(this, abilityIndex, target);
+                            
+                            if (this.abilities && this.abilities[abilityIndex]) {
+                                const ability = this.abilities[abilityIndex];
+                                setTimeout(() => {
+                                    tridensVowHandler.onAbilityUsed(this, ability);
+                                }, 50);
+                            }
+                            
+                            return result;
+                        };
+                        
+                        window.Character.prototype.useAbility._tridensVowHooked = true;
+                    }
+                } else {
+                    setTimeout(checkForCharacterSystem, 100);
+                }
+            };
+            
+            checkForCharacterSystem();
+        };
+
+        setupAbilityHook();
     }
 
     /**
@@ -848,9 +1165,10 @@ class CharacterInventory {
      * Use a consumable item from inventory
      * @param {number} slotIndex - The slot index
      * @param {Character} character - The character using the item
+     * @param {Character} target - The target character (for targeting consumables)
      * @returns {Object} Result object with success status and message
      */
-    useConsumableItem(slotIndex, character) {
+    useConsumableItem(slotIndex, character, target = null) {
         const slot = this.items[slotIndex];
         if (!slot) {
             return { success: false, message: 'No item in this slot' };
@@ -862,7 +1180,7 @@ class CharacterInventory {
         }
 
         // Try to use the consumable
-        const result = item.useConsumable(character);
+        const result = item.useConsumable(character, target);
         
         if (result.success) {
             // Remove one from the stack
@@ -1066,33 +1384,37 @@ class GlobalInventory {
      * @param {number} quantity - Quantity to add (default 1)
      */
     addItem(itemId, quantity = 1) {
-        console.log(`[GlobalInventory] DEBUG: Adding item "${itemId}" (qty: ${quantity}) to global inventory`);
-        
-        const item = window.ItemRegistry?.getItem(itemId);
-        
-        // For consumables and crafting materials, try to stack with existing items
-        if (item && (item.isConsumable || item.type === 'crafting')) {
+        const item = window.ItemRegistry.getItem(itemId);
+        if (!item) {
+            console.error(`[GlobalInventory] Attempted to add unknown item: ${itemId}`);
+            return;
+        }
+
+        // For stackable items, try to stack with existing items first
+        if (item.isConsumable || item.type === 'crafting' || item.type === 'lootbox') {
             for (let i = 0; i < this.items.length; i++) {
-                const existing = this.items[i];
-                // Handle both new format (objects) and old format (strings)
-                const existingItemId = typeof existing === 'object' ? existing.itemId : existing;
-                
-                if (existingItemId === itemId) {
-                    // Found existing stack, add to it
-                    if (typeof existing === 'object') {
-                        existing.quantity += quantity;
-                    } else {
-                        // Convert old format to new format
-                        this.items[i] = { itemId: itemId, quantity: 1 + quantity };
-                    }
-                    console.log(`[GlobalInventory] Stacked ${quantity} ${itemId}. New quantity: ${this.items[i].quantity || (quantity + 1)}`);
-                    return;
+                const existingItem = this.items[i];
+                if (existingItem && existingItem.itemId === itemId) {
+                    existingItem.quantity += quantity;
+                    return; // Item stacked, no need to add to a new slot
                 }
             }
         }
-        
-        // No existing stack found or not stackable, add new entry
-        this.items.push({ itemId, quantity });
+
+        // If not stackable or no existing stack, find the first empty slot
+        let added = false;
+        for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i] === null || this.items[i] === undefined) {
+                this.items[i] = { itemId, quantity };
+                added = true;
+                break;
+            }
+        }
+
+        // If no empty slots were found, add it to the end
+        if (!added) {
+            this.items.push({ itemId, quantity });
+        }
     }
 
     /**
@@ -1261,25 +1583,27 @@ class GlobalInventory {
      */
     deserialize(data) {
         console.log('[GlobalInventory] DEBUG: deserialize() called with data:', data);
-        console.log('[GlobalInventory] DEBUG: Current items before deserialize:', this.items);
-        
+
         if (!Array.isArray(data)) {
-            this.items = [];
+            // Do not wipe existing items if data is invalid
             return;
         }
-        
+
+        // Clear the current inventory before loading new data
+        this.items = [];
+
         // Handle both old format (string arrays) and new format (object arrays)
-        this.items = data.map(entry => {
+        const loadedItems = data.map(entry => {
             if (typeof entry === 'string') {
-                // Old format: convert to new format
                 return { itemId: entry, quantity: 1 };
             } else if (entry && typeof entry === 'object' && entry.itemId) {
-                // New format: ensure quantity exists
                 return { itemId: entry.itemId, quantity: entry.quantity || 1 };
             }
             return null;
         }).filter(entry => entry !== null);
-        
+
+        this.items = loadedItems;
+
         console.log('[GlobalInventory] DEBUG: Items after deserialize:', this.items);
     }
 }
@@ -1287,7 +1611,305 @@ class GlobalInventory {
 // Global instances should be created manually in the initialization process
 // to avoid automatic item addition during script loading
 
-// Export classes for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { Item, ItemRegistry, CharacterInventory, GlobalInventory };
+// Zasalamel Scythe Q ability healing effect handler
+class ZasalamelScytheHandler {
+    constructor() {
+        this.boundOnDamageDealt = this.onDamageDealt.bind(this);
+        this.initialize();
+    }
+
+    initialize() {
+        // Listen for damage dealt events
+        document.addEventListener('character:damage-dealt', this.boundOnDamageDealt);
+        console.log('[ZasalamelScythe] Handler initialized - listening for Q ability damage');
+    }
+
+    onDamageDealt(event) {
+        const { character: caster, target, damage, damageType, options } = event.detail;
+        
+        if (!caster || !damage || damage <= 0) return;
+        
+        // Check if this damage came from a Q ability (index 0)
+        const isQAbility = options && options.abilityIndex === 0;
+        if (!isQAbility) return;
+        
+        // Check if the caster has Zasalamel Scythe equipped
+        const casterInventory = window.CharacterInventories?.get(caster.id);
+        if (!casterInventory) return;
+        
+        const hasZasalamelScythe = casterInventory.getAllItems().some(itemSlot => 
+            itemSlot && itemSlot.itemId === 'zasalamel_scythe'
+        );
+        
+        if (!hasZasalamelScythe) return;
+        
+        // Calculate healing amount (50% of damage dealt)
+        const healingAmount = Math.floor(damage * 0.5);
+        
+        if (healingAmount <= 0) return;
+        
+        // Apply healing to the caster
+        const currentHp = caster.stats.currentHp || 0;
+        const maxHp = caster.stats.maxHp || caster.stats.hp || 100;
+        
+        if (currentHp >= maxHp) {
+            console.log(`[ZasalamelScythe] ${caster.name} already at full HP`);
+            return;
+        }
+        
+        const actualHealing = Math.min(healingAmount, maxHp - currentHp);
+        caster.stats.currentHp = Math.min(maxHp, currentHp + actualHealing);
+        
+        // Log the healing
+        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+        log(`⚰️ ${caster.name}'s Zasalamel Scythe restores ${actualHealing} HP from Q ability damage!`, 'heal');
+        
+        // Trigger healing animation if available
+        if (window.gameManager && window.gameManager.uiManager) {
+            window.gameManager.uiManager.triggerHealingAnimation(caster, 'restore', actualHealing);
+        }
+        
+        // Update character UI
+        if (typeof updateCharacterUI === 'function') {
+            updateCharacterUI(caster);
+        }
+        
+        console.log(`[ZasalamelScythe] ${caster.name} healed for ${actualHealing} HP (${damage} damage * 50%)`);
+    }
+
+    destroy() {
+        document.removeEventListener('character:damage-dealt', this.boundOnDamageDealt);
+        console.log('[ZasalamelScythe] Handler destroyed');
+    }
 }
+
+// Shinnok's Dark Magic Bubble start-of-game buff handler
+class ShinnoksDarkMagicBubbleHandler {
+    constructor() {
+        this.initialize();
+    }
+
+    initialize() {
+        // Listen for game start events to apply the permanent buff
+        document.addEventListener('game:start', this.onGameStart.bind(this));
+        document.addEventListener('character:initialized', this.onCharacterInitialized.bind(this));
+        document.addEventListener('character:items-applied', this.onCharacterItemsApplied.bind(this));
+        console.log('[ShinnoksDarkMagicBubble] Handler initialized - listening for game start and item application');
+    }
+
+    onGameStart(event) {
+        console.log('[ShinnoksDarkMagicBubble] Game started, checking for items...');
+        this.applyDarkMagicBuffs();
+    }
+
+    onCharacterItemsApplied(event) {
+        if (event.detail && event.detail.character) {
+            this.applyDarkMagicBuffToCharacter(event.detail.character);
+        }
+    }
+
+    onCharacterInitialized(event) {
+        if (event.detail && event.detail.character) {
+            // Delay to ensure items are loaded
+            setTimeout(() => {
+                this.applyDarkMagicBuffToCharacter(event.detail.character);
+            }, 100);
+        }
+    }
+
+    applyDarkMagicBuffs() {
+        // Check all characters for the item
+        if (window.gameManager && window.gameManager.gameState) {
+            const allCharacters = [
+                ...(window.gameManager.gameState.playerCharacters || []),
+                ...(window.gameManager.gameState.aiCharacters || [])
+            ];
+            
+            allCharacters.forEach(character => {
+                this.applyDarkMagicBuffToCharacter(character);
+            });
+        }
+    }
+
+    applyDarkMagicBuffToCharacter(character) {
+        if (!character) return;
+        
+        // Check if character has Shinnok's Dark Magic Bubble
+        let hasItem = false;
+        
+        // Check in character inventory
+        if (window.CharacterInventories) {
+            const inventory = window.CharacterInventories.get(character.id);
+            if (inventory) {
+                const items = inventory.getAllItems();
+                hasItem = items.some(slot => slot && slot.itemId === 'shinnoks_dark_magic_bubble');
+            }
+        }
+        
+        if (!hasItem) return;
+        
+        // Check if buff already applied
+        const existingBuff = character.buffs?.find(b => b.id === 'shinnoks_dark_magic');
+        if (existingBuff) {
+            console.log(`[ShinnoksDarkMagicBubble] ${character.name} already has Dark Magic buff`);
+            return;
+        }
+        
+        // Apply permanent buff that gives +2 magical damage every turn
+        const darkMagicBuff = {
+            id: 'shinnoks_dark_magic',
+            name: "Shinnok's Dark Magic",
+            icon: '🔮',
+            duration: -1, // Permanent
+            isDebuff: false,
+            isPermanent: true,
+            source: "Shinnok's Dark Magic Bubble",
+            description: 'Grants +2 magical damage every turn. This effect stacks.',
+            
+            onTurnStart: function(character) {
+                // Increase magical damage by 2
+                if (!character.stats.magicalDamage) {
+                    character.stats.magicalDamage = 0;
+                }
+                character.stats.magicalDamage += 2;
+                
+                // Also update base stats for persistence
+                if (!character.baseStats.magicalDamage) {
+                    character.baseStats.magicalDamage = 0;
+                }
+                character.baseStats.magicalDamage += 2;
+                
+                if (window.gameManager) {
+                    window.gameManager.addLogEntry(
+                        `🔮 ${character.name}'s Dark Magic increases magical damage by 2! (Total: ${character.stats.magicalDamage})`,
+                        'buff'
+                    );
+                }
+                
+                console.log(`[ShinnoksDarkMagicBubble] ${character.name} gained +2 magical damage (Total: ${character.stats.magicalDamage})`);
+            }
+        };
+        
+        character.addBuff(darkMagicBuff, character);
+        console.log(`[ShinnoksDarkMagicBubble] Applied Dark Magic buff to ${character.name}`);
+    }
+}
+
+// Global debug and test functions for Triden's Vow
+window.debugTridensVow = function() {
+    console.log('[Triden\'s Vow Debug] Current state:');
+    console.log('- Handler available:', !!window.tridensVowHandler);
+    console.log('- Character with item:', window.gameManager?.gameState?.playerCharacters?.find(c => 
+        window.tridensVowHandler?.hasItem(c)));
+};
+
+window.testTridensVowEffect = function(characterName = 'Atlantean Kagome') {
+    const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
+    if (!character) {
+        console.log('[Triden\'s Vow Test] Character not found:', characterName);
+        return;
+    }
+    
+    if (!window.tridensVowHandler) {
+        console.log('[Triden\'s Vow Test] Handler not available');
+        return;
+    }
+    
+    console.log('[Triden\'s Vow Test] Testing effect for:', character.name);
+    const result = window.tridensVowHandler.onAbilityUsed(character, { name: 'Test Ability', id: 'test' });
+    console.log('[Triden\'s Vow Test] Result:', result);
+    return result;
+};
+
+window.testTridensVowGuaranteed = function(characterName = 'Atlantean Kagome') {
+    const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
+    if (!character || !window.tridensVowHandler) {
+        console.log('[Triden\'s Vow Test] Character or handler not available');
+        return;
+    }
+    
+    // Temporarily override Math.random to guarantee activation
+    const originalRandom = Math.random;
+    Math.random = () => 0.1; // Always roll low enough to activate
+    
+    console.log('[Triden\'s Vow Test] Testing with guaranteed activation...');
+    const result = window.tridensVowHandler.onAbilityUsed(character, { name: 'Test Ability', id: 'test' });
+    
+    // Restore original Math.random
+    Math.random = originalRandom;
+    
+    console.log('[Triden\'s Vow Test] Guaranteed test result:', result);
+    return result;
+};
+
+window.giveTridensVow = function(characterName = 'Atlantean Kagome') {
+    console.log('=== GIVING TRIDEN\'S VOW TO CHARACTER ===');
+    
+    const foundCharacter = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
+    if (!foundCharacter) {
+        console.log('[Triden\'s Vow] Character not found:', characterName);
+        return;
+    }
+    
+    const inventory = window.CharacterInventories?.get(foundCharacter.id);
+    if (!inventory) {
+        console.log('[Triden\'s Vow] No inventory found for character');
+        return;
+    }
+    
+    const success = inventory.addItem('tridens_vow', 1);
+    console.log(`[Triden's Vow] Added Triden's Vow to ${characterName}'s inventory:`, success);
+};
+
+// Debug function to give Ice Shard to a character
+window.giveIceShard = function(characterName = 'Atlantean Kagome') {
+    console.log('=== GIVING ICE SHARD TO CHARACTER ===');
+    
+    const foundCharacter = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
+    if (!foundCharacter) {
+        console.error(`Character "${characterName}" not found. Available characters:`, 
+            window.gameManager?.gameState?.playerCharacters?.map(c => c.name) || 'No characters found');
+        return;
+    }
+    
+    const inventory = window.CharacterInventories?.get(foundCharacter.id);
+    if (!inventory) {
+        console.error(`No inventory found for character ${foundCharacter.name}`);
+        return;
+    }
+    
+    const success = inventory.addItem('ice_shard', 1);
+    console.log(`[Ice Shard] Added Ice Shard to ${characterName}'s inventory:`, success);
+    
+    // Check if item was added
+    const items = inventory.getAllItems();
+    console.log(`[Ice Shard] Character inventory now contains:`, items);
+};
+
+window.testIceShard = function() {
+    console.log('=== TESTING ICE SHARD ITEM ===');
+    
+    // Check if ItemRegistry has the ice shard
+    const iceShard = window.ItemRegistry?.getItem('ice_shard');
+    if (iceShard) {
+        console.log('[Ice Shard] Found in ItemRegistry:', iceShard);
+        console.log('[Ice Shard] Properties:', {
+            id: iceShard.id,
+            name: iceShard.name,
+            isConsumable: iceShard.isConsumable,
+            needsTarget: iceShard.needsTarget,
+            targetType: iceShard.targetType,
+            cooldownTurns: iceShard.cooldownTurns
+        });
+    } else {
+        console.error('[Ice Shard] NOT found in ItemRegistry');
+    }
+    
+    // List all items in registry
+    const allItems = window.ItemRegistry?.getAllItems();
+    console.log('[Ice Shard] All items in registry:', allItems?.map(item => item.id) || 'No items');
+};
+
+console.log('Ice Shard debug functions loaded:');
+console.log('- testIceShard() - Test if Ice Shard is properly loaded');
+console.log('- giveIceShard("Character Name") - Give Ice Shard to a character');

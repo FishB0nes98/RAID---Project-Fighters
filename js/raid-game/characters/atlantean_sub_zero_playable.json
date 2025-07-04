@@ -21,7 +21,8 @@
         "critMultiplier": 1.8,
         "dodgeChance": 0.00,
         "hpPerTurn": 0,
-        "manaPerTurn": 0
+        "manaPerTurn": 0,
+         "lifesteal": 0.00
     },
     "abilities": [
         {

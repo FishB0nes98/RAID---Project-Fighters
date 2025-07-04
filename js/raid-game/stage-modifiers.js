@@ -1407,7 +1407,7 @@ class StageModifiersRegistry {
         this.registerModifier({
             id: 'freezing_waters',
             name: 'Freezing Waters',
-            description: 'All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 40% chance for their abilities to succeed.',
+            description: 'All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 42% chance for their abilities to succeed.',
             icon: '❄️',
             vfx: {
                 type: 'freezing_waters',
@@ -1447,7 +1447,7 @@ class StageModifiersRegistry {
                                     maxDuration: 2,
                                     isDebuff: true,
                                     source: 'Freezing Waters',
-                                    description: 'Frozen by the icy waters! Abilities have only 40% chance to succeed.',
+                                    description: 'Frozen by the icy waters! Abilities have only 42% chance to succeed.',
                                     effect: function(character) {
                                         // Freeze effect is handled in the ability usage logic
                                     },
