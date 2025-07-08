@@ -14,7 +14,7 @@
         "manaPerTurn": 0,
         "lifesteal": 0.0,
         "dodgeChance": 0.1,
-        "critChance": 0.1,
+        "critChance": 0,
         "critDamage": 1.8,
         "healingPower": 0.0,
         "speed": 110

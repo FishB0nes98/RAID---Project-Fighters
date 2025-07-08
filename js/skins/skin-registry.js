@@ -2,6 +2,35 @@
 window.SkinRegistry = {
     // Define all available skins
     skins: {
+
+        //Infernal Ibuki Evil Form
+        'infernal_ibuki_evil_form': {
+            id: 'infernal_ibuki_evil_form',
+            name: 'Infernal Ibuki Evil Form',
+            characterId: 'infernal_ibuki',
+            description: 'The true form of Ibuki, revealing her infernal powers in full glory.',
+            imagePath: 'Loading Screen/Infernal Ibuki Evil Form.png',
+            videoPath: 'Loading Screen/Infernal Ibuki Evil Form.mp4',
+            hasVideo: true,
+            price: 1500,
+            rarity: 'legendary',
+            category: 'infernal',
+            unlocked: false
+        },
+        //Schoolgirl Ayane True Form
+        'schoolgirl_ayane_true_form': {
+            id: 'schoolgirl_ayane_true_form',
+            name: 'Schoolgirl Ayane True Form',
+            characterId: 'schoolgirl_ayane',
+            description: 'The true form of Ayane, revealing her butterfly spirit in full glory.',
+            imagePath: 'Loading Screen/Schoolgirl Ayane True Form.png',
+            videoPath: 'Loading Screen/Schoolgirl Ayane True Form.mp4',
+            hasVideo: true,
+            price: 1500,
+            rarity: 'legendary',
+            category: 'schoolgirl',
+            unlocked: false
+        },
         //Schoolgirl Kokoro Holy
         'schoolgirl_kokoro_holy': {
             id: 'schoolgirl_kokoro_holy',

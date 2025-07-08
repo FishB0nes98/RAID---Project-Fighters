@@ -1198,33 +1198,121 @@ class GameManager {
         }
         
         if (backgroundImagePath) {
-            const img = new Image();
-            img.onload = () => {
-                backgroundElement.style.backgroundImage = `url(${backgroundImagePath})`;
-            };
-            img.onerror = () => {
-                console.warn(`[GameManager] Failed to load background image: ${backgroundImagePath}. Attempting .png fallback.`);
-                // Try .png fallback
-                const pngPath = backgroundImagePath.replace(/\.webp$/, '.png');
-                if (pngPath !== backgroundImagePath) {
-                    const pngImg = new Image();
-                    pngImg.onload = () => {
-                        backgroundElement.style.backgroundImage = `url(${pngPath})`;
-                    };
-                    pngImg.onerror = () => {
-                        console.error(`[GameManager] Failed to load background image: ${pngPath}. Using default gradient.`);
-                        backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
-                    };
-                    pngImg.src = pngPath;
-                } else {
-                    console.error(`[GameManager] Background image is not a .webp, no .png fallback possible. Using default gradient.`);
-                    backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
-                }
-            };
-            img.src = backgroundImagePath;
+            this.tryLoadBackgroundWithFallbacks(backgroundImagePath, backgroundElement);
         } else {
             backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
         }
+    }
+    
+    // Try to load background with multiple format fallbacks
+    tryLoadBackgroundWithFallbacks(originalPath, backgroundElement) {
+        // Define supported file formats in order of preference
+        const supportedFormats = ['png', 'webp', 'jpeg', 'jpg', 'jfif', 'html'];
+        
+        // Extract base path (remove extension)
+        const lastDotIndex = originalPath.lastIndexOf('.');
+        const basePath = lastDotIndex > -1 ? originalPath.substring(0, lastDotIndex) : originalPath;
+        const originalExt = lastDotIndex > -1 ? originalPath.substring(lastDotIndex + 1).toLowerCase() : '';
+        
+        // Create list of paths to try, starting with PNG
+        const pathsToTry = [];
+        
+        // Always try PNG first, then WebP
+        pathsToTry.push(`${basePath}.png`);
+        pathsToTry.push(`${basePath}.webp`);
+        
+        // Add other formats if they're not PNG or WebP
+        supportedFormats.forEach(format => {
+            if (format !== 'png' && format !== 'webp') {
+                pathsToTry.push(`${basePath}.${format}`);
+            }
+        });
+        
+        // If original path has a different extension, try it as well
+        if (originalExt && !supportedFormats.includes(originalExt)) {
+            pathsToTry.unshift(originalPath); // Try original first
+        }
+        
+        console.log(`[GameManager] Trying to load background with formats:`, pathsToTry);
+        
+        this.tryLoadBackgroundRecursive(pathsToTry, 0, backgroundElement);
+    }
+    
+    // Recursively try loading background images with different formats
+    tryLoadBackgroundRecursive(pathsToTry, currentIndex, backgroundElement) {
+        if (currentIndex >= pathsToTry.length) {
+            console.error(`[GameManager] Failed to load background image with any supported format. Using default gradient.`);
+            backgroundElement.style.backgroundImage = 'linear-gradient(to bottom, #1a1a2e, #16213e, #1a1a2e)';
+            return;
+        }
+        
+        const currentPath = pathsToTry[currentIndex];
+        console.log(`[GameManager] Attempting to load background: ${currentPath}`);
+        
+        // Check if it's an HTML file
+        if (currentPath.toLowerCase().endsWith('.html')) {
+            this.tryLoadHTMLBackground(currentPath, backgroundElement, () => {
+                // Success callback
+                console.log(`[GameManager] Successfully loaded HTML background: ${currentPath}`);
+            }, () => {
+                // Error callback - try next format
+                console.warn(`[GameManager] Failed to load HTML background: ${currentPath}. Trying next format.`);
+                this.tryLoadBackgroundRecursive(pathsToTry, currentIndex + 1, backgroundElement);
+            });
+        } else {
+            // Try loading as image
+            const img = new Image();
+            img.onload = () => {
+                console.log(`[GameManager] Successfully loaded background image: ${currentPath}`);
+                backgroundElement.style.backgroundImage = `url(${currentPath})`;
+            };
+            img.onerror = () => {
+                console.warn(`[GameManager] Failed to load background image: ${currentPath}. Trying next format.`);
+                this.tryLoadBackgroundRecursive(pathsToTry, currentIndex + 1, backgroundElement);
+            };
+            img.src = currentPath;
+        }
+    }
+    
+    // Try to load HTML background (for interactive backgrounds)
+    tryLoadHTMLBackground(htmlPath, backgroundElement, successCallback, errorCallback) {
+        fetch(htmlPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(htmlContent => {
+                // Create iframe for HTML background
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.style.position = 'absolute';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+                iframe.style.zIndex = '-1';
+                iframe.style.pointerEvents = 'none'; // Prevent interaction
+                
+                // Clear any existing background
+                backgroundElement.style.backgroundImage = 'none';
+                backgroundElement.innerHTML = '';
+                
+                // Add iframe to background element
+                backgroundElement.appendChild(iframe);
+                
+                // Write HTML content to iframe
+                iframe.contentDocument.open();
+                iframe.contentDocument.write(htmlContent);
+                iframe.contentDocument.close();
+                
+                successCallback();
+            })
+            .catch(error => {
+                console.error(`[GameManager] Error loading HTML background: ${error.message}`);
+                errorCallback();
+            });
     }
     
     // Play stage background music
@@ -1604,6 +1692,11 @@ class GameManager {
 
     // Handle player targeting a character with an ability
     targetCharacter(target) {
+        if (!target) {
+            console.warn('[GameManager.targetCharacter] Called with null or undefined target.');
+            this.uiManager.addLogEntry("Internal error: Tried to target a null or undefined character.", "error");
+            return false;
+        }
         console.log(`[DEBUG] targetCharacter called with target: ${target ? target.name : 'null'}`);
         
         // --- NEW: Check if target is dead ---
@@ -1771,44 +1864,54 @@ class GameManager {
             
             // IMPORTANT DEBUG: Log whether we should prevent turn end
             console.log("[DEBUG MANAGER] After ability use, preventTurnEndFlag =", this.preventTurnEndFlag);
-            console.log("[DEBUG MANAGER] Ability ID:", this.gameState.selectedAbility.id);
-            
+            if (this.gameState.selectedAbility) {
+                console.log("[DEBUG MANAGER] Ability ID:", this.gameState.selectedAbility.id);
+            } else {
+                console.log("[DEBUG MANAGER] Ability ID: null");
+            }
+
             // Force Ayane's Q ability to prevent turn end - IMPORTANT FIX
-            if (this.gameState.selectedAbility.id === 'ayane_q') {
+            if (this.gameState.selectedAbility && this.gameState.selectedAbility.id === 'ayane_q') {
                 console.log("[DEBUG MANAGER] Ayane's Q ability used - special handling");
                 this.preventTurnEndFlag = true; // CRITICAL: Force the flag to true
             }
-            
+
             // CRITICAL FIX: Boink should ALWAYS end the turn, regardless of other flags
-            if (this.gameState.selectedAbility.id === 'boink') {
+            if (this.gameState.selectedAbility && this.gameState.selectedAbility.id === 'boink') {
                 console.log("[DEBUG MANAGER] Boink ability used - forcing turn to end");
                 this.preventTurnEndFlag = false; // CRITICAL: Force Boink to end the turn
             }
-            
+
             // Only mark character as acted if turn shouldn't be prevented
             if (!this.preventTurnEndFlag) {
                 // Mark character as having acted this turn
-                this.actedCharacters.push(this.gameState.selectedCharacter.id);
-                this.uiManager.markCharacterAsActed(this.gameState.selectedCharacter);
+                if (this.gameState.selectedCharacter && this.gameState.selectedCharacter.id) {
+                    this.actedCharacters.push(this.gameState.selectedCharacter.id);
+                    this.uiManager.markCharacterAsActed(this.gameState.selectedCharacter);
+                }
             } else {
                 // Remove character from acted list if they were just added
-                const index = this.actedCharacters.indexOf(this.gameState.selectedCharacter.id);
-                if (index > -1) {
-                    this.actedCharacters.splice(index, 1);
+                if (this.gameState.selectedCharacter && this.gameState.selectedCharacter.id) {
+                    const index = this.actedCharacters.indexOf(this.gameState.selectedCharacter.id);
+                    if (index > -1) {
+                        this.actedCharacters.splice(index, 1);
+                    }
+                    // Mark character as active again
+                    this.uiManager.markCharacterAsActive(this.gameState.selectedCharacter);
+                    // Add message to battle log
+                    this.addLogEntry(`${this.gameState.selectedCharacter.name} can act again!`, 'combo');
+                    // Update button text
+                    this.uiManager.updateEndTurnButton();
                 }
-                
-                // Mark character as active again
-                this.uiManager.markCharacterAsActive(this.gameState.selectedCharacter);
-                
-                // Add message to battle log
-                this.addLogEntry(`${this.gameState.selectedCharacter.name} can act again!`, 'combo');
-                
-                // Update button text
-                this.uiManager.updateEndTurnButton();
             }
-            
+
             // Reset preventTurnEndFlag after use
-            if (this.preventTurnEndFlag && this.gameState.selectedAbility.id !== 'ayane_q' && this.gameState.selectedAbility.id !== 'boink') {
+            if (
+                this.preventTurnEndFlag &&
+                this.gameState.selectedAbility &&
+                this.gameState.selectedAbility.id !== 'ayane_q' &&
+                this.gameState.selectedAbility.id !== 'boink'
+            ) {
                 this.preventTurnEndFlag = false;
             }
             
@@ -1860,6 +1963,18 @@ class GameManager {
             console.log(`[validateTarget] Target ${target.name} is untargetable due to an effect.`);
             this.addLogEntry(`${target.name} cannot be targeted right now!`, 'error');
             return false;
+        }
+        
+        // --- NEW: Check if target is untargetable by enemies only (stealth effects) ---
+        const targetIsUntargetableByEnemies = target.isUntargetableByEnemies && target.isUntargetableByEnemies();
+        if (targetIsUntargetableByEnemies) {
+            // Only block targeting if the caster is an enemy
+            const casterIsEnemy = this.areEnemies(selectedChar, target);
+            if (casterIsEnemy) {
+                console.log(`[validateTarget] Target ${target.name} is untargetable by enemies due to stealth.`);
+                this.addLogEntry(`${target.name} is hidden and cannot be targeted!`, 'error');
+                return false;
+            }
         }
         
         // --- NEW: Check for enemy forced targeting (like Shadow Wings) ---
@@ -1962,6 +2077,12 @@ class GameManager {
                 console.warn(`[validateTarget] Unknown target type: ${targetType}`);
                 return false;
         }
+    }
+
+    // Check if two characters are enemies (on opposite teams)
+    areEnemies(char1, char2) {
+        if (!char1 || !char2) return false;
+        return char1.isAI !== char2.isAI;
     }
 
     // Check if all player characters have acted
@@ -2540,15 +2661,9 @@ class GameManager {
                }
            });
 
-           // --- Process Start-of-Turn for AI characters (Duration Reduction Only) ---
-           // AI regeneration and cooldowns happen at the *start* of executeAITurn
-           this.gameState.aiCharacters.forEach(aiChar => {
-                if (aiChar && !aiChar.isDead()) {
-                    // Only reduce effect durations here
-                    aiChar.processEffects(false, false); // false, false -> Don't reduce duration here, don't regenerate
-                    this.uiManager.updateCharacterUI(aiChar); // Update UI for duration changes
-                }
-           });
+           // --- Process Start-of-Turn for AI characters (No processing needed here) ---
+           // AI character effects and cooldowns are processed at the *start* of executeAITurn
+           // No additional processing needed here for AI characters
            // --- END AI Start-of-Turn Processing ---
 
 
@@ -4165,15 +4280,45 @@ class GameManager {
        }
 
        /**
-        * Get character image path with proper naming conversion
+        * Get character media path (video or image) with proper naming conversion
         */
-       getCharacterImagePath(characterId) {
+       getCharacterMediaPath(characterId) {
            // Always try skin system first (handles both basic and premium skins)
            if (window.SkinManager) {
                try {
-                   const skinImagePath = window.SkinManager.getCharacterImagePath(characterId);
-                   if (skinImagePath) {
-                       return skinImagePath;
+                   const skinMediaPath = window.SkinManager.getCharacterMediaPath(characterId);
+                   if (skinMediaPath) {
+                       return skinMediaPath;
+                   }
+               } catch (error) {
+                   console.warn(`[GameManager] Error getting skin media for ${characterId}: ${error.message}`);
+               }
+           }
+           
+           // Fallback to Loading Screen folder for ALL character images
+           const characterImagePath = this.getCharacterImageFromRegistry(characterId);
+           if (characterImagePath) {
+               // Use URL encoding for the path from registry
+               return characterImagePath.replace(/ /g, '%20');
+           } else {
+               // Use the same character name mapping as SkinManager
+               return this.getDefaultCharacterImagePath(characterId);
+           }
+       }
+
+       /**
+        * Get character image path with proper naming conversion (legacy method, now uses media path)
+        */
+       getCharacterImagePath(characterId) {
+           // For backwards compatibility, always return image path
+           if (window.SkinManager) {
+               try {
+                   const selectedSkin = window.SkinManager.getSelectedSkin(characterId);
+                   if (selectedSkin) {
+                       const skin = window.SkinRegistry.getSkin(selectedSkin);
+                       if (skin) {
+                           return skin.imagePath;
+                       }
                    }
                } catch (error) {
                    console.warn(`[GameManager] Error getting skin image for ${characterId}: ${error.message}`);
@@ -4186,13 +4331,8 @@ class GameManager {
                // Use URL encoding for the path from registry
                return characterImagePath.replace(/ /g, '%20');
            } else {
-               // If character not found in registry, try to derive name from characterId
-               // Convert character_id format to Character Name format
-               const characterName = characterId
-                   .split('_')
-                   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                   .join(' ');
-               return `Loading%20Screen/${encodeURIComponent(characterName)}.png`;
+               // Use the same character name mapping as SkinManager
+               return this.getDefaultCharacterImagePath(characterId);
            }
        }
 
@@ -4461,6 +4601,11 @@ class GameManager {
            // Trigger stage modifiers for character death
            if (window.stageModifiersRegistry && this.stageManager) {
                window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'characterDeath', { character: character });
+           }
+
+           // Cleanup talent effects for the dead character
+           if (window.talentManager) {
+               window.talentManager.cleanupCharacterTalents(character);
            }
 
            // Check for game over after handling death
@@ -4950,27 +5095,34 @@ class GameManager {
                this.gameManager.gameState.phase = 'ai';
                this.gameManager.uiManager.updatePhase('ai');
 
-               // Process AI effects at start of their turn WITH duration reduction
+               // --- Process AI character effects and cooldowns at start of AI turn ---
                this.gameManager.gameState.aiCharacters.forEach(aiChar => {
-                   if (!aiChar.isDead()) {
-                       // 1. Trigger onTurnStart for passives (using the current turn number)
-                       if (aiChar.passiveHandler && typeof aiChar.passiveHandler.onTurnStart === 'function') {
-                           try {
-                               console.log(`[GameManager executeAITurn] Calling onTurnStart for ${aiChar.name} (Instance: ${aiChar.instanceId || aiChar.id}), Turn: ${this.gameManager.gameState.turn}`);
-                               aiChar.passiveHandler.onTurnStart(aiChar, this.gameManager.gameState.turn);
-                           } catch (e) {
-                               console.error(`Error in onTurnStart for ${aiChar.name}'s passive:`, e);
-                           }
-                       }
+                   if (aiChar && !aiChar.isDead()) {
+                       // Process effects with duration reduction and resource regeneration
+                       aiChar.processEffects(true, true); // true, true -> Reduce duration and regenerate resources
                        
-                       // Process buffs/debuffs, reduce duration=true, regenerate resources
-                       aiChar.processEffects(true, true);
                        // Reduce ability cooldowns
                        aiChar.abilities.forEach(ability => ability.reduceCooldown());
-                       // Update UI after processing
+                       
+                       // Reduce consumable cooldowns if they exist
+                       if (aiChar.consumableCooldowns) {
+                           Object.keys(aiChar.consumableCooldowns).forEach(itemId => {
+                               if (aiChar.consumableCooldowns[itemId] > 0) {
+                                   aiChar.consumableCooldowns[itemId]--;
+                                   if (aiChar.consumableCooldowns[itemId] <= 0) {
+                                       delete aiChar.consumableCooldowns[itemId];
+                                       console.log(`[GameManager] ${aiChar.name}'s ${itemId} consumable cooldown expired`);
+                                   }
+                               }
+                           });
+                       }
+                       
+                       // Update UI for AI characters
                        this.gameManager.uiManager.updateCharacterUI(aiChar);
                    }
                });
+               console.log("[GameManager] AI character effects and cooldowns processed at start of AI turn");
+               // --- END AI character processing ---
 
                // Show planning phase overlay
                this.gameManager.uiManager.showPlanningPhase(true);
@@ -5086,6 +5238,15 @@ class GameManager {
                 // The target is untargetable because an enemy is forcing targeting
                 // This means we can only target allies/self for support abilities
                 return false;
+            }
+            
+            // Check if this target is untargetable by enemies (stealth effects)
+            if (target.isUntargetableByEnemies && target.isUntargetableByEnemies()) {
+                // Only block targeting if the caster is an enemy
+                const casterIsEnemy = caster.isAI !== target.isAI;
+                if (casterIsEnemy) {
+                    return false;
+                }
             }
             
             // Check for Heart Debuff forced targeting restrictions on the caster
@@ -5267,6 +5428,15 @@ class GameManager {
                 // The target is untargetable because an enemy is forcing targeting
                 // This means we can only target allies/self for support abilities
                 return false;
+            }
+            
+            // Check if this target is untargetable by enemies (stealth effects)
+            if (target.isUntargetableByEnemies && target.isUntargetableByEnemies()) {
+                // Only block targeting if the caster is an enemy
+                const casterIsEnemy = caster.isAI !== target.isAI;
+                if (casterIsEnemy) {
+                    return false;
+                }
             }
             
             // Check for Heart Debuff forced targeting restrictions on the caster
@@ -6306,6 +6476,70 @@ class GameManager {
             }
         }
 
+        // Update character image/video based on skin preferences
+        updateCharacterImage(character) {
+            const elementId = character.instanceId || character.id;
+            const characterElement = document.getElementById(`character-${elementId}`);
+            if (!characterElement) return;
+            
+            const imageContainer = characterElement.querySelector('.image-container');
+            if (!imageContainer) return;
+            
+            const currentMedia = imageContainer.querySelector('.character-image, .character-video');
+            if (!currentMedia) return;
+            
+            // Get the new media path
+            const newMediaSource = this.gameManager.getCharacterMediaPath(character.id);
+            const isVideo = newMediaSource && newMediaSource.endsWith('.mp4');
+            
+            // Check if we need to change media type
+            const currentIsVideo = currentMedia.tagName.toLowerCase() === 'video';
+            
+            if (isVideo !== currentIsVideo) {
+                // Need to replace the element
+                let newMediaElement;
+                
+                if (isVideo) {
+                    // Create video element
+                    newMediaElement = document.createElement('video');
+                    newMediaElement.autoplay = true;
+                    newMediaElement.muted = true;
+                    newMediaElement.loop = true;
+                    newMediaElement.className = 'character-image character-video';
+                    newMediaElement.src = newMediaSource;
+                    newMediaElement.alt = character.name;
+                    
+                    // Add fallback to image if video fails to load
+                    newMediaElement.addEventListener('error', () => {
+                        console.warn(`[UIManager] Video failed to load for ${character.name}, falling back to image`);
+                        const fallbackImage = document.createElement('img');
+                        fallbackImage.src = this.gameManager.getCharacterImagePath(character.id);
+                        fallbackImage.className = 'character-image';
+                        fallbackImage.alt = character.name;
+                        newMediaElement.replaceWith(fallbackImage);
+                    });
+                } else {
+                    // Create image element
+                    newMediaElement = document.createElement('img');
+                    newMediaElement.src = newMediaSource || this.gameManager.getCharacterImagePath(character.id);
+                    newMediaElement.className = 'character-image';
+                    newMediaElement.alt = character.name;
+                }
+                
+                // Copy event listeners
+                newMediaElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    this.showCharacterStatsMenu(character, e.clientX, e.clientY);
+                });
+                
+                // Replace the element
+                currentMedia.replaceWith(newMediaElement);
+            } else {
+                // Just update the source
+                currentMedia.src = newMediaSource;
+            }
+        }
+
         // Create character UI element
         createCharacterElement(character, isAI = false) {
             const charDiv = document.createElement('div');
@@ -6328,15 +6562,55 @@ class GameManager {
             const imageContainer = document.createElement('div');
             imageContainer.className = 'image-container';
             
-            const image = document.createElement('img');
-            // Use skin system for image path
-            const imageSource = this.gameManager.getCharacterImagePath(character.id) || character.image;
-            image.src = imageSource;
-            image.className = 'character-image';
-            image.alt = character.name;
+            // Get media path (video or image)
+            const mediaSource = this.gameManager.getCharacterMediaPath(character.id);
+            const isVideo = mediaSource && mediaSource.endsWith('.mp4');
             
-            // Add right-click context menu for character stats
-            image.addEventListener('contextmenu', (e) => {
+            let mediaElement;
+            if (isVideo) {
+                // Create video element
+                mediaElement = document.createElement('video');
+                mediaElement.autoplay = true;
+                mediaElement.muted = true;
+                mediaElement.loop = true;
+                mediaElement.className = 'character-image character-video';
+                mediaElement.src = mediaSource;
+                mediaElement.alt = character.name;
+                
+                // Add fallback to image if video fails to load
+                mediaElement.addEventListener('error', () => {
+                    console.warn(`[UIManager] Video failed to load for ${character.name}, falling back to image`);
+                    const fallbackImage = document.createElement('img');
+                    fallbackImage.src = this.gameManager.getCharacterImagePath(character.id);
+                    fallbackImage.className = 'character-image';
+                    fallbackImage.alt = character.name;
+                    
+                    // Add right-click context menu to fallback image
+                    fallbackImage.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        this.showCharacterStatsMenu(character, e.clientX, e.clientY);
+                    });
+                    
+                    mediaElement.replaceWith(fallbackImage);
+                    mediaElement = fallbackImage;
+                });
+            } else {
+                // Create image element
+                mediaElement = document.createElement('img');
+                mediaElement.src = mediaSource || this.gameManager.getCharacterImagePath(character.id) || character.image;
+                mediaElement.className = 'character-image';
+                mediaElement.alt = character.name;
+            }
+            
+            // Add right-click context menu for character stats to the image container
+            // This ensures it works for both images and videos
+            imageContainer.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.showCharacterStatsMenu(character, e.clientX, e.clientY);
+            });
+            
+            // Also add it to the media element for backward compatibility
+            mediaElement.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 this.showCharacterStatsMenu(character, e.clientX, e.clientY);
             });
@@ -6366,7 +6640,7 @@ class GameManager {
                 siegfriedPassiveDiv.style.display = 'none'; // Hide initially
             }
 
-            imageContainer.appendChild(image);
+            imageContainer.appendChild(mediaElement);
             imageContainer.appendChild(buffsDiv);
             imageContainer.appendChild(debuffsDiv);
             // Only append if created (i.e., if it's Cham Cham)
@@ -7965,6 +8239,15 @@ class GameManager {
                     character.passive.description = currentPassiveDesc;
                 }
                 console.log(`[UIManager] Updated Elphelt passive description for talents: ${currentPassiveDesc}`);
+            }
+            // Update Ayane's passive description for talents
+            else if (character.id === 'schoolgirl_ayane' && typeof window.updateAyanePassiveDescriptionForTalents === 'function') {
+                currentPassiveDesc = window.updateAyanePassiveDescriptionForTalents(character);
+                // Also update the character's passive object
+                if (character.passive) {
+                    character.passive.description = currentPassiveDesc;
+                }
+                console.log(`[UIManager] Updated Ayane passive description for talents: ${currentPassiveDesc}`);
             }
             
             // Use innerHTML to render potential talent spans

@@ -592,17 +592,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!talentDefinitions[childId]) continue; // Use talentDefinitions
                     
                     // If child not yet visited, add to next tier
-                    if (!visited.has(childId)) {
-                        // Initialize tier if needed
-                        if (!tiers[currentTier + 1]) tiers[currentTier + 1] = [];
-                        tiers[currentTier + 1].push(childId);
-                        nextTierNodes.push(childId);
-                        visited.add(childId);
-                        
-                        // Track branch information
-                        if (!branches[nodeId]) branches[nodeId] = [];
-                        branches[nodeId].push(childId);
-                    }
+                    if (!tiers[currentTier + 1]) tiers[currentTier + 1] = [];
+                    tiers[currentTier + 1].push(childId);
+                    nextTierNodes.push(childId);
+                    visited.add(childId);
+                    
+                    // Track branch information
+                    if (!branches[nodeId]) branches[nodeId] = [];
+                    branches[nodeId].push(childId);
                 }
             }
             
@@ -785,16 +782,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderConnectors(positions) {
-        // Create connector elements between linked talents using talentDefinitions
-        for (const talentId in talentDefinitions) { // Use talentDefinitions
-            const talent = talentDefinitions[talentId]; // Use talentDefinitions
+        // Create connector elements between linked talents
+        for (const talentId in talentDefinitions) {
+            const talent = talentDefinitions[talentId];
             if (!talent) continue;
             
             // Create connectors from parents to this talent
             if (talent.parents) {
                 talent.parents.forEach(parentId => {
-                    if (talentDefinitions[parentId]) { // Use talentDefinitions
-                        createConnector(talentDefinitions[parentId], talent, positions); // Use talentDefinitions
+                    if (talentDefinitions[parentId]) {
+                        createConnector(talentDefinitions[parentId], talent, positions);
                     }
                 });
             }
@@ -866,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTalentClick(talentId) {
-        const talent = talentDefinitions[talentId]; // Use talentDefinitions
+        const talent = talentDefinitions[talentId];
         if (!talent) return;
         
         const status = getTalentStatus(talentId);
@@ -937,14 +934,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function canDeselectTalent(talentId) {
         // Can't deselect if other selected talents depend on it
-        const talent = talentDefinitions[talentId]; // Use talentDefinitions
+        const talent = talentDefinitions[talentId];
         if (!talent || !talent.children) return true;
         
         // Check if any selected child would lose its requirement
         for (const childId of talent.children) {
             if (!selectedTalents[childId]) continue;
             
-            const childTalent = talentDefinitions[childId]; // Use talentDefinitions
+            const childTalent = talentDefinitions[childId];
             if (!childTalent || !childTalent.parents) continue;
             
             // If child has other selected parents, it's fine
@@ -972,10 +969,22 @@ document.addEventListener('DOMContentLoaded', () => {
             await firebaseDatabase.ref(`users/${userId}/characterTalents/${characterId}`).set(selectedTalents);
             hideLoading();
             showNotification("Talents saved successfully!", "success");
+
+            // Re-initialize the talent tree to ensure positions are re-read from the updated JSON
+            await initialize(); 
+
         } catch (error) {
             console.error("Error saving talents:", error);
             hideLoading();
             showNotification(`Error saving: ${error.message}`, "error");
+            
+            // Fallback: download file locally
+            try {
+                downloadTalentFile();
+                showNotification('💾 Downloaded talent file locally as fallback', 'warning');
+            } catch (downloadError) {
+                console.error('[Edit Mode] Fallback download failed:', downloadError);
+            }
         }
     }
 
@@ -1107,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 descriptionHtml = `${baseDesc.trim()}<br><span class="talent-effect ${talentClass}">${talentDesc.replace(talentMarker, 'Talent:').trim()}</span>`;
             }
-            elements.tooltipDescription.innerHTML = descriptionHtml.replace(/\n/g, '<br>'); // Replace \n with <br>
+            elements.tooltipDescription.innerHTML = descriptionHtml.replace(/\n/g, '<br>'); // Replace \n with \n
         }
 
         // Set powerful talent attribute
@@ -1390,7 +1399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getTalentStatus(talentId) {
-        const talent = talentDefinitions[talentId]; // Use talentDefinitions
+        const talent = talentDefinitions[talentId];
         if (!talent) return 'locked';
         
         // Check if talent is already selected
@@ -1409,7 +1418,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isStartingNode || hasSelectedParent) {
             // --- NEW: Check for powerful talent restriction ---
             if (talent.powerful) {
-                // Check if another powerful talent is already selected
                 const hasOtherPowerfulSelected = Object.keys(selectedTalents).some(selectedId => {
                     const otherTalent = talentDefinitions[selectedId];
                     return otherTalent && otherTalent.powerful && selectedId !== talentId;
@@ -1427,8 +1435,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateAllNodeStates() {
-        if (!talentDefinitions) return; // Check talentDefinitions
-        for (const talentId in talentDefinitions) { // Use talentDefinitions
+        if (!talentDefinitions) return;
+        for (const talentId in talentDefinitions) {
             updateNodeState(talentId);
         }
     }
@@ -1437,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const node = nodeElements[talentId];
         if (!node) return;
         
-        const talent = talentDefinitions[talentId]; // Use talentDefinitions
+        const talent = talentDefinitions[talentId];
         if (!talent) return;
         
         // Get current status
@@ -1550,8 +1558,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Group nodes by their tier
         const tiers = {};
         
-        for (const talentId in talentDefinitions) { // Use talentDefinitions
-            const talent = talentDefinitions[talentId]; // Use talentDefinitions
+        for (const talentId in talentDefinitions) {
+            const talent = talentDefinitions[talentId];
             if (!talent) continue;
             
             // Determine tier based on parents/children
@@ -1566,7 +1574,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Calculate tier based on parent tiers
                 const parentTiers = talent.parents
-                    .map(parentId => talentDefinitions[parentId]?.tier || 0) // Use talentDefinitions
+                    .map(parentId => talentDefinitions[parentId]?.tier || 0)
                     .filter(t => t !== undefined);
                 
                 tier = parentTiers.length ? Math.max(...parentTiers) + 1 : 1;
@@ -2458,4 +2466,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleEditMode = toggleEditMode;
 
 
-}); 
+});

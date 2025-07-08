@@ -406,10 +406,12 @@
       "difficulty": 1,
       "type": "challenge",
       "backgroundImage": "images/stages/test_background.png",
-      "backgroundMusic": null,
+      "backgroundMusic": "sounds/music/battle_theme.mp3",
       "unlockRequirements": [],
       "playerunlocked": false,
-      "isHidden": true
+      "isHidden": true,
+      "enemyPool": ["target_dummy"],
+      "enemyCount": 1
     },
     {
       "id": "cleansing_winds_challenge",

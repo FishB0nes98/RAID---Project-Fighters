@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spectral Daggers Visual Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #222; color: white; }
+        .character-container { 
+            position: relative; 
+            width: 100px; 
+            height: 100px; 
+            background: #444; 
+            border: 2px solid #fff; 
+            margin: 50px; 
+            display: inline-block;
+            overflow: visible;
+        }
+        .character-name { text-align: center; line-height: 100px; }
+        
+        /* Copy the spectral dagger styles */
+        .spectral-dagger {
+            position: absolute;
+            width: 20px;
+            height: 6px;
+            background: linear-gradient(90deg, transparent, #e879f9, #d946ef, #e879f9, transparent);
+            border-radius: 3px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 8px rgba(232, 121, 249, 0.8);
+            z-index: 95;
+            pointer-events: none;
+            filter: drop-shadow(0 0 5px rgba(232, 121, 249, 0.5));
+        }
+        
+        @keyframes spectral-dagger-float-left {
+            0% { transform: translateY(-50%) rotate(-10deg) translateX(0px); }
+            50% { transform: translateY(-50%) rotate(-10deg) translateX(-3px); }
+            100% { transform: translateY(-50%) rotate(-10deg) translateX(0px); }
+        }
+        
+        @keyframes spectral-dagger-float-right {
+            0% { transform: translateY(-50%) rotate(10deg) translateX(0px); }
+            50% { transform: translateY(-50%) rotate(10deg) translateX(3px); }
+            100% { transform: translateY(-50%) rotate(10deg) translateX(0px); }
+        }
+        
+        .test-dagger-emoji {
+            position: absolute;
+            font-size: 16px;
+            z-index: 999;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spectral Daggers Visual Test</h1>
+    
+    <div class="character-container" id="test-char">
+        <div class="character-name">AYANE</div>
+        <!-- Test daggers will be added here -->
+    </div>
+    
+    <button onclick="addTestDaggers()">Add Test Daggers</button>
+    <button onclick="removeTestDaggers()">Remove Test Daggers</button>
+    
+    <script>
+        function addTestDaggers() {
+            const charElement = document.getElementById('test-char');
+            
+            // Clear existing daggers
+            removeTestDaggers();
+            
+            // Add CSS gradient daggers
+            for (let i = 0; i < 2; i++) {
+                const dagger = document.createElement('div');
+                dagger.className = 'spectral-dagger test-dagger';
+                dagger.style.left = i === 0 ? '-25px' : '85px';
+                dagger.style.top = '30px';
+                
+                if (i === 0) {
+                    dagger.style.animation = 'spectral-dagger-float-left 2s ease-in-out infinite';
+                } else {
+                    dagger.style.animation = 'spectral-dagger-float-right 2s ease-in-out infinite';
+                }
+                
+                charElement.appendChild(dagger);
+                console.log('Added CSS dagger', i + 1);
+            }
+            
+            // Add emoji daggers for comparison
+            for (let i = 0; i < 2; i++) {
+                const dagger = document.createElement('div');
+                dagger.className = 'test-dagger-emoji test-dagger';
+                dagger.innerHTML = '🗡️';
+                dagger.style.left = i === 0 ? '-25px' : '85px';
+                dagger.style.top = '50px';
+                
+                charElement.appendChild(dagger);
+                console.log('Added emoji dagger', i + 1);
+            }
+        }
+        
+        function removeTestDaggers() {
+            const daggers = document.querySelectorAll('.test-dagger');
+            daggers.forEach(d => d.remove());
+        }
+    </script>
+</body>
+</html>

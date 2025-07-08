@@ -1,0 +1,532 @@
+/* Butterfly Vitality VFX */
+@keyframes butterfly-vitality-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-vitality-spiral {
+    0% {
+        transform: rotate(var(--angle)) translateX(0) rotate(calc(-1 * var(--angle)));
+        opacity: 0;
+    }
+    50% {
+        transform: rotate(calc(var(--angle) + 180deg)) translateX(40px) rotate(calc(-1 * (var(--angle) + 180deg)));
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(calc(var(--angle) + 360deg)) translateX(60px) rotate(calc(-1 * (var(--angle) + 360deg)));
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-vitality-text-glow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+        text-shadow: 0 0 20px #FFD700, 0 0 40px #FFD700, 0 0 60px #FFD700;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Butterfly Vampirism VFX - Pink Theme */
+@keyframes butterfly-vampirism-spiral {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(0);
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(calc(var(--angle) + 180deg)) translateX(30px) scale(1);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(calc(var(--angle) + 720deg)) translateX(60px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-vampirism-central-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-vampirism-flutter {
+    0% {
+        transform: translateY(0) scale(0.8) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1) rotate(5deg);
+    }
+    40% {
+        transform: translateY(-20px) rotate(15deg) scale(1.1);
+    }
+    60% {
+        transform: translateY(-30px) rotate(-10deg) scale(0.9);
+    }
+    80% {
+        transform: translateY(-40px) rotate(5deg) scale(1);
+    }
+    100% {
+        transform: translateY(-60px) scale(0.7) rotate(0deg);
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-wing-flap {
+    0% {
+        transform: rotateY(0deg) scaleX(1);
+    }
+    100% {
+        transform: rotateY(20deg) scaleX(0.8);
+    }
+}
+
+@keyframes butterfly-vampirism-heal-text-rise {
+    0% {
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 1;
+    }
+    40% {
+        transform: translate(-50%, -60%) scale(1.1);
+    }
+    80% {
+        transform: translate(-50%, -80%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -120%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-vampirism-wave-expand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+        box-shadow: 0 0 0 rgba(255, 105, 180, 0.8);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.6;
+        box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+        box-shadow: 0 0 40px rgba(255, 105, 180, 0.2);
+    }
+}
+
+@keyframes butterfly-vampirism-sparkle {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2) rotate(90deg);
+        opacity: 1;
+    }
+    40% {
+        transform: scale(1) rotate(180deg);
+        opacity: 0.9;
+    }
+    70% {
+        transform: scale(0.8) rotate(270deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes butterfly-vampirism-glow-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    70% {
+        opacity: 0.4;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.3);
+    }
+}
+
+/* Enhanced Butterfly Vitality VFX */
+@keyframes butterfly-vitality-swirl {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.2) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.butterfly-vitality-vfx-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.butterfly-vitality-vfx {
+    position: absolute;
+    width: 12px;
+    height: 8px;
+    background: linear-gradient(45deg, #FFD700, #FFA500, #FF69B4);
+    border-radius: 50% 10% 50% 10%;
+    animation: butterfly-vitality-flutter 2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.2s);
+}
+
+.butterfly-vitality-vfx::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -6px;
+    width: 8px;
+    height: 6px;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border-radius: 50% 10% 50% 10%;
+    transform: rotate(-20deg);
+}
+
+@keyframes butterfly-vitality-flutter {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(15px, -20px) rotate(10deg);
+    }
+    50% {
+        transform: translate(-10px, -40px) rotate(-5deg);
+    }
+    75% {
+        transform: translate(20px, -60px) rotate(15deg);
+    }
+}
+
+/* Talent Enhanced Glow Effect */
+.talent-enhanced-glow {
+    text-shadow: 0 0 15px #FFD700, 0 0 30px #FFA500, 0 0 45px #FF69B4;
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* Passive VFX Text Enhancement */
+.passive-vfx-text.talent-enhanced-glow {
+    animation: talent-enhanced-pulse 0.6s ease-out;
+}
+
+@keyframes talent-enhanced-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        text-shadow: 0 0 10px #FFD700;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        text-shadow: 0 0 20px #FFD700, 0 0 30px #FFA500, 0 0 40px #FF69B4;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        text-shadow: 0 0 15px #FFD700, 0 0 25px #FFA500;
+    }
+}
+
+/* Enhanced Butterfly Healing VFX */
+.butterfly-heal-vfx {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #32CD32;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 10px #32CD32, 0 0 20px #228B22;
+    animation: butterfly-heal-rise 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+@keyframes butterfly-heal-rise {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(0.8);
+        opacity: 0;
+    }
+    20% {
+        transform: translateX(-50%) translateY(-10px) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(-50%) translateY(-40px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-60px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Continuous Looping Animations for Dynamic VFX */
+
+/* Continuous butterfly wing flap animation */
+@keyframes butterfly-wing-flap-continuous {
+    0% {
+        transform: rotateY(0deg) scaleX(1);
+    }
+    25% {
+        transform: rotateY(15deg) scaleX(0.9);
+    }
+    50% {
+        transform: rotateY(30deg) scaleX(0.8);
+    }
+    75% {
+        transform: rotateY(15deg) scaleX(0.9);
+    }
+    100% {
+        transform: rotateY(0deg) scaleX(1);
+    }
+}
+
+/* Continuous floating and rotating animation for energy orbs */
+@keyframes energy-orb-float-continuous {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+    25% {
+        transform: translateY(-10px) rotate(90deg) scale(1.05);
+    }
+    50% {
+        transform: translateY(-20px) rotate(180deg) scale(1.1);
+    }
+    75% {
+        transform: translateY(-10px) rotate(270deg) scale(1.05);
+    }
+    100% {
+        transform: translateY(0) rotate(360deg) scale(1);
+    }
+}
+
+/* Continuous sparkle twinkle animation */
+@keyframes sparkle-twinkle-continuous {
+    0% {
+        opacity: 0.3;
+        transform: scale(0.8) rotate(0deg);
+    }
+    25% {
+        opacity: 0.8;
+        transform: scale(1.2) rotate(90deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.4) rotate(180deg);
+    }
+    75% {
+        opacity: 0.8;
+        transform: scale(1.2) rotate(270deg);
+    }
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8) rotate(360deg);
+    }
+}
+
+/* Continuous glow pulse animation */
+@keyframes glow-pulse-continuous {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+        transform: scale(0.95);
+    }
+    25% {
+        box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
+        transform: scale(1.05);
+    }
+    75% {
+        box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+        transform: scale(1);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+        transform: scale(0.95);
+    }
+}
+
+/* Continuous butterfly dance animation */
+@keyframes butterfly-dance-continuous {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    12.5% {
+        transform: translate(10px, -5px) rotate(15deg);
+    }
+    25% {
+        transform: translate(15px, -15px) rotate(30deg);
+    }
+    37.5% {
+        transform: translate(10px, -25px) rotate(15deg);
+    }
+    50% {
+        transform: translate(0, -30px) rotate(0deg);
+    }
+    62.5% {
+        transform: translate(-10px, -25px) rotate(-15deg);
+    }
+    75% {
+        transform: translate(-15px, -15px) rotate(-30deg);
+    }
+    87.5% {
+        transform: translate(-10px, -5px) rotate(-15deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+/* Continuous energy swirl animation */
+@keyframes energy-swirl-continuous {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    25% {
+        transform: rotate(90deg) scale(1.1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.2);
+    }
+    75% {
+        transform: rotate(270deg) scale(1.1);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+/* Continuous pulsing border effect */
+@keyframes border-pulse-continuous {
+    0% {
+        border: 2px solid rgba(255, 105, 180, 0.3);
+    }
+    25% {
+        border: 3px solid rgba(255, 105, 180, 0.5);
+    }
+    50% {
+        border: 4px solid rgba(255, 105, 180, 0.7);
+    }
+    75% {
+        border: 3px solid rgba(255, 105, 180, 0.5);
+    }
+    100% {
+        border: 2px solid rgba(255, 105, 180, 0.3);
+    }
+}
+
+/* Classes for applying continuous animations to VFX elements */
+.butterfly-continuous-flap {
+    animation: butterfly-wing-flap-continuous 1.5s ease-in-out infinite;
+}
+
+.energy-orb-continuous-float {
+    animation: energy-orb-float-continuous 3s ease-in-out infinite;
+}
+
+.sparkle-continuous-twinkle {
+    animation: sparkle-twinkle-continuous 2s ease-in-out infinite;
+}
+
+.glow-continuous-pulse {
+    animation: glow-pulse-continuous 2.5s ease-in-out infinite;
+}
+
+.butterfly-continuous-dance {
+    animation: butterfly-dance-continuous 4s ease-in-out infinite;
+}
+
+.energy-continuous-swirl {
+    animation: energy-swirl-continuous 3s linear infinite;
+}
+
+.border-continuous-pulse {
+    animation: border-pulse-continuous 2s ease-in-out infinite;
+}
+
+/* Ayane Passive Flash Animation */
+@keyframes ayane-passive-flash {
+    0% {
+        background: rgba(255, 215, 0, 0);
+        box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+    }
+    50% {
+        background: rgba(255, 215, 0, 0.3);
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+    }
+    100% {
+        background: rgba(255, 215, 0, 0);
+        box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+    }
+}
+
+.schoolgirl-ayane-passive-proc-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    border-radius: 8px;
+}

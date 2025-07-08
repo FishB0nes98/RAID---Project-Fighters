@@ -87,8 +87,8 @@ const stealthEffect = (caster, target) => {
             AssassinStealthAbilities.removeStealthVFX(target);
         },
         isDebuff: false,
-        isUntargetable: true,
-        description: "Untargetable by abilities."
+        isUntargetableByEnemies: true,
+        description: "Untargetable by enemies only."
     };
 
     // Create and apply the untargetable effect
@@ -101,7 +101,7 @@ const stealthEffect = (caster, target) => {
         untargetableBuff.isDebuff
     );
     
-    untargetableEffect.isUntargetable = untargetableBuff.isUntargetable;
+    untargetableEffect.isUntargetableByEnemies = untargetableBuff.isUntargetableByEnemies;
     untargetableEffect.onApply = untargetableBuff.onApply;
     untargetableEffect.onRemove = untargetableBuff.onRemove;
     untargetableEffect.setDescription(untargetableBuff.description);

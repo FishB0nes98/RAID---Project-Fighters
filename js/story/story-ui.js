@@ -64,6 +64,9 @@ class StoryUI {
         
         // Initialize character registry cache
         this.characterRegistry = null;
+
+        // NEW: Slideshow instance
+        this.storySlideshow = null;
     }
 
     /**
@@ -147,6 +150,14 @@ class StoryUI {
 
         // Setup inventory event handlers
         this.setupInventoryEventHandlers();
+
+        // Initialize StorySlideshow
+        if (typeof StorySlideshow !== 'undefined') {
+            this.storySlideshow = new StorySlideshow(this.storyManager, this);
+            console.log('[StoryUI] StorySlideshow initialized.');
+        } else {
+            console.warn('[StoryUI] StorySlideshow class not found. Slideshow functionality will be unavailable.');
+        }
 
         // Set global reference for inline events
         window.storyUI = this;
@@ -1040,6 +1051,14 @@ class StoryUI {
             case 'healing_and_recruit':
                 await this.showStageDetails(fullStageData); // Show base details
                 // Don't process effects here - wait for user to click "Continue Journey"
+                break;
+            case 'slideshow': // NEW: Handle slideshow stage type
+                if (this.storySlideshow) {
+                    this.storySlideshow.startSlideshow(fullStageData.slides);
+                } else {
+                    console.error('[StoryUI] StorySlideshow not initialized, cannot start slideshow.');
+                    this.showPopupMessage('Slideshow feature not available.', 'error');
+                }
                 break;
             default:
                 console.error("Unknown stage type:", stage.type);

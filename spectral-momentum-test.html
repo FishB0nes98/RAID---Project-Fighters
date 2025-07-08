@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectral Momentum Talent Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #222;
+            color: white;
+        }
+        .test-container {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .talent-enhanced {
+            color: #90EE90;
+            font-weight: bold;
+        }
+        .cooldown-info {
+            background: #444;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spectral Momentum Talent Test</h1>
+    
+    <div class="test-container">
+        <h2>Test: Spectral Momentum Talent</h2>
+        <p>This tests the new talent that reduces cooldowns when dealing >865 damage</p>
+        
+        <button onclick="testSpectralMomentum()">Test Spectral Momentum</button>
+        <button onclick="testLowDamage()">Test Low Damage (Should not trigger)</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div class="cooldown-info">
+            <h3>Ayane's Ability Cooldowns:</h3>
+            <div id="cooldownInfo">Loading...</div>
+        </div>
+        
+        <div class="log" id="testLog">
+            <div>Test log will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Mock window.gameManager for testing
+        if (!window.gameManager) {
+            window.gameManager = {
+                addLogEntry: function(message) {
+                    const log = document.getElementById('testLog');
+                    const entry = document.createElement('div');
+                    entry.innerHTML = message;
+                    log.appendChild(entry);
+                    log.scrollTop = log.scrollHeight;
+                },
+                uiManager: {
+                    updateCharacterUI: function(character) {
+                        updateCooldownInfo(character);
+                    }
+                }
+            };
+        }
+
+        let testCharacter = null;
+
+        // Initialize test character
+        function initializeTestCharacter() {
+            testCharacter = {
+                id: 'schoolgirl_ayane',
+                name: 'Schoolgirl Ayane',
+                abilities: [
+                    {
+                        id: 'schoolgirl_ayane_q',
+                        name: 'Butterfly Dagger',
+                        currentCooldown: 2,
+                        maxCooldown: 3
+                    },
+                    {
+                        id: 'schoolgirl_ayane_w',
+                        name: 'Butterfly Trail',
+                        currentCooldown: 1,
+                        maxCooldown: 2
+                    },
+                    {
+                        id: 'schoolgirl_ayane_e',
+                        name: 'Quick Reflexes',
+                        currentCooldown: 3,
+                        maxCooldown: 4
+                    }
+                ],
+                spectralMomentumConfig: {
+                    damageThreshold: 865,
+                    cooldownReduction: 2
+                }
+            };
+        }
+
+        function updateCooldownInfo(character) {
+            const info = document.getElementById('cooldownInfo');
+            let infoText = '';
+            character.abilities.forEach(ability => {
+                infoText += `${ability.name}: ${ability.currentCooldown}/${ability.maxCooldown} turns<br>`;
+            });
+            info.innerHTML = infoText;
+        }
+
+        function testSpectralMomentum() {
+            if (!testCharacter) {
+                initializeTestCharacter();
+            }
+
+            window.gameManager.addLogEntry('🧪 Testing Spectral Momentum with 1000 damage...');
+            
+            // Simulate high damage event
+            const event = new CustomEvent('character:damage-dealt', {
+                detail: {
+                    character: testCharacter,
+                    damage: 1000
+                }
+            });
+            
+            document.dispatchEvent(event);
+            updateCooldownInfo(testCharacter);
+        }
+
+        function testLowDamage() {
+            if (!testCharacter) {
+                initializeTestCharacter();
+            }
+
+            window.gameManager.addLogEntry('🧪 Testing with 500 damage (should not trigger)...');
+            
+            // Simulate low damage event
+            const event = new CustomEvent('character:damage-dealt', {
+                detail: {
+                    character: testCharacter,
+                    damage: 500
+                }
+            });
+            
+            document.dispatchEvent(event);
+            updateCooldownInfo(testCharacter);
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '<div>Test log cleared...</div>';
+        }
+
+        // Set up spectral momentum listener (simulating the talent system)
+        document.addEventListener('character:damage-dealt', function(event) {
+            const { character, damage } = event.detail;
+            
+            // Only process if this is our test character and has spectral momentum
+            if (character !== testCharacter || !character.spectralMomentumConfig) return;
+            
+            const config = character.spectralMomentumConfig;
+            
+            // Check if damage meets threshold
+            if (damage <= config.damageThreshold) {
+                window.gameManager.addLogEntry(`❌ Damage ${damage} is not above threshold ${config.damageThreshold}`);
+                return;
+            }
+            
+            // Reduce cooldowns for all abilities with active cooldowns
+            let abilitiesAffected = 0;
+            character.abilities.forEach(ability => {
+                if (ability.currentCooldown > 0) {
+                    const oldCooldown = ability.currentCooldown;
+                    ability.currentCooldown = Math.max(0, ability.currentCooldown - config.cooldownReduction);
+                    if (ability.currentCooldown < oldCooldown) {
+                        abilitiesAffected++;
+                    }
+                }
+            });
+            
+            if (abilitiesAffected > 0) {
+                window.gameManager.addLogEntry(`<span class="talent-enhanced">✨ ${character.name}'s Spectral Momentum reduces ${abilitiesAffected} ability cooldowns by ${config.cooldownReduction} turns!</span>`);
+                
+                // Update UI
+                if (window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
+                }
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            initializeTestCharacter();
+            updateCooldownInfo(testCharacter);
+        });
+    </script>
+</body>
+</html>

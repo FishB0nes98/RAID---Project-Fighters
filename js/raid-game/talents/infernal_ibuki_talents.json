@@ -1,0 +1,371 @@
+{
+    "talentTree": {
+        "infernal_ibuki_t1": {
+            "id": "infernal_ibuki_t1",
+            "name": "Elemental Mastery",
+            "description": "Increases Magical Damage by 60. Kunai Throw scales with an additional 50% of Magical Damage.",
+            "icon": "Icons/talents/infernal_ibuki_t1.png",
+            "unlocked": true,
+            "tier": 0,
+            "position": {
+                "x": 1040,
+                "y": 120
+            },
+            "children": [
+                "infernal_ibuki_t2",
+                "infernal_ibuki_t3"
+            ]
+        },
+        "infernal_ibuki_t2": {
+            "id": "infernal_ibuki_t2",
+            "name": "Kunai Mastery Awakening",
+            "description": "Kunai Throw cooldown is reduced to 0. Kunai Throw has a 17% chance to end your turn (does not call acted).",
+            "icon": "Icons/talents/infernal_ibuki_t2.png",
+            "unlocked": true,
+            "tier": 1,
+            "parents": [
+                "infernal_ibuki_t1"
+            ],
+            "position": {
+                "x": 1380,
+                "y": 120
+            },
+            "children": [
+                "infernal_ibuki_t16"
+            ]
+        },
+        "infernal_ibuki_t3": {
+            "id": "infernal_ibuki_t3",
+            "name": "Infernal Edge",
+            "description": "Gains 11% crit chance.",
+            "icon": "Icons/talents/infernal_ibuki_t3.png",
+            "unlocked": true,
+            "tier": 1,
+            "parents": [
+                "infernal_ibuki_t1"
+            ],
+            "position": {
+                "x": 1040,
+                "y": 470
+            },
+            "children": [
+                "infernal_ibuki_t4",
+                "infernal_ibuki_t6"
+            ]
+        },
+        "infernal_ibuki_t4": {
+            "id": "infernal_ibuki_t4",
+            "name": "Urarenge",
+            "description": "If Swift Strike Crits, it deals damage to the same target again (before dash to another target).",
+            "icon": "Icons/talents/infernal_ibuki_t4.png",
+            "unlocked": true,
+            "tier": 2,
+            "parents": [
+                "infernal_ibuki_t3"
+            ],
+            "position": {
+                "x": 860,
+                "y": 680
+            },
+            "children": [
+                "infernal_ibuki_t5",
+                "infernal_ibuki_t7"
+            ]
+        },
+        "infernal_ibuki_t5": {
+            "id": "infernal_ibuki_t5",
+            "name": "Vampiric Strikes",
+            "description": "Your critical strikes heal you for 25% of the damage dealt.",
+            "icon": "Icons/talents/infernal_ibuki_t5.png",
+            "unlocked": true,
+            "tier": 3,
+            "parents": [
+                "infernal_ibuki_t4"
+            ],
+            "position": {
+                "x": 690,
+                "y": 680
+            },
+            "children": [
+                "infernal_ibuki_t8"
+            ]
+        },
+        "infernal_ibuki_t6": {
+            "id": "infernal_ibuki_t6",
+            "name": "Savage Blade",
+            "description": "Ibuki starts with bonus 75 Phyiscal Damage.",
+            "icon": "Icons/talents/infernal_ibuki_t6.png",
+            "unlocked": true,
+            "tier": 2,
+            "parents": [
+                "infernal_ibuki_t3"
+            ],
+            "position": {
+                "x": 1230,
+                "y": 570
+            },
+            "children": [
+                "infernal_ibuki_t12"
+            ]
+        },
+        "infernal_ibuki_t12": {
+            "id": "infernal_ibuki_t12",
+            "name": "Shadow Strike",
+            "description": "Attacking a target with Smoke bomb debuff (Obscured) deals additional 200% Magical Damage to them.",
+            "icon": "Icons/talents/infernal_ibuki_t12.png",
+            "unlocked": true,
+            "tier": 3,
+            "parents": [
+                "infernal_ibuki_t6"
+            ],
+            "position": {
+                "x": 1230,
+                "y": 720
+            },
+            "children": [
+                "infernal_ibuki_t13",
+                "infernal_ibuki_t14"
+            ]
+        },
+        "infernal_ibuki_t14": {
+            "id": "infernal_ibuki_t14",
+            "name": "Doubled Physical Damage",
+            "description": "At turn 25, your physical damage is doubled permanently.",
+            "icon": "Icons/talents/infernal_ibuki_t14.png",
+            "unlocked": true,
+            "tier": 4,
+            "parents": [
+                "infernal_ibuki_t6"
+            ],
+            "position": {
+                "x": 1390,
+                "y": 470
+            },
+            "children": [
+                "infernal_ibuki_t15"
+            ]
+        },
+        "infernal_ibuki_t15": {
+            "id": "infernal_ibuki_t15",
+            "name": "Twin Shadow Strike",
+            "description": "While Shadow Veil is active, Kunai Throw (Q) throws two kunais instead of one.",
+            "icon": "Icons/talents/infernal_ibuki_t15.png",
+            "unlocked": true,
+            "tier": 5,
+            "parents": [
+                "infernal_ibuki_t14"
+            ],
+            "position": {
+                "x": 1680,
+                "y": 470
+            },
+            "children": [
+                "infernal_ibuki_t16"
+            ]
+        },
+        "infernal_ibuki_t7": {
+            "id": "infernal_ibuki_t7",
+            "name": "Swift Blade Expertise",
+            "description": "Swift Strike now benefits from Ibuki's Blade Expertise passive, gaining an additional 10% total damage per Blade Expertise stack.",
+            "icon": "Icons/talents/infernal_ibuki_t7.png",
+            "unlocked": true,
+            "tier": 3,
+            "parents": [
+                "infernal_ibuki_t4"
+            ],
+            "position": {
+                "x": 1030,
+                "y": 680
+            },
+            "children": [
+                "infernal_ibuki_t8"
+            ]
+        },
+        "infernal_ibuki_t8": {
+            "id": "infernal_ibuki_t8",
+            "name": "Critical Stack",
+            "description": "Your critical strikes now count 1 additional passive stack.",
+            "icon": "Icons/talents/infernal_ibuki_t8.png",
+            "unlocked": true,
+            "tier": 4,
+            "parents": [
+                "infernal_ibuki_t5",
+                "infernal_ibuki_t7"
+            ],
+            "position": {
+                "x": 860,
+                "y": 830
+            },
+            "children": [
+                "infernal_ibuki_t9",
+                "infernal_ibuki_t10"
+            ]
+        },
+        "infernal_ibuki_t9": {
+            "id": "infernal_ibuki_t9",
+            "name": "Critical Damage Boost",
+            "description": "Increases Critical Damage by 20%.",
+            "icon": "Icons/talents/infernal_ibuki_t9.png",
+            "unlocked": true,
+            "tier": 5,
+            "parents": [
+                "infernal_ibuki_t8"
+            ],
+            "position": {
+                "x": 690,
+                "y": 980
+            }
+        },
+        "infernal_ibuki_t10": {
+            "id": "infernal_ibuki_t10",
+            "name": "Blade Expertise Enhancement",
+            "description": "Increases Blade Expertise bonus by 5%.",
+            "icon": "Icons/talents/infernal_ibuki_t10.png",
+            "unlocked": true,
+            "tier": 5,
+            "parents": [
+                "infernal_ibuki_t8"
+            ],
+            "position": {
+                "x": 1030,
+                "y": 980
+            }
+        },
+        "infernal_ibuki_t11": {
+            "id": "infernal_ibuki_t11",
+            "name": "Kunai Barrage",
+            "description": "Kunai Throw now hits all enemies. It has 100% chance to hit the main target and 70% chance to hit all other enemies.",
+            "icon": "Icons/talents/infernal_ibuki_t11.png",
+            "unlocked": true,
+            "tier": 6,
+            "parents": [
+                "infernal_ibuki_t9",
+                "infernal_ibuki_t10"
+            ],
+            "powerful": true,
+            "position": {
+                "x": 860,
+                "y": 1130
+            }
+        },
+        "infernal_ibuki_t13": {
+            "id": "infernal_ibuki_t13",
+            "name": "Smoke Bomb Enhancement",
+            "description": "Smoke bomb damage increased by 50 and now scales with 20% of Ibuki's Magical Damage.",
+            "icon": "Icons/talents/infernal_ibuki_t13.png",
+            "unlocked": true,
+            "tier": 4,
+            "parents": [
+                "infernal_ibuki_t12"
+            ],
+            "position": {
+                "x": 1420,
+                "y": 720
+            },
+            "children": [
+                "infernal_ibuki_t19",
+                "infernal_ibuki_t20"
+            ]
+        },
+        "infernal_ibuki_t19": {
+            "id": "infernal_ibuki_t19",
+            "name": "Debilitating Strikes",
+            "description": "Ibuki deals 25% increased damage to targets with at least 1 debuff.",
+            "icon": "Icons/talents/infernal_ibuki_t19.png",
+            "unlocked": true,
+            "tier": 5,
+            "parents": [
+                "infernal_ibuki_t13"
+            ],
+            "position": {
+                "x": 1300,
+                "y": 980
+            }
+        },
+        "infernal_ibuki_t16": {
+            "id": "infernal_ibuki_t16",
+            "name": "Swift Shadow",
+            "description": "Decreases Shadow Veil cooldown by 2 turns.",
+            "icon": "Icons/abilities/shadow_step.png",
+            "unlocked": true,
+            "tier": 6,
+            "children": [
+                "infernal_ibuki_t17"
+            ],
+            "parents": [
+                "infernal_ibuki_t2",
+                "infernal_ibuki_t15"
+            ],
+            "position": {
+                "x": 1950,
+                "y": 300
+            }
+        },
+        "infernal_ibuki_t17": {
+            "id": "infernal_ibuki_t17",
+            "name": "Shadow Dance",
+            "description": "After Ibuki uses Q, E, or R, she has a 10% chance to enter Shadow Veil for 2 turns.",
+            "icon": "Icons/talents/infernal_ibuki_t17.png",
+            "unlocked": true,
+            "tier": 7,
+            "parents": [
+                "infernal_ibuki_t16"
+            ],
+            "position": {
+                "x": 2120,
+                "y": 300
+            },
+            "children": [
+                "infernal_ibuki_t18"
+            ]
+        },
+        "infernal_ibuki_t18": {
+            "id": "infernal_ibuki_t18",
+            "name": "Shadow Dance Mastery",
+            "description": "While in Shadow Dance, you have 100% dodge chance now instead of the original amount. You also gain 30% Lifesteal, 50% Crit Chance, and 50 HP Regen.",
+            "icon": "Icons/talents/infernal_ibuki_t18.png",
+            "unlocked": true,
+            "tier": 8,
+            "powerful": true,
+            "parents": [
+                "infernal_ibuki_t17"
+            ],
+            "position": {
+                "x": 2270,
+                "y": 300
+            }
+        },
+        "infernal_ibuki_t20": {
+            "id": "infernal_ibuki_t20",
+            "name": "Infernal Kunais",
+            "description": "Your Kunai Throw applies a Blazing debuff on the target. It is a permanent debuff but can be removed. It deals 100% of Ibuki's Magical Damage to the debuff holder every turn.",
+            "icon": "Icons/talents/infernal_ibuki_t20.png",
+            "unlocked": true,
+            "tier": 5,
+            "parents": [
+                "infernal_ibuki_t13"
+            ],
+            "position": {
+                "x": 1560,
+                "y": 980
+            }
+        },
+        "infernal_ibuki_t21": {
+            "id": "infernal_ibuki_t21",
+            "name": "Debilitating Kunais",
+            "description": "Enemy characters with 3 or more debuffs are auto-targeted by Ibuki's Swift Strike at the start of each turn.",
+            "icon": "Icons/talents/infernal_ibuki_t21.png",
+            "unlocked": true,
+            "tier": 6,
+            "powerful": true,
+            "parents": [
+                "infernal_ibuki_t19",
+                "infernal_ibuki_t20"
+            ],
+            "position": {
+                "x": 1440,
+                "y": 1130
+            }
+        }
+    }
+}

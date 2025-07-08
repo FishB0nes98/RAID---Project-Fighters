@@ -25,7 +25,8 @@ class Character {
             maxMana: stats.maxMana || stats.mana || 100,
             currentMana: stats.currentMana || stats.mana || 100,
             hpPerTurn: stats.hpPerTurn || 0,
-            manaPerTurn: stats.manaPerTurn || 0
+            manaPerTurn: stats.manaPerTurn || 0,
+            damageMultiplier: stats.damageMultiplier || 1.0  // NEW: Global damage multiplier
         };
 
         // Only add currentSunlight for Kotal Kahn
@@ -81,6 +82,7 @@ class Character {
             manaPerTurn: 0,
             maxSunlight: 0,
             currentSunlight: 0,
+            damageMultiplier: 0  // NEW: Global damage multiplier bonus
         };
     }
 
@@ -285,23 +287,60 @@ class Character {
     }
 
     applyStatModification(statName, operation, value) {
+        // Safety check to prevent NaN values
+        if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
+            console.error(`[Character ${this.name}] Invalid value for stat modification: ${value}, skipping modification for ${statName}`);
+            return;
+        }
+        
         // Apply modification based on operation
         switch (operation) {
             case 'add':
                 // Apply additive change to both base and current stats for recalculation consistency
-                this.baseStats[statName] = (this.baseStats[statName] || 0) + value;
+                const newAddValue = (this.baseStats[statName] || 0) + value;
+                if (isNaN(newAddValue) || !isFinite(newAddValue)) {
+                    console.error(`[Character ${this.name}] ADD operation resulted in NaN for ${statName}, skipping`);
+                    return;
+                }
+                this.baseStats[statName] = newAddValue;
                 // We primarily modify baseStats; recalculateStats will handle applying it to current stats
                 break;
             case 'subtract':
-                this.baseStats[statName] = (this.baseStats[statName] || 0) - value;
+                const newSubValue = (this.baseStats[statName] || 0) - value;
+                if (isNaN(newSubValue) || !isFinite(newSubValue)) {
+                    console.error(`[Character ${this.name}] SUBTRACT operation resulted in NaN for ${statName}, skipping`);
+                    return;
+                }
+                this.baseStats[statName] = newSubValue;
                 break;
             case 'multiply': // Usually applied as a percentage bonus in recalc
-                console.warn(`[Character ${this.name}] Talent operation 'multiply' for stat ${statName} should typically be handled via percentage buffs/debuffs or direct base stat setting.`);
-                // If truly needed, modify base stat directly:
-                // this.baseStats[statName] = (this.baseStats[statName] || 0) * value;
+                // Handle multiply operation properly for damage multipliers
+                if (statName === 'damageMultiplier') {
+                    // For damage multiplier, we want to multiply the base value (1.0) by the modifier
+                    const newMulValue = (this.baseStats[statName] || 1.0) * value;
+                    if (isNaN(newMulValue) || !isFinite(newMulValue)) {
+                        console.error(`[Character ${this.name}] MULTIPLY operation resulted in NaN for ${statName}, skipping`);
+                        return;
+                    }
+                    this.baseStats[statName] = newMulValue;
+                    console.log(`[Character ${this.name}] Applied multiply operation: ${statName} = ${this.baseStats[statName] || 1.0} * ${value} = ${newMulValue}`);
+                } else {
+                    console.warn(`[Character ${this.name}] Talent operation 'multiply' for stat ${statName} should typically be handled via percentage buffs/debuffs or direct base stat setting.`);
+                    // If truly needed, modify base stat directly:
+                    const newMulValue = (this.baseStats[statName] || 0) * value;
+                    if (isNaN(newMulValue) || !isFinite(newMulValue)) {
+                        console.error(`[Character ${this.name}] MULTIPLY operation resulted in NaN for ${statName}, skipping`);
+                        return;
+                    }
+                    this.baseStats[statName] = newMulValue;
+                }
                 break;
             case 'set':
                 // Direct set (use cautiously - overwrites base)
+                if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
+                    console.error(`[Character ${this.name}] SET operation attempted with invalid value: ${value} for ${statName}, skipping`);
+                    return;
+                }
                 this.baseStats[statName] = value;
                 break;
             default:
@@ -419,12 +458,9 @@ class Character {
             console.log(`[RecalcStats] Preserving desert heat mana regen: ${preservedStageValues.manaPerTurn} (original: ${preservedStageValues.originalManaPerTurn})`);
         }
         
-        // --- NEW: Preserve healingPower from talents ---
-        if (this.stats.healingPower !== undefined && this.stats.healingPower > 0) {
-            preservedStageValues.healingPower = this.stats.healingPower;
-            console.log(`[RecalcStats] Preserving talent healingPower: ${preservedStageValues.healingPower}`);
-        }
-        // --- END NEW ---
+        // --- REMOVED: Healing power preservation that was causing stacking issues ---
+        // The healing power should be reset to base values and then reapplied from buffs
+        // --- END REMOVED ---
         
         // Check if character has Firebase stats that should be preserved during base stat reset
         const hasFirebaseStats = this.hellEffects || this._firebaseStatsLoaded;
@@ -481,15 +517,9 @@ class Character {
             console.log(`[RecalcStats] Restored desert heat mana regen: ${this.stats.manaPerTurn}`);
         }
         
-        // --- NEW: Restore healingPower from talents ---
-        if (preservedStageValues.healingPower !== undefined) {
-            // Only restore if the preserved value is greater than the current value
-            if (preservedStageValues.healingPower > (this.stats.healingPower || 0)) {
-                this.stats.healingPower = preservedStageValues.healingPower;
-                console.log(`[RecalcStats] Restored talent healingPower: ${this.stats.healingPower}`);
-            }
-        }
-        // --- END NEW ---
+        // --- REMOVED: Healing power restoration that was causing stacking issues ---
+        // The healing power should be reset to base values and then reapplied from buffs
+        // --- END REMOVED ---
         
         // Continue with the rest of the recalculation process...
         
@@ -921,6 +951,26 @@ class Character {
         if (this.id === 'schoolboy_shoma' && typeof window.applyDebuffResonance === 'function') {
             window.applyDebuffResonance(this);
         }
+        
+        // === DEADLY POWER SPECIAL HANDLING ===
+        // Force 100% crit chance if deadly power buff is active
+        const deadlyPowerBuff = this.buffs.find(buff => buff.id === 'deadly_power_crit_buff');
+        if (deadlyPowerBuff) {
+            this.stats.critChance = 1.0;
+            console.log(`[DeadlyPower] Forced crit chance to 100% for ${this.name}`);
+        }
+        
+        // === DEADLY POWER TALENT CHECK ===
+        // Check Deadly Power state after stats have been recalculated
+        if (this.deadlyPowerConfig && window.talentManager) {
+            window.talentManager.checkDeadlyPowerState(this);
+        }
+        
+        // Dispatch stats changed event for other systems
+        const statsChangedEvent = new CustomEvent('character:stats-changed', {
+            detail: { character: this, context: callerContext }
+        });
+        document.dispatchEvent(statsChangedEvent);
     }
 
     // Add an ability to the character
@@ -928,6 +978,53 @@ class Character {
         // Assign this character as the owner of the ability instance
         ability.character = this;
         this.abilities.push(ability);
+    }
+
+    // Dynamically add Fan of Knives ability to a character from Shadow Assassin Female's data
+    async addFanOfKnivesAbility(keybind = 'T') {
+        try {
+            // Check if already has the ability
+            if (this.abilities.find(a => a.id === 'fan_of_knives')) {
+                console.log(`[Character] ${this.name} already has Fan of Knives ability`);
+                return;
+            }
+
+            // Load Shadow Assassin Female's ability data
+            const response = await fetch('js/raid-game/characters/shadow_assassin_female.json');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch shadow_assassin_female.json: ${response.status}`);
+            }
+            
+            const shadowAssassinData = await response.json();
+            const fanOfKnivesData = shadowAssassinData.abilities.find(ability => ability.id === 'fan_of_knives');
+            
+            if (!fanOfKnivesData) {
+                throw new Error('Fan of Knives ability not found in Shadow Assassin Female data');
+            }
+
+            // Create a copy of the ability data and set the keybind
+            const abilityData = { ...fanOfKnivesData };
+            abilityData.keybind = keybind;
+            
+            // Create the ability using AbilityFactory
+            const ability = AbilityFactory.createAbility(abilityData);
+            if (ability) {
+                this.addAbility(ability);
+                console.log(`[Character] Successfully added Fan of Knives ability to ${this.name} with keybind ${keybind}`);
+                
+                // Trigger UI update to show new ability
+                document.dispatchEvent(new CustomEvent('abilityAdded', {
+                    detail: { character: this, ability: ability }
+                }));
+                
+                return true;
+            } else {
+                throw new Error('Failed to create Fan of Knives ability');
+            }
+        } catch (error) {
+            console.error(`[Character] Error adding Fan of Knives ability to ${this.name}:`, error);
+            return false;
+        }
     }
 
     // Use an ability by its index
@@ -1423,50 +1520,15 @@ class Character {
                 console.error(`[DODGE EVENT ERROR] Failed to dispatch dodge event:`, error);
             }
             
-                    // Trigger the dodge handler in passive for Nimble Strikes talent
+        // Trigger the dodge handler in passive for abilities and talents
         if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
+            console.log(`[DODGE EVENT] Calling onDodge for ${this.name} with passive handler`);
             this.passiveHandler.onDodge(this, caster);
+        } else {
+            console.log(`[DODGE EVENT] No passive handler or onDodge method found for ${this.name}`);
+            console.log(`[DODGE EVENT] - passiveHandler exists: ${!!this.passiveHandler}`);
+            console.log(`[DODGE EVENT] - onDodge method exists: ${this.passiveHandler && typeof this.passiveHandler.onDodge === 'function'}`);
         }
-        
-        // <<< NEW: Apply Schoolgirl Ayane's Combat Reflexes Passive >>>
-        if (this.id === 'schoolgirl_ayane') {
-            const damageBonus = 200; // +200 Physical Damage
-            const buffDuration = 5; // 5 turns
-            
-            // Create Combat Reflexes buff
-            if (window.Effect) {
-                const combatReflexesBuff = new window.Effect(
-                    'combat_reflexes_damage',
-                    'Combat Reflexes',
-                    'Icons/buffs/combat_reflexes.png',
-                    buffDuration,
-                    null,
-                    false
-                ).setDescription(`+${damageBonus} Physical Damage from dodging an attack`);
-                
-                combatReflexesBuff.apply = function(character) {
-                    character.stats.physicalDamage += damageBonus;
-                };
-                
-                combatReflexesBuff.remove = function(character) {
-                    character.stats.physicalDamage -= damageBonus;
-                };
-                
-                this.addBuff(combatReflexesBuff);
-                
-                if (window.gameManager) {
-                    window.gameManager.addLogEntry(`${this.name}'s Combat Reflexes activates! +${damageBonus} Physical Damage for ${buffDuration} turns!`, 'ayane');
-                }
-                
-                // Track passive statistics
-                if (window.trackCombatReflexesPassiveStats) {
-                    window.trackCombatReflexesPassiveStats(this, damageBonus);
-                }
-                
-                console.log(`[Combat Reflexes] Applied +${damageBonus} Physical Damage buff to ${this.name} for ${buffDuration} turns`);
-            }
-        }
-        // <<< END NEW >>>
             
             // Check if this is Zoey for custom VFX
             if (this.id === 'zoey' && typeof window.showZoeyDodgeVFX === 'function') {
@@ -1576,11 +1638,11 @@ class Character {
         // --- END NEW ---
 
         // Check for critical hit
-        let isCritical = false;
+        let isCritical = options.isCritical || false;
         
         // --- Add caster check for critical hit calculation --- 
         const critSource = caster || this.isDamageSource; // Prioritize direct caster
-        if (critSource && Math.random() < (critSource.stats.critChance || 0)) {
+        if (!options.isCritical && critSource && Math.random() < (critSource.stats.critChance || 0)) {
             let critDamageMultiplier = critSource.stats.critDamage || 1.5; // Use source's crit damage
             
             // --- DEBUG: Check critDamageMultiplier --- 
@@ -2428,6 +2490,20 @@ class Character {
             // Add log entry for enhanced damage
             if (window.gameManager && window.gameManager.addLogEntry) {
                 window.gameManager.addLogEntry(`${this.name}'s enchanted weapon deals +${Math.round(this.enchantedWeaponBonus * 100)}% physical damage!`, 'stage-effect enemy-enchant');
+            }
+        }
+        // --- END NEW ---
+
+        // --- NEW: Apply global damage multiplier stat if exists ---
+        if (this.stats.damageMultiplier && this.stats.damageMultiplier !== 1) {
+            const originalDamage = finalDamage;
+            finalDamage = Math.floor(finalDamage * this.stats.damageMultiplier);
+            
+            console.log(`[Damage Multiplier] ${this.name} applies damage multiplier ${this.stats.damageMultiplier}: ${originalDamage} → ${finalDamage}`);
+            
+            // Add log entry for damage multiplier
+            if (window.gameManager && window.gameManager.addLogEntry) {
+                window.gameManager.addLogEntry(`${this.name}'s mastery increases damage by ${Math.round((this.stats.damageMultiplier - 1) * 100)}%!`, 'talent-effect');
             }
         }
         // --- END NEW ---
@@ -3320,7 +3396,31 @@ class Character {
         let buffAppliedSuccessfully = false;
         
         if (existingBuff) {
-            // ... (handle existing buff: stacks, duration refresh) ...
+            // Handle existing buff: stacks, duration refresh
+            if (existingBuff.maxStacks && existingBuff.currentStacks < existingBuff.maxStacks) {
+                // Stackable buff - increase stacks
+                existingBuff.currentStacks = (existingBuff.currentStacks || 1) + 1;
+                console.log(`${buffName} stacks increased to ${existingBuff.currentStacks}/${existingBuff.maxStacks} for ${this.name}`);
+                
+                // Update stat modifiers if they exist
+                if (existingBuff.statModifiers) {
+                    existingBuff.statModifiers.forEach(modifier => {
+                        if (modifier.stackable) {
+                            modifier.value = modifier.baseValue * existingBuff.currentStacks;
+                        }
+                    });
+                }
+            } else {
+                // Non-stackable buff or at max stacks - refresh duration
+                existingBuff.duration = buff.duration;
+                console.log(`${buffName} duration refreshed to ${buff.duration} turns for ${this.name}`);
+            }
+            
+            // Update description if the buff has an updateDescription method
+            if (typeof existingBuff.updateDescription === 'function') {
+                existingBuff.updateDescription();
+            }
+            
             this.recalculateStats('addBuff-refresh'); // Recalculate after refreshing existing
             buffAppliedSuccessfully = true;
         } else {
@@ -3973,9 +4073,10 @@ class Character {
 
             // Remove if expired (duration > 0 and reaches 0)
             if (debuff.duration === 0) { // Check for exactly 0, ignoring permanent -1
-                // <<< MODIFICATION: Call onRemove directly >>>
                 const debuffName = debuff.name || debuff.id;
                 console.log(`[DEBUG] Debuff ${debuffName} on ${this.name} expired.`);
+                
+                // Call the debuff's specific onRemove function *before* removing it
                 if (typeof debuff.onRemove === 'function') {
                     try {
                         console.log(`[DEBUG] Calling onRemove for ${debuffName}`);
@@ -3984,9 +4085,9 @@ class Character {
                         console.error(`Error executing onRemove for debuff ${debuffName}:`, error);
                     }
                 }
+                
                 // Remove from the array
                 this.debuffs.splice(i, 1);
-                // <<< END MODIFICATION >>>
                 
                 // Log expiration
                 try {
@@ -4120,6 +4221,22 @@ class Character {
         const theirTeam = otherCharacter.isAI ? 'ai' : 'player';
         
         return myTeam !== theirTeam;
+    }
+
+    // Check if this character is untargetable by enemies only (stealth effects)
+    isUntargetableByEnemies() {
+        // Check both buffs and debuffs arrays for stealth effects
+        const allEffects = [...this.buffs, ...this.debuffs];
+        if (allEffects.some(effect => effect.isUntargetableByEnemies === true)) {
+            return true;
+        }
+        
+        // Check for effects that have isUntargetableByEnemies in their effects object
+        if (allEffects.some(effect => effect.effects && effect.effects.isUntargetableByEnemies === true)) {
+            return true;
+        }
+        
+        return false;
     }
 
     // Freeze debuff helper methods
@@ -4402,11 +4519,23 @@ class Character {
         dodgeVfx.appendChild(dodgeParticles);
         
         // Create afterimage effect
-        const characterImage = charElement.querySelector('.character-image');
-        if (characterImage) {
+        const characterMedia = charElement.querySelector('.character-image, .character-video');
+        if (characterMedia) {
             const afterimage = document.createElement('div');
             afterimage.className = 'dodge-afterimage';
-            afterimage.style.backgroundImage = `url(${characterImage.src})`;
+            
+            // Handle both image and video elements
+            if (characterMedia.tagName.toLowerCase() === 'video') {
+                // For video, we need to capture the current frame or use a poster
+                // For now, use a solid color background as afterimage for videos
+                afterimage.style.background = `linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%)`;
+                afterimage.style.backdropFilter = 'blur(2px)';
+                afterimage.style.webkitBackdropFilter = 'blur(2px)';
+            } else {
+                // For images, use the traditional background image approach
+                afterimage.style.backgroundImage = `url(${characterMedia.src})`;
+            }
+            
             dodgeVfx.appendChild(afterimage);
         }
         
@@ -4877,7 +5006,10 @@ class Ability {
             'tags', 'numberOfBeamsMin', 'numberOfBeamsMax', 'doesNotEndTurn', 
             // --- NEW: Ensure targeting-related flags are preserved ---
             'canTargetEnemies', 'canTargetAllies',
-            'debuffEffect' // ADDED: Ensure debuffEffect is copied during clone
+            'debuffEffect', // ADDED: Ensure debuffEffect is copied during clone
+            'bonusMultiplier', // ADDED: Ensure bonusMultiplier is copied during clone (needed for talent modifications)
+            'additionalPhysicalScaling', // ADDED: Ensure additionalPhysicalScaling is copied during clone (needed for talent modifications)
+            'dodgeProcChance' // ADDED: Ensure dodgeProcChance is copied during clone (needed for talent modifications)
         ];
         
         for (const prop of additionalProps) {
@@ -5662,6 +5794,7 @@ const AbilityFactory = {
                 if (PassiveHandlerClass && typeof PassiveHandlerClass === 'function') {
                     character.passiveHandler = new PassiveHandlerClass();
                     console.log(`[AbilityFactory] Attached ${passiveClassName} handler to ${character.name}`);
+                    console.log(`[AbilityFactory] Passive handler has onDodge: ${typeof character.passiveHandler.onDodge === 'function'}`);
                      // Initialize the passive handler (if it has an initialize method)
                      if (typeof character.passiveHandler.initialize === 'function') {
                          console.log(`[AbilityFactory] Initializing passive handler for ${character.name}`);
@@ -6221,7 +6354,10 @@ const AbilityFactory = {
                     // Calculate heal amount: fixed + MD scaling
                     let healAmount = healingConfig.fixedAmount || 0;
                     if (healingConfig.magicalDamagePercent) {
-                        healAmount += Math.floor((caster.stats.magicalDamage || 0) * healingConfig.magicalDamagePercent);
+                        const magicalDamage = caster.stats.magicalDamage || 0;
+                        const bonus = Math.floor(magicalDamage * healingConfig.magicalDamagePercent);
+                        healAmount += bonus;
+                        console.log(`[Circle Heal Debug] Caster: ${caster.name}, MD: ${magicalDamage}, Percent: ${healingConfig.magicalDamagePercent}, Bonus: ${bonus}, Total: ${healAmount}`);
                     }
                     
                     // Apply the healing with abilityId for statistics
@@ -6259,7 +6395,10 @@ const AbilityFactory = {
                 // Calculate heal amount: fixed + MD scaling
                 let healAmount = healingConfig.fixedAmount || 0;
                 if (healingConfig.magicalDamagePercent) {
-                    healAmount += Math.floor((caster.stats.magicalDamage || 0) * healingConfig.magicalDamagePercent);
+                    const magicalDamage = caster.stats.magicalDamage || 0;
+                    const bonus = Math.floor(magicalDamage * healingConfig.magicalDamagePercent);
+                    healAmount += bonus;
+                    console.log(`[Single Heal Debug] Caster: ${caster.name}, MD: ${magicalDamage}, Percent: ${healingConfig.magicalDamagePercent}, Bonus: ${bonus}, Total: ${healAmount}`);
                 }
                 
                 // Apply the healing with abilityId for statistics

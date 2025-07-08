@@ -60,6 +60,9 @@
                 <button id="save-talents-button" class="rpg-button primary">
                     <i class="fas fa-save"></i> Save
                 </button>
+                <button id="admin-grant-talents-button" class="rpg-button admin" style="display:none;">
+                    <i class="fas fa-gem"></i> Grant 15 Talent Points
+                </button>
                 <button id="back-button" class="rpg-button secondary">
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
@@ -119,5 +122,25 @@
     <script src="js/raid-game/character-xp-manager.js"></script>
     <script src="js/raid-game/controller-manager.js"></script>
     <script src="js/raid-game/talents.js"></script>
+    <script>
+    // Show admin button only for FishB0nes98
+    document.addEventListener('DOMContentLoaded', function() {
+        const adminButton = document.getElementById('admin-grant-talents-button');
+        // Wait for Firebase Auth to be ready
+        function showIfAdmin() {
+            if (typeof firebaseAuth !== 'undefined' && firebaseAuth.currentUser && firebaseAuth.currentUser.displayName === 'FishB0nes98') {
+                adminButton.style.display = '';
+            }
+        }
+        if (typeof firebaseAuth !== 'undefined') {
+            firebaseAuth.onAuthStateChanged(showIfAdmin);
+        }
+        adminButton.addEventListener('click', function() {
+            if (typeof window.grantTempTalentPoints === 'function') {
+                window.grantTempTalentPoints(15);
+            }
+        });
+    });
+    </script>
 </body>
 </html> 

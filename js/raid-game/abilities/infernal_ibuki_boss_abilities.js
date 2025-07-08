@@ -279,12 +279,12 @@ const shadowStepEffect = (caster, target) => {
         },
         isDebuff: false,
         // --- Key property for untargetability ---
-        isUntargetable: true,
-        description: "Untargetable by abilities."
+        isUntargetableByEnemies: true,
+        description: "Untargetable by enemies only."
     };
 
     const buff = new Effect(buffData.id, buffData.name, buffData.icon, buffData.duration, buffData.effect, buffData.isDebuff);
-    buff.isUntargetable = buffData.isUntargetable; // Add the custom property
+    buff.isUntargetableByEnemies = buffData.isUntargetableByEnemies; // Add the custom property
     buff.onApply = buffData.onApply;
     buff.onRemove = buffData.onRemove;
     buff.setDescription(buffData.description);

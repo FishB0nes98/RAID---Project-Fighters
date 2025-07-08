@@ -2078,4 +2078,4 @@ class Stage {
 }
 
 // Global Stage Manager instance
-const stageManager = new StageManager(); 
+const stageManager = new StageManager();

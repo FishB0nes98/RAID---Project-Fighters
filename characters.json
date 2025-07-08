@@ -86,7 +86,7 @@
   },
   {
     "name": "Necromatic Corrupted Bear",
-    "image": "images/characters/necromatic_corrupted_bear.png",
+    "image": "Loading Screen/necromatic_corrupted_bear.png",
     "tags": ["Beast", "Undead", "AI Only"]
   }
 

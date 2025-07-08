@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Spectral Daggers with Buffs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .debug-container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #4a4a4a;
+        }
+        
+        .debug-title {
+            color: #ff6b6b;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stats-display {
+            background-color: #3a3a3a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .button:hover {
+            background-color: #45a049;
+        }
+        
+        .button.danger {
+            background-color: #f44336;
+        }
+        
+        .button.danger:hover {
+            background-color: #da190b;
+        }
+        
+        .log-container {
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+        }
+        
+        .log-debug { color: #888; }
+        .log-info { color: #4fc3f7; }
+        .log-warn { color: #ffb74d; }
+        .log-error { color: #f48fb1; }
+        .log-success { color: #81c784; }
+        
+        .spectral-daggers-active {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .spectral-daggers-inactive {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug - Spectral Daggers with Buffs</h1>
+    
+    <div class="debug-container">
+        <div class="debug-title">Test Scenario</div>
+        <p>This test checks if Spectral Daggers talent activates when Ayane's dodge chance exceeds 50% through buffs.</p>
+        <p>Base dodge chance: 30% | Buff dodge chance: +25% | Total: 55% (should activate)</p>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">Character Stats</div>
+        <div class="stats-display" id="stats-display">
+            <div>Base Dodge Chance: <span id="base-dodge">0%</span></div>
+            <div>Buff Dodge Chance: <span id="buff-dodge">0%</span></div>
+            <div>Total Dodge Chance: <span id="total-dodge">0%</span></div>
+            <div>Spectral Daggers Status: <span id="spectral-status">Inactive</span></div>
+        </div>
+        
+        <button class="button" onclick="setupCharacter()">Setup Ayane</button>
+        <button class="button" onclick="addDodgeBuff()">Add Dodge Buff (+25%)</button>
+        <button class="button" onclick="removeDodgeBuff()">Remove Dodge Buff</button>
+        <button class="button" onclick="checkSpectralDaggers()">Check Spectral Daggers</button>
+        <button class="button danger" onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">Debug Logs</div>
+        <div class="log-container" id="log-container"></div>
+    </div>
+
+    <!-- Include necessary scripts -->
+    <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/talent-manager.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_ayane_abilities.js"></script>
+    
+    <script>
+        let testCharacter = null;
+        let talentManager = null;
+        
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Also log to console
+            console.log(`[SpectralDaggersDebug] ${message}`);
+        }
+        
+        function updateStatsDisplay() {
+            if (!testCharacter) return;
+            
+            const baseDodge = testCharacter.stats?.dodgeChance || 0;
+            let buffDodge = 0;
+            let totalDodge = baseDodge;
+            
+            // Calculate buff dodge
+            if (testCharacter.buffs && testCharacter.buffs.length > 0) {
+                testCharacter.buffs.forEach(buff => {
+                    if (buff.statModifiers && buff.statModifiers.dodgeChance) {
+                        const modifier = buff.statModifiers.dodgeChance;
+                        if (modifier.operation === 'add') {
+                            buffDodge += modifier.value;
+                            totalDodge += modifier.value;
+                        } else if (modifier.operation === 'multiply') {
+                            totalDodge *= modifier.value;
+                        }
+                    }
+                });
+            }
+            
+            document.getElementById('base-dodge').textContent = `${(baseDodge * 100).toFixed(1)}%`;
+            document.getElementById('buff-dodge').textContent = `${(buffDodge * 100).toFixed(1)}%`;
+            document.getElementById('total-dodge').textContent = `${(totalDodge * 100).toFixed(1)}%`;
+            
+            // Check spectral daggers status
+            const isActive = testCharacter.spectralDaggersConfig?.active || false;
+            document.getElementById('spectral-status').textContent = isActive ? 'Active' : 'Inactive';
+            
+            // Update visual indicator
+            const statsDisplay = document.getElementById('stats-display');
+            statsDisplay.className = `stats-display ${isActive ? 'spectral-daggers-active' : 'spectral-daggers-inactive'}`;
+        }
+        
+        async function setupCharacter() {
+            try {
+                log('Setting up Ayane character...', 'info');
+                
+                // Initialize talent manager
+                talentManager = new TalentManager();
+                await talentManager.initialize();
+                
+                // Create Ayane character
+                testCharacter = new Character({
+                    id: 'schoolgirl_ayane',
+                    name: 'Ayane',
+                    stats: {
+                        health: 100,
+                        mana: 50,
+                        attackDamage: 25,
+                        dodgeChance: 0.30 // 30% base dodge
+                    },
+                    buffs: []
+                });
+                
+                // Apply Spectral Daggers talent
+                const spectralDaggersTalent = {
+                    id: 'schoolgirl_ayane_t11',
+                    name: 'Spectral Daggers',
+                    specialType: 'spectral_daggers'
+                };
+                
+                await talentManager.applyTalentToCharacter(testCharacter, spectralDaggersTalent);
+                
+                log('Ayane character setup complete', 'success');
+                updateStatsDisplay();
+                
+            } catch (error) {
+                log(`Error setting up character: ${error.message}`, 'error');
+                console.error('Setup error:', error);
+            }
+        }
+        
+        function addDodgeBuff() {
+            if (!testCharacter) {
+                log('Character not set up yet', 'warn');
+                return;
+            }
+            
+            log('Adding dodge buff (+25%)...', 'info');
+            
+            const dodgeBuff = {
+                id: 'test_dodge_buff',
+                name: 'Test Dodge Buff',
+                duration: 5,
+                statModifiers: {
+                    dodgeChance: {
+                        operation: 'add',
+                        value: 0.25 // +25%
+                    }
+                }
+            };
+            
+            testCharacter.addBuff(dodgeBuff);
+            log('Dodge buff applied', 'success');
+            updateStatsDisplay();
+        }
+        
+        function removeDodgeBuff() {
+            if (!testCharacter) {
+                log('Character not set up yet', 'warn');
+                return;
+            }
+            
+            log('Removing dodge buff...', 'info');
+            
+            const buffIndex = testCharacter.buffs.findIndex(buff => buff.id === 'test_dodge_buff');
+            if (buffIndex !== -1) {
+                testCharacter.buffs.splice(buffIndex, 1);
+                testCharacter.recalculateStats('buff_removed');
+                log('Dodge buff removed', 'success');
+                updateStatsDisplay();
+            } else {
+                log('No dodge buff found to remove', 'warn');
+            }
+        }
+        
+        function checkSpectralDaggers() {
+            if (!testCharacter || !talentManager) {
+                log('Character or talent manager not set up yet', 'warn');
+                return;
+            }
+            
+            log('Manually checking Spectral Daggers activation...', 'info');
+            talentManager.checkSpectralDaggersActivation(testCharacter);
+            updateStatsDisplay();
+        }
+        
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+        
+        // Listen for buff applied events
+        document.addEventListener('BuffApplied', (event) => {
+            const { character, buff } = event.detail || {};
+            if (character === testCharacter) {
+                log(`Buff applied event received: ${buff.name || buff.id}`, 'debug');
+                updateStatsDisplay();
+            }
+        });
+        
+        // Initial setup
+        log('Debug page loaded. Click "Setup Ayane" to begin.', 'info');
+    </script>
+</body>
+</html>

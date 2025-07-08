@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Lethal Mastery Talent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 20px;
+        }
+        .debug-container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .character-info {
+            background-color: #3a3a3a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .stat-info {
+            margin: 5px 0;
+        }
+        .test-button {
+            background-color: #4a9eff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background-color: #357abd;
+        }
+        .log-entry {
+            background-color: #1a1a1a;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            border-left: 3px solid #4a9eff;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .warning {
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Lethal Mastery Talent</h1>
+    
+    <div class="debug-container">
+        <h2>Test Configuration</h2>
+        <button class="test-button" onclick="testLethalMastery()">Test Lethal Mastery Application</button>
+        <button class="test-button" onclick="testDamageCalculation()">Test Damage Calculation</button>
+        <button class="test-button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="debug-container">
+        <h2>Character Information</h2>
+        <div id="character-info">
+            <div class="character-info">
+                <h3>Ayane (Before Talent)</h3>
+                <div id="ayane-before-stats">Loading...</div>
+            </div>
+            <div class="character-info">
+                <h3>Ayane (After Talent)</h3>
+                <div id="ayane-after-stats">Not applied yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-container">
+        <h2>Test Log</h2>
+        <div id="test-log"></div>
+    </div>
+
+    <!-- Load necessary scripts -->
+    <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/talent-manager.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_ayane_abilities.js"></script>
+    <script src="js/raid-game/passives/schoolgirl_ayane_passive.js"></script>
+    
+    <script>
+        let ayane = null;
+        let ayaneAfterTalent = null;
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('test-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = '';
+        }
+
+        function displayCharacterStats(character, elementId) {
+            const element = document.getElementById(elementId);
+            if (!character) {
+                element.innerHTML = '<div class="error">Character not initialized</div>';
+                return;
+            }
+
+            const stats = character.stats;
+            const html = `
+                <div class="stat-info">Physical Damage: ${stats.physicalDamage || 0}</div>
+                <div class="stat-info">Magical Damage: ${stats.magicalDamage || 0}</div>
+                <div class="stat-info">Crit Chance: ${(stats.critChance || 0) * 100}%</div>
+                <div class="stat-info">Damage Multiplier: ${stats.damageMultiplier || 1}</div>
+                <div class="stat-info">HP: ${stats.maxHp || stats.hp || 0}</div>
+                <div class="stat-info">Mana: ${stats.maxMana || stats.mana || 0}</div>
+                <div class="stat-info">Applied Talents: ${character.appliedTalents ? character.appliedTalents.join(', ') : 'None'}</div>
+            `;
+            element.innerHTML = html;
+        }
+
+        async function initializeAyane() {
+            try {
+                // Create Ayane with base stats
+                ayane = new Character('schoolgirl_ayane', 'Schoolgirl Ayane', 'path/to/image.png', {
+                    physicalDamage: 100,
+                    magicalDamage: 50,
+                    armor: 20,
+                    magicalShield: 15,
+                    lifesteal: 0,
+                    dodgeChance: 0.15,
+                    critChance: 0.05,
+                    critDamage: 1.5,
+                    speed: 85,
+                    hp: 800,
+                    mana: 150,
+                    hpPerTurn: 0,
+                    manaPerTurn: 5
+                });
+
+                // Add abilities
+                ayane.abilities = [
+                    // Mock abilities for testing
+                    {
+                        id: 'schoolgirl_ayane_q',
+                        name: 'Butterfly Dagger',
+                        manaCost: 50,
+                        cooldown: 1,
+                        currentCooldown: 0
+                    }
+                ];
+
+                displayCharacterStats(ayane, 'ayane-before-stats');
+                log('Ayane initialized successfully', 'success');
+                
+                return ayane;
+            } catch (error) {
+                log(`Error initializing Ayane: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function testLethalMastery() {
+            try {
+                log('Starting Lethal Mastery test...');
+                
+                // Initialize Ayane
+                await initializeAyane();
+                
+                // Initialize talent manager
+                log('Initializing talent manager...');
+                await talentManager.initialize();
+                
+                // Apply the Lethal Mastery talent
+                log('Applying Lethal Mastery talent...');
+                const selectedTalents = ['schoolgirl_ayane_t24']; // Lethal Mastery
+                
+                // Create a copy for testing
+                ayaneAfterTalent = new Character('schoolgirl_ayane', 'Schoolgirl Ayane', 'path/to/image.png', {
+                    physicalDamage: 100,
+                    magicalDamage: 50,
+                    armor: 20,
+                    magicalShield: 15,
+                    lifesteal: 0,
+                    dodgeChance: 0.15,
+                    critChance: 0.05,
+                    critDamage: 1.5,
+                    speed: 85,
+                    hp: 800,
+                    mana: 150,
+                    hpPerTurn: 0,
+                    manaPerTurn: 5
+                });
+
+                // Apply talents
+                await talentManager.applyTalentsToCharacter(ayaneAfterTalent, selectedTalents);
+                
+                // Display results
+                displayCharacterStats(ayaneAfterTalent, 'ayane-after-stats');
+                
+                // Check the stats
+                const beforeDamageMultiplier = ayane.stats.damageMultiplier || 1;
+                const afterDamageMultiplier = ayaneAfterTalent.stats.damageMultiplier || 1;
+                const beforeCritChance = ayane.stats.critChance || 0;
+                const afterCritChance = ayaneAfterTalent.stats.critChance || 0;
+                
+                log(`Before - Damage Multiplier: ${beforeDamageMultiplier}, Crit Chance: ${beforeCritChance * 100}%`);
+                log(`After - Damage Multiplier: ${afterDamageMultiplier}, Crit Chance: ${afterCritChance * 100}%`);
+                
+                // Check base stats too
+                log(`Before - Base Damage Multiplier: ${ayane.baseStats.damageMultiplier || 1}`);
+                log(`After - Base Damage Multiplier: ${ayaneAfterTalent.baseStats.damageMultiplier || 1}`);
+                
+                // Verify the talent effects
+                if (afterDamageMultiplier > beforeDamageMultiplier) {
+                    log('✓ Damage multiplier increased correctly!', 'success');
+                    log(`Expected: 1.1 (10% increase), Actual: ${afterDamageMultiplier}`, 'success');
+                } else {
+                    log('✗ Damage multiplier not applied correctly', 'error');
+                    log(`Expected: 1.1, Actual: ${afterDamageMultiplier}`, 'error');
+                }
+                
+                if (afterCritChance > beforeCritChance) {
+                    log('✓ Crit chance increased correctly!', 'success');
+                    log(`Expected: +0.1 (10% increase), Actual: +${afterCritChance - beforeCritChance}`, 'success');
+                } else {
+                    log('✗ Crit chance not applied correctly', 'error');
+                    log(`Expected: +0.1, Actual: +${afterCritChance - beforeCritChance}`, 'error');
+                }
+                
+                log('Lethal Mastery test completed');
+                
+            } catch (error) {
+                log(`Error in Lethal Mastery test: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function testDamageCalculation() {
+            try {
+                log('Starting damage calculation test...');
+                
+                if (!ayane || !ayaneAfterTalent) {
+                    log('Characters not initialized. Running Lethal Mastery test first...', 'warning');
+                    await testLethalMastery();
+                }
+                
+                // Test damage calculation
+                const baseDamage = 100;
+                const damageBefore = ayane.calculateDamage(baseDamage, 'physical');
+                const damageAfter = ayaneAfterTalent.calculateDamage(baseDamage, 'physical');
+                
+                log(`Base damage: ${baseDamage}`);
+                log(`Damage before talent: ${damageBefore}`);
+                log(`Damage after talent: ${damageAfter}`);
+                
+                if (damageAfter > damageBefore) {
+                    log('✓ Damage multiplier is working in damage calculation!', 'success');
+                    log(`Damage increase: ${damageAfter - damageBefore} (${((damageAfter / damageBefore - 1) * 100).toFixed(1)}%)`, 'success');
+                } else {
+                    log('✗ Damage multiplier not working in damage calculation', 'error');
+                }
+                
+                log('Damage calculation test completed');
+                
+            } catch (error) {
+                log(`Error in damage calculation test: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            log('Page loaded, ready for testing');
+        });
+    </script>
+</body>
+</html>

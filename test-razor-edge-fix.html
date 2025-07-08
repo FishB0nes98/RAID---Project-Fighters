@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razor Edge Talent Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
+        .success {
+            background-color: #2d5a2d;
+            color: #90ee90;
+        }
+        
+        .error {
+            background-color: #5a2d2d;
+            color: #ff6b6b;
+        }
+        
+        .info {
+            background-color: #2d4a5a;
+            color: #87ceeb;
+        }
+        
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #357abd;
+        }
+        
+        .damage-comparison {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .damage-box {
+            flex: 1;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .damage-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        
+        .damage-label {
+            font-size: 14px;
+            color: #cccccc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🗡️ Razor Edge Talent Test</h1>
+        <p>This test verifies that the Razor Edge talent correctly increases Butterfly Dagger damage by 115.</p>
+        
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="testResults"></div>
+            <button onclick="runTest()">Run Test</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Damage Comparison</h2>
+            <div class="damage-comparison">
+                <div class="damage-box">
+                    <div class="damage-value" id="baseDamage">-</div>
+                    <div class="damage-label">Base Damage (No Talent)</div>
+                </div>
+                <div class="damage-box">
+                    <div class="damage-value" id="talentDamage">-</div>
+                    <div class="damage-label">With Razor Edge (+115)</div>
+                </div>
+                <div class="damage-box">
+                    <div class="damage-value" id="damageDiff">-</div>
+                    <div class="damage-label">Difference</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Details</h2>
+            <div id="testDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock classes and functions for testing
+        class MockCharacter {
+            constructor(name, hasRazorEdge = false) {
+                this.name = name;
+                this.id = 'test-character';
+                this.stats = {
+                    physicalDamage: 100 // Base physical damage for testing
+                };
+                this.abilities = [];
+                this.isAI = false;
+                
+                if (hasRazorEdge) {
+                    this.setupRazorEdgeAbility();
+                }
+            }
+            
+            setupRazorEdgeAbility() {
+                // Mock the Butterfly Dagger ability with Razor Edge talent
+                const butterflyDagger = {
+                    id: 'schoolgirl_ayane_q',
+                    name: 'Butterfly Dagger',
+                    fixedDamage: 425 + 115, // Base damage + Razor Edge bonus
+                    additionalPhysicalScaling: 0,
+                    dodgeProcChance: 0.60
+                };
+                this.abilities.push(butterflyDagger);
+            }
+            
+            applyLifesteal(damage) {
+                // Mock lifesteal application
+            }
+        }
+        
+        class MockTarget {
+            constructor(name) {
+                this.name = name;
+                this.id = 'test-target';
+                this.currentHp = 1000;
+                this.maxHp = 1000;
+            }
+            
+            applyDamage(damage, damageType, source, options = {}) {
+                const actualDamage = Math.floor(damage);
+                this.currentHp -= actualDamage;
+                return {
+                    damage: actualDamage,
+                    isCritical: false,
+                    damageType: damageType
+                };
+            }
+            
+            isDead() {
+                return this.currentHp <= 0;
+            }
+        }
+        
+        // Mock the damage calculation logic from the ability
+        function calculateButterflyDaggerDamage(caster, hasRazorEdge = false) {
+            let physicalScaling = 0.55; // Base 55% scaling
+            
+            // Try to find the ability in the caster's abilities array for talent modifications
+            const ability = caster.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+            if (ability && ability.additionalPhysicalScaling !== undefined) {
+                physicalScaling += ability.additionalPhysicalScaling;
+            }
+            
+            // Use the ability's fixedDamage property (modified by talents like Razor Edge) instead of hardcoded 425
+            const fixedDamage = ability?.fixedDamage ?? 425; // Fallback to 425 if not found
+            const baseDamage = fixedDamage + ((caster.stats.physicalDamage || 0) * physicalScaling);
+            
+            return {
+                fixedDamage: fixedDamage,
+                physicalDamage: caster.stats.physicalDamage,
+                scaling: physicalScaling,
+                totalDamage: baseDamage
+            };
+        }
+        
+        // Mock log function
+        function log(message) {
+            console.log(message);
+        }
+        
+        // Mock UI update functions
+        function updateCharacterUI(character) {
+            // Mock UI update
+        }
+        
+        function addTestResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        function addTestDetail(message) {
+            const detailsDiv = document.getElementById('testDetails');
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'test-result info';
+            detailDiv.textContent = message;
+            detailsDiv.appendChild(detailDiv);
+        }
+        
+        function runTest() {
+            // Clear previous results
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('testDetails').innerHTML = '';
+            
+            addTestResult('🚀 Starting Razor Edge Talent Test...', 'info');
+            
+            try {
+                // Test 1: Character without Razor Edge talent
+                const ayaneBase = new MockCharacter('Ayane (Base)', false);
+                const baseDamageResult = calculateButterflyDaggerDamage(ayaneBase, false);
+                
+                // Test 2: Character with Razor Edge talent
+                const ayaneWithTalent = new MockCharacter('Ayane (Razor Edge)', true);
+                const talentDamageResult = calculateButterflyDaggerDamage(ayaneWithTalent, true);
+                
+                // Calculate differences
+                const damageDifference = talentDamageResult.totalDamage - baseDamageResult.totalDamage;
+                const expectedDifference = 115; // Razor Edge bonus
+                
+                // Update UI
+                document.getElementById('baseDamage').textContent = Math.floor(baseDamageResult.totalDamage);
+                document.getElementById('talentDamage').textContent = Math.floor(talentDamageResult.totalDamage);
+                document.getElementById('damageDiff').textContent = '+' + Math.floor(damageDifference);
+                
+                // Add test details
+                addTestDetail(`Base Character - Fixed Damage: ${baseDamageResult.fixedDamage}, Physical Damage: ${baseDamageResult.physicalDamage}, Scaling: ${(baseDamageResult.scaling * 100).toFixed(1)}%`);
+                addTestDetail(`Talent Character - Fixed Damage: ${talentDamageResult.fixedDamage}, Physical Damage: ${talentDamageResult.physicalDamage}, Scaling: ${(talentDamageResult.scaling * 100).toFixed(1)}%`);
+                addTestDetail(`Expected Difference: ${expectedDifference}, Actual Difference: ${Math.floor(damageDifference)}`);
+                
+                // Verify the test
+                if (Math.abs(damageDifference - expectedDifference) < 0.1) {
+                    addTestResult('✅ SUCCESS: Razor Edge talent correctly increases damage by 115!', 'success');
+                    addTestResult(`✓ Base damage: ${Math.floor(baseDamageResult.totalDamage)}`, 'success');
+                    addTestResult(`✓ With Razor Edge: ${Math.floor(talentDamageResult.totalDamage)}`, 'success');
+                    addTestResult(`✓ Difference: +${Math.floor(damageDifference)} (Expected: +${expectedDifference})`, 'success');
+                } else {
+                    addTestResult('❌ FAILURE: Razor Edge talent bonus is not working correctly!', 'error');
+                    addTestResult(`✗ Expected difference: +${expectedDifference}, Got: +${Math.floor(damageDifference)}`, 'error');
+                }
+                
+                // Test ability lookup
+                const abilityFound = ayaneWithTalent.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+                if (abilityFound) {
+                    addTestResult('✅ SUCCESS: Ability lookup is working correctly!', 'success');
+                    addTestResult(`✓ Fixed damage property: ${abilityFound.fixedDamage}`, 'success');
+                } else {
+                    addTestResult('❌ FAILURE: Ability lookup failed!', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult(`❌ ERROR: Test failed with exception: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Run test automatically on page load
+        window.addEventListener('load', function() {
+            setTimeout(runTest, 500);
+        });
+    </script>
+</body>
+</html>

@@ -161,16 +161,21 @@ function executeWolfClawStrike(caster, target, abilityInstance, isDoubleClawSeco
             logFunction(`${caster.name}'s Instinctive Veil talent activates!`, 'talent-effect renee');
             
             // Create a stealth buff (same as Lupine Veil but for 1 turn only)
-            const stealthBuff = {
-                id: 'renee_instinctive_veil_buff',
-                name: 'Instinctive Veil',
-                icon: 'Icons/abilities/lupine_veil.webp',
-                duration: 2, // Two turns for the talent
-                isUntargetable: true,
-                statModifiers: [{ stat: 'critChance', value: 1, operation: 'set' }],
-                description: 'Instinctive Veil: Untargetable, 100% crit chance for 2 turns. Using any other ability breaks stealth.',
-                _abilityListener: null,
-                onApply(target) {
+            const stealthBuff = new Effect(
+                'renee_instinctive_veil_buff',
+                'Instinctive Veil',
+                'Icons/abilities/lupine_veil.webp',
+                2, // Two turns for the talent
+                () => {}, // No per-turn effect
+                false // Not a debuff
+            );
+            
+            stealthBuff.isUntargetableByEnemies = true;
+            stealthBuff.statModifiers = [{ stat: 'critChance', value: 1, operation: 'set' }];
+            stealthBuff.description = 'Instinctive Veil: Untargetable by enemies, 100% crit chance for 2 turns. Using any other ability breaks stealth.';
+            stealthBuff._abilityListener = null;
+            
+            stealthBuff.onApply = function(target) {
                     // Add stealth VFX
                     const el = document.getElementById(`character-${target.instanceId || target.id}`);
                     if (el && !el.querySelector('.renee-stealth-vfx')) {
@@ -200,8 +205,9 @@ function executeWolfClawStrike(caster, target, abilityInstance, isDoubleClawSeco
                     };
                     document.addEventListener('AbilityUsed', this._abilityListener);
                     document.addEventListener('abilityUsed', this._abilityListener);
-                },
-                onRemove(target) {
+                };
+                
+            stealthBuff.onRemove = function(target) {
                     // Remove VFX
                     const el = document.getElementById(`character-${target.instanceId || target.id}`);
                     if (el) {
@@ -216,8 +222,7 @@ function executeWolfClawStrike(caster, target, abilityInstance, isDoubleClawSeco
                         this._abilityListener = null;
                     }
                     if (logFunction) logFunction(`${target.name}'s Instinctive Veil fades.`, 'renee');
-                }
-            };
+                };
             
             // Apply the stealth buff to the caster
             caster.addBuff(stealthBuff);
@@ -458,16 +463,21 @@ function executeLupineVeil(caster, abilityInstance) {
     console.log('[LupineVeil] Creating stealth buff...');
     
     // Buff definition
-    const stealthBuff = {
-        id: 'renee_stealth_buff',
-        name: 'Lupine Veil',
-        icon: 'Icons/abilities/lupine_veil.webp',
-        duration: 3,
-        isUntargetable: true,
-        statModifiers: [{ stat: 'critChance', value: 1, operation: 'set' }],
-        description: 'Stealthed: Untargetable, 100% crit chance. Using any other ability or expiring breaks stealth.',
-        _abilityListener: null,
-        onApply(target) {
+    const stealthBuff = new Effect(
+        'renee_stealth_buff',
+        'Lupine Veil',
+        'Icons/abilities/lupine_veil.webp',
+        3,
+        () => {}, // No per-turn effect
+        false // Not a debuff
+    );
+    
+    stealthBuff.isUntargetableByEnemies = true;
+    stealthBuff.statModifiers = [{ stat: 'critChance', value: 1, operation: 'set' }];
+    stealthBuff.description = 'Stealthed: Untargetable by enemies, 100% crit chance. Using any other ability or expiring breaks stealth.';
+    stealthBuff._abilityListener = null;
+    
+    stealthBuff.onApply = function(target) {
             // Add stealth VFX
             const el = document.getElementById(`character-${target.instanceId || target.id}`);
             if (el && !el.querySelector('.renee-stealth-vfx')) {
@@ -502,8 +512,9 @@ function executeLupineVeil(caster, abilityInstance) {
             };
             document.addEventListener('AbilityUsed', this._abilityListener);
             document.addEventListener('abilityUsed', this._abilityListener);
-        },
-        onRemove(target) {
+        };
+        
+    stealthBuff.onRemove = function(target) {
             // Remove VFX
             const el = document.getElementById(`character-${target.instanceId || target.id}`);
             if (el) {
@@ -518,8 +529,8 @@ function executeLupineVeil(caster, abilityInstance) {
                 this._abilityListener = null;
             }
             if (log) log(`${target.name}'s Lupine Veil fades.`, 'renee');
-        }
-    };
+        };
+    
     caster.addBuff(stealthBuff);
     
     // Track Lupine Veil statistics

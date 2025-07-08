@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Schoolgirl Ayane Talent Effects</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .talent-enhanced {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        .talent-effect {
+            color: #ffd700;
+            font-style: italic;
+        }
+        .talent-effect.damage {
+            color: #ff6b6b;
+        }
+        .talent-effect.utility {
+            color: #4ecdc4;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        #output {
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Schoolgirl Ayane Talent Effects Test</h1>
+        
+        <div class="test-section">
+            <div class="test-title">Test 1: Base Q Ability Description</div>
+            <button onclick="testBaseDescription()">Test Base Description</button>
+            <div id="baseResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">Test 2: Q Ability with Relentless Daggers Talent</div>
+            <button onclick="testRelentlessEffects()">Test Relentless Effects</button>
+            <div id="relentlessResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">Test 3: Q Ability with Endless Assault Talent</div>
+            <button onclick="testEndlessEffects()">Test Endless Effects</button>
+            <div id="endlessResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">Console Output</div>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock the Ability class and other dependencies
+        class Ability {
+            constructor(id, name, icon, manaCost, cooldown, effect) {
+                this.id = id;
+                this.name = name;
+                this.icon = icon;
+                this.manaCost = manaCost;
+                this.cooldown = cooldown;
+                this.effect = effect;
+                this.targetType = 'single';
+                this.description = '';
+            }
+            
+            setTargetType(type) {
+                this.targetType = type;
+                return this;
+            }
+        }
+        
+        // Mock console.log to capture output
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const output = document.getElementById('output');
+            output.textContent += args.join(' ') + '\n';
+        };
+
+        // Create the Q ability with the new generateDescription function
+        function createQAbility() {
+            const qAbility = new Ability(
+                'schoolgirl_ayane_q',
+                'Butterfly Dagger',
+                'Icons/abilities/butterfly_dagger.webp',
+                50,
+                1,
+                null
+            );
+            
+            qAbility.dodgeProcChance = 0.60;
+            qAbility.additionalPhysicalScaling = 0;
+            qAbility.talentModifiers = {};
+            
+            qAbility.generateDescription = function() {
+                const safeDodgeChance = (isNaN(this.dodgeProcChance) || !isFinite(this.dodgeProcChance)) ? 0.60 : (this.dodgeProcChance || 0.60);
+                const dodgeChancePercent = (safeDodgeChance * 100).toFixed(0);
+                console.log(`[Ayane Q] Generating description with dodgeProcChance: ${this.dodgeProcChance} -> safe: ${safeDodgeChance} (${dodgeChancePercent}%)`);
+                
+                // Check if the dodge chance has been enhanced by talents (above base 60%)
+                const isEnhanced = safeDodgeChance > 0.60;
+                const dodgeChanceText = isEnhanced 
+                    ? `<span class="talent-enhanced">${dodgeChancePercent}%</span>` 
+                    : `${dodgeChancePercent}%`;
+                
+                // Check for Spectral Mastery talent
+                let physicalScaling = 0.55; // Base 55% scaling
+                let scalingText = "55%";
+                let talentEffects = "";
+                
+                if (this.additionalPhysicalScaling !== undefined) {
+                    physicalScaling += this.additionalPhysicalScaling;
+                    scalingText = `<span class="talent-enhanced">${(physicalScaling * 100).toFixed(0)}%</span>`;
+                    talentEffects += `\n<span class="talent-effect damage">⚡ Spectral Mastery: Enhanced physical damage scaling from 55% to ${(physicalScaling * 100).toFixed(0)}%.</span>`;
+                    console.log(`[Ayane Q] Spectral Mastery talent active! Total scaling: ${physicalScaling * 100}%`);
+                }
+                
+                // Check for Relentless Daggers or Endless Assault talent effects
+                let cooldownText = "";
+                let chanceToNotEndTurnText = "";
+                
+                // Check if cooldown has been modified by talents
+                if (this.cooldown === 0) {
+                    cooldownText = ` <span class="talent-enhanced">No cooldown</span>.`;
+                    talentEffects += `\n<span class="talent-effect utility">⚡ Relentless Assault: Removes cooldown on Butterfly Dagger.</span>`;
+                } else {
+                    cooldownText = ` ${this.cooldown} turn cooldown.`;
+                }
+                
+                // Check for chance to not end turn
+                if (this.chanceToNotEndTurn && this.chanceToNotEndTurn > 0) {
+                    const chancePercent = (this.chanceToNotEndTurn * 100).toFixed(0);
+                    chanceToNotEndTurnText = ` <span class="talent-enhanced">${chancePercent}% chance to not end turn</span>.`;
+                    talentEffects += `\n<span class="talent-effect utility">⚡ Relentless Assault: ${chancePercent}% chance to not end turn when using Butterfly Dagger.</span>`;
+                }
+                
+                this.description = `Deals 425 (+${scalingText} Physical Damage). ${dodgeChanceText} chance to gain 50% dodge chance for 2 turns.${cooldownText}${chanceToNotEndTurnText}${talentEffects}`;
+                
+                if (isEnhanced) {
+                    console.log(`[Ayane Q] Description enhanced with talent styling: ${dodgeChancePercent}%`);
+                }
+                
+                return this.description;
+            };
+            
+            return qAbility;
+        }
+        
+        function testBaseDescription() {
+            console.log("=== Testing Base Description ===");
+            const qAbility = createQAbility();
+            const description = qAbility.generateDescription();
+            document.getElementById('baseResult').innerHTML = `<strong>Base Description:</strong><br>${description}`;
+        }
+        
+        function testRelentlessEffects() {
+            console.log("=== Testing Relentless Daggers Effects ===");
+            const qAbility = createQAbility();
+            
+            // Apply talent effects
+            qAbility.cooldown = 0;
+            qAbility.chanceToNotEndTurn = 0.20;
+            
+            const description = qAbility.generateDescription();
+            document.getElementById('relentlessResult').innerHTML = `<strong>With Relentless Daggers:</strong><br>${description}`;
+        }
+        
+        function testEndlessEffects() {
+            console.log("=== Testing Endless Assault Effects ===");
+            const qAbility = createQAbility();
+            
+            // Apply talent effects (same as Relentless Daggers)
+            qAbility.cooldown = 0;
+            qAbility.chanceToNotEndTurn = 0.20;
+            
+            const description = qAbility.generateDescription();
+            document.getElementById('endlessResult').innerHTML = `<strong>With Endless Assault:</strong><br>${description}`;
+        }
+        
+        // Clear output on page load
+        window.addEventListener('load', function() {
+            document.getElementById('output').textContent = '';
+        });
+    </script>
+</body>
+</html>

@@ -4,7 +4,153 @@ class InfernalIbukiCharacter extends Character {
     constructor(id, name, image, stats) {
         super(id, name, image, stats);
         this.kunaiStacks = 0; // Initialize passive stacks (max 15)
+        // Initialize blade expertise bonus per stack, default to 0.10 (10%)
+        this.bladeExpertiseBonusPerStack = 0.10; 
         this.createPassiveIndicator();
+
+        // Expose a passiveHandler for talents that expect it (e.g., Critical Stack)
+        this.passiveHandler = {
+            addPassiveStack: (amount = 1) => {
+                for (let i = 0; i < amount; i++) {
+                    this.applyBladeExpertisePassive();
+                }
+            },
+            // Add other passive-related methods here if needed by generic talent logic
+};
+
+// Function to apply Doubled Physical Damage VFX
+window.applyDoubledPhysicalDamageVFX = function(character) {
+    console.log(`[VFX DEBUG] applyDoubledPhysicalDamageVFX called for ${character.name}`);
+    const characterElementId = character.instanceId || character.id;
+    const characterElement = document.getElementById(`character-${characterElementId}`);
+    if (characterElement) {
+        console.log(`[VFX DEBUG] Found character element (character-slot) for ${character.name}.`);
+        
+        // Add the main active class to the character-slot for border/aura effect
+        characterElement.classList.add('doubled-physical-damage-active');
+        
+        // Create a new div for the outer VFX
+        let outerVfx = characterElement.querySelector('.doubled-physical-damage-outer-vfx');
+        if (!outerVfx) {
+            outerVfx = document.createElement('div');
+            outerVfx.className = 'doubled-physical-damage-outer-vfx';
+            document.body.appendChild(outerVfx); // Append to body to bypass overflow:hidden parents
+        }
+
+        // Position the fixed VFX element over the character slot
+        const rect = characterElement.getBoundingClientRect();
+        outerVfx.style.position = 'fixed';
+        outerVfx.style.top = `${rect.top - 5}px`; // Adjust by -5px to allow for the -5px top/left/right/bottom in CSS
+        outerVfx.style.left = `${rect.left - 5}px`; // Adjust by -5px
+        outerVfx.style.width = `${rect.width + 10}px`; // Adjust by +10px
+        outerVfx.style.height = `${rect.height + 10}px`; // Adjust by +10px
+
+        console.log(`[VFX DEBUG] Applied Doubled Physical Damage outer VFX to ${character.name}'s character slot.`);
+    } else {
+        console.warn(`[VFX DEBUG] Character element (character-slot) not found for ${character.name} to apply VFX.`);
+    }
+};
+
+// Function to remove Doubled Physical Damage VFX (if needed)
+window.removeDoubledPhysicalDamageVFX = function(character) {
+    console.log(`[VFX DEBUG] removeDoubledPhysicalDamageVFX called for ${character.name}`);
+    const characterElementId = character.instanceId || character.id;
+    const characterElement = document.getElementById(`character-${characterElementId}`);
+    if (characterElement) {
+        // Remove the main active class from the character-slot
+        characterElement.classList.remove('doubled-physical-damage-active');
+        
+        // Remove the outer VFX div
+        const outerVfx = characterElement.querySelector('.doubled-physical-damage-outer-vfx');
+        if (outerVfx) {
+            outerVfx.remove();
+        }
+        console.log(`[VFX DEBUG] Removed Doubled Physical Damage outer VFX from ${character.name}'s character slot.`);
+    } else {
+        console.warn(`[VFX DEBUG] Character element (character-slot) not found for ${character.name} to remove VFX.`);
+    }
+};
+
+// Function to show smoke explosion VFX for Debilitating Strikes
+window.showDebilitatingStrikesVFX = function(character) {
+    console.log(`[VFX DEBUG] showDebilitatingStrikesVFX called for ${character.name}`);
+    const characterElementId = character.instanceId || character.id;
+    const characterElement = document.getElementById(`character-${characterElementId}`);
+    if (characterElement) {
+        console.log(`[VFX DEBUG] Found character element for ${character.name}.`);
+
+        const smokeVfxContainer = document.createElement('div');
+        smokeVfxContainer.className = 'debilitating-strikes-smoke-vfx';
+        characterElement.appendChild(smokeVfxContainer);
+
+        // Create multiple smoke particles
+        for (let i = 0; i < 10; i++) {
+            const smokeParticle = document.createElement('div');
+            smokeParticle.className = 'smoke-particle';
+            smokeParticle.style.setProperty('--delay', `${i * 0.05}s`);
+            smokeParticle.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
+            smokeParticle.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
+            smokeVfxContainer.appendChild(smokeParticle);
+        }
+
+        // Play a sound effect
+        const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+        playSound('sounds/smoke_explosion.mp3', 0.6); // Placeholder sound
+
+        setTimeout(() => {
+            smokeVfxContainer.remove();
+            console.log(`[VFX DEBUG] Removed Debilitating Strikes VFX for ${character.name}.`);
+        }, 1500); // Duration of the animation
+    } else {
+        console.warn(`[VFX DEBUG] Character element not found for ${character.name} to apply Debilitating Strikes VFX.`);
+    }
+};
+
+// Function to show Blazing damage VFX
+window.showBlazingDamageVFX = function(character, damageAmount) {
+    console.log(`[VFX DEBUG] showBlazingDamageVFX called for ${character.name}`);
+    const characterElementId = character.instanceId || character.id;
+    const characterElement = document.getElementById(`character-${characterElementId}`);
+    if (characterElement) {
+        console.log(`[VFX DEBUG] Found character element for ${character.name}.`);
+
+        const blazingVfxContainer = document.createElement('div');
+        blazingVfxContainer.className = 'blazing-debuff-vfx';
+        characterElement.appendChild(blazingVfxContainer);
+
+        // Create multiple flame particles
+        for (let i = 0; i < 10; i++) {
+            const flameParticle = document.createElement('div');
+            flameParticle.className = 'blazing-flame-particle';
+            flameParticle.style.setProperty('--delay', `${i * 0.05}s`);
+            flameParticle.style.setProperty('--x', `${(Math.random() - 0.5) * 50}px`);
+            flameParticle.style.setProperty('--y', `${(Math.random() - 0.5) * 50}px`);
+            blazingVfxContainer.appendChild(flameParticle);
+        }
+
+        // Add a pulsing overlay
+        const pulseOverlay = document.createElement('div');
+        pulseOverlay.className = 'blazing-pulse-overlay';
+        blazingVfxContainer.appendChild(pulseOverlay);
+
+        // Add damage text
+        const damageText = document.createElement('div');
+        damageText.className = 'blazing-damage-text';
+        damageText.textContent = `-${damageAmount}`;
+        blazingVfxContainer.appendChild(damageText);
+
+        // Play a sound effect (placeholder)
+        const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+        playSound('sounds/fire_damage.mp3', 0.6); 
+
+        setTimeout(() => {
+            blazingVfxContainer.remove();
+            console.log(`[VFX DEBUG] Removed Blazing Damage VFX for ${character.name}.`);
+        }, 2000); // Duration of the animation
+    } else {
+        console.warn(`[VFX DEBUG] Character element not found for ${character.name} to apply Blazing Damage VFX.`);
+    }
+};
     }
 
     // Override useAbility to implement the Blade Expertise passive
@@ -17,10 +163,11 @@ class InfernalIbukiCharacter extends Character {
         // Call the original useAbility method
         const abilityUsed = super.useAbility(abilityIndex, target);
 
-        // If Kunai Throw was successfully used, apply the passive
-        if (abilityUsed && isKunaiThrow) {
-            this.applyBladeExpertisePassive();
-        }
+        // The passive is now applied within the kunaiThrowEffect for each kunai thrown.
+        // So, no need to apply it here.
+        // if (abilityUsed && isKunaiThrow) {
+        //     this.applyBladeExpertisePassive();
+        // }
 
         return abilityUsed;
     }
@@ -28,7 +175,8 @@ class InfernalIbukiCharacter extends Character {
     applyBladeExpertisePassive() {
         if (this.kunaiStacks < 15) { // Max 15 stacks
             this.kunaiStacks++;
-            const damageBonus = this.kunaiStacks * 10; // 10% per stack
+            // Use the dynamic bladeExpertiseBonusPerStack and round for display
+            const damageBonus = Math.round(this.kunaiStacks * (this.bladeExpertiseBonusPerStack * 100)); 
             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
             log(`${this.name}'s Blade Expertise activates! Kunai damage permanently increased. (+${damageBonus}% total, ${this.kunaiStacks}/15 stacks)`, 'passive');
 
@@ -95,7 +243,9 @@ class InfernalIbukiCharacter extends Character {
         if (characterElement) {
             const indicator = characterElement.querySelector('.kunai-mastery-indicator');
             if (indicator) {
-                indicator.title = `Blade Expertise Stacks: ${this.kunaiStacks}/15 (+${this.kunaiStacks * 10}% damage)`;
+                // Use the dynamic bladeExpertiseBonusPerStack for the tooltip and round for display
+                const totalBonusPercentage = Math.round(this.kunaiStacks * (this.bladeExpertiseBonusPerStack * 100));
+                indicator.title = `Blade Expertise Stacks: ${this.kunaiStacks}/15 (+${totalBonusPercentage}% damage)`;
                 const indicatorText = indicator.querySelector('.indicator-text');
                  if (indicatorText) {
                      indicatorText.textContent = this.kunaiStacks;
@@ -121,54 +271,213 @@ class InfernalIbukiCharacter extends Character {
 }
 
 // Enhance Kunai Throw Effect with better VFX
+// NOTE: Do not use import here; handled by game flow for PLAYABLE version only
 const kunaiThrowEffect = (caster, target) => {
     const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
     // Base damage components - BALANCED: 100% Physical Damage scaling
     const baseFixedDamage = 250;
-    const basePhysicalScaling = 1.0; // Changed from 1.5 to 1.0 (100%)
+    const basePhysicalScaling = 1.0; // 100% Physical
 
-    // Calculate base damage before passive
-    let calculatedDamage = baseFixedDamage + (caster.stats.physicalDamage * basePhysicalScaling);
-
-    // Apply Blade Expertise passive multiplier (10% per stack, max 15 stacks = 150%)
-    const passiveMultiplier = (caster.kunaiStacks !== undefined) ? (1 + (caster.kunaiStacks * 0.10)) : 1; // Use 0.10 for 10%
-    calculatedDamage *= passiveMultiplier;
-
-    // Recalculate final damage, applying the passive multiplier to the total base damage
-    const finalBaseDamage = (baseFixedDamage + (caster.stats.physicalDamage * basePhysicalScaling)) * passiveMultiplier;
-
-    // Use the character's calculateDamage to factor in crit/defense AFTER the passive boost
-    const finalDamage = caster.calculateDamage(finalBaseDamage, 'physical', target);
-
-    // Check for critical hit to trigger passive
-    const damageResult = target.applyDamage(finalDamage, 'physical', caster, { abilityId: 'kunai_throw' });
-    
-    // Trigger critical hit passive if it was a crit
-    if (damageResult.isCritical && typeof caster.onCriticalHit === 'function') {
-        caster.onCriticalHit();
+    // Magical scaling from talent
+    let magicalScaling = 0;
+    if (caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t1')) {
+        magicalScaling = 0.5;
     }
 
-    // Track statistics
+    // Apply Blade Expertise passive multiplier (using the dynamic bonus per stack)
+    const passiveMultiplier = (caster.kunaiStacks !== undefined) ? (1 + (caster.kunaiStacks * (caster.bladeExpertiseBonusPerStack || 0.10))) : 1;
+
+    // Calculate base damage for a single hit
+    const calculateHitDamage = (targetCharacter) => {
+        let calculatedDamage = baseFixedDamage + (caster.stats.physicalDamage * basePhysicalScaling) + (caster.stats.magicalDamage * magicalScaling);
+        calculatedDamage *= passiveMultiplier;
+
+        // Shadow Strike Talent: Additional magical damage if target is Obscured
+        if (caster.shadowStrikeBonusEnabled && targetCharacter.debuffs && targetCharacter.debuffs.some(d => d.id.startsWith('obscured_debuff'))) {
+            const shadowStrikeBonus = caster.stats.magicalDamage * 2.0; // 200% Magical Damage
+            calculatedDamage += shadowStrikeBonus;
+            log(`${caster.name}'s Shadow Strike adds ${shadowStrikeBonus} magical damage to ${targetCharacter.name}!`, 'talent-enhanced');
+        }
+        
+        return calculatedDamage;
+    };
+
+    // Determine if Kunai Barrage talent is active
+    const kunaiAbilityInstance = caster.abilities.find(ab => ab.id === 'kunai_throw');
+    const hitsAllEnemies = kunaiAbilityInstance && kunaiAbilityInstance.hitsAllEnemies;
+    const multiTargetHitChance = (kunaiAbilityInstance && kunaiAbilityInstance.multiTargetHitChance) !== undefined ? kunaiAbilityInstance.multiTargetHitChance : 0.70;
+
+    let targetsToHit = [];
+    if (hitsAllEnemies && window.gameManager && window.gameManager.gameState) {
+        const allEnemies = window.gameManager.gameState.aiCharacters.filter(enemy => !enemy.isDead());
+        
+        // Always hit the main target (the one selected by the user)
+        targetsToHit.push(target);
+
+        // For other enemies, check the multi-target hit chance
+        allEnemies.forEach(enemy => {
+            if (enemy.instanceId !== target.instanceId && Math.random() < multiTargetHitChance) {
+                targetsToHit.push(enemy);
+            }
+        });
+    } else {
+        // If talent is not active, or no game state, only hit the main target
+        targetsToHit.push(target);
+    }
+
+    // Determine how many kunais to throw
+    const kunaiCount = (caster.canThrowTwoKunais && caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t15')) ? 2 : 1;
+
+    for (let i = 0; i < kunaiCount; i++) {
+        for (const currentTarget of targetsToHit) {
+            const rawDamage = calculateHitDamage(currentTarget); // Pass currentTarget to calculateHitDamage
+            const finalDamage = caster.calculateDamage(rawDamage, 'physical', currentTarget);
+            const damageResult = currentTarget.applyDamage(finalDamage, 'physical', caster, { abilityId: 'kunai_throw' });
+
+            // Debilitating Strikes VFX check
+            if (caster.debilitatingStrikesEnabled && currentTarget.debuffs && currentTarget.debuffs.length > 0) {
+                // Check if the target has at least one debuff
+                const hasDebuff = currentTarget.debuffs.some(debuff => debuff.isDebuff === true);
+                if (hasDebuff) {
+                    console.log('[Debilitating Strikes] Triggering VFX on target:', currentTarget.name);
+                    if (typeof window.showDebilitatingStrikesVFX === 'function') {
+                        window.showDebilitatingStrikesVFX(currentTarget);
+                    }
+                }
+            }
+
+            if (damageResult.isCritical && typeof caster.onCriticalHit === 'function') {
+                caster.onCriticalHit();
+            }
+
+            if (window.statisticsManager) {
+                // Record damage dealt for each kunai
+                window.statisticsManager.recordDamageDealt(caster, currentTarget, damageResult.damage, 'physical', damageResult.isCritical, 'kunai_throw');
+            }
+
+            const stackText = caster.kunaiStacks ? ` (Passive: +${Math.round(caster.kunaiStacks * (caster.bladeExpertiseBonusPerStack || 0.10) * 100)}%)` : '';
+            const magicalText = magicalScaling > 0 ? ` + ${Math.round(caster.stats.magicalDamage * magicalScaling)} magic` : '';
+            log(`${caster.name} throws a Kunai at ${currentTarget.name}, dealing ${damageResult.damage} physical damage${magicalText}${stackText}${damageResult.isCritical ? ' (Critical!)' : ''}`);
+
+            playSound('sounds/kunai_throw.mp3', 0.7);
+            showEnhancedKunaiTossVFX(caster, currentTarget);
+
+            // Apply passive for each kunai
+            if (typeof caster.applyBladeExpertisePassive === 'function') {
+                caster.applyBladeExpertisePassive();
+            }
+
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(currentTarget);
+            }
+        }
+
+        // For Infernal Kunais talent (infernal_ibuki_t20)
+        if (caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t20')) {
+            for (const currentTarget of targetsToHit) { // Apply debuff to all hit targets
+                // Create the Blazing debuff
+                const blazingDebuff = new Effect(
+                    'blazing_debuff',
+                    'Blazing',
+                    'Icons/effects/fire.png', // Placeholder icon for the debuff
+                    -1, // Permanent duration
+                    null, // No direct per-turn effect function, use onTurnStart
+                    true // isDebuff
+                );
+                blazingDebuff.setDescription(`${currentTarget.name} is burning, taking magical damage each turn.`);
+                blazingDebuff.dotDamage = {
+                    magicalDamagePercent: 1.0 // 100% of Ibuki's Magical Damage
+                };
+                // The onTurnStart function captures the 'caster' (Ibuki) from its creation scope
+                blazingDebuff.onTurnStart = (characterUnderDebuff) => {
+                    if (characterUnderDebuff.isDead()) return;
+
+                    // Calculate damage based on Ibuki's current magical damage
+                    const dotDamage = Math.floor(caster.stats.magicalDamage * blazingDebuff.dotDamage.magicalDamagePercent);
+
+                    if (dotDamage > 0) {
+                        characterUnderDebuff.applyDamage(dotDamage, 'magical', caster, {
+                            isTalentEffect: true, // Custom flag for talent-based damage
+                            abilityId: 'infernal_kunais_dot',
+                            talentId: 'infernal_ibuki_t20'
+                        });
+                        window.gameManager.addLogEntry(
+                            `${characterUnderDebuff.name} burns from Blazing for ${dotDamage} magical damage!`,
+                            'debuff-effect'
+                        );
+                        // TODO: Add VFX for blazing damage (showBlazingDamageVFX)
+                    }
+                };
+                // Add the debuff to the current target
+                currentTarget.addDebuff(blazingDebuff);
+                log(`${currentTarget.name} is now Blazing!`);
+            }
+        }
+    }
+    // Record ability usage once after all kunais are thrown
     if (window.statisticsManager) {
         window.statisticsManager.recordAbilityUsage(caster, 'kunai_throw', 'use', 1);
-        window.statisticsManager.recordDamageDealt(caster, target, damageResult.damage, 'physical', damageResult.isCritical, 'kunai_throw');
     }
 
-    const stackText = caster.kunaiStacks ? ` (Passive: +${(caster.kunaiStacks * 10)}%)` : '';
-    log(`${caster.name} throws a Kunai at ${target.name}, dealing ${damageResult.damage} physical damage${stackText}${damageResult.isCritical ? ' (Critical!)' : ''}`);
-
-    // Play sounds
-    playSound('sounds/kunai_throw.mp3', 0.7);
-
-    // Show enhanced VFX
-    showEnhancedKunaiTossVFX(caster, target);
-
-    // Update UI
-    if (typeof updateCharacterUI === 'function') {
-        updateCharacterUI(target);
+    // --- BEGIN: Ayane-style "does not end turn" logic for Kunai Mastery Awakening ---
+    // If talent is active, always prevent turn end (does not call acted), matching Ayane's Q logic
+    // This must work regardless of game state, and must not call acted or end the turn
+    let kunaiMasteryActive = false;
+    // Check for the correct talent ID only
+    if (caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t2')) {
+        kunaiMasteryActive = true;
     }
+
+    if (kunaiMasteryActive) {
+        // Set cooldown to 0 on the actual ability instance (for this use)
+        if (caster.abilities && Array.isArray(caster.abilities)) {
+            for (let i = 0; i < caster.abilities.length; i++) {
+                const ab = caster.abilities[i];
+                if (ab && (ab.id === 'kunai_throw' || ab.name === 'Kunai Throw')) {
+                    ab.cooldown = 0;
+                    ab.currentCooldown = 0;
+                }
+            }
+        }
+        // 17% chance NOT to end your turn (matches talent description)
+        // Default to 0.17 if not set on ability
+        let notEndTurnChance = 0.17;
+        if (caster.abilities && Array.isArray(caster.abilities)) {
+            const kunaiAbility = caster.abilities.find(ab => ab && (ab.id === 'kunai_throw' || ab.name === 'Kunai Throw'));
+            if (kunaiAbility && typeof kunaiAbility.kunaiEndTurnChance === 'number') {
+                notEndTurnChance = kunaiAbility.kunaiEndTurnChance;
+            }
+        }
+        if (Math.random() < notEndTurnChance) {
+            // You can act again!
+            if (window.gameManager && typeof window.gameManager.addLogEntry === 'function') {
+                window.gameManager.addLogEntry(`${caster.name}'s Kunai Mastery Awakening: You can act again!`, 'special');
+            } else {
+                log(`%c${caster.name}'s Kunai Mastery Awakening: You can act again!`, 'color: #ff9900; font-weight: bold; text-shadow: 0 0 2px #fff, 0 0 8px #ff9900;');
+            }
+            if (window.gameManager && typeof window.gameManager.preventTurnEnd === 'function') {
+                window.gameManager.preventTurnEnd();
+            } else if (window.gameManager) {
+                window.gameManager.preventTurnEndFlag = true;
+                log(`${caster.name}'s Kunai Mastery Awakening: fallback preventTurnEndFlag`);
+            }
+            // Do NOT call acted or end the turn here
+            // --- Fix for white screen: forcibly return here to prevent double turn logic ---
+            return true;
+        } else {
+            // End turn as normal (do not prevent turn end)
+            if (window.gameManager && typeof window.gameManager.addLogEntry === 'function') {
+                window.gameManager.addLogEntry(`${caster.name}'s Kunai Mastery Awakening: Your turn ends!`, 'special');
+            } else {
+                log(`%c${caster.name}'s Kunai Mastery Awakening: Your turn ends!`, 'color: #ff9900; font-weight: bold; text-shadow: 0 0 2px #fff, 0 0 8px #ff9900;');
+            }
+            // Allow normal turn end (do not set preventTurnEnd)
+            return true;
+        }
+    }
+    // --- END: Ayane-style logic ---
 
     return true; // Indicate successful execution
 };
@@ -249,15 +558,75 @@ function showEnhancedKunaiTossVFX(caster, target) {
 
 
 // Create Ability object
+function getKunaiThrowDescription(character) {
+    // Use the dynamic bladeExpertiseBonusPerStack for the description and round for display
+    const expertiseBonus = character ? Math.round(character.bladeExpertiseBonusPerStack * 100) : 10;
+    let desc = `Deals 250 + 100% Physical Damage to the target.\nEach use grants +${expertiseBonus}% damage permanently (max 15 stacks).`;
+    let talents = [];
+    if (character && Array.isArray(character.appliedTalents)) {
+        talents = character.appliedTalents;
+    }
+    // Elemental Mastery
+    if (talents.includes('infernal_ibuki_t1')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Also scales with +50% Magical Damage.</b>`;
+    }
+    // Kunai Mastery Awakening
+    if (talents.includes('infernal_ibuki_t2')) {
+        desc += `\n<b style='color:#ff9900;'>[Talent] Cooldown reduced to 0. <b>17% chance NOT to end your turn</b> (does not call acted).</b>`;
+    }
+    if (talents.includes('infernal_ibuki_t5')) {
+        desc += `\n<b style='color:#90ee90;'>[Talent] Critical strikes heal you for 25% of the damage dealt.</b>`;
+    }
+    if (talents.includes('infernal_ibuki_t7')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Also benefits from +${expertiseBonus}% total damage per Blade Expertise stack.</b>`;
+    }
+    // Kunai Barrage
+    if (talents.includes('infernal_ibuki_t11')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Now hits all enemies (100% main target, 70% other enemies).</b>`;
+    }
+    // Twin Shadow Strike
+    if (talents.includes('infernal_ibuki_t15')) {
+        desc += `\n<b style='color:#ff9900;'>[Talent] While Shadow Veil is active, throws two kunais instead of one.</b>`;
+    }
+    // Infernal Kunais
+    if (talents.includes('infernal_ibuki_t20')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Applies a permanent Blazing debuff, dealing 100% Magical Damage per turn.</b>`;
+    }
+    return desc;
+}
+
 const kunaiThrowAbility = new Ability(
     'kunai_throw',
     'Kunai Throw',
     'Icons/abilities/kunai_toss.png',
     40, // Mana cost
-    1,  // Cooldown
+    1,  // Cooldown (will be set to 0 by talent modifier if needed)
     kunaiThrowEffect
-).setDescription('Deals 250 + 100% Physical Damage to the target. Each use grants +10% damage permanently (max 15 stacks).')
+).setDescription(getKunaiThrowDescription())
  .setTargetType('enemy');
+
+// Listen for talent changes and update description live
+if (window.addEventListener) {
+    window.addEventListener('talentsChanged', function() {
+        if (kunaiThrowAbility && typeof kunaiThrowAbility.setDescription === 'function') {
+            // Pass the character to getKunaiThrowDescription for dynamic updates
+            const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.id === 'infernal_ibuki');
+            kunaiThrowAbility.setDescription(getKunaiThrowDescription(character));
+            console.log('[Kunai Q Desc] talentsChanged event: description updated');
+        }
+    });
+    // Also update on DOMContentLoaded in case talents are set late
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (kunaiThrowAbility && typeof kunaiThrowAbility.setDescription === 'function') {
+                // Pass the character to getKunaiThrowDescription for dynamic updates
+                const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.id === 'infernal_ibuki');
+                kunaiThrowAbility.setDescription(getKunaiThrowDescription(character));
+                console.log('[Kunai Q Desc] DOMContentLoaded: description updated');
+            }
+        }, 100); // slight delay to allow talents to be set
+    });
+}
 
 // --- Shadow Veil Ability ---
 
@@ -301,50 +670,133 @@ const shadowVeilEffect = (caster, target) => {
              }
         },
         isDebuff: false,
-        isUntargetable: true,
-        description: "Untargetable by abilities."
+        isUntargetableByEnemies: true,
+        description: "Untargetable by enemies only."
     };
 
-    // Dodge bonus buff for 3 turns
+    const talent18Active = caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t18');
+
+    // Dodge bonus buff for 3 turns (modified by t18)
     const dodgeBuff = {
-        id: 'shadow_veil_dodge',
-        name: 'Shadow Reflexes',
+        id: talent18Active ? 'shadow_dance_mastery_dodge_t18' : 'shadow_veil_dodge',
+        name: talent18Active ? 'Shadow Dance Mastery (Dodge)' : 'Shadow Reflexes',
         icon: 'Icons/abilities/shadow_step.png',
         duration: 3,
-        effect: (target) => {
-            target.stats.dodgeChance += 0.25; // +25% dodge
-        },
-        onApply: (target) => {
-            target.stats.dodgeChance = Math.min(0.95, target.stats.dodgeChance + 0.25); // Cap at 95%
-        },
-        onRemove: (target) => {
-            target.stats.dodgeChance = Math.max(0, target.stats.dodgeChance - 0.25);
-        },
+        statModifiers: [{ stat: 'dodgeChance', value: talent18Active ? 1.0 : 0.25, operation: 'set' }], // 100% dodge for t18
         isDebuff: false,
-        description: "+25% dodge chance."
+        description: talent18Active ? "100% dodge chance." : "+25% dodge chance."
     };
 
-    // Apply both buffs
-    const untargetableEffect = new Effect(untargetableBuff.id, untargetableBuff.name, untargetableBuff.icon, untargetableBuff.duration, untargetableBuff.effect, untargetableBuff.isDebuff);
-    untargetableEffect.isUntargetable = untargetableBuff.isUntargetable;
+    // Shadow Dancer talent buff (20% crit chance)
+    let shadowDancerBuff = null;
+    if (caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t5')) {
+        shadowDancerBuff = {
+            id: 'shadow_dancer_crit_buff',
+            name: 'Shadow Dancer',
+            icon: 'Icons/abilities/shadow_step.png', // Use ability image
+            duration: 3, // Same duration as Shadow Veil
+            statModifiers: [{ stat: 'critChance', value: 0.20, operation: 'add' }], // +20% crit chance
+            isDebuff: false,
+            description: "Gain 20% crit chance while Shadow Veil is active."
+        };
+    }
+
+    // Twin Shadow Strike talent: Allows Kunai Throw to throw two kunais
+    let twinShadowStrikeBuff = null;
+    if (caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t15')) {
+        twinShadowStrikeBuff = {
+            id: 'twin_shadow_strike_buff',
+            name: 'Twin Shadow Strike',
+            icon: 'Icons/talents/infernal_ibuki_t15.png',
+            duration: 3, // Same duration as Shadow Veil
+            onApply: (target) => {
+                target.canThrowTwoKunais = true;
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`<span class="talent-enhanced">${target.name}'s Twin Shadow Strike activates! Kunai Throw now launches two kunais!</span>`);
+            },
+            onRemove: (target) => {
+                target.canThrowTwoKunais = false;
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`<span class="talent-enhanced">${target.name}'s Twin Shadow Strike deactivates. Kunai Throw returns to single kunai.</span>`);
+            },
+            isDebuff: false,
+            description: "Kunai Throw launches two kunais while Shadow Veil is active."
+        };
+    }
+
+    // Apply buffs
+    const untargetableEffect = new Effect(untargetableBuff.id, untargetableBuff.name, untargetableBuff.icon, untargetableBuff.duration, null, untargetableBuff.isDebuff);
+    untargetableEffect.isUntargetableByEnemies = untargetableBuff.isUntargetableByEnemies;
     untargetableEffect.onApply = untargetableBuff.onApply;
     untargetableEffect.onRemove = untargetableBuff.onRemove;
     untargetableEffect.setDescription(untargetableBuff.description);
 
-    const dodgeEffect = new Effect(dodgeBuff.id, dodgeBuff.name, dodgeBuff.icon, dodgeBuff.duration, dodgeBuff.effect, dodgeBuff.isDebuff);
-    dodgeEffect.onApply = dodgeBuff.onApply;
-    dodgeEffect.onRemove = dodgeBuff.onRemove;
+    const dodgeEffect = new Effect(dodgeBuff.id, dodgeBuff.name, dodgeBuff.icon, dodgeBuff.duration, null, dodgeBuff.isDebuff);
+    dodgeEffect.statModifiers = dodgeBuff.statModifiers; // Assign stat modifiers directly
     dodgeEffect.setDescription(dodgeBuff.description);
 
     caster.addBuff(untargetableEffect);
     caster.addBuff(dodgeEffect);
 
+    // Add Shadow Dancer buff if talent is active
+    if (shadowDancerBuff) {
+        const critBuffInstance = new Effect(shadowDancerBuff.id, shadowDancerBuff.name, shadowDancerBuff.icon, shadowDancerBuff.duration, null, shadowDancerBuff.isDebuff);
+        critBuffInstance.statModifiers = shadowDancerBuff.statModifiers;
+        critBuffInstance.setDescription(shadowDancerBuff.description);
+        caster.addBuff(critBuffInstance);
+    }
+
+    // Add Twin Shadow Strike buff if talent is active
+    if (twinShadowStrikeBuff) {
+        const twinStrikeBuffInstance = new Effect(twinShadowStrikeBuff.id, twinShadowStrikeBuff.name, twinShadowStrikeBuff.icon, twinShadowStrikeBuff.duration, null, twinShadowStrikeBuff.isDebuff);
+        twinStrikeBuffInstance.onApply = twinShadowStrikeBuff.onApply;
+        twinStrikeBuffInstance.onRemove = twinShadowStrikeBuff.onRemove;
+        twinStrikeBuffInstance.setDescription(twinShadowStrikeBuff.description);
+        caster.addBuff(twinStrikeBuffInstance);
+    }
+
+    // Add Shadow Dance Mastery (t18) combined buff if talent is active
+    if (talent18Active) {
+        const shadowDanceMasteryBuff = new Effect(
+            'shadow_dance_mastery_t18_buff',
+            'Shadow Dance Mastery',
+            'Icons/talents/infernal_ibuki_t18.png', // Using the talent icon for the combined buff
+            3, // Same duration as Shadow Veil
+            null, // No per-turn effect function needed for these stat mods
+            false // isDebuff
+        );
+        shadowDanceMasteryBuff.statModifiers = [
+            { stat: 'lifesteal', value: 0.30, operation: 'add' },
+            { stat: 'critChance', value: 0.50, operation: 'add' },
+            { stat: 'hpPerTurn', value: 50, operation: 'add' } // Corrected stat name
+        ];
+        shadowDanceMasteryBuff.setDescription("While in Shadow Dance, you have 100% dodge chance, gain 30% Lifesteal, 50% Crit Chance, and 50 HP Regen.");
+
+        caster.addBuff(shadowDanceMasteryBuff);
+        log(`${caster.name}'s Shadow Dance Mastery activates! She gains powerful combined buffs!`, 'talent');
+    }
+
     // Track statistics
     if (window.statisticsManager) {
         window.statisticsManager.recordAbilityUsage(caster, 'shadow_veil', 'use', 1);
-        window.statisticsManager.recordAbilityUsage(caster, 'shadow_veil', 'buff', 2); // 2 buffs applied
-        window.statisticsManager.recordStatusEffect(caster, caster, 'buff', 'shadow_veil_untargetable', false, 'shadow_veil');
-        window.statisticsManager.recordStatusEffect(caster, caster, 'buff', 'shadow_veil_dodge', false, 'shadow_veil');
+        let buffsAppliedCount = 2; // Untargetable and Dodge buffs (from base Shadow Veil)
+
+        window.statisticsManager.recordStatusEffect(caster, caster, 'buff', untargetableBuff.id, false, 'shadow_veil');
+        window.statisticsManager.recordStatusEffect(caster, caster, 'buff', dodgeBuff.id, false, 'shadow_veil');
+
+        if (shadowDancerBuff) {
+            buffsAppliedCount++;
+            window.statisticsManager.recordStatusEffect(caster, caster, 'buff', shadowDancerBuff.id, false, 'shadow_veil');
+        }
+        if (twinShadowStrikeBuff) {
+            buffsAppliedCount++;
+            window.statisticsManager.recordStatusEffect(caster, caster, 'buff', twinShadowStrikeBuff.id, false, 'shadow_veil');
+        }
+        if (talent18Active) {
+            buffsAppliedCount++; // Only one buff for Shadow Dance Mastery
+            window.statisticsManager.recordStatusEffect(caster, caster, 'buff', 'shadow_dance_mastery_t18_buff', false, 'shadow_veil');
+        }
+        window.statisticsManager.recordAbilityUsage(caster, 'shadow_veil', 'buff', buffsAppliedCount); // Total buffs applied
     }
 
     log(`${caster.name} uses Shadow Veil and becomes untargetable while gaining enhanced reflexes!`, 'ability');
@@ -359,6 +811,19 @@ const shadowVeilEffect = (caster, target) => {
 };
 
 // Create Ability object for Shadow Veil
+function getShadowVeilDescription(character) {
+    let desc = 'Become untargetable by enemies for 3 turns and gain +25% dodge chance for 3 turns.';
+    let talents = [];
+    if (character && Array.isArray(character.appliedTalents)) {
+        talents = character.appliedTalents;
+    }
+    // Swift Shadow
+    if (talents.includes('infernal_ibuki_t16')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Cooldown reduced by 2 turns.</b>`;
+    }
+    return desc;
+}
+
 const shadowVeilAbility = new Ability(
     'shadow_veil',
     'Shadow Veil',
@@ -366,8 +831,28 @@ const shadowVeilAbility = new Ability(
     90, // Mana cost
     11, // Cooldown
     shadowVeilEffect
-).setDescription('Become untargetable by enemies for 3 turns and gain +25% dodge chance for 3 turns.')
+).setDescription(getShadowVeilDescription())
  .setTargetType('self');
+
+// Listen for talent changes and update description live
+if (window.addEventListener) {
+    window.addEventListener('talentsChanged', function() {
+        if (shadowVeilAbility && typeof shadowVeilAbility.setDescription === 'function') {
+            const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.id === 'infernal_ibuki');
+            shadowVeilAbility.setDescription(getShadowVeilDescription(character));
+            console.log('[Shadow Veil Desc] talentsChanged event: description updated');
+        }
+    });
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (shadowVeilAbility && typeof shadowVeilAbility.setDescription === 'function') {
+                const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.id === 'infernal_ibuki');
+                shadowVeilAbility.setDescription(getShadowVeilDescription(character));
+                console.log('[Shadow Veil Desc] DOMContentLoaded: description updated');
+            }
+        }, 100);
+    });
+}
 // --- End Shadow Veil Ability ---
 
 // --- Dashing Strike Ability ---
@@ -495,18 +980,67 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
     const physicalDamagePercent = 1.8; // Updated scaling: 180%
     const baseDamage = Math.floor((caster.stats.physicalDamage || 0) * physicalDamagePercent);
 
+    // Apply Blade Expertise passive multiplier if talent is active
+    let passiveMultiplier = 1;
+    if (caster.appliedTalents && caster.appliedTalents.includes('infernal_ibuki_t7') && caster.kunaiStacks !== undefined) {
+        // Use the dynamic bladeExpertiseBonusPerStack
+        passiveMultiplier = (1 + (caster.kunaiStacks * (caster.bladeExpertiseBonusPerStack || 0.10))); 
+    }
+    let actualDamage = baseDamage * passiveMultiplier;
+
+    // Shadow Strike Talent: Additional magical damage if target is Obscured
+    if (caster.shadowStrikeBonusEnabled && currentTarget.debuffs && currentTarget.debuffs.some(d => d.id.startsWith('obscured_debuff'))) {
+        const shadowStrikeBonus = caster.stats.magicalDamage * 2.0; // 200% Magical Damage
+        actualDamage += shadowStrikeBonus;
+        log(`${caster.name}'s Shadow Strike adds ${shadowStrikeBonus} magical damage to ${currentTarget.name}!`, 'talent-enhanced');
+    }
+
     // Apply critical hit check separately for each hit in the chain
-    let actualDamage = baseDamage;
     let isCritical = false;
     if (Math.random() < (caster.stats.critChance || 0)) {
-        actualDamage = Math.floor(baseDamage * (caster.stats.critDamage || 1.5));
+        actualDamage = Math.floor(actualDamage * (caster.stats.critDamage || 1.5));
         isCritical = true;
     }
 
     // Apply damage (uses target's defenses)
-    const damageResult = currentTarget.applyDamage(actualDamage, damageType, caster, { abilityId: 'swift_strike' });
-    if (isCritical) {
-        damageResult.isCritical = true;
+    const damageResult = currentTarget.applyDamage(actualDamage, damageType, caster, { abilityId: 'swift_strike', isCritical: isCritical });
+    damageResult.isCritical = isCritical; // Explicitly set the flag
+    console.log(`[Urarenge Debug] damageResult.isCritical: ${damageResult.isCritical}`);
+
+    // Debilitating Strikes VFX check
+    if (caster.debilitatingStrikesEnabled && currentTarget.debuffs && currentTarget.debuffs.length > 0) {
+        // Check if the target has at least one debuff
+        const hasDebuff = currentTarget.debuffs.some(debuff => debuff.isDebuff === true);
+        if (hasDebuff) {
+            console.log('[Debilitating Strikes] Triggering VFX on target:', currentTarget.name);
+            if (typeof window.showDebilitatingStrikesVFX === 'function') {
+                window.showDebilitatingStrikesVFX(currentTarget);
+            }
+        }
+    }
+
+    // Urarenge Talent: If the attack is a critical hit, strike again
+    const swiftStrikeAbility = caster.abilities.find(ability => ability.id === 'swift_strike');
+    if (damageResult.isCritical && swiftStrikeAbility && swiftStrikeAbility.urarenge) {
+        log(`${caster.name}'s Urarenge talent triggers, striking again!`, 'talent');
+        playSound('sounds/unrelenting_assault.mp3', 0.8);
+
+        // Apply the same damage again
+        const extraDamageResult = currentTarget.applyDamage(actualDamage, damageType, caster, { abilityId: 'swift_strike_urarenge', isCritical: true });
+        log(`${caster.name} strikes ${currentTarget.name} again for ${extraDamageResult.damage} physical damage!`, 'info');
+
+        // Show floating damage number for the extra hit
+        const targetElementId = currentTarget.instanceId || currentTarget.id;
+        const targetElement = document.getElementById(`character-${targetElementId}`);
+        if (targetElement) {
+            const extraDamageNumber = document.createElement('div');
+            extraDamageNumber.className = `damage-number physical critical`;
+            extraDamageNumber.textContent = extraDamageResult.damage;
+            extraDamageNumber.style.setProperty('--offset-x', `${(Math.random() * 40) - 20}px`);
+            extraDamageNumber.style.setProperty('--offset-y', `-30px`); // Position it slightly differently
+            targetElement.appendChild(extraDamageNumber);
+            setTimeout(() => extraDamageNumber.remove(), 1500);
+        }
     }
 
     // Track statistics
@@ -696,6 +1230,32 @@ const swiftStrikeEffect = async (caster, target) => {
 };
 
 // Create Ability object for Swift Strike
+function getSwiftStrikeDescription(character) {
+    // Use the dynamic bladeExpertiseBonusPerStack for the description and round for display
+    const expertiseBonus = character ? Math.round(character.bladeExpertiseBonusPerStack * 100) : 10;
+    let desc = `Deals 180% Physical Damage. 45% chance to dash to another enemy and repeat (max 2 chains).`;
+    let talents = [];
+    if (character && Array.isArray(character.appliedTalents)) {
+        talents = character.appliedTalents;
+    }
+    if (talents.includes('infernal_ibuki_t4')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] If Swift Strike Crits, it deals damage to the same target again.</b>`;
+    }
+    if (talents.includes('infernal_ibuki_t5')) {
+        desc += `\n<b style='color:#90ee90;'>[Talent] Critical strikes heal you for 25% of the damage dealt.</b>`;
+    }
+    if (talents.includes('infernal_ibuki_t7')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Also benefits from +${expertiseBonus}% total damage per Blade Expertise stack.</b>`;
+    }
+    if (talents.includes('infernal_ibuki_t12')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] Attacking an Obscured target deals additional 200% Magical Damage.</b>`;
+    }
+    if (talents.includes('infernal_ibuki_t21')) {
+        desc += `\n<b style='color:#ff2222;'>[Talent] If Swift Strike Crits, it deals damage to the same target again.</b>`;
+    }
+    return desc;
+}
+
 const swiftStrikeAbility = new Ability(
     'swift_strike',
     'Swift Strike',
@@ -703,7 +1263,7 @@ const swiftStrikeAbility = new Ability(
     85, // Mana cost
     6,  // Cooldown - BALANCED: Reduced from 8 to 6
     swiftStrikeEffect
-).setDescription('Deals 180% Physical Damage. 45% chance to dash to another enemy and repeat (max 2 chains).')
+).setDescription(getSwiftStrikeDescription())
  .setTargetType('enemy');
 // --- End Swift Strike Ability ---
 
@@ -754,16 +1314,26 @@ const smokeBombEffect = (caster, target) => {
         
         // Add custom properties for the miss chance and DOT damage
         obscuredDebuff.missChance = 0.20;
+        // Find the specific smoke_bomb ability instance on the caster, which will have talent modifications
+        const smokeBombAbilityInstance = caster.abilities.find(ab => ab.id === 'smoke_bomb');
+        const dotFixedAmount = smokeBombAbilityInstance ? (smokeBombAbilityInstance.baseDamage || 55) : 55;
+        const dotMagicalScaling = smokeBombAbilityInstance ? (smokeBombAbilityInstance.magicalScaling || 0.50) : 0.50;
+        
+        console.log(`[Smoke Bomb Effect Debug] Found smokeBombAbilityInstance on caster:`, smokeBombAbilityInstance);
+        console.log(`[Smoke Bomb Effect Debug] Using dotFixedAmount: ${dotFixedAmount}`);
+        console.log(`[Smoke Bomb Effect Debug] Using dotMagicalScaling: ${dotMagicalScaling}`);
+        console.log(`[Smoke Bomb Effect Debug] caster.stats.magicalDamage: ${caster.stats.magicalDamage}`);
+
         obscuredDebuff.dotDamage = {
-            fixedAmount: 55,
-            magicalDamagePercent: 0.50
+            fixedAmount: dotFixedAmount,
+            magicalDamagePercent: dotMagicalScaling
         };
         
         // Add onTurnStart callback for DOT damage
         obscuredDebuff.onTurnStart = (character) => {
             if (character.isDead()) return;
             
-            // Calculate DOT damage: 55 + 50% of Ibuki's magical damage
+            // Calculate DOT damage using the debuff's own properties
             const dotDamage = Math.floor(obscuredDebuff.dotDamage.fixedAmount + (caster.stats.magicalDamage * obscuredDebuff.dotDamage.magicalDamagePercent));
             
             // Apply DOT damage
@@ -788,44 +1358,65 @@ const smokeBombEffect = (caster, target) => {
         };
         
         // Add cleanup logic when debuff is removed
-        obscuredDebuff.remove = function(character) {
-            // Check if any other characters still have the obscured debuff
-            const allCharacters = [...(gameState.playerCharacters || []), ...(gameState.aiCharacters || [])];
-            const stillObscured = allCharacters.some(char => 
-                !char.isDead() && 
-                char !== character && 
-                char.debuffs && 
-                char.debuffs.some(debuff => debuff.id.startsWith('obscured_debuff'))
-            );
-            
-            // If no one else is obscured, remove the smoke VFX
-            if (!stillObscured && window.smokeBombOverlay) {
-                gameManager.addLogEntry('The obscuring smoke begins to clear...', 'system');
-                
-                // Add fade out animation
-                window.smokeBombOverlay.style.transition = 'opacity 3s ease-out';
-                window.smokeBombOverlay.style.opacity = '0';
-                
-                // Remove after fade out
-                setTimeout(() => {
-                    if (window.smokeBombOverlay && window.smokeBombOverlay.parentNode) {
-                        window.smokeBombOverlay.remove();
-                        window.smokeBombOverlay = null;
-                    }
-                }, 3000);
+        obscuredDebuff.onRemove = function(character) {
+            console.log(`[Smoke Bomb - ONREMOVE] Debuff for ${character.name} being removed. Initial obscuredDebuffCount: ${window.gameManager ? window.gameManager.obscuredDebuffCount : 'N/A'}`);
+
+            // Decrement global counter for obscured debuffs
+            if (window.gameManager && typeof window.gameManager.obscuredDebuffCount !== 'undefined') {
+                window.gameManager.obscuredDebuffCount--;
+                console.log(`[Smoke Bomb - ONREMOVE] Obscured debuff count after decrement: ${window.gameManager.obscuredDebuffCount}`);
+
+                // If no characters are obscured AND the overlay exists, remove the VFX
+                const shouldRemoveOverlay = window.gameManager.obscuredDebuffCount <= 0;
+                const overlayExists = !!window.smokeBombOverlay;
+
+                console.log(`[Smoke Bomb - ONREMOVE] Should remove overlay: ${shouldRemoveOverlay}, Overlay exists: ${overlayExists}`);
+
+                if (shouldRemoveOverlay && overlayExists) {
+                    gameManager.addLogEntry('The obscuring smoke begins to clear...', 'system');
+                    window.smokeBombOverlay.style.transition = 'opacity 3s ease-out';
+                    window.smokeBombOverlay.style.opacity = '0';
+                    console.log('[Smoke Bomb - ONREMOVE] Initiating overlay removal with 3s fade-out.');
+                    setTimeout(() => {
+                        if (window.smokeBombOverlay && window.smokeBombOverlay.parentNode) {
+                            window.smokeBombOverlay.remove();
+                            window.smokeBombOverlay = null;
+                            console.log('[Smoke Bomb - ONREMOVE] Overlay fully removed after timeout.');
+                        } else {
+                            console.log('[Smoke Bomb - ONREMOVE] Overlay already removed or not found during timeout.');
+                        }
+                    }, 3000);
+                } else if (window.gameManager.obscuredDebuffCount > 0) {
+                    console.log(`[Smoke Bomb - ONREMOVE] Not removing overlay: ${window.gameManager.obscuredDebuffCount} characters still obscured.`);
+                } else if (!overlayExists) {
+                    console.log('[Smoke Bomb - ONREMOVE] Not removing overlay: smokeBombOverlay does not exist.');
+                }
+            } else {
+                console.warn('[Smoke Bomb - ONREMOVE] window.gameManager or obscuredDebuffCount is undefined. Cannot process removal logic.');
             }
         };
         
         // Apply the unique debuff to this enemy
         enemy.addDebuff(obscuredDebuff);
+
+        // Initialize and increment global counter for obscured debuffs
+        if (window.gameManager) {
+            if (typeof window.gameManager.obscuredDebuffCount === 'undefined') {
+                window.gameManager.obscuredDebuffCount = 0;
+            }
+            window.gameManager.obscuredDebuffCount++;
+            console.log(`[Smoke Bomb] Obscured debuff applied to ${enemy.name}. Total obscured: ${window.gameManager.obscuredDebuffCount}`);
+        }
         
         // Track statistics for debuff application
         if (window.statisticsManager) {
             window.statisticsManager.recordStatusEffect(caster, enemy, 'debuff', 'obscured_debuff', true, 'smoke_bomb');
         }
         
+        // Calculate the actual damage once the debuff properties are set
+        const actualLogDamage = Math.floor(dotFixedAmount + (caster.stats.magicalDamage * dotMagicalScaling));
         gameManager.addLogEntry(
-            `${enemy.name} is obscured by smoke! (20% miss chance, ${Math.floor(55 + (caster.stats.magicalDamage * 0.5))} damage/turn)`,
+            `${enemy.name} is obscured by smoke! (20% miss chance, ${actualLogDamage} damage/turn)`,
             'debuff-applied'
         );
     });
@@ -1070,6 +1661,23 @@ function showSmokeDamageVFX(character, damageAmount) {
     }, 2500);
 }
 
+function getSmokeBombDescription(character) {
+    let baseFixedDamage = 55;
+    let baseMagicalScaling = 0.50;
+
+    let talents = [];
+    if (character && Array.isArray(character.appliedTalents)) {
+        talents = character.appliedTalents;
+    }
+
+    if (talents.includes('infernal_ibuki_t13')) {
+        baseFixedDamage += 50;
+        baseMagicalScaling += 0.20;
+    }
+
+    return `Creates obscuring smoke on the battlefield. All enemies gain Obscured for 4 turns: 20% chance to miss abilities and take ${baseFixedDamage} + ${Math.round(baseMagicalScaling * 100)}% Magical Damage each turn.`;
+}
+
 const smokeBombAbility = new Ability(
     'smoke_bomb',
     'Smoke Bomb',
@@ -1077,8 +1685,10 @@ const smokeBombAbility = new Ability(
     60, // Mana cost
     15, // Cooldown - BALANCED: Increased from 12 to 15
     smokeBombEffect
-).setDescription('Creates obscuring smoke on the battlefield. All enemies gain Obscured for 4 turns: 20% chance to miss abilities and take 55 + 50% Magical Damage each turn.')
+).setDescription(getSmokeBombDescription())
  .setTargetType('all_enemies');
+smokeBombAbility.baseDamage = 55; // Initialize baseDamage
+smokeBombAbility.magicalScaling = 0.50; // Initialize magicalScaling
 // --- End Smoke Bomb Ability ---
 
 
@@ -1103,8 +1713,52 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fallback
         window.definedAbilities = window.definedAbilities || {};
         window.definedAbilities.kunai_throw = kunaiThrowAbility;
-        window.definedAbilities.shadow_veil = shadowVeilAbility;
+        window.definedAbilities.shadow_veil = shadowAbilities;
         window.definedAbilities.swift_strike = swiftStrikeAbility;
         window.definedAbilities.smoke_bomb = smokeBombAbility;
     }
-}); 
+});
+
+// --- Ability Description Update Hook for TalentManager ---
+// This function will be called by TalentManager after talents are applied
+window.updateIbukiAbilityDescriptionsForTalents = function(character) {
+    if (!character) {
+        // Try to find the player character instance if not provided
+        if (window.gameManager && window.gameManager.gameState && window.gameManager.gameState.playerCharacters) {
+            character = window.gameManager.gameState.playerCharacters.find(c => c && c.id === 'infernal_ibuki');
+        }
+    }
+    if (!character) {
+        console.warn('[Ibuki Desc Update] updateIbukiAbilityDescriptionsForTalents: No character provided or found');
+        return;
+    }
+    // Update all abilities for this character
+    if (Array.isArray(character.abilities)) {
+        character.abilities.forEach(function(ability) {
+            if (ability && typeof ability.setDescription === 'function') {
+                if (ability.id === 'kunai_throw') {
+                    ability.setDescription(getKunaiThrowDescription(character));
+                } else if (ability.id === 'swift_strike') {
+                    ability.setDescription(getSwiftStrikeDescription(character));
+                } else if (ability.id === 'shadow_veil') {
+                    ability.setDescription(getShadowVeilDescription(character));
+                } else if (ability.id === 'smoke_bomb') {
+                    ability.setDescription(getSmokeBombDescription(character));
+                }
+            }
+        });
+    }
+    // Also update the global ability objects if they exist
+    if (typeof kunaiThrowAbility !== 'undefined' && kunaiThrowAbility && typeof kunaiThrowAbility.setDescription === 'function') {
+        kunaiThrowAbility.setDescription(getKunaiThrowDescription(character));
+    }
+    if (typeof swiftStrikeAbility !== 'undefined' && swiftStrikeAbility && typeof swiftStrikeAbility.setDescription === 'function') {
+        swiftStrikeAbility.setDescription(getSwiftStrikeDescription(character));
+    }
+    if (typeof shadowVeilAbility !== 'undefined' && shadowVeilAbility && typeof shadowVeilAbility.setDescription === 'function') {
+        shadowVeilAbility.setDescription(getShadowVeilDescription(character));
+    }
+    if (typeof smokeBombAbility !== 'undefined' && smokeBombAbility && typeof smokeBombAbility.setDescription === 'function') {
+        smokeBombAbility.setDescription(getSmokeBombDescription(character));
+    }
+};

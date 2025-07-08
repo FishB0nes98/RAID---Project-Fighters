@@ -2385,6 +2385,16 @@ Character.prototype.applyDamage = function(amount, type, caster = null, options 
         if (dodgeRoll < dodgeChance) {
             console.log(`[DODGE] ${this.name} dodged an attack! Roll: ${dodgeRoll.toFixed(3)}, Needed: <${dodgeChance.toFixed(3)}`);
             
+            // IMPORTANT: Call the character's dodge handler for passives
+            if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
+                console.log(`[DODGE EVENT] Calling onDodge for ${this.name} with passive handler`);
+                this.passiveHandler.onDodge(this, caster);
+            } else {
+                console.log(`[DODGE EVENT] No passive handler or onDodge method found for ${this.name}`);
+                console.log(`[DODGE EVENT] - passiveHandler exists: ${!!this.passiveHandler}`);
+                console.log(`[DODGE EVENT] - onDodge method exists: ${this.passiveHandler && typeof this.passiveHandler.onDodge === 'function'}`);
+            }
+            
             // If this is Farmer Nina and she has the Combat Reflexes talent, apply the critical buff
             if (this.id === 'farmer_nina' && this.appliedTalents && this.appliedTalents.includes('critical_dodge')) {
                 console.log(`[COMBAT REFLEXES] ${this.name} triggered Combat Reflexes talent from dodge`);
@@ -2406,6 +2416,21 @@ Character.prototype.applyDamage = function(amount, type, caster = null, options 
             // Add log entry
             const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : addLogEntry;
             log(`${this.name} dodged the attack!`, 'system');
+            
+            // Dispatch character:dodged event for talents to hook into
+            try {
+                document.dispatchEvent(new CustomEvent('character:dodged', {
+                    detail: {
+                        character: this,
+                        attacker: caster,
+                        damageAmount: amount,
+                        damageType: type
+                    }
+                }));
+                console.log(`[DODGE EVENT] Dispatched character:dodged event for ${this.name}`);
+            } catch (error) {
+                console.error(`[DODGE EVENT] Error dispatching character:dodged event for ${this.name}:`, error);
+            }
             
             // Zoey Agile Counterforce: apply buff when Zoey dodges
             if (this.id === 'zoey' && this.passiveHandler && typeof this.passiveHandler.applyAgileCounterforceBuff === 'function') {

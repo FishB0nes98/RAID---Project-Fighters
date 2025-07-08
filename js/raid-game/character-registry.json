@@ -855,7 +855,7 @@
         {
             "id": "necromatic_corrupted_bear",
             "name": "Necromatic Corrupted Bear",
-            "image": "Icons/characters/Necromatic Corrupted Bear.png",
+            "image": "Loading Screen/necromatic_corrupted_bear.png",
             "rarity": "epic",
             "type": "enemy",
             "tags": ["Forest", "Necromatic", "Physical"],

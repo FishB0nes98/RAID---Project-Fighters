@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Razor Edge Talent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: #ffffff;
+        }
+        .debug-container {
+            background-color: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background-color: #d73654;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #0f3460;
+            background-color: rgba(15, 52, 96, 0.3);
+        }
+        .log-entry.info {
+            border-left-color: #4CAF50;
+        }
+        .log-entry.error {
+            border-left-color: #f44336;
+            background-color: rgba(244, 67, 54, 0.1);
+        }
+        .log-entry.success {
+            border-left-color: #2196F3;
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Razor Edge Talent</h1>
+    
+    <div class="debug-container">
+        <h2>Test Configuration</h2>
+        <button class="test-button" onclick="testRazorEdgeTalent()">Test Razor Edge Application</button>
+        <button class="test-button" onclick="testDamageIncrease()">Test Damage Increase</button>
+        <button class="test-button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="debug-container">
+        <h2>Character Information</h2>
+        <div id="character-info">
+            <div class="character-info">
+                <strong>Before Talent:</strong> <span id="before-damage">-</span>
+            </div>
+            <div class="character-info">
+                <strong>After Talent:</strong> <span id="after-damage">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-container">
+        <h2>Test Log</h2>
+        <div id="test-log"></div>
+    </div>
+
+    <!-- Load necessary scripts -->
+    <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/talent-manager.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_ayane_abilities.js"></script>
+    
+    <script>
+        let ayane = null;
+        let ayaneAfterTalent = null;
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('test-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = '';
+            document.getElementById('before-damage').textContent = '-';
+            document.getElementById('after-damage').textContent = '-';
+        }
+
+        async function testRazorEdgeTalent() {
+            log('=== Starting Razor Edge Talent Test ===');
+            
+            try {
+                // Load character data
+                const response = await fetch('js/raid-game/characters/schoolgirl_ayane.json');
+                const charData = await response.json();
+                
+                log('Character data loaded', 'info');
+                
+                // Create character instance
+                const character = new Character(charData);
+                
+                log(`Character created: ${character.name}`, 'info');
+                
+                // Find Q ability
+                const qAbility = character.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+                if (qAbility) {
+                    log(`✓ Found Q ability: ${qAbility.name}`, 'info');
+                    log(`Initial base damage: ${qAbility.fixedDamage}`, 'info');
+                    document.getElementById('before-damage').textContent = qAbility.fixedDamage;
+                } else {
+                    log('✗ Q ability not found', 'error');
+                    return;
+                }
+                
+                // Apply talent
+                const talentManager = new TalentManager();
+                const selectedTalents = ['schoolgirl_ayane_t26'];
+                await talentManager.applyTalentsToCharacter(character, selectedTalents);
+                
+                log('Applied Razor Edge talent', 'success');
+                
+                // Check damage after talent
+                const qAbilityAfter = character.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+                if (qAbilityAfter) {
+                    log(`✓ Base damage after talent: ${qAbilityAfter.fixedDamage}`, 'success');
+                    document.getElementById('after-damage').textContent = qAbilityAfter.fixedDamage;
+                    
+                    const damageIncrease = qAbilityAfter.fixedDamage - qAbility.fixedDamage;
+                    log(`Damage increase: +${damageIncrease}`, damageIncrease === 115 ? 'success' : 'error');
+                    
+                    if (damageIncrease === 115) {
+                        log('🎉 Razor Edge talent working correctly!', 'success');
+                    } else {
+                        log(`❌ Expected +115 damage, got +${damageIncrease}`, 'error');
+                    }
+                }
+                
+                ayane = character;
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        }
+
+        async function testDamageIncrease() {
+            if (!ayane) {
+                log('Please run the talent test first', 'error');
+                return;
+            }
+            
+            log('=== Testing Damage Calculation ===');
+            
+            const qAbility = ayane.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+            if (qAbility) {
+                const baseDamage = qAbility.fixedDamage || 425;
+                const physicalDamage = ayane.stats.physicalDamage || 0;
+                const scaling = 0.55; // 55% physical damage scaling
+                
+                const totalDamage = baseDamage + (physicalDamage * scaling);
+                
+                log(`Base Damage: ${baseDamage}`, 'info');
+                log(`Physical Damage: ${physicalDamage}`, 'info');
+                log(`Scaling: ${scaling * 100}%`, 'info');
+                log(`Total Expected Damage: ${Math.floor(totalDamage)}`, 'success');
+            }
+        }
+
+        // Load scripts and run initial test
+        window.addEventListener('load', () => {
+            log('Page loaded, ready for testing');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Mastered Trail Stacking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .debug-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .log-entry {
+            background-color: #333;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Mastered Trail Stacking Issue</h1>
+    
+    <div class="debug-section">
+        <h2>Test Controls</h2>
+        <button onclick="testTalentStacking()">Test Talent Stacking</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Debug Logs</h2>
+        <div id="debug-logs"></div>
+    </div>
+
+    <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/abilities/schoolgirl_ayane_abilities.js"></script>
+    <script src="js/raid-game/talent-manager.js"></script>
+    <script src="js/raid-game/ability-modifier.js"></script>
+    
+    <script>
+        function log(message) {
+            const logsDiv = document.getElementById('debug-logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('debug-logs').innerHTML = '';
+        }
+        
+        async function testTalentStacking() {
+            log('=== Starting Talent Stacking Test ===');
+            
+            try {
+                // Load talents
+                const talentResponse = await fetch('js/raid-game/talents/schoolgirl_ayane_talents.json');
+                const talentData = await talentResponse.json();
+                
+                log('Loaded talents successfully');
+                
+                // Create a mock character with Ayane's abilities
+                const character = {
+                    id: 'schoolgirl_ayane',
+                    name: 'Schoolgirl Ayane',
+                    abilities: {},
+                    selectedTalents: []
+                };
+                
+                // Initialize abilities
+                if (typeof window.SchoolgirlAyaneAbilities !== 'undefined') {
+                    character.abilities = window.SchoolgirlAyaneAbilities.getAbilities();
+                    log('Initialized abilities');
+                } else {
+                    log('ERROR: SchoolgirlAyaneAbilities not found');
+                    return;
+                }
+                
+                // Check base W ability
+                const baseW = character.abilities['schoolgirl_ayane_w'];
+                if (baseW) {
+                    log(`Base W bonusMultiplier: ${baseW.bonusMultiplier}`);
+                } else {
+                    log('ERROR: Base W ability not found');
+                    return;
+                }
+                
+                // Test 1: Apply only Empowered Trail (t6)
+                log('\n--- Test 1: Apply Empowered Trail (t6) ---');
+                character.selectedTalents = ['schoolgirl_ayane_t6'];
+                
+                // Clone the ability
+                const clonedW1 = JSON.parse(JSON.stringify(baseW));
+                
+                // Apply talent t6
+                const t6 = talentData.talentTree['schoolgirl_ayane_t6'];
+                if (t6 && t6.effect.type === 'modify_ability') {
+                    const effect = t6.effect;
+                    if (effect.operation === 'add') {
+                        clonedW1[effect.property] += effect.value;
+                    }
+                    log(`Applied t6: ${effect.property} += ${effect.value}`);
+                    log(`After t6: bonusMultiplier = ${clonedW1.bonusMultiplier}`);
+                }
+                
+                // Test 2: Apply both Empowered Trail (t6) and Mastered Trail (t21)
+                log('\n--- Test 2: Apply both t6 and t21 ---');
+                character.selectedTalents = ['schoolgirl_ayane_t6', 'schoolgirl_ayane_t21'];
+                
+                // Clone the ability again
+                const clonedW2 = JSON.parse(JSON.stringify(baseW));
+                
+                // Apply talent t6
+                const t6Effect = t6.effect;
+                if (t6Effect.operation === 'add') {
+                    clonedW2[t6Effect.property] += t6Effect.value;
+                }
+                log(`Applied t6: ${t6Effect.property} += ${t6Effect.value}`);
+                log(`After t6: bonusMultiplier = ${clonedW2.bonusMultiplier}`);
+                
+                // Apply talent t21
+                const t21 = talentData.talentTree['schoolgirl_ayane_t21'];
+                if (t21 && t21.effect.type === 'modify_ability') {
+                    const effect = t21.effect;
+                    if (effect.operation === 'add') {
+                        clonedW2[effect.property] += effect.value;
+                    }
+                    log(`Applied t21: ${effect.property} += ${effect.value}`);
+                    log(`After t21: bonusMultiplier = ${clonedW2.bonusMultiplier}`);
+                }
+                
+                // Expected result
+                log(`\nExpected final bonusMultiplier: ${baseW.bonusMultiplier + 0.1 + 0.2} (base + t6 + t21)`);
+                log(`Actual final bonusMultiplier: ${clonedW2.bonusMultiplier}`);
+                
+                if (Math.abs(clonedW2.bonusMultiplier - (baseW.bonusMultiplier + 0.1 + 0.2)) < 0.001) {
+                    log('✅ STACKING WORKS CORRECTLY IN ISOLATION');
+                } else {
+                    log('❌ STACKING FAILED IN ISOLATION');
+                }
+                
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

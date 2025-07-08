@@ -165,14 +165,20 @@ class SkinSelector {
         // Get the basic character image from Loading Screen folder
         const basicImage = this.getBasicCharacterImage(character.characterId);
         
-        // Get current selected skin image (will be from Loading Screen folder too)
-        const currentSkinImage = character.currentSkin ? 
-            window.SkinRegistry.getSkin(character.currentSkin)?.imagePath || basicImage :
-            basicImage;
+        // Get current selected skin
+        const currentSkin = character.currentSkin ? window.SkinRegistry.getSkin(character.currentSkin) : null;
         
-        const currentSkinName = character.currentSkin ? 
-            window.SkinRegistry.getSkin(character.currentSkin)?.name || 'Unknown Skin' : 
-            'Default';
+        // Determine current skin media (video or image)
+        let currentSkinMedia;
+        if (currentSkin && currentSkin.hasVideo && window.SkinManager.getVideoPreference(character.characterId, character.currentSkin)) {
+            currentSkinMedia = `<video class="character-image" src="${currentSkin.videoPath}" autoplay muted loop></video>`;
+        } else {
+            const currentSkinImage = currentSkin ? (currentSkin.imagePath || basicImage) : basicImage;
+            currentSkinMedia = `<img class="character-image" src="${currentSkinImage}" alt="Current ${character.characterName}" 
+                                     onerror="this.src='Icons/characters/default.png'">`;
+        }
+        
+        const currentSkinName = currentSkin ? currentSkin.name : 'Default';
 
         return `
             <div class="character-card">
@@ -184,8 +190,7 @@ class SkinSelector {
                             <div class="image-label">Default</div>
                         </div>
                         <div class="character-image-half">
-                            <img class="character-image" src="${currentSkinImage}" alt="Current ${character.characterName}" 
-                                 onerror="this.src='Icons/characters/default.png'">
+                            ${currentSkinMedia}
                             <div class="image-label">Current</div>
                         </div>
                     </div>
@@ -242,17 +247,91 @@ class SkinSelector {
 
     // Create skin option HTML
     createSkinOption(skinId, characterId, name, imagePath, isSelected) {
+        const skin = skinId ? window.SkinRegistry.getSkin(skinId) : null;
+        const hasVideo = skin && skin.hasVideo;
+        const currentVideoPreference = hasVideo ? window.SkinManager.getVideoPreference(characterId, skinId) : false;
+        
         return `
             <div class="skin-option ${isSelected ? 'selected' : ''}" data-skin-id="${skinId || 'default'}">
-                <img class="skin-option-image" src="${imagePath}" alt="${name}" 
-                     onerror="this.src='Icons/characters/default.png'">
+                <div class="skin-option-media">
+                    ${hasVideo && currentVideoPreference ? 
+                        `<video class="skin-option-video" src="${skin.videoPath}" autoplay muted loop></video>` :
+                        `<img class="skin-option-image" src="${imagePath}" alt="${name}" 
+                             onerror="this.src='Icons/characters/default.png'">`
+                    }
+                    ${hasVideo ? `
+                        <div class="video-toggle-container">
+                            <label class="video-toggle-label">
+                                <input type="checkbox" class="video-toggle" 
+                                       ${currentVideoPreference ? 'checked' : ''} 
+                                       onchange="window.skinSelector.toggleVideoPreference('${characterId}', '${skinId}', this.checked)">
+                                <span class="video-toggle-text">🎬 Use Video</span>
+                            </label>
+                        </div>
+                    ` : ''}
+                </div>
                 <div class="skin-option-info">
                     <h4 class="skin-option-name">${name}</h4>
                     <p class="skin-option-type">${skinId ? 'Premium Skin' : 'Default Skin'}</p>
+                    ${hasVideo ? '<p class="skin-option-video-badge">🎬 Video Available</p>' : ''}
                 </div>
                 ${isSelected ? '<div class="selected-indicator">✓ Selected</div>' : ''}
             </div>
         `;
+    }
+
+    // Toggle video preference for a skin
+    async toggleVideoPreference(characterId, skinId, useVideo) {
+        try {
+            const result = await window.SkinManager.setVideoPreference(characterId, skinId, useVideo);
+            
+            if (result.success) {
+                this.showNotification(
+                    `Video preference updated! ${useVideo ? 'Video will be used' : 'Image will be used'}`, 
+                    'success'
+                );
+                
+                // Update the preview in the modal
+                const skinOption = document.querySelector(`[data-skin-id="${skinId}"]`);
+                if (skinOption) {
+                    this.updateSkinOptionPreview(skinOption, characterId, skinId, useVideo);
+                }
+            } else {
+                this.showNotification(result.error || 'Failed to update video preference', 'error');
+            }
+        } catch (error) {
+            console.error('[SkinSelector] Video preference error:', error);
+            this.showNotification('Failed to update video preference. Please try again.', 'error');
+        }
+    }
+
+    // Update skin option preview (switch between video and image)
+    updateSkinOptionPreview(skinOption, characterId, skinId, useVideo) {
+        const mediaContainer = skinOption.querySelector('.skin-option-media');
+        const skin = window.SkinRegistry.getSkin(skinId);
+        
+        if (!skin || !skin.hasVideo) return;
+        
+        const currentMedia = mediaContainer.querySelector('.skin-option-video, .skin-option-image');
+        
+        if (useVideo) {
+            // Replace with video
+            const video = document.createElement('video');
+            video.className = 'skin-option-video';
+            video.src = skin.videoPath;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            currentMedia.replaceWith(video);
+        } else {
+            // Replace with image
+            const image = document.createElement('img');
+            image.className = 'skin-option-image';
+            image.src = skin.imagePath;
+            image.alt = skin.name;
+            image.onerror = () => image.src = 'Icons/characters/default.png';
+            currentMedia.replaceWith(image);
+        }
     }
 
     // Select a skin
@@ -361,4 +440,4 @@ function closeSkinModal() {
 document.addEventListener('DOMContentLoaded', async () => {
     window.skinSelector = new SkinSelector();
     await window.skinSelector.init();
-}); 
+});

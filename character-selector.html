@@ -3754,6 +3754,7 @@ addShadowDaggerToGlobalInventory()
             let currentSelectionMode = 'story';
             let characterXPManager = null;
             let currentUserId = null; // Store current user ID globally
+            let isAdminUser = false;
 
             // UI Element Variables
             let characterGrid, storyContainer, stageContainer, weeklyChallengesContainer, teamSlotsContainer,
@@ -3842,9 +3843,37 @@ addShadowDaggerToGlobalInventory()
                 // Firebase Auth Check
                 firebaseAuth.onAuthStateChanged(async (user) => {
                     if (user) {
-                                                    console.log("User logged in:", user.uid);
+                        console.log("User logged in:", user.uid);
                         const userId = user.uid;
                         currentUserId = userId; // Set global user ID
+                        // ADMIN CHECK: If user is FishB0nes98, set isAdminUser = true
+                        // You can check by email or UID. We'll check both for robustness.
+                        let adminEmails = [
+                            "fishb0nes98@gmail.com",
+                            "fishb0nes98@protonmail.com",
+                            "micskomate@gmail.com" // Added your actual email
+                        ];
+                        let adminUIDs = [
+                            "FishB0nes98", // If UID is set to this
+                            "fishb0nes98", // Lowercase variant
+                            "u8Qw2v7k3Xb9z1A6L5N0", // Example Firebase UID
+                            "J1Wanf4kmFMTiG2xOLsvR9bsrYd2" // Added your actual UID
+                        ];
+                        // Log the actual UID and email for debugging
+                        console.log('[ADMIN DEBUG] Checking admin status...');
+                        console.log('[ADMIN DEBUG] user.uid:', user.uid);
+                        console.log('[ADMIN DEBUG] user.email:', user.email);
+                        const isEmailAdmin = user.email && adminEmails.includes(user.email);
+                        const isUidAdmin = adminUIDs.includes(user.uid);
+                        console.log('[ADMIN DEBUG] isEmailAdmin:', isEmailAdmin);
+                        console.log('[ADMIN DEBUG] isUidAdmin:', isUidAdmin);
+                        if (isEmailAdmin || isUidAdmin) {
+                            isAdminUser = true;
+                            console.log("[ADMIN] Admin user detected: FishB0nes98");
+                        } else {
+                            isAdminUser = false;
+                            console.log('[ADMIN DEBUG] User is NOT admin.');
+                        }
                         
                         // Initialize inventory system
                         if (window.InventoryIntegrationManager) {
@@ -4036,6 +4065,60 @@ addShadowDaggerToGlobalInventory()
                         }
                         
                         isLoadingUserData = false;
+                        // --- ADMIN: Always show target dummy stage for FishB0nes98 ---
+                        console.log('[ADMIN DEBUG] isAdminUser value at stage logic:', isAdminUser);
+                        if (isAdminUser) {
+                            console.log('[ADMIN DEBUG] Entered admin block for target dummy stage logic.');
+                            // Extra: log allStages and ownedStages before admin logic
+                            setTimeout(() => {
+                                try {
+                                    console.log('[ADMIN] (ASYNC PRE) allStages:', Array.isArray(allStages) ? allStages.map(s => s.id) : allStages);
+                                    console.log('[ADMIN] (ASYNC PRE) ownedStages:', Array.isArray(ownedStages) ? ownedStages : ownedStages);
+                                } catch (e) {
+                                    console.warn('[ADMIN] Could not log allStages/ownedStages:', e);
+                                }
+                            }, 1000);
+                            console.log('[ADMIN] Ensuring Target Dummy stage is visible and selectable for admin.');
+                            // Find the target dummy stage in allStages or create it if missing
+                            let targetDummyId = "test_dummy_stage";
+                            let targetDummyStage = allStages.find(s => s.id === targetDummyId);
+                            if (!targetDummyStage && stageRegistry && Array.isArray(stageRegistry.stages)) {
+                                targetDummyStage = stageRegistry.stages.find(s => s.id === targetDummyId);
+                                if (targetDummyStage) {
+                                    console.log('[ADMIN] Found test dummy stage in stageRegistry:', targetDummyStage);
+                                } else {
+                                    console.log('[ADMIN] Test dummy stage not found in stageRegistry.');
+                                }
+                            }
+                            if (targetDummyStage) {
+                                // Add to allStages if not present
+                                if (!allStages.some(s => s.id === targetDummyId)) {
+                                    allStages.push(targetDummyStage);
+                                    console.log('[ADMIN] Added test dummy stage to allStages.');
+                                } else {
+                                    console.log('[ADMIN] Test dummy stage already present in allStages.');
+                                }
+                                // Add to ownedStages if not present
+                                if (!ownedStages.includes(targetDummyId)) {
+                                    ownedStages.push(targetDummyId);
+                                    console.log('[ADMIN] Added test dummy stage to ownedStages.');
+                                } else {
+                                    console.log('[ADMIN] Test dummy stage already present in ownedStages.');
+                                }
+                            } else {
+                                console.warn('[ADMIN] Could not find test dummy stage definition.');
+                            }
+                            // Extra: log allStages and ownedStages after admin logic
+                            setTimeout(() => {
+                                try {
+                                    console.log('[ADMIN] (ASYNC POST) allStages:', Array.isArray(allStages) ? allStages.map(s => s.id) : allStages);
+                                    console.log('[ADMIN] (ASYNC POST) ownedStages:', Array.isArray(ownedStages) ? ownedStages : ownedStages);
+                                } catch (e) {
+                                    console.warn('[ADMIN] Could not log allStages/ownedStages (POST):', e);
+                                }
+                            }, 1200);
+                        }
+
                         // Re-populate/update grids now that user data is loaded
                         populateCharacterGrid(allCharacters);
                         populateStoryGrid(allStories);

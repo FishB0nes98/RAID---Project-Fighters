@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blade Mastery Talent Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #222; color: white; }
+        .character-container { 
+            position: relative; 
+            width: 120px; 
+            height: 120px; 
+            background: #444; 
+            border: 2px solid #fff; 
+            margin: 50px; 
+            display: inline-block;
+            overflow: visible;
+        }
+        .character-name { text-align: center; line-height: 120px; font-size: 12px; }
+        
+        /* Blade Mastery Indicator Styles */
+        .blade-mastery-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+            z-index: 50;
+            pointer-events: none;
+            border: 1px solid #ff4444;
+        }
+        
+        @keyframes blade-mastery-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 4px 8px rgba(255, 107, 107, 0.5); }
+        }
+        
+        @keyframes blade-mastery-stack-gain {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes blade-mastery-vfx-float {
+            0% { transform: translateY(0px); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+        }
+        
+        .blade-mastery-vfx {
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 0 0 4px rgba(255, 107, 107, 0.8);
+            z-index: 999;
+            pointer-events: none;
+            animation: blade-mastery-vfx-float 2s ease-out forwards;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #666;
+        }
+        
+        .stats {
+            margin: 20px 0;
+            padding: 15px;
+            background: #333;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blade Mastery Talent Test</h1>
+    
+    <div class="character-container" id="test-ayane">
+        <div class="character-name">AYANE</div>
+        <!-- Blade Mastery indicator will be added here -->
+    </div>
+    
+    <div class="controls">
+        <button onclick="addBladeMasteryIndicator()">Add Blade Mastery Indicator</button>
+        <button onclick="simulateDamageDealt()">Simulate Damage Dealt</button>
+        <button onclick="resetStacks()">Reset Stacks</button>
+        <button onclick="removeBladeMasteryIndicator()">Remove Indicator</button>
+    </div>
+    
+    <div class="stats" id="stats">
+        <h3>Test Character Stats</h3>
+        <p>Physical Damage: <span id="physical-damage">100</span></p>
+        <p>Blade Mastery Stacks: <span id="stacks">0</span></p>
+        <p>Bonus Damage: <span id="bonus-damage">0</span></p>
+    </div>
+    
+    <script>
+        // Test character object
+        const testCharacter = {
+            name: "Test Ayane",
+            id: "schoolgirl_ayane",
+            instanceId: "test-ayane",
+            stats: {
+                physicalDamage: 100
+            },
+            bladeMasteryConfig: {
+                damagePerHit: 4,
+                stacksInfinitely: true,
+                currentStacks: 0,
+                totalBonusDamage: 0
+            }
+        };
+        
+        function addBladeMasteryIndicator() {
+            const charElement = document.getElementById('test-ayane');
+            
+            // Remove existing indicator
+            removeBladeMasteryIndicator();
+            
+            const indicator = document.createElement('div');
+            indicator.className = 'blade-mastery-indicator';
+            indicator.style.animation = 'blade-mastery-pulse 2s ease-in-out infinite';
+            
+            const config = testCharacter.bladeMasteryConfig;
+            indicator.textContent = `⚔️${config.currentStacks}`;
+            indicator.title = `Blade Mastery: ${config.currentStacks} stacks (+${config.totalBonusDamage} Physical Damage)`;
+            
+            charElement.appendChild(indicator);
+            console.log('Added Blade Mastery indicator');
+        }
+        
+        function simulateDamageDealt() {
+            const config = testCharacter.bladeMasteryConfig;
+            
+            // Increment stacks
+            config.currentStacks++;
+            config.totalBonusDamage += config.damagePerHit;
+            
+            // Apply damage bonus
+            testCharacter.stats.physicalDamage += config.damagePerHit;
+            
+            // Update visual indicator
+            updateBladeMasteryIndicator();
+            
+            // Show VFX
+            showBladeMasteryVFX();
+            
+            // Update stats display
+            updateStatsDisplay();
+            
+            console.log(`Blade Mastery stack gained! Stack ${config.currentStacks} (+${config.damagePerHit} damage, +${config.totalBonusDamage} total)`);
+        }
+        
+        function updateBladeMasteryIndicator() {
+            const charElement = document.getElementById('test-ayane');
+            const indicator = charElement.querySelector('.blade-mastery-indicator');
+            
+            if (!indicator) return;
+            
+            const config = testCharacter.bladeMasteryConfig;
+            indicator.textContent = `⚔️${config.currentStacks}`;
+            indicator.title = `Blade Mastery: ${config.currentStacks} stacks (+${config.totalBonusDamage} Physical Damage)`;
+            
+            // Add stack gain animation
+            indicator.style.animation = 'none';
+            setTimeout(() => {
+                indicator.style.animation = 'blade-mastery-stack-gain 0.5s ease-out, blade-mastery-pulse 2s ease-in-out infinite 0.5s';
+            }, 10);
+        }
+        
+        function showBladeMasteryVFX() {
+            const charElement = document.getElementById('test-ayane');
+            
+            const vfx = document.createElement('div');
+            vfx.className = 'blade-mastery-vfx';
+            vfx.textContent = '+4 ATK';
+            
+            charElement.appendChild(vfx);
+            
+            // Remove VFX after animation
+            setTimeout(() => {
+                vfx.remove();
+            }, 2000);
+        }
+        
+        function resetStacks() {
+            const config = testCharacter.bladeMasteryConfig;
+            
+            // Reset stats
+            testCharacter.stats.physicalDamage = 100;
+            config.currentStacks = 0;
+            config.totalBonusDamage = 0;
+            
+            // Update indicator
+            updateBladeMasteryIndicator();
+            
+            // Update stats display
+            updateStatsDisplay();
+            
+            console.log('Reset Blade Mastery stacks');
+        }
+        
+        function removeBladeMasteryIndicator() {
+            const charElement = document.getElementById('test-ayane');
+            const indicator = charElement.querySelector('.blade-mastery-indicator');
+            
+            if (indicator) {
+                indicator.remove();
+                console.log('Removed Blade Mastery indicator');
+            }
+        }
+        
+        function updateStatsDisplay() {
+            document.getElementById('physical-damage').textContent = testCharacter.stats.physicalDamage;
+            document.getElementById('stacks').textContent = testCharacter.bladeMasteryConfig.currentStacks;
+            document.getElementById('bonus-damage').textContent = testCharacter.bladeMasteryConfig.totalBonusDamage;
+        }
+        
+        // Initialize display
+        updateStatsDisplay();
+    </script>
+</body>
+</html>

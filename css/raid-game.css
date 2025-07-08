@@ -47,6 +47,19 @@ img {
     background-size: cover;
     background-position: center;
     opacity: 0.7;
+    overflow: hidden; /* Prevent iframe scrollbars */
+}
+
+/* Support for iframe backgrounds */
+.stage-background iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* Character sections */
@@ -95,6 +108,7 @@ img {
     border: 3px solid #333;
     position: relative;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    overflow: visible; /* Allow VFX to go outside the container */
 }
 
 .character-slot.selected {
@@ -117,6 +131,67 @@ img {
 @keyframes validTarget {
     0% { box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
     100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.9); }
+}
+
+/* Character video support */
+.character-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    pointer-events: auto; /* Allow pointer events for context menu */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Ensure video plays correctly in character slots */
+.character-slot video.character-image {
+    background: #000;
+    display: block;
+}
+
+/* Video loading states */
+.character-video:not([data-loaded]) {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.character-video[data-loaded] {
+    background: transparent;
+}
+
+/* Character image and video styling */
+.character-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    pointer-events: auto; /* Allow pointer events for context menu */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Disable video controls */
+.character-video::-webkit-media-controls {
+    display: none !important;
+}
+
+.character-video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+.character-video::-webkit-media-controls-play-button {
+    display: none !important;
+}
+
+.character-video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+}
+
+/* Allow right-click context menu on videos */
+.character-video {
+    -webkit-context-menu: default;
+    -moz-context-menu: default;
+    context-menu: default;
 }
 
 /* Character image */
@@ -1316,7 +1391,7 @@ img {
     position: relative;
     transition: all 0.2s ease;
     border-left: 4px solid #555; /* Visible left border */
-    color: #ffffff !important; /* Force white text */
+    /* color: #ffffff !important;  Force white text */
     font-size: 12px;
     line-height: 1.4;
     display: block !important;

@@ -11,6 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- NEW: Slideshow Container - Moved to be a direct child of body -->
+    <div id="story-slideshow-container" class="story-slideshow-container"></div>
+    <!-- END NEW -->
+
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loader"></div>
@@ -79,6 +83,8 @@
                 </div>
             </div>
         </main>
+
+    </div> <!-- Closing .story-container here -->
 
         <!-- Stage Details Panel (initially hidden) -->
         <div id="stage-details" class="stage-details">
@@ -220,6 +226,7 @@
     <script src="js/story/default-images.js"></script>
     <script src="js/story/story-manager.js"></script>
     <script src="js/story/story-ui.js"></script>
+    <script src="js/story/story-slideshow.js"></script> <!-- NEW -->
 
     <!-- Helper Functions -->
     <script>
@@ -260,6 +267,12 @@
 
             // --- NEW Function to contain story initialization logic ---
             async function initializeStory(userId) {
+                if (window.storyInitialized) {
+                    console.warn('[Story] Story already initialized. Skipping second initialization.');
+                    return;
+                }
+                window.storyInitialized = true; // Set flag to prevent re-initialization
+
                 let currentStep = "Starting initialization";
                 try {
                      currentStep = "Parsing URL and localStorage";
@@ -667,4 +680,4 @@
         // --- End Placeholder Helper Functions ---
     </script>
 </body>
-</html> 
+</html>

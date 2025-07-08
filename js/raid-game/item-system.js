@@ -143,28 +143,13 @@ class Item {
                     
                     console.log(`[Item] Applied max HP bonus: +${bonus}, new maxHp: ${newMaxHp}, initial currentHp: ${character.stats.currentHp}`);
                 }
-            } else if (stat === 'healingPower') {
-                // Prevent duplicate healing power bonuses
-                const currentHealingPower = character.stats.healingPower || 0;
-                const talentHealingPower = character.baseStats.healingPower || 0;
-                
-                // Only apply if the item bonus is greater than the current healing power
-                // and doesn't exceed a reasonable total
-                if (bonus > 0 && currentHealingPower < bonus + talentHealingPower) {
-                    const newHealingPower = Math.min(
-                        currentHealingPower + bonus, 
-                        talentHealingPower + bonus
-                    );
-                    
-                    character.stats.healingPower = newHealingPower;
-                    console.log(`[Item] Applied healing power bonus: +${bonus}, new healingPower: ${character.stats.healingPower}`);
-                }
             } else {
-                // Default handling for other stats
+                // Default handling for all stats, including healingPower
                 if (!character.itemBonuses[stat]) {
                     character.itemBonuses[stat] = 0;
                 }
                 character.itemBonuses[stat] += bonus;
+                console.log(`[Item] Applied item bonus to itemBonuses.${stat}: +${bonus}, new total: ${character.itemBonuses[stat]}`);
             }
         });
 
@@ -382,6 +367,147 @@ class ItemRegistry {
 
         this.registerItem(manaSack);
 
+        // Strange Fungoose - Consumable Item
+        const strangeFungoose = new Item(
+            'strange_fungoose',
+            'Strange Fungoose',
+            'A peculiar mushroom that either provides a burst of healing or unleashes a detrimental force upon consumption. A gamble with fate.',
+            'items/strange_fungoose.png',
+            'rare',
+            {},
+            'consumable'
+        );
+
+        strangeFungoose.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            const outcome = Math.random(); // 0 to 1
+            const amount = 1000;
+
+            if (outcome < 0.5) { // 50% chance to heal
+                const healResult = character.heal(amount, character);
+                log(`🍄 ${character.name} consumed a Strange Fungoose and was healed for ${healResult.healAmount} HP!`, 'consumable-use');
+                
+                // Trigger healing animation if available
+                if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.triggerHealingAnimation === 'function') {
+                    window.gameManager.uiManager.triggerHealingAnimation(character, 'restore', healResult.healAmount);
+                }
+                return { success: true, message: `Healed for ${healResult.healAmount} HP.` };
+            } else { // 50% chance to deal damage
+                const damageResult = character.applyDamage(amount, 'true', null, {
+                    source: 'Strange Fungoose',
+                    canDodge: false,
+                    canCrit: false
+                });
+                log(`🍄 ${character.name} consumed a Strange Fungoose and took ${damageResult.damage} damage!`, 'consumable-use');
+                
+                // Trigger damage animation if available
+                if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.triggerDamageAnimation === 'function') {
+                    window.gameManager.uiManager.triggerDamageAnimation(character, 'damage', damageResult.damage);
+                }
+                return { success: true, message: `Took ${damageResult.damage} damage.` };
+            }
+        }, 3); // 3 turn cooldown
+
+        this.registerItem(strangeFungoose);
+
+        // Rotten Apple - Consumable Item
+        const rottenApple = new Item(
+            'rotten_apple',
+            'Rotten Apple',
+            'A foul-smelling apple that offers instant relief, but at a cost. Heals for 500 HP but inflicts a permanent curse.',
+            'items/rotten_apple.png',
+            'common',
+            {},
+            'consumable'
+        );
+
+        rottenApple.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            // Heal the character
+            const healAmount = 500;
+            const currentHp = character.stats.currentHp || 0;
+            const maxHp = character.stats.maxHp || character.stats.hp || 0;
+            
+            if (currentHp >= maxHp) {
+                return { success: false, message: 'Character already has full HP' };
+            }
+
+            const newHp = Math.min(maxHp, currentHp + healAmount);
+            const actualHealed = newHp - currentHp;
+            
+            character.stats.currentHp = newHp;
+            
+            log(`🍎 ${character.name} consumed a Rotten Apple and restored ${actualHealed} HP!`, 'consumable-use');
+
+            // Apply permanent debuff
+            const permanentDebuff = {
+                id: 'rotten_apple_curse',
+                name: 'Rotten Apple Curse',
+                icon: 'items/rotten_apple.png', // Icon for the debuff
+                duration: -1, // Permanent
+                isDebuff: true,
+                isPermanent: true,
+                source: 'Rotten Apple',
+                description: 'Permanently deals 10 damage each turn.',
+                
+                onTurnStart: function(debuffHolder) {
+                    const damage = 10;
+                    if (!debuffHolder || debuffHolder.isDead()) {
+                        return; // Do nothing if the character is dead
+                    }
+                    
+                    const result = debuffHolder.applyDamage(damage, 'true', null, {
+                        source: 'Rotten Apple Curse',
+                        canDodge: false,
+                        canCrit: false
+                    });
+
+                    log(`💀 ${debuffHolder.name} takes ${damage} damage from the Rotten Apple Curse!`, 'debuff-damage');
+                    
+                    // Trigger damage animation if available
+                    if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.triggerDamageAnimation === 'function') {
+                        window.gameManager.uiManager.triggerDamageAnimation(debuffHolder, 'damage', damage);
+                    }
+                    
+                    // Update character UI
+                    if (typeof updateCharacterUI === 'function') {
+                        updateCharacterUI(debuffHolder);
+                    }
+                }
+            };
+            
+            // Check if buff already applied to prevent duplicates
+            const existingCurse = character.buffs?.find(b => b.id === 'rotten_apple_curse');
+            if (!existingCurse) {
+                character.addDebuff(permanentDebuff);
+                log(`😈 ${character.name} is cursed by the Rotten Apple!`, 'debuff');
+            }
+
+            // Trigger healing animation if available
+            if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.triggerHealingAnimation === 'function') {
+                window.gameManager.uiManager.triggerHealingAnimation(character, 'restore', actualHealed);
+            }
+
+            // Update character UI
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(character);
+            }
+
+            return { success: true, message: `Restored ${actualHealed} HP and cursed!` };
+        }, 12); // 12 turn cooldown
+
+        this.registerItem(rottenApple);
+
         // Ice Shard - Consumable Item (Target Enemy)
         const iceShard = new Item(
             'ice_shard',
@@ -466,7 +592,7 @@ class ItemRegistry {
             }
 
             return { success: true, message: `Ice Shard hit ${target.name} for ${damage} damage!` };
-        }, 8); // 3 turn cooldown
+        }, 8); // 8 turn cooldown
 
         // Mark as targeting consumable
         iceShard.needsTarget = true;
@@ -666,6 +792,50 @@ class ItemRegistry {
 
         this.registerItem(atlanteanTreasureChest);
 
+        // NEW ITEMS
+        this.registerItem(new Item(
+            'corrupted_tree_branch',
+            'Corrupted Tree Branch',
+            '+5% Healing Power. A gnarled branch pulsating with dark energy, harvested from a blighted forest.',
+            'items/corrupted_tree_branch.png',
+            'uncommon',
+            {
+                healingPower: 0.05
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'grizzly_fur_shoulderplate',
+            'Grizzly Fur Shoulderplate',
+            '+10 Magic Resistance. Heavy shoulderplate crafted from the hide of an ancient grizzly bear, providing robust magical defense.',
+            'items/grizzly_fur_shoulderplate.png',
+            'rare',
+            {
+                magicalShield: 10
+            },
+            'equipment'
+        ));
+
+        this.registerItem(new Item(
+            'grizzly_fur',
+            'Grizzly Fur',
+            'Thick, coarse fur from a grizzly bear. A valuable crafting material for sturdy armor and warm clothing.',
+            'items/grizzly_fur.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        this.registerItem(new Item(
+            'corrupted_wood',
+            'Corrupted Wood',
+            'Wood tainted by dark magic, brittle yet imbued with strange energies. Useful in forbidden crafting rituals.',
+            'items/corrupted_wood.png',
+            'common',
+            {},
+            'crafting'
+        ));
         // NEW ATLANTEAN ITEMS
         this.registerItem(new Item(
             'fish_scale_shoulderplate',

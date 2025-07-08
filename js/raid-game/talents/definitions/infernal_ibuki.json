@@ -1,0 +1,39 @@
+{
+    "talents": [
+        {
+            "id": "elemental_mastery",
+            "name": "Elemental Mastery",
+            "description": "Increases Magical Damage by 60. Kunai Throw now deals bonus magical damage equal to 50% of Magical Damage.",
+            "icon": "Icons/talents/elemental_mastery.png",
+            "tier": 1,
+            "effects": [
+                {
+                    "type": "statModification",
+                    "stat": "magicalDamage",
+                    "value": 60
+                },
+                {
+                    "type": "special",
+                    "specialType": "elemental_mastery",
+                    "magicalScaling": 0.5
+                }
+            ]
+        },
+        {
+            "id": "kunai_mastery_awakening",
+            "name": "Kunai Mastery Awakening",
+            "description": "Kunai Throw cooldown is reduced to 0. Kunai Throw now has a 17% chance to end your turn (does not call acted).",
+            "icon": "Icons/talents/kunai_mastery_awakening.png",
+            "tier": 2,
+            "requires": ["elemental_mastery"],
+            "effects": [
+                {
+                    "type": "special",
+                    "specialType": "kunai_mastery_awakening",
+                    "kunaiThrowCooldown": 0,
+                    "kunaiThrowEndTurnChance": 0.17
+                }
+            ]
+        }
+    ]
+}

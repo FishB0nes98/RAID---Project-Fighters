@@ -1,0 +1,123 @@
+/* Blazing aura for Infernal Ibuki's Kunai Throw talent (when turn does NOT end) */
+.battle-log .log-entry.kunai-blaze,
+.log-entry.kunai-blaze,
+.battle-log-entry.kunai-blaze,
+.battle-log-message.kunai-blaze {
+    color: #ff8800 !important;
+    font-weight: bold !important;
+    text-shadow: 0 1px 2px #fff8, 0 0 4px #ff8800;
+    background: linear-gradient(90deg, rgba(255,140,0,0.13) 0%, rgba(255,80,0,0.09) 100%);
+    border-left: 5px solid #ff8800;
+    box-shadow: 0 0 10px 2px #ff8800, 0 0 18px 4px #ff2222;
+    position: relative;
+    overflow: visible;
+}
+
+.log-entry.kunai-blaze::before {
+    content: '';
+    position: absolute;
+    top: -4px; left: -8px; right: -8px; bottom: -4px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: 0 0 0 0 #ff8800, 0 0 0 0 #ff2222;
+    animation: kunaiBlazeAuraBorder 1.2s infinite alternate;
+}
+
+/* Ensure inner .log-message in kunai-blaze log entries is also orange and bold, but not blurry */
+.log-entry.kunai-blaze .log-message,
+.battle-log-entry.kunai-blaze .log-message,
+.battle-log-message.kunai-blaze .log-message {
+    color: #ff8800 !important;
+    font-weight: bold !important;
+    text-shadow: 0 1px 2px #fff8, 0 0 4px #ff8800;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes kunaiBlazeAuraBorder {
+    0% {
+        box-shadow: 0 0 8px 2px #ff8800, 0 0 0px 0px #ff2222;
+        opacity: 0.7;
+    }
+    50% {
+        box-shadow: 0 0 18px 8px #ff8800, 0 0 24px 8px #ff2222;
+        opacity: 1;
+    }
+    100% {
+        box-shadow: 0 0 8px 2px #ff8800, 0 0 0px 0px #ff2222;
+        opacity: 0.7;
+    }
+}
+
+/* Blazing aura for Ibuki's Q ability icon when talent triggers */
+.ability.kunai-blaze {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 10px 2px #ff8800, 0 0 18px 4px #ff2222;
+    border-radius: 8px;
+    animation: kunaiBlazeAuraBorder 1.2s infinite alternate;
+    background: linear-gradient(90deg, rgba(255,140,0,0.13) 0%, rgba(255,80,0,0.09) 100%);
+}
+.ability.kunai-blaze::before {
+    content: '';
+    position: absolute;
+    top: -6px; left: -6px; right: -6px; bottom: -6px;
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: 0 0 0 0 #ff8800, 0 0 0 0 #ff2222;
+    animation: kunaiBlazeAuraBorder 1.2s infinite alternate;
+}
+.battle-log .log-entry.special,
+.log-entry.special,
+.battle-log-entry.special,
+.battle-log-message.special {
+    color: #ff2222 !important;
+    font-weight: bold !important;
+    text-shadow: 0 1px 2px #fff8, 0 0 2px #ff6600;
+    background: linear-gradient(90deg, rgba(255,80,0,0.10) 0%, rgba(255,0,0,0.07) 100%);
+    border-left: 5px solid #ff6600;
+    box-shadow: 0 0 8px 1px #ff6600, 0 0 12px 2px #ff2222;
+    position: relative;
+    overflow: visible;
+}
+
+.log-entry.special::before {
+    content: '';
+    position: absolute;
+    top: -4px; left: -8px; right: -8px; bottom: -4px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: 0 0 0 0 #ff6600, 0 0 0 0 #ff2222;
+    animation: blazingAuraBorder 1.2s infinite alternate;
+}
+
+/* Ensure inner .log-message in special log entries is also red and bold, but not blurry */
+.log-entry.special .log-message,
+.battle-log-entry.special .log-message,
+.battle-log-message.special .log-message {
+    color: #ff2222 !important;
+    font-weight: bold !important;
+    text-shadow: 0 1px 2px #fff8, 0 0 2px #ff6600;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes blazingAuraBorder {
+    0% {
+        box-shadow: 0 0 8px 2px #ff6600, 0 0 0px 0px #ff2222;
+        opacity: 0.7;
+    }
+    50% {
+        box-shadow: 0 0 18px 8px #ff6600, 0 0 32px 8px #ff2222;
+        opacity: 1;
+    }
+    100% {
+        box-shadow: 0 0 8px 2px #ff6600, 0 0 0px 0px #ff2222;
+        opacity: 0.7;
+    }
+}

@@ -84,8 +84,7 @@
             ],
             "children": [
                 "sprout_fertility",
-                "spirit_purification",
-                "healing_kick_double_strike"
+                "spirit_purification"
             ],
             "position": {
                 "x": 830,
@@ -353,8 +352,7 @@
                 "spirit_quickness"
             ],
             "children": [
-                "natures_might",
-                "spirit_quickness"
+                "natures_might"
             ],
             "position": {
                 "x": 1170,

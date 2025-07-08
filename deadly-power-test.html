@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadly Power Test</title>
+    <link rel="stylesheet" href="css/schoolgirl_ayane_abilities.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>Deadly Power Talent Test</h1>
+        <p>This test verifies the Deadly Power talent for Schoolgirl Ayane.</p>
+        
+        <div id="character-schoolgirl_ayane" style="
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #333;
+            background: #f0f0f0;
+            margin: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        ">
+            <div>Schoolgirl Ayane</div>
+        </div>
+        
+        <div style="margin: 20px;">
+            <button onclick="testDeadlyPower()">Test Deadly Power</button>
+            <button onclick="testDeactivateDeadlyPower()">Test Deactivate</button>
+        </div>
+        
+        <div id="log" style="margin: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; height: 200px; overflow-y: auto;">
+            <h3>Test Log</h3>
+        </div>
+    </div>
+
+    <script>
+        // Mock character object for testing
+        const testCharacter = {
+            id: 'schoolgirl_ayane',
+            name: 'Schoolgirl Ayane',
+            instanceId: 'schoolgirl_ayane',
+            stats: {
+                physicalDamage: 800,
+                critChance: 0.05
+            },
+            deadlyPowerConfig: null
+        };
+
+        // Mock logging function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += '<div>' + message + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Mock game manager
+        window.gameManager = {
+            addLogEntry: log
+        };
+
+        // Test function
+        function testDeadlyPower() {
+            log('=== Testing Deadly Power Activation ===');
+            
+            // Initialize deadly power config
+            testCharacter.deadlyPowerConfig = {
+                thresholdDamage: 750,
+                critChanceBonus: 1.0,
+                isActive: false,
+                originalCritChance: 0.05
+            };
+            
+            log('Character Physical Damage: ' + testCharacter.stats.physicalDamage);
+            log('Character Crit Chance: ' + testCharacter.stats.critChance);
+            
+            // Test activation
+            if (typeof window.activateDeadlyPower === 'function') {
+                window.activateDeadlyPower(testCharacter);
+                log('Deadly Power activated!');
+                log('New Crit Chance: ' + testCharacter.stats.critChance);
+            } else {
+                log('ERROR: activateDeadlyPower function not found!');
+            }
+        }
+
+        function testDeactivateDeadlyPower() {
+            log('=== Testing Deadly Power Deactivation ===');
+            
+            // Lower physical damage
+            testCharacter.stats.physicalDamage = 700;
+            log('Character Physical Damage reduced to: ' + testCharacter.stats.physicalDamage);
+            
+            // Test deactivation
+            if (typeof window.deactivateDeadlyPower === 'function') {
+                window.deactivateDeadlyPower(testCharacter);
+                log('Deadly Power deactivated!');
+                log('Restored Crit Chance: ' + testCharacter.stats.critChance);
+            } else {
+                log('ERROR: deactivateDeadlyPower function not found!');
+            }
+        }
+
+        // Load the ability file
+        const script = document.createElement('script');
+        script.src = 'js/raid-game/abilities/schoolgirl_ayane_abilities.js';
+        script.onload = function() {
+            log('Schoolgirl Ayane abilities loaded successfully!');
+        };
+        script.onerror = function() {
+            log('ERROR: Failed to load schoolgirl_ayane_abilities.js');
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

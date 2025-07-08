@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healing Power Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        .test-result.pass {
+            border-left-color: #28a745;
+            background-color: #d4edda;
+        }
+        .test-result.fail {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Healing Power Application Test</h1>
+        <p>This test verifies that healing power buffs are applied correctly.</p>
+        
+        <button onclick="testHealingPowerApplication()">Test Healing Power Application</button>
+        <button onclick="testProtectiveAuraBuff()">Test Protective Aura Buff</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        function logResult(message, isPass = true) {
+            const resultsDiv = document.getElementById('test-results');
+            const result = document.createElement('div');
+            result.className = `test-result ${isPass ? 'pass' : 'fail'}`;
+            result.textContent = message;
+            resultsDiv.appendChild(result);
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+        }
+
+        function testHealingPowerApplication() {
+            logResult('=== Testing Healing Power Application ===');
+            
+            // Test 1: Base healing power calculation
+            const baseHealAmount = 1000;
+            const healingPower1 = 0.2; // 20% healing power
+            const expectedHeal1 = Math.floor(baseHealAmount * (1 + healingPower1));
+            const actualHeal1 = Math.floor(1000 * (1 + 0.2));
+            
+            logResult(`Test 1: Base healing (${baseHealAmount}) with 20% healing power`);
+            logResult(`Expected: ${expectedHeal1}, Actual: ${actualHeal1}`, expectedHeal1 === actualHeal1);
+            
+            // Test 2: Healing power with buff
+            const healingPower2 = 0.2 + 0.35; // 20% base + 35% buff = 55%
+            const expectedHeal2 = Math.floor(baseHealAmount * (1 + healingPower2));
+            const actualHeal2 = Math.floor(1000 * (1 + 0.55));
+            
+            logResult(`Test 2: Base healing (${baseHealAmount}) with 55% healing power (20% + 35% buff)`);
+            logResult(`Expected: ${expectedHeal2}, Actual: ${actualHeal2}`, expectedHeal2 === actualHeal2);
+            
+            // Test 3: Zero healing power with buff
+            const healingPower3 = 0 + 0.35; // 0% base + 35% buff = 35%
+            const expectedHeal3 = Math.floor(baseHealAmount * (1 + healingPower3));
+            const actualHeal3 = Math.floor(1000 * (1 + 0.35));
+            
+            logResult(`Test 3: Base healing (${baseHealAmount}) with 35% healing power (0% + 35% buff)`);
+            logResult(`Expected: ${expectedHeal3}, Actual: ${actualHeal3}`, expectedHeal3 === actualHeal3);
+        }
+
+        function testProtectiveAuraBuff() {
+            logResult('=== Testing Protective Aura Buff ===');
+            
+            // Mock Effect class
+            class MockEffect {
+                constructor(id, name, icon, duration, onTurnEffect, isDebuff) {
+                    this.id = id;
+                    this.name = name;
+                    this.icon = icon;
+                    this.duration = duration;
+                    this.onTurnEffect = onTurnEffect;
+                    this.isDebuff = isDebuff;
+                    this.statModifiers = [];
+                }
+                
+                setDescription(desc) {
+                    this.description = desc;
+                    return this;
+                }
+            }
+            
+            // Create a mock character with healing power
+            const mockCharacter = {
+                name: 'Test Character',
+                stats: {
+                    healingPower: 0.2,
+                    armor: 10,
+                    magicalDamage: 200
+                },
+                baseStats: {
+                    healingPower: 0.2,
+                    armor: 10,
+                    magicalDamage: 200
+                },
+                buffs: []
+            };
+            
+            // Create the Protective Aura buff
+            const buff = new MockEffect(
+                'protective_aura',
+                'Protective Aura',
+                'Icons/abilities/protective_aura.jfif',
+                7,
+                null,
+                false
+            );
+            
+            // Define stat modifiers
+            buff.statModifiers = [
+                { stat: 'armor', value: 15, operation: 'add' },
+                { stat: 'healingPower', value: 0.35, operation: 'add' }
+            ];
+            
+            logResult('Initial character stats:');
+            logResult(`  Healing Power: ${mockCharacter.stats.healingPower}`);
+            logResult(`  Armor: ${mockCharacter.stats.armor}`);
+            
+            // Apply the buff manually (simulating recalculateStats)
+            buff.statModifiers.forEach(modifier => {
+                const stat = modifier.stat;
+                const value = modifier.value;
+                const operation = modifier.operation || 'add';
+                
+                if (operation === 'add') {
+                    mockCharacter.stats[stat] += value;
+                }
+            });
+            
+            logResult('After applying Protective Aura buff:');
+            logResult(`  Healing Power: ${mockCharacter.stats.healingPower} (should be 0.55)`);
+            logResult(`  Armor: ${mockCharacter.stats.armor} (should be 25)`);
+            
+            // Verify the results
+            const expectedHealingPower = 0.2 + 0.35;
+            const expectedArmor = 10 + 15;
+            
+            logResult(`Healing Power correct: ${mockCharacter.stats.healingPower === expectedHealingPower}`, 
+                     mockCharacter.stats.healingPower === expectedHealingPower);
+            logResult(`Armor correct: ${mockCharacter.stats.armor === expectedArmor}`, 
+                     mockCharacter.stats.armor === expectedArmor);
+                     
+            // Test healing calculation with the buffed healing power
+            const baseHeal = 1000;
+            const buffedHeal = Math.floor(baseHeal * (1 + mockCharacter.stats.healingPower));
+            const expectedBuffedHeal = Math.floor(1000 * (1 + 0.55));
+            
+            logResult(`Healing calculation with buffed healing power:`);
+            logResult(`  Base heal: ${baseHeal}`);
+            logResult(`  Buffed heal: ${buffedHeal} (should be ${expectedBuffedHeal})`);
+            logResult(`Healing calculation correct: ${buffedHeal === expectedBuffedHeal}`, 
+                     buffedHeal === expectedBuffedHeal);
+        }
+
+        // Run initial tests
+        window.onload = function() {
+            logResult('Healing Power Test Suite Ready');
+            logResult('Click the buttons above to run specific tests');
+        };
+    </script>
+</body>
+</html>

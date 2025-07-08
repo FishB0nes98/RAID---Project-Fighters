@@ -3422,3 +3422,147 @@ body::before {
         font-size: 10px;
     }
 }
+
+/* Story Slideshow Styles */
+#story-slideshow-container {
+    position: fixed; /* Change to fixed to cover entire viewport */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Use viewport width */
+    height: 100vh; /* Use viewport height */
+    background-color: rgba(0, 0, 0, 0.95); /* Slightly darker overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it's on top of everything else */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#story-slideshow-container.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.slideshow-content {
+    position: relative;
+    width: 90vw; /* Use viewport width */
+    height: 90vh; /* Use viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); /* Stronger shadow */
+    border: 2px solid var(--primary); /* Add a border for definition */
+}
+
+.slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Default object-fit */
+    position: absolute;
+    top: 0;
+    left: 0;
+    filter: brightness(0.7); /* Slightly dim the image for text readability */
+}
+
+/* NEW: Styles for two-image layout */
+.slideshow-content.two-images-layout {
+    flex-direction: row; /* Arrange images side-by-side */
+    justify-content: center;
+    align-items: center;
+    padding: 0; /* Remove padding to maximize image space */
+}
+
+.slideshow-content.two-images-layout .two-image-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    position: relative; /* Ensure it covers the content area */
+    overflow: hidden;
+}
+
+.slideshow-content.two-images-layout .slide-image {
+    position: relative; /* Adjust positioning for flexbox */
+    width: 50%; /* Each image takes half width */
+    height: 100%;
+    object-fit: cover; /* Cover for both images */
+    filter: brightness(0.7); /* Maintain dimming */
+    border-radius: 0; /* Remove individual image border-radius */
+}
+
+.slideshow-content.two-images-layout .slide-text-overlay {
+    bottom: 0; /* Stay at the bottom of the slideshow content */
+    left: 0;
+    width: 100%;
+    padding: 20px 40px 100px 40px; /* Keep padding for text */
+    box-sizing: border-box;
+    z-index: 2; /* Ensure text is above images */
+}
+
+.slideshow-content.two-images-layout .slideshow-button {
+    bottom: 30px; /* Adjust button position to be above text overlay */
+    z-index: 3; /* Ensure buttons are above text overlay */
+}
+
+.slide-text-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0)); /* Make gradient stronger */
+    padding: 20px 40px 100px 40px; /* Increased bottom padding to prevent button overlap */
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.slide-text {
+    color: white;
+    font-size: 2em; /* Increase font size */
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9); /* Stronger shadow for readability */
+    padding: 0 20px; /* Add horizontal padding */
+}
+
+.slideshow-button {
+    position: absolute;
+    bottom: 30px; /* Adjust button position */
+    padding: 12px 25px; /* Larger padding */
+    font-size: 1.3em; /* Larger font size */
+    font-weight: bold;
+    border: none;
+    border-radius: 8px; /* More rounded corners */
+    cursor: pointer;
+    background-color: var(--primary);
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Add transform transition */
+    z-index: 1; /* Ensure buttons are above overlays */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Add shadow to buttons */
+}
+
+.slideshow-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-3px); /* Lift button on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow on hover */
+}
+
+.slideshow-button:hover {
+    background-color: var(--primary-dark);
+}
+
+.next-button {
+    right: 20px;
+}
+
+.skip-button {
+    left: 20px;
+    background-color: var(--secondary);
+}
+
+.skip-button:hover {
+    background-color: var(--secondary-dark);
+}

@@ -553,6 +553,7 @@ class StoryManager {
                 tutorialMessage: stage.tutorialMessage || null,
                 healingEffect: stage.healingEffect || null,
                 recruitEffect: stage.recruitEffect || null,
+                slides: stage.slides || null, // NEW: Add slides property
                 index: index,
                 // A stage is completed if its index is less than the current active index.
                 isCompleted: index < this.storyProgress.currentStageIndex, 
@@ -571,7 +572,7 @@ class StoryManager {
     getCurrentStage() {
         if (!this.currentStory) {
             throw new Error('No story loaded');
-        }
+        } 
         
         // Use storyProgress.currentStageIndex as the reliable index
         const currentStageIndex = this.storyProgress.currentStageIndex;
@@ -610,6 +611,7 @@ class StoryManager {
             description_detail: stage.description_detail || null, // For ally_selection stages
             healingEffect: stage.healingEffect || null, // For healing_and_recruit stages
             recruitEffect: stage.recruitEffect || null, // For healing_and_recruit stages
+            slides: stage.slides || null, // Corrected and retained
             // Add missing properties for battle stages
             enemies: stage.enemies || null,
             loot: stage.loot || null,

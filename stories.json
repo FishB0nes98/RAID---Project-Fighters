@@ -181,7 +181,34 @@
       "teamSize": { "min": 2, "max": 2 },
       "allowedCharacters": ["schoolboy_shoma", "schoolgirl_julia"]
     },
+    "forcedSkins": [
+      { "characterId": "schoolboy_shoma", "skinId": "schoolboy_shoma_forest" },
+      { "characterId": "schoolgirl_julia", "skinId": "schoolgirl_julia_forest" }
+    ],
     "stages": [
+      {
+        "name": "A Date in the Forest - Prologue",
+        "description": "Shoma and Julia's love story begins.",
+        "type": "slideshow",
+        "slides": [
+          {
+            "image": "storyimg/a_date_in_the_forest/01.png",
+            "text": "In a bustling classroom, Shoma glances at Julia, a silent yearning in his heart. Across the room, Julia's thoughts drift to Shoma, a gentle smile playing on her lips. Their phones buzz simultaneously."
+          },
+          {
+            "image": "storyimg/a_date_in_the_forest/02.png",
+            "text": "A flurry of texts exchange, planning a secret rendezvous. 'Meet me in the forest,' Shoma types, his heart pounding. 'I'll be there,' Julia replies, her fingers trembling with excitement. A date in the forest, where their love story will truly begin."
+          },
+          {
+            "image": "storyimg/a_date_in_the_forest/03.png",
+            "text": "Hand in hand, Shoma and Julia step into the forest, its canopy a vibrant tapestry of green. But as they venture deeper, the air grows heavy, the shadows lengthen, and an unsettling silence falls. A chill creeps down their spines—something is terribly wrong."
+          },
+          {
+            "image": "storyimg/a_date_in_the_forest/04.png",
+            "text": "A guttural roar shatters the stillness. From the depths of the woods, a corrupted grizzly bear, eyes glowing with malevolent energy, lunges at Shoma. Julia screams, her romantic dream transforming into a terrifying nightmare."
+          }
+        ]
+      },
       {
         "name": "Corrupted Bear Encounter",
         "description": "As you venture deeper into the mystical forest, you encounter a scene of dark corruption. Two ancient trees whisper with malevolent intent while a massive bear, its fur matted with shadow and eyes glowing with dark energy, stands between them. The forest's peaceful magic has been twisted by some unknown force.",
@@ -200,7 +227,47 @@
           }
         ],
         "backgroundImage": "images/stages/mystical_forest.png",
-        "backgroundMusic": "sounds/music/forest_ambient.mp3"
+        "backgroundMusic": "sounds/The Witch's Whisper.mp3",
+        "loot": {
+          "items": [
+            {
+              "itemId": "strange_fungoose",
+              "dropChance": 0.40,
+              "quantityMin": 2,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "rotten_apple",
+              "dropChance": 0.80,
+              "quantityMin": 2,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "corrupted_wood",
+              "dropChance": 0.80,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "grizzly_fur",
+              "dropChance": 0.50,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "grizzly_fur_shoulderplate",
+              "dropChance": 0.12,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "corrupted_tree_branch",
+              "dropChance": 0.24,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        }
       }
     ]
   },

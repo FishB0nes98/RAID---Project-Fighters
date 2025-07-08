@@ -1,0 +1,593 @@
+{
+    "talentTree": {
+        "schoolgirl_ayane_t1": {
+            "id": "schoolgirl_ayane_t1",
+            "name": "Sixth Sense",
+            "description": "Ayane gains 9% additional dodge chance.",
+            "icon": "Icons/abilities/passive_schoolgirl_ayane.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "dodgeChance",
+                "operation": "add",
+                "value": 0.09
+            },
+            "parents": [],
+            "children": [
+                "schoolgirl_ayane_t2",
+                "schoolgirl_ayane_t3",
+                "schoolgirl_ayane_t26"
+            ],
+            "position": {
+                "x": 950,
+                "y": 290
+            }
+        },
+        "schoolgirl_ayane_t2": {
+            "id": "schoolgirl_ayane_t2",
+            "name": "Piercing Dagger",
+            "description": "Butterfly Dagger now has 25% additional chance to apply bonus dodge.",
+            "icon": "Icons/abilities/butterfly_dagger.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_q",
+                "property": "dodgeProcChance",
+                "operation": "add",
+                "value": 0.25
+            },
+            "parents": [
+                "schoolgirl_ayane_t1"
+            ],
+            "children": [
+                "schoolgirl_ayane_t4",
+                "schoolgirl_ayane_t5"
+            ],
+            "position": {
+                "x": 530,
+                "y": 410
+            }
+        },
+        "schoolgirl_ayane_t3": {
+            "id": "schoolgirl_ayane_t3",
+            "name": "Lethal Precision",
+            "description": "Ayane Gains +5% crit chance.",
+            "icon": "Icons/stat_icons/crit_chance.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "critChance",
+                "operation": "add",
+                "value": 0.05
+            },
+            "parents": [
+                "schoolgirl_ayane_t1"
+            ],
+            "children": [
+                "schoolgirl_ayane_t10",
+                "schoolgirl_ayane_t11"
+            ],
+            "position": {
+                "x": 950,
+                "y": 720
+            }
+        },
+        "schoolgirl_ayane_t4": {
+            "id": "schoolgirl_ayane_t4",
+            "name": "Enhanced Reflexes",
+            "description": "Combat Reflexes now gives an additional 55 Physical Damage.",
+            "icon": "Icons/abilities/passive_schoolgirl_ayane.webp",
+            "effect": {
+                "type": "modify_passive",
+                "passiveId": "schoolgirl_ayane_passive",
+                "property": "physicalDamageBonus",
+                "operation": "add",
+                "value": 55
+            },
+            "parents": [
+                "schoolgirl_ayane_t2"
+            ],
+            "children": [
+                "schoolgirl_ayane_t6"
+            ],
+            "position": {
+                "x": 350,
+                "y": 580
+            }
+        },
+        "schoolgirl_ayane_t5": {
+            "id": "schoolgirl_ayane_t5",
+            "name": "Fluid Combat",
+            "description": "Quick Reflexes (E) does not end your turn.",
+            "icon": "Icons/abilities/quick_reflexes.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_e",
+                "property": "doesNotEndTurn",
+                "operation": "set",
+                "value": true
+            },
+            "parents": [
+                "schoolgirl_ayane_t2"
+            ],
+            "children": [
+                "schoolgirl_ayane_t7"
+            ],
+            "position": {
+                "x": 530,
+                "y": 580
+            }
+        },
+        "schoolgirl_ayane_t6": {
+            "id": "schoolgirl_ayane_t6",
+            "name": "Empowered Trail",
+            "description": "Butterfly Trail increases bonuses by an additional 10%.",
+            "icon": "Icons/abilities/butterfly_trail_schoolgirl.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_w",
+                "property": "bonusMultiplier",
+                "operation": "add",
+                "value": 0.1
+            },
+            "parents": [
+                "schoolgirl_ayane_t4"
+            ],
+            "children": [
+                "schoolgirl_ayane_t8",
+                "schoolgirl_ayane_t21"
+            ],
+            "position": {
+                "x": 210,
+                "y": 710
+            }
+        },
+        "schoolgirl_ayane_t7": {
+            "id": "schoolgirl_ayane_t7",
+            "name": "Graceful Trail",
+            "description": "Butterfly Trail (W) does not end your turn.",
+            "icon": "Icons/abilities/butterfly_trail_schoolgirl.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_w",
+                "property": "doesNotEndTurn",
+                "operation": "set",
+                "value": true
+            },
+            "parents": [
+                "schoolgirl_ayane_t5"
+            ],
+            "children": [
+                "schoolgirl_ayane_t9",
+                "schoolgirl_ayane_t21"
+            ],
+            "position": {
+                "x": 620,
+                "y": 720
+            }
+        },
+        "schoolgirl_ayane_t9": {
+            "id": "schoolgirl_ayane_t9",
+            "name": "Spectral Daggers",
+            "description": "If Ayane has above 50% dodge chance, summon two spectral daggers that automatically fire each turn, dealing 500 damage to random enemies.",
+            "icon": "Icons/abilities/butterfly_dagger.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "spectral_daggers",
+                "dodgeThreshold": 0.5,
+                "daggerCount": 2,
+                "damagePerDagger": 500,
+                "autoFire": true
+            },
+            "parents": [
+                "schoolgirl_ayane_t7"
+            ],
+            "children": [
+                "schoolgirl_ayane_t17",
+                "schoolgirl_ayane_t19",
+                "schoolgirl_ayane_t24"
+            ],
+            "position": {
+                "x": 620,
+                "y": 930
+            }
+        },
+        "schoolgirl_ayane_t8": {
+            "id": "schoolgirl_ayane_t8",
+            "name": "Relentless Assault",
+            "description": "When Ayane deals more than 1000 damage in a single attack, she permanently gains 50 Physical Damage.",
+            "icon": "Icons/stat_icons/physical_damage.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "damage_threshold_buff",
+                "threshold": 1000,
+                "buffId": "relentless_assault_permanent",
+                "buffName": "Relentless Assault",
+                "buffIcon": "Icons/stat_icons/physical_damage.webp",
+                "statModifier": {
+                    "stat": "physicalDamage",
+                    "value": 50,
+                    "operation": "add"
+                }
+            },
+            "parents": [
+                "schoolgirl_ayane_t6"
+            ],
+            "children": [
+                "schoolgirl_ayane_t22"
+            ],
+            "position": {
+                "x": 120,
+                "y": 850
+            }
+        },
+        "schoolgirl_ayane_t10": {
+            "id": "schoolgirl_ayane_t10",
+            "name": "Assassin's Focus",
+            "description": "Ayane's relentless training grants her +50 Physical Damage.",
+            "icon": "Icons/stat_icons/physical_damage.webp",
+            "effect": {
+                "type": "modify_stat",
+                "stat": "physicalDamage",
+                "operation": "add",
+                "value": 50
+            },
+            "parents": [
+                "schoolgirl_ayane_t3"
+            ],
+            "children": [
+                "schoolgirl_ayane_t17"
+            ],
+            "position": {
+                "x": 950,
+                "y": 930
+            }
+        },
+        "schoolgirl_ayane_t11": {
+            "id": "schoolgirl_ayane_t11",
+            "name": "Butterfly Protection",
+            "description": "Ayane gains 12 Magic Shield at game start. Whenever she dodges, she gains 1 additional Magic Shield (max 10 stacks, permanent).",
+            "icon": "Icons/stat_icons/magic_shield.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "butterfly_protection",
+                "initialMagicShield": 12,
+                "magicShieldPerDodge": 1,
+                "maxStacks": 10
+            },
+            "parents": [
+                "schoolgirl_ayane_t3"
+            ],
+            "children": [
+                "schoolgirl_ayane_t12",
+                "schoolgirl_ayane_t13"
+            ],
+            "position": {
+                "x": 1190,
+                "y": 720
+            }
+        },
+        "schoolgirl_ayane_t12": {
+            "id": "schoolgirl_ayane_t12",
+            "name": "Butterfly Healing",
+            "description": "Whenever Ayane dodges, she is healed by 175 HP.",
+            "icon": "Icons/stat_icons/healing.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "butterfly_healing",
+                "healingPerDodge": 175
+            },
+            "parents": [
+                "schoolgirl_ayane_t11"
+            ],
+            "children": [
+                "schoolgirl_ayane_t14",
+                "schoolgirl_ayane_t15"
+            ],
+            "position": {
+                "x": 1410,
+                "y": 720
+            }
+        },
+        "schoolgirl_ayane_t13": {
+            "id": "schoolgirl_ayane_t13",
+            "name": "Butterfly Stealth",
+            "description": "Ayane has a 50% chance to go stealth for 2 turns after dodging an attack.",
+            "icon": "Icons/abilities/shadow_step.png",
+            "effect": {
+                "type": "special",
+                "specialType": "butterfly_stealth",
+                "stealthChance": 0.5,
+                "stealthDuration": 2
+            },
+            "parents": [
+                "schoolgirl_ayane_t11"
+            ],
+            "children": [
+                "schoolgirl_ayane_t14",
+                "schoolgirl_ayane_t15"
+            ],
+            "position": {
+                "x": 1190,
+                "y": 930
+            }
+        },
+        "schoolgirl_ayane_t14": {
+            "id": "schoolgirl_ayane_t14",
+            "name": "Butterfly Vitality",
+            "description": "Permanent: Heals on you are 12% stronger.",
+            "icon": "Icons/stat_icons/healing.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "butterfly_vitality",
+                "healingMultiplier": 1.12,
+                "duration": -1
+            },
+            "parents": [
+                "schoolgirl_ayane_t12",
+                "schoolgirl_ayane_t13"
+            ],
+            "children": [
+                "schoolgirl_ayane_t16"
+            ],
+            "position": {
+                "x": 1550,
+                "y": 970
+            }
+        },
+        "schoolgirl_ayane_t15": {
+            "id": "schoolgirl_ayane_t15",
+            "name": "Butterfly Vampirism",
+            "description": "When you deal damage, you have 100% chance that you are healed for 100% of the damage you dealt.",
+            "icon": "Icons/abilities/life_drain.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "butterfly_vampirism",
+                "vampirismChance": 1,
+                "vampirismMultiplier": 1
+            },
+            "parents": [
+                "schoolgirl_ayane_t12",
+                "schoolgirl_ayane_t13"
+            ],
+            "children": [],
+            "position": {
+                "x": 1410,
+                "y": 880
+            }
+        },
+        "schoolgirl_ayane_t16": {
+            "id": "schoolgirl_ayane_t16",
+            "name": "Butterfly Guardian",
+            "description": "Each turn, 14% chance for a beautiful butterfly to fly to you and heal you for 1815 HP.",
+            "icon": "Icons/abilities/butterfly_guardian.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "butterfly_guardian",
+                "healingPerTurn": 1815,
+                "procChance": 0.14
+            },
+            "parents": [
+                "schoolgirl_ayane_t14"
+            ],
+            "children": [],
+            "powerful": true,
+            "position": {
+                "x": 1690,
+                "y": 1090
+            }
+        },
+        "schoolgirl_ayane_t17": {
+            "id": "schoolgirl_ayane_t17",
+            "name": "Blade Mastery",
+            "description": "Whenever Ayane deals damage, she gains +4 Physical Damage permanently (stacks infinitely).",
+            "icon": "Icons/stat_icons/physical_damage.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "blade_mastery",
+                "damagePerHit": 4,
+                "stacksInfinitely": true
+            },
+            "parents": [
+                "schoolgirl_ayane_t9",
+                "schoolgirl_ayane_t10"
+            ],
+            "children": [
+                "schoolgirl_ayane_t18"
+            ],
+            "position": {
+                "x": 785,
+                "y": 1120
+            }
+        },
+        "schoolgirl_ayane_t18": {
+            "id": "schoolgirl_ayane_t18",
+            "name": "Deadly Power",
+            "description": "When Ayane is above 750 Physical Damage, she gains 100% Crit Chance (permanent non-removable buff) until her Physical Damage goes under 750.",
+            "icon": "Icons/abilities/deadly_power.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "deadly_power",
+                "thresholdDamage": 750,
+                "critChanceBonus": 1
+            },
+            "parents": [
+                "schoolgirl_ayane_t17"
+            ],
+            "children": [],
+            "powerful": true,
+            "position": {
+                "x": 785,
+                "y": 1250
+            }
+        },
+        "schoolgirl_ayane_t19": {
+            "id": "schoolgirl_ayane_t19",
+            "name": "Spectral Momentum",
+            "description": "If you deal more than 865 damage in a single attack, your active cooldowns lose 2 turns cooldown.",
+            "icon": "Icons/abilities/butterfly_dagger.webp",
+            "effect": {
+                "type": "special",
+                "specialType": "spectral_momentum",
+                "damageThreshold": 865,
+                "cooldownReduction": 2
+            },
+            "parents": [
+                "schoolgirl_ayane_t9"
+            ],
+            "children": [
+                "schoolgirl_ayane_t20"
+            ],
+            "position": {
+                "x": 480,
+                "y": 1120
+            }
+        },
+        "schoolgirl_ayane_t20": {
+            "id": "schoolgirl_ayane_t20",
+            "name": "Spectral Mastery",
+            "description": "Your Q now scales with 75% additional physical damage (55% → 130%).",
+            "icon": "Icons/abilities/butterfly_dagger.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_q",
+                "property": "additionalPhysicalScaling",
+                "operation": "add",
+                "value": 0.75
+            },
+            "parents": [
+                "schoolgirl_ayane_t19"
+            ],
+            "children": [],
+            "powerful": true,
+            "position": {
+                "x": 480,
+                "y": 1250
+            }
+        },
+        "schoolgirl_ayane_t21": {
+            "id": "schoolgirl_ayane_t21",
+            "name": "Mastered Trail",
+            "description": "Butterfly Trail bonuses are increased by an additional 20% (stacks with other bonuses).",
+            "icon": "Icons/abilities/butterfly_trail_schoolgirl.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_w",
+                "property": "bonusMultiplier",
+                "operation": "add",
+                "value": 0.2
+            },
+            "parents": [
+                "schoolgirl_ayane_t6",
+                "schoolgirl_ayane_t7"
+            ],
+            "children": [],
+            "position": {
+                "x": 415,
+                "y": 850
+            }
+        },
+        "schoolgirl_ayane_t22": {
+            "id": "schoolgirl_ayane_t22",
+            "name": "Relentless Daggers",
+            "description": "Your Q has no cooldown now and has 20% chance not to end your turn.",
+            "icon": "Icons/abilities/butterfly_dagger.webp",
+            "effect": [
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolgirl_ayane_q",
+                    "property": "cooldown",
+                    "operation": "set",
+                    "value": 0
+                },
+                {
+                    "type": "modify_ability",
+                    "abilityId": "schoolgirl_ayane_q",
+                    "property": "chanceToNotEndTurn",
+                    "operation": "set",
+                    "value": 0.2
+                }
+            ],
+            "parents": [
+                "schoolgirl_ayane_t8"
+            ],
+            "children": [
+                "schoolgirl_ayane_t24"
+            ],
+            "position": {
+                "x": 120,
+                "y": 950
+            }
+        },
+        "schoolgirl_ayane_t24": {
+            "id": "schoolgirl_ayane_t24",
+            "name": "Lethal Mastery",
+            "description": "Increases your overall damage output by 10% and grants 10% crit chance.",
+            "icon": "Icons/stat_icons/crit_chance.webp",
+            "effect": [
+                {
+                    "type": "modify_stat",
+                    "stat": "damageMultiplier",
+                    "operation": "multiply",
+                    "value": 1.1
+                },
+                {
+                    "type": "modify_stat",
+                    "stat": "critChance",
+                    "operation": "add",
+                    "value": 0.1
+                }
+            ],
+            "parents": [
+                "schoolgirl_ayane_t22",
+                "schoolgirl_ayane_t9"
+            ],
+            "children": [
+                "schoolgirl_ayane_t25"
+            ],
+            "position": {
+                "x": 120,
+                "y": 1140
+            }
+        },
+        "schoolgirl_ayane_t25": {
+            "id": "schoolgirl_ayane_t25",
+            "name": "Fan of Knives",
+            "description": "Gain the Fan of Knives ability as your T ability. Hurls deadly knives at all enemies for 565 physical damage. If this ability critically strikes, it chains immediately without cost or cooldown.",
+            "icon": "Icons/abilities/fan_of_knives.png",
+            "effect": {
+                "type": "add_ability",
+                "abilityId": "fan_of_knives",
+                "keybind": "T",
+                "specialType": "fan_of_knives"
+            },
+            "parents": [
+                "schoolgirl_ayane_t24"
+            ],
+            "powerful": true,
+            "children": [],
+            "position": {
+                "x": 120,
+                "y": 1330
+            }
+        },
+        "schoolgirl_ayane_t26": {
+            "id": "schoolgirl_ayane_t26",
+            "name": "Razor Edge",
+            "description": "Butterfly Dagger base damage increased by 115. The blade cuts deeper with enhanced precision.",
+            "icon": "Icons/abilities/butterfly_dagger.webp",
+            "effect": {
+                "type": "modify_ability",
+                "abilityId": "schoolgirl_ayane_q",
+                "property": "fixedDamage",
+                "operation": "add",
+                "value": 115
+            },
+            "parents": [
+                "schoolgirl_ayane_t1"
+            ],
+            "children": [],
+            "position": {
+                "x": 1370,
+                "y": 410
+            }
+        }
+    }
+}

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Ayane Talent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .debug-section {
+            background: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left-color: #f44336;
+        }
+        .warning {
+            border-left-color: #ff9800;
+        }
+        .info {
+            border-left-color: #2196F3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .talent-info {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debug Ayane Talent - Endless Assault</h1>
+        
+        <div class="debug-section info">
+            <h3>Test Steps:</h3>
+            <ol>
+                <li>Load Ayane character</li>
+                <li>Apply the new talent (t23 - Endless Assault)</li>
+                <li>Check if Q ability has correct properties</li>
+                <li>Verify cooldown = 0 and chanceToNotEndTurn = 0.2</li>
+            </ol>
+        </div>
+
+        <div class="debug-section">
+            <h3>Controls:</h3>
+            <button onclick="debugAyaneTalent()">Debug Ayane Talent</button>
+            <button onclick="testTalentApplication()">Test Talent Application</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Include required game files
+        const scripts = [
+            'js/raid-game/character.js',
+            'js/raid-game/abilities/schoolgirl_ayane_abilities.js',
+            'js/raid-game/talent-manager.js',
+            'js/raid-game/ability-modifier.js'
+        ];
+
+        let scriptsLoaded = 0;
+        
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function loadAllScripts() {
+            try {
+                for (const script of scripts) {
+                    await loadScript(script);
+                    scriptsLoaded++;
+                    console.log(`Loaded: ${script}`);
+                }
+                console.log('All scripts loaded');
+            } catch (error) {
+                console.error('Error loading scripts:', error);
+            }
+        }
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `debug-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function debugAyaneTalent() {
+            log('=== DEBUGGING AYANE TALENT ===', 'info');
+            
+            try {
+                // Load talent definitions
+                const response = await fetch('js/raid-game/talents/schoolgirl_ayane_talents.json');
+                const talentData = await response.json();
+                
+                log('Talent definitions loaded successfully', 'info');
+                
+                // Check if our new talent exists
+                const endlessAssault = talentData.talentTree.schoolgirl_ayane_t23;
+                if (endlessAssault) {
+                    log('✓ Found Endless Assault talent (t23)', 'info');
+                    log(`Name: ${endlessAssault.name}`, 'info');
+                    log(`Description: ${endlessAssault.description}`, 'info');
+                    log(`Effects: ${JSON.stringify(endlessAssault.effects, null, 2)}`, 'info');
+                    
+                    // Check effects
+                    const effects = endlessAssault.effects;
+                    let cooldownEffect = null;
+                    let chanceEffect = null;
+                    
+                    for (const effect of effects) {
+                        if (effect.property === 'cooldown') {
+                            cooldownEffect = effect;
+                        }
+                        if (effect.property === 'chanceToNotEndTurn') {
+                            chanceEffect = effect;
+                        }
+                    }
+                    
+                    if (cooldownEffect) {
+                        log(`✓ Cooldown effect found: ${JSON.stringify(cooldownEffect)}`, 'info');
+                    } else {
+                        log('✗ Cooldown effect not found', 'error');
+                    }
+                    
+                    if (chanceEffect) {
+                        log(`✓ ChanceToNotEndTurn effect found: ${JSON.stringify(chanceEffect)}`, 'info');
+                    } else {
+                        log('✗ ChanceToNotEndTurn effect not found', 'error');
+                    }
+                    
+                } else {
+                    log('✗ Endless Assault talent (t23) not found', 'error');
+                }
+                
+                // Check parent-child connections
+                const relentlessAssault = talentData.talentTree.schoolgirl_ayane_t8;
+                if (relentlessAssault) {
+                    log(`✓ Found Relentless Assault (t8)`, 'info');
+                    log(`Children: ${JSON.stringify(relentlessAssault.children)}`, 'info');
+                    
+                    if (relentlessAssault.children && relentlessAssault.children.includes('schoolgirl_ayane_t23')) {
+                        log('✓ t23 is correctly connected as child of t8', 'info');
+                    } else {
+                        log('✗ t23 is not connected to t8', 'error');
+                    }
+                } else {
+                    log('✗ Relentless Assault (t8) not found', 'error');
+                }
+                
+            } catch (error) {
+                log(`Error loading talent definitions: ${error.message}`, 'error');
+            }
+        }
+
+        async function testTalentApplication() {
+            log('=== TESTING TALENT APPLICATION ===', 'info');
+            
+            try {
+                // Check if TalentManager is available
+                if (!window.talentManager) {
+                    log('TalentManager not available, creating mock...', 'warning');
+                    // We'll create a simplified test
+                    return testWithMockTalentManager();
+                }
+                
+                // Test with real TalentManager
+                const talentManager = window.talentManager;
+                
+                // Load Ayane character data
+                const charResponse = await fetch('js/raid-game/characters/schoolgirl_ayane.json');
+                const charData = await charResponse.json();
+                
+                log('Character data loaded', 'info');
+                
+                // Create character instance
+                const character = new Character(charData);
+                
+                log(`Character created: ${character.name}`, 'info');
+                
+                // Find Q ability
+                const qAbility = character.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+                if (qAbility) {
+                    log(`✓ Found Q ability: ${qAbility.name}`, 'info');
+                    log(`Initial cooldown: ${qAbility.cooldown}`, 'info');
+                    log(`Initial chanceToNotEndTurn: ${qAbility.chanceToNotEndTurn || 'undefined'}`, 'info');
+                } else {
+                    log('✗ Q ability not found', 'error');
+                    return;
+                }
+                
+                // Apply talent
+                const selectedTalents = ['schoolgirl_ayane_t23'];
+                await talentManager.applyTalentsToCharacter(character, selectedTalents);
+                
+                log('Talent applied, checking results...', 'info');
+                
+                // Check results
+                const updatedQAbility = character.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+                if (updatedQAbility) {
+                    log(`After talent - cooldown: ${updatedQAbility.cooldown}`, 'info');
+                    log(`After talent - chanceToNotEndTurn: ${updatedQAbility.chanceToNotEndTurn || 'undefined'}`, 'info');
+                    
+                    // Verify expected values
+                    if (updatedQAbility.cooldown === 0) {
+                        log('✓ Cooldown correctly set to 0', 'info');
+                    } else {
+                        log(`✗ Cooldown not set correctly. Expected: 0, Got: ${updatedQAbility.cooldown}`, 'error');
+                    }
+                    
+                    if (updatedQAbility.chanceToNotEndTurn === 0.2) {
+                        log('✓ ChanceToNotEndTurn correctly set to 0.2', 'info');
+                    } else {
+                        log(`✗ ChanceToNotEndTurn not set correctly. Expected: 0.2, Got: ${updatedQAbility.chanceToNotEndTurn}`, 'error');
+                    }
+                } else {
+                    log('✗ Q ability not found after talent application', 'error');
+                }
+                
+                // Check applied talents
+                if (character.appliedTalents) {
+                    log(`Applied talents: ${JSON.stringify(character.appliedTalents)}`, 'info');
+                } else {
+                    log('No appliedTalents property found', 'warning');
+                }
+                
+            } catch (error) {
+                log(`Error in talent application test: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testWithMockTalentManager() {
+            log('Testing with mock talent manager...', 'info');
+            
+            // Load talent definitions
+            const response = await fetch('js/raid-game/talents/schoolgirl_ayane_talents.json');
+            const talentData = await response.json();
+            
+            // Get talent
+            const talent = talentData.talentTree.schoolgirl_ayane_t23;
+            if (!talent) {
+                log('Talent not found', 'error');
+                return;
+            }
+            
+            // Create mock ability
+            const mockAbility = {
+                id: 'schoolgirl_ayane_q',
+                name: 'Butterfly Dagger',
+                cooldown: 2,
+                chanceToNotEndTurn: undefined
+            };
+            
+            log(`Mock ability initial state: ${JSON.stringify(mockAbility)}`, 'info');
+            
+            // Apply effects manually
+            talent.effects.forEach(effect => {
+                if (effect.type === 'modify_ability' && effect.abilityId === 'schoolgirl_ayane_q') {
+                    const property = effect.property;
+                    const value = effect.value;
+                    const operation = effect.operation || 'set';
+                    
+                    log(`Applying effect: ${property} ${operation} ${value}`, 'info');
+                    
+                    switch (operation) {
+                        case 'set':
+                            mockAbility[property] = value;
+                            break;
+                        case 'add':
+                            mockAbility[property] = (mockAbility[property] || 0) + value;
+                            break;
+                        case 'multiply':
+                            mockAbility[property] = (mockAbility[property] || 1) * value;
+                            break;
+                    }
+                    
+                    log(`After effect: ${property} = ${mockAbility[property]}`, 'info');
+                }
+            });
+            
+            log(`Mock ability final state: ${JSON.stringify(mockAbility)}`, 'info');
+            
+            // Verify
+            if (mockAbility.cooldown === 0) {
+                log('✓ Mock test: Cooldown correctly set to 0', 'info');
+            } else {
+                log(`✗ Mock test: Cooldown incorrect. Expected: 0, Got: ${mockAbility.cooldown}`, 'error');
+            }
+            
+            if (mockAbility.chanceToNotEndTurn === 0.2) {
+                log('✓ Mock test: ChanceToNotEndTurn correctly set to 0.2', 'info');
+            } else {
+                log(`✗ Mock test: ChanceToNotEndTurn incorrect. Expected: 0.2, Got: ${mockAbility.chanceToNotEndTurn}`, 'error');
+            }
+        }
+
+        // Load scripts when page loads
+        window.addEventListener('load', () => {
+            loadAllScripts().then(() => {
+                log('Debug page ready. Scripts loaded successfully.', 'info');
+            }).catch(error => {
+                log(`Error loading scripts: ${error.message}`, 'error');
+            });
+        });
+    </script>
+</body>
+</html>

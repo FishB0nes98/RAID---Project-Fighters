@@ -23,6 +23,18 @@ class TalentManager {
     }
 
     /**
+     * For Infernal Ibuki: call updateIbukiAbilityDescriptionsForTalents after talents are applied
+     * Ensures ability descriptions are updated after talents are loaded and applied
+     */
+    callIbukiDescriptionUpdateHook(character) {
+        if (character.id === 'infernal_ibuki' && typeof window.updateIbukiAbilityDescriptionsForTalents === 'function') {
+            // Debug: log playerTalents state
+            console.debug('[TalentManager] Calling updateIbukiAbilityDescriptionsForTalents. window.playerTalents:', window.playerTalents);
+            window.updateIbukiAbilityDescriptionsForTalents(character);
+        }
+    }
+
+    /**
      * Initialize the talent manager
      */
     async initialize() {
@@ -100,6 +112,7 @@ class TalentManager {
             const response = await fetch(`js/raid-game/talents/${characterId}_talents.json`);
             if (!response.ok) {
                 // If 404 or other error, store null and return
+                console.warn(`[TalentManager] No talent file found for ${characterId}. Status: ${response.status}`);
                 this.talentDefinitionsCache[characterId] = null; 
                 return null;
             }
@@ -349,21 +362,21 @@ class TalentManager {
             // Handle talent with multiple effects (array) - check both 'effects' and 'effect'
             if (Array.isArray(talent.effects)) {
                 for (const effect of talent.effects) {
-                    this.applyTalentEffect(character, effect);
+                    await this.applyTalentEffect(character, effect);
                     appliedEffectsCount++;
                 }
             } else if (Array.isArray(talent.effect)) {
                 for (const effect of talent.effect) {
-                    this.applyTalentEffect(character, effect);
+                    await this.applyTalentEffect(character, effect);
                     appliedEffectsCount++;
                 }
             } 
             // Handle single effect (object) - check both 'effects' and 'effect'
             else if (talent.effects) {
-                this.applyTalentEffect(character, talent.effects);
+                await this.applyTalentEffect(character, talent.effects);
                 appliedEffectsCount++;
             } else if (talent.effect) {
-                this.applyTalentEffect(character, talent.effect);
+                await this.applyTalentEffect(character, talent.effect);
                 appliedEffectsCount++;
             }
             
@@ -504,13 +517,456 @@ class TalentManager {
             window.updateShomaAbilityDescriptions(character);
         }
         
+        // For Schoolgirl Ayane: update ability descriptions to reflect new talents
+        if (character.id === 'schoolgirl_ayane') {
+            console.log('[TalentManager] Updating Schoolgirl Ayane ability descriptions');
+            console.log('[TalentManager] Ayane talents being applied:', selectedTalentIds);
+            console.log('[TalentManager] Ayane character object:', character);
+
+            // Update Q ability description if it has a generateDescription method
+            const qAbility = character.abilities.find(a => a.id === 'schoolgirl_ayane_q');
+            if (qAbility && typeof qAbility.generateDescription === 'function') {
+                const desc = qAbility.generateDescription();
+                console.log('[TalentManager] Updated Butterfly Dagger description for talent modifications:', desc);
+            } else {
+                console.log('[TalentManager] Q ability or generateDescription not found for Ayane.');
+            }
+
+            // Dispatch specific event for Ayane talent application
+            setTimeout(() => {
+                console.log('[TalentManager] Dispatching schoolgirl_ayane_talents_applied event', {
+                    character: character,
+                    talentIds: selectedTalentIds
+                });
+                document.dispatchEvent(new CustomEvent('schoolgirl_ayane_talents_applied', {
+                    detail: {
+                        character: character,
+                        talentIds: selectedTalentIds
+                    }
+                }));
+            }, 100);
+        }
+
+        // For Infernal Ibuki: apply talent effects
+        if (character.id === 'infernal_ibuki') {
+            try {
+                const allAbilities = character.abilitiesById || character.abilitiesMap || character.abilities;
+                const appliedTalents = character.appliedTalents || [];
+
+                // Elemental Mastery: +60 magical damage, +50% magical scaling on Kunai Throw
+                if (appliedTalents.includes('infernal_ibuki_t1')) {
+                    character.applyStatModification('magicalDamage', 'add', 60);
+                    const kunaiThrowAbility = allAbilities.find(ability => ability.id === 'kunai_throw');
+                    if (kunaiThrowAbility) {
+                        kunaiThrowAbility.magicalScaling = (kunaiThrowAbility.magicalScaling || 0) + 0.5;
+                    }
+                }
+
+                // Kunai Mastery Awakening: cooldown 0, 17% chance to end turn
+                if (appliedTalents.includes('infernal_ibuki_t2')) {
+                    const kunaiThrowAbility = allAbilities.find(ability => ability.id === 'kunai_throw');
+                    if (kunaiThrowAbility) {
+                        kunaiThrowAbility.cooldown = 0;
+                        kunaiThrowAbility.kunaiEndTurnChance = 0.17;
+                    }
+                }
+
+                // Infernal Edge: +11% crit chance
+                if (appliedTalents.includes('infernal_ibuki_t3')) {
+                    character.applyStatModification('critChance', 'add', 0.11);
+                }
+
+                // Savage Blade: +75 Physical Damage
+                if (appliedTalents.includes('infernal_ibuki_t6')) {
+                    character.applyStatModification('physicalDamage', 'add', 75);
+                }
+
+                // Urarenge: Swift Strike crits deal damage again
+                const swiftStrikeAbility = allAbilities.find(ability => ability.id === 'swift_strike');
+                if (appliedTalents.includes('infernal_ibuki_t4') && swiftStrikeAbility) {
+                    swiftStrikeAbility.urarenge = true;
+                }
+
+                // Vampiric Strikes: heal for 25% of crit damage
+                if (appliedTalents.includes('infernal_ibuki_t5')) {
+                    if (!character.vampiricStrikesListenerAttached) {
+                        const vampiricListener = (event) => {
+                            const { character: attacker, damage, isCritical } = event.detail;
+                            // Check if the attacker has the talent and if it was a critical hit.
+                            if (attacker && attacker.id === character.id && attacker.appliedTalents && attacker.appliedTalents.includes('infernal_ibuki_t5') && isCritical && damage > 0) {
+                                const healingAmount = Math.round(damage * 0.25);
+                                if (typeof attacker.heal === 'function') {
+                                    attacker.heal(healingAmount, attacker, { abilityId: 'infernal_ibuki_vampiric_strikes' });
+                                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                    log(`<span class="talent-enhanced">${attacker.name} heals for ${healingAmount} from a critical strike!</span>`);
+                                }
+                            }
+                        };
+                        document.addEventListener('character:damage-dealt', vampiricListener);
+                        // Store listener for cleanup and a flag to prevent re-attaching
+                        character.vampiricStrikesListener = vampiricListener;
+                        character.vampiricStrikesListenerAttached = true;
+                    }
+                }
+                
+                // Swift Blade Expertise: Swift Strike scales with Blade Expertise passive
+                if (appliedTalents.includes('infernal_ibuki_t7')) {
+                    // This talent's effect is handled directly in infernal_ibuki_abilities.js
+                    // by checking for the presence of the talent ID in appliedTalents.
+                    // No direct modification needed here, but keeping this block for clarity
+                    // that the talent is acknowledged.
+                    console.log('[TalentManager] Infernal Ibuki T7 (Swift Blade Expertise) detected. Swift Strike passive scaling enabled.');
+                }
+
+                // Critical Stack: Critical strikes count 1 additional passive stack
+                if (appliedTalents.includes('infernal_ibuki_t8')) {
+                    if (!character.criticalStackListenerAttached) {
+                        const criticalStackListener = (event) => {
+                            const { character: attacker, isCritical } = event.detail;
+                            if (attacker && attacker.id === character.id && attacker.appliedTalents && attacker.appliedTalents.includes('infernal_ibuki_t8') && isCritical) {
+                                if (character.passiveHandler && typeof character.passiveHandler.addPassiveStack === 'function') {
+                                    character.passiveHandler.addPassiveStack(1); // Add 1 additional stack
+                                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                    log(`<span class="talent-enhanced">${attacker.name}'s Critical Stack talent grants an additional passive stack!</span>`);
+                                } else {
+                                    console.warn('[TalentManager] Infernal Ibuki Critical Stack talent: passiveHandler or addPassiveStack not found.');
+                                }
+                            }
+                        };
+                        document.addEventListener('character:damage-dealt', criticalStackListener); // Assuming this event fires on critical strikes
+                        character.criticalStackListener = criticalStackListener;
+                        character.criticalStackListenerAttached = true;
+                    }
+                }
+
+                // Critical Damage Boost: Increase Critical Damage Stat by 20%
+                if (appliedTalents.includes('infernal_ibuki_t9')) {
+                    character.applyStatModification('critDamage', 'add', 0.20);
+                }
+
+                // Blade Expertise Enhancement: Increase Blade Expertise bonus by 5%
+                if (appliedTalents.includes('infernal_ibuki_t10')) {
+                    // Update the character's bladeExpertiseBonusPerStack property
+                    character.bladeExpertiseBonusPerStack = (character.bladeExpertiseBonusPerStack || 0.10) + 0.05;
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`<span class="talent-enhanced">${character.name}'s Blade Expertise Enhancement increases Blade Expertise bonus!</span>`);
+                }
+
+                // Kunai Barrage: Kunai Throw hits all enemies
+                if (appliedTalents.includes('infernal_ibuki_t11')) {
+                    const kunaiThrowAbility = allAbilities.find(ability => ability.id === 'kunai_throw');
+                    if (kunaiThrowAbility) {
+                        kunaiThrowAbility.hitsAllEnemies = true;
+                        kunaiThrowAbility.multiTargetHitChance = 0.70; // 70% chance for other enemies
+                    }
+                }
+
+                // Shadow Strike: Attacking Obscured targets deals additional 200% Magical Damage
+                if (appliedTalents.includes('infernal_ibuki_t12')) {
+                    character.shadowStrikeBonusEnabled = true;
+                    console.log('[TalentManager] Infernal Ibuki T12 (Shadow Strike) detected. Enabling bonus damage against Obscured targets.');
+                }
+
+                // Smoke Bomb Enhancement: Increase Smoke bomb damage by 50 and scales with 20% of Magical Damage.
+                if (appliedTalents.includes('infernal_ibuki_t13')) {
+                    const smokeBombAbility = allAbilities.find(ability => ability.id === 'smoke_bomb');
+                    if (smokeBombAbility) {
+                        smokeBombAbility.baseDamage = (smokeBombAbility.baseDamage || 0) + 50;
+                        smokeBombAbility.magicalScaling = (smokeBombAbility.magicalScaling || 0) + 0.20;
+                        console.log('[TalentManager] Infernal Ibuki T13 (Smoke Bomb Enhancement) detected. Smoke bomb damage and scaling increased.');
+                        console.log(`[TalentManager Debug] smokeBombAbility.baseDamage after T13: ${smokeBombAbility.baseDamage}`);
+                        console.log(`[TalentManager Debug] smokeBombAbility.magicalScaling after T13: ${smokeBombAbility.magicalScaling}`);
+                    }
+                }
+
+                // Debilitating Strikes: Ibuki deals 25% increased damage to targets with at least 1 debuff.
+                if (appliedTalents.includes('infernal_ibuki_t19')) {
+                    character.debilitatingStrikesEnabled = true;
+                    console.log('[TalentManager] Infernal Ibuki T19 (Debilitating Strikes) detected. Enabling bonus damage against debuffed targets.');
+                    // Call VFX function
+                    if (typeof window.showDebilitatingStrikesVFX === 'function') {
+                        window.showDebilitatingStrikesVFX(character);
+                    }
+                }
+
+                // Doubled Physical Damage: At turn 25, physical damage is doubled permanently
+                if (appliedTalents.includes('infernal_ibuki_t14') && !character._doubledPhysicalDamageApplied) {
+                    console.log('[TalentManager] Infernal Ibuki T14 (Doubled Physical Damage) detected. Setting up turn 25 listener.');
+
+                    const doubledPhysicalDamageListener = (event) => {
+                        // Use event.detail.turn for reliability
+                        const currentTurn = event.detail.turn;
+                        console.log(`[TalentManager DEBUG] doubledPhysicalDamageListener triggered. Current turn: ${currentTurn}, Character: ${character.name}, Talent Applied: ${character._doubledPhysicalDamageApplied}`);
+                        if (currentTurn === 25) {
+                            if (character && !character.isDead() && !character._doubledPhysicalDamageApplied) {
+                                console.log('[TalentManager] Applying Infernal Ibuki T14: Doubling Physical Damage.');
+                                character.applyStatModification('physicalDamage', 'multiply', 2);
+                                character._doubledPhysicalDamageApplied = true;
+                                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                log(`<span class="talent-enhanced">🔥 ${character.name}'s Physical Damage is permanently doubled by Doubled Physical Damage talent!</span>`);
+                                
+                                // Apply VFX
+                                if (typeof window.applyDoubledPhysicalDamageVFX === 'function') {
+                                    window.applyDoubledPhysicalDamageVFX(character);
+                                } else {
+                                    console.warn('[TalentManager] applyDoubledPhysicalDamageVFX function not found.');
+                                }
+
+                                // Remove listener after applying to prevent re-application
+                                document.removeEventListener('turn:start', doubledPhysicalDamageListener);
+                            }
+                        }
+                    };
+                    // Store the listener reference on the character for potential cleanup if needed
+                    character._doubledPhysicalDamageListener = doubledPhysicalDamageListener;
+                    document.addEventListener('turn:start', doubledPhysicalDamageListener);
+                }
+
+                // Swift Shadow: Decrease Shadow Veil cooldown by 2 turns
+                if (appliedTalents.includes('infernal_ibuki_t16')) {
+                    const shadowVeilAbility = allAbilities.find(ability => ability.id === 'shadow_veil');
+                    if (shadowVeilAbility) {
+                        shadowVeilAbility.cooldown = Math.max(0, (shadowVeilAbility.cooldown || 0) - 2);
+                        console.log(`[TalentManager] Infernal Ibuki T16 (Swift Shadow) detected. Shadow Veil cooldown reduced to: ${shadowVeilAbility.cooldown}`);
+                    } else {
+                        console.warn('[TalentManager] Shadow Veil ability not found for Infernal Ibuki T16.');
+                    }
+                }
+
+                // Shadow Dance (infernal_ibuki_t17): 10% chance for Shadow Veil after Q, E, R
+                if (appliedTalents.includes('infernal_ibuki_t17')) {
+                    console.log('[TalentManager] Infernal Ibuki T17 (Shadow Dance) detected. Setting up ability-used listener.');
+
+                    // Attach listener if not already attached
+                    if (!character._shadowDanceListenerAttached) {
+                        const shadowDanceListener = (event) => {
+                            console.log('[TalentManager] shadowDanceListener triggered (re-added logs).');
+                            const { caster: abilityCaster, ability: usedAbility } = event.detail;
+                            console.log(`[TalentManager DEBUG] abilityCaster.id: ${abilityCaster.id}, character.id: ${character.id}`);
+                            console.log(`[TalentManager DEBUG] abilityCaster.appliedTalents: ${JSON.stringify(abilityCaster.appliedTalents)}`);
+                            console.log(`[TalentManager DEBUG] usedAbility.id: ${usedAbility.id}`);
+
+                            // Ensure it's Ibuki using her own abilities
+                            if (abilityCaster.id === character.id && abilityCaster.appliedTalents.includes('infernal_ibuki_t17')) {
+                                console.log(`[TalentManager DEBUG] Character ID and talent check passed.`);
+                                const abilityId = usedAbility.id;
+                                console.log(`[TalentManager DEBUG] Ability ID: ${abilityId}`);
+                                // Check if it's Q, E, or R
+                                if (['kunai_throw', 'swift_strike', 'smoke_bomb'].includes(abilityId)) {
+                                    console.log(`[TalentManager DEBUG] Used ability is Kunai Throw (Q), Swift Strike (E), or Smoke Bomb (R).`);
+                                    // 10% chance to activate
+                                    if (Math.random() < 0.10) { // Reverted to 0.10
+                                        console.log(`[TalentManager DEBUG] Shadow Dance activated after ${usedAbility.name}! (Random check passed)`);
+                                        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                        const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
+
+                                        // Apply Shadow Veil buffs for 2 turns
+                                        const untargetableBuff = {
+                                            id: 'shadow_veil_untargetable_t17',
+                                            name: 'Shadow Veil (Talent)',
+                                            icon: 'Icons/abilities/shadow_step.png',
+                                            duration: 2, // 2 turns as per talent description
+                                            onApply: (target) => {
+                                                console.log(`[TalentManager DEBUG] Applying untargetableBuff to ${target.name}.`);
+                                                const targetElementId = target.instanceId || target.id;
+                                                const targetElement = document.getElementById(`character-${targetElementId}`);
+                                                if (targetElement) {
+                                                    targetElement.classList.add('shadow-step-active');
+                                                    const smokeContainer = document.createElement('div');
+                                                    smokeContainer.className = 'shadow-step-smoke-container';
+                                                    for (let i = 0; i < 5; i++) {
+                                                        const smoke = document.createElement('div');
+                                                        smoke.className = 'shadow-step-smoke';
+                                                        smoke.style.setProperty('--i', i);
+                                                        smokeContainer.appendChild(smoke);
+                                                    }
+                                                    targetElement.appendChild(smokeContainer);
+                                                } else {
+                                                    console.warn(`[TalentManager DEBUG] Target element not found for untargetableBuff: character-${targetElementId}`);
+                                                }
+                                            },
+                                            onRemove: (target) => {
+                                                console.log(`[TalentManager DEBUG] Removing untargetableBuff from ${target.name}.`);
+                                                const targetElementId = target.instanceId || target.id;
+                                                const targetElement = document.getElementById(`character-${targetElementId}`);
+                                                if (targetElement) {
+                                                    targetElement.classList.remove('shadow-step-active');
+                                                    const smokeContainer = targetElement.querySelector('.shadow-step-smoke-container');
+                                                    if (smokeContainer) {
+                                                        smokeContainer.remove();
+                                                    }
+                                                } else {
+                                                    console.warn(`[TalentManager DEBUG] Target element not found for untargetableBuff removal: character-${targetElementId}`);
+                                                }
+                                            },
+                                            isDebuff: false,
+                                            isUntargetableByEnemies: true,
+                                            description: "Untargetable by enemies only."
+                                        };
+
+                                        log(`${character.name}'s Shadow Dance activates! She enters Shadow Veil for 2 turns!`, 'talent');
+                                        playSound('sounds/shadow_step.mp3', 0.7);
+
+                                        if (typeof updateCharacterUI === 'function') {
+                                            updateCharacterUI(character);
+                                        } else {
+                                            console.warn(`[TalentManager DEBUG] updateCharacterUI function not found!`);
+                                        }
+                                    } else {
+                                        console.log(`[TalentManager DEBUG] Shadow Dance did not activate (10% chance failed) after ${usedAbility.name}.`);
+                                    }
+                                } else {
+                                    console.log(`[TalentManager DEBUG] Used ability ${abilityId} is not Q, E, or R.`);
+                                }
+                            } else {
+                                console.log(`[TalentManager DEBUG] Character ID or talent check failed. abilityCaster.id=${abilityCaster.id}, character.id=${character.id}, talent included=${abilityCaster.appliedTalents.includes('infernal_ibuki_t17')}`);
+                            }
+                        };
+                        document.addEventListener('AbilityUsed', shadowDanceListener);
+                        character._shadowDanceListener = shadowDanceListener;
+                        character._shadowDanceListenerAttached = true;
+                    }
+                }
+
+                // Infernal Kunais (infernal_ibuki_t20): Kunai Throw applies Blazing debuff
+                if (appliedTalents.includes('infernal_ibuki_t20')) {
+                    console.log('[TalentManager] Infernal Ibuki T20 (Infernal Kunais) detected. Debuff application handled in Kunai Throw effect.');
+                    // No direct action needed here, as the effect is applied within the kunaiThrowEffect.
+                }
+
+                // Debilitating Kunais (infernal_ibuki_t21): Auto-target enemies with 3+ debuffs with Swift Strike
+                if (appliedTalents.includes('infernal_ibuki_t21')) {
+                    console.log('[TalentManager] Infernal Ibuki T21 (Debilitating Kunais) detected. Setting up turn start listener.');
+                    if (!character._debilitatingKunaisListenerAttached) {
+                        const debilitatingKunaisListener = (event) => {
+                            const { character: currentChar } = event.detail || {};
+                            if (currentChar && currentChar.id === character.id && !currentChar.isDead()) {
+                                console.log('[TalentManager] Debilitating Kunais listener triggered for Ibuki.');
+                                
+                                if (!window.gameManager || !window.gameManager.gameState) {
+                                    console.warn('[TalentManager] GameManager or GameState not available.');
+                                    return;
+                                }
+
+                                const enemies = window.gameManager.gameState.aiCharacters;
+                                console.log(`[TalentManager DEBUG] Total AI enemies found: ${enemies ? enemies.length : 0}`);
+                                if (!enemies || enemies.length === 0) {
+                                    console.log('[TalentManager DEBUG] No AI enemies to check for debuffs.');
+                                    return;
+                                }
+
+                                const swiftStrikeAbility = allAbilities.find(ability => ability.id === 'swift_strike');
+
+                                if (!swiftStrikeAbility) {
+                                    console.warn('[TalentManager] Swift Strike ability not found for Debilitating Kunais talent.');
+                                    return;
+                                }
+                                
+                                console.log('[TalentManager] Checking enemies for debuffs...');
+                                const aliveEnemiesWithDebuffs = enemies.filter(enemy => {
+                                    console.log(`[TalentManager DEBUG] Processing enemy: ${enemy.name} (${enemy.id}). isDead(): ${enemy.isDead()}`);
+                                    if (enemy.isDead()) {
+                                        console.log(`[TalentManager DEBUG] Enemy ${enemy.name} is dead, skipping.`);
+                                        return false;
+                                    }
+                                    // Declare debuffs in a higher scope so it's accessible outside the filter callback
+                                    let currentEnemyDebuffs = []; 
+                                    if (typeof enemy.getBuffsAndDebuffs === 'function') {
+                                        const allEffects = enemy.getBuffsAndDebuffs();
+                                        currentEnemyDebuffs = allEffects.filter(effect => {
+                                            console.log(`[TalentManager DEBUG] Effect on ${enemy.name}: ID=${effect.id}, Name=${effect.name}, isDebuff=${effect.isDebuff}`);
+                                            return effect.isDebuff;
+                                        });
+                                        console.log(`[TalentManager DEBUG] Enemy ${enemy.name} (${enemy.id}) has ${currentEnemyDebuffs.length} debuffs after filtering (via getBuffsAndDebuffs). All effects raw:`, allEffects);
+                                        console.log(`[TalentManager DEBUG] Debuffs on ${enemy.name} (filtered):`, currentEnemyDebuffs.map(d => d.id));
+                                    } else if (enemy.debuffs && Array.isArray(enemy.debuffs)) {
+                                        // Fallback if getBuffsAndDebuffs is not available
+                                        currentEnemyDebuffs = enemy.debuffs.filter(effect => {
+                                            console.log(`[TalentManager DEBUG] Fallback (enemy.debuffs) Effect on ${enemy.name}: ID=${effect.id}, Name=${effect.name}, isDebuff=${effect.isDebuff}`);
+                                            return effect.isDebuff;
+                                        });
+                                        console.warn(`[TalentManager] enemy.getBuffsAndDebuffs is not a function for ${enemy.name}. Falling back to enemy.debuffs. Found ${currentEnemyDebuffs.length} debuffs.`);
+                                        console.log(`[TalentManager DEBUG] Debuffs on ${enemy.name} (fallback):`, currentEnemyDebuffs.map(d => d.id));
+                                    } else if (enemy.activeEffects && Array.isArray(enemy.activeEffects)) {
+                                        // Another common pattern for active effects
+                                        currentEnemyDebuffs = enemy.activeEffects.filter(effect => {
+                                            console.log(`[TalentManager DEBUG] Fallback (enemy.activeEffects) Effect on ${enemy.name}: ID=${effect.id}, Name=${effect.name}, isDebuff=${effect.isDebuff}`);
+                                            return effect.isDebuff;
+                                        });
+                                        console.warn(`[TalentManager] Neither getBuffsAndDebuffs nor enemy.debuffs found for ${enemy.name}. Falling back to enemy.activeEffects. Found ${currentEnemyDebuffs.length} debuffs.`);
+                                        console.log(`[TalentManager DEBUG] Debuffs on ${enemy.name} (fallback activeEffects):`, currentEnemyDebuffs.map(d => d.id));
+                                    }
+                                    else {
+                                        console.warn(`[TalentManager] No debuff information found for ${enemy.name}. Neither getBuffsAndDebuffs, enemy.debuffs, nor enemy.activeEffects is available.`);
+                                        console.log(`[TalentManager DEBUG] Full enemy object for ${enemy.name}:`, enemy); // Log the full object
+                                    }
+                                    // Attach the debuff count to the enemy object for sorting
+                                    enemy._tempDebuffCount = currentEnemyDebuffs.length;
+                                    return currentEnemyDebuffs.length >= 3;
+                                });
+
+                                if (aliveEnemiesWithDebuffs.length > 0) {
+                                    console.log(`[TalentManager] Found ${aliveEnemiesWithDebuffs.length} enemies with 3+ debuffs.`);
+                                    // Sort by number of debuffs (descending) then by currentHP (ascending)
+                                    aliveEnemiesWithDebuffs.sort((a, b) => {
+                                        // Use the _tempDebuffCount for sorting
+                                        const aDebuffs = a._tempDebuffCount;
+                                        const bDebuffs = b._tempDebuffCount;
+                                        if (aDebuffs !== bDebuffs) {
+                                            return bDebuffs - aDebuffs;
+                                        }
+                                        return a.currentHP - b.currentHP;
+                                    });
+
+                                    const targetEnemy = aliveEnemiesWithDebuffs[0]; // Target the enemy with most debuffs/lowest HP
+                                    // Use the stored _tempDebuffCount for logging
+                                    const targetEnemyDebuffCount = targetEnemy._tempDebuffCount; 
+                                    console.log(`[TalentManager] Debilitating Kunais: Auto-targeting ${targetEnemy.name} with Swift Strike (${targetEnemyDebuffCount} debuffs).`);
+                                    
+                                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                                    log(`<span class="talent-enhanced">🔥 ${character.name}'s Debilitating Kunais automatically targets ${targetEnemy.name} with Swift Strike!</span>`);
+
+                                    // Simulate ability use. This assumes swiftStrikeAbility has a use() method
+                                    // and that the game loop can handle an ability being used outside of a player action.
+                                    if (typeof swiftStrikeAbility.use === 'function') {
+                                        // Ensure the ability's caster is set correctly
+                                        swiftStrikeAbility.caster = character;
+                                        swiftStrikeAbility.character = character;
+                                        swiftStrikeAbility.use(character, targetEnemy); // Use Swift Strike on the target
+                                    } else {
+                                        console.warn('[TalentManager] Swift Strike ability does not have a "use" method. Auto-targeting failed.');
+                                    }
+                                }
+                            }
+                        };
+                        document.addEventListener('turn:start', debilitatingKunaisListener);
+                        character._debilitatingKunaisListener = debilitatingKunaisListener;
+                        console.log(`[TalentManager] Debilitating Kunais listener attached: ${character._debilitatingKunaisListenerAttached}`);
+                        character._debilitatingKunaisListenerAttached = true;
+                    } else {
+                        console.log('[TalentManager] Debilitating Kunais listener already attached.');
+                    }
+                }
+
+            } catch (err) {
+                console.error('[TalentManager] Error applying Infernal Ibuki special talent:', err);
+            }
+            // Update Ibuki's ability descriptions after applying talents
+            if (typeof window.updateIbukiAbilityDescriptionsForTalents === 'function') {
+                window.updateIbukiAbilityDescriptionsForTalents(character);
+            }
+        }
+        console.log('[TalentManager] Finished Infernal Ibuki talent application.');
+        
         // Get talent definitions for more detailed event
         const talentDefinitionsForEvent = await this.loadTalentDefinitions(character.id);
         if (talentDefinitionsForEvent) {
+            console.log('[TalentManager] Dispatching talent_applied event for each applied talent:', selectedTalentIds);
             // Dispatch talent applied event for each applied talent with detailed info
             selectedTalentIds.forEach(talentId => {
                 const talent = talentDefinitionsForEvent[talentId];
                 if (talent) {
+                    console.log(`[TalentManager] Dispatching talent_applied for ${character.name} talent:`, talentId, talent);
                     document.dispatchEvent(new CustomEvent('talent_applied', {
                         detail: {
                             character: character,
@@ -518,10 +974,12 @@ class TalentManager {
                             talentId: talentId
                         }
                     }));
+                } else {
+                    console.warn(`[TalentManager] Talent definition not found for id: ${talentId}`);
                 }
             });
         } else {
-            // Fallback to simpler event if definitions aren't available
+            console.warn('[TalentManager] No talent definitions found for event dispatch. Fallback to simple event.');
             document.dispatchEvent(new CustomEvent('talent_applied', {
                 detail: {
                     character: character,
@@ -529,6 +987,7 @@ class TalentManager {
                 }
             }));
         }
+        console.log('[TalentManager] Finished dispatching talent_applied events.');
         
         return character;
     }
@@ -537,17 +996,17 @@ class TalentManager {
      * Apply a specific talent effect to a character
      * Accepts either a single effect object or an array of effect objects.
      */
-    applyTalentEffect(character, effectOrEffects) {
+    async applyTalentEffect(character, effectOrEffects) {
         // Handle array of effects (for talents with multiple effects)
         if (Array.isArray(effectOrEffects)) {
             console.log(`[TalentManager] Applying multiple effects (${effectOrEffects.length}) from a single talent`);
-            effectOrEffects.forEach(singleEffect => {
+            for (const singleEffect of effectOrEffects) {
                 // Recursive call for each effect in the array
-                this.applySingleTalentEffect(character, singleEffect);
-            });
+                await this.applySingleTalentEffect(character, singleEffect);
+            }
         } else {
             // Apply a single effect object
-            this.applySingleTalentEffect(character, effectOrEffects);
+            await this.applySingleTalentEffect(character, effectOrEffects);
         }
         // Note: updateCharacterAfterTalent is called once after all talents for a character are processed.
     }
@@ -555,13 +1014,15 @@ class TalentManager {
     /**
      * Apply a single talent effect object to a character
      */
-    applySingleTalentEffect(character, effect) {
+    async applySingleTalentEffect(character, effect) {
         if (!effect || !character) return false;
 
         switch (effect.type) {
             case 'modify_stat':
             case 'stat_modification':
-                this.applyStatModification(character, effect);
+                // Call the applyStatModification method on the character object
+                // The character.applyStatModification expects (statName, operation, value)
+                character.applyStatModification(effect.stat, effect.operation, effect.value);
                 break;
             case 'modify_ability':
             case 'ability_modification':
@@ -586,8 +1047,94 @@ class TalentManager {
             case 'reduce_all_cooldowns':
                 this.applyReduceCooldowns(character, effect);
                 break;
+            case 'add_ability':
+                await this.addAbilityToCharacter(character, effect);
+                break;
+            case 'special':
+                this.applySpecialTalentEffect(character, effect);
+                break;
             default:
                 console.warn(`[TalentManager] Unknown talent effect type: ${effect.type}`);
+        }
+    }
+
+    /**
+     * Apply special talent effects based on specialType
+     */
+    applySpecialTalentEffect(character, effect) {
+        if (!effect.specialType) {
+            console.warn(`[TalentManager] Special effect missing specialType:`, effect);
+            return;
+        }
+
+        console.log(`[TalentManager] Applying special talent effect: ${effect.specialType} to ${character.name}`);
+
+        // Infernal Ibuki special talents
+        if (character.id === 'infernal_ibuki') {
+            try {
+                // Lazy import to avoid circular deps
+                if (!window.applyInfernalIbukiRootTalent || !window.applyInfernalIbukiTalents) {
+                    // Try to import if not already loaded
+                    // (Assume ES6 modules or global script loaded)
+                }
+                // Always call root talent for elemental mastery
+                if (effect.specialType === 'elemental_mastery' && typeof window.applyInfernalIbukiRootTalent === 'function') {
+                    window.applyInfernalIbukiRootTalent(character, character.abilitiesById || character.abilitiesMap || character.abilities);
+                }
+                // Apply all Infernal Ibuki talents directly here
+                const allAbilities = character.abilitiesById || character.abilitiesMap || character.abilities;
+                const appliedTalents = character.appliedTalents || [];
+
+                // Elemental Mastery: +60 magical damage, +50% magical scaling on Kunai Throw
+                if (appliedTalents.includes('infernal_ibuki_t1')) {
+                    // Use applyStatModification to ensure recalculation
+                    character.applyStatModification('magicalDamage', 'add', 60);
+                    const kunaiThrowAbility = allAbilities.find(ability => ability.id === 'kunai_throw');
+                    if (kunaiThrowAbility) {
+                        kunaiThrowAbility.magicalScaling = (kunaiThrowAbility.magicalScaling || 0) + 0.5;
+                    }
+                }
+
+                // Kunai Mastery Awakening: cooldown 0, 17% chance to end turn
+                if (appliedTalents.includes('infernal_ibuki_t2')) {
+                    const kunaiThrowAbility = allAbilities.find(ability => ability.id === 'kunai_throw');
+                    if (kunaiThrowAbility) {
+                        kunaiThrowAbility.cooldown = 0;
+                        kunaiThrowAbility.kunaiEndTurnChance = 0.17;
+                    }
+                }
+
+                // Infernal Edge: +11% crit chance
+                if (appliedTalents.includes('infernal_ibuki_t3')) {
+                    character.critChance = (character.critChance || 0) + 0.11;
+                }
+
+                // Urarenge: Swift Strike crits deal damage again
+                const swiftStrikeAbility = allAbilities.find(ability => ability.id === 'swift_strike');
+                if (appliedTalents.includes('infernal_ibuki_t4') && swiftStrikeAbility) {
+                    swiftStrikeAbility.urarenge = true;
+                }
+
+                // Vampiric Strikes: heal for 25% of crit damage
+                if (appliedTalents.includes('infernal_ibuki_t5')) {
+                    // The listener for this is attached in applyTalentsToCharacter to ensure it's only for the player
+                }
+            } catch (err) {
+                console.error('[TalentManager] Error applying Infernal Ibuki special talent:', err);
+            }
+            return;
+        }
+
+        if (effect.specialType === 'blade_mastery') {
+            this.setupBladeMastery(character, effect);
+        } else if (effect.specialType === 'deadly_power') {
+            this.setupDeadlyPower(character, effect);
+        } else if (effect.specialType === 'spectral_momentum') {
+            this.setupSpectralMomentum(character, effect);
+        } else if (effect.specialType === 'spectral_daggers') {
+            this.setupSpectralDaggers(character, effect);
+        } else {
+            console.warn(`[TalentManager] Special talent type not implemented: ${effect.specialType}`);
         }
     }
 
@@ -595,11 +1142,14 @@ class TalentManager {
      * Updates any character properties after a talent is applied
      */
     updateCharacterAfterTalent(character) {
-        console.log(`[TalentManager] Updating character ${character.name} after talent application`);
-        
-        // Update stats to ensure all modifications are applied
+        // Recalculate stats to ensure all modifications are applied
         if (typeof character.recalculateStats === 'function') {
-            character.recalculateStats('talent-application');
+            character.recalculateStats('talent_applied');
+        }
+        
+        // Check spectral daggers activation if the talent is configured
+        if (character.spectralDaggersConfig) {
+            this.checkSpectralDaggersActivation(character);
         }
         
         // Update UI to reflect changes
@@ -621,6 +1171,25 @@ class TalentManager {
             window.updateElpheltAbilityDescriptionsForTalents(character);
         }
         
+        // Special handling for Ayane to update ability and passive descriptions
+        if (character.id === 'schoolgirl_ayane') {
+            console.log('[TalentManager] Updating Ayane ability and passive descriptions');
+            
+            // Update ability descriptions (Q ability with dodge chance)
+            if (character.abilities) {
+                character.abilities.forEach(ability => {
+                    if (ability.generateDescription && typeof ability.generateDescription === 'function') {
+                        ability.generateDescription();
+                    }
+                });
+            }
+            
+            // Update passive description
+            if (character.passiveHandler && typeof character.passiveHandler.updateDescription === 'function') {
+                character.passiveHandler.updateDescription(character);
+            }
+        }
+        
         // Dispatch talent application event
         const talentEvent = new CustomEvent('talentsApplied', {
             detail: { character: character },
@@ -631,117 +1200,85 @@ class TalentManager {
         console.log(`[TalentManager] Character ${character.name} updated after talent application`);
     }
 
+
     /**
-     * Apply stat modification from talent
+     * Apply ability modification from talent
      */
-    applyStatModification(character, effect) {
-        // Support both 'stat' and 'statName' properties
-        const statName = effect.stat || effect.statName;
-        if (!statName || effect.value === undefined) {
-            console.warn('Invalid stat modification effect', effect);
+    applyAbilityModification(character, effect) {
+        const abilityId = effect.abilityId;
+        const property = effect.property;
+        const operation = effect.operation || 'set';
+        const value = effect.value;
+        
+        if (!abilityId || !property || value === undefined) {
+            console.warn('Invalid ability modification effect', effect);
             return;
         }
-
-        // --- NEW: Add flag for Reinforced Fur --- 
-        if (character.id === 'farmer_alice' && statName === 'armor' && effect.operation === 'add' && effect.value === 8) {
-             console.log(`[TalentManager] Setting hasReinforcedFurTalent flag for ${character.name}`);
-             character.hasReinforcedFurTalent = true;
-        }
-        // --- END NEW ---
-
-        // Special handling for maxMana increases - give the player the extra mana immediately
-        if (statName === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
-            const oldCurrentMana = character.stats.currentMana || character.stats.mana || 0;
-            const oldMaxMana = character.stats.maxMana || character.stats.mana || 0;
-            
-            console.log(`[TalentManager] Before mana modification - Current: ${oldCurrentMana}, Max: ${oldMaxMana}`);
-        }
-
-        // Use the character's existing method to modify stats
-        const operation = effect.operation || 'set'; // Default to set
-
-        if (operation === 'add_base_percentage') {
-            const baseVal = character.baseStats[statName] || 0;
-            const addVal = baseVal * effect.value;
-            console.log(`[TalentManager] add_base_percentage converted for ${statName}: base ${baseVal} + ${(effect.value*100).toFixed(1)}% = +${addVal}`);
-            character.applyStatModification(statName, 'add', addVal);
+        
+        // Find the ability in the character's abilities
+        const ability = character.abilities?.find(ab => ab.id === abilityId);
+        if (!ability) {
+            console.warn(`Ability ${abilityId} not found for character ${character.name}`);
             return;
         }
-
-        character.applyStatModification(statName, operation, effect.value);
         
-        // Special handling for maxMana increases - ensure current mana also increases
-        if (statName === 'maxMana' && (effect.operation === 'add' || effect.operation === 'set')) {
-            const newMaxMana = character.stats.maxMana || character.stats.mana || 0;
-            
-            if (effect.operation === 'add') {
-                // Increase current mana by the same amount we increased max mana
-                const manaIncrease = effect.value;
-                character.stats.currentMana = (character.stats.currentMana || character.stats.mana || 0) + manaIncrease;
-                console.log(`[TalentManager] Increased current mana by ${manaIncrease} due to maxMana talent`);
-                
-                // Trigger VFX for Julia's Enhanced Mystic Reserve talent
-                if (character.id === 'schoolgirl_julia' && manaIncrease === 1000 && typeof window.showEnhancedMysticReserveVFX === 'function') {
-                    setTimeout(() => {
-                        window.showEnhancedMysticReserveVFX(character);
-                    }, 100);
-                }
-            } else if (effect.operation === 'set') {
-                // For set operations, give full mana
-                character.stats.currentMana = newMaxMana;
-                console.log(`[TalentManager] Set current mana to max (${newMaxMana}) due to maxMana talent`);
-            }
-            
-            // Make sure current mana doesn't exceed max mana
-            if (character.stats.currentMana > newMaxMana) {
-                character.stats.currentMana = newMaxMana;
-            }
-            
-            console.log(`[TalentManager] After mana modification - Current: ${character.stats.currentMana}, Max: ${newMaxMana}`);
+        // Apply the modification
+        switch (operation) {
+            case 'set':
+                ability[property] = value;
+                break;
+            case 'add':
+                ability[property] = (ability[property] || 0) + value;
+                break;
+            case 'multiply':
+                ability[property] = (ability[property] || 1) * value;
+                break;
+            default:
+                console.warn(`Unknown ability modification operation: ${operation}`);
+                return;
         }
         
-        // Special handling for critChance increases - trigger VFX for Julia's Critical Strike Mastery
-        if (statName === 'critChance' && character.id === 'schoolgirl_julia' && effect.operation === 'add' && effect.value === 0.10) {
-            if (typeof window.showCriticalStrikeMasteryVFX === 'function') {
-                setTimeout(() => {
-                    window.showCriticalStrikeMasteryVFX(character);
-                }, 100);
-            }
+        console.log(`Applied ability modification to ${character.name}: ${abilityId}.${property} ${operation} ${value}`);
+    }
+
+    /**
+     * Apply passive modification from talent
+     */
+    applyPassiveModification(character, effect) {
+        const passiveId = effect.passiveId;
+        const property = effect.property;
+        const operation = effect.operation || 'set';
+        const value = effect.value;
+        
+        if (!passiveId || !property || value === undefined) {
+            console.warn('Invalid passive modification effect', effect);
+            return;
         }
         
-        // Special handling for HP increases - give the player the extra HP immediately
-        if ((statName === 'hp' || statName === 'maxHp') && (effect.operation === 'add' || effect.operation === 'set')) {
-            // Wait for the stat modification to be applied first
-            setTimeout(() => {
-                const newMaxHp = character.stats.maxHp || character.stats.hp || 0;
-                const currentHp = character.stats.currentHp || character.stats.hp || 0;
-
-                if (effect.operation === 'add') {
-                    // Increase current HP by the exact amount we increased max HP
-                    const hpIncrease = effect.value;
-                    character.stats.currentHp = currentHp + hpIncrease;
-                    console.log(`[TalentManager] Increased current HP by ${hpIncrease} due to ${statName} talent`);
-                } else if (effect.operation === 'set') {
-                    // For set operations, heal to full
-                    character.stats.currentHp = newMaxHp;
-                    console.log(`[TalentManager] Set current HP to max (${newMaxHp}) due to ${statName} talent`);
-                }
-
-                // Ensure current HP does not exceed the new maximum
-                if (character.stats.currentHp > newMaxHp) {
-                    character.stats.currentHp = newMaxHp;
-                }
-
-                console.log(`[TalentManager] After HP modification - Current: ${character.stats.currentHp}, Max: ${newMaxHp}`);
-                
-                // Update the UI to reflect the new HP values
-                if (window.gameManager && window.gameManager.uiManager) {
-                    window.gameManager.uiManager.updateCharacterUI(character);
-                }
-            }, 10);
+        // Find the passive in the character's passives
+        const passive = character.passives?.find(p => p.id === passiveId);
+        if (!passive) {
+            console.warn(`Passive ${passiveId} not found for character ${character.name}`);
+            return;
         }
         
-        console.log(`Applied stat modification to ${character.name}: ${statName} ${operation} ${effect.value}`);
+        // Apply the modification
+        switch (operation) {
+            case 'set':
+                passive[property] = value;
+                break;
+            case 'add':
+                passive[property] = (passive[property] || 0) + value;
+                break;
+            case 'multiply':
+                passive[property] = (passive[property] || 1) * value;
+                break;
+            default:
+                console.warn(`Unknown passive modification operation: ${operation}`);
+                return;
+        }
+        
+        console.log(`Applied passive modification to ${character.name}: ${passiveId}.${property} ${operation} ${value}`);
     }
 
     /**
@@ -945,580 +1482,965 @@ class TalentManager {
                 window.updateShomaAbilityDescriptions(character);
             }
         }
-        // --- END NEW ---
-
-        // Existing switch for specific side effects (can be removed if direct assignment is enough)
-        /*
-        switch (property) {
-            case 'powerGrowth':
-                // Raiden's passive: gain power every 10 turns
-                character.powerGrowth = value;
-                break;
-                
-            case 'lowHealthDodge':
-                // Raiden's passive: gain dodge when below 50% HP
-                character.lowHealthDodge = value;
-                break;
-                
-            case 'critOnBuff':
-                // Raiden's passive: gain crit when receiving a buff
-                character.critOnBuff = value;
-                break;
-                
-            case 'stunningZap':
-                // Raiden's passive: zap has chance to stun
-                character.stunningZap = value;
-                break;
-                
-            case 'zapLifesteal':
-                // Raiden's passive: zap heals based on damage
-                character.zapLifesteal = value;
-                break;
-                
-            case 'permanentThunderShield':
-                // Raiden's talent: start with permanent shield
-                character.permanentThunderShield = value;
-                // If player has a passive system loaded, apply the effect
-                if (window.FarmerRaidenPassive) {
-                    try {
-                        const applyPermanentShield = window.applyPermanentThunderShield;
-                        if (typeof applyPermanentShield === 'function') {
-                            applyPermanentShield(character);
-                            console.log(`Applied permanent thunder shield to ${character.name}`);
-                        } else {
-                            console.warn('applyPermanentThunderShield function not found');
-                        }
-                    } catch (error) {
-                        console.error('Error applying permanent thunder shield:', error);
-                    }
-                }
-                break;
-                
-            case 'initialMagicalShield':
-                // Raiden's talent: start with magical shield
-                character.initialMagicalShield = value;
-                // Apply initial shield effect (15%)
-                character.stats.magicalShield += 15;
-                console.log(`Applied initial magical shield to ${character.name}: +15%`);
-                break;
-                
-            case 'stormEmpowerment':
-                // Raiden's talent: gain magical damage on stun
-                character.stormEmpowerment = value;
-                break;
-                
-            case 'zapDamageMultiplier':
-                // Raiden's talent: increase zap damage scaling
-                character.zapDamageMultiplier = value;
-                break;
-                
-            case 'growingPower':
-                // Raiden's talent: gain magical damage on ability use
-                character.growingPower = value;
-                console.log(`Applied Growing Power talent to ${character.name}`);
-                break;
-                
-            case 'teamHealthAura':
-                // Handle the team health aura property for Farmer Shoma
-                if (character.id === 'farmer_shoma') {
-                    console.log(`[TalentManager] Setting up Nurturing Aura talent for ${character.name}`);
-                    console.log(`[TalentManager] Self bonus: +${value.selfBonus} HP, Ally bonus: +${value.allyBonus} HP`);
-                }
-                break;
-                
-            case 'primalFuryPassive':
-                // Primal Fury passive for Night Hunter Ayane
-                console.log(`[TalentManager] Setting up Primal Fury passive for ${character.name}`);
-                break;
-                
-            // --- Farmer Shoma Specific Properties ---
-            case 'passiveCritBoostValue':
-                character.passiveCritBoostValue = value; // Set the value for passive handler
-                console.log(`Set ${character.name}'s passiveCritBoostValue to ${value}`);
-                break;
-                
-            case 'passiveTriggerTurn':
-                character.passiveTriggerTurn = value; // Set the value for passive handler
-                console.log(`Set ${character.name}'s passiveTriggerTurn to ${value}`);
-                break;
-                
-            case 'criticalHealProc':
-                character.criticalHealProc = value; // Set the value for passive handler
-                console.log(`Set ${character.name}'s criticalHealProc amount to ${value}`);
-                break;
-                
-            case 'critLifestealBoost':
-                character.critLifestealBoost = value; // Set the value for passive handler
-                console.log(`Set ${character.name}'s critLifestealBoost to ${value}`);
-                break;
-            // --- End Farmer Shoma Specific Properties ---
-                
-            // --- NEW: Raiden Relentless Storm talent ---
-            case 'reduceShockOnAbilityUse':
-                character.reduceShockOnAbilityUse = value;
-                console.log(`Set ${character.name}'s reduceShockOnAbilityUse to ${value}`);
-                break;
-            // --- END NEW ---
-
-            // --- NEW: Farmer Alice Quick Reflexes talent ---
-            case 'chanceToReduceCooldownsOnHit':
-                character.chanceToReduceCooldownsOnHit = value;
-                console.log(`Set ${character.name}'s chanceToReduceCooldownsOnHit to ${value}`);
-                break;
-            // --- END NEW ---
-
-            // --- NEW: Farmer Alice Adaptive Defense talent ---
-            case 'bonusHpPerEnemy':
-                character.bonusHpPerEnemy = value;
-                console.log(`Set ${character.name}'s bonusHpPerEnemy to ${value}`);
-                // The actual HP bonus will be applied when the battle starts
-                break;
-            // --- END NEW ---
-
-            // --- NEW: Siegfried Mana Efficiency talent ---
-            case 'manaCostReduction':
-                // Apply mana cost reduction to all abilities
-                console.log(`[TalentManager] Applying mana cost reduction of ${Math.round(value * 100)}% to all abilities for ${character.name}`);
-                if (character.abilities && Array.isArray(character.abilities)) {
-                    character.abilities.forEach(ability => {
-                        if (ability.baseManaCost === undefined) {
-                            ability.baseManaCost = ability.manaCost; // Store original cost
-                        }
-                        const reducedCost = Math.ceil(ability.baseManaCost * (1 - value));
-                        ability.manaCost = Math.max(1, reducedCost); // Minimum 1 mana
-                        console.log(`[TalentManager] ${ability.name} mana cost: ${ability.baseManaCost} -> ${ability.manaCost}`);
-                    });
-                }
-                break;
-            // --- END NEW ---
-
-            default:
-                console.warn(`Unknown character property modification: ${property}`);
-                break;
-        }
-        */
     }
 
     /**
-     * Apply ability modification from talent
+     * Add ability to character from talent
      */
-    applyAbilityModification(character, effect) {
-        if (!effect.abilityId || !effect.property || effect.value === undefined) {
-            console.warn('Invalid ability modification effect', effect);
+    async addAbilityToCharacter(character, effect) {
+        const { abilityId, keybind, specialType } = effect;
+        
+        console.log(`[TalentManager] Adding ability ${abilityId} to ${character.name} with keybind ${keybind}`);
+        
+        // Check if the ability is already added
+        const existingAbility = character.abilities?.find(a => a.id === abilityId);
+        if (existingAbility) {
+            console.log(`[TalentManager] Ability ${abilityId} already exists for ${character.name}`);
             return;
         }
+        
+        // Use the character's built-in method for Fan of Knives
+        if (abilityId === 'fan_of_knives') {
+            if (typeof character.addFanOfKnivesAbility === 'function') {
+                const success = await character.addFanOfKnivesAbility(keybind);
+                if (success) {
+                    console.log(`[TalentManager] Successfully added Fan of Knives to ${character.name} using character method`);
+                } else {
+                    console.error(`[TalentManager] Failed to add Fan of Knives to ${character.name}`);
+                }
+            } else {
+                console.error(`[TalentManager] Character ${character.name} does not have addFanOfKnivesAbility method`);
+            }
+            return;
+        }
+        
+        // For other abilities, use the existing logic
+        console.warn(`[TalentManager] Unknown ability ID: ${abilityId}`);
+    }
 
-        const abilityToModify = character.abilities.find(a => a.id === effect.abilityId);
-        if (abilityToModify) {
-            // Store the modification details (optional, mainly for debugging or complex logic)
-            abilityToModify.talentModifiers = abilityToModify.talentModifiers || {};
-            
-            // Get the property to modify
-            const property = effect.property;
-            const value = effect.value;
-            const operation = effect.operation || 'set';
-            
-            // Apply the modification based on operation
-            if (operation === 'set') {
-                abilityToModify[property] = value;
-                abilityToModify.talentModifiers[property] = value;
-                console.log(`[TalentManager] Applied SET: Set ${character.name}'s ability ${effect.abilityId} property ${property} to ${value}`);
-            } else if (operation === 'add') {
-                if (typeof abilityToModify[property] === 'undefined') {
-                    abilityToModify[property] = value;
-                } else if (typeof abilityToModify[property] === 'number') {
-                    abilityToModify[property] += value;
-                } else {
-                    console.warn(`Cannot add to non-numeric ability property: ${property}`);
-                }
-                abilityToModify.talentModifiers[property] = abilityToModify[property];
-                console.log(`[TalentManager] Applied ADD: Added ${value} to ${character.name}'s ability ${effect.abilityId} property ${property}, new value: ${abilityToModify[property]}`);
-            } else if (operation === 'subtract') {
-                if (typeof abilityToModify[property] === 'number') {
-                    abilityToModify[property] -= value;
-                    // Make sure cooldown doesn't go below 0
-                    if (property === 'cooldown' && abilityToModify[property] < 0) {
-                        abilityToModify[property] = 0;
-                    }
-                } else {
-                    console.warn(`Cannot subtract from non-numeric ability property: ${property}`);
-                }
-                abilityToModify.talentModifiers[property] = abilityToModify[property];
-                console.log(`[TalentManager] Applied SUBTRACT: Subtracted ${value} from ${character.name}'s ability ${effect.abilityId} property ${property}, new value: ${abilityToModify[property]}`);
-            } else if (operation === 'multiply') {
-                if (typeof abilityToModify[property] === 'number') {
-                    abilityToModify[property] *= value;
-                } else {
-                    console.warn(`Cannot multiply non-numeric ability property: ${property}`);
-                }
-                abilityToModify.talentModifiers[property] = abilityToModify[property];
-                console.log(`[TalentManager] Applied MULTIPLY: Multiplied ${character.name}'s ability ${effect.abilityId} property ${property} by ${value}, new value: ${abilityToModify[property]}`);
-            }
-            
-            // Special handling for target type changes
-            if (effect.property === 'canTargetEnemies' && effect.value === true) {
-                console.log(`[TalentManager] Enabling enemy targeting for ${character.name}'s ${effect.abilityId}`);
-                // The ability's getTargetType method will handle the dynamic change
-            }
-            
-            // Special handling for Bridget's Focused Barrage talent affecting W ability
-            if (character.id === 'bridget' && effect.abilityId === 'bridget_w') {
-                console.log(`[TalentManager] Special handling for Bridget's W ability modification: ${effect.property} = ${effect.value}`);
-                
-                // If damageScaling is changed (Focused Barrage talent)
-                if (effect.property === 'damageScaling') {
-                    console.log(`[TalentManager] Bridget's Focused Barrage talent detected - damageScaling modified to ${effect.value}`);
-                    // Ensure we update bubble beam description
-                    if (typeof abilityToModify.generateDescription === 'function') {
-                        abilityToModify.description = abilityToModify.generateDescription();
-                        console.log(`[TalentManager] Specifically updated W ability description for damageScaling change`);
-                    }
-                    // Force trigger an event to let the UI know
-                    document.dispatchEvent(new CustomEvent('bridget_w_modified', {
-                        detail: {
-                            character: character,
-                            ability: abilityToModify,
-                            property: effect.property,
-                            value: effect.value
-                        }
-                    }));
-                }
-                
-                // If cooldown is changed (Focused Barrage talent)
-                if (effect.property === 'cooldown') {
-                    console.log(`[TalentManager] Bridget's Focused Barrage talent detected - cooldown modified to ${effect.value}`);
-                    // Ensure we update bubble beam description
-                    if (typeof abilityToModify.generateDescription === 'function') {
-                        abilityToModify.description = abilityToModify.generateDescription();
-                        console.log(`[TalentManager] Specifically updated W ability description for cooldown change`);
-                    }
-                }
-            }
-            
-            // --- IMPORTANT: Regenerate description AFTER modification --- 
-            let descriptionChanged = false;
-            if (typeof abilityToModify.generateDescription === 'function') {
-                const oldDescription = abilityToModify.description;
-                try {
-                    abilityToModify.generateDescription(); // Generate description right after direct modification
-                    if (oldDescription !== abilityToModify.description) {
-                        console.log(`  - Regenerated description for ${effect.abilityId} after direct talent application.`);
-                        descriptionChanged = true;
-                    }
-                } catch (error) {
-                    console.error(`[TalentManager] Error regenerating description for ability ${effect.abilityId}:`, error);
-                }
-            }
-            // --- END DESCRIPTION REGENERATION ---
-
-            // Dispatch an event to notify that the ability was modified
-            if (descriptionChanged || property === 'cooldown' || property === 'manaCost') { // Include manaCost as it's a common display property
-                const abilityModifiedEvent = new CustomEvent('abilityModified', {
-                    detail: {
-                        abilityId: abilityToModify.id,
-                        property: property,
-                        newValue: abilityToModify[property],
-                        character: character,
-                        ability: abilityToModify
-                    },
-                    bubbles: true
-                });
-                document.dispatchEvent(abilityModifiedEvent);
-            }
-            
-            // Apply side effects specific to certain ability modifications
-            if (effect.abilityId === 'farmer_boomerang' && effect.property === 'extraHitsChance') {
-                // Potentially update UI or other elements related to Boomerang hits
-                console.log(`  - Updated Farmer Cham Cham's Boomerang extra hit chance.`);
-            } else if (effect.abilityId === 'farmer_leap' && effect.property === 'additionalLifestealBuff') {
-                 // Potentially update UI or other elements related to Leap buff
-                console.log(`  - Updated Farmer Cham Cham's Leap to grant lifesteal buff.`);
-            } else if (effect.abilityId === 'infernal_scorch' && effect.property === 'baseDamagePercentage') {
-                // If modifying Infernal Scorch damage for Astaroth
-                console.log(`  - Updated Infernal Astaroth's Scorch damage scaling.`);
-            } else if (effect.abilityId === 'infernal_scorch' && effect.property === 'dotDamagePercentage') {
-                // If modifying Infernal Scorch DoT for Astaroth
-                console.log(`  - Updated Infernal Astaroth's Scorch DoT scaling.`);
-            } else if (effect.abilityId === 'lightning_zap' && effect.property === 'baseDamagePercent') {
-                 // If modifying Raiden's Zap damage
-                 console.log(`  - Updated Farmer Raiden's Zap damage scaling.`);
-            } else if (effect.abilityId === 'shocking_touch' && effect.property === 'bonusDamageOnStunned') {
-                 // If modifying Raiden's Shocking Touch bonus damage
-                 console.log(`  - Updated Farmer Raiden's Shocking Touch bonus damage on stunned targets.`);
-            } else if (effect.abilityId === 'apple_throw' && effect.property === 'casterHealPercent') {
-                 // If modifying Farmer Shoma's Apple Throw self-heal
-                 console.log(`  - Updated Farmer Shoma's Apple Throw self-heal percentage.`);
-            } else if (effect.abilityId === 'apple_throw' && effect.property === 'appliesHealingPowerBuff') {
-                 // If modifying Farmer Shoma's Apple Throw healing power buff application
-                 console.log(`  - Updated Farmer Shoma's Apple Throw to apply stacking Healing Power buff.`);
-            } else if (effect.abilityId === 'root_armor' && effect.property === 'thornsDamagePercent') {
-                 // If modifying Farmer Alice's Root Armor thorns damage
-                 console.log(`  - Updated Farmer Alice's Root Armor thorns damage.`);
-            }
-            // Add other specific checks if needed
-            
-            // Special handling for Julia's Spirit Mastery talent - trigger VFX for R ability cooldown reduction
-            if (character.id === 'schoolgirl_julia' && effect.abilityId === 'schoolgirl_julia_r' && effect.property === 'cooldown' && effect.operation === 'subtract' && effect.value === 2) {
-                console.log(`[TalentManager] Julia's Spirit Mastery talent detected - R ability cooldown reduced by ${effect.value} turns`);
-                
-                // Trigger VFX for Spirit Mastery
-                if (typeof window.showSpiritMasteryVFX === 'function') {
-                    window.showSpiritMasteryVFX(character);
-                }
-                
-                // Add log entry
-                if (window.gameManager && window.gameManager.addLogEntry) {
-                    window.gameManager.addLogEntry(`${character.name}'s Spirit Mastery reduces Spirits Strength cooldown by an additional 2 turns!`, 'talent-effect utility');
-                }
-            }
-            
-            // Special handling for Julia's Nature's Resilience talent - trigger VFX for damage restoration
-            if (character.id === 'schoolgirl_julia' && effect.property === 'naturesResiliencePercent' && effect.value === 0.01) {
-                console.log(`[TalentManager] Julia's Nature's Resilience talent detected - 1% HP/Mana restoration on damage`);
-                
-                // Add log entry
-                if (window.gameManager && window.gameManager.addLogEntry) {
-                    window.gameManager.addLogEntry(`${character.name} gains Nature's Resilience! Restores 1% HP and mana when damaged.`, 'talent-effect healing');
-                }
-            }
+    /**
+     * Setup deadly power talent for Ayane
+     */
+    setupDeadlyPower(character, effect) {
+        const { thresholdDamage, critChanceBonus } = effect;
+        
+        console.log(`[TalentManager] Setting up Deadly Power for ${character.name}: 100% crit chance when above ${thresholdDamage} Physical Damage`);
+        
+        // Initialize deadly power config
+        character.deadlyPowerConfig = {
+            thresholdDamage,
+            critChanceBonus,
+            isActive: false,
+            originalCritChance: character.stats.critChance || 0
+        };
+        
+        // Use the ability file functions if available
+        if (typeof window.initializeDeadlyPower === 'function') {
+            window.initializeDeadlyPower(character);
         } else {
-            console.warn(`[TalentManager] Ability ${effect.abilityId} not found on character ${character.name}.`);
+            // Fallback to checking state directly
+            this.checkDeadlyPowerState(character);
+        }
+        
+        console.log(`[TalentManager] Deadly Power set up for ${character.name}`);
+    }
+
+    /**
+     * Check and update deadly power state
+     */
+    checkDeadlyPowerState(character) {
+        if (!character.deadlyPowerConfig) return;
+        
+        // Use the ability file function if available
+        if (typeof window.checkDeadlyPowerState === 'function') {
+            window.checkDeadlyPowerState(character);
+        } else {
+            // Fallback implementation
+            const config = character.deadlyPowerConfig;
+            const currentPhysicalDamage = character.stats.physicalDamage || 0;
+            const shouldBeActive = currentPhysicalDamage > config.thresholdDamage;
+            
+            if (shouldBeActive && !config.isActive) {
+                this.activateDeadlyPower(character);
+            } else if (!shouldBeActive && config.isActive) {
+                this.deactivateDeadlyPower(character);
+            }
         }
     }
 
     /**
-     * Apply add ability effect from talent
+     * Activate deadly power
      */
-    applyAddAbility(character, effect) {
-        if (!effect.ability) {
-            console.warn('Invalid add ability effect', effect);
-            return;
+    activateDeadlyPower(character) {
+        // Use the ability file function if available
+        if (typeof window.activateDeadlyPower === 'function') {
+            window.activateDeadlyPower(character);
+        } else {
+            // Fallback implementation
+            const config = character.deadlyPowerConfig;
+            if (!config) return;
+            
+            config.isActive = true;
+            character.stats.critChance = 1.0;
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${character.name}'s Deadly Power activates! 100% Critical Hit Chance!`);
         }
-
-        // Add the new ability
-        character.addAbility(effect.ability);
-        console.log(`Added ability ${effect.ability.name} to ${character.name}`);
     }
 
     /**
-     * Apply passive modification from talent
+     * Deactivate deadly power
      */
-    applyPassiveModification(character, effect) {
-        if (!effect.property || effect.value === undefined) {
-            console.warn('Invalid passive modification effect', effect);
-            return;
+    deactivateDeadlyPower(character) {
+        // Use the ability file function if available
+        if (typeof window.deactivateDeadlyPower === 'function') {
+            window.deactivateDeadlyPower(character);
+        } else {
+            // Fallback implementation
+            const config = character.deadlyPowerConfig;
+            if (!config) return;
+            
+            config.isActive = false;
+            character.stats.critChance = config.originalCritChance;
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${character.name}'s Deadly Power deactivates as Physical Damage drops below ${config.thresholdDamage}.`);
         }
+    }
 
-        // Handle character-specific passive modifications
-        if (character.id === 'schoolboy_siegfried' && character.passiveHandler) {
-            if (typeof character.passiveHandler.applyTalentModification === 'function') {
-                character.passiveHandler.applyTalentModification(effect.property, effect.value);
-                console.log(`Applied talent modification to Siegfried's passive: ${effect.property} = ${effect.value}`);
-                return;
+    /**
+     * Create visual indicator for Deadly Power
+     */
+    createDeadlyPowerIndicator(character) {
+        // Try multiple possible character element IDs
+        const possibleIds = [
+            `character-${character.instanceId}`,
+            `character-${character.id}`,
+            `character-${character.instanceId || character.id}`,
+            `player-character-${character.id}`,
+            `ally-character-${character.id}`
+        ];
+        
+        let charElement = null;
+        for (const id of possibleIds) {
+            charElement = document.getElementById(id);
+            if (charElement) {
+                console.log(`[Deadly Power] Found character element with ID: ${id}`);
+                break;
             }
         }
         
-        // Handle Elphelt's passive modifications (defensive recovery, stalwart defense)
-        if (character.id === 'schoolgirl_elphelt' && character.passiveHandler) {
-            if (typeof character.passiveHandler.applyTalentModification === 'function') {
-                character.passiveHandler.applyTalentModification(effect.property, effect.value);
-                console.log(`Applied talent modification to Elphelt's passive: ${effect.property} = ${effect.value}`);
-                return;
-            }
+        if (!charElement) {
+            console.log(`[Deadly Power] Could not find character element for ${character.name}. Will try again later`);
+            return;
         }
+        
+        // Remove existing indicator
+        const existingIndicator = charElement.querySelector('.deadly-power-indicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
+        const indicator = document.createElement('div');
+        indicator.className = 'deadly-power-indicator';
+        indicator.style.cssText = `
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff0000, #ff6b6b, #ffaa00);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            z-index: 10000;
+            pointer-events: none;
+            border: 2px solid #ff0000;
+            animation: deadly-power-pulse 1.5s ease-in-out infinite;
+            display: block !important;
+            visibility: visible !important;
+            text-align: center;
+            white-space: nowrap;
+        `;
+        
+        // Ensure parent has relative positioning
+        const computedStyle = window.getComputedStyle(charElement);
+        if (computedStyle.position === 'static') {
+            charElement.style.position = 'relative';
+        }
+        
+        // Add CSS animation if not already present
+        if (!document.getElementById('deadly-power-styles')) {
+            const style = document.createElement('style');
+            style.id = 'deadly-power-styles';
+            style.textContent = `
+                @keyframes deadly-power-pulse {
+                    0%, 100% { 
+                        transform: translateX(-50%) scale(1); 
+                        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+                        background: linear-gradient(135deg, #ff0000, #ff6b6b, #ffaa00);
+                    }
+                    50% { 
+                        transform: translateX(-50%) scale(1.1); 
+                        box-shadow: 0 0 30px rgba(255, 0, 0, 1.0);
+                        background: linear-gradient(135deg, #ff6b6b, #ffaa00, #ff0000);
+                    }
+                }
+                
+                @keyframes deadly-power-activation {
+                    0% { transform: translateX(-50%) scale(0) rotate(0deg); opacity: 0; }
+                    50% { transform: translateX(-50%) scale(1.5) rotate(180deg); opacity: 1; }
+                    100% { transform: translateX(-50%) scale(1) rotate(360deg); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        indicator.textContent = '💀 DEADLY POWER';
+        indicator.title = 'Deadly Power: 100% Critical Hit Chance while above 750 Physical Damage';
+        
+        charElement.appendChild(indicator);
+        
+        console.log(`[TalentManager] Created deadly power indicator for ${character.name}`);
+    }
 
-        // Modify the passive
-        if (character.passive) {
-            const operation = effect.operation || 'set'; // Default to set
+    /**
+     * Remove visual indicator for Deadly Power
+     */
+    removeDeadlyPowerIndicator(character) {
+        // Use the ability file function if available
+        if (typeof window.removeDeadlyPowerVisuals === 'function') {
+            window.removeDeadlyPowerVisuals(character);
+        } else {
+            // Fallback implementation
+            const possibleIds = [
+                `character-${character.instanceId}`,
+                `character-${character.id}`,
+                `character-${character.instanceId || character.id}`,
+                `player-character-${character.id}`,
+                `ally-character-${character.id}`
+            ];
             
-            if (operation === 'set') {
-                character.passive[effect.property] = effect.value;
-            } else if (operation === 'add') {
-                character.passive[effect.property] += effect.value;
-            } else if (operation === 'multiply') {
-                character.passive[effect.property] *= effect.value;
+            let charElement = null;
+            for (const id of possibleIds) {
+                charElement = document.getElementById(id);
+                if (charElement) break;
             }
             
-            console.log(`Applied passive modification to ${character.name}: ${effect.property} ${operation} ${effect.value}`);
-        } else {
-            console.warn(`Character ${character.name} has no passive ability to modify`);
+            if (!charElement) return;
+            
+            const indicator = charElement.querySelector('.deadly-power-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
         }
     }
 
     /**
-     * Hook into character creation process to apply talents
-     * This is called by our modified talent application code
+     * Show VFX for Deadly Power activation
      */
-    async enhanceCharacterWithTalents(character) {
-        if (!character || !character.id) return character;
+    showDeadlyPowerActivationVFX(character) {
+        const possibleIds = [
+            `character-${character.instanceId}`,
+            `character-${character.id}`,
+            `character-${character.instanceId || character.id}`,
+            `player-character-${character.id}`,
+            `ally-character-${character.id}`
+        ];
         
-        // CRITICAL SAFETY CHECK: Never apply user talents to AI characters
-        if (character.isAI === true) {
-            console.log(`[TalentManager] BLOCKED: enhanceCharacterWithTalents called on AI character ${character.name}. AI characters should not get user talents.`);
-            return character;
+        let charElement = null;
+        for (const id of possibleIds) {
+            charElement = document.getElementById(id);
+            if (charElement) break;
+        }
+        
+        if (!charElement) return;
+        
+        const vfx = document.createElement('div');
+        vfx.className = 'deadly-power-activation-vfx';
+        vfx.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 1);
+            z-index: 999;
+            pointer-events: none;
+            animation: deadly-power-activation-vfx 2s ease-out forwards;
+        `;
+        vfx.textContent = '💀 DEADLY POWER ACTIVATED! 💀';
+        
+        // Add CSS animation if not already present
+        if (!document.getElementById('deadly-power-activation-vfx-styles')) {
+            const style = document.createElement('style');
+            style.id = 'deadly-power-activation-vfx-styles';
+            style.textContent = `
+                @keyframes deadly-power-activation-vfx {
+                    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+                    20% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+                    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        charElement.appendChild(vfx);
+        
+        // Remove VFX after animation
+        setTimeout(() => {
+            vfx.remove();
+        }, 2000);
+    }
+
+    /**
+     * Clean up talent-related UI elements and listeners for a character
+     */
+    cleanupCharacterTalents(character) {
+        if (!character) return;
+        
+        console.log(`[TalentManager] Cleaning up talents for ${character.name}`);
+        
+        // Remove Butterfly Protection indicator
+        this.removeButterflyProtectionIndicator(character);
+        
+        // Remove Blade Mastery indicator
+        this.removeBladeMasteryIndicator(character);
+        
+        // Remove Deadly Power indicator
+        this.removeDeadlyPowerIndicator(character);
+        
+        // Remove event listeners
+        if (character.butterflyProtectionListener) {
+            document.removeEventListener('character:dodged', character.butterflyProtectionListener);
+            character.butterflyProtectionListener = null;
+        }
+        
+        if (character.butterflyStealthListener) {
+            document.removeEventListener('character:dodged', character.butterflyStealthListener);
+            character.butterflyStealthListener = null;
+        }
+        
+        if (character.bladeMasteryListener) {
+            document.removeEventListener('character:damage-dealt', character.bladeMasteryListener);
+            character.bladeMasteryListener = null;
+        }
+
+        if (character.vampiricStrikesListener) {
+            document.removeEventListener('character:damage-dealt', character.vampiricStrikesListener);
+            character.vampiricStrikesListener = null;
+        }
+
+        if (character.spectralMomentumListener) {
+            document.removeEventListener('character:damage-dealt', character.spectralMomentumListener);
+            character.spectralMomentumListener = null;
+        }
+        
+        if (character.bladeMasteryUIListener) {
+            document.removeEventListener('character:ui-created', character.bladeMasteryUIListener);
+            character.bladeMasteryUIListener = null;
+        }
+        
+        // Note: Butterfly Healing is handled by the passive handler's onDodge method
+        
+        // Remove Spectral Daggers listener and visuals
+        if (character.spectralDaggersListener) {
+            document.removeEventListener('turn:start', character.spectralDaggersListener);
+            character.spectralDaggersListener = null;
+        }
+        
+        if (character.spectralDaggersBuffListener) {
+            document.removeEventListener('BuffApplied', character.spectralDaggersBuffListener);
+            character.spectralDaggersBuffListener = null;
+        }
+
+        // Remove Shadow Dance listener
+        if (character._shadowDanceListener) {
+            document.removeEventListener('AbilityUsed', character._shadowDanceListener);
+            character._shadowDanceListener = null;
+            character._shadowDanceListenerAttached = false;
+        }
+        
+        // Remove spectral daggers visuals
+        this.removeSpectralDaggersVisuals(character);
+        
+        // Clear spectral daggers config
+        if (character.spectralDaggersConfig) {
+            character.spectralDaggersConfig = null;
+        }
+        
+        // Clear talent-related config
+        if (character.butterflyProtectionConfig) {
+            character.butterflyProtectionConfig = null;
+        }
+        
+        if (character.bladeMasteryConfig) {
+            character.bladeMasteryConfig = null;
+        }
+        
+        if (character.spectralMomentumConfig) {
+            character.spectralMomentumConfig = null;
+        }
+        
+        if (character.deadlyPowerConfig) {
+            character.deadlyPowerConfig = null;
+        }
+
+        // Remove Doubled Physical Damage VFX if applied
+        if (typeof window.removeDoubledPhysicalDamageVFX === 'function') {
+            window.removeDoubledPhysicalDamageVFX(character);
+        }
+        
+        console.log(`[TalentManager] Cleaned up talents for ${character.name}`);
+    }
+
+    /**
+     * Reset all talents for a character and clean up UI
+     */
+    async resetCharacterTalents(characterId, userId) {
+        if (!userId) {
+            userId = getCurrentUserId();
+        }
+        
+        if (!userId) {
+            console.error('No user ID available for resetting talents');
+            return;
         }
         
         try {
-            // Get user ID
-            const userId = getCurrentUserId();
-            if (!userId) {
-                console.warn('No user ID available for talent application');
-                return character;
-            }
+            // Save empty talent selection
+            await this.saveSelectedTalents(characterId, {}, userId);
             
-            // Get selected talents for this character
-            const selectedTalents = await this.getSelectedTalents(character.id, userId);
-            if (!selectedTalents || selectedTalents.length === 0) {
-                console.log(`No talents selected for ${character.id}`);
-                return character;
-            }
-            
-            // Apply talents to the character
-            const enhancedCharacter = await this.applyTalentsToCharacter(character, selectedTalents);
-
-            // Update UI and dispatch events
-            if (window.updateCharacterUI && document.getElementById(`character-${character.instanceId || character.id}`)) {
-                window.updateCharacterUI(enhancedCharacter);
-            }
-            
-            // ADDED: Dispatch character initialized event
-            document.dispatchEvent(new CustomEvent('characterInitialized', {
-                detail: {
-                    character: enhancedCharacter
+            // Find character instances and clean up
+            const characterElements = document.querySelectorAll(`[id^="character-${characterId}"]`);
+            characterElements.forEach(element => {
+                // Remove visual indicators
+                const indicator = element.querySelector('.butterfly-protection-indicator');
+                if (indicator) {
+                    indicator.remove();
                 }
-            }));
+            });
             
-            return enhancedCharacter;
+            console.log(`[TalentManager] Reset talents for ${characterId}`);
+            return true;
         } catch (error) {
-            console.error(`Error enhancing character ${character.id} with talents:`, error);
-            return character; // Return unmodified character on error
+            console.error(`Error resetting talents for ${characterId}:`, error);
+            throw error;
         }
+    }
+    
+    /**
+     * Setup blade mastery talent for Ayane
+     */
+    setupBladeMastery(character, effect) {
+        const { damagePerHit, stacksInfinitely } = effect;
+        
+        console.log(`[TalentManager] Setting up Blade Mastery for ${character.name}: +${damagePerHit} Physical Damage per hit dealt${stacksInfinitely ? ' (infinite stacks)' : ''}`);
+        
+        // Initialize blade mastery config
+        character.bladeMasteryConfig = {
+            damagePerHit,
+            stacksInfinitely,
+            currentStacks: 0,
+            totalBonusDamage: 0
+        };
+        
+        // Set up damage dealt listener
+        const damageListener = (event) => {
+            const { character: attacker, damage } = event.detail;
+            
+            // Only trigger for our character
+            if (attacker !== character) return;
+            
+            // Only trigger if damage was actually dealt
+            if (damage <= 0) return;
+            
+            const config = character.bladeMasteryConfig;
+            if (!config) return;
+            
+            // Increment stacks
+            config.currentStacks++;
+            config.totalBonusDamage += config.damagePerHit;
+            
+            // Apply permanent physical damage bonus to base stats
+            character.baseStats.physicalDamage = (character.baseStats.physicalDamage || 0) + config.damagePerHit;
+            
+            // Recalculate stats to apply the bonus
+            character.recalculateStats();
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`<span class="talent-enhanced">${character.name} gains +${config.damagePerHit} Physical Damage from Blade Mastery! (${config.currentStacks} stacks, +${config.totalBonusDamage} total)</span>`);
+            
+            console.log(`[Blade Mastery] ${character.name} gained stack ${config.currentStacks} (+${config.damagePerHit} damage, +${config.totalBonusDamage} total)`);
+        };
+        
+        // Listen for damage dealt events
+        document.addEventListener('character:damage-dealt', damageListener);
+        
+        // Store listener for cleanup
+        character.bladeMasteryListener = damageListener;
+        
+        console.log(`[TalentManager] Blade Mastery set up for ${character.name}`);
     }
 
     /**
-     * Sets up an event listener for the 'on_crit_heal_self_stat_buff_permanent' talent effect.
-     * When the specified character performs a critical heal, a stat is permanently buffed,
-     * and a VFX is shown.
+     * Setup spectral momentum talent for Ayane
      */
-    setupCritHealStatBuffListener(character, talentEffect) {
-        if (!character || !talentEffect || !talentEffect.stat || typeof talentEffect.value !== 'number') {
-            console.error('[TalentManager] Invalid arguments for setupCritHealStatBuffListener:', character, talentEffect);
-            return;
-        }
-
-        console.log(`[TalentManager] Attaching criticalHeal listener for ${character.name}, talent effect:`, talentEffect);
-
-        const listener = (event) => {
-            console.log(`%c[Aqueous Renewal Listener DEBUG] GLOBAL criticalHeal event captured!`, 'color: lime; font-weight: bold;', event.detail);
-
-            // Ensure the event has the necessary details
-            if (event.detail && event.detail.source && event.detail.isCritical) {
-                const eventSourceId = event.detail.source.id;
-                const characterIdForListener = character.id;
-                const isSourceMatching = eventSourceId === characterIdForListener;
+    setupSpectralMomentum(character, effect) {
+        const { damageThreshold, cooldownReduction } = effect;
+        
+        console.log(`[TalentManager] Setting up Spectral Momentum for ${character.name}: -${cooldownReduction} turns cooldown when dealing >${damageThreshold} damage`);
+        
+        // Initialize spectral momentum config
+        character.spectralMomentumConfig = {
+            damageThreshold,
+            cooldownReduction
+        };
+        
+        // Set up damage dealt listener
+        const damageListener = (event) => {
+            const { character: attacker, damage } = event.detail;
+            
+            // Only trigger for our character
+            if (attacker !== character) return;
+            
+            // Check if damage meets threshold
+            if (damage <= damageThreshold) return;
+            
+            const config = character.spectralMomentumConfig;
+            if (!config) return;
+            
+            // Reduce cooldowns for all abilities with active cooldowns
+            let abilitiesAffected = 0;
+            if (character.abilities) {
+                character.abilities.forEach(ability => {
+                    if (ability.currentCooldown > 0) {
+                        const oldCooldown = ability.currentCooldown;
+                        ability.currentCooldown = Math.max(0, ability.currentCooldown - cooldownReduction);
+                        if (ability.currentCooldown < oldCooldown) {
+                            abilitiesAffected++;
+                        }
+                    }
+                });
+            }
+            
+            if (abilitiesAffected > 0) {
+                const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                log(`<span class="talent-enhanced">${character.name}'s Spectral Momentum reduces ${abilitiesAffected} ability cooldowns by ${cooldownReduction} turns!</span>`);
                 
-                console.log(`[Aqueous Renewal Listener DEBUG] Event source ID: ${eventSourceId}, Listener character ID: ${characterIdForListener}, Match: ${isSourceMatching}`);
-                console.log(`[Aqueous Renewal Listener DEBUG] Event isCritical: ${event.detail.isCritical}`);
-
-                // Check if the source is the character with the talent AND it was critical
-                // IMPORTANT: We removed the ally-only check so it works when Bridget heals anyone (including herself)
-                if (isSourceMatching && event.detail.isCritical) { 
-                    console.log(`[TalentManager] 'Aqueous Renewal' triggered for ${character.name} by critical heal on ${event.detail.target.name}.`);
-
-                    const statToBuff = talentEffect.stat; // e.g., 'healingPower'
-                    const buffValue = talentEffect.value; // e.g., 0.05
-
-                    const oldValue = character.stats[statToBuff] || 0;
-                    character.stats[statToBuff] = oldValue + buffValue;
-                    console.log(`[TalentManager] ${character.name}'s ${statToBuff} Before: ${oldValue}, After: ${character.stats[statToBuff]} (Added: ${buffValue})`);
-
-                    if (typeof character.recalculateStats === 'function') {
-                        console.log(`[TalentManager] Calling recalculateStats for ${character.name} after Aqueous Renewal.`);
-                        character.recalculateStats('talent_crit_heal_buff_aqueous_renewal');
-                    } else {
-                        console.warn(`[TalentManager] character.recalculateStats is not a function for ${character.name}.`);
-                    }
-
-                    if (typeof showAqueousRenewalVFX === 'function') {
-                        console.log(`[TalentManager] Calling showAqueousRenewalVFX for ${character.name}.`);
-                        showAqueousRenewalVFX(character, buffValue);
-                    } else {
-                        console.warn('[TalentManager] showAqueousRenewalVFX function is not defined. Cannot show VFX.');
-                    }
-
-                    if (window.gameManager && typeof window.gameManager.addLogEntry === 'function') {
-                        const buffPercentage = Math.round(buffValue * 100);
-                        window.gameManager.addLogEntry(
-                            `${character.name}'s Aqueous Renewal activates, permanently increasing Healing Power by ${buffPercentage}%!`,
-                            'talent-effect positive'
-                        );
-                    }
-                    if (typeof updateCharacterUI === 'function') {
-                        console.log(`[TalentManager] Calling updateCharacterUI for ${character.name} after Aqueous Renewal.`);
-                        updateCharacterUI(character);
-                    }
-                } else {
-                    console.log(`[Aqueous Renewal Listener DEBUG] Critical heal event requirements not met: Source match=${isSourceMatching}, Critical=${event.detail.isCritical}`);
+                console.log(`[Spectral Momentum] ${character.name} dealt ${damage} damage (>${damageThreshold}), reduced ${abilitiesAffected} ability cooldowns by ${cooldownReduction} turns`);
+                
+                // Update UI to reflect cooldown changes
+                if (window.gameManager && window.gameManager.uiManager) {
+                    window.gameManager.uiManager.updateCharacterUI(character);
                 }
-            } else {
-                console.log('[Aqueous Renewal Listener DEBUG] Critical heal event ignored: Missing detail, source, or not critical.', event.detail);
             }
         };
-
-        document.addEventListener('criticalHeal', listener);
         
-        console.log(`[TalentManager] Event listener for '${talentEffect.id || 'Aqueous Renewal'}' on critical heal set up for ${character.name}.`);
+        // Listen for damage dealt events
+        document.addEventListener('character:damage-dealt', damageListener);
+        
+        // Store listener for cleanup
+        character.spectralMomentumListener = damageListener;
+        
+        console.log(`[TalentManager] Spectral Momentum set up for ${character.name}`);
     }
 
     /**
-     * Apply property modification from talent
+     * Setup spectral daggers talent for Ayane
      */
-    applyPropertyModification(character, effect) {
-        if (!effect.property || effect.value === undefined) {
-            console.warn('Invalid property modification effect', effect);
-            return false;
-        }
-
-        const property = effect.property;
-        const value = effect.value;
-        const operation = effect.operation || 'set';
-
-        console.log(`Applying property modification: ${property} = ${value} for ${character.name}`);
-
-        // Apply the modification
-        if (operation === 'set') {
-            character[property] = value;
-        } else if (operation === 'add') {
-            if (typeof character[property] === 'undefined') {
-                character[property] = value;
-            } else if (typeof character[property] === 'number') {
-                character[property] += value;
-            } else {
-                console.warn(`Cannot add to non-numeric character property: ${property}`);
-            }
-        } else if (operation === 'subtract') {
-            if (typeof character[property] === 'number') {
-                character[property] -= value;
-            } else {
-                console.warn(`Cannot subtract from non-numeric character property: ${property}`);
-            }
-        }
-
-        console.log(`[TalentManager] Set character.${property} = ${character[property]}`);
-        return true;
+    setupSpectralDaggers(character, effect) {
+        const { dodgeThreshold, daggerCount, damagePerDagger, autoFire } = effect;
+        
+        console.log(`[TalentManager] Setting up Spectral Daggers for ${character.name}: ${daggerCount} daggers, ${damagePerDagger} damage each, dodge threshold: ${dodgeThreshold * 100}%`);
+        
+        // Initialize spectral daggers config
+        character.spectralDaggersConfig = {
+            dodgeThreshold,
+            daggerCount,
+            damagePerDagger,
+            autoFire,
+            active: false
+        };
+        
+        // Set up turn start listener for auto-fire
+        const turnStartListener = (event) => {
+            const { character: currentChar } = event.detail || {};
+            
+            // Only trigger for our character
+            if (currentChar !== character) return;
+            
+            // Check if spectral daggers are active
+            if (!character.spectralDaggersConfig || !character.spectralDaggersConfig.active) return;
+            
+            this.fireSpectralDaggers(character);
+        };
+        
+        // Set up buff applied listener to check activation when dodge buffs are added
+        const buffAppliedListener = (event) => {
+            const { character: buffedChar } = event.detail || {};
+            
+            // Only trigger for our character
+            if (buffedChar !== character) return;
+            
+            // Check if the buff affects dodge chance and recheck activation
+            this.checkSpectralDaggersActivation(character);
+        };
+        
+        // Listen for turn start events
+        document.addEventListener('turn:start', turnStartListener);
+        
+        // Listen for buff applied events
+        document.addEventListener('BuffApplied', buffAppliedListener);
+        
+        // Store listeners for cleanup
+        character.spectralDaggersListener = turnStartListener;
+        character.spectralDaggersBuffListener = buffAppliedListener;
+        
+        // Initial activation check
+        this.checkSpectralDaggersActivation(character);
+        
+        console.log(`[TalentManager] Spectral Daggers set up for ${character.name}`);
     }
 
+    /**
+     * Check if spectral daggers should be activated based on dodge chance
+     */
+    checkSpectralDaggersActivation(character) {
+        if (!character.spectralDaggersConfig) return;
+        
+        const config = character.spectralDaggersConfig;
+        
+        // Get current dodge chance including buffs
+        let currentDodgeChance = character.stats?.dodgeChance || 0;
+        
+        // Add dodge chance from active buffs
+        if (character.buffs && character.buffs.length > 0) {
+            character.buffs.forEach(buff => {
+                if (buff.statModifiers && buff.statModifiers.dodgeChance) {
+                    const modifier = buff.statModifiers.dodgeChance;
+                    if (modifier.operation === 'add') {
+                        currentDodgeChance += modifier.value;
+                    } else if (modifier.operation === 'multiply') {
+                        currentDodgeChance *= modifier.value;
+                    }
+                }
+            });
+        }
+        
+        const shouldBeActive = currentDodgeChance >= config.dodgeThreshold;
+        
+        console.log(`[TalentManager] Checking Spectral Daggers activation for ${character.name}: base dodge=${((character.stats?.dodgeChance || 0) * 100).toFixed(1)}%, total dodge=${(currentDodgeChance * 100).toFixed(1)}%, threshold=${(config.dodgeThreshold * 100).toFixed(1)}%, should be active=${shouldBeActive}`);
+        
+        if (shouldBeActive && !config.active) {
+            // Activate spectral daggers
+            config.active = true;
+            this.summonSpectralDaggers(character);
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`<span class="talent-enhanced">✨ ${character.name}'s Spectral Daggers activated! (${(currentDodgeChance * 100).toFixed(1)}% dodge chance)</span>`);
+        } else if (!shouldBeActive && config.active) {
+            // Deactivate spectral daggers
+            config.active = false;
+            this.removeSpectralDaggersVisuals(character);
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`<span class="talent-enhanced">💫 ${character.name}'s Spectral Daggers deactivated (${(currentDodgeChance * 100).toFixed(1)}% dodge chance)</span>`);
+        }
+    }
+
+    /**
+     * Summon spectral daggers visuals
+     */
+    summonSpectralDaggers(character) {
+        console.log(`[TalentManager] Summoning spectral daggers for ${character.name}`);
+        
+        // Find character's UI element
+        const characterSlot = document.querySelector(`[data-character-id="${character.id}"]`);
+        if (!characterSlot) {
+            console.warn(`[TalentManager] Character slot not found for ${character.name}`);
+            return;
+        }
+        
+        // Remove existing daggers
+        const existingDaggers = characterSlot.querySelectorAll('.spectral-dagger');
+        existingDaggers.forEach(dagger => dagger.remove());
+        
+        // Add spectral daggers class to character slot
+        characterSlot.classList.add('has-spectral-daggers');
+        
+        // Create dagger elements
+        const config = character.spectralDaggersConfig;
+        for (let i = 0; i < config.daggerCount; i++) {
+            const dagger = document.createElement('div');
+            dagger.className = 'spectral-dagger';
+            dagger.style.left = i === 0 ? '-25px' : '85px';
+            dagger.style.top = '30px';
+            
+            if (i === 0) {
+                dagger.style.animation = 'spectral-dagger-float-left 2s ease-in-out infinite';
+            } else {
+                dagger.style.animation = 'spectral-dagger-float-right 2s ease-in-out infinite';
+            }
+            
+            characterSlot.appendChild(dagger);
+        }
+        
+        console.log(`[TalentManager] Summoned ${config.daggerCount} spectral daggers for ${character.name}`);
+    }
+
+    /**
+     * Fire spectral daggers at random enemies
+     */
+    fireSpectralDaggers(character) {
+        const config = character.spectralDaggersConfig;
+        if (!config || !config.active) return;
+        
+        console.log(`[TalentManager] Firing spectral daggers for ${character.name}`);
+        
+        // Get all enemies from the game state
+        const enemies = window.gameManager?.gameState?.aiCharacters || [];
+        
+        // Debug logging to understand enemy structure
+        console.log(`[TalentManager] Enemy objects:`, enemies);
+        enemies.forEach((enemy, index) => {
+            console.log(`[TalentManager] Enemy ${index}:`, {
+                name: enemy.name,
+                currentHP: enemy.currentHP,
+                hp: enemy.hp,
+                stats: enemy.stats,
+                isDead: enemy.isDead(),
+                isAlive: !enemy.isDead()
+            });
+        });
+        
+        const aliveEnemies = enemies.filter(enemy => !enemy.isDead());
+        
+        console.log(`[TalentManager] Found ${enemies.length} total enemies, ${aliveEnemies.length} alive`);
+        
+        if (aliveEnemies.length === 0) {
+            console.log(`[TalentManager] No alive enemies to target with spectral daggers`);
+            return;
+        }
+        
+        // Fire each dagger at a random enemy
+        for (let i = 0; i < config.daggerCount; i++) {
+            const randomEnemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+            
+            // Show VFX for spectral dagger firing
+            this.showSpectralDaggerVFX(character, randomEnemy, i);
+            
+            // Apply damage
+            const result = randomEnemy.applyDamage(config.damagePerDagger, 'magical', character, { 
+                abilityId: 'spectral_daggers',
+                isSpectralDagger: true 
+            });
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`🗡️ ${character.name}'s spectral dagger strikes ${randomEnemy.name} for ${result.damage} damage!`);
+        }
+        
+        console.log(`[TalentManager] Fired ${config.daggerCount} spectral daggers`);
+    }
+
+    /**
+     * Remove spectral daggers visuals
+     */
+    removeSpectralDaggersVisuals(character) {
+        console.log(`[TalentManager] Removing spectral daggers visuals for ${character.name}`);
+        
+        // Find character's UI element
+        const characterSlot = document.querySelector(`[data-character-id="${character.id}"]`);
+        if (characterSlot) {
+            // Remove spectral daggers class
+            characterSlot.classList.remove('has-spectral-daggers');
+            
+            // Remove dagger elements
+            const daggers = characterSlot.querySelectorAll('.spectral-dagger');
+            daggers.forEach(dagger => dagger.remove());
+            
+            console.log(`[TalentManager] Removed spectral daggers visuals for ${character.name}`);
+        }
+    }
+
+    /**
+     * Show VFX for spectral dagger firing
+     */
+    showSpectralDaggerVFX(caster, target, daggerIndex) {
+        try {
+            console.log(`[TalentManager] Creating spectral dagger VFX from ${caster.name} to ${target.name}`);
+            
+            // Get character elements
+            const casterElement = document.querySelector(`[data-character-id="${caster.id}"]`);
+            const targetElement = document.querySelector(`[data-character-id="${target.id}"]`);
+            
+            if (!casterElement || !targetElement) {
+                console.log(`[TalentManager] Missing character elements for spectral dagger VFX - caster: ${!!casterElement}, target: ${!!targetElement}`);
+                return;
+            }
+
+            console.log(`[TalentManager] Character elements found, creating VFX container`);
+
+            // Create VFX container
+            const vfxContainer = document.createElement('div');
+            vfxContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                pointer-events: none;
+                z-index: 10000;
+                background: rgba(0,0,0,0.1);
+            `;
+            document.body.appendChild(vfxContainer);
+
+            // Get positions
+            const casterRect = casterElement.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            
+            const startX = casterRect.left + casterRect.width / 2;
+            const startY = casterRect.top + casterRect.height / 2;
+            const endX = targetRect.left + targetRect.width / 2 + (Math.random() - 0.5) * 40;
+            const endY = targetRect.top + targetRect.height / 2 + (Math.random() - 0.5) * 40;
+
+            console.log(`[TalentManager] Dagger path: (${startX}, ${startY}) -> (${endX}, ${endY})`);
+
+            // Create spectral dagger projectile
+            const dagger = document.createElement('div');
+            dagger.style.cssText = `
+                position: absolute;
+                left: ${startX}px;
+                top: ${startY}px;
+                width: 30px;
+                height: 8px;
+                background: linear-gradient(90deg, #4444ff, #aaaaff, #4444ff);
+                border-radius: 4px;
+                transform: translate(-50%, -50%);
+                box-shadow: 0 0 20px rgba(68, 68, 255, 0.9), 0 0 40px rgba(68, 68, 255, 0.5);
+                transition: all 0.8s ease-out;
+                opacity: 1;
+                border: 2px solid #aaaaff;
+            `;
+            vfxContainer.appendChild(dagger);
+
+            // Create spectral trail
+            const trail = document.createElement('div');
+            trail.style.cssText = `
+                position: absolute;
+                left: ${startX}px;
+                top: ${startY}px;
+                width: 60px;
+                height: 4px;
+                background: linear-gradient(90deg, transparent, rgba(68, 68, 255, 0.6), transparent);
+                transform: translate(-50%, -50%);
+                transition: all 0.8s ease-out;
+                opacity: 0.8;
+            `;
+            vfxContainer.appendChild(trail);
+
+            // Calculate rotation angle
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            
+            // Apply rotation
+            dagger.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+            trail.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+            console.log(`[TalentManager] Dagger created, animating in ${50 + daggerIndex * 150}ms`);
+
+            // Animate dagger to target
+            setTimeout(() => {
+                console.log(`[TalentManager] Starting dagger animation`);
+                dagger.style.left = `${endX}px`;
+                dagger.style.top = `${endY}px`;
+                trail.style.left = `${endX}px`;
+                trail.style.top = `${endY}px`;
+                trail.style.opacity = '0';
+            }, 50 + daggerIndex * 150); // Stagger multiple daggers
+
+            // Create impact effect
+            setTimeout(() => {
+                console.log(`[TalentManager] Creating impact effect`);
+                // Create impact particles
+                for (let i = 0; i < 8; i++) {
+                    const particle = document.createElement('div');
+                    particle.style.cssText = `
+                        position: absolute;
+                        left: ${endX}px;
+                        top: ${endY}px;
+                        width: 6px;
+                        height: 6px;
+                        background: #4444ff;
+                        border-radius: 50%;
+                        transform: translate(-50%, -50%);
+                        transition: all 0.8s ease-out;
+                        box-shadow: 0 0 10px rgba(68, 68, 255, 0.8);
+                    `;
+                    
+                    const angle = (i * 45) * Math.PI / 180;
+                    const distance = 30 + Math.random() * 20;
+                    
+                    vfxContainer.appendChild(particle);
+                    
+                    // Animate particles outward
+                    setTimeout(() => {
+                        particle.style.left = `${endX + Math.cos(angle) * distance}px`;
+                        particle.style.top = `${endY + Math.sin(angle) * distance}px`;
+                        particle.style.opacity = '0';
+                        particle.style.transform = `translate(-50%, -50%) scale(0)`;
+                    }, 50);
+                }
+
+                // Fade out dagger
+                dagger.style.opacity = '0';
+                dagger.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(0.3)`;
+                
+            }, 850 + daggerIndex * 150);
+
+            // Clean up VFX
+            setTimeout(() => {
+                console.log(`[TalentManager] Cleaning up spectral dagger VFX`);
+                if (vfxContainer && vfxContainer.parentNode) {
+                    vfxContainer.remove();
+                }
+            }, 1800 + daggerIndex * 150);
+
+        } catch (error) {
+            console.error(`[TalentManager] Error showing spectral dagger VFX:`, error);
+        }
+    }
+
+    /**
+     * Reduce all ability cooldowns for a character by a specified amount (used by talents)
+     */
     applyReduceCooldowns(character, effect) {
-        const reduction = typeof effect.value === 'number' ? effect.value : 1;
-        if (!character.abilities || character.abilities.length === 0) return;
-        console.log(`[TalentManager] Reducing cooldowns of all ${character.abilities.length} abilities for ${character.name} by ${reduction}`);
-        character.abilities.forEach(ab => {
-            if (typeof ab.cooldown === 'number') {
-                const oldCd = ab.cooldown;
-                ab.cooldown = Math.max(0, ab.cooldown - reduction);
-                console.log(` - Ability ${ab.name}: cooldown ${oldCd} -> ${ab.cooldown}`);
+        if (!character || !character.abilities || !effect || typeof effect.amount !== 'number') {
+            console.warn('[TalentManager] applyReduceCooldowns: Invalid arguments', { character, effect });
+            return;
+        }
+        const amount = effect.amount;
+        let affected = 0;
+        character.abilities.forEach(ability => {
+            if (ability.currentCooldown > 0) {
+                const oldCooldown = ability.currentCooldown;
+                ability.currentCooldown = Math.max(0, ability.currentCooldown - amount);
+                if (ability.currentCooldown < oldCooldown) {
+                    affected++;
+                }
             }
         });
+        if (affected > 0) {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`<span class="talent-enhanced">${character.name}'s talent reduces ${affected} ability cooldown(s) by ${amount} turn(s)!</span>`);
+            if (window.gameManager && window.gameManager.uiManager) {
+                window.gameManager.uiManager.updateCharacterUI(character);
+            }
+        }
     }
 }
 

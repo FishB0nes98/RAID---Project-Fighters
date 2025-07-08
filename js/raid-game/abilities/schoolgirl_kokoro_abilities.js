@@ -1523,16 +1523,12 @@ const silencingRingEffect = (caster, target) => {
     }
     
     // Create and add the debuff with DOT damage
-    const debuff = {
-        id: 'silencing_ring',
-        name: 'Silencing Ring',
-        description: debuffDescription,
-        icon: 'Icons/abilities/silencing_ring.jfif',
-        duration: 6,
-        caster: caster, // Store reference to caster for critical strike calculations
-        
-        // Per-turn DOT effect
-        effect: function(character) {
+    const debuff = new Effect( // Use Effect constructor
+        'silencing_ring',
+        'Silencing Ring',
+        'Icons/abilities/silencing_ring.jfif',
+        6, // Duration
+        function(character) { // Per-turn DOT effect
             let dotDamage = 90;
             
             // Check for Empowered Silencing talent
@@ -1569,88 +1565,91 @@ const silencingRingEffect = (caster, target) => {
                 }
             }
         },
-        
-        // Set up when the debuff is first applied
-        onApply: function() {
-            // Store the original damage calculation method
-            if (!target._originalCalculateDamage) {
-                // Only save the original if we haven't already (to prevent stacking)
-                if (typeof target.calculateDamage === 'function') {
-                    target._originalCalculateDamage = target.calculateDamage;
+        true // isDebuff - Explicitly set to true
+    );
+    
+    debuff.caster = caster; // Store reference to caster for critical strike calculations
+    debuff.setDescription(debuffDescription); // Set description after talents are applied
+
+    // Set up when the debuff is first applied
+    debuff.onApply = function(targetCharacter) { // Changed 'this' to 'targetCharacter' for clarity
+        // Store the original damage calculation method
+        if (!targetCharacter._originalCalculateDamage) {
+            // Only save the original if we haven't already (to prevent stacking)
+            if (typeof targetCharacter.calculateDamage === 'function') {
+                targetCharacter._originalCalculateDamage = targetCharacter.calculateDamage;
+            }
+            
+            // Override the damage calculation method
+            targetCharacter.calculateDamage = function(baseDamage, type) {
+                // First use the original calculation if it exists
+                let damage = baseDamage;
+                if (this._originalCalculateDamage) {
+                    damage = this._originalCalculateDamage.call(this, baseDamage, type);
                 }
+               
+                // Then apply our 30% reduction
+                return Math.floor(damage * 0.7); // 30% damage reduction
+            };
+        }
+        
+        // Check for Mana Disruption talent (using the original caster reference)
+        if (this.caster && this.caster.manaDisruption) { // 'this.caster' refers to the caster stored on the debuff
+            // Store original useAbility method for mana cost doubling
+            if (!targetCharacter._originalUseAbility) {
+                targetCharacter._originalUseAbility = targetCharacter.useAbility;
                 
-                // Override the damage calculation method
-                target.calculateDamage = function(baseDamage, type) {
-                    // First use the original calculation if it exists
-                    let damage = baseDamage;
-                    if (this._originalCalculateDamage) {
-                        damage = this._originalCalculateDamage.call(this, baseDamage, type);
-                    }
-                   
-                    // Then apply our 30% reduction
-                    return Math.floor(damage * 0.7); // 30% damage reduction
+                // Override useAbility to double mana costs
+                targetCharacter.useAbility = function(index, targetChar) {
+                    // Get the ability
+                    const ability = this.abilities[index];
+                    if (!ability) return false;
+                    
+                    // Store original mana cost and double it temporarily
+                    const originalManaCost = ability.manaCost;
+                    ability.manaCost = originalManaCost * 2;
+                    
+                    // Call original useAbility method
+                    const result = this._originalUseAbility.call(this, index, targetChar);
+                    
+                    // Restore original mana cost
+                    ability.manaCost = originalManaCost;
+                    
+                    return result;
                 };
-            }
-            
-            // Check for Mana Disruption talent
-            if (caster && caster.manaDisruption) {
-                // Store original useAbility method for mana cost doubling
-                if (!target._originalUseAbility) {
-                    target._originalUseAbility = target.useAbility;
-                    
-                    // Override useAbility to double mana costs
-                    target.useAbility = function(index, targetChar) {
-                        // Get the ability
-                        const ability = this.abilities[index];
-                        if (!ability) return false;
-                        
-                        // Store original mana cost and double it temporarily
-                        const originalManaCost = ability.manaCost;
-                        ability.manaCost = originalManaCost * 2;
-                        
-                        // Call original useAbility method
-                        const result = this._originalUseAbility.call(this, index, targetChar);
-                        
-                        // Restore original mana cost
-                        ability.manaCost = originalManaCost;
-                        
-                        return result;
-                    };
-                    
-                    // Add visual indicator for mana disruption
-                    showManaDisruptionVFX(target);
-                }
-            }
-        },
-        
-        // Clean up when the debuff expires or is removed
-        remove: function() {
-            log(`Silencing Ring effect removed from ${target.name}.`, 'status');
-            
-            // Restore the original damage calculation method
-            if (target._originalCalculateDamage) {
-                target.calculateDamage = target._originalCalculateDamage;
-                delete target._originalCalculateDamage;
-            }
-            
-            // Restore the original useAbility method (mana disruption cleanup)
-            if (target._originalUseAbility) {
-                target.useAbility = target._originalUseAbility;
-                delete target._originalUseAbility;
                 
-                // Remove mana disruption visual indicator
-                removeManaDisruptionVFX(target);
+                // Add visual indicator for mana disruption
+                showManaDisruptionVFX(targetCharacter);
             }
+        }
+    };
+    
+    // Clean up when the debuff expires or is removed
+    debuff.onRemove = function(targetCharacter) { // Changed 'this' to 'targetCharacter' for clarity
+        log(`Silencing Ring effect removed from ${targetCharacter.name}.`, 'status');
+        
+        // Restore the original damage calculation method
+        if (targetCharacter._originalCalculateDamage) {
+            targetCharacter.calculateDamage = targetCharacter._originalCalculateDamage;
+            delete targetCharacter._originalCalculateDamage;
+        }
+        
+        // Restore the original useAbility method (mana disruption cleanup)
+        if (targetCharacter._originalUseAbility) {
+            targetCharacter.useAbility = targetCharacter._originalUseAbility;
+            delete targetCharacter._originalUseAbility;
+            
+            // Remove mana disruption visual indicator
+            removeManaDisruptionVFX(targetCharacter);
         }
     };
     
     // Apply the debuff to the target
     target.addDebuff(debuff);
     
-    // Manually call the onApply method since the Character class doesn't do it
-    if (typeof debuff.onApply === 'function') {
-        debuff.onApply();
-    }
+    // Manually call the onApply method since the Character class doesn't do it automatically for newly added debuffs
+    // This is crucial for the debuff's effects to take place immediately upon application
+    debuff.onApply(target);
     
     // Show visual effect for silencing
     showSilencingRingVFX(target);
@@ -1797,8 +1796,11 @@ const circleHealEffect = (caster, target, options = {}) => {
         magicalDamageMultiplier = 2.0; // 200% with talent
     }
     
-    const magicalDamageBonus = Math.floor(caster.stats.magicalDamage * magicalDamageMultiplier);
+    const magicalDamageBonus = Math.floor((caster.stats.magicalDamage || 0) * magicalDamageMultiplier);
     const totalHealAmount = baseHealAmount + magicalDamageBonus;
+    
+    // Debug log to troubleshoot NaN issues
+    console.log(`[Circle Heal Debug] Caster: ${caster.name}, MD: ${caster.stats.magicalDamage}, Multiplier: ${magicalDamageMultiplier}, Bonus: ${magicalDamageBonus}, Total: ${totalHealAmount}`);
     
     // Log the ability usage
     if (isDivineResonanceEcho) {
@@ -1825,7 +1827,7 @@ const circleHealEffect = (caster, target, options = {}) => {
     // Apply healing to all allies
     allAllies.forEach(ally => {
         // Apply healing power multiplier from caster (the one casting the healing spell)
-        const healAmount = Math.floor(totalHealAmount * (1 + caster.stats.healingPower));
+        const healAmount = Math.floor(totalHealAmount * (1 + (caster.stats.healingPower || 0)));
         
         // Apply healing using the ally's heal() method with proper caster tracking
         const abilityId = isDivineResonanceEcho ? 'circle_heal_divine_resonance' : 'circle_heal';

@@ -3,7 +3,7 @@
     "name": "Necromatic Corrupted Bear",
     "description": "A massive bear corrupted by necromantic energies, its eyes glowing with malevolent intent.",
     "isAI": true,
-    "image": "images/characters/necromatic_corrupted_bear.png",
+    "image": "Loading Screen/necromatic_corrupted_bear.png",
     "stats": {
         "hp": 8000,
         "currentHp": 8000,

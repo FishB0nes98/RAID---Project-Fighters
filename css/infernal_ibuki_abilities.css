@@ -38,6 +38,30 @@
 }
 
 /* Kunai Toss VFX - Enhanced */
+
+/* Add magical scaling highlight for Kunai Throw if needed */
+.kunai-throw-magical-scaling {
+    filter: drop-shadow(0 0 8px #6b6bff) brightness(1.2);
+    border: 2px solid #6b6bff;
+    background: linear-gradient(90deg, #b3b3ff 0%, #6b6bff 100%);
+}
+
+.kunai-mastery-indicator.status-indicator.max-stacks {
+    box-shadow: 0 0 12px 4px #ff6b6b, 0 0 24px 8px #ffb347;
+    background: linear-gradient(90deg, #ffb347 0%, #ff6b6b 100%);
+    color: #fff;
+    border: 2px solid #ff6b6b;
+}
+
+.kunai-mastery-indicator.status-indicator.stack-added {
+    animation: kunaiStackPulse 0.5s;
+}
+
+@keyframes kunaiStackPulse {
+    0% { box-shadow: 0 0 0 0 #ffb347; }
+    50% { box-shadow: 0 0 16px 8px #ffb347; }
+    100% { box-shadow: 0 0 0 0 #ffb347; }
+}
 .kunai-toss-vfx {
     position: absolute;
     top: 0;
@@ -646,4 +670,195 @@
         box-shadow: 0 0 20px rgba(255, 170, 0, 1), inset 0 0 10px rgba(255, 255, 255, 0.9);
         transform: scale(1.1);
     }
-} 
+}
+
+/* Doubled Physical Damage Talent VFX */
+.image-container.doubled-physical-damage-active {
+    /* Existing styles for the image container when active, if any */
+    /* No pseudo-elements directly on image-container anymore */
+    /* Remove overflow: hidden if it was causing issues for child elements */
+    overflow: visible; 
+}
+
+/* New CSS class for the outer blazing effect */
+.doubled-physical-damage-outer-vfx {
+    position: absolute; /* Changed to absolute */
+    /* top, left, right, bottom set by JS */
+    border-radius: 18px; /* Match character-slot border-radius */
+    box-shadow: 
+        0 0 20px 8px rgba(255, 69, 0, 0.8), /* Inner glow */
+        0 0 40px 15px rgba(255, 140, 0, 0.6), /* Outer glow */
+        0 0 60px 25px rgba(255, 215, 0, 0.4); /* Farthest glow */
+    animation: outer-fiery-pulse 1.5s infinite alternate ease-in-out;
+    pointer-events: none;
+    z-index: 9999; /* Max z-index to ensure it renders on top */
+}
+
+/* Add a dynamic border/aura directly on the character slot for the effect */
+.character-slot.doubled-physical-damage-active {
+    border-color: #ff4500; /* Change border color */
+    box-shadow: 
+        0 0 15px 5px rgba(255, 69, 0, 0.7), /* Primary glow */
+        0 0 30px 10px rgba(255, 140, 0, 0.5); /* Secondary glow */
+    animation: slot-fiery-border 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes outer-fiery-pulse {
+    0% { transform: scale(0.98); opacity: 0.8; }
+    100% { transform: scale(1.02); opacity: 1; }
+}
+
+@keyframes slot-fiery-border {
+    0% { 
+        box-shadow: 
+            0 0 15px 5px rgba(255, 69, 0, 0.7), 
+            0 0 30px 10px rgba(255, 140, 0, 0.5); 
+    }
+    100% { 
+        box-shadow: 
+            0 0 25px 8px rgba(255, 69, 0, 0.9), 
+            0 0 45px 15px rgba(255, 140, 0, 0.7); 
+    }
+}
+
+@keyframes fiery-pulse {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    100% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes fiery-glow {
+    0% { box-shadow: 0 0 25px 10px rgba(255, 69, 0, 0.8), 0 0 50px 20px rgba(255, 140, 0, 0.6); }
+    100% { box-shadow: 0 0 35px 15px rgba(255, 69, 0, 1), 0 0 60px 25px rgba(255, 140, 0, 0.8); }
+}
+
+/* Debilitating Strikes Smoke VFX */
+.debilitating-strikes-smoke-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.smoke-particle {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, rgba(100, 100, 100, 0.8) 0%, rgba(50, 50, 50, 0.5) 70%, transparent 100%);
+    border-radius: 50%;
+    filter: blur(5px);
+    opacity: 0;
+    animation: smoke-explosion-burst 1.5s ease-out forwards;
+    animation-delay: var(--delay);
+    transform: translate(-50%, -50%);
+}
+
+@keyframes smoke-explosion-burst {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.3);
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 50px)) scale(1.5);
+    }
+}
+
+/* Blazing Debuff VFX */
+.blazing-debuff-vfx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.blazing-flame-particle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, #ffaa00 0%, #ff4500 70%, transparent 100%);
+    border-radius: 50%;
+    filter: blur(3px);
+    opacity: 0;
+    animation: blazing-flame-float 1.5s ease-out forwards;
+    animation-delay: var(--delay);
+    transform: translate(-50%, -50%);
+}
+
+@keyframes blazing-flame-float {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.5);
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 30px)) scale(1.2);
+    }
+}
+
+.blazing-pulse-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 100, 0, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: blazing-pulse 1s ease-out infinite alternate;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes blazing-pulse {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+.blazing-damage-text {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffaa00;
+    text-shadow: 
+        0 0 8px rgba(255, 100, 0, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.9);
+    animation: blazing-text-fade 2s ease-out forwards;
+    z-index: 51;
+}
+
+@keyframes blazing-text-fade {
+    0% { 
+        transform: translateX(-50%) scale(0.8); 
+        opacity: 0; 
+    }
+    20% { 
+        transform: translateX(-50%) scale(1.2); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateX(-50%) translateY(-30px) scale(0.9); 
+        opacity: 0; 
+    }
+}
