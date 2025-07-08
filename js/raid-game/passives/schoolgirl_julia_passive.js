@@ -405,11 +405,6 @@ class SchoolgirlJuliaPassiveHandler {
             if (isDodged) {
                 console.log(`${this.name} dodged the attack!`);
                 
-                // Show dodge VFX
-                if (window.gameManager && window.gameManager.uiManager) {
-                    window.gameManager.uiManager.showDodgeVFX(this);
-                }
-                
                 if (window.gameManager && window.gameManager.addLogEntry) {
                     window.gameManager.addLogEntry(`${this.name} dodged the attack!`, 'dodge');
                 }

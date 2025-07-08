@@ -1,0 +1,25 @@
+{
+    "id": "venomous_spider",
+    "name": "Venomous Spider",
+    "description": "A swift and deadly spider, its fangs dripping with potent venom.",
+    "isAI": true,
+    "image": "images/characters/venomous_spider.png",
+    "stats": {
+        "hp": 1300,
+        "currentHp": 1300,
+        "mana": 120,
+        "currentMana": 120,
+        "physicalDamage": 70,
+        "magicalDamage": 90,
+        "armor": 15,
+        "magicalShield": 20,
+        "speed": 130,
+        "critChance": 0.15,
+        "critDamage": 1.6,
+        "lifesteal": 0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 12
+    },
+    "abilities": [],
+    "tags": ["Arachnid"]
+}

@@ -44,61 +44,32 @@ class TalentManager {
             return;
         }
         
-        try {
-            console.log("[TalentManager] Calling preloadAllTalents...");
-            await this.preloadAllTalents();
-            console.log("[TalentManager] preloadAllTalents completed successfully.");
-            
-            console.log('TalentManager initialized successfully');
-            this.initialized = true;
-            console.log("[TalentManager] Initialization flag set to true.");
-        } catch (error) {
-            // Explicitly log the error that occurred during initialization
-            console.error('[TalentManager] Initialization failed during preloadAllTalents:', error);
-            throw new Error('TalentManager failed to initialize'); // Re-throw a general error
-        }
+        // Preloading is deferred to on-demand loading in GameManager.
+        this.initialized = true;
+        console.log('TalentManager initialized successfully (preloading deferred).');
     }
 
     /**
-     * Preload all character talents
+     * Load talent definitions for characters present in the current game.
+     * This is called by the GameManager when a stage is loaded.
+     * @param {Array<Character>} characters - The character instances in the current match.
      */
-    async preloadAllTalents() {
-        console.log("[TalentManager] Starting preloadAllTalents...");
-        try {
-            // --- MODIFICATION START: Fetch registry directly ---
-            let availableCharacters = [];
-            try {
-                const response = await fetch('js/raid-game/character-registry.json');
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch character registry: ${response.statusText}`);
-                }
-                const registryData = await response.json();
-                // Assuming registryData.characters is an array of {id: "...", path: "..."}
-                availableCharacters = registryData.characters.map(charInfo => charInfo.id);
-                console.log(`[TalentManager] Fetched available characters from registry: ${availableCharacters.length} found`, availableCharacters);
-            } catch (registryError) {
-                console.error("[TalentManager] Error fetching character registry:", registryError);
-                // Optionally, try a fallback or just return if registry is essential
-                console.warn("[TalentManager] Cannot preload talents without character registry.");
-                return; // Exit preload if registry fetch fails
-            }
-            // --- MODIFICATION END ---
+    async loadTalentsForCharacters(characters) {
+        if (!characters || !Array.isArray(characters)) {
+            console.warn('[TalentManager] No characters provided to load talents for.');
+            return;
+        }
+        
+        const characterIds = new Set(characters.map(c => c.id));
+        console.log(`[TalentManager] Loading talents for ${characterIds.size} unique characters in the match.`);
 
-            if (!availableCharacters || availableCharacters.length === 0) {
-                console.warn("[TalentManager] No available characters found in registry. Cannot preload talents.");
-                return; // Don't throw error, just warn and exit preload
-            }
-            
-            // Load talents for each character
-            for (const characterId of availableCharacters) {
-                console.log(`[TalentManager] Preloading talents for: ${characterId}`);
+        for (const characterId of characterIds) {
+            if (characterId) {
+                // This will use cache if available, or fetch if not.
                 await this.loadTalentDefinitions(characterId);
             }
-            console.log("[TalentManager] Finished preloading talents for all characters.");
-        } catch (error) {
-            console.error('[TalentManager] Error during preloadAllTalents:', error);
-            throw error; // Re-throw the error to be caught by initialize
         }
+        console.log('[TalentManager] Finished loading talents for current match characters.');
     }
 
     /**

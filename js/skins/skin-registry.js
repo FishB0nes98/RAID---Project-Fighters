@@ -2,8 +2,32 @@
 window.SkinRegistry = {
     // Define all available skins
     skins: {
-
-        //Infernal Ibuki Evil Form
+        //Schoolboy Shoma Forest
+        'schoolboy_shoma_forest': {
+            id: 'schoolboy_shoma_forest',
+            name: 'Schoolboy Shoma Forest',
+            characterId: 'schoolboy_shoma',
+            description: 'A forest-themed school uniform for the energetic Shoma.',
+            imagePath: 'Loading Screen/Schoolboy Shoma Forest.png',
+            hasVideo: false,
+            price: 1500,
+            rarity: 'common',
+            category: 'schoolboy',
+            unlocked: false
+        },
+        //Schoolgirl Julia Forest
+        'schoolgirl_julia_forest': {
+            id: 'schoolgirl_julia_forest',
+            name: 'Schoolgirl Julia Forest',
+            characterId: 'schoolgirl_julia',
+            description: 'A forest-themed school uniform for the dedicated healer Julia.',
+            imagePath: 'Loading Screen/Schoolgirl Julia Forest.png',
+            hasVideo: false,
+            price: 1500,
+            rarity: 'common',
+            category: 'schoolgirl',
+            unlocked: false
+        },      
         'infernal_ibuki_evil_form': {
             id: 'infernal_ibuki_evil_form',
             name: 'Infernal Ibuki Evil Form',

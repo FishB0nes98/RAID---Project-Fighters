@@ -37,6 +37,11 @@ class StageManager {
             
             // Load the stage registry
             await this.loadStageRegistry();
+
+            // Initialize the character service
+            if (window.characterService) {
+                await window.characterService.initialize();
+            }
             
             return true;
         } catch (error) {
@@ -110,8 +115,17 @@ class StageManager {
             // Check if this is a story stage
             if (storyContext && storyContext.storyId && storyContext.stageIndex !== undefined) {
                 console.log(`Loading story stage from stories.json: ${storyContext.storyId}[${storyContext.stageIndex}]`);
+                const story = await this.getStoryData(storyContext.storyId);
+                if (story && story.forcedSkins) {
+                    window.SkinManager.setForcedSkins(story.forcedSkins);
+                } else {
+                    window.SkinManager.clearForcedSkins();
+                }
                 stageData = await this.loadStoryStage(storyContext.storyId, storyContext.stageIndex);
             } else {
+                // It's not a story stage, so clear any forced skins
+                window.SkinManager.clearForcedSkins();
+
                 // Check if this is a single stage from localStorage first (for random battles)
                 const storedStage = localStorage.getItem('selectedStage');
                 if (storedStage) {
@@ -696,7 +710,7 @@ class StageManager {
             try {
                 console.log(`[StageManager] Loading character: ${charId} for ${isAI ? 'AI' : 'player'} team`);
                 
-                const charData = await CharacterFactory.loadCharacterData(charId);
+                const charData = await window.characterService.getCharacterData(charId);
                 if (!charData) {
                     console.error(`Failed to load character data: ${charId}`);
                     continue;
@@ -759,7 +773,7 @@ class StageManager {
             console.log(`[StageManager] Processing enemy: ${enemyInfo.characterId}`); // <<< Log each enemy
             try {
                 // Load character data
-                const charData = await CharacterFactory.loadCharacterData(enemyInfo.characterId);
+                const charData = await window.characterService.getCharacterData(enemyInfo.characterId);
                 
                 // <<< Log loaded charData >>>
                 console.log(`[StageManager] Loaded charData for ${enemyInfo.characterId}:`, charData ? 'Data OK' : 'Load FAILED', charData);
@@ -806,6 +820,21 @@ class StageManager {
         }
         
         console.log(`[StageManager] Loaded ${this.gameState.aiCharacters.length} AI characters for stage`);
+    }
+
+    // --- NEW: Helper to get story data ---
+    async getStoryData(storyId) {
+        if (!this.allStoriesData) {
+            try {
+                const response = await fetch('stories.json');
+                if (!response.ok) throw new Error('Failed to load stories.json');
+                this.allStoriesData = await response.json();
+            } catch (error) {
+                console.error("Failed to load stories.json:", error);
+                return null;
+            }
+        }
+        return this.allStoriesData.find(story => story.id === storyId) || null;
     }
     
     // Load player characters
@@ -925,7 +954,7 @@ class StageManager {
                 // Get saved state only if we are NOT using default state
                 const savedState = useDefaultState ? null : teamState[charId];
 
-                const charData = await CharacterFactory.loadCharacterData(charId);
+                const charData = await window.characterService.getCharacterData(charId);
 
                 if (!charData) {
                     console.error(`Failed to load player character: ${charId}`);

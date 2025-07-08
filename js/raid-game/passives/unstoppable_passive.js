@@ -54,14 +54,8 @@ function attachToExisting() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', attachToExisting);
-if (window.gameManager) {
-    // after game init may call
-    if (window.gameManager.initialized) attachToExisting();
-    else {
-        window.addEventListener('gameManager:initialized', attachToExisting);
-    }
-}
+// Defer attachment until the game is fully ready and characters are loaded
+document.addEventListener('gameReady', attachToExisting);
 
 // Character creation event as before
 document.addEventListener('character:created', (e) => {
@@ -70,4 +64,4 @@ document.addEventListener('character:created', (e) => {
         ch.passiveHandler = new UnstoppablePassive();
         ch.passiveHandler.initialize(ch);
     }
-}); 
+});

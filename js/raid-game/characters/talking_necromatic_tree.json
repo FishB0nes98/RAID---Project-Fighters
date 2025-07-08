@@ -10,7 +10,7 @@
   "isHidden": true,
   "ingameimage": "Loading Screen/Talking Necromatic Tree.png",
   "stats": {
-    "hp": 8500,
+    "hp": 4755,
     "mana": 1200,
     "physicalDamage": 180,
     "magicalDamage": 320,
@@ -19,7 +19,7 @@
     "speed": 85,
     "critChance": 0.15,
     "critMultiplier": 1.8,
-    "dodgeChance": 0.08,
+    "dodgeChance": 0,
     "hpRegen": 45,
     "manaRegen": 60
   },

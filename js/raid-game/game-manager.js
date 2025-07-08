@@ -845,6 +845,12 @@ class GameManager {
 
             // Update ability descriptions and images after everything is loaded
             this.updateAllAbilityDescriptionsAndImages();
+
+            // Load talents only for characters in the current game
+            if (window.talentManager) {
+                const allCharacters = [...this.gameState.playerCharacters, ...this.gameState.aiCharacters];
+                window.talentManager.loadTalentsForCharacters(allCharacters);
+            }
             
         }, 0); // Use setTimeout to ensure all initial rendering/setup is complete
     }
@@ -1042,6 +1048,10 @@ class GameManager {
             // Update ability descriptions and images after everything is loaded
             this.updateAllAbilityDescriptionsAndImages();
             
+            // Dispatch the gameReady event after everything is loaded and initialized
+            document.dispatchEvent(new CustomEvent('gameReady'));
+            console.log('[GameManager] Dispatched gameReady event.');
+
         }, 0); // Use setTimeout to ensure all initial rendering/setup is complete
     }
 
@@ -2842,7 +2852,14 @@ class GameManager {
            }
            
            if (gameOver) {
-               this.isGameOver = true; // Set the flag to prevent this from running again
+                this.isGameOver = true; // Set the flag to prevent this from running again
+                
+                // --- NEW: Clear forced skins on game over ---
+                if (window.SkinManager) {
+                    window.SkinManager.clearForcedSkins();
+                }
+                // --- END NEW ---
+
                 // --- DEBUG LOGGING ---
                 console.log(`[GameManager] checkGameOver: Game Over detected. Victory: ${isVictory}`);
                 console.log('[GameManager] Attempting to save battle result and award XP...');
@@ -4446,6 +4463,12 @@ class GameManager {
            console.log("[GameManager] Resetting game...");
            this.isGameOver = false;
            this.isGameRunning = false;
+
+            // --- NEW: Clear forced skins on game reset ---
+            if (window.SkinManager) {
+                window.SkinManager.clearForcedSkins();
+            }
+            // --- END NEW ---
            this.actedCharacters = [];
            this.deadCharactersLogged = []; // Reset logged deaths
            this.gameState = {
@@ -5085,9 +5108,10 @@ class GameManager {
    }
 
    // AI Manager for handling AI turns
-   class AIManager {
-       constructor(gameManager) {
-           this.gameManager = gameManager;
+class AIManager {
+    constructor(gameManager) {
+        this.gameManager = gameManager;
+        this.lastTargetedPlayerCharacterInstanceId = null; // Track the last player character targeted by any AI
        }
 
        async executeAITurn() {
@@ -5801,9 +5825,19 @@ class GameManager {
 
             // Use ability (pass the final validated target info)
             // Ensure useAbility is called on the correct Character instance
-            const success = caster.useAbility(action.abilityIndex, finalTargetInfo); 
+            const success = caster.useAbility(action.abilityIndex, finalTargetInfo);
 
             if (success) {
+                // Update last targeted player character if the ability was offensive and targeted a player character
+                if (finalTargetInfo && !Array.isArray(finalTargetInfo) && !finalTargetInfo.isAI) {
+                    // Check if the ability was offensive (e.g., targets enemy)
+                    const ability = caster.abilities[action.abilityIndex];
+                    if (ability.targetType === 'enemy' || ability.targetType === 'single_enemy' || ability.targetType === 'any' || ability.targetType === 'ally_or_enemy' || ability.targetType === 'any_except_self') {
+                        this.lastTargetedPlayerCharacterInstanceId = finalTargetInfo.instanceId || finalTargetInfo.id;
+                        console.log(`[AI Execute] Updated lastTargetedPlayerCharacterInstanceId: ${this.lastTargetedPlayerCharacterInstanceId}`);
+                    }
+                }
+
                 // Log cooldown only if successful
                 if (ability.cooldown > 0) {
                      this.gameManager.addLogEntry(`${ability.name} is on cooldown for ${ability.cooldown} more turns.`, 'enemy-turn'); // Use gameManager

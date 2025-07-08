@@ -7,6 +7,36 @@ class SkinManager {
         this.videoPreferences = {}; // characterId_skinId -> boolean mapping
         this.userFM = 0;
         this.initialized = false;
+        this.forcedSkins = null; // To handle story-forced skins
+    }
+
+    /**
+     * Set forced skins for a story.
+     * @param {Array} skins - Array of { characterId, skinId }
+     */
+    setForcedSkins(skins) {
+        if (!skins || !Array.isArray(skins)) {
+            this.forcedSkins = null;
+            return;
+        }
+
+        this.forcedSkins = {};
+        skins.forEach(skinInfo => {
+            if (skinInfo.characterId && skinInfo.skinId) {
+                this.forcedSkins[skinInfo.characterId] = skinInfo.skinId;
+            }
+        });
+        console.log('[SkinManager] Forced skins set:', this.forcedSkins);
+    }
+
+    /**
+     * Clear any forced skins.
+     */
+    clearForcedSkins() {
+        if (this.forcedSkins) {
+            console.log('[SkinManager] Clearing forced skins.');
+            this.forcedSkins = null;
+        }
     }
 
     // Initialize the skin manager
@@ -108,6 +138,11 @@ class SkinManager {
 
     // Get selected skin for a character (returns null if using default)
     getSelectedSkin(characterId) {
+        // NEW: Check for forced skins first
+        if (this.forcedSkins && this.forcedSkins[characterId]) {
+            console.log(`[SkinManager] Using forced skin ${this.forcedSkins[characterId]} for ${characterId}`);
+            return this.forcedSkins[characterId];
+        }
         return this.selectedSkins[characterId] || null;
     }
 

@@ -1724,6 +1724,62 @@ class StageModifiersRegistry {
         });
 
         console.log('[StageModifiers] Registered power_of_love modifier successfully');
+
+        // ==== WEBBED MODIFIER ====
+        this.registerModifier({
+            id: 'webbed',
+            name: 'Webbed',
+            description: 'A random ability for all player characters are disabled permanently (cant be cleansed).',
+            icon: '🕸️',
+            vfx: {
+                type: 'webbed',
+                particles: false,
+                animation: 'spiderweb_disable'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                const playerCharacters = gameManager.gameState.playerCharacters;
+
+                if (playerCharacters.length > 0) {
+                    gameManager.addLogEntry(
+                        `🕸️ The battlefield is covered in sticky webs! A random ability for each player is disabled!`,
+                        'stage-effect dramatic'
+                    );
+                }
+
+                playerCharacters.forEach(character => {
+                    if (!character.isDead() && character.abilities.length > 0) {
+                        // Filter out abilities that are already disabled or passives
+                        const usableAbilities = character.abilities.filter(ability => 
+                            !ability.isDisabled && !ability.isPassive && ability.id !== 'basic_attack'
+                        );
+
+                        if (usableAbilities.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * usableAbilities.length);
+                            const abilityToDisable = usableAbilities[randomIndex];
+
+                            if (abilityToDisable) {
+                                abilityToDisable.isDisabled = true;
+                                abilityToDisable.isWebbed = true; // Mark as webbed for permanent disable
+                                
+                                gameManager.addLogEntry(
+                                    `🕸️ ${character.name}'s ${abilityToDisable.name} is now webbed and disabled!`,
+                                    'stage-effect debuff'
+                                );
+
+                                // Apply VFX to the ability icon
+                                this.createWebbedAbilityVFX(character, abilityToDisable.id);
+
+                                // Update character UI to reflect disabled ability
+                                if (gameManager.uiManager && typeof gameManager.uiManager.updateCharacterAbilityUI === 'function') {
+                                    gameManager.uiManager.updateCharacterAbilityUI(character, abilityToDisable.id);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        console.log('[StageModifiers] Registered webbed modifier successfully');
     }
 
     createPowerOfLoveVFX(character) {
@@ -1748,6 +1804,91 @@ class StageModifiersRegistry {
         artContainer.appendChild(vfxContainer);
 
         setTimeout(() => vfxContainer.remove(), 2500);
+    }
+
+    createWebbedAbilityVFX(character, abilityId) {
+        const abilityElement = document.querySelector(`#character-${character.instanceId || character.id} .ability-icon[data-ability-id="${abilityId}"]`);
+        if (!abilityElement) {
+            console.warn(`[WebbedVFX] Could not find ability element for ${character.name}'s ability ${abilityId}`);
+            return;
+        }
+
+        let webOverlay = abilityElement.querySelector('.webbed-overlay');
+        if (!webOverlay) {
+            webOverlay = document.createElement('div');
+            webOverlay.className = 'webbed-overlay';
+            webOverlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6); /* Dark overlay */
+                border-radius: 5px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 2em;
+                color: #fff;
+                opacity: 0;
+                animation: webbedAppear 0.5s forwards;
+                z-index: 10;
+                overflow: hidden;
+            `;
+            
+            const webIcon = document.createElement('div');
+            webIcon.textContent = '🕸️';
+            webIcon.style.cssText = `
+                animation: webbedIconPulse 1.5s infinite alternate;
+            `;
+            webOverlay.appendChild(webIcon);
+
+            // Add web lines effect
+            for (let i = 0; i < 4; i++) {
+                const webLine = document.createElement('div');
+                webLine.className = 'web-line';
+                webLine.style.cssText = `
+                    position: absolute;
+                    background: #ccc;
+                    width: 2px;
+                    height: 100%;
+                    transform-origin: center;
+                    animation: webLineSpin 1s ease-out forwards;
+                    animation-delay: ${i * 0.1}s;
+                `;
+                if (i % 2 === 0) {
+                    webLine.style.transform = `rotate(${i * 45}deg)`;
+                } else {
+                    webLine.style.height = '2px';
+                    webLine.style.width = '100%';
+                    webLine.style.transform = `rotate(${i * 45}deg)`;
+                }
+                webOverlay.appendChild(webLine);
+            }
+            
+            abilityElement.appendChild(webOverlay);
+
+            // Add CSS animations to the head if not already present
+            if (!document.getElementById('webbed-ability-vfx-styles')) {
+                const styleSheet = document.createElement('style');
+                styleSheet.id = 'webbed-ability-vfx-styles';
+                styleSheet.textContent = `
+                    @keyframes webbedAppear {
+                        from { opacity: 0; transform: scale(0.8); }
+                        to { opacity: 1; transform: scale(1); }
+                    }
+                    @keyframes webbedIconPulse {
+                        from { transform: scale(0.9); }
+                        to { transform: scale(1.1); }
+                    }
+                    @keyframes webLineSpin {
+                        from { transform: rotate(0deg) scale(0); opacity: 0; }
+                        to { transform: rotate(360deg) scale(1); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+            }
+        }
     }
 
     // Helper method to apply draft mode effect to all characters
@@ -6691,4 +6832,4 @@ class StageModifiersRegistry {
 }
 
 // Create global instance
-window.stageModifiersRegistry = new StageModifiersRegistry(); 
+window.stageModifiersRegistry = new StageModifiersRegistry();

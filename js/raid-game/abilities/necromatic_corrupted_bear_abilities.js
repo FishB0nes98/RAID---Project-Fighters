@@ -6,7 +6,7 @@ console.log('Necromatic Corrupted Bear abilities loaded');
 function createMaulEffect(caster, target) {
     console.log('[Maul] Executing ability:', { caster: caster.name, target: target.name });
     
-    const damage = 1000;
+    const damage = 2420;
     const stunChance = 0.5;
     const stunDuration = 2;
 
@@ -106,7 +106,7 @@ function showMaulVFX(caster, target) {
 function createBearChargeEffect(caster, target) {
     console.log('[Bear Charge] Executing ability:', { caster: caster.name, target: target.name });
     
-    const damage = 750;
+    const damage = 1000;
     const stunChance = 0.25;
     const stunDuration = 1;
 
@@ -155,8 +155,8 @@ function createBearChargeEffect(caster, target) {
 function createHeartRipEffect(caster, target) {
     console.log('[Heart Rip] Executing ability:', { caster: caster.name, target: target.name });
     
-    // Calculate damage as 8% of target's max HP
-    const maxHpDamage = Math.floor(target.stats.maxHp * 0.08);
+    // Calculate damage as 10% of target's max HP
+    const maxHpDamage = Math.floor(target.stats.maxHp * 0.10);
     
     // Apply damage with proper options for statistics tracking
     const damageResult = target.applyDamage(maxHpDamage, 'physical', caster, { 
@@ -181,14 +181,14 @@ function createHeartRipEffect(caster, target) {
         999, // Permanent duration (999 turns)
         null, // Effect function will be set separately
         true // isDebuff
-    ).setDescription('Suffers 120 damage per turn from heart wound.');
+    ).setDescription('Suffers 898 damage per turn from heart wound.');
     
-    // Add the bleeding effect that deals 120 damage per turn
+    // Add the bleeding effect that deals 700 damage per turn
     bleedingDebuff.effect = (character) => {
         if (window.gameManager) {
-            const bleedDamage = 120;
+            const bleedDamage = 700;
             const bleedResult = character.applyDamage(bleedDamage, 'physical', caster, { 
-                abilityId: 'heart_rip_bleeding_dot',
+                abilityId: 'heart_rip_bleeding',
                 source: 'heart_rip_bleeding'
             });
             

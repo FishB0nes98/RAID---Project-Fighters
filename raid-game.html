@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Performance and Rendering Optimizations -->
     <meta name="renderer" content="webkit">
@@ -321,6 +321,7 @@
             z-index: 1100;
             max-width: 380px;
             min-width: 320px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -549,6 +550,7 @@
             opacity: 0;
             transition: all 0.4s ease;
             z-index: 1050;
+            -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -666,7 +668,7 @@
         <!-- Volume Control -->
         <div class="volume-control" id="volume-control">
             <span class="volume-icon" id="volume-icon">🔊</span>
-            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70">
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70" aria-label="Volume Control">
         </div>
 
         <!-- Quest Panel Toggle Button -->
@@ -852,6 +854,7 @@
     <!-- Add other passive scripts here -->
 
     <!-- Factories -->
+    <script src="js/raid-game/character/character-service.js"></script>
     <!-- <script src="js/raid-game/character-factory.js"></script> -->
     <!-- NOTE: CharacterFactory logic seems integrated into character.js now -->
 

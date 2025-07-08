@@ -1,0 +1,25 @@
+{
+    "id": "black_spider",
+    "name": "Black Spider",
+    "description": "A dark, ominous spider, its presence brings an unsettling chill.",
+    "isAI": true,
+    "image": "images/characters/black_spider.png",
+    "stats": {
+        "hp": 1800,
+        "currentHp": 1800,
+        "mana": 80,
+        "currentMana": 80,
+        "physicalDamage": 95,
+        "magicalDamage": 40,
+        "armor": 25,
+        "magicalShield": 10,
+        "speed": 100,
+        "critChance": 0.05,
+        "critDamage": 1.5,
+        "lifesteal": 0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 8
+    },
+    "abilities": [],
+    "tags": ["Arachnid"]
+}

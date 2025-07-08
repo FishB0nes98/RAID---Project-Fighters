@@ -1,0 +1,25 @@
+{
+    "id": "bloodsucker_spider",
+    "name": "Bloodsucker Spider",
+    "description": "A horrifying spider that drains the life force from its victims.",
+    "isAI": true,
+    "image": "images/characters/bloodsucker_spider.png",
+    "stats": {
+        "hp": 1600,
+        "currentHp": 1600,
+        "mana": 100,
+        "currentMana": 100,
+        "physicalDamage": 75,
+        "magicalDamage": 60,
+        "armor": 18,
+        "magicalShield": 15,
+        "speed": 110,
+        "critChance": 0.08,
+        "critDamage": 1.6,
+        "lifesteal": 0.1,
+        "hpPerTurn": 0,
+        "manaPerTurn": 10
+    },
+    "abilities": [],
+    "tags": ["Arachnid"]
+}

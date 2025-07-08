@@ -1966,10 +1966,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.definedAbilities.farmer_shoma_e = farmersCatchAbility;
         window.definedAbilities.farmer_shoma_r = cottageRunAbility;
     }
-    
-    // Set up turn listener for passive turn-based effects
-    setupTurnBasedPassives();
 });
+
+// Set up turn listener for passive turn-based effects after the game is ready
+document.addEventListener('gameReady', setupTurnBasedPassives);
 
 // Setup function for all turn-based passive effects
 function setupTurnBasedPassives() {

@@ -1,0 +1,15 @@
+{
+  "id": "spiderweb_encounter",
+  "name": "Spiderweb",
+  "description": "You find yourself entangled in a dense spiderweb, the air thick with the scent of silk and the ominous scuttling of many legs. Four formidable spiders emerge from the shadows, their eyes gleaming with predatory intent. Escape seems impossible.",
+  "difficulty": 2,
+  "type": "battle",
+  "enemies": [
+    { "characterId": "rose_spider" },
+    { "characterId": "venomous_spider" },
+    { "characterId": "black_spider" },
+    { "characterId": "bloodsucker_spider" }
+  ],
+  "backgroundImage": "images/stages/spiderweb.png",
+  "backgroundMusic": "sounds/music/spiderweb_ambient.mp3"
+}

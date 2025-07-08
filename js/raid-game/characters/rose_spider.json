@@ -1,0 +1,25 @@
+{
+    "id": "rose_spider",
+    "name": "Rose Spider",
+    "description": "A beautiful yet deadly spider, its body adorned with rose-like patterns.",
+    "isAI": true,
+    "image": "images/characters/rose_spider.png",
+    "stats": {
+        "hp": 1500,
+        "currentHp": 1500,
+        "mana": 100,
+        "currentMana": 100,
+        "physicalDamage": 80,
+        "magicalDamage": 50,
+        "armor": 20,
+        "magicalShield": 10,
+        "speed": 120,
+        "critChance": 0.1,
+        "critDamage": 1.7,
+        "lifesteal": 0,
+        "hpPerTurn": 0,
+        "manaPerTurn": 10
+    },
+    "abilities": [],
+    "tags": ["Arachnid"]
+}
