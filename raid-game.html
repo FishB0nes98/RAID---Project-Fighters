@@ -18,12 +18,18 @@
     <link rel="preload" href="js/raid-game/talent-modifiers/infernal_ibuki_talent_modifier.js" as="script">
     <script src="js/skins/skin-registry.js"></script>
     <link rel="preload" href="css/raid-game.css" as="style">
+    <link rel="stylesheet" href="css/crow-crown.css">
     
     <!-- Performance Hints -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <title>Roguelike Raid Battle</title>
+</head>
+<body>
+    <div class="game-container">
+        <div class="crow-crown"></div>
+    </div>
     
     <!-- Hardware Acceleration CSS -->
     <style>
@@ -55,6 +61,197 @@
         .game-container {
             contain: layout style paint;
             will-change: contents;
+        }
+
+        .crow-crown {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Allows clicks to pass through to elements below */
+            /* Removed overflow: hidden; to allow feathers to be visible outside the container */
+        }
+
+        /* Optimize animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Performance-critical elements */
+        .hp-bar, .mana-bar, .shield-bar {
+            transform: translate3d(0, 0, 0);
+            will-change: width;
+        }
+        
+        /* Enable GPU acceleration for the entire page */
+        html {
+            -webkit-transform: translateZ(0);
+            -moz-transform: translateZ(0);
+            -ms-transform: translateZ(0);
+            -o-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            /* Force hardware acceleration */
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            
+            /* Performance optimizations */
+            contain: layout style paint;
+            will-change: auto;
+        }
+        
+        /* Optimize animations and transitions */
+        * {
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+        }
+        
+        /* Character containers - GPU acceleration */
+        .characters-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            contain: layout style paint;
+        }
+        
+        /* Character slots - GPU acceleration */
+        .character-slot {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+            contain: layout style paint;
+        }
+        
+        /* Abilities - GPU acceleration */
+        .ability {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Battle log - GPU acceleration */
+        .battle-log-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            contain: layout style paint;
+        }
+        
+        /* Stage background - GPU acceleration */
+        .stage-background {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+            contain: strict;
+        }
+        
+        /* Panels - GPU acceleration */
+        .talents-panel,
+        .statistics-panel,
+        .quests-panel {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            contain: layout style paint;
+        }
+        
+        /* VFX and animations - GPU acceleration */
+        [class*="vfx"],
+        [class*="animation"],
+        [class*="particle"] {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Progress bars - GPU acceleration */
+        .progress-bar,
+        .hp-bar,
+        .mana-bar,
+        .shield-bar {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, width;
+        }
+        
+        /* Tooltips - GPU acceleration */
+        .tooltip {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Notifications - GPU acceleration */
+        .quest-completion-notification,
+        .quest-progress-notification {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        
+        /* Game over screen - GPU acceleration */
+        .game-over-container {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, opacity;
+            contain: layout style paint;
+        }
+        
+        /* Loading screen - GPU acceleration */
+        .loading-screen {
+            transform: translate3d(0, 0, 0);
+        }
+    </style>
+    <script src="js/raid-game/game-manager.js"></script>
+</body>
+<body>
+    <div class="game-container">
+        <div class="crow-crown"></div>
+    </div>
+    
+    <!-- Hardware Acceleration CSS -->
+    <style>
+        /* Minimal critical CSS for initial render */
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Essential hardware acceleration */
+        .characters-container, 
+        .character-slot, 
+        .ability, 
+        .battle-log-container, 
+        .stage-background {
+            transform: translate3d(0, 0, 0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        /* Lazy loading placeholders */
+        img {
+            content-visibility: auto;
+            contain-intrinsic-size: 1px 1px;
+        }
+
+        /* Critical path rendering */
+        .game-container {
+            contain: layout style paint;
+            will-change: contents;
+        }
+
+        .crow-crown {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Allows clicks to pass through to elements below */
+            overflow: hidden; /* Ensures particles don't go outside */
         }
 
         /* Optimize animations */
@@ -210,6 +407,7 @@
     <link rel="preload" as="style" href="css/raid-game.css">
     <link rel="stylesheet" href="css/raid-game.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="css/raid-game.css"></noscript>
+    <link rel="stylesheet" href="css/crow-crown.css">
 
     <!-- Combine multiple CSS files -->
     <link rel="preload" as="style" href="css/combined-abilities.css">

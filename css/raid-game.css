@@ -14,7 +14,8 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Improve image quality globally */
@@ -32,7 +33,7 @@ img {
     position: relative;
     width: 100%;
     height: 100vh;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
 }
@@ -202,6 +203,11 @@ img {
     border-radius: 8px;
     border: 2px solid #444;
     margin: 0 auto 8px; /* Center the image horizontally and keep the existing bottom margin */
+}
+
+/* Allow overflow for crow crown visual effects */
+.crow-crown-visual .image-container {
+    overflow: visible;
 }
 
 .character-image {
@@ -1900,6 +1906,7 @@ img {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
 
 /* AI planning indicator */
 .ai-character.planning {
@@ -5809,37 +5816,312 @@ img {
     display: none !important;
 }
 
-/* Stun Visual Effects */
+/* === ENHANCED STUN VISUAL EFFECTS === */
+/* Primary stun VFX that appears when stun is first applied */
 .stun-vfx {
     position: absolute;
-    top: -30px;
-    left: 0;
-    width: 100%;
-    height: 50px;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 80px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     pointer-events: none;
-    z-index: 5;
-    animation: bounce 0.5s ease infinite alternate;
+    z-index: 15;
+    opacity: 0;
+    animation: stun-appear 0.6s ease-out forwards;
 }
 
+/* Persistent stun indicator that stays while stunned */
+.stun-indicator {
+    position: absolute;
+    top: -25px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    pointer-events: none;
+    z-index: 12;
+    opacity: 0;
+    animation: stun-indicator-appear 0.5s ease-out 0.3s forwards;
+}
+
+/* Stun indicator background */
+.stun-indicator-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 200, 0, 0.9) 0%, rgba(255, 150, 0, 0.6) 70%, transparent 100%);
+    border-radius: 50%;
+    border: 2px solid #ffaa00;
+    box-shadow: 0 0 15px rgba(255, 200, 0, 0.8);
+    animation: stun-indicator-pulse 2s ease-in-out infinite;
+}
+
+/* Stun indicator icon */
+.stun-indicator-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 0 0 5px #000;
+    animation: stun-indicator-wobble 1.5s ease-in-out infinite;
+}
+
+/* Enhanced stun stars with better positioning */
 .stun-star {
     position: absolute;
-    color: gold;
-    font-size: 24px;
+    font-size: 28px;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 1), 0 0 20px rgba(255, 215, 0, 0.8);
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.9));
     opacity: 0;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
-    animation: spin-star 2s ease-in-out infinite;
+    animation: stun-star-orbit 2s ease-in-out infinite;
 }
 
+.stun-star:nth-child(1) {
+    animation-delay: 0s;
+    --orbit-radius: 35px;
+    --orbit-angle: 0deg;
+}
+
+.stun-star:nth-child(2) {
+    animation-delay: 0.4s;
+    --orbit-radius: 35px;
+    --orbit-angle: 120deg;
+}
+
+.stun-star:nth-child(3) {
+    animation-delay: 0.8s;
+    --orbit-radius: 35px;
+    --orbit-angle: 240deg;
+}
+
+/* Enhanced stun text with better visibility */
 .stun-text {
-    color: #ffdd00;
+    position: relative;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 
+        0 0 5px #000,
+        0 0 10px #000,
+        0 0 15px rgba(255, 200, 0, 0.8),
+        0 0 20px rgba(255, 200, 0, 0.6);
+    background: linear-gradient(45deg, #ffd700, #ffaa00, #ffd700);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: stun-text-glow 1.5s ease-in-out infinite alternate;
+    margin-top: 10px;
+}
+
+/* Stun break VFX for when stun is removed */
+.stun-break-vfx {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 15;
+    opacity: 0;
+    animation: stun-break-appear 0.5s ease-out forwards;
+}
+
+.stun-break-text {
+    color: #00ff88;
     font-size: 16px;
-    font-weight: bold;
-    text-shadow: 0 0 3px #000, 0 0 5px #000;
+    font-weight: 900;
+    text-transform: uppercase;
     letter-spacing: 1px;
-    animation: pulse 0.5s ease infinite alternate;
+    text-shadow: 
+        0 0 5px #000,
+        0 0 10px #000,
+        0 0 15px rgba(0, 255, 136, 0.8);
+    animation: stun-break-text-zoom 0.8s ease-out forwards;
+}
+
+.stun-break-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #00ff88;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+    opacity: 0;
+    animation: stun-break-particle-burst 1s ease-out forwards;
+}
+
+/* === STUN ANIMATIONS === */
+@keyframes stun-appear {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5) translateY(20px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.1) translateY(-5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1) translateY(0);
+    }
+}
+
+@keyframes stun-indicator-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes stun-indicator-pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 200, 0, 0.8);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(255, 200, 0, 1);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes stun-indicator-wobble {
+    0%, 100% {
+        transform: translate(-50%, -50%) rotate(-5deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(5deg);
+    }
+}
+
+@keyframes stun-star-orbit {
+    0% {
+        opacity: 0;
+        transform: rotate(var(--orbit-angle)) translateX(var(--orbit-radius)) rotate(calc(-1 * var(--orbit-angle))) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+        transform: rotate(calc(var(--orbit-angle) + 180deg)) translateX(var(--orbit-radius)) rotate(calc(-1 * (var(--orbit-angle) + 180deg))) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(calc(var(--orbit-angle) + 360deg)) translateX(var(--orbit-radius)) rotate(calc(-1 * (var(--orbit-angle) + 360deg))) scale(0.8);
+    }
+}
+
+@keyframes stun-text-glow {
+    0% {
+        background-position: 0% 50%;
+        text-shadow: 
+            0 0 5px #000,
+            0 0 10px #000,
+            0 0 15px rgba(255, 200, 0, 0.8),
+            0 0 20px rgba(255, 200, 0, 0.6);
+    }
+    100% {
+        background-position: 100% 50%;
+        text-shadow: 
+            0 0 5px #000,
+            0 0 10px #000,
+            0 0 15px rgba(255, 200, 0, 1),
+            0 0 20px rgba(255, 200, 0, 0.9),
+            0 0 30px rgba(255, 200, 0, 0.5);
+    }
+}
+
+@keyframes stun-break-appear {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.3);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+@keyframes stun-break-text-zoom {
+    0% {
+        transform: scale(0.5);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes stun-break-particle-burst {
+    0% {
+        opacity: 1;
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.3) translate(
+            calc(cos(var(--angle)) * 40px), 
+            calc(sin(var(--angle)) * 40px)
+        );
+    }
+}
+
+/* Character overlay when stunned */
+.character-slot.stunned {
+    position: relative;
+}
+
+.character-slot.stunned::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(255, 200, 0, 0.1) 0%,
+        rgba(255, 150, 0, 0.05) 50%,
+        rgba(255, 200, 0, 0.1) 100%);
+    border: 2px solid rgba(255, 200, 0, 0.3);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 10;
+    animation: stun-character-glow 2s ease-in-out infinite;
+}
+
+@keyframes stun-character-glow {
+    0%, 100% {
+        border-color: rgba(255, 200, 0, 0.3);
+        box-shadow: inset 0 0 20px rgba(255, 200, 0, 0.1);
+    }
+    50% {
+        border-color: rgba(255, 200, 0, 0.6);
+        box-shadow: inset 0 0 30px rgba(255, 200, 0, 0.2);
+    }
 }
 
 @keyframes spin-star {

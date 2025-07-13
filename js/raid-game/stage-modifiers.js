@@ -94,6 +94,47 @@ class StageModifiersRegistry {
             }
         });
 
+        // Healing Farm Wind Modifier (similar to healing wind but farm-themed)
+        this.registerModifier({
+            id: 'healing_farm_wind',
+            name: 'Healing Farm Wind',
+            description: 'A gentle breeze carries healing energy across the battlefield.',
+            icon: '🌾',
+            vfx: {
+                type: 'healing_wind', // Reuse the same VFX as healing_wind
+                particles: true,
+                animation: 'floating_particles'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                const healPercent = modifier.effect?.value || 0.01; // 1% by default
+                const target = modifier.effect?.target || 'all';
+                
+                let targets = [];
+                if (target === 'all') {
+                    targets = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
+                } else if (target === 'players') {
+                    targets = gameManager.gameState.playerCharacters;
+                } else if (target === 'enemies') {
+                    targets = gameManager.gameState.aiCharacters;
+                }
+                targets.forEach(character => {
+                    if (!character.isDead()) {
+                        const healAmount = Math.floor(character.stats.maxHp * healPercent);
+                        if (healAmount > 0) {
+                            character.heal(healAmount, null, { 
+                                isStageEffect: true,
+                                stageModifierName: modifier.name 
+                            });
+                            gameManager.addLogEntry(
+                                `${character.name} heals ${healAmount} HP from ${modifier.name}.`, 
+                                'stage-effect heal'
+                            );
+                        }
+                    }
+                });
+            }
+        });
+
         // Heavy Rain Modifier
         this.registerModifier({
             id: 'its_raining_man',

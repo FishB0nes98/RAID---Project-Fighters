@@ -168,6 +168,11 @@ class Item {
             // Apply Shadow Dagger armor penetration buff immediately when item is equipped
             window.shadowDaggerHandler.applyShadowDaggerBuffToCharacter(character);
         }
+
+        // Dispatch a custom event to notify that items have been applied
+        document.dispatchEvent(new CustomEvent('character:items-applied', {
+            detail: { character: character }
+        }));
     }
 
     /**
@@ -264,6 +269,136 @@ class ItemRegistry {
     constructor() {
         this.items = new Map();
         this.initializeDefaultItems();
+    }
+
+    /**
+     * Set up Crow Crown special effect
+     */
+    setupCrowCrownEffect() {
+        if (window.crowCrownHandler) return;
+
+        const handler = {
+            hasItem: function(character) {
+                if (!character) return false;
+                const inventory = window.CharacterInventories?.get(character.id);
+                return inventory?.getAllItems().some(slot => slot?.itemId === 'crow_crown');
+            },
+            applyEffect: function(character) {
+                console.log(`[CrowCrown] applyEffect called for character: ${character.name}`);
+                if (this.hasItem(character)) {
+                    const characterElement = document.getElementById(`character-${character.instanceId}`) || 
+                                           document.getElementById(`character-${character.id}`) ||
+                                           document.querySelector(`[data-character-id="${character.id}"]`);
+                    if (characterElement) {
+                        characterElement.classList.add('crow-crown-visual');
+                        // Add helper classes to ALL parent containers to disable CSS containment
+                        document.body.classList.add('has-crow-crown');
+                        const gameContainer = document.querySelector('.game-container');
+                        if (gameContainer) {
+                            gameContainer.classList.add('has-crow-crown');
+                        }
+                        const charactersContainer = characterElement.closest('.characters-container');
+                        if (charactersContainer) {
+                            charactersContainer.classList.add('has-crow-crown');
+                        }
+                        const section = characterElement.closest('.top-section, .bottom-section');
+                        if (section) {
+                            section.classList.add('has-crow-crown');
+                        }
+                        console.log(`[CrowCrown] Applied 'crow-crown-visual' to element:`, characterElement);
+                    } else {
+                        console.warn(`[CrowCrown] Character element NOT FOUND for ${character.name} (ID: ${character.instanceId || character.id}). VFX not applied.`);
+                    }
+                } else {
+                    console.log(`[CrowCrown] Character ${character.name} does NOT have Crow Crown equipped (hasItem returned false).`);
+                }
+            },
+            removeEffect: function(character) {
+                console.log(`[CrowCrown] removeEffect called for character: ${character.name}`);
+                const characterElement = document.getElementById(`character-${character.instanceId}`);
+                if (characterElement) {
+                    characterElement.classList.remove('crow-crown-visual');
+                    // Remove helper classes if no more crow crown characters exist
+                    if (!document.querySelector('.crow-crown-visual')) {
+                        document.body.classList.remove('has-crow-crown');
+                        const gameContainer = document.querySelector('.game-container');
+                        if (gameContainer) {
+                            gameContainer.classList.remove('has-crow-crown');
+                        }
+                        document.querySelectorAll('.characters-container, .top-section, .bottom-section').forEach(el => {
+                            el.classList.remove('has-crow-crown');
+                        });
+                    }
+                    console.log(`[CrowCrown] Removed 'crow-crown-visual' from element:`, characterElement);
+                } else {
+                    console.warn(`[CrowCrown] Character element NOT FOUND for ${character.name} (ID: ${character.instanceId || character.id}). VFX not removed.`);
+                }
+            },
+            hasItem: function(character) {
+                if (!character) {
+                    console.log('[CrowCrown][hasItem] Character object is null or undefined.');
+                    return false;
+                }
+                console.log(`[CrowCrown][hasItem] Checking for Crow Crown on ${character.name} (ID: ${character.id || character.instanceId})`);
+                
+                // Check equippedItems
+                if (character.equippedItems && Array.isArray(character.equippedItems)) {
+                    const foundInEquipped = character.equippedItems.some(item => item && item.id === 'crow_crown');
+                    if (foundInEquipped) {
+                        console.log('[CrowCrown][hasItem] Found in character.equippedItems.');
+                        return true;
+                    }
+                    console.log('[CrowCrown][hasItem] Not found in character.equippedItems.');
+                }
+                
+                // Check inventory via CharacterInventories
+                if (window.CharacterInventories && window.CharacterInventories.get) {
+                    const inventory = window.CharacterInventories.get(character.id);
+                    if (inventory) {
+                        const allInventoryItems = inventory.getAllItems();
+                        const foundInInventory = allInventoryItems.some(slot => slot && slot.itemId === 'crow_crown');
+                        if (foundInInventory) {
+                            console.log('[CrowCrown][hasItem] Found in window.CharacterInventories.');
+                            return true;
+                        }
+                        console.log('[CrowCrown][hasItem] Not found in window.CharacterInventories.');
+                    } else {
+                        console.log('[CrowCrown][hasItem] No inventory found for character in window.CharacterInventories.');
+                    }
+                }
+                
+                // Check character.items (fallback for older or alternative structures)
+                if (character.items && Array.isArray(character.items)) {
+                    const foundInCharacterItems = character.items.some(item => item && (item.id === 'crow_crown' || item.itemId === 'crow_crown'));
+                    if (foundInCharacterItems) {
+                        console.log('[CrowCrown][hasItem] Found in character.items.');
+                        return true;
+                    }
+                    console.log('[CrowCrown][hasItem] Not found in character.items.');
+                }
+                
+                console.log(`[CrowCrown][hasItem] Crow Crown NOT found for ${character.name}. Returning false.`);
+                return false;
+            }
+        };
+
+        window.crowCrownHandler = handler;
+
+        document.addEventListener('character:items-applied', (event) => {
+            console.log(`[CrowCrown] Event 'character:items-applied' received for character:`, event.detail.character.name);
+            if (event.detail && event.detail.character) {
+                handler.applyEffect(event.detail.character);
+            }
+        });
+
+        document.addEventListener('character:items-removed', (event) => {
+            console.log(`[CrowCrown] Event 'character:items-removed' received for character:`, event.detail.character.name);
+            if (event.detail && event.detail.character) {
+                handler.removeEffect(event.detail.character);
+            }
+        });
+        
+        console.log('[CrowCrown] Handler initialized.');
     }
 
     /**
@@ -751,6 +886,45 @@ class ItemRegistry {
             'crafting'
         ));
 
+        const basketofGoods = new Item(
+            'basket_of_goods',
+            'Basket of Goods',
+            'A basket filled with various farm items.',
+            'items/basket_of_goods.png',
+            'rare',
+            {},
+            'lootbox'
+        );
+        this.registerItem(basketofGoods);
+
+        // Set the loot table for Atlantean Treasure Chest
+        basketofGoods.setLootTable([
+            { itemId: 'cow_bell', weight: 3, quantity: 1 },
+            { itemId: 'iron_nail', weight: 6, quantity: 1 },
+            { itemId: 'wooden_plank', weight: 6, quantity: 1 },
+            { itemId: 'corn', weight: 6, quantity: 1 },
+            { itemId: 'goat_milk_crafting', weight: 6, quantity: 1 },
+            { itemId: 'pork', weight: 6, quantity: 1 },
+            { itemId: 'crow_feather', weight: 6, quantity: 1 },
+            { itemId: 'red_linen', weight: 4, quantity: 2 },
+            { itemId: 'green_apple', weight: 3, quantity: 1 },
+            { itemId: 'yellow_apple', weight: 3, quantity: 1 },
+            { itemId: 'healthy_apple', weight: 3, quantity: 1 },
+            { itemId: 'rake', weight: 3, quantity: 1 },
+            { itemId: 'carrot', weight: 3, quantity: 1 },
+            { itemId: 'alcohol', weight: 3, quantity: 1 },
+            { itemId: 'carrot_cannon', weight: 2, quantity: 1 },
+            { itemId: 'pitchfork', weight: 3, quantity: 1 },
+            { itemId: 'fertilizer_sprayer', weight: 2, quantity: 1 },
+            { itemId: 'corn_spear', weight: 1.5, quantity: 1 },
+            { itemId: 'dog_collar', weight: 1, quantity: 1 },
+            { itemId: 'beehive_bomb', weight: 3, quantity: 1 },
+            { itemId: 'exploding_pumpkin', weight: 2, quantity: 1 },
+            { itemId: 'double_kitchen_knife', weight: 1, quantity: 1 },
+            { itemId: 'kotal_kahns_atlantean_dagger', weight: 1, quantity: 1 },
+            { itemId: 'seaborn_crown', weight: 1, quantity: 1 }
+        ]);
+
         // ATLANTEAN TREASURE CHEST - LOOTBOX
         const atlanteanTreasureChest = new Item(
             'atlantean_treasure_chest',
@@ -761,6 +935,7 @@ class ItemRegistry {
             {},
             'lootbox'
         );
+        this.registerItem(atlanteanTreasureChest);
 
         // Set the loot table for Atlantean Treasure Chest
         atlanteanTreasureChest.setLootTable([
@@ -997,6 +1172,618 @@ class ItemRegistry {
             'equipment'
         ));
 
+        // FARM-RELATED ITEMS
+        
+        // Pitchfork - Equipment Item
+        this.registerItem(new Item(
+            'pitchfork',
+            'Pitchfork',
+            'A sturdy farming tool that doubles as a formidable weapon. Its sharp prongs deal significant physical damage to enemies.',
+            'items/pitchfork.png',
+            'uncommon',
+            {
+                physicalDamage: 45
+            },
+            'equipment'
+        ));
+
+        // Carrot Cannon - Equipment Item
+        this.registerItem(new Item(
+            'carrot_cannon',
+            'Carrot Cannon',
+            'A whimsical contraption that launches carrots with surprising accuracy. Your Q ability gains +15% crit chance.',
+            'items/carrot_cannon.png',
+            'rare',
+            {},
+            'equipment'
+        ));
+
+        // Corn - Consumable Item
+        const corn = new Item(
+            'corn',
+            'Corn',
+            'A nutritious ear of corn that enhances reflexes when consumed. Grants temporary agility boost.',
+            'items/corn.png',
+            'common',
+            {},
+            'consumable'
+        );
+
+        // Set consumable effect for Corn
+        corn.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            // Create dodge chance buff
+            const cornDodgeBuff = new Effect(
+                'corn_dodge_boost',
+                'Corn Agility',
+                'items/corn.png',
+                4,
+                null,
+                false
+            );
+
+            cornDodgeBuff.setDescription('Gains 10% dodge chance for 4 turns');
+            cornDodgeBuff.statModifiers = [{
+                stat: 'dodgeChance',
+                value: 0.10,
+                operation: 'add'
+            }];
+
+            character.addBuff(cornDodgeBuff);
+
+            log(`🌽 ${character.name} consumed corn and gained enhanced agility (+10% dodge chance)!`, 'consumable-use');
+
+            // Update character UI
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(character);
+            }
+
+            return { success: true, message: 'Gained 10% dodge chance for 4 turns' };
+        }, 0); // No cooldown
+
+        this.registerItem(corn);
+
+        // Alcohol - Consumable Item
+        const alcohol = new Item(
+            'alcohol',
+            'Alcohol',
+            'Heals for 3000 HP but reduces Armor and Magic Shield to 0 for 5 turns.',
+            'items/alcohol.png',
+            'uncommon',
+            {},
+            'consumable'
+        );
+
+        alcohol.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            const healAmount = 3000;
+            const healResult = character.heal(healAmount, character);
+            log(`🍺 ${character.name} drinks alcohol, healing for ${healResult.healAmount} HP but becomes drunk!`, 'consumable-use');
+            
+            const alcoholDebuff = new Effect(
+                'alcohol_debuff',
+                'Drunk',
+                'items/alcohol.png',
+                5,
+                null,
+                true
+            ).setDescription('Armor and Magic Shield reduced to 0.');
+
+            alcoholDebuff.onApply = function(character) {
+                this.originalBaseArmor = character.baseStats.armor;
+                this.originalBaseMagicShield = character.baseStats.magicalShield;
+                
+                character.baseStats.armor = 0;
+                character.baseStats.magicalShield = 0;
+                
+                log(`${character.name} is drunk! Armor and Magic Shield reduced to 0.`, 'debuff');
+            };
+            
+            alcoholDebuff.remove = function(character) {
+                if (this.originalBaseArmor !== undefined) {
+                    character.baseStats.armor = this.originalBaseArmor;
+                }
+                if (this.originalBaseMagicShield !== undefined) {
+                    character.baseStats.magicalShield = this.originalBaseMagicShield;
+                }
+                log(`${character.name} is no longer drunk. Armor and Magic Shield restored.`, 'system');
+            };
+
+            character.addDebuff(alcoholDebuff);
+
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(character);
+            }
+
+            return { success: true, message: `Healed for ${healResult.healAmount} HP and became drunk.` };
+        }, 10);
+
+        this.registerItem(alcohol);
+
+        // Carrot - Consumable Item
+        const carrot = new Item(
+            'carrot',
+            'Carrot',
+            'A fresh carrot. Reduces all active ability cooldowns by 1 turn.',
+            'items/carrot.png',
+            'common',
+            {},
+            'consumable'
+        );
+
+        carrot.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            character.abilities.forEach(ability => {
+                if (ability.currentCooldown > 0) {
+                    ability.reduceCooldown();
+                }
+            });
+
+            log(`🥕 ${character.name} consumed a Carrot, reducing all active cooldowns by 1 turn!`, 'consumable-use');
+            
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(character);
+            }
+
+            return { success: true, message: 'All active cooldowns reduced by 1.' };
+        }, 10);
+
+        this.registerItem(carrot);
+
+        // Healthy Apple - Consumable Item
+        const healthyApple = new Item(
+            'healthy_apple',
+            'Healthy Apple',
+            'A crisp, healthy apple. Heals for 500 HP.',
+            'items/healthy_apple.png',
+            'common',
+            {},
+            'consumable'
+        );
+
+        healthyApple.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            const healAmount = 500;
+            const healResult = character.heal(healAmount, character);
+            log(`🍎 ${character.name} consumed a Healthy Apple and was healed for ${healResult.healAmount} HP!`, 'consumable-use');
+            
+            if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.triggerHealingAnimation === 'function') {
+                window.gameManager.uiManager.triggerHealingAnimation(character, 'restore', healResult.healAmount);
+            }
+            return { success: true, message: `Healed for ${healResult.healAmount} HP.` };
+        }, 4);
+
+        this.registerItem(healthyApple);
+
+        // Yellow Apple - Crafting Material
+        this.registerItem(new Item(
+            'yellow_apple',
+            'Yellow Apple',
+            'A sweet yellow apple, perfect for crafting.',
+            'items/yellow_apple.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Green Apple - Crafting Material
+        this.registerItem(new Item(
+            'green_apple',
+            'Green Apple',
+            'A tart green apple, useful in various recipes.',
+            'items/green_apple.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Rake - Equipment Item
+        this.registerItem(new Item(
+            'rake',
+            'Rake',
+            'A simple garden rake. Increases critical damage.',
+            'items/rake.png',
+            'uncommon',
+            {
+                critDamage: 0.20
+            },
+            'equipment'
+        ));
+
+        // Fertilizer Sprayer - Equipment Item
+        this.registerItem(new Item(
+            'fertilizer_sprayer',
+            'Fertilizer Sprayer',
+            'A device for spraying fertilizer. Provides steady health regeneration.',
+            'items/fertilizer_sprayer.png',
+            'rare',
+            {
+                hpPerTurn: 12
+            },
+            'equipment'
+        ));
+
+        // Cow Bell - Equipment Item
+        this.registerItem(new Item(
+            'cow_bell',
+            'Cow Bell',
+            'A loud cow bell. Bolsters magical power and mana regeneration.',
+            'items/cow_bell.png',
+            'rare',
+            {
+                magicalDamage: 70,
+                manaPerTurn: 20
+            },
+            'equipment'
+        ));
+
+        // Iron Nail - Crafting Material
+        this.registerItem(new Item(
+            'iron_nail',
+            'Iron Nail',
+            'A standard iron nail, a basic building component.',
+            'items/iron_nail.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Wooden Plank - Crafting Material
+        this.registerItem(new Item(
+            'wooden_plank',
+            'Wooden Plank',
+            'A sturdy wooden plank, essential for construction.',
+            'items/wooden_plank.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Corn Spear - Equipment Item
+        this.registerItem(new Item(
+            'corn_spear',
+            'Corn Spear',
+            'A spear made from hardened corn stalks. Surprisingly sharp.',
+            'items/corn_spear.png',
+            'uncommon',
+            {
+                physicalDamage: 30,
+                critDamage: 0.05,
+                critChance: 0.05
+            },
+            'equipment'
+        ));
+
+        // Goat Milk - Crafting Material
+        this.registerItem(new Item(
+            'goat_milk_crafting',
+            'Goat Milk',
+            'Fresh goat milk, a versatile crafting ingredient.',
+            'items/goat_milk.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Milking Bucket - Crafting Material
+        this.registerItem(new Item(
+            'milking_bucket',
+            'Milking Bucket',
+            'A bucket used for milking goats.',
+            'items/milking_bucket.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Goat Milk - Consumable
+        const goatMilkConsumable = new Item(
+            'goat_milk_consumable',
+            'Goat Milk',
+            'A refreshing drink that permanently boosts your vitality. Grants a non-deletable +50 HP regen buff.',
+            'items/goat_milk.png',
+            'epic',
+            {},
+            'consumable'
+        );
+
+        goatMilkConsumable.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            if (!target) {
+                 return { success: false, message: 'Goat Milk requires a target.', needsTarget: true, targetType: 'ally_or_self' };
+            }
+
+            const permanentHpRegenBuff = new Effect(
+                'goat_milk_hp_regen',
+                'Goat Milk Vitality',
+                'items/goat_milk.png',
+                -1, // Permanent
+                null,
+                false // isDebuff
+            ).setDescription('Permanently regenerates 50 HP per turn.');
+            
+            permanentHpRegenBuff.statModifiers = [{
+                stat: 'hpPerTurn',
+                value: 50,
+                operation: 'add'
+            }];
+            permanentHpRegenBuff.isPermanent = true;
+
+            target.addBuff(permanentHpRegenBuff);
+            log(`🥛 ${target.name} drinks Goat Milk and feels invigorated! Gained a permanent +50 HP regen buff.`, 'consumable-use');
+            
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(target);
+            }
+
+            return { success: true, message: `Granted permanent HP regen to ${target.name}.` };
+        }, 50);
+        goatMilkConsumable.needsTarget = true;
+        goatMilkConsumable.targetType = 'ally_or_self';
+        this.registerItem(goatMilkConsumable);
+        
+        // Dog Collar - Equipment Item
+        this.registerItem(new Item(
+            'dog_collar',
+            'Dog Collar',
+            'A sturdy collar. Your Q and W damage abilities cause the enemy to bleed.',
+            'items/dog_collar.png',
+            'epic',
+            {},
+            'equipment'
+        ));
+
+        // Beehive Bomb - Consumable/Crafting Item
+        const beehiveBomb = new Item(
+            'beehive_bomb',
+            'Beehive Bomb',
+            'A buzzing beehive rigged to explode. Deals 300 magical damage to a target.',
+            'items/beehive_bomb.png',
+            'uncommon',
+            {},
+            'consumable' 
+        );
+        beehiveBomb.type = 'crafting'; 
+
+        beehiveBomb.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!target) {
+                return { success: false, message: 'Beehive Bomb requires a target', needsTarget: true, targetType: 'enemy' };
+            }
+            if (target.isDead()) {
+                return { success: false, message: 'Target is already defeated.' };
+            }
+            if (target.isAI === character.isAI) {
+                return { success: false, message: 'Cannot target allies.' };
+            }
+
+            const damage = 300;
+            const damageResult = target.applyDamage(damage, 'magical', character, { abilityId: 'beehive_bomb' });
+            log(`🐝 ${character.name} throws a Beehive Bomb at ${target.name}, dealing ${damageResult.damage} magical damage!`, 'consumable-use');
+            
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(target);
+            }
+
+            return { success: true, message: `Dealt ${damageResult.damage} damage to ${target.name}.` };
+        }, 5);
+        beehiveBomb.needsTarget = true;
+        beehiveBomb.targetType = 'enemy';
+        this.registerItem(beehiveBomb);
+
+        // Exploding Pumpkin - Consumable Item
+        const explodingPumpkin = new Item(
+            'exploding_pumpkin',
+            'Exploding Pumpkin',
+            'Places a ticking pumpkin on an enemy. It explodes for 1000 damage after 5 turns.',
+            'items/exploding_pumpkin.png',
+            'epic',
+            {},
+            'consumable'
+        );
+
+        explodingPumpkin.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+
+            if (!target) {
+                return { success: false, message: 'Exploding Pumpkin requires a target', needsTarget: true, targetType: 'enemy' };
+            }
+            if (target.isDead()) {
+                return { success: false, message: 'Target is already defeated.' };
+            }
+            if (target.isAI === character.isAI) {
+                return { success: false, message: 'Cannot target allies.' };
+            }
+
+            const debuff = new Effect(
+                `exploding_pumpkin_${Date.now()}`,
+                'Exploding Pumpkin',
+                'items/exploding_pumpkin.png',
+                5,
+                null,
+                true
+            ).setDescription('A ticking time bomb! Will explode for 1000 damage when the timer runs out.');
+
+            debuff.onRemove = function(char) {
+                if (char.isDead()) return;
+                log(`🎃 The Exploding Pumpkin on ${char.name} detonates!`, 'debuff-effect');
+                const damage = 1000;
+                char.applyDamage(damage, 'magical', character, { abilityId: 'exploding_pumpkin' });
+            };
+
+            target.addDebuff(debuff);
+            log(`🎃 ${character.name} places an Exploding Pumpkin on ${target.name}. It will explode in 5 turns!`, 'consumable-use');
+
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(target);
+            }
+            
+            return { success: true, message: `Pumpkin placed on ${target.name}.` };
+        }, 15);
+        explodingPumpkin.needsTarget = true;
+        explodingPumpkin.targetType = 'enemy';
+        this.registerItem(explodingPumpkin);
+
+        // Pork - Consumable Item
+        const pork = new Item(
+            'pork',
+            'Pork',
+            'A succulent piece of cooked pork. Heals for 1500 HP.',
+            'items/pork.png',
+            'common',
+            {},
+            'consumable'
+        );
+
+        pork.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            const healAmount = 1500;
+            const healResult = character.heal(healAmount, character);
+            log(`🍖 ${character.name} consumed Pork and was healed for ${healResult.healAmount} HP!`, 'consumable-use');
+            
+            if (window.gameManager && window.gameManager.uiManager && typeof window.gameManager.uiManager.triggerHealingAnimation === 'function') {
+                window.gameManager.uiManager.triggerHealingAnimation(character, 'restore', healResult.healAmount);
+            }
+            return { success: true, message: `Healed for ${healResult.healAmount} HP.` };
+        }, 15); // 15 turn cooldown
+
+        this.registerItem(pork);
+
+        // Red Linen - Consumable Item
+        const redLinen = new Item(
+            'red_linen',
+            'Red Linen',
+            'A vibrant red cloth. When shown to an enemy, it taunts them, forcing them to attack only you for 3 turns.',
+            'items/red_linen.png',
+            'uncommon',
+            {},
+            'consumable'
+        );
+
+        redLinen.setConsumableEffect((character, target) => {
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            
+            if (!target) {
+                return { success: false, message: 'Red Linen requires a target', needsTarget: true, targetType: 'enemy' };
+            }
+
+            if (!character || character.isDead()) {
+                return { success: false, message: 'Character is dead or invalid' };
+            }
+
+            if (target.isDead()) {
+                return { success: false, message: 'Target is already dead' };
+            }
+
+            if (target.isAI === character.isAI) {
+                return { success: false, message: 'Red Linen can only target enemies' };
+            }
+
+            const debuffId = `taunt_debuff_${Date.now()}`;
+            const duration = 3;
+
+            log(`${character.name} taunts ${target.name} with Red Linen!`);
+
+            const tauntDebuff = {
+                id: debuffId,
+                name: 'Taunted',
+                icon: 'items/red_linen.png',
+                duration: duration,
+                isDebuff: true,
+                description: `Taunted by ${character.name}. Can only target ${character.name}.`,
+                forcedTargetCaster: character,
+                forcedTargetCasterId: character.instanceId || character.id,
+                remove: (char) => {
+                    log(`${char.name}'s Taunt debuff fades.`);
+                    if (char.forcedTargeting && char.forcedTargeting.debuffId === debuffId) {
+                        delete char.forcedTargeting;
+                    }
+                }
+            };
+
+            target.addDebuff(tauntDebuff);
+            
+            target.forcedTargeting = {
+                type: 'taunt',
+                casterId: character.instanceId || character.id,
+                casterName: character.name,
+                debuffId: debuffId
+            };
+
+            if (typeof updateCharacterUI === 'function') {
+                updateCharacterUI(character);
+                updateCharacterUI(target);
+            }
+
+            return { success: true, message: `${target.name} is taunted!` };
+        }, 10);
+
+        redLinen.needsTarget = true;
+        redLinen.targetType = 'enemy';
+
+        this.registerItem(redLinen);
+        
+        // Double Kitchen Knife - Equipment Item
+        this.registerItem(new Item(
+            'double_kitchen_knife',
+            'Double Kitchen Knife',
+            'A pair of wickedly sharp kitchen knives. Your E ability activates twice when used.',
+            'items/double_kitchen_knife.png',
+            'epic',
+            {
+                physicalDamage: 25
+            },
+            'equipment'
+        ));
+
+        // Crow Feather - Crafting Material
+        this.registerItem(new Item(
+            'crow_feather',
+            'Crow Feather',
+            'A dark feather from a crow. Used in crafting.',
+            'items/crow_feather.png',
+            'common',
+            {},
+            'crafting'
+        ));
+
+        // Crow Crown - Equipment Item
+        this.registerItem(new Item(
+            'crow_crown',
+            'Crow Crown',
+            'A crown made of crow feathers. The owner of this item has a dark creative visual on his character-container.',
+            'items/crow_crown.png',
+            'epic',
+            {},
+            'equipment'
+        ));
+
         // Initialize special item effects after all items are registered
         this.initializeSpecialItemEffects();
     }
@@ -1007,6 +1794,18 @@ class ItemRegistry {
     initializeSpecialItemEffects() {
         // Set up Triden's Vow special effect
         this.setupTridensVowEffect();
+        
+        // Set up Carrot Cannon special effect
+        this.setupCarrotCannonEffect();
+
+        // Set up Double Kitchen Knife special effect
+        this.setupDoubleKitchenKnifeEffect();
+
+        // Set up Dog Collar special effect
+        this.setupDogCollarEffect();
+
+        // Set up Crow Crown special effect
+        this.setupCrowCrownEffect();
     }
 
     /**
@@ -1205,6 +2004,236 @@ class ItemRegistry {
         };
 
         setupAbilityHook();
+    }
+
+    /**
+     * Set up Carrot Cannon special effect - 15% crit chance to Q ability
+     */
+    setupCarrotCannonEffect() {
+        // Check if already set up
+        if (window.carrotCannonHandler) return;
+
+        const carrotCannonHandler = {
+            // Check if a character has Carrot Cannon equipped
+            hasItem: function(character) {
+                if (!character) return false;
+                
+                // Check in character's equippedItems array
+                if (character.equippedItems && Array.isArray(character.equippedItems)) {
+                    for (let i = 0; i < character.equippedItems.length; i++) {
+                        const item = character.equippedItems[i];
+                        if (item && item.id === 'carrot_cannon') {
+                            return true;
+                        }
+                    }
+                }
+                
+                // Check in character's inventory
+                if (window.CharacterInventories && window.CharacterInventories.get) {
+                    const inventory = window.CharacterInventories.get(character.id);
+                    if (inventory) {
+                        const items = inventory.getAllItems();
+                        for (let i = 0; i < items.length; i++) {
+                            const slot = items[i];
+                            if (slot && slot.itemId === 'carrot_cannon') {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                
+                // Check in character's items array (alternative structure)
+                if (character.items && Array.isArray(character.items)) {
+                    for (let i = 0; i < character.items.length; i++) {
+                        const item = character.items[i];
+                        if (item && (item.id === 'carrot_cannon' || item.itemId === 'carrot_cannon')) {
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            },
+
+            // Apply Carrot Cannon effect to Q ability
+            onAbilityUsed: function(character, ability, abilityIndex) {
+                const hasItem = this.hasItem(character);
+                if (!hasItem) return false;
+
+                // Only apply to Q ability (index 0)
+                if (abilityIndex !== 0) return false;
+
+                // Apply crit chance boost directly to character stats
+                this.applyCarrotCannonCritBoost(character);
+                return true;
+            },
+
+            // Apply crit chance boost directly to character stats
+            applyCarrotCannonCritBoost: function(character) {
+                // Store original crit chance if not already stored
+                if (!character._carrotCannonOriginalCrit) {
+                    character._carrotCannonOriginalCrit = character.stats.critChance || 0;
+                }
+
+                // Apply +15% crit chance directly to stats
+                character.stats.critChance = (character.stats.critChance || 0) + 0.15;
+
+                // Log the effect
+                if (window.gameManager && window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(
+                        `🥕 ${character.name}'s Carrot Cannon enhances their aim (+15% crit chance)!`,
+                        'item-effect'
+                    );
+                }
+
+                console.log(`[Carrot Cannon] Applied +15% crit chance to ${character.name}'s Q ability (New crit: ${character.stats.critChance})`);
+                
+                // Schedule restoration of original crit chance after ability execution
+                setTimeout(() => {
+                    if (character._carrotCannonOriginalCrit !== undefined) {
+                        character.stats.critChance = character._carrotCannonOriginalCrit;
+                        delete character._carrotCannonOriginalCrit;
+                        console.log(`[Carrot Cannon] Restored original crit chance to ${character.stats.critChance}`);
+                    }
+                }, 100);
+            }
+        };
+
+        // Store globally for access
+        window.carrotCannonHandler = carrotCannonHandler;
+
+        // Hook into the game's ability usage system
+        const setupCarrotAbilityHook = () => {
+            // Method 1: Listen for AbilityUsed event
+            document.addEventListener('AbilityUsed', (event) => {
+                if (event.detail && event.detail.caster && event.detail.ability && event.detail.abilityIndex !== undefined) {
+                    carrotCannonHandler.onAbilityUsed(event.detail.caster, event.detail.ability, event.detail.abilityIndex);
+                }
+            });
+            
+            // Method 2: Hook into Character.useAbility if available
+            const checkForCharacterSystem = () => {
+                if (window.Character && window.Character.prototype && window.Character.prototype.useAbility) {
+                    if (!window.Character.prototype.useAbility._carrotCannonHooked) {
+                        const originalUseAbility = window.Character.prototype.useAbility;
+                        
+                        window.Character.prototype.useAbility = function(abilityIndex, target) {
+                            // Apply Carrot Cannon effect before ability execution
+                            if (abilityIndex === 0) { // Q ability
+                                carrotCannonHandler.onAbilityUsed(this, this.abilities[abilityIndex], abilityIndex);
+                            }
+                            
+                            const result = originalUseAbility.call(this, abilityIndex, target);
+                            return result;
+                        };
+                        
+                        window.Character.prototype.useAbility._carrotCannonHooked = true;
+                    }
+                } else {
+                    setTimeout(checkForCharacterSystem, 100);
+                }
+            };
+            
+            checkForCharacterSystem();
+        };
+
+        setupCarrotAbilityHook();
+    }
+
+    /**
+     * Set up Double Kitchen Knife special effect - E ability activates twice
+     */
+    setupDoubleKitchenKnifeEffect() {
+        if (window.doubleKitchenKnifeHandler) return;
+
+        const handler = {
+            hasItem: function(character) {
+                if (!character) {
+                    console.log('[DoubleKitchenKnife Debug] hasItem: character object is null or undefined.');
+                    return false;
+                }
+
+                console.log(`[DoubleKitchenKnife Debug] Checking for item on ${character.name} (ID: ${character.id})`);
+
+                // Check 1: character.equippedItems
+                if (character.equippedItems && Array.isArray(character.equippedItems)) {
+                    console.log('[DoubleKitchenKnife Debug] Checking character.equippedItems:', character.equippedItems);
+                    if (character.equippedItems.some(item => item && item.id === 'double_kitchen_knife')) {
+                        console.log('[DoubleKitchenKnife Debug] Found item in character.equippedItems.');
+                        return true;
+                    }
+                } else {
+                    console.log('[DoubleKitchenKnife Debug] character.equippedItems not found or not an array.');
+                }
+
+                // Check 2: window.CharacterInventories
+                if (window.CharacterInventories && window.CharacterInventories.get) {
+                    const inventory = window.CharacterInventories.get(character.id);
+                    if (inventory) {
+                        const items = inventory.getAllItems();
+                        console.log(`[DoubleKitchenKnife Debug] Checking inventory for ${character.name}:`, items);
+                        if (items.some(slot => slot && slot.itemId === 'double_kitchen_knife')) {
+                            console.log('[DoubleKitchenKnife Debug] Found item in window.CharacterInventories.');
+                            return true;
+                        }
+                    } else {
+                        console.log(`[DoubleKitchenKnife Debug] No inventory found for ${character.name} in window.CharacterInventories.`);
+                    }
+                } else {
+                    console.log('[DoubleKitchenKnife Debug] window.CharacterInventories not available.');
+                }
+
+                // Check 3: character.items
+                if (character.items && Array.isArray(character.items)) {
+                    console.log('[DoubleKitchenKnife Debug] Checking character.items:', character.items);
+                    if (character.items.some(item => item && (item.id === 'double_kitchen_knife' || item.itemId === 'double_kitchen_knife'))) {
+                        console.log('[DoubleKitchenKnife Debug] Found item in character.items.');
+                        return true;
+                    }
+                } else {
+                    console.log('[DoubleKitchenKnife Debug] character.items not found or not an array.');
+                }
+
+                console.log(`[DoubleKitchenKnife Debug] Item not found for ${character.name}. Returning false.`);
+                return false;
+            }
+        };
+        window.doubleKitchenKnifeHandler = handler;
+        console.log('[DoubleKitchenKnife] Handler initialized.');
+    }
+
+    /**
+     * Set up Dog Collar special effect - Q and W abilities apply bleed
+     */
+    setupDogCollarEffect() {
+        if (window.dogCollarHandler) return;
+
+        const handler = {
+            hasItem: function(character) {
+                if (!character) return false;
+                if (character.equippedItems?.some(item => item?.id === 'dog_collar')) return true;
+                const inventory = window.CharacterInventories?.get(character.id);
+                return inventory?.getAllItems().some(slot => slot?.itemId === 'dog_collar');
+            },
+            onDamageDealt: function(event) {
+                const { character: caster, target, damage, options } = event.detail;
+                if (!caster || !target || damage <= 0) return;
+
+                const abilityIndex = options?.abilityIndex;
+                if ((abilityIndex !== 0 && abilityIndex !== 1) || !this.hasItem(caster)) return;
+
+                if (window.HoundPassive) {
+                    const passiveHandler = new window.HoundPassive();
+                    passiveHandler.applyBleedingStack(caster, target);
+                    const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+                    log(`🩸 ${caster.name}'s Dog Collar causes ${target.name} to bleed!`, 'item-effect');
+                }
+            }
+        };
+
+        window.dogCollarHandler = handler;
+        document.addEventListener('character:damage-dealt', handler.onDamageDealt.bind(handler));
+        console.log('[DogCollar] Handler initialized.');
     }
 
     /**
@@ -1780,306 +2809,3 @@ class GlobalInventory {
 
 // Global instances should be created manually in the initialization process
 // to avoid automatic item addition during script loading
-
-// Zasalamel Scythe Q ability healing effect handler
-class ZasalamelScytheHandler {
-    constructor() {
-        this.boundOnDamageDealt = this.onDamageDealt.bind(this);
-        this.initialize();
-    }
-
-    initialize() {
-        // Listen for damage dealt events
-        document.addEventListener('character:damage-dealt', this.boundOnDamageDealt);
-        console.log('[ZasalamelScythe] Handler initialized - listening for Q ability damage');
-    }
-
-    onDamageDealt(event) {
-        const { character: caster, target, damage, damageType, options } = event.detail;
-        
-        if (!caster || !damage || damage <= 0) return;
-        
-        // Check if this damage came from a Q ability (index 0)
-        const isQAbility = options && options.abilityIndex === 0;
-        if (!isQAbility) return;
-        
-        // Check if the caster has Zasalamel Scythe equipped
-        const casterInventory = window.CharacterInventories?.get(caster.id);
-        if (!casterInventory) return;
-        
-        const hasZasalamelScythe = casterInventory.getAllItems().some(itemSlot => 
-            itemSlot && itemSlot.itemId === 'zasalamel_scythe'
-        );
-        
-        if (!hasZasalamelScythe) return;
-        
-        // Calculate healing amount (50% of damage dealt)
-        const healingAmount = Math.floor(damage * 0.5);
-        
-        if (healingAmount <= 0) return;
-        
-        // Apply healing to the caster
-        const currentHp = caster.stats.currentHp || 0;
-        const maxHp = caster.stats.maxHp || caster.stats.hp || 100;
-        
-        if (currentHp >= maxHp) {
-            console.log(`[ZasalamelScythe] ${caster.name} already at full HP`);
-            return;
-        }
-        
-        const actualHealing = Math.min(healingAmount, maxHp - currentHp);
-        caster.stats.currentHp = Math.min(maxHp, currentHp + actualHealing);
-        
-        // Log the healing
-        const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
-        log(`⚰️ ${caster.name}'s Zasalamel Scythe restores ${actualHealing} HP from Q ability damage!`, 'heal');
-        
-        // Trigger healing animation if available
-        if (window.gameManager && window.gameManager.uiManager) {
-            window.gameManager.uiManager.triggerHealingAnimation(caster, 'restore', actualHealing);
-        }
-        
-        // Update character UI
-        if (typeof updateCharacterUI === 'function') {
-            updateCharacterUI(caster);
-        }
-        
-        console.log(`[ZasalamelScythe] ${caster.name} healed for ${actualHealing} HP (${damage} damage * 50%)`);
-    }
-
-    destroy() {
-        document.removeEventListener('character:damage-dealt', this.boundOnDamageDealt);
-        console.log('[ZasalamelScythe] Handler destroyed');
-    }
-}
-
-// Shinnok's Dark Magic Bubble start-of-game buff handler
-class ShinnoksDarkMagicBubbleHandler {
-    constructor() {
-        this.initialize();
-    }
-
-    initialize() {
-        // Listen for game start events to apply the permanent buff
-        document.addEventListener('game:start', this.onGameStart.bind(this));
-        document.addEventListener('character:initialized', this.onCharacterInitialized.bind(this));
-        document.addEventListener('character:items-applied', this.onCharacterItemsApplied.bind(this));
-        console.log('[ShinnoksDarkMagicBubble] Handler initialized - listening for game start and item application');
-    }
-
-    onGameStart(event) {
-        console.log('[ShinnoksDarkMagicBubble] Game started, checking for items...');
-        this.applyDarkMagicBuffs();
-    }
-
-    onCharacterItemsApplied(event) {
-        if (event.detail && event.detail.character) {
-            this.applyDarkMagicBuffToCharacter(event.detail.character);
-        }
-    }
-
-    onCharacterInitialized(event) {
-        if (event.detail && event.detail.character) {
-            // Delay to ensure items are loaded
-            setTimeout(() => {
-                this.applyDarkMagicBuffToCharacter(event.detail.character);
-            }, 100);
-        }
-    }
-
-    applyDarkMagicBuffs() {
-        // Check all characters for the item
-        if (window.gameManager && window.gameManager.gameState) {
-            const allCharacters = [
-                ...(window.gameManager.gameState.playerCharacters || []),
-                ...(window.gameManager.gameState.aiCharacters || [])
-            ];
-            
-            allCharacters.forEach(character => {
-                this.applyDarkMagicBuffToCharacter(character);
-            });
-        }
-    }
-
-    applyDarkMagicBuffToCharacter(character) {
-        if (!character) return;
-        
-        // Check if character has Shinnok's Dark Magic Bubble
-        let hasItem = false;
-        
-        // Check in character inventory
-        if (window.CharacterInventories) {
-            const inventory = window.CharacterInventories.get(character.id);
-            if (inventory) {
-                const items = inventory.getAllItems();
-                hasItem = items.some(slot => slot && slot.itemId === 'shinnoks_dark_magic_bubble');
-            }
-        }
-        
-        if (!hasItem) return;
-        
-        // Check if buff already applied
-        const existingBuff = character.buffs?.find(b => b.id === 'shinnoks_dark_magic');
-        if (existingBuff) {
-            console.log(`[ShinnoksDarkMagicBubble] ${character.name} already has Dark Magic buff`);
-            return;
-        }
-        
-        // Apply permanent buff that gives +2 magical damage every turn
-        const darkMagicBuff = {
-            id: 'shinnoks_dark_magic',
-            name: "Shinnok's Dark Magic",
-            icon: '🔮',
-            duration: -1, // Permanent
-            isDebuff: false,
-            isPermanent: true,
-            source: "Shinnok's Dark Magic Bubble",
-            description: 'Grants +2 magical damage every turn. This effect stacks.',
-            
-            onTurnStart: function(character) {
-                // Increase magical damage by 2
-                if (!character.stats.magicalDamage) {
-                    character.stats.magicalDamage = 0;
-                }
-                character.stats.magicalDamage += 2;
-                
-                // Also update base stats for persistence
-                if (!character.baseStats.magicalDamage) {
-                    character.baseStats.magicalDamage = 0;
-                }
-                character.baseStats.magicalDamage += 2;
-                
-                if (window.gameManager) {
-                    window.gameManager.addLogEntry(
-                        `🔮 ${character.name}'s Dark Magic increases magical damage by 2! (Total: ${character.stats.magicalDamage})`,
-                        'buff'
-                    );
-                }
-                
-                console.log(`[ShinnoksDarkMagicBubble] ${character.name} gained +2 magical damage (Total: ${character.stats.magicalDamage})`);
-            }
-        };
-        
-        character.addBuff(darkMagicBuff, character);
-        console.log(`[ShinnoksDarkMagicBubble] Applied Dark Magic buff to ${character.name}`);
-    }
-}
-
-// Global debug and test functions for Triden's Vow
-window.debugTridensVow = function() {
-    console.log('[Triden\'s Vow Debug] Current state:');
-    console.log('- Handler available:', !!window.tridensVowHandler);
-    console.log('- Character with item:', window.gameManager?.gameState?.playerCharacters?.find(c => 
-        window.tridensVowHandler?.hasItem(c)));
-};
-
-window.testTridensVowEffect = function(characterName = 'Atlantean Kagome') {
-    const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
-    if (!character) {
-        console.log('[Triden\'s Vow Test] Character not found:', characterName);
-        return;
-    }
-    
-    if (!window.tridensVowHandler) {
-        console.log('[Triden\'s Vow Test] Handler not available');
-        return;
-    }
-    
-    console.log('[Triden\'s Vow Test] Testing effect for:', character.name);
-    const result = window.tridensVowHandler.onAbilityUsed(character, { name: 'Test Ability', id: 'test' });
-    console.log('[Triden\'s Vow Test] Result:', result);
-    return result;
-};
-
-window.testTridensVowGuaranteed = function(characterName = 'Atlantean Kagome') {
-    const character = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
-    if (!character || !window.tridensVowHandler) {
-        console.log('[Triden\'s Vow Test] Character or handler not available');
-        return;
-    }
-    
-    // Temporarily override Math.random to guarantee activation
-    const originalRandom = Math.random;
-    Math.random = () => 0.1; // Always roll low enough to activate
-    
-    console.log('[Triden\'s Vow Test] Testing with guaranteed activation...');
-    const result = window.tridensVowHandler.onAbilityUsed(character, { name: 'Test Ability', id: 'test' });
-    
-    // Restore original Math.random
-    Math.random = originalRandom;
-    
-    console.log('[Triden\'s Vow Test] Guaranteed test result:', result);
-    return result;
-};
-
-window.giveTridensVow = function(characterName = 'Atlantean Kagome') {
-    console.log('=== GIVING TRIDEN\'S VOW TO CHARACTER ===');
-    
-    const foundCharacter = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
-    if (!foundCharacter) {
-        console.log('[Triden\'s Vow] Character not found:', characterName);
-        return;
-    }
-    
-    const inventory = window.CharacterInventories?.get(foundCharacter.id);
-    if (!inventory) {
-        console.log('[Triden\'s Vow] No inventory found for character');
-        return;
-    }
-    
-    const success = inventory.addItem('tridens_vow', 1);
-    console.log(`[Triden's Vow] Added Triden's Vow to ${characterName}'s inventory:`, success);
-};
-
-// Debug function to give Ice Shard to a character
-window.giveIceShard = function(characterName = 'Atlantean Kagome') {
-    console.log('=== GIVING ICE SHARD TO CHARACTER ===');
-    
-    const foundCharacter = window.gameManager?.gameState?.playerCharacters?.find(c => c.name === characterName);
-    if (!foundCharacter) {
-        console.error(`Character "${characterName}" not found. Available characters:`, 
-            window.gameManager?.gameState?.playerCharacters?.map(c => c.name) || 'No characters found');
-        return;
-    }
-    
-    const inventory = window.CharacterInventories?.get(foundCharacter.id);
-    if (!inventory) {
-        console.error(`No inventory found for character ${foundCharacter.name}`);
-        return;
-    }
-    
-    const success = inventory.addItem('ice_shard', 1);
-    console.log(`[Ice Shard] Added Ice Shard to ${characterName}'s inventory:`, success);
-    
-    // Check if item was added
-    const items = inventory.getAllItems();
-    console.log(`[Ice Shard] Character inventory now contains:`, items);
-};
-
-window.testIceShard = function() {
-    console.log('=== TESTING ICE SHARD ITEM ===');
-    
-    // Check if ItemRegistry has the ice shard
-    const iceShard = window.ItemRegistry?.getItem('ice_shard');
-    if (iceShard) {
-        console.log('[Ice Shard] Found in ItemRegistry:', iceShard);
-        console.log('[Ice Shard] Properties:', {
-            id: iceShard.id,
-            name: iceShard.name,
-            isConsumable: iceShard.isConsumable,
-            needsTarget: iceShard.needsTarget,
-            targetType: iceShard.targetType,
-            cooldownTurns: iceShard.cooldownTurns
-        });
-    } else {
-        console.error('[Ice Shard] NOT found in ItemRegistry');
-    }
-    
-    // List all items in registry
-    const allItems = window.ItemRegistry?.getAllItems();
-    console.log('[Ice Shard] All items in registry:', allItems?.map(item => item.id) || 'No items');
-};
-
-console.log('Ice Shard debug functions loaded:');
-console.log('- testIceShard() - Test if Ice Shard is properly loaded');
-console.log('- giveIceShard("Character Name") - Give Ice Shard to a character');

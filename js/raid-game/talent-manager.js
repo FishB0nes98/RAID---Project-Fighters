@@ -1678,6 +1678,70 @@ class TalentManager {
     }
 
     /**
+     * Remove visual indicator for Butterfly Protection
+     */
+    removeButterflyProtectionIndicator(character) {
+        // Use the ability file function if available
+        if (typeof window.removeButterflyProtectionVisuals === 'function') {
+            window.removeButterflyProtectionVisuals(character);
+        } else {
+            // Fallback implementation
+            const possibleIds = [
+                `character-${character.instanceId}`,
+                `character-${character.id}`,
+                `character-${character.instanceId || character.id}`,
+                `player-character-${character.id}`,
+                `ally-character-${character.id}`
+            ];
+            
+            let charElement = null;
+            for (const id of possibleIds) {
+                charElement = document.getElementById(id);
+                if (charElement) break;
+            }
+            
+            if (!charElement) return;
+            
+            const indicator = charElement.querySelector('.butterfly-protection-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+    }
+
+    /**
+     * Remove visual indicator for Blade Mastery
+     */
+    removeBladeMasteryIndicator(character) {
+        // Use the ability file function if available
+        if (typeof window.removeBladeMasteryVisuals === 'function') {
+            window.removeBladeMasteryVisuals(character);
+        } else {
+            // Fallback implementation
+            const possibleIds = [
+                `character-${character.instanceId}`,
+                `character-${character.id}`,
+                `character-${character.instanceId || character.id}`,
+                `player-character-${character.id}`,
+                `ally-character-${character.id}`
+            ];
+            
+            let charElement = null;
+            for (const id of possibleIds) {
+                charElement = document.getElementById(id);
+                if (charElement) break;
+            }
+            
+            if (!charElement) return;
+            
+            const indicator = charElement.querySelector('.blade-mastery-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+    }
+
+    /**
      * Remove visual indicator for Deadly Power
      */
     removeDeadlyPowerIndicator(character) {

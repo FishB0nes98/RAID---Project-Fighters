@@ -559,7 +559,7 @@
             "image": "Loading Screen/Crazy Farmer.png",
             "rarity": "epic",
             "type": "fighter",
-            "tags": ["Enemy", "Farmer", "Support"],
+            "tags": ["Enemy", "Support"],
             "description": "An unhinged farmer who can boost his stats at great cost and shares healing with allies through his Healing Pact passive.",
             "playerunlocked": false,
             "isHidden": true,

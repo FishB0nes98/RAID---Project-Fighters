@@ -1,2587 +1,745 @@
-/* Farmer Nina-specific CSS */
+/* =============================================================================
+   FARMER NINA - SNIPER/STEALTH SPECIALIST - COMPLETE VISUAL OVERHAUL
+   Theme: Tactical precision, stealth operations, sniper warfare
+   Color Palette: Military greens, gunmetal grays, muzzle flash oranges, scope blues
+============================================================================= */
 
-/* Passive VFX */
-.nina-passive-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 100;
-    animation: nina-passive-pulse 1s ease-out;
-}
-
-.nina-passive-symbol {
-    font-size: 3em;
-    color: gold;
-    text-shadow: 0 0 10px gold, 0 0 20px gold;
-    animation: nina-passive-float 1s ease-out;
-}
-
-@keyframes nina-passive-pulse {
-    0% {
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0;
-    }
-}
-
-@keyframes nina-passive-float {
-    0% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-20px);
-    }
-    100% {
-        transform: translateY(-40px);
-        opacity: 0;
-    }
-}
-
-/* Special styling for Farmer Nina's buff icons - to show they're amplified */
-.character[id^="character-nina"] .buff-icon {
+/* === BASE CHARACTER STYLING === */
+.character[id*="farmer_nina"] {
     position: relative;
     overflow: visible;
+    filter: drop-shadow(0 0 8px rgba(76, 128, 76, 0.3));
 }
 
-.character[id^="character-nina"] .buff-icon::after {
-    content: "×2";
-    position: absolute;
-    bottom: -5px;
-    right: -5px;
-    background-color: gold;
-    color: black;
-    font-size: 0.7em;
-    font-weight: bold;
-    width: 1.5em;
-    height: 1.5em;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0 5px gold;
-    animation: nina-buff-pulse 2s infinite;
-}
 
-@keyframes nina-buff-pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 5px gold;
-    }
-    50% {
-        transform: scale(1.2);
-        box-shadow: 0 0 8px gold, 0 0 12px yellow;
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 5px gold;
-    }
-}
-
-/* Sniper Shot VFX */
-.sniper-shot-tracer {
-    position: fixed;
-    height: 2px;
-    background: linear-gradient(to right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1));
-    transform-origin: left center;
-    z-index: 100;
-    animation: tracer-fade 0.3s linear;
-}
-
-@keyframes tracer-fade {
-    0% {
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-.sniper-shot-impact {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(255, 0, 0, 0) 70%);
-    transform: translate(-50%, -50%);
-    z-index: 90;
-    animation: impact-expand 0.6s ease-out;
-}
-
-@keyframes impact-expand {
-    0% {
-        transform: translate(-50%, -50%) scale(0.2);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(2);
-        opacity: 0;
-    }
-}
-
-/* Hiding VFX */
-.hiding-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 90;
-    animation: hiding-fade 1s ease-out;
-}
-
-.hiding-cloak {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0, 100, 255, 0.3) 0%, rgba(0, 50, 150, 0) 70%);
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 100, 255, 0.5);
-    animation: hiding-cloak-pulse 1s ease-out;
-}
-
-/* Special styling for characters that are hiding */
-.character[data-is-hiding="true"] {
-    pointer-events: auto !important; /* Keep clickable for player */
-    position: relative;
-}
-
-/* No-targeting indicator */
-.character[data-is-hiding="true"]::before {
-    content: "";
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30px;
-    height: 30px;
-    background-image: url('Icons/untargetable.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    z-index: 120;
-    filter: drop-shadow(0 0 3px rgba(0, 100, 255, 0.7));
-    animation: hiding-untargetable-float 2s infinite ease-in-out;
-}
-
-@keyframes hiding-untargetable-float {
-    0% {
-        transform: translateX(-50%) translateY(0);
-    }
-    50% {
-        transform: translateX(-50%) translateY(-5px);
-    }
-    100% {
-        transform: translateX(-50%) translateY(0);
-    }
-}
-
-.character[data-is-hiding="true"]:hover::after {
-    content: "Hiding";
+/* === PASSIVE: EVASIVE ADAPTABILITY === */
+.nina-passive-dodge-boost {
     position: absolute;
     top: -30px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 100, 255, 0.8);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(76, 128, 76, 0.9), rgba(46, 98, 46, 0.9));
+    border: 2px solid #4c804c;
+    border-radius: 20px;
+    padding: 5px 12px;
     font-size: 0.8em;
+    font-weight: bold;
+    color: #e8f4e8;
     white-space: nowrap;
-    z-index: 120;
+    z-index: 150;
+    animation: nina-dodge-boost-appear 0.6s ease-out;
+    box-shadow: 0 0 15px rgba(76, 128, 76, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
-@keyframes hiding-fade {
+@keyframes nina-dodge-boost-appear {
     0% {
         opacity: 0;
+        transform: translateX(-50%) translateY(-10px) scale(0.8);
     }
     50% {
         opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
     }
     100% {
-        opacity: 0;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
     }
 }
 
-@keyframes hiding-cloak-pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0;
-    }
-}
-
-/* Special styling for the hiding buff icon */
-.character[id^="character-nina"] .buff-icon[data-buff-id="nina_w_hiding_buff"] {
-    background-image: url('../Icons/hiding.png');
-    background-size: contain;
-    position: relative;
-    filter: drop-shadow(0 0 3px rgba(0, 100, 255, 0.7));
-}
-
-.character[id^="character-nina"] .buff-icon[data-buff-id="nina_w_hiding_buff"]::before {
-    content: "";
+.nina-buff-amplifier {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0, 100, 255, 0.5) 0%, rgba(0, 50, 150, 0) 70%);
+    bottom: -10px;
+    right: -10px;
+    background: radial-gradient(circle, #ffd700, #ffb347);
+    border: 2px solid #ff8c00;
     border-radius: 50%;
-    animation: hiding-icon-pulse 2s infinite;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: #333;
+    z-index: 160;
+    animation: nina-buff-pulse 2s infinite;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
 }
 
-@keyframes hiding-icon-pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.5;
+@keyframes nina-buff-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
     }
     50% {
-        transform: scale(1.2);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(0.8);
-        opacity: 0.5;
+        transform: scale(1.15);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 30px rgba(255, 140, 0, 0.6);
     }
 }
 
-/* Target Lock VFX */
-.target-lock-vfx {
+/* === Q ABILITY: SNIPER SHOT === */
+.sniper-shot-setup {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     pointer-events: none;
-    z-index: 90;
+    z-index: 200;
+}
+
+.sniper-scope-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, transparent 120px, rgba(0, 0, 0, 0.8) 140px);
+    z-index: 300;
+    animation: sniper-scope-zoom 1.2s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes sniper-scope-zoom {
+    0% {
+        opacity: 0;
+        background: radial-gradient(circle at center, transparent 200px, rgba(0, 0, 0, 0) 220px);
+    }
+    30% {
+        opacity: 1;
+        background: radial-gradient(circle at center, transparent 120px, rgba(0, 0, 0, 0.8) 140px);
+    }
+    70% {
+        opacity: 1;
+        background: radial-gradient(circle at center, transparent 120px, rgba(0, 0, 0, 0.8) 140px);
+    }
+    100% {
+        opacity: 0;
+        background: radial-gradient(circle at center, transparent 120px, rgba(0, 0, 0, 0.8) 140px);
+    }
+}
+
+.sniper-crosshair {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 2px solid #00ff88;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: sniper-crosshair-lock 1s ease-in-out;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.8), inset 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.sniper-crosshair::before,
+.sniper-crosshair::after {
+    content: '';
+    position: absolute;
+    background: #00ff88;
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+}
+
+.sniper-crosshair::before {
+    width: 2px;
+    height: 20px;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.sniper-crosshair::after {
+    width: 20px;
+    height: 2px;
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+}
+
+@keyframes sniper-crosshair-lock {
+    0% {
+        transform: translate(-50%, -50%) scale(2) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.sniper-muzzle-flash {
+    position: absolute;
+    width: 80px;
+    height: 40px;
+    background: radial-gradient(ellipse, #ffff88, #ff8800, transparent);
+    top: 40%;
+    left: -40px;
+    transform: translateY(-50%);
+    animation: sniper-muzzle-flash 0.15s ease-out;
+    z-index: 250;
+}
+
+@keyframes sniper-muzzle-flash {
+    0% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.3);
+    }
+}
+
+.sniper-bullet-trail {
+    position: absolute;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ffff88, #ff4400, transparent);
+    z-index: 250;
+    animation: sniper-bullet-travel 0.3s ease-out;
+    box-shadow: 0 0 8px rgba(255, 68, 0, 0.8);
+}
+
+@keyframes sniper-bullet-travel {
+    0% {
+        opacity: 1;
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
+}
+
+.sniper-crit-buff-indicator {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ff6b35, #ff8c42);
+    border: 2px solid #ff4500;
+    border-radius: 15px;
+    padding: 4px 10px;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    animation: crit-buff-appear 0.8s ease-out;
+    z-index: 170;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+}
+
+@keyframes crit-buff-appear {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px) scale(0.5);
+    }
+    60% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(5px) scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+/* === W ABILITY: HIDING (STEALTH) === */
+.nina-stealth-activation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 30%, rgba(0, 0, 0, 0.4) 50%, transparent 70%);
+    animation: stealth-engage 1.5s ease-in-out;
+    z-index: 180;
+    pointer-events: none;
+}
+
+@keyframes stealth-engage {
+    0% {
+        opacity: 0;
+        transform: scale(2);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+}
+
+.nina-stealth-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 40%, rgba(100, 149, 237, 0.2) 50%, transparent 60%);
+    animation: stealth-shimmer 3s infinite linear;
+    z-index: 160;
+    pointer-events: none;
+}
+
+@keyframes stealth-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.nina-stealth-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150;
+    pointer-events: none;
+}
+
+.stealth-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #87ceeb, transparent);
+    border-radius: 50%;
+    animation: stealth-particle-float 2s infinite ease-in-out;
+}
+
+@keyframes stealth-particle-float {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(-30px) scale(1);
+    }
+}
+
+.nina-regeneration-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    border: 3px solid #32cd32;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: regen-pulse 1.5s infinite ease-out;
+    z-index: 140;
+    pointer-events: none;
+}
+
+@keyframes regen-pulse {
+    0% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+/* === E ABILITY: TARGET LOCK === */
+.target-lock-scanning {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #ff0040;
+    border-radius: 8px;
+    animation: target-lock-scan 2s ease-in-out;
+    z-index: 190;
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(255, 0, 64, 0.6), inset 0 0 20px rgba(255, 0, 64, 0.3);
+}
+
+@keyframes target-lock-scan {
+    0% {
+        opacity: 0;
+        border-color: #ff0040;
+        transform: scale(1.5);
+    }
+    25% {
+        opacity: 1;
+        border-color: #ff6040;
+        transform: scale(1.2);
+    }
+    50% {
+        opacity: 1;
+        border-color: #ff0040;
+        transform: scale(1);
+    }
+    75% {
+        opacity: 1;
+        border-color: #ff6040;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 0.8;
+        border-color: #ff0040;
+        transform: scale(1);
+    }
 }
 
 .target-lock-reticle {
-    position: relative;
+    position: absolute;
     width: 60px;
     height: 60px;
-    border: 2px solid rgba(255, 0, 0, 0.8);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #ff0040;
     border-radius: 50%;
-    animation: reticle-lock 0.5s ease-out;
+    animation: target-lock-stabilize 1.5s ease-out;
+    z-index: 200;
+    pointer-events: none;
 }
 
 .target-lock-reticle::before,
 .target-lock-reticle::after {
-    content: "";
+    content: '';
     position: absolute;
-    background-color: rgba(255, 0, 0, 0.8);
+    background: #ff0040;
+    box-shadow: 0 0 6px rgba(255, 0, 64, 0.8);
 }
 
 .target-lock-reticle::before {
-    top: 50%;
-    left: -10px;
-    right: -10px;
-    height: 2px;
-    transform: translateY(-50%);
+    width: 2px;
+    height: 16px;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .target-lock-reticle::after {
-    left: 50%;
-    top: -10px;
-    bottom: -10px;
-    width: 2px;
-    transform: translateX(-50%);
+    width: 16px;
+    height: 2px;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
 }
 
-@keyframes reticle-lock {
+@keyframes target-lock-stabilize {
     0% {
-        transform: scale(2);
+        transform: translate(-50%, -50%) scale(0.3) rotate(180deg);
         opacity: 0;
-        border-color: rgba(255, 0, 0, 0.3);
     }
     50% {
-        transform: scale(1.2);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1.3) rotate(90deg);
         opacity: 1;
-        border-color: rgba(255, 0, 0, 0.8);
-    }
-}
-
-.target-lock-icon {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30px;
-    height: 30px;
-    background-image: url('../Icons/target-lock.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.7));
-    animation: target-lock-pulse 2s infinite ease-in-out;
-    z-index: 110;
-}
-
-.target-lock-icon::before {
-    content: "LOCKED";
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: red;
-    font-size: 0.7em;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-@keyframes target-lock-pulse {
-    0% {
-        transform: translateX(-50%) scale(1);
-        filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.7));
-    }
-    50% {
-        transform: translateX(-50%) scale(1.2);
-        filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.9));
     }
     100% {
-        transform: translateX(-50%) scale(1);
-        filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.7));
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
     }
 }
 
-/* Piercing Shot VFX */
-.piercing-shot-tracer {
-    position: fixed;
-    height: 3px;
-    background: linear-gradient(to right, rgba(255, 0, 0, 0.3), rgba(255, 100, 0, 0.8));
-    transform-origin: left center;
-    z-index: 1000;
-    animation: piercing-shot-tracer 0.3s forwards;
-    pointer-events: none;
-    border-radius: 1px;
-    box-shadow: 0 0 5px rgba(255, 100, 0, 0.5);
-}
-
-@keyframes piercing-shot-tracer {
-    0% { opacity: 0.3; height: 1px; }
-    50% { opacity: 1; height: 3px; }
-    100% { opacity: 0; height: 2px; }
-}
-
-.piercing-shot-impact {
+.target-lock-beam {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 100, 0, 0.8) 0%, rgba(255, 100, 0, 0) 70%);
-    transform: translate(-50%, -50%);
-    z-index: 90;
-    animation: piercing-shot-impact 0.6s ease-out;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #ff0040, #ff6040, #ff0040, transparent);
+    z-index: 180;
+    animation: target-lock-beam-sweep 1s ease-in-out;
+    box-shadow: 0 0 8px rgba(255, 0, 64, 0.8);
 }
 
-@keyframes piercing-shot-impact {
-    0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+@keyframes target-lock-beam-sweep {
+    0% {
+        opacity: 0;
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
 }
 
-/* Armor Break Text Effect */
-.armor-break-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ff5500;
-    font-weight: bold;
-    font-size: 1.5em;
-    text-shadow: 0 0 5px #ff5500, 0 0 10px #ff5500;
-    white-space: nowrap;
-    z-index: 110;
-    animation: armor-break-text 1s ease-out;
-}
-
-@keyframes armor-break-text {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    20% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-}
-
-/* Deadly Precision Talent Visual Effects */
-.deadly-precision-vfx {
+.target-lock-debuff-indicator {
     position: absolute;
     top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    pointer-events: none;
-    z-index: 20;
-}
-
-.deadly-precision-text {
-    background: linear-gradient(135deg, #ff3838, #ff0000);
+    right: -25px;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #ff0040, #cc0033);
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
     color: white;
     font-weight: bold;
-    font-size: 14px;
-    padding: 4px 10px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7), 
-                inset 0 0 5px rgba(255, 255, 255, 0.5);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-    animation: deadly-precision-pulse 2s infinite;
+    animation: target-lock-indicator-pulse 2s infinite;
+    z-index: 170;
+    box-shadow: 0 0 15px rgba(255, 0, 64, 0.8);
 }
 
-@keyframes deadly-precision-pulse {
-    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.7), inset 0 0 5px rgba(255, 255, 255, 0.5); }
-    50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.7); }
-    100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.7), inset 0 0 5px rgba(255, 255, 255, 0.5); }
+@keyframes target-lock-indicator-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(255, 0, 64, 0.8);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(255, 0, 64, 1), 0 0 35px rgba(255, 0, 64, 0.6);
+    }
 }
 
-/* Doubled Damage Flash Effect */
-.doubled-damage-flash {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, #ff3838, #ff0000);
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 5px 12px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.7), 
-                inset 0 0 8px rgba(255, 255, 255, 0.5);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-    z-index: 100;
-    animation: doubled-damage-flash 1s forwards;
-    pointer-events: none;
-}
-
-@keyframes doubled-damage-flash {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-}
-
-/* Add a subtle glow effect to Nina's character when Deadly Precision is active */
-.character[id^="character-farmer_nina"][data-has-deadly-precision="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-deadly-precision="true"]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
-    pointer-events: none;
-    z-index: -1;
-    animation: deadly-precision-glow 3s infinite;
-}
-
-@keyframes deadly-precision-glow {
-    0% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
-    50% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.7); }
-    100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
-}
-
-/* Make Nina's damage VFX more impactful when Deadly Precision is active */
-.character[id^="character-farmer_nina"][data-has-deadly-precision="true"] .damage-vfx {
-    font-size: 24px;
-    text-shadow: 0 0 10px #ff0000, 0 0 15px #ff0000;
-}
-
-.character[id^="character-farmer_nina"][data-has-deadly-precision="true"] .damage-vfx.critical {
-    font-size: 28px;
-    text-shadow: 0 0 10px #ff0000, 0 0 15px #ff0000, 0 0 20px #ff0000;
-}
-
-/* Add these new styles for Shadow Stance talent effect */
-
-.shadow-stance-vfx {
+/* === R ABILITY: PIERCING SHOT === */
+.piercing-shot-charge {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background: radial-gradient(circle, transparent 40%, rgba(255, 165, 0, 0.3) 60%, transparent 80%);
+    animation: piercing-charge 2s ease-in-out;
+    z-index: 190;
     pointer-events: none;
-    z-index: 5;
-    animation: shadow-stance-aura 2s ease-out forwards;
 }
 
-@keyframes shadow-stance-aura {
+@keyframes piercing-charge {
     0% {
-        background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 70%);
-        box-shadow: 0 0 15px 5px rgba(70, 70, 100, 0.5);
         opacity: 0;
+        transform: scale(2);
     }
-    20% {
-        background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 70%);
-        box-shadow: 0 0 20px 10px rgba(70, 70, 100, 0.7);
+    50% {
         opacity: 1;
-    }
-    80% {
-        background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 70%);
-        box-shadow: 0 0 15px 5px rgba(70, 70, 100, 0.5);
-        opacity: 0.8;
+        transform: scale(1);
     }
     100% {
-        background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 70%);
-        box-shadow: 0 0 0 0 rgba(70, 70, 100, 0);
         opacity: 0;
+        transform: scale(0.5);
     }
 }
 
-.shadow-stance-text {
-    color: #c8d8ff;
-    font-size: 1.6rem;
-    font-weight: bold;
-    text-shadow: 0 0 8px #000, 0 0 12px #4466cc;
-    animation: shadow-stance-text 2s ease-out;
-    opacity: 0;
-    transform: translateY(-50px);
+.piercing-shot-energy {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 4px solid #ffa500;
+    border-radius: 50%;
+    animation: piercing-energy-build 1.8s ease-in-out;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 0 30px rgba(255, 165, 0, 0.8), inset 0 0 30px rgba(255, 165, 0, 0.4);
 }
 
-@keyframes shadow-stance-text {
+@keyframes piercing-energy-build {
     0% {
         opacity: 0;
-        transform: translateY(20px) scale(0.8);
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        border-color: #ffa500;
     }
     30% {
         opacity: 1;
-        transform: translateY(-10px) scale(1.2);
+        transform: translate(-50%, -50%) scale(0.7) rotate(90deg);
+        border-color: #ff6500;
     }
     70% {
         opacity: 1;
-        transform: translateY(-15px) scale(1);
+        transform: translate(-50%, -50%) scale(1.1) rotate(270deg);
+        border-color: #ff4500;
     }
     100% {
         opacity: 0;
-        transform: translateY(-40px) scale(0.8);
+        transform: translate(-50%, -50%) scale(1.5) rotate(360deg);
+        border-color: #ff0000;
     }
 }
 
-/* Add styles for Mass Targeting VFX */
-.target-lock-vfx.aoe {
-    animation: target-lock-aoe-pulse 1.2s ease-out;
-    transform-origin: center;
-}
-
-@keyframes target-lock-aoe-pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-}
-
-.character[id^="character-farmer_nina"][data-has-shadow-stance="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-shadow-stance="true"]::after {
-    content: '';
+.piercing-shot-projectile {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(20,30,50,0.2) 0%, rgba(0,0,0,0) 70%);
-    box-shadow: 0 0 15px 5px rgba(70, 70, 100, 0.3);
-    animation: shadow-stance-persistent 3s infinite alternate;
-    pointer-events: none;
-    z-index: 1;
-}
-
-@keyframes shadow-stance-persistent {
-    0% {
-        opacity: 0.5;
-        box-shadow: 0 0 15px 5px rgba(70, 70, 100, 0.3);
-    }
-    100% {
-        opacity: 0.7;
-        box-shadow: 0 0 20px 8px rgba(70, 70, 100, 0.5);
-    }
-}
-
-/* Piercing Rounds Talent Effects */
-.piercing-shot-tracer {
-    position: fixed;
-    height: 3px;
-    background: linear-gradient(to right, rgba(255, 0, 0, 0.3), rgba(255, 100, 0, 0.8));
-    transform-origin: left center;
-    z-index: 1000;
-    animation: piercing-shot-tracer 0.3s forwards;
-    pointer-events: none;
-    border-radius: 1px;
-    box-shadow: 0 0 5px rgba(255, 100, 0, 0.5);
-}
-
-@keyframes piercing-shot-tracer {
-    0% { opacity: 0.3; height: 1px; }
-    50% { opacity: 1; height: 3px; }
-    100% { opacity: 0; height: 2px; }
-}
-
-/* Enhanced Ammunition Talent VFX */
-.enhanced-ammo-flash {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 165, 0, 0.8);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-    box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
-    z-index: 100;
-    animation: enhanced-ammo-flash 1s forwards;
-    pointer-events: none;
-}
-
-@keyframes enhanced-ammo-flash {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-}
-
-/* Talent indicator on ability icon */
-.character[id^="character-farmer_nina"] .ability:first-child::after {
-    content: '';
-    display: none;
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    background-color: rgba(255, 165, 0, 0.9);
-    box-shadow: 0 0 5px rgba(255, 165, 0, 0.7);
-    z-index: 5;
-}
-
-/* When Enhanced Ammunition is active */
-.character[id^="character-farmer_nina"][data-has-enhanced-ammo="true"] .ability:first-child::after {
-    display: block;
-    content: '⚡';
-    font-size: 10px;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* When Piercing Rounds is active */
-.character[id^="character-farmer_nina"][data-has-piercing-rounds="true"] .ability:first-child::after {
-    display: block;
-    content: '⚡';
-    font-size: 10px;
-    color: white;
-    background-color: rgba(255, 0, 0, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Bloodthirst Talent Visual Effects */
-.bloodthirst-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 90;
-    animation: bloodthirst-pulse 2s ease-out;
-}
-
-.bloodthirst-symbol {
-    color: #ff0000;
-    font-size: 2em;
-    font-weight: bold;
-    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
-    animation: bloodthirst-float 2s ease-out;
-}
-
-@keyframes bloodthirst-pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0;
-    }
-}
-
-@keyframes bloodthirst-float {
-    0% {
-        transform: translateY(0px);
-        opacity: 0;
-    }
-    50% {
-        transform: translateY(-20px);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-40px);
-        opacity: 0;
-    }
-}
-
-/* Character with Bloodthirst talent */
-.character[id^="character-farmer_nina"][data-has-bloodthirst="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-bloodthirst="true"]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
-    pointer-events: none;
-    z-index: -1;
-    animation: bloodthirst-glow 4s infinite alternate;
-}
-
-@keyframes bloodthirst-glow {
-    0% {
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
-    }
-    100% {
-        box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
-    }
-}
-
-/* Lifesteal VFX */
-.lifesteal-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 90;
-}
-
-.lifesteal-particles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.lifesteal-particles::before,
-.lifesteal-particles::after {
-    content: "";
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: rgba(255, 0, 0, 0.7);
-    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-}
-
-.lifesteal-particles::before {
-    top: 50%;
-    left: 50%;
-    animation: lifesteal-particle-flow 1s ease-out;
-}
-
-.lifesteal-particles::after {
-    top: 30%;
-    left: 70%;
-    animation: lifesteal-particle-flow 1.2s ease-out;
-}
-
-@keyframes lifesteal-particle-flow {
-    0% {
-        transform: translate(0, 0) scale(0.5);
-        opacity: 0;
-    }
-    50% {
-        transform: translate(-20px, -20px) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-40px, -40px) scale(0.5);
-        opacity: 0;
-    }
-}
-
-/* Deadeye Talent Visual Effects */
-.deadeye-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 90;
-    animation: deadeye-pulse 2s ease-out;
-}
-
-.deadeye-symbol {
-    color: #ffcc00;
-    font-size: 2em;
-    font-weight: bold;
-    text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00;
-    animation: deadeye-float 2s ease-out;
-}
-
-@keyframes deadeye-pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0;
-    }
-}
-
-@keyframes deadeye-float {
-    0% {
-        transform: translateY(0px);
-        opacity: 0;
-    }
-    50% {
-        transform: translateY(-20px);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-40px);
-        opacity: 0;
-    }
-}
-
-/* Character with Deadeye talent */
-.character[id^="character-farmer_nina"][data-has-deadeye="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-deadeye="true"]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
-    pointer-events: none;
-    z-index: -1;
-    animation: deadeye-glow 4s infinite alternate;
-}
-
-@keyframes deadeye-glow {
-    0% {
-        box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
-    }
-    100% {
-        box-shadow: 0 0 25px rgba(255, 204, 0, 0.5);
-    }
-}
-
-/* Critical hit enhancements for Deadeye */
-.character[id^="character-farmer_nina"][data-has-deadeye="true"] .damage-vfx.critical {
-    font-size: 28px;
-    text-shadow: 0 0 10px #ffcc00, 0 0 15px #ffcc00;
-}
-
-/* Talent indicator on character */
-.character[id^="character-farmer_nina"] .talent-indicators {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    display: flex;
-    gap: 5px;
-    z-index: 10;
-}
-
-.talent-indicator {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 10px;
-    color: white;
-    text-shadow: 0 0 2px black;
-}
-
-.talent-indicator.bloodthirst {
-    background-color: rgba(255, 0, 0, 0.9);
-    box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
-}
-
-.talent-indicator.deadeye {
-    background-color: rgba(255, 204, 0, 0.9);
-    box-shadow: 0 0 5px rgba(255, 204, 0, 0.7);
-}
-
-/* Enhanced Targeting talent effects */
-.character[id^="character-farmer_nina"][data-has-enhanced-targeting="true"] .ability[data-ability-id="farmer_nina_e"]::after {
-    content: '+15%';
-    position: absolute;
-    top: -10px;
-    right: -5px;
-    background-color: rgba(220, 50, 50, 0.9);
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 2px 5px;
-    border-radius: 10px;
-    z-index: 5;
-    pointer-events: none;
-}
-
-/* Target Lock enhanced visual when target is affected */
-.character:has(.debuff-icon[data-debuff-id="farmer_nina_e_target_lock"]) .target-lock-icon::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(255, 50, 50, 0.6) 0%, rgba(255, 50, 50, 0) 70%);
-    animation: enhanced-target-lock-pulse 2s infinite;
-    pointer-events: none;
-    z-index: 1;
-}
-
-@keyframes enhanced-target-lock-pulse {
-    0% { opacity: 0.4; }
-    50% { opacity: 0.8; }
-    100% { opacity: 0.4; }
-}
-
-/* Enhanced target lock application visual effect */
-.enhanced-target-lock-vfx {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.enhanced-target-lock-text {
-    background-color: rgba(220, 50, 50, 0.9);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 14px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 15px rgba(255, 100, 100, 0.8);
-    animation: enhanced-target-lock-text 2s forwards;
-}
-
-@keyframes enhanced-target-lock-text {
-    0% { transform: scale(0.5); opacity: 0; }
-    20% { transform: scale(1.2); opacity: 1; }
-    80% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
-}
-
-/* Tactical Recovery talent effects */
-.character[id^="character-farmer_nina"][data-has-damage-to-mana="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-damage-to-mana="true"]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 5px;
-    border: 2px solid rgba(64, 144, 255, 0.4);
-    box-shadow: 0 0 10px rgba(64, 144, 255, 0.3);
-    pointer-events: none;
-    z-index: 1;
-    animation: tactical-recovery-glow 3s infinite;
-}
-
-@keyframes tactical-recovery-glow {
-    0% { opacity: 0.3; }
-    50% { opacity: 0.7; }
-    100% { opacity: 0.3; }
-}
-
-/* Mana recovery VFX */
-.mana-recovery-vfx {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.mana-recovery-particles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    overflow: visible;
-}
-
-.mana-recovery-particles::before,
-.mana-recovery-particles::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: rgba(64, 144, 255, 0.8);
-    box-shadow: 0 0 10px rgba(64, 144, 255, 0.6);
-    animation: mana-recovery-particle-flow 1.2s ease-out;
-}
-
-.mana-recovery-particles::before {
-    left: 30%;
-    top: 50%;
-}
-
-.mana-recovery-particles::after {
-    left: 70%;
-    top: 40%;
-}
-
-@keyframes mana-recovery-particle-flow {
-    0% {
-        transform: translateY(20px) scale(0.3);
-        opacity: 0;
-    }
-    20% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-    80% {
-        transform: translateY(-60px) scale(0.8);
-        opacity: 0.8;
-    }
-    100% {
-        transform: translateY(-80px) scale(0.3);
-        opacity: 0;
-    }
-}
-
-/* Talent indicator for mana recovery */
-.talent-indicator.damage-to-mana {
-    background-color: rgba(64, 144, 255, 0.8);
-    font-size: 14px;
-}
-
-/* Talent indicator for enhanced targeting */
-.talent-indicator.enhanced-target-lock {
-    background-color: rgba(220, 50, 50, 0.8);
-    font-size: 14px;
-}
-
-/* Combat Reflexes (Critical Dodge) Talent CSS */
-.combat-reflexes-vfx {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    pointer-events: none;
-    animation: combat-reflexes-pulse 2s ease-out;
-}
-
-.combat-reflexes-text {
-    background: linear-gradient(135deg, #ffcc00, #ff9900);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
-    white-space: nowrap;
-}
-
-@keyframes combat-reflexes-pulse {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-}
-
-/* Combat Reflexes Talent Initialization Animation */
-.combat-reflexes-init-vfx {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    pointer-events: none;
-    animation: combat-reflexes-init 2.5s ease-out;
-}
-
-.combat-reflexes-init-text {
-    background: linear-gradient(135deg, #ffcc00, #ff9900);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
-    white-space: nowrap;
-}
-
-@keyframes combat-reflexes-init {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    20% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    80% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-}
-
-/* Survivalist Instinct (Physical Growth) Talent CSS */
-.survivalist-instinct-vfx {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    pointer-events: none;
-    animation: survivalist-instinct-pulse 2s ease-out;
-}
-
-.survivalist-instinct-text {
-    background: linear-gradient(135deg, #ff5e3a, #ff2a6d);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    box-shadow: 0 0 15px rgba(255, 94, 58, 0.6);
-    white-space: nowrap;
-}
-
-@keyframes survivalist-instinct-pulse {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-    }
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-}
-
-/* Survivalist Instinct Talent Initialization Animation */
-.survivalist-instinct-init-vfx {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    pointer-events: none;
-    animation: survivalist-instinct-init 2.5s ease-out;
-}
-
-.survivalist-instinct-init-text {
-    background: linear-gradient(135deg, #ff5e3a, #ff2a6d);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    box-shadow: 0 0 15px rgba(255, 94, 58, 0.6);
-    white-space: nowrap;
-}
-
-@keyframes survivalist-instinct-init {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    20% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    80% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-}
-
-/* Critical hit indicator for Combat Reflexes */
-.critical-dodge-active {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #ffcc00, #ff9900);
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
-    white-space: nowrap;
-    z-index: 50;
-    pointer-events: none;
-}
-
-/* Physical growth stack indicator */
-.physical-growth-stack {
-    position: absolute;
-    bottom: -20px;
-    right: -10px;
-    background: linear-gradient(135deg, #ff5e3a, #ff2a6d);
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(255, 94, 58, 0.6);
-    white-space: nowrap;
-    z-index: 50;
-    pointer-events: none;
-}
-
-/* Critical Power Talent Styles */
-.critical-power-init-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    pointer-events: none;
-    animation: critical-power-init-fade 2.5s ease-out forwards;
-}
-
-.critical-power-init-text {
-    color: #ff5e00;
-    font-size: 22px;
-    font-weight: bold;
-    text-shadow: 0 0 10px #ff8f00, 0 0 20px #ff5e00;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 8px 15px;
-    border-radius: 5px;
-    white-space: nowrap;
-    z-index: 25;
-    animation: critical-power-init-pulse 2.5s ease-out;
-    transform: translateY(-30px);
-}
-
-@keyframes critical-power-init-fade {
-    0% { opacity: 0; }
-    10% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-@keyframes critical-power-init-pulse {
-    0% { transform: translateY(0) scale(0.8); opacity: 0; }
-    15% { transform: translateY(-30px) scale(1.2); opacity: 1; }
-    30% { transform: translateY(-30px) scale(1); opacity: 1; }
-    80% { transform: translateY(-30px) scale(1); opacity: 1; }
-    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
-}
-
-/* Critical Power Activation Effect */
-.critical-power-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    pointer-events: none;
-    animation: critical-power-fade 2s ease-out forwards;
-}
-
-.critical-power-text {
-    color: #ff5e00;
-    font-size: 22px;
-    font-weight: bold;
-    text-shadow: 0 0 10px #ff8f00, 0 0 20px #ff5e00;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 5px 12px;
-    border-radius: 5px;
-    white-space: nowrap;
-    transform: translateY(-20px);
-    animation: critical-power-text-float 2s ease-out;
-}
-
-@keyframes critical-power-fade {
-    0% { opacity: 0; }
-    20% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-@keyframes critical-power-text-float {
-    0% { transform: translateY(0) scale(0.8); opacity: 0; }
-    20% { transform: translateY(-20px) scale(1.1); opacity: 1; }
-    40% { transform: translateY(-25px) scale(1); opacity: 1; }
-    80% { transform: translateY(-35px) scale(1); opacity: 1; }
-    100% { transform: translateY(-50px) scale(0.8); opacity: 0; }
-}
-
-/* Character with Critical Power Talent */
-.character[id^="character-farmer_nina"][data-has-critical-power="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-critical-power="true"]::after {
-    content: "";
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    border-radius: 8px;
-    background: radial-gradient(circle at center, rgba(255, 94, 0, 0.15) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.5;
-    animation: critical-power-glow 3s infinite alternate;
-}
-
-@keyframes critical-power-glow {
-    0% { opacity: 0.2; }
-    100% { opacity: 0.5; }
-}
-
-/* Critical Power Buff Style */
-.character[id^="character-farmer_nina"] .buff-icon[data-buff-id^="critical_power_buff_"] {
-    border-color: #ff5e00;
-    position: relative;
-    overflow: visible;
-}
-
-.character[id^="character-farmer_nina"] .buff-icon[data-buff-id^="critical_power_buff_"]::after {
-    content: "";
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(255, 94, 0, 0.6) 0%, transparent 70%);
-    z-index: -1;
-    animation: critical-power-buff-pulse 1.5s infinite alternate;
-}
-
-@keyframes critical-power-buff-pulse {
-    0% { opacity: 0.3; transform: scale(0.9); }
-    100% { opacity: 0.7; transform: scale(1.1); }
-}
-
-/* Add Critical Power to talent indicators */
-.talent-indicator.critical-power {
-    background-color: #ff5e00;
-    color: #fff;
-}
-
-/* Stack counter for Critical Power buff */
-.critical-power-stack {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #ff5e00;
-    border: 1px solid #fff;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    font-weight: bold;
-    color: white;
-    z-index: 10;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-/* Armor Breach VFX */
-.armor-breach-vfx {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 100;
-    animation: armor-breach-fade 2s forwards;
-}
-
-.armor-breach-text {
-    font-size: 16px;
-    font-weight: bold;
-    color: #ff3c3c;
-    text-shadow: 0 0 4px #000, 0 0 8px #000;
-    animation: armor-breach-text 2s forwards;
-    white-space: nowrap;
-}
-
-@keyframes armor-breach-fade {
-    0% { opacity: 0; }
-    10% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-@keyframes armor-breach-text {
-    0% { transform: scale(0.8); opacity: 0; }
-    10% { transform: scale(1.2); opacity: 1; }
-    20% { transform: scale(1); opacity: 1; }
-    80% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(0.8); opacity: 0; }
-}
-
-/* Armor Breach Persistent Effect */
-.character[data-has-armor-breach="true"],
-.character.armor-breach-active {
-    /* Before/after effect */
-    position: relative;
-    overflow: visible;
-}
-
-.character[data-has-armor-breach="true"]::after,
-.character.armor-breach-active::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,60,60,0.2) 0%, rgba(255,60,60,0) 70%);
-    pointer-events: none;
-    animation: armor-breach-pulse 3s infinite;
-    z-index: 5;
-}
-
-@keyframes armor-breach-pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 0.3; }
-    100% { opacity: 0.6; }
-}
-
-/* Target Lock Icon modification for Armor Breach */
-.character[data-has-armor-breach="true"] .debuff-icon[data-debuff-id="farmer_nina_e_target_lock"],
-.debuff-icon[data-debuff-id="farmer_nina_e_target_lock"][data-has-armor-breach="true"] {
-    border: 2px solid #ff3c3c;
-    box-shadow: 0 0 10px #ff3c3c;
-}
-
-/* Add armor stat in UI highlighting */
-.character[data-has-armor-breach="true"] .stat-item[data-stat="armor"] .stat-value,
-.character.armor-breach-active .stat-item[data-stat="armor"] .stat-value {
-    color: #ff3c3c;
-    animation: armor-breach-stat-pulse 2s infinite;
-}
-
-@keyframes armor-breach-stat-pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-/* Stack counter for Target Lock */
-.stack-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #ff3c3c;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    animation: stack-count-pulse 2s infinite;
-    z-index: 5;
-}
-
-@keyframes stack-count-pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 5px rgba(255, 60, 60, 0.8);
-    }
-    50% {
-        transform: scale(1.15);
-        box-shadow: 0 0 10px rgba(255, 60, 60, 1);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 5px rgba(255, 60, 60, 0.8);
-    }
-}
-
-/* Add intensity based on stack count */
-.debuff-icon[data-stack-count="2"] {
-    filter: brightness(1.2);
-}
-
-.debuff-icon[data-stack-count="3"] {
-    filter: brightness(1.4);
-}
-
-.debuff-icon[data-stack-count="4"] {
-    filter: brightness(1.6);
-}
-
-.debuff-icon[data-stack-count="5"],
-.debuff-icon[data-stack-count="6"],
-.debuff-icon[data-stack-count="7"],
-.debuff-icon[data-stack-count="8"],
-.debuff-icon[data-stack-count="9"],
-.debuff-icon[data-stack-count="10"] {
-    filter: brightness(1.8);
-}
-
-/* Unshakeable Focus visualization */
-.character[data-target-lock-stacks] .debuff-icon[data-debuff-id="farmer_nina_e_target_lock"]::after {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,60,60,0.3) 0%, rgba(255,60,60,0) 70%);
-    z-index: -1;
-    animation: unshakeable-focus-pulse 3s infinite;
-}
-
-@keyframes unshakeable-focus-pulse {
-    0% {
-        opacity: 0.5;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.2);
-    }
-    100% {
-        opacity: 0.5;
-        transform: scale(1);
-    }
-}
-
-/* Permanent Target Lock styling */
-.debuff-icon.permanent-debuff {
-    border: 2px solid #ff3c3c !important;
-    box-shadow: 0 0 10px #ff3c3c, inset 0 0 5px #ff3c3c !important;
-}
-
-.debuff-icon.permanent-debuff .status-duration {
-    display: none;
-}
-
-/* Add infinity symbol instead of duration */
-.debuff-icon.permanent-debuff::after {
-    content: "∞";
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    font-size: 10px;
-    font-weight: bold;
-    background-color: #ff3c3c;
-    color: white;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    animation: permanent-pulse 2s infinite;
-    z-index: 3;
-}
-
-@keyframes permanent-pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 5px rgba(255, 60, 60, 0.8);
-    }
-    50% {
-        transform: scale(1.15);
-        box-shadow: 0 0 10px rgba(255, 60, 60, 1);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 5px rgba(255, 60, 60, 0.8);
-    }
-}
-
-/* Bullet Rain talent visual effects - REALISTIC BULLETS */
-.bullet-rain-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 100;
-}
-
-/* Realistic bullet styling */
-.bullet-projectile {
-    position: absolute;
-    width: 14px;
-    height: 6px;
-    background: linear-gradient(90deg, #ffd700, #b8860b 30%, #7c7c7c 50%, #5a5a5a 90%);
-    border-radius: 3px 50% 50% 3px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(255, 255, 255, 0.8);
-    transform-origin: center;
-    z-index: 9990;
-    animation: bullet-fly 0.5s linear forwards;
-}
-
-/* Bullet tip */
-.bullet-projectile::before {
-    content: "";
-    position: absolute;
-    right: -2px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 4px;
-    background: #c0c0c0;
-    border-radius: 50%;
-}
-
-/* Bullet casing */
-.bullet-projectile::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 5px;
-    background: #b8860b;
-    border-radius: 1px 0 0 1px;
-}
-
-/* Trailing smoke effect */
-.bullet-smoke {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(200, 200, 200, 0.7), rgba(150, 150, 150, 0.1));
-    opacity: 0.7;
-    z-index: 9980;
-    animation: smoke-dissipate 0.8s linear forwards;
-}
-
-@keyframes bullet-fly {
-    0% {
-        opacity: 0;
-    }
-    5% {
-        opacity: 1;
-    }
-    95% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-@keyframes smoke-dissipate {
-    0% {
-        transform: scale(0.2);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
-
-/* Critical bullet styling */
-.bullet-projectile.critical {
-    width: 16px;
-    height: 7px;
-    background: linear-gradient(90deg, #ff8c00, #ffd700 30%, #b8860b 70%, #8b4513 90%);
-    box-shadow: 0 0 8px rgba(255, 140, 0, 0.7), inset 0 0 3px rgba(255, 215, 0, 0.9);
-}
-
-.bullet-projectile.critical::before {
-    width: 5px;
-    height: 5px;
-    background: #ffd700;
-}
-
-/* Bullet impact effect */
-.bullet-impact {
-    position: absolute;
-    z-index: 9985;
-    animation: impact-fade 0.4s forwards;
-}
-
-/* Center flash */
-.bullet-impact::before {
-    content: "";
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    background: radial-gradient(circle, rgba(255, 255, 200, 0.9), rgba(255, 120, 0, 0));
-    border-radius: 50%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 10px rgba(255, 140, 0, 0.6);
-}
-
-/* Impact particles */
-.impact-particle {
-    position: absolute;
-    width: 4px;
-    height: 1px;
-    background: #ffd700;
-    border-radius: 2px;
-    transform-origin: center;
-    animation: particle-fly 0.3s forwards;
-    box-shadow: 0 0 3px rgba(255, 215, 0, 0.6);
-}
-
-.impact-particle.critical {
     width: 6px;
-    height: 2px;
-    background: #ff8c00;
-    box-shadow: 0 0 5px rgba(255, 140, 0, 0.8);
+    height: 80px;
+    background: linear-gradient(to bottom, #ffff00, #ff6500, #ff0000);
+    z-index: 250;
+    animation: piercing-projectile-travel 0.4s ease-out;
+    box-shadow: 0 0 15px rgba(255, 100, 0, 0.9), 0 0 30px rgba(255, 0, 0, 0.6);
+    border-radius: 3px;
 }
 
-@keyframes impact-fade {
+@keyframes piercing-projectile-travel {
     0% {
-        opacity: 1;
-        transform: scale(0.5);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(2);
-    }
-}
-
-@keyframes particle-fly {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-.bullet-rain-impact {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: radial-gradient(circle, rgba(255, 255, 0, 0.7), rgba(255, 100, 0, 0));
-    border-radius: 50%;
-    animation: bullet-rain-impact 0.3s ease-out forwards;
-    z-index: 105;
-}
-
-.bullet-rain-impact.critical {
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, rgba(255, 255, 50, 0.9), rgba(255, 180, 0, 0));
-    animation: bullet-rain-impact-critical 0.4s ease-out forwards;
-}
-
-@keyframes bullet-rain-impact {
-    0% {
-        transform: scale(0.5);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-@keyframes bullet-rain-impact-critical {
-    0% {
-        transform: scale(0.5);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(2.5);
-        opacity: 0;
-    }
-}
-
-.bullet-rain-source {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, rgba(255, 255, 150, 0.8), rgba(255, 150, 50, 0));
-    border-radius: 50%;
-    animation: bullet-rain-source 0.5s ease-out infinite;
-    z-index: 105;
-    top: 20%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-/* Muzzle flash effect */
-.muzzle-flash {
-    position: absolute;
-    width: 25px;
-    height: 25px;
-    background: radial-gradient(ellipse, rgba(255, 255, 150, 0.9), rgba(255, 120, 0, 0.3) 70%, transparent);
-    border-radius: 50%;
-    z-index: 9995;
-    animation: muzzle-flash 0.15s forwards;
-}
-
-@keyframes muzzle-flash {
-    0% {
-        transform: scale(0.5);
-        opacity: 0.9;
-    }
-    70% {
-        transform: scale(1.2);
-        opacity: 0.7;
-    }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
-
-/* Source VFX container for Nina */
-.bullet-rain-source-vfx {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 9999;
-}
-
-/* Bullet Rain text display */
-.bullet-rain-text {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #ffcc00;
-    text-shadow: 0 0 5px #ffcc00, 0 0 10px #ff6a00, 0 0 15px #ff4500;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 5px 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
-    animation: bullet-rain-text-pulse 2s ease-out;
-    white-space: nowrap;
-}
-
-@keyframes bullet-rain-text-pulse {
-    0% {
-        transform: translateY(20px) scale(0.8);
-        opacity: 0;
-    }
-    20% {
-        transform: translateY(0) scale(1.2);
-        opacity: 1;
-    }
-    70% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-20px) scale(0.8);
-        opacity: 0;
-    }
-}
-
-@keyframes bullet-rain-source {
-    0% {
-        transform: translate(-50%, -50%) scale(0.8);
-        opacity: 0.8;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 0;
-    }
-}
-
-/* Character glowing effect when Bullet Rain is active */
-.character[id^="character-farmer_nina"][data-has-bullet-rain="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-bullet-rain="true"]::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(255, 180, 0, 0.7), inset 0 0 20px rgba(255, 150, 0, 0.4);
-    pointer-events: none;
-    z-index: 5;
-    animation: bullet-rain-glow 0.5s infinite alternate;
-}
-
-@keyframes bullet-rain-glow {
-    0% {
-        box-shadow: 0 0 15px rgba(255, 180, 0, 0.7), inset 0 0 20px rgba(255, 150, 0, 0.4);
-    }
-    100% {
-        box-shadow: 0 0 25px rgba(255, 220, 0, 0.9), inset 0 0 30px rgba(255, 180, 0, 0.6);
-    }
-}
-
-/* Style for enemies targeted by Bullet Rain */
-.character[data-bullet-rain-target="true"] {
-    position: relative;
-}
-
-.character[data-bullet-rain-target="true"]::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(255, 100, 0, 0.6);
-    pointer-events: none;
-    z-index: 5;
-    animation: bullet-rain-target-glow 0.3s infinite alternate;
-}
-
-@keyframes bullet-rain-target-glow {
-    0% {
-        box-shadow: 0 0 15px rgba(255, 100, 0, 0.6);
-    }
-    100% {
-        box-shadow: 0 0 25px rgba(255, 150, 0, 0.8);
-    }
-}
-
-/* Rest of Nina's CSS styles */
-/* ... existing code ... */ 
-
-/* Focused Precision Talent Styles */
-.focused-precision-vfx {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    pointer-events: none;
-}
-
-.focused-precision-text {
-    color: #4682ff;
-    font-size: 16px;
-    font-weight: bold;
-    text-shadow: 0 0 5px rgba(70, 130, 255, 0.8);
-    animation: focused-precision-pulse 2.5s ease-out forwards;
-    white-space: nowrap;
-}
-
-@keyframes focused-precision-pulse {
-    0% { transform: scale(0.5); opacity: 0; }
-    20% { transform: scale(1.2); opacity: 1; }
-    70% { transform: scale(1); opacity: 1; }
-    100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
-}
-
-.ability.focused-precision-active {
-    position: relative;
-    overflow: visible;
-}
-
-.ability.focused-precision-active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 2px solid #4682ff;
-    box-shadow: 0 0 8px rgba(70, 130, 255, 0.6);
-    border-radius: 8px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.ability.focused-precision-active:hover::before {
-    opacity: 1;
-}
-
-.sniper-shot-enhanced-indicator {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: rgba(70, 130, 255, 0.7);
-    color: white;
-    font-size: 10px;
-    padding: 2px 5px;
-    border-radius: 8px;
-    pointer-events: none;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 0.2s, transform 0.2s;
-}
-
-.ability.focused-precision-active:hover .sniper-shot-enhanced-indicator {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* Add appropriate positioning within the existing talent indicators */
-.talent-indicator.focused-precision {
-    background-color: rgba(70, 130, 255, 0.8);
-    color: white;
-}
-
-/* Damage scaling visual feedback */
-.character[id^="character-farmer_nina"][data-has-focused-precision="true"] .ability[data-ability-id="farmer_nina_q"]::after {
-    content: '75% AD';
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background-color: rgba(70, 130, 255, 0.7);
-    color: white;
-    font-size: 11px;
-    padding: 1px 4px;
-    border-radius: 4px;
-    box-shadow: 0 0 4px rgba(70, 130, 255, 0.8);
-    pointer-events: none;
-    z-index: 5;
-}
-
-/* Survivalist Instinct Buff Styles */
-.buff-icon[data-buff-id="survivalist_instinct_buff"] {
-    position: relative;
-    overflow: visible;
-}
-
-.buff-icon[data-buff-id="survivalist_instinct_buff"]::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0, 200, 0, 0.3) 30%, transparent 70%);
-    animation: survivalist-buff-pulse 2s infinite alternate;
-    pointer-events: none;
-    z-index: -1;
-}
-
-@keyframes survivalist-buff-pulse {
-    0% { opacity: 0.4; transform: scale(1); }
-    100% { opacity: 0.8; transform: scale(1.2); }
-}
-
-.buff-icon[data-buff-id="survivalist_instinct_buff"] .stack-count {
-    position: absolute;
-    bottom: -3px;
-    right: -3px;
-    background: rgba(0, 0, 0, 0.7);
-    color: #2eff2e;
-    font-size: 10px;
-    padding: 1px 3px;
-    border-radius: 10px;
-    border: 1px solid #2eff2e;
-    font-weight: bold;
-    min-width: 14px;
-    text-align: center;
-    box-shadow: 0 0 3px #2eff2e;
-}
-
-.buff-icon[data-buff-id="survivalist_instinct_buff"] .stack-count.stack-update {
-    animation: stack-update-pulse 0.8s ease-out;
-}
-
-@keyframes stack-update-pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.6); background: rgba(0, 0, 0, 0.8); color: #fff; box-shadow: 0 0 8px #2eff2e; }
-    100% { transform: scale(1); }
-}
-
-/* Enhanced Survivalist Instinct Text Animation */
-.survivalist-instinct-text {
-    color: #2eff2e;
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 0 0 5px rgba(46, 255, 46, 0.8);
-    animation: survivalist-text-rise 2s ease-out forwards;
-    white-space: nowrap;
-}
-
-@keyframes survivalist-text-rise {
-    0% { transform: translateY(0) scale(0.8); opacity: 0; }
-    20% { transform: translateY(-15px) scale(1.2); opacity: 1; }
-    80% { transform: translateY(-35px) scale(1); opacity: 1; }
-    100% { transform: translateY(-50px) scale(0.8); opacity: 0; }
-}
-
-/* Visual effect for character with the talent */
-.character[id^="character-farmer_nina"][data-has-physical-growth="true"]::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 15%;
-    background: linear-gradient(to top, rgba(46, 255, 46, 0.2), transparent);
-    animation: survivalist-growth-pulse 3s infinite alternate;
-    pointer-events: none;
-    z-index: -1;
-}
-
-@keyframes survivalist-growth-pulse {
-    0% { opacity: 0.2; height: 10%; }
-    100% { opacity: 0.5; height: 20%; }
-}
-
-/* Add CSS for the new Evasive Adaptability passive */
-
-/* Modern Evasive Adaptability Passive Indicator - positioned on image container */
-.character[id^="character-farmer_nina"] .image-container {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"] .evasive-adaptability-indicator {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    width: 28px;
-    height: 28px;
-    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
-    z-index: 110;
-    opacity: 0;
-    transform: scale(0.8);
-    animation: dodge-indicator-appear 0.3s ease-out forwards;
-}
-
-.evasive-adaptability-indicator::before {
-    content: "⚡";
-    font-size: 14px;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.evasive-adaptability-indicator span {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-    color: white;
-    font-size: 9px;
-    font-weight: bold;
-    padding: 1px 3px;
-    border-radius: 6px;
-    min-width: 14px;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    line-height: 1;
-}
-
-@keyframes dodge-indicator-appear {
-    0% {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    100% {
         opacity: 1;
         transform: scale(1);
     }
+    80% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
 }
 
-/* Subtle character glow when passive is active */
-.evasive-adaptability-active {
-    position: relative;
-}
-
-.evasive-adaptability-active::before {
-    content: "";
+.armor-pierce-effect {
     position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, transparent, rgba(74, 144, 226, 0.1), transparent);
-    border-radius: 12px;
-    animation: evasive-adaptability-subtle-glow 3s infinite;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #ff4500, transparent);
+    animation: armor-pierce-shatter 0.8s ease-out;
+    z-index: 220;
     pointer-events: none;
-    z-index: -1;
 }
 
-@keyframes evasive-adaptability-subtle-glow {
+@keyframes armor-pierce-shatter {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+/* === TALENT: BULLET RAIN === */
+.bullet-rain-setup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 180;
+}
+
+.bullet-rain-storm {
+    position: absolute;
+    top: -50px;
+    left: -20px;
+    width: 140%;
+    height: 200px;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 0, 0.1) 50%, transparent 70%);
+    animation: bullet-rain-sweep 1.5s ease-in-out;
+    z-index: 190;
+    pointer-events: none;
+}
+
+@keyframes bullet-rain-sweep {
+    0% {
+        opacity: 0;
+        transform: translateY(-100px) rotate(-10deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100px) rotate(10deg);
+    }
+}
+
+.bullet-rain-tracer {
+    position: absolute;
+    width: 2px;
+    height: 30px;
+    background: linear-gradient(to bottom, #ffff00, #ff8800, transparent);
+    animation: bullet-rain-tracer-fall 0.8s ease-in;
+    z-index: 200;
+    box-shadow: 0 0 4px rgba(255, 136, 0, 0.8);
+}
+
+@keyframes bullet-rain-tracer-fall {
+    0% {
+        opacity: 1;
+        transform: translateY(-50px) rotate(15deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(150px) rotate(15deg);
+    }
+}
+
+/* === STATUS EFFECTS === */
+.nina-untargetable {
+    opacity: 0.4;
+    filter: blur(1px) hue-rotate(200deg);
+    animation: nina-stealth-flicker 2s infinite;
+}
+
+@keyframes nina-stealth-flicker {
     0%, 100% {
-        opacity: 0.3;
+        opacity: 0.4;
     }
     50% {
         opacity: 0.6;
     }
 }
 
-/* Floating dodge bonus text */
-.evasive-adaptability-vfx {
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #4a90e2;
-    font-size: 11px;
-    font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    animation: dodge-bonus-float 1.5s ease-out forwards;
-    pointer-events: none;
-    z-index: 105;
+.nina-dead {
+    filter: grayscale(100%) brightness(0.3);
+    opacity: 0.5;
 }
 
-@keyframes dodge-bonus-float {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(0px);
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+    .sniper-scope-overlay {
+        background: radial-gradient(circle at center, transparent 80px, rgba(0, 0, 0, 0.8) 100px);
     }
-    20% {
-        opacity: 1;
+    
+    .sniper-crosshair {
+        width: 40px;
+        height: 40px;
     }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-30px);
+    
+    .target-lock-reticle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .piercing-shot-energy {
+        width: 80px;
+        height: 80px;
     }
 }
 
-/* Special effect when dodging with high dodge chance */
-.character[id^="character-farmer_nina"] .dodge-text {
-    color: #4DA6FF;
-    text-shadow: 0 0 10px #4DA6FF;
-}
-
-.character[id^="character-farmer_nina"][data-dodge-bonus="high"] .dodge-text {
-    font-size: 2.2em;
-    animation: high-dodge-pulse 0.5s infinite alternate;
-}
-
-@keyframes high-dodge-pulse {
-    0% {
-        text-shadow: 0 0 10px #4DA6FF;
-        transform: scale(1);
-    }
-    100% {
-        text-shadow: 0 0 20px #4DA6FF, 0 0 30px #4DA6FF;
-        transform: scale(1.1);
-    }
-}
-
-/* Dodge chance visualization in character stat menu */
-.character[id^="character-farmer_nina"] .stat-item[data-stat="dodgeChance"] .stat-value.buffed {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"] .stat-item[data-stat="dodgeChance"] .stat-value.buffed::after {
-    content: '(Evasive Adaptability)';
-    font-size: 80%;
-    margin-left: 5px;
-    color: #4DA6FF;
-    opacity: 0.9;
-}
-
-/* Debuff Exploitation talent visual effects */
-.debuff-exploitation-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-    animation: debuff-exploitation-pulse 0.8s ease-out forwards;
-}
-
-.debuff-exploitation-text {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 16px;
-    font-weight: bold;
-    color: #ff5500;
-    text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 150, 0, 0.5);
-    white-space: nowrap;
-    animation: debuff-exploitation-text 1.5s ease-out forwards;
-}
-
-@keyframes debuff-exploitation-pulse {
-    0% {
-        background-color: rgba(255, 50, 0, 0.1);
-        box-shadow: 0 0 15px 5px rgba(255, 50, 0, 0.3) inset;
-    }
-    50% {
-        background-color: rgba(255, 80, 0, 0.2);
-        box-shadow: 0 0 20px 8px rgba(255, 80, 0, 0.5) inset;
-    }
-    100% {
-        background-color: rgba(255, 80, 0, 0);
-        box-shadow: 0 0 0 0 rgba(255, 80, 0, 0) inset;
-    }
-}
-
-@keyframes debuff-exploitation-text {
-    0% { transform: translateX(-50%) translateY(0); opacity: 0; }
-    20% { transform: translateX(-50%) translateY(-15px); opacity: 1; }
-    80% { transform: translateX(-50%) translateY(-35px); opacity: 1; }
-    100% { transform: translateX(-50%) translateY(-45px); opacity: 0; }
-}
-
-/* Shadow Purge (Debuff Cleanse) talent visual effects */
-.shadow-purge-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    pointer-events: none;
-    z-index: 10;
-    background: radial-gradient(circle, rgba(100, 200, 255, 0.3) 0%, rgba(100, 200, 255, 0) 70%);
-    animation: shadow-purge-pulse 1.2s ease-out forwards;
-}
-
-.cleanse-particles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 11;
-}
-
-.cleanse-particles::before,
-.cleanse-particles::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background-image: radial-gradient(circle, rgba(100, 200, 255, 0.8) 0%, rgba(100, 200, 255, 0) 70%);
-    border-radius: 50%;
-    transform: scale(0.1);
-    animation: cleanse-particle-flow 1.2s ease-out forwards;
-}
-
-.cleanse-particles::before {
-    animation-delay: 0;
-}
-
-.cleanse-particles::after {
-    animation-delay: 0.3s;
-}
-
-@keyframes shadow-purge-pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-        box-shadow: 0 0 0 0 rgba(100, 200, 255, 0);
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-        box-shadow: 0 0 20px 10px rgba(100, 200, 255, 0.5);
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0;
-        box-shadow: 0 0 0 0 rgba(100, 200, 255, 0);
-    }
-}
-
-@keyframes cleanse-particle-flow {
-    0% {
-        transform: scale(0.1);
-        opacity: 0;
-    }
-    30% {
-        transform: scale(0.5);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1.2);
-        opacity: 0;
-    }
-}
-
-/* Talent indicator for new talents */
-.talent-indicator.debuff-exploitation {
-    background-color: rgba(255, 80, 0, 0.9);
-    box-shadow: 0 0 5px rgba(255, 80, 0, 0.7);
-}
-
-.talent-indicator.shadow-purge {
-    background-color: rgba(100, 200, 255, 0.9);
-    box-shadow: 0 0 5px rgba(100, 200, 255, 0.7);
-}
-
-/* Character with Debuff Exploitation talent active */
-.character[id^="character-farmer_nina"][data-has-debuff-exploitation="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-debuff-exploitation="true"]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(255, 80, 0, 0.3);
-    pointer-events: none;
-    z-index: -1;
-    animation: debuff-exploitation-glow 4s infinite alternate;
-}
-
-@keyframes debuff-exploitation-glow {
-    0% {
-        box-shadow: 0 0 10px rgba(255, 80, 0, 0.3);
-    }
-    100% {
-        box-shadow: 0 0 20px rgba(255, 80, 0, 0.5);
-    }
-}
-
-/* Farm Resources VFX - Rural Resourcefulness Talent */
-.farm-resource-vfx {
+/* === UTILITY CLASSES === */
+.nina-vfx-container {
     position: absolute;
     top: 0;
     left: 0;
@@ -2589,185 +747,23 @@
     height: 100%;
     pointer-events: none;
     z-index: 100;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    animation: resource-vfx-fade 2.5s ease-out forwards;
+    overflow: visible;
 }
 
-.resource-icon {
-    width: 48px;
-    height: 48px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
-    animation: resource-icon-bounce 1s ease-out infinite;
+.nina-damage-amplified {
+    color: #ff6b35 !important;
+    text-shadow: 0 0 8px rgba(255, 107, 53, 0.8) !important;
+    animation: damage-amplified-pulse 0.3s ease-out !important;
 }
 
-.corn-icon {
-    background-image: url('../Icons/resources/corn.webp');
-}
-
-.apple-icon {
-    background-image: url('../Icons/resources/apple.webp');
-}
-
-.pumpkin-icon {
-    background-image: url('../Icons/resources/pumpkin.webp');
-}
-
-.cucumber-icon {
-    background-image: url('../Icons/resources/cucumber.webp');
-}
-
-.water-icon {
-    background-image: url('../Icons/resources/water_bottle.webp');
-}
-
-.egg-icon {
-    background-image: url('../Icons/resources/egg.webp');
-}
-
-.resource-text {
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-    animation: resource-text-float 2s ease-out forwards;
-}
-
-.corn-vfx {
-    background-color: rgba(255, 215, 0, 0.1);
-}
-
-.apple-vfx {
-    background-color: rgba(220, 20, 60, 0.1);
-}
-
-.pumpkin-vfx {
-    background-color: rgba(255, 140, 0, 0.1);
-}
-
-.cucumber-vfx {
-    background-color: rgba(50, 205, 50, 0.1);
-}
-
-.water-vfx {
-    background-color: rgba(30, 144, 255, 0.1);
-}
-
-.egg-vfx {
-    background-color: rgba(255, 250, 240, 0.1);
-}
-
-@keyframes resource-vfx-fade {
-    0% { opacity: 0; transform: scale(0.8); }
-    20% { opacity: 1; transform: scale(1); }
-    80% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.1); }
-}
-
-@keyframes resource-icon-bounce {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-    100% { transform: translateY(0); }
-}
-
-@keyframes resource-text-float {
-    0% { transform: translateY(10px); opacity: 0; }
-    20% { transform: translateY(0); opacity: 1; }
-    80% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-10px); opacity: 0; }
-}
-
-/* Egg Explosion VFX */
-.egg-explosion-vfx {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: explosion-fade 1.5s ease-out forwards;
-}
-
-.explosion-icon {
-    width: 64px;
-    height: 64px;
-    background-image: url('../Icons/effects/explosion.webp');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    filter: drop-shadow(0 0 10px rgba(255, 200, 50, 0.8));
-    animation: explosion-grow 0.8s ease-out forwards;
-}
-
-@keyframes explosion-fade {
-    0% { background-color: rgba(255, 200, 50, 0.2); }
-    30% { background-color: rgba(255, 200, 50, 0.3); }
-    100% { background-color: rgba(255, 200, 50, 0); }
-}
-
-@keyframes explosion-grow {
-    0% { transform: scale(0.2); opacity: 0; }
-    40% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); opacity: 0; }
-}
-
-/* Resource Buff Icons */
-.buff-icon[data-buff-id="rural_resourcefulness_corn"] {
-    background-image: url('../Icons/buffs/corn_armor.webp');
-}
-
-.buff-icon[data-buff-id="rural_resourcefulness_pumpkin"] {
-    background-image: url('../Icons/buffs/pumpkin_power.webp');
-}
-
-.buff-icon[data-buff-id="rural_resourcefulness_cucumber"] {
-    background-image: url('../Icons/buffs/cucumber_agility.webp');
-}
-
-.buff-icon[data-buff-id="rural_resourcefulness_egg"] {
-    background-image: url('../Icons/buffs/explosive_egg.webp');
-}
-
-/* Rural Resourcefulness Talent Indicator */
-.talent-indicator.rural-resourcefulness {
-    background-image: url('../Icons/talents/farm_resources.webp');
-}
-
-/* Add glow effect to character with Rural Resourcefulness */
-.character[id^="character-farmer_nina"][data-has-rural-resourcefulness="true"] {
-    position: relative;
-}
-
-.character[id^="character-farmer_nina"][data-has-rural-resourcefulness="true"]::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    box-shadow: 0 0 8px 2px rgba(76, 175, 80, 0.4);
-    pointer-events: none;
-    z-index: 5;
-    animation: rural-resourcefulness-glow 3s ease-in-out infinite;
-}
-
-@keyframes rural-resourcefulness-glow {
-    0% { opacity: 0.4; }
-    50% { opacity: 0.7; }
-    100% { opacity: 0.4; }
+@keyframes damage-amplified-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
 }

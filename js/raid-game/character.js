@@ -2365,33 +2365,7 @@ class Character {
                     });
                     
                     // Show visual effect for breaking stun
-                    const elementId = this.instanceId || this.id;
-                    const charElement = document.getElementById(`character-${elementId}`);
-                    if (charElement) {
-                        const breakFreeVfx = document.createElement('div');
-                        breakFreeVfx.className = 'stun-break-vfx';
-                        breakFreeVfx.innerHTML = `
-                            <div class="stun-break-text">BREAK FREE!</div>
-                            <div class="stun-break-particles"></div>
-                        `;
-                        charElement.appendChild(breakFreeVfx);
-                        
-                        // Add particle effects
-                        for (let i = 0; i < 8; i++) {
-                            const particle = document.createElement('div');
-                            particle.className = 'stun-break-particle';
-                            particle.style.setProperty('--angle', `${i * 45}deg`);
-                            particle.style.setProperty('--delay', `${i * 0.05}s`);
-                            breakFreeVfx.appendChild(particle);
-                        }
-                        
-                        // Remove VFX after animation
-                        setTimeout(() => {
-                            if (breakFreeVfx.parentNode === charElement) {
-                                charElement.removeChild(breakFreeVfx);
-                            }
-                        }, 2000);
-                    }
+                    this.showStunBreakVFX();
                     
                     // Update UI to reflect stun removal
                     if (typeof updateCharacterUI === 'function') {
@@ -3582,6 +3556,45 @@ class Character {
         return buffAppliedSuccessfully; 
     }
 
+    // New method for debuff application with optional dodge check
+    addDebuffWithDodgeCheck(debuff, caster = null, allowDodge = true) {
+        // If dodge checking is enabled and caster is provided, check for dodge
+        if (allowDodge && caster && Math.random() < this.stats.dodgeChance) {
+            console.log(`[${this.name}] Dodged ${caster.name}'s debuff: ${debuff.name}`);
+            
+            const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
+            log(`${this.name} dodged ${caster.name}'s ${debuff.name}!`, 'dodge');
+            
+            // Show dodge VFX
+            if (this.id === 'zoey' && typeof window.showZoeyDodgeVFX === 'function') {
+                window.showZoeyDodgeVFX(this);
+            } else {
+                this.showEnhancedDodgeVFX();
+            }
+            
+            // Trigger dodge event for talents
+            document.dispatchEvent(new CustomEvent('character:dodged', {
+                detail: {
+                    character: this,
+                    attacker: caster,
+                    damageAmount: 0,
+                    damageType: 'debuff'
+                }
+            }));
+            
+            // Trigger passive dodge handler
+            if (this.passiveHandler && typeof this.passiveHandler.onDodge === 'function') {
+                this.passiveHandler.onDodge(this, caster);
+            }
+            
+            return false; // Indicate debuff was dodged
+        }
+        
+        // Apply the debuff normally
+        this.addDebuff(debuff);
+        return true; // Indicate debuff was applied
+    }
+
     addDebuff(debuff) {
         // Check if we're dealing with a special case for stacking Target Lock
         const isStackingTargetLock = debuff.id === 'farmer_nina_e_target_lock' && 
@@ -3761,6 +3774,27 @@ class Character {
             if (debuff.id === 'freeze') {
                 if (window.AtlanteanSubZeroAbilities) {
                     window.AtlanteanSubZeroAbilities.removeFreezeIndicator(this, false); // melt on expire
+                }
+            }
+            
+            // Remove stun visual effects when stun debuff expires
+            if (debuff.id === 'stun' || 
+                (debuff.name && debuff.name.toLowerCase().includes('stun')) || 
+                (debuff.effects && debuff.effects.cantAct === true)) {
+                
+                // Check if character still has any other stun debuffs
+                const hasOtherStuns = this.debuffs.some((otherDebuff, otherIndex) => 
+                    otherIndex !== index && (
+                        otherDebuff.id === 'stun' || 
+                        (otherDebuff.name && otherDebuff.name.toLowerCase().includes('stun')) || 
+                        (otherDebuff.effects && otherDebuff.effects.cantAct === true)
+                    )
+                );
+                
+                // Only remove VFX if no other stun debuffs remain
+                if (!hasOtherStuns) {
+                    this.removeStunVFX();
+                    console.log(`Stun VFX cleaned up for ${this.name} - debuff expired`);
                 }
             }
 
@@ -4267,23 +4301,28 @@ class Character {
     }
     // --- END NEW ---
 
-    // Method to show stun visual effect
+    // Enhanced method to show stun visual effect
     showStunVFX() {
-        // Get the character element using instanceId or id
         const elementId = this.instanceId || this.id;
         const charElement = document.getElementById(`character-${elementId}`);
         if (!charElement) return;
         
-        // Create stun VFX container
+        // Add stunned class to character for persistent overlay effect
+        charElement.classList.add('stunned');
+        
+        // Remove any existing stun VFX to prevent duplicates
+        this.removeStunVFX();
+        
+        // Create initial stun VFX container (appears once)
         const stunVFX = document.createElement('div');
         stunVFX.className = 'stun-vfx';
+        stunVFX.id = `stun-vfx-${elementId}`;
         
-        // Create stars
-        for (let i = 0; i < 5; i++) {
+        // Create orbiting stars
+        for (let i = 0; i < 3; i++) {
             const star = document.createElement('div');
             star.className = 'stun-star';
             star.textContent = '✦';
-            star.style.animationDelay = `${i * 0.2}s`;
             stunVFX.appendChild(star);
         }
         
@@ -4293,15 +4332,92 @@ class Character {
         stunText.textContent = 'STUNNED';
         stunVFX.appendChild(stunText);
         
-        // Add VFX to the character element
-        charElement.appendChild(stunVFX);
+        // Create persistent stun indicator
+        const stunIndicator = document.createElement('div');
+        stunIndicator.className = 'stun-indicator';
+        stunIndicator.id = `stun-indicator-${elementId}`;
         
-        // Remove after animation completes
+        const indicatorBg = document.createElement('div');
+        indicatorBg.className = 'stun-indicator-bg';
+        stunIndicator.appendChild(indicatorBg);
+        
+        const indicatorIcon = document.createElement('div');
+        indicatorIcon.className = 'stun-indicator-icon';
+        indicatorIcon.textContent = '😵';
+        stunIndicator.appendChild(indicatorIcon);
+        
+        // Add both VFX elements to character
+        charElement.appendChild(stunVFX);
+        charElement.appendChild(stunIndicator);
+        
+        // Remove initial VFX after animation, but keep indicator
         setTimeout(() => {
             if (stunVFX && stunVFX.parentNode === charElement) {
                 charElement.removeChild(stunVFX);
             }
-        }, 2000);
+        }, 2500);
+        
+        console.log(`Enhanced stun VFX applied to ${this.name}`);
+    }
+
+    // Method to remove stun visual effects
+    removeStunVFX() {
+        const elementId = this.instanceId || this.id;
+        const charElement = document.getElementById(`character-${elementId}`);
+        if (!charElement) return;
+        
+        // Remove stunned class
+        charElement.classList.remove('stunned');
+        
+        // Remove VFX elements
+        const stunVFX = document.getElementById(`stun-vfx-${elementId}`);
+        const stunIndicator = document.getElementById(`stun-indicator-${elementId}`);
+        
+        if (stunVFX && stunVFX.parentNode === charElement) {
+            charElement.removeChild(stunVFX);
+        }
+        
+        if (stunIndicator && stunIndicator.parentNode === charElement) {
+            charElement.removeChild(stunIndicator);
+        }
+        
+        console.log(`Stun VFX removed from ${this.name}`);
+    }
+
+    // Method to show stun break visual effect
+    showStunBreakVFX() {
+        const elementId = this.instanceId || this.id;
+        const charElement = document.getElementById(`character-${elementId}`);
+        if (!charElement) return;
+        
+        // Create stun break VFX
+        const breakVFX = document.createElement('div');
+        breakVFX.className = 'stun-break-vfx';
+        
+        const breakText = document.createElement('div');
+        breakText.className = 'stun-break-text';
+        breakText.textContent = 'BREAK FREE!';
+        breakVFX.appendChild(breakText);
+        
+        // Create burst particles
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'stun-break-particle';
+            particle.style.setProperty('--angle', `${i * 45}deg`);
+            particle.style.setProperty('--delay', `${i * 0.05}s`);
+            breakVFX.appendChild(particle);
+        }
+        
+        charElement.appendChild(breakVFX);
+        
+        // Remove after animation
+        setTimeout(() => {
+            if (breakVFX && breakVFX.parentNode === charElement) {
+                charElement.removeChild(breakVFX);
+            }
+        }, 1500);
+        
+        console.log(`Stun break VFX shown for ${this.name}`);
     }
 
     // --- NEW: Freeze miss VFX for characters failing to act due to freeze ---
@@ -6535,6 +6651,7 @@ const AbilityFactory = {
                   return;
              }
 
+
             // --- MODIFICATION START: Read from abilityData.debuffEffect --- 
             const debuffDetails = abilityData.debuffEffect;
             if (!debuffDetails) {
@@ -6574,9 +6691,11 @@ const AbilityFactory = {
             debuff.appliedBy = caster;
             debuff.abilityId = abilityData.id;
 
-            // Apply the debuff to the target
-            target.addDebuff(debuff);
-            addLogEntry(`${caster.name} used ${abilityData.name} on ${target.name}, applying ${debuff.name} for ${debuff.duration} turns.`);
+            // Apply the debuff to the target with dodge check
+            const debuffApplied = target.addDebuffWithDodgeCheck(debuff, caster, true);
+            if (debuffApplied) {
+                addLogEntry(`${caster.name} used ${abilityData.name} on ${target.name}, applying ${debuff.name} for ${debuff.duration} turns.`);
+            }
 
              // Update target UI
              updateCharacterUI(target);

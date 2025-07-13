@@ -1,42 +1,9 @@
 # Project Fighters - Changelog
 
-## Patch 0.5 - Schoolboy Shoma Talent System Expansion
-*Released: [Current Date]*
+## Patch 0.5
+Stealthed characters can now be targeted by allies
 
-### New Features
-
-#### ⚾ Schoolboy Shoma - Advanced Talent Tree
-**Rationale**: Schoolboy Shoma's talent tree was limited to just the Debuff Hunter talent. This expansion adds two powerful new Boink enhancement talents that branch from the root, giving players meaningful choices in how they develop Shoma's signature ability.
-
-**New Talents Added:**
-
-**🔥 Power Boink** (Tier 2 - Connected to Debuff Hunter)
-- **Effect**: Boink now scales with **85% additional Physical Damage**
-- **Visual Enhancement**: Stunning power aura VFX with energy burst, floating "POWER BOINK!" text, and radial strength particles
-- **Impact**: Transforms Boink from a utility ability into a devastating damage dealer that scales with Shoma's Physical Damage stat
-
-**⚡ Efficient Boink** (Tier 2 - Connected to Debuff Hunter)
-- **Effect**: Boink **costs no mana**
-- **Visual Enhancement**: Updated UI displays show "0 mana" cost with proper crossed-out original cost styling
-- **Impact**: Allows unlimited Boink usage, enabling aggressive playstyles without mana constraints
-
-**Technical Features:**
-- **Smart Ability Descriptions**: Boink's tooltip dynamically updates to show all active talent effects in a clean, organized format
-- **Enhanced VFX System**: Power Boink features particle-based visual effects with golden energy bursts, power auras, and floating combat text
-- **Complete Integration**: Both talents work seamlessly with existing systems including battle statistics, AI targeting, and controller support
-- **Stacking Compatibility**: Power Boink stacks multiplicatively with Debuff Hunter for massive damage against debuffed targets
-
-**Developer Commentary**: 
-*These talents provide meaningful branching choices for Shoma players. Power Boink appeals to damage-focused builds and scales naturally with character progression, while Efficient Boink enables spam-heavy playstyles and resource-free aggression. Both talents enhance Shoma's signature ability in distinct ways, allowing players to customize their approach based on team composition and preferred playstyle.*
-
-**Balance Considerations**:
-- Power Boink provides significant damage scaling but requires investment in Physical Damage stats
-- Efficient Boink removes resource constraints but doesn't increase damage output
-- Both talents require the Debuff Hunter prerequisite, ensuring players invest in the character's core identity first
-
----
-
-## Patch 0.4 - Farmer Alice Balance Changes
+## Patch 0.5 - Farmer Alice Balance Changes
 *Released: [Current Date]*
 
 ### Character Balance Changes

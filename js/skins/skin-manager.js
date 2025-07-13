@@ -245,7 +245,13 @@ class SkinManager {
             'infernal_astaroth': 'Infernal Astaroth.png',
             'infernal_birdie': 'Infernal Birdie.png',
             'infernal_raiden': 'Infernal Raiden.png',
-            'infernal_scorpion': 'Infernal Scorpion.png'
+            'infernal_scorpion': 'Infernal Scorpion.png',
+            'little_devil': 'Little Devil.webp',
+            'little_devil_female': 'Little_Devil_Female.webp',
+            'angry_carrot': 'Angry Carrot.jpeg',
+            'angry_bull': 'Angry Bull.jpeg',
+            'angry_pig': 'Angry Pig.jpeg',
+            'angry_chicken': 'Angry Chicken.jpeg',
         };
         
         const imageName = imageNameMap[characterId];
@@ -490,7 +496,7 @@ window.listCharacterMappings = () => {
         'infernal_astaroth': 'Infernal Astaroth.png',
         'infernal_birdie': 'Infernal Birdie.png',
         'infernal_raiden': 'Infernal Raiden.png',
-        'infernal_scorpion': 'Infernal Scorpion.png'
+        'infernal_scorpion': 'Infernal Scorpion.png',
     };
     
     Object.entries(imageNameMap).forEach(([id, filename]) => {

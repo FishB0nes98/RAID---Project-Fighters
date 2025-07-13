@@ -144,7 +144,226 @@ class GameManager {
         };
         
         console.log('GameManager initialized. Use window.debugHPBars() in browser console to test HP calculations');
+        this.observeCrowCrownElement();
     }
+
+    /**
+     * Observes the DOM for the .crow-crown-visual element and initializes feather particles when found.
+     */
+    observeCrowCrownElement() {
+        const targetNode = document.body; // Observe the entire body for changes
+        const config = { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] };
+
+        const callback = (mutationsList, observer) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    // Check added nodes
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType === 1 && node.classList.contains('crow-crown-visual')) {
+                            console.log('MutationObserver: crow-crown-visual element added:', node);
+                            this.initializeFeatherParticles(node);
+                            observer.disconnect(); // Stop observing once found
+                            return;
+                        }
+                    }
+                } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    // Check if class was added to an existing element
+                    if (mutation.target.classList.contains('crow-crown-visual')) {
+                        console.log('MutationObserver: crow-crown-visual class added to existing element:', mutation.target);
+                        this.initializeFeatherParticles(mutation.target);
+                        observer.disconnect(); // Stop observing once found
+                        return;
+                    }
+                }
+            }
+            // Also check if the element already exists on initial load or after some mutations
+            const crowCrownElement = document.querySelector('.crow-crown-visual');
+            if (crowCrownElement) {
+                console.log('MutationObserver: crow-crown-visual element found on check:', crowCrownElement);
+                this.initializeFeatherParticles(crowCrownElement);
+            this.initializeSurroundingFeatherParticles(crowCrownElement);
+            this.initializeStaticFeatherParticles(crowCrownElement);
+                observer.disconnect(); // Stop observing once found
+            }
+        };
+
+        const observer = new MutationObserver(callback);
+        observer.observe(targetNode, config);
+
+        // Initial check in case the element is already present before any mutations
+        const crowCrownElement = document.querySelector('.crow-crown-visual');
+        if (crowCrownElement) {
+            console.log('MutationObserver: crow-crown-visual element already present on initial load:', crowCrownElement);
+            this.initializeFeatherParticles(crowCrownElement);
+            observer.disconnect();
+        }
+    }
+
+    /**
+     * Initializes and appends feather particle elements to the DOM.
+     * These elements are styled and animated via crow-crown.css.
+     * @param {HTMLElement} crowCrownElement - The DOM element with the 'crow-crown-visual' class.
+     */
+    initializeFeatherParticles(crowCrownElement) {
+
+    /**
+     * Initializes and appends feather particle elements to the DOM.
+     * These elements are styled and animated via crow-crown.css.
+     */
+
+        console.log('Crow crown element found:', crowCrownElement);
+
+        const numberOfFeathers = 100; // Adjust as needed for border density
+        const elementWidth = crowCrownElement.offsetWidth;
+        const elementHeight = crowCrownElement.offsetHeight;
+        const perimeter = 2 * (elementWidth + elementHeight);
+        const featherSpacing = perimeter / numberOfFeathers;
+
+        for (let i = 0; i < numberOfFeathers; i++) {
+            const feather = document.createElement('img');
+            feather.src = 'images/effects/black_feather.png';
+            feather.classList.add('feather-particle', 'black-feather-image');
+
+            let x, y;
+            let currentDistance = i * featherSpacing + (Math.random() * featherSpacing * 0.8 - featherSpacing * 0.4); // Add random offset within 40% of spacing
+
+            if (currentDistance < elementWidth) { // Top edge
+                x = currentDistance;
+                y = 0;
+            } else if (currentDistance < elementWidth + elementHeight) { // Right edge
+                x = elementWidth;
+                y = currentDistance - elementWidth;
+            } else if (currentDistance < 2 * elementWidth + elementHeight) { // Bottom edge - No feathers here, skip to next edge
+                continue; // Skip this iteration to avoid placing feathers on the bottom
+            } else { // Left edge
+                x = 0;
+                y = elementHeight - (currentDistance - (2 * elementWidth + elementHeight));
+            }
+
+            let finalX = x;
+            let finalY = y;
+
+            // Apply outward offset
+            const offset = 5; // Pixels to move outwards
+            if (y === 0) { // Top edge
+                finalY -= offset;
+            } else if (x === elementWidth) { // Right edge
+                finalX += offset;
+            } else if (y === elementHeight) { // Bottom edge (though we skip this)
+                finalY += offset;
+            } else if (x === 0) { // Left edge
+                finalX -= offset;
+            }
+
+            // Apply global push
+            const globalPushLeft = 20; // Increased push to the left
+            const globalPushUp = 20; // Increased push upwards
+            finalX -= globalPushLeft;
+            finalY -= globalPushUp;
+
+            // Apply tilt
+            let tilt = Math.random() * 30 - 15; // -15 to 15 degrees
+            // Mirror tilt for left edge feathers
+            if (x === 0) { 
+                tilt = -tilt;
+            }
+
+            feather.style.left = `${finalX}px`;
+            feather.style.top = `${finalY}px`;
+            feather.style.transform = `rotate(${tilt}deg)`;
+            crowCrownElement.appendChild(feather);
+            console.log('Appended feather particle:', feather);
+        }
+        console.log(`Initialized ${numberOfFeathers} feather particles along the border.`);
+    }
+
+    /**
+     * Initializes and appends feather particle elements that surround and move around the crow-crown-visual element.
+     * These elements will have a different animation and styling.
+     * @param {HTMLElement} crowCrownElement - The DOM element with the 'crow-crown-visual' class.
+     */
+    initializeSurroundingFeatherParticles(crowCrownElement) {
+        const numberOfSurroundingFeathers = 50; // Adjust as needed
+        const containerWidth = crowCrownElement.offsetWidth;
+        const containerHeight = crowCrownElement.offsetHeight;
+        const radius = Math.max(containerWidth, containerHeight) * 0.7; // Radius for circular movement
+
+        for (let i = 0; i < numberOfSurroundingFeathers; i++) {
+            const feather = document.createElement('img');
+            feather.src = 'images/effects/black_feather.png';
+            feather.classList.add('feather-particle', 'surrounding-feather', 'black-feather-image');
+
+            // Initial random position around the container
+            const angle = Math.random() * 2 * Math.PI;
+            const randomOffset = Math.random() * 2 * Math.PI; // Random offset for angle
+            const initialX = containerWidth / 2 + radius * Math.cos(angle + randomOffset) - feather.offsetWidth / 2;
+            const initialY = containerHeight / 2 + radius * Math.sin(angle + randomOffset) - feather.offsetHeight / 2;
+
+            feather.style.left = `${initialX}px`;
+            feather.style.top = `${initialY}px`;
+
+            // Set CSS variables for animation
+            feather.style.setProperty('--start-angle', `${angle}rad`);
+            feather.style.setProperty('--radius', `${radius}px`);
+            feather.style.setProperty('--center-x', `${containerWidth / 2}px`);
+            feather.style.setProperty('--center-y', `${containerHeight / 2}px`);
+
+            feather.style.animationDelay = `${Math.random() * 5}s`; // Random delay for staggered animation
+            feather.style.animationDuration = `${10 + Math.random() * 10}s`; // Longer duration for slow, continuous movement
+            crowCrownElement.appendChild(feather);
+        }
+        console.log(`Initialized ${numberOfSurroundingFeathers} surrounding feather particles.`);
+    }
+
+    /**
+     * Initializes and appends static or barely moving feather particle elements to the DOM.
+     * These elements are positioned along the perimeter of the crow-crown-visual element.
+     * @param {HTMLElement} crowCrownElement - The DOM element with the 'crow-crown-visual' class.
+     */
+    initializeStaticFeatherParticles(crowCrownElement) {
+        const numberOfStaticFeathers = 150; // Adjust as needed for density
+        const elementWidth = crowCrownElement.offsetWidth;
+        const elementHeight = crowCrownElement.offsetHeight;
+        console.log(`initializeStaticFeatherParticles: crowCrownElement dimensions - Width: ${elementWidth}, Height: ${elementHeight}`);
+        const perimeter = 2 * (elementWidth + elementHeight);
+        const featherSpacing = perimeter / numberOfStaticFeathers;
+
+        for (let i = 0; i < numberOfStaticFeathers; i++) {
+            if (i < 5 || i > numberOfStaticFeathers - 5) { // Log first and last few feathers
+                console.log(`Feather ${i}: currentDistance = ${currentDistance}`);
+            }
+            const feather = document.createElement('img');
+            feather.src = 'images/effects/black_feather.png';
+            feather.classList.add('feather-particle', 'static-feather', 'black-feather-image');
+
+            let x, y;
+            let currentDistance = i * featherSpacing + (Math.random() * featherSpacing * 0.8 - featherSpacing * 0.4); // Add random offset within 40% of spacing
+
+            if (currentDistance < elementWidth) { // Top edge
+                x = currentDistance;
+                y = 0;
+            } else if (currentDistance < elementWidth + elementHeight) { // Right edge
+                x = elementWidth;
+                y = currentDistance - elementWidth;
+            } else if (currentDistance < 2 * elementWidth + elementHeight) { // Bottom edge
+                continue; // Skip this iteration to avoid placing feathers on the bottom
+            } else { // Left edge
+                x = 0;
+                y = elementHeight - (currentDistance - (2 * elementWidth + elementHeight));
+            }
+
+            feather.style.left = `${x}px`;
+            feather.style.top = `${y}px`;
+            if (i < 5 || i > numberOfStaticFeathers - 5) { // Log first and last few feathers
+                console.log(`Feather ${i}: x = ${x}, y = ${y}`);
+            }
+            // No animation properties for static feathers, or very subtle ones if desired later
+            crowCrownElement.appendChild(feather);
+        }
+        console.log(`Initialized ${numberOfStaticFeathers} static feather particles.`);
+    }
+
+
     
     // Test battle log functionality
     testBattleLog() {
@@ -1438,6 +1657,19 @@ class GameManager {
         localStorage.setItem('gameVolume', JSON.stringify(volumeSettings));
     }
 
+    // Check if reduction messages should be shown
+    shouldShowReductionMessages() {
+        const saved = localStorage.getItem('showReductionMessages');
+        return saved !== null ? JSON.parse(saved) : true; // Default to true
+    }
+
+    // Toggle reduction messages setting
+    toggleReductionMessages() {
+        const current = this.shouldShowReductionMessages();
+        localStorage.setItem('showReductionMessages', JSON.stringify(!current));
+        return !current;
+    }
+
     // Start a new game with a specific stage
     async startGame(stageId) {
         const userId = getCurrentUserId();
@@ -1774,6 +2006,34 @@ class GameManager {
         // Call the Character's useAbility method, passing the index and target.
         // This ensures the logic within Character.useAbility (like the interaction sound) is executed.
         success = caster.useAbility(abilityIndex, target);
+
+        // --- NEW: Double Kitchen Knife Check ---
+        if (success && abilityIndex === 2 && window.doubleKitchenKnifeHandler?.hasItem(caster)) {
+            console.log(`[GameManager] Double Kitchen Knife detected on ${caster.name}. Triggering second E ability use.`);
+            this.addLogEntry(`🔪 ${caster.name}'s Double Kitchen Knife triggers a second activation of ${ability.name}!`, 'item-effect');
+            
+            setTimeout(() => {
+                console.log(`[GameManager] Re-activating E ability for ${caster.name} via Double Kitchen Knife.`);
+                const eAbility = caster.abilities[abilityIndex];
+                if (eAbility) {
+                    const originalCooldown = eAbility.currentCooldown;
+                    console.log(`[DoubleKitchenKnife] Temporarily resetting cooldown for ${eAbility.name} from ${originalCooldown} to 0.`);
+                    eAbility.currentCooldown = 0;
+                    
+                    caster.useAbility(abilityIndex, target);
+                    
+                    console.log(`[DoubleKitchenKnife] Restoring cooldown for ${eAbility.name} to ${originalCooldown}.`);
+                    eAbility.currentCooldown = originalCooldown;
+                    
+                    if (this.uiManager) {
+                        this.uiManager.updateCharacterUI(caster);
+                    }
+                } else {
+                    console.error('[DoubleKitchenKnife] Could not find E ability to re-activate.');
+                }
+            }, 600); // 600ms delay for visual clarity
+        }
+        // --- END NEW ---
         
         // --- NEW: Check if the ability effect returned a result with 'doesNotEndTurn' ---
         // Look for a result object with doesNotEndTurn property from the ability effect
@@ -2617,13 +2877,24 @@ class GameManager {
                        }
                    }
 
-                   // 2. Process effects (apply buffs/debuffs, NO duration reduction, NO regeneration - already done at end of player turn)
+                   // 2. Auto-mark stunned characters as acted
+                   if (char.isStunned()) {
+                       const charId = char.instanceId || char.id;
+                       if (!this.actedCharacters.includes(charId)) {
+                           this.actedCharacters.push(charId);
+                           this.uiManager.markCharacterAsActed(char);
+                           console.log(`[GameManager endAITurn] ${char.name} is stunned - automatically marked as acted`);
+                           this.addLogEntry(`${char.name} is stunned and cannot act this turn.`, 'debuff');
+                       }
+                   }
+
+                   // 3. Process effects (apply buffs/debuffs, NO duration reduction, NO regeneration - already done at end of player turn)
                    char.processEffects(false, false); // false, false -> Apply effects, don't reduce duration, don't regenerate
 
-                                  // 4. Reduce ability cooldowns
-               char.abilities.forEach(ability => ability.reduceCooldown());
+                   // 4. Reduce ability cooldowns
+                   char.abilities.forEach(ability => ability.reduceCooldown());
 
-               // 5. Reduce consumable cooldowns (same as abilities - turn-based)
+                   // 5. Reduce consumable cooldowns (same as abilities - turn-based)
                if (char.consumableCooldowns) {
                    Object.keys(char.consumableCooldowns).forEach(itemId => {
                        if (char.consumableCooldowns[itemId] > 0) {
@@ -2638,8 +2909,8 @@ class GameManager {
                    this.refreshConsumableUI();
                }
 
-               // 6. Update UI
-               this.uiManager.updateCharacterUI(char); // Use this.uiManager
+                   // 6. Update UI
+                   this.uiManager.updateCharacterUI(char); // Use this.uiManager
                }
            });
            // --- END Player Start-of-Turn Processing ---
@@ -6246,8 +6517,6 @@ class AIManager {
                                 this.gameManager.selectCharacter(character);
                             }
                         }
-                    } else {
-                        console.error('Game state or player characters not available');
                     }
                 }
             });
@@ -6267,8 +6536,6 @@ class AIManager {
                             console.error(`Could not find AI character with instanceId: ${instanceId}`);
                             // Fallback or further debugging needed
                         }
-                    } else {
-                        console.error('Game state or AI characters not available');
                     }
                 }
             });

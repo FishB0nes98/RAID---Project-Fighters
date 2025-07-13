@@ -1061,7 +1061,7 @@ class FarmerRaidenPassive {
         let attempts = 0;
 
         const tryInitialize = () => {
-            const characterElement = document.getElementById(`character-${this.character.id}`);
+            const characterElement = document.getElementById(`character-${character.id}`);
             
             if (characterElement) {
                 // Success: Element exists, proceed with passive setup

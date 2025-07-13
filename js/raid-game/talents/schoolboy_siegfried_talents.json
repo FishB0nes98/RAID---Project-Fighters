@@ -613,9 +613,7 @@
                 "critical_blessing",
                 "restorative_buffs"
             ],
-            "children": [
-                "restorative_buffs"
-            ]
+            "children": []
         },
         "purifying_resolve": {
             "id": "purifying_resolve",

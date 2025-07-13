@@ -538,6 +538,13 @@ const schoolboySiegfriedLionProtectionEffect = (caster, isAuto = false) => {
         onRemove: (character) => {
             character.recalculateStats('lion_protection_remove');
             console.log(`[Lion Protection Buff] Removed from ${character.name}`);
+            
+            // Remove Lion Protection VFX
+            const shieldVfx = document.getElementById(`lion-shield-${character.instanceId || character.id}`);
+            if (shieldVfx) {
+                shieldVfx.remove();
+                console.log(`[Lion Protection Buff] VFX removed for ${character.name}`);
+            }
         }
     };
     
@@ -1294,8 +1301,9 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
         }
 
         // Heal random ally if found
+        let allyHealResult = null;
         if (randomAlly) {
-            const allyHealResult = randomAlly.heal(healAmount, caster, { abilityId: 'schoolboy_siegfried_r_ally_heal' });
+            allyHealResult = randomAlly.heal(healAmount, caster, { abilityId: 'schoolboy_siegfried_r_ally_heal' });
             // --- NEW: Use ally instanceId if available ---
             const allyName = randomAlly.name || (randomAlly.instanceId || randomAlly.id);
             log(`${allyName} is healed by Judgement for ${allyHealResult.healAmount} HP.`);
@@ -1317,7 +1325,7 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
 
         // Track comprehensive statistics for Judgement ability
         if (window.trackJudgementStats) {
-            const allyHealAmount = randomAlly ? allyHealResult.healAmount : 0;
+            const allyHealAmount = randomAlly && allyHealResult ? allyHealResult.healAmount : 0;
             window.trackJudgementStats(caster, target, result, casterHealResult.healAmount, allyHealAmount, randomAlly);
         }
     }

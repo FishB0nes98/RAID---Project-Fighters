@@ -123,10 +123,93 @@
     <script src="js/raid-game/controller-manager.js"></script>
     <script src="js/raid-game/talents.js"></script>
     <script>
-    // Show admin button only for FishB0nes98
+    // Diagnostic script to help identify loading issues
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('[Talents] DOM loaded, starting diagnostics...');
+        
+        // Check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const characterId = urlParams.get('character');
+        console.log('[Talents] Character ID from URL:', characterId);
+        
+        if (!characterId) {
+            console.error('[Talents] ERROR: No character ID in URL. Please add ?character=characterId');
+            document.getElementById('loading-screen').innerHTML = `
+                <div class="loader"></div>
+                <div class="loading-text" style="color: #ff6b6b;">
+                    ERROR: Missing character parameter
+                    <br><br>
+                    Please visit this page with: talents.html?character=characterId
+                    <br><br>
+                    <button onclick="window.history.back()" style="
+                        background: #007bff; 
+                        color: white; 
+                        border: none; 
+                        padding: 10px 20px; 
+                        border-radius: 5px; 
+                        cursor: pointer;
+                    ">Go Back</button>
+                </div>
+            `;
+            return;
+        }
+        
+        // Check Firebase availability
+        setTimeout(() => {
+            if (typeof firebaseAuth === 'undefined') {
+                console.error('[Talents] ERROR: Firebase Auth not available');
+                document.getElementById('loading-screen').innerHTML = `
+                    <div class="loader"></div>
+                    <div class="loading-text" style="color: #ff6b6b;">
+                        ERROR: Firebase not loaded
+                        <br><br>
+                        Please check your internet connection
+                        <br><br>
+                        <button onclick="location.reload()" style="
+                            background: #007bff; 
+                            color: white; 
+                            border: none; 
+                            padding: 10px 20px; 
+                            border-radius: 5px; 
+                            cursor: pointer;
+                        ">Retry</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Check auth state
+            if (!firebaseAuth.currentUser) {
+                console.warn('[Talents] No user logged in, waiting for auth...');
+                firebaseAuth.onAuthStateChanged((user) => {
+                    if (!user) {
+                        console.error('[Talents] ERROR: User not authenticated');
+                        document.getElementById('loading-screen').innerHTML = `
+                            <div class="loader"></div>
+                            <div class="loading-text" style="color: #ff6b6b;">
+                                ERROR: Please log in first
+                                <br><br>
+                                <button onclick="window.location.href='character-selector.html'" style="
+                                    background: #007bff; 
+                                    color: white; 
+                                    border: none; 
+                                    padding: 10px 20px; 
+                                    border-radius: 5px; 
+                                    cursor: pointer;
+                                ">Go to Character Selector</button>
+                            </div>
+                        `;
+                    } else {
+                        console.log('[Talents] User authenticated:', user.uid);
+                    }
+                });
+            } else {
+                console.log('[Talents] User already authenticated:', firebaseAuth.currentUser.uid);
+            }
+        }, 1000);
+        
+        // Show admin button only for FishB0nes98
         const adminButton = document.getElementById('admin-grant-talents-button');
-        // Wait for Firebase Auth to be ready
         function showIfAdmin() {
             if (typeof firebaseAuth !== 'undefined' && firebaseAuth.currentUser && firebaseAuth.currentUser.displayName === 'FishB0nes98') {
                 adminButton.style.display = '';

@@ -1,0 +1,207 @@
+/* Crow Crown Visual Effect - Real Feather Shapes */
+
+/* Override CSS containment that clips content */
+body:has(.crow-crown-visual) {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.game-container:has(.crow-crown-visual) {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.characters-container:has(.crow-crown-visual) {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.top-section:has(.crow-crown-visual),
+.bottom-section:has(.crow-crown-visual) {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+body.has-crow-crown {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.game-container.has-crow-crown {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.characters-container.has-crow-crown {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.top-section.has-crow-crown,
+.bottom-section.has-crow-crown {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+/* Main container */
+.character.character-slot.crow-crown-visual {
+    position: relative !important;
+    z-index: 1000 !important;
+    overflow: visible !important;
+    contain: none !important;
+    transform: none !important;
+}
+
+/* Ensure character image is NOT affected */
+.character.character-slot.crow-crown-visual .character-image {
+    position: relative !important;
+    z-index: 10 !important;
+    filter: none !important;
+    transform: none !important;
+    background: none !important;
+}
+
+
+
+
+
+/* Animation keyframes */
+@keyframes featherSway {
+    0% {
+        transform: rotate(-1deg) scale(1);
+        opacity: 0.9;
+    }
+    33% {
+        transform: rotate(1deg) scale(1.02);
+        opacity: 1;
+    }
+    66% {
+        transform: rotate(-0.5deg) scale(0.98);
+        opacity: 0.95;
+    }
+    100% {
+        transform: rotate(-1deg) scale(1);
+        opacity: 0.9;
+    }
+}
+
+@keyframes featherFlyAway {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.9;
+        filter: drop-shadow(0 0 5px rgba(139, 0, 139, 0.7));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 10px rgba(139, 0, 139, 0.9));
+    }
+    100% {
+        transform: scale(0.3);
+        opacity: 0;
+        filter: drop-shadow(0 0 15px rgba(139, 0, 139, 0.5));
+    }
+}
+
+
+
+/* New animation for continuous feather generation and movement */
+@keyframes generateFeathers {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.9));
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1.1) translate(var(--fly-x, 0), -50px) rotate(var(--rot, 0deg));
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translate(var(--fly-x, 0), -100px) rotate(var(--rot, 0deg));
+        filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.3));
+    }
+}
+
+
+
+.character.character-slot.crow-crown-visual {
+    /* ... existing styles ... */
+    position: relative !important;
+    z-index: 10 !important; /* Changed to a lower z-index */
+    overflow: visible !important;
+    contain: none !important;
+    transform: none !important;
+    box-shadow: 
+        0 0 30px 10px rgba(0, 0, 0, 0.9),
+        0 0 60px 20px rgba(0, 0, 0, 0.7),
+        0 0 100px 40px rgba(0, 0, 0, 0.5);
+
+}
+
+.crow-crown {
+
+}
+
+.crow-crown-visual .feather-particle {
+    position: absolute;
+    width: 50px; /* Significantly larger */
+    height: 100px; /* Significantly larger */
+
+    pointer-events: none;
+    z-index: 1; /* Ensure feathers are behind the main element */
+    filter: 
+        drop-shadow(0 0 5px rgba(0, 0, 0, 0.9))
+        drop_shadow(0 0 10px rgba(0, 0, 0, 0.5));
+}
+
+
+
+.feather-particle.surrounding-feather {
+    z-index: 0;
+    animation: moveAroundContainer var(--animation-duration, 15s) linear infinite;
+}
+
+.feather-particle.static-feather {
+    z-index: 1; /* Ensure these are behind the border but potentially above other feathers if needed */
+    opacity: 1; /* Make them fully opaque for better visibility */
+    /* No animation or very subtle animation if desired */
+}
+
+@keyframes moveAroundContainer {
+    0% {
+        transform: translate(var(--center-x), var(--center-y)) rotate(0deg) translateX(var(--radius)) rotate(calc(var(--start-angle) + 0deg));
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--center-x), var(--center-y)) rotate(360deg) translateX(var(--radius)) rotate(calc(var(--start-angle) + 360deg));
+        opacity: 0.7;
+    }
+}
+
+
+.character.character-slot.crow-crown-visual::before,
+.character.character-slot.crow-crown-visual .feather-particle {
+    /* animation-delay and animation-duration are set by JavaScript */
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+}
+
+        .crow-crown {
+            position: relative;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Allows clicks to pass through to elements below */
+            overflow: visible; /* Ensures particles don't go outside */
+        }

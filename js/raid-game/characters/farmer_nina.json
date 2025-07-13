@@ -21,23 +21,36 @@
         {
             "id": "farmer_nina_q",
             "name": "Sniper Shot",
-            "type": "damage",
-            "damageType": "physical",
+            "type": "custom",
+            "functionName": "farmer_ninaSniperShotEffect",
             "manaCost": 40,
             "cooldown": 1,
             "targetType": "enemy",
-            "description": "Deals 400 (+50% AD) damage. After use, gain 20% crit chance for 3 turns.",
-            "icon": "Icons/abilities/sniper_shot.jpeg"
+            "description": "🎯 Carefully aims and fires a precision shot dealing 400 (+50% AD) damage. After use, Nina gains <span class='buff-text'>Sniper Focus</span>: +20% crit chance for 3 turns.",
+            "icon": "Icons/abilities/sniper_shot.jpeg",
+            "vfx": {
+                "scopeOverlay": true,
+                "muzzleFlash": true,
+                "bulletTrail": true,
+                "critBuff": true
+            }
         },
         {
             "id": "farmer_nina_w",
             "name": "Hiding",
-            "type": "buff",
+            "type": "custom",
+            "functionName": "farmer_ninaHidingEffect",
             "manaCost": 30,
             "cooldown": 8,
             "targetType": "self",
-            "description": "Become untargetable for 2 turns and regenerate 350 HP each turn. Farmer Nina can still be damaged by AOE and DOT effects. Stealth breaks if damaged or when using other abilities.",
-            "icon": "Icons/abilities/hiding.jpeg"
+            "description": "🌫️ Vanishes into the shadows, becoming <span class='buff-text'>untargetable</span> for 2 turns and regenerating <span class='heal-text'>350 HP per turn</span>. Can still take damage from AoE and DoT effects.",
+            "icon": "Icons/abilities/hiding.jpeg",
+            "vfx": {
+                "stealthActivation": true,
+                "shimmerEffect": true,
+                "stealthParticles": true,
+                "regenerationPulse": true
+            }
         },
         {
             "id": "farmer_nina_e",
@@ -47,25 +60,61 @@
             "manaCost": 0,
             "cooldown": 20,
             "targetType": "enemy",
-            "description": "Marks a target, causing them to take 15% more physical damage for 10 turns.",
-            "icon": "Icons/abilities/target_lock.jpeg"
+            "description": "🔴 Locks onto a target with advanced targeting systems. Marked enemies take <span class='debuff-text'>+15% more physical damage</span> per stack for 10 turns. Stacks with multiple uses.",
+            "icon": "Icons/abilities/target_lock.jpeg",
+            "vfx": {
+                "targetScanning": true,
+                "lockingReticle": true,
+                "targetingBeam": true,
+                "debuffIndicator": true
+            }
         },
         {
             "id": "farmer_nina_r",
             "name": "Piercing Shot",
-            "type": "damage",
-            "damageType": "physical",
+            "type": "custom",
+            "functionName": "farmer_ninaPiercingShotEffect",
             "manaCost": 100,
             "cooldown": 12,
             "targetType": "enemy",
-            "description": "Fires a specialized round that deals 750 (+250% AD) physical damage and completely ignores the target's armor.",
-            "icon": "Icons/abilities/piercing_shot.jpeg"
+            "description": "💥 Charges and fires an armor-piercing round dealing 750 (+250% AD) physical damage. <span class='damage-text'>Completely ignores armor</span> and cannot be reduced.",
+            "icon": "Icons/abilities/piercing_shot.jpeg",
+            "vfx": {
+                "energyCharge": true,
+                "piercingProjectile": true,
+                "armorPierceEffect": true,
+                "chargeAura": true
+            }
         }
     ],
     "passive": {
         "id": "farmer_nina_passive",
         "name": "Evasive Adaptability",
-        "description": "Nina gains 5% dodge chance for each buff active on her.",
-        "icon": "Icons/passive_farmer_farmer_nina.png"
+        "description": "🏃‍♀️ Nina's tactical training allows her to adapt to combat situations. Gains <span class='buff-text'>+5% dodge chance</span> for each active buff.",
+        "icon": "Icons/passive_farmer_farmer_nina.png",
+        "vfx": {
+            "dodgeBoostIndicator": true,
+            "adaptabilityPulse": true
+        }
+    },
+    "talents": [
+        {
+            "id": "bullet_rain",
+            "name": "Bullet Rain",
+            "description": "🌧️ At the start of each turn, automatically unleashes a barrage on all enemies marked with Target Lock, dealing 25% AD damage to each.",
+            "functionName": "executeBulletRain",
+            "vfx": {
+                "bulletStorm": true,
+                "multipleTracers": true,
+                "staggeredEffects": true
+            }
+        }
+    ],
+    "characterTheme": {
+        "primaryRole": "Sniper/Assassin",
+        "combatStyle": "Precision, Stealth, Long-range",
+        "visualTheme": "Military tactical, Advanced optics, Stealth technology",
+        "colorPalette": ["#4c804c", "#ff0040", "#ffa500", "#00ff88", "#87ceeb"],
+        "soundProfile": "Sniper rifle shots, Scope adjustments, Stealth activation"
     }
 } 
