@@ -7,7 +7,7 @@
 class ZoeyPassive {
     constructor(character) {
         this.name = "Sparkle Bell Mark";
-        this.description = "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 125% damage to marked enemies. The mark disappears when the enemy takes damage.";
+        this.description = "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 175% damage to marked enemies. The mark disappears when the enemy takes damage.";
         this.icon = "Icons/abilities/sparkle_bell_mark.png";
         
         // Store character if provided in constructor
@@ -86,7 +86,7 @@ class ZoeyPassive {
     
     updateDescription() {
         // Base description
-        let description = "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 125% damage to marked enemies. The mark disappears when the enemy takes damage.";
+        let description = "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 175% damage to marked enemies. The mark disappears when the enemy takes damage.";
         
         // Add talent descriptions if applicable
         let talentEffects = '';
@@ -307,26 +307,14 @@ class ZoeyPassive {
         if (caster === this.character && damage > 0 && target) {
             console.log(`[Zoey Passive] ✅ Zoey is dealing ${damage} damage to ${target.name} with source: "${source}"`);
             
-            // Check if ability was a damage spell
-            const isDamageSpellResult = this.isDamageSpell(source);
-            console.log(`[Zoey Passive] isDamageSpell("${source}") = ${isDamageSpellResult}`);
-            
-            if (isDamageSpellResult) {
-                console.log(`[Zoey Passive] ✅ Adding ${target.name} to pending mark targets for source: "${source}"`);
-                console.log(`[Zoey Passive] Pending targets before add:`, Array.from(this.pendingMarkTargets).map(t => t.name));
-                // Add target to pending mark list instead of applying immediately
-                this.pendingMarkTargets.add(target);
-                console.log(`[Zoey Passive] Pending targets after add:`, Array.from(this.pendingMarkTargets).map(t => t.name));
-            } else {
-                console.log(`[Zoey Passive] ❌ Source "${source}" not recognized as damage spell, no mark will be applied`);
-            }
+            // Mark application logic is now in onDamageTaken.
             
             // Check if target is marked - if so, multiply the damage based on stacks
             if (this.isMarked(target)) {
                 const markData = this.markedEnemies.get(target.id);
                 const stacks = markData?.stacks || 1;
-                // Updated: 1 stack = 1.25x damage (125%), 2 stacks = 1.5x damage (150%)
-                const damageMultiplier = 1 + (stacks * 0.25);
+                // Updated: 1 stack = 1.75x damage (175%), 2 stacks = 2x damage (200%)
+                const damageMultiplier = 1 + (stacks * 0.75);
                 
                 const originalDamage = damage;
                 event.detail.damage = Math.round(damage * damageMultiplier);
@@ -407,16 +395,22 @@ class ZoeyPassive {
 
     onDamageTaken(event) {
         if (!event.detail) {
-            console.log(`[Zoey Passive] onDamageTaken - No event detail`);
+            console.log(`[Zoey Passive] onDamage:Taken - No event detail`);
             return;
         }
         const { caster, target, damage } = event.detail;
         
-        console.log(`[Zoey Passive] onDamageTaken - caster: ${caster?.name}, target: ${target?.name}, damage: ${damage}`);
-        console.log(`[Zoey Passive] onDamageTaken - caster === this.character? ${caster === this.character}`);
+        console.log(`[Zoey Passive] onDamage:Taken - caster: ${caster?.name}, target: ${target?.name}, damage: ${damage}`);
+        console.log(`[Zoey Passive] onDamage:Taken - caster === this.character? ${caster === this.character}`);
         
         // First check if this is a damage event caused by Zoey
-        if (caster === this.character && damage > 0) {            
+        if (caster === this.character && damage > 0 && target) {
+            // Apply Sparkle Bell Mark if the ability is a damage spell
+            const abilityId = event.detail.abilityId;
+            if (this.isDamageSpell(abilityId)) {
+                this.applyMark(target);
+            }
+            
             // Handle Symbiotic Healing talent - heal self and allies for 1% of damage dealt
             if (this.character && this.character.enableSymbioticHealing) {
                 const healingAmount = Math.round(damage * 0.01);
@@ -462,68 +456,6 @@ class ZoeyPassive {
             }
             
 
-            
-            // Apply mark if this target is pending a mark
-            console.log(`[Zoey Passive] Checking if ${target.name} is in pending mark list...`);
-            console.log(`[Zoey Passive] Pending targets:`, Array.from(this.pendingMarkTargets).map(t => t.name));
-            console.log(`[Zoey Passive] Has target?`, this.pendingMarkTargets.has(target));
-            
-            if (this.pendingMarkTargets.has(target)) {
-                console.log(`[Zoey Passive] ✅ Target ${target.name} is in pending mark list, checking if already processing...`);
-                
-                // Check if we're already processing this target to prevent duplicate events
-                const processingKey = `${target.id}-${Date.now()}`;
-                const currentTime = Date.now();
-                
-                // Clean up old processing entries (older than 1 second)
-                for (const [key, timestamp] of this.processingMarkTargets.entries()) {
-                    if (currentTime - timestamp > 1000) {
-                        this.processingMarkTargets.delete(key);
-                    }
-                }
-                
-                // Check if target is already being processed (within last 100ms)
-                let isAlreadyProcessing = false;
-                for (const [key, timestamp] of this.processingMarkTargets.entries()) {
-                    if (key.startsWith(target.id + '-') && (currentTime - timestamp) < 100) {
-                        isAlreadyProcessing = true;
-                        console.log(`[Zoey Passive] ⚠️ Target ${target.name} is already being processed, skipping duplicate event`);
-                        break;
-                    }
-                }
-                
-                if (!isAlreadyProcessing) {
-                    // Mark as processing
-                    this.processingMarkTargets.set(processingKey, currentTime);
-                    console.log(`[Zoey Passive] 🎯 Processing mark application for ${target.name}`);
-                    
-                    // Remove from pending list
-                    this.pendingMarkTargets.delete(target);
-                    console.log(`[Zoey Passive] Removed ${target.name} from pending list. New size: ${this.pendingMarkTargets.size}`);
-                    
-                    // Apply mark AFTER damage is dealt
-                    setTimeout(() => {
-                        // Apply the mark (but only if target is still alive)
-                        if (!target.isDead()) {
-                            console.log(`[Zoey Passive] ✅ Applying Sparkle Bell Mark to ${target.name}`);
-                            this.applyMark(target);
-                        } else {
-                            console.log(`[Zoey Passive] ❌ Target ${target.name} is dead, not applying mark`);
-                        }
-                        
-                        // Clean up processing entry
-                        this.processingMarkTargets.delete(processingKey);
-                    }, 50);
-                }
-                
-                // IMPORTANT: Return early to prevent processing this event again
-                return;
-            } else {
-                console.log(`[Zoey Passive] ❌ Target ${target.name} not in pending mark list (size: ${this.pendingMarkTargets.size})`);
-                if (this.pendingMarkTargets.size > 0) {
-                    console.log(`[Zoey Passive] Available pending targets:`, Array.from(this.pendingMarkTargets).map(t => `${t.name} (id: ${t.id})`));
-                }
-            }
         }
         // Then, if a marked enemy takes damage from any source, remove the mark
         else if (damage > 0 && this.isMarked(target)) {
@@ -904,7 +836,7 @@ class ZoeyPassive {
         const markDebuff = {
             id: 'sparkle-bell-mark',
             name: `Sparkle Bell Mark${stacks > 1 ? ` (${stacks}x)` : ''}`,
-            description: `Marked by Zoey. Takes ${stacks > 1 ? ((1 + stacks * 0.25) * 100).toFixed(0) + '%' : '125%'} damage from Zoey's attacks. Removed when taking damage.`,
+            description: `Marked by Zoey. Takes ${stacks > 1 ? ((1 + stacks * 0.75) * 100).toFixed(0) + '%' : '175%'} damage from Zoey's attacks. Removed when taking damage.`,
             icon: 'Icons/abilities/sparkle_bell_mark.png',
             duration: 2,
             stacks: stacks,
@@ -2291,4 +2223,4 @@ if (typeof window.PassiveFactory !== 'undefined' && typeof window.PassiveFactory
     
     // Fallback: Add to window object so it can be found by other registration methods
     window.ZoeyPassive = ZoeyPassive;
-} 
+}

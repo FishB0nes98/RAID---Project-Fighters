@@ -4,7 +4,7 @@
     "image": "Loading Screen/Atlantean Kagome.png",
     "stats": {
         "physicalDamage": 150,
-        "magicalDamage": 220,
+        "magicalDamage": 255,
         "armor": 7,
         "magicalShield": 11,
         "hp": 6888,

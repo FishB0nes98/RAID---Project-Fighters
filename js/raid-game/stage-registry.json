@@ -521,6 +521,43 @@
       "backgroundMusic": "sounds/music/forest_ambient.mp3",
       "unlockRequirements": [],
       "path": "js/raid-game/stages/corrupted_bear_encounter.json"
+    },
+    {
+      "id": "weekly_challenge_pumpkin_field",
+      "name": "Weekly Challenge: Pumpkin Field",
+      "description": "Face the farm school gang in a cursed pumpkin field! Starting at turn 2, every 6th turn all living characters gain exploding pumpkin debuffs. Can you survive the explosive chaos?",
+      "difficulty": 6,
+      "type": "weekly_challenge",
+      "backgroundImage": "images/stages/farmstage2.jpeg",
+      "backgroundMusic": "sounds/Stage_1_Audio.mp3",
+      "unlockRequirements": [],
+      "path": "single-stages.json",
+      "playerunlocked": true,
+      "stageModifiers": [
+        {
+          "id": "exploding_pumpkin_field",
+          "name": "Exploding Pumpkin Field",
+          "description": "Starting at turn 2, every 6th turn all living characters gain an exploding pumpkin debuff!",
+          "icon": "🎃"
+        },
+        {
+          "id": "triple_hp",
+          "name": "Triple HP",
+          "description": "All characters have triple HP! Battles last longer but hits feel more impactful.",
+          "icon": "💖"
+        }
+      ],
+      "enemies": [
+        "farmer_shoma",
+        "farmer_cham_cham", 
+        "schoolgirl_ayane",
+        "bridget",
+        "schoolgirl_julia"
+      ],
+      "requirements": {
+        "tags": [],
+        "teamSize": { "min": 1, "max": 5 }
+      }
     }
   ]
 }

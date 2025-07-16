@@ -8,40 +8,77 @@
     const abilityModifications = {};
     
     // Function to apply ability modifications when an ability is used
-    function applyStoredModifications(ability) {
+    function applyStoredModifications(ability, characterId) {
         const abilityId = ability.id;
-        if (!abilityModifications[abilityId]) return;
         
-        // Apply all stored modifications
-        for (const prop in abilityModifications[abilityId]) {
-            ability[prop] = abilityModifications[abilityId][prop];
+        // Check for character-specific modifications first
+        if (characterId && abilityModifications[characterId] && abilityModifications[characterId][abilityId]) {
+            console.log(`[ApplyStoredModifications] Applying character-specific modifications for ${characterId}, ${abilityId}`);
             
-            // Always regenerate description after any property change
-            if (typeof ability.generateDescription === 'function') {
-                ability.generateDescription();
-                console.log(`[ApplyStoredModifications] Updated description for ${ability.name || ability.id}`);
+            // Apply all stored modifications for this character's ability
+            for (const prop in abilityModifications[characterId][abilityId]) {
+                const value = abilityModifications[characterId][abilityId][prop];
+                ability[prop] = value;
+                console.log(`[ApplyStoredModifications] Applied ${prop} = ${value} to ${ability.name || ability.id}`);
+                
+                // Always regenerate description after any property change
+                if (typeof ability.generateDescription === 'function') {
+                    ability.generateDescription();
+                    console.log(`[ApplyStoredModifications] Updated description for ${ability.name || ability.id}`);
+                }
+            }
+            
+            // If there are any changes, dispatch an event to notify UI components
+            if (Object.keys(abilityModifications[characterId][abilityId]).length > 0) {
+                const abilityModifiedEvent = new CustomEvent('abilityModified', {
+                    detail: {
+                        characterId: characterId,
+                        abilityId: abilityId,
+                        ability: ability,
+                        properties: Object.keys(abilityModifications[characterId][abilityId])
+                    },
+                    bubbles: true
+                });
+                document.dispatchEvent(abilityModifiedEvent);
             }
         }
         
-        // If there are any changes, dispatch an event to notify UI components
-        if (Object.keys(abilityModifications[abilityId]).length > 0) {
-            const abilityModifiedEvent = new CustomEvent('abilityModified', {
-                detail: {
-                    abilityId: abilityId,
-                    ability: ability,
-                    properties: Object.keys(abilityModifications[abilityId])
-                },
-                bubbles: true
-            });
-            document.dispatchEvent(abilityModifiedEvent);
+        // Also check for legacy global modifications (for backward compatibility)
+        if (abilityModifications[abilityId]) {
+            console.log(`[ApplyStoredModifications] Applying legacy global modifications for ${abilityId}`);
+            
+            // Apply all stored modifications
+            for (const prop in abilityModifications[abilityId]) {
+                ability[prop] = abilityModifications[abilityId][prop];
+                
+                // Always regenerate description after any property change
+                if (typeof ability.generateDescription === 'function') {
+                    ability.generateDescription();
+                    console.log(`[ApplyStoredModifications] Updated description for ${ability.name || ability.id}`);
+                }
+            }
+            
+            // If there are any changes, dispatch an event to notify UI components
+            if (Object.keys(abilityModifications[abilityId]).length > 0) {
+                const abilityModifiedEvent = new CustomEvent('abilityModified', {
+                    detail: {
+                        abilityId: abilityId,
+                        ability: ability,
+                        properties: Object.keys(abilityModifications[abilityId])
+                    },
+                    bubbles: true
+                });
+                document.dispatchEvent(abilityModifiedEvent);
+            }
         }
     }
     
     // Patch the Ability class use method to apply modifications before use
     const originalAbilityUse = Ability.prototype.use;
     Ability.prototype.use = function(caster, targetOrTargets, actualManaCost, options = {}) {
-        // Apply any stored modifications
-        applyStoredModifications(this);
+        // Apply any stored modifications, passing the caster's ID for character-specific modifications
+        const characterId = caster ? caster.id : null;
+        applyStoredModifications(this, characterId);
         
         // Call the original method and pass back its result
         return originalAbilityUse.call(this, caster, targetOrTargets, actualManaCost, options);
@@ -60,7 +97,7 @@
                 // Apply any stored modifications to abilities immediately
                 if (character && character.abilities) {
                     character.abilities.forEach(ability => {
-                        applyStoredModifications(ability);
+                        applyStoredModifications(ability, character.id);
                         
                         // Special handling for Schoolboy Shoma's Boink ability
                         if (character.id === 'schoolboy_shoma' && ability.id === 'boink') {
@@ -228,6 +265,61 @@
         
         console.log("=== END DEBUG ===");
     };
+
+    // Function to add a modification to a specific ability on a specific character
+    window.addAbilityModification = function(characterId, abilityId, property, value) {
+        if (!characterId || !abilityId) {
+            console.warn('[AbilityModifier] addAbilityModification called without valid characterId or abilityId.');
+            return;
+        }
+        if (!abilityModifications[characterId]) {
+            abilityModifications[characterId] = {};
+        }
+        if (!abilityModifications[characterId][abilityId]) {
+            abilityModifications[characterId][abilityId] = {};
+        }
+        abilityModifications[characterId][abilityId][property] = value;
+        console.log(`[DEBUG_AM] Added modification for character ${characterId}, ability ${abilityId}: ${property} = ${value}`);
+        // Dispatch an event to notify UI components that a modification has been added
+        document.dispatchEvent(new CustomEvent('abilityModificationAdded', {
+            detail: { characterId: characterId, abilityId: abilityId, property: property, value: value },
+            bubbles: true
+        }));
+    };
+
+    // Function to clear a specific modification from an ability on a specific character
+    window.clearAbilityModification = function(characterId, abilityId, property) {
+        if (!characterId || !abilityId) {
+            console.warn('[AbilityModifier] clearAbilityModification called without valid characterId or abilityId.');
+            return;
+        }
+        if (abilityModifications[characterId] &&
+            abilityModifications[characterId][abilityId] &&
+            abilityModifications[characterId][abilityId][property] !== undefined) {
+            
+            console.log(`[DEBUG_AM] Clearing modification for character ${characterId}, ability ${abilityId}, property ${property}`);
+            delete abilityModifications[characterId][abilityId][property];
+
+            // Clean up empty ability entry
+            if (Object.keys(abilityModifications[characterId][abilityId]).length === 0) {
+                delete abilityModifications[characterId][abilityId];
+                console.log(`[DEBUG_AM] All modifications cleared for ability ${abilityId} on character ${characterId}, removing ability entry.`);
+            }
+            // Clean up empty character entry
+            if (Object.keys(abilityModifications[characterId]).length === 0) {
+                delete abilityModifications[characterId];
+                console.log(`[DEBUG_AM] All modifications cleared for character ${characterId}, removing character entry.`);
+            }
+            
+            // Dispatch an event to notify UI components that a modification has been cleared
+            document.dispatchEvent(new CustomEvent('abilityModificationCleared', {
+                detail: { characterId: characterId, abilityId: abilityId, property: property },
+                bubbles: true
+            }));
+        } else {
+            console.warn(`[DEBUG_AM] No modification found to clear for character ${characterId}, ability ${abilityId}, property ${property}`);
+        }
+    };
     
     // Apply stored modifications immediately to all character abilities after loading
     document.addEventListener('DOMContentLoaded', function() {
@@ -240,7 +332,7 @@
                     window.gameManager.gameState.playerCharacters.forEach(character => {
                         if (character.abilities) {
                             character.abilities.forEach(ability => {
-                                applyStoredModifications(ability);
+                                applyStoredModifications(ability, character.id);
                             });
                         }
                     });
@@ -251,7 +343,7 @@
                     window.gameManager.gameState.aiCharacters.forEach(character => {
                         if (character.abilities) {
                             character.abilities.forEach(ability => {
-                                applyStoredModifications(ability);
+                                applyStoredModifications(ability, character.id);
                             });
                         }
                     });
@@ -271,7 +363,7 @@
             [...playerCharacters, ...aiCharacters].forEach(character => {
                 if (character && character.abilities) {
                     character.abilities.forEach(ability => {
-                        applyStoredModifications(ability);
+                        applyStoredModifications(ability, character.id);
                     });
                 }
             });
@@ -294,7 +386,7 @@
                     // Apply modifications before creating UI elements
                     if (character && character.abilities) {
                         character.abilities.forEach(ability => {
-                            applyStoredModifications(ability);
+                            applyStoredModifications(ability, character.id);
                         });
                     }
                     
@@ -321,7 +413,7 @@
                         // Apply modifications before updating UI
                         if (character && character.abilities) {
                             character.abilities.forEach(ability => {
-                                applyStoredModifications(ability);
+                                applyStoredModifications(ability, character.id);
                             });
                         }
                         
@@ -338,7 +430,7 @@
                         // Apply modifications before highlighting
                         if (character && character.abilities) {
                             character.abilities.forEach(ability => {
-                                applyStoredModifications(ability);
+                                applyStoredModifications(ability, character.id);
                             });
                         }
                         
@@ -354,7 +446,7 @@
                         // Apply modifications before showing abilities
                         if (character && character.abilities) {
                             character.abilities.forEach(ability => {
-                                applyStoredModifications(ability);
+                                applyStoredModifications(ability, character.id);
                             });
                         }
                         
@@ -419,4 +511,4 @@
             }, 100);
         }
     });
-})(); 
+})();

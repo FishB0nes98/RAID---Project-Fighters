@@ -44,8 +44,8 @@ class SkinManager {
         try {
             // Wait for Firebase auth
             await this.waitForAuth();
-            this.currentUserId = window.auth.currentUser?.uid;
-            
+            this.currentUserId = window.auth?.currentUser?.uid || firebase?.auth()?.currentUser?.uid;
+
             if (!this.currentUserId) {
                 console.error('[SkinManager] No authenticated user found');
                 return false;
@@ -66,8 +66,10 @@ class SkinManager {
     async waitForAuth() {
         return new Promise((resolve, reject) => {
             console.log('[SkinManager] Waiting for authentication...');
-            
-            if (window.auth && window.auth.currentUser) {
+
+            // Check multiple auth sources
+            const currentUser = window.auth?.currentUser || firebase?.auth()?.currentUser;
+            if (currentUser) {
                 console.log('[SkinManager] User already authenticated');
                 resolve();
                 return;
@@ -79,8 +81,9 @@ class SkinManager {
             const checkAuth = () => {
                 attempts++;
                 console.log(`[SkinManager] Auth check attempt ${attempts}/${maxAttempts}`);
-                
-                if (window.auth && window.auth.currentUser) {
+
+                const user = window.auth?.currentUser || firebase?.auth()?.currentUser;
+                if (user) {
                     console.log('[SkinManager] Authentication successful');
                     resolve();
                 } else if (attempts >= maxAttempts) {
@@ -100,23 +103,30 @@ class SkinManager {
             const userId = this.currentUserId;
             if (!userId) return;
 
+            // Get database reference
+            const database = window.database || firebase.database();
+            if (!database) {
+                console.error('[SkinManager] Firebase database not available');
+                return;
+            }
+
             // Load owned skins from RAIDSkin
-            const ownedSkinsRef = window.database.ref(`users/${userId}/RAIDSkin`);
+            const ownedSkinsRef = database.ref(`users/${userId}/RAIDSkin`);
             const ownedSkinsSnapshot = await ownedSkinsRef.once('value');
             this.ownedSkins = ownedSkinsSnapshot.val() || {};
 
             // Load selected skins
-            const selectedSkinsRef = window.database.ref(`users/${userId}/selectedSkins`);
+            const selectedSkinsRef = database.ref(`users/${userId}/selectedSkins`);
             const selectedSkinsSnapshot = await selectedSkinsRef.once('value');
             this.selectedSkins = selectedSkinsSnapshot.val() || {};
 
             // Load video preferences
-            const videoPreferencesRef = window.database.ref(`users/${userId}/videoPreferences`);
+            const videoPreferencesRef = database.ref(`users/${userId}/videoPreferences`);
             const videoPreferencesSnapshot = await videoPreferencesRef.once('value');
             this.videoPreferences = videoPreferencesSnapshot.val() || {};
 
             // Load user's Fighter Money (FM)
-            const fmRef = window.database.ref(`users/${userId}/FM`);
+            const fmRef = database.ref(`users/${userId}/FM`);
             const fmSnapshot = await fmRef.once('value');
             this.userFM = fmSnapshot.val() || 0;
 
@@ -155,22 +165,27 @@ class SkinManager {
 
             const userId = this.currentUserId;
             const preferenceKey = `${characterId}_${skinId}`;
-            
+            const database = window.database || firebase.database();
+
+            if (!database) {
+                throw new Error('Firebase database not available');
+            }
+
             if (useVideo) {
-                await window.database.ref(`users/${userId}/videoPreferences/${preferenceKey}`).set(true);
+                await database.ref(`users/${userId}/videoPreferences/${preferenceKey}`).set(true);
                 this.videoPreferences[preferenceKey] = true;
             } else {
-                await window.database.ref(`users/${userId}/videoPreferences/${preferenceKey}`).remove();
+                await database.ref(`users/${userId}/videoPreferences/${preferenceKey}`).remove();
                 delete this.videoPreferences[preferenceKey];
             }
 
             console.log(`[SkinManager] Video preference set for ${characterId} ${skinId}:`, useVideo);
-            
+
             // Dispatch event for UI updates
             document.dispatchEvent(new CustomEvent('videoPreferenceChanged', {
                 detail: { characterId, skinId, useVideo }
             }));
-            
+
             return { success: true };
         } catch (error) {
             console.error('[SkinManager] Video preference error:', error);
@@ -188,7 +203,7 @@ class SkinManager {
     shouldUseVideo(characterId, skinId) {
         const skin = window.SkinRegistry.getSkin(skinId);
         if (!skin || !skin.hasVideo) return false;
-        
+
         return this.getVideoPreference(characterId, skinId);
     }
 
@@ -197,7 +212,7 @@ class SkinManager {
         if (!skinId) {
             skinId = this.getSelectedSkin(characterId);
         }
-        
+
         if (!skinId) {
             // Default character image
             return this.getDefaultCharacterImage(characterId);
@@ -252,13 +267,22 @@ class SkinManager {
             'angry_bull': 'Angry Bull.jpeg',
             'angry_pig': 'Angry Pig.jpeg',
             'angry_chicken': 'Angry Chicken.jpeg',
+            'monster_apple': 'Monster Apple.webp',
+            'healthy_apple': 'Healthy Apple.webp',
+            'angry_apple': 'Angry Apple.webp',
+            'leafy_apple': 'Leafy Apple.webp',
+            'rotten_apple': 'Rotten Apple.webp',
+            'crazy_farmer': 'Crazy Farmer.jpeg',
+            'hound': 'Hound.jpeg',
+            'crow': 'Crow.webp',
+            'scarecrow': 'Scarecrow.webp',
         };
-        
+
         const imageName = imageNameMap[characterId];
         if (imageName) {
             return `Loading Screen/${imageName}`;
         }
-        
+
         // Fallback: try to convert character_id to Character Name format
         const characterName = characterId
             .split('_')
@@ -272,7 +296,7 @@ class SkinManager {
         if (!skinId) {
             skinId = this.getSelectedSkin(characterId);
         }
-        
+
         if (!skinId) {
             // Default character image
             return this.getDefaultCharacterImage(characterId);
@@ -308,13 +332,18 @@ class SkinManager {
             }
 
             const userId = this.currentUserId;
+            const database = window.database || firebase.database();
+
+            if (!database) {
+                throw new Error('Firebase database not available');
+            }
 
             // Deduct FM
             const newFM = this.userFM - skin.price;
-            await window.database.ref(`users/${userId}/FM`).set(newFM);
+            await database.ref(`users/${userId}/FM`).set(newFM);
 
             // Add skin to owned skins
-            await window.database.ref(`users/${userId}/RAIDSkin/${skinId}`).set({
+            await database.ref(`users/${userId}/RAIDSkin/${skinId}`).set({
                 purchasedAt: Date.now(),
                 price: skin.price
             });
@@ -358,14 +387,19 @@ class SkinManager {
             }
 
             const userId = this.currentUserId;
+            const database = window.database || firebase.database();
+
+            if (!database) {
+                throw new Error('Firebase database not available');
+            }
 
             if (skinId === null || skinId === undefined) {
                 // Remove skin selection (use default)
-                await window.database.ref(`users/${userId}/selectedSkins/${characterId}`).remove();
+                await database.ref(`users/${userId}/selectedSkins/${characterId}`).remove();
                 delete this.selectedSkins[characterId];
             } else {
                 // Set skin selection
-                await window.database.ref(`users/${userId}/selectedSkins/${characterId}`).set(skinId);
+                await database.ref(`users/${userId}/selectedSkins/${characterId}`).set(skinId);
                 this.selectedSkins[characterId] = skinId;
             }
 
@@ -416,45 +450,104 @@ class SkinManager {
             selected: this.getSelectedSkin(skin.characterId) === skin.id
         }));
     }
+
+    // Grant a skin to the user (for lootbox rewards)
+    async grantSkin(skinId, source = 'lootbox') {
+        try {
+            if (!this.initialized || !this.currentUserId) {
+                console.error('[SkinManager] Cannot grant skin - not initialized or no user');
+                return { success: false, error: 'Not initialized or no user' };
+            }
+
+            if (this.ownsSkin(skinId)) {
+                console.log(`[SkinManager] User already owns skin ${skinId}`);
+                return { success: false, error: 'Skin already owned' };
+            }
+
+            const userId = this.currentUserId;
+            const database = window.database || firebase.database();
+
+            if (!database) {
+                console.error('[SkinManager] Firebase database not available');
+                return { success: false, error: 'Database not available' };
+            }
+
+            // Add skin to Firebase
+            await database.ref(`users/${userId}/RAIDSkin/${skinId}`).set({
+                grantedAt: Date.now(),
+                source: source,
+                price: 0 // Free from lootbox
+            });
+
+            // Update local data
+            this.ownedSkins[skinId] = {
+                grantedAt: Date.now(),
+                source: source,
+                price: 0
+            };
+
+            console.log(`[SkinManager] Successfully granted skin ${skinId} to user ${userId}`);
+            return { success: true };
+        } catch (error) {
+            console.error('[SkinManager] Error granting skin:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Check if SkinManager is ready for operations
+    isReady() {
+        return this.initialized && this.currentUserId;
+    }
+
+    // Wait for SkinManager to be ready
+    async waitForReady(maxWaitTime = 10000) {
+        const startTime = Date.now();
+
+        while (!this.isReady() && (Date.now() - startTime) < maxWaitTime) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        return this.isReady();
+    }
 }
 
 // Debug: Add a global function to check character image paths
 window.debugCharacterImages = (characterId) => {
     console.log(`[Debug] Checking character images for: ${characterId}`);
-    
+
     // Test SkinManager path
     if (window.SkinManager) {
         try {
             const skinImagePath = window.SkinManager.getCharacterImagePath(characterId);
             console.log(`[Debug] SkinManager image path: ${skinImagePath}`);
-            
+
             const skinMediaPath = window.SkinManager.getCharacterMediaPath(characterId);
             console.log(`[Debug] SkinManager media path: ${skinMediaPath}`);
         } catch (error) {
             console.error(`[Debug] SkinManager error: ${error.message}`);
         }
     }
-    
+
     // Test GameManager path
     if (window.gameManager) {
         try {
             const gameImagePath = window.gameManager.getCharacterImagePath(characterId);
             console.log(`[Debug] GameManager image path: ${gameImagePath}`);
-            
+
             const gameMediaPath = window.gameManager.getCharacterMediaPath(characterId);
             console.log(`[Debug] GameManager media path: ${gameMediaPath}`);
         } catch (error) {
             console.error(`[Debug] GameManager error: ${error.message}`);
         }
     }
-    
+
     // Test actual file existence
     const testPaths = [
         `Loading Screen/${characterId}.png`,
         `Loading Screen/${characterId.charAt(0).toUpperCase() + characterId.slice(1)}.png`,
         `Loading Screen/${characterId.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}.png`
     ];
-    
+
     testPaths.forEach(async (path) => {
         try {
             const response = await fetch(path, { method: 'HEAD' });
@@ -468,7 +561,7 @@ window.debugCharacterImages = (characterId) => {
 // Debug: List all character image mappings
 window.listCharacterMappings = () => {
     console.log('[Debug] Character Image Mappings:');
-    
+
     const imageNameMap = {
         'schoolgirl_ayane': 'Schoolgirl Ayane.png',
         'schoolgirl_kokoro': 'Schoolgirl Kokoro.png',
@@ -498,7 +591,7 @@ window.listCharacterMappings = () => {
         'infernal_raiden': 'Infernal Raiden.png',
         'infernal_scorpion': 'Infernal Scorpion.png',
     };
-    
+
     Object.entries(imageNameMap).forEach(([id, filename]) => {
         console.log(`  ${id} -> ${filename}`);
     });
@@ -511,20 +604,20 @@ console.log('- window.listCharacterMappings() - List all character mappings');
 // Debug: Add a test function to check video support
 window.testVideoSupport = () => {
     console.log('[Debug] Testing video support...');
-    
+
     if (window.SkinManager && window.SkinRegistry) {
         const ayaneSkin = window.SkinRegistry.getSkin('schoolgirl_ayane_true_form');
         console.log('[Debug] Ayane True Form skin:', ayaneSkin);
-        
+
         if (ayaneSkin) {
             console.log('[Debug] Has video:', ayaneSkin.hasVideo);
             console.log('[Debug] Video path:', ayaneSkin.videoPath);
             console.log('[Debug] Image path:', ayaneSkin.imagePath);
-            
+
             // Test media path resolution
             const mediaPath = window.SkinManager.getCharacterMediaPath('schoolgirl_ayane', 'schoolgirl_ayane_true_form');
             console.log('[Debug] Resolved media path:', mediaPath);
-            
+
             // Test video preference
             const videoPreference = window.SkinManager.getVideoPreference('schoolgirl_ayane', 'schoolgirl_ayane_true_form');
             console.log('[Debug] Video preference:', videoPreference);
@@ -539,9 +632,9 @@ window.testVideoToggle = () => {
     if (window.SkinManager) {
         const currentPreference = window.SkinManager.getVideoPreference('schoolgirl_ayane', 'schoolgirl_ayane_true_form');
         const newPreference = !currentPreference;
-        
+
         console.log(`[Debug] Toggling video preference from ${currentPreference} to ${newPreference}`);
-        
+
         window.SkinManager.setVideoPreference('schoolgirl_ayane', 'schoolgirl_ayane_true_form', newPreference)
             .then(result => {
                 console.log('[Debug] Video preference toggle result:', result);
@@ -559,4 +652,87 @@ console.log('- window.testVideoToggle() - Toggle video preference for Ayane True
 // Create global instance
 window.SkinManager = new SkinManager();
 
+// Auto-initialize SkinManager when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.SkinManager && !window.SkinManager.initialized) {
+        console.log('[SkinManager] Auto-initializing on DOMContentLoaded...');
+        window.SkinManager.initialize().catch(error => {
+            console.warn('[SkinManager] Auto-initialization failed:', error);
+        });
+    }
+});
+
+// Also try to initialize when Firebase auth state changes
+if (typeof firebase !== 'undefined' && firebase.auth) {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user && window.SkinManager && !window.SkinManager.initialized) {
+            console.log('[SkinManager] Auto-initializing on auth state change...');
+            window.SkinManager.initialize().catch(error => {
+                console.warn('[SkinManager] Auto-initialization on auth change failed:', error);
+            });
+        }
+    });
+}
+
+// Debug function to test lootbox skin drops
+window.testLootboxSkinDrop = async function () {
+    console.log('[Debug] Testing lootbox skin drop...');
+
+    if (!window.ItemRegistry) {
+        console.error('[Debug] ItemRegistry not available');
+        return;
+    }
+
+    const basketItem = window.ItemRegistry.getItem('basket_of_goods');
+    if (!basketItem) {
+        console.error('[Debug] Basket of Goods item not found');
+        return;
+    }
+
+    // Create mock character
+    const mockCharacter = {
+        id: 'test-character',
+        name: 'Test Character'
+    };
+
+    try {
+        console.log('[Debug] Opening basket of goods...');
+        const result = await basketItem.openLootbox(mockCharacter);
+        console.log('[Debug] Lootbox result:', result);
+
+        if (result.specialRewards && result.specialRewards.length > 0) {
+            console.log('[Debug] 🎉 Skin dropped!', result.specialRewards);
+        } else {
+            console.log('[Debug] No skin drop this time');
+        }
+
+        return result;
+    } catch (error) {
+        console.error('[Debug] Error testing lootbox:', error);
+        return null;
+    }
+};
+
+// Debug function to test multiple drops
+window.testMultipleLootboxDrops = async function (count = 10) {
+    console.log(`[Debug] Testing ${count} lootbox drops...`);
+
+    let skinDrops = 0;
+    const results = [];
+
+    for (let i = 0; i < count; i++) {
+        const result = await window.testLootboxSkinDrop();
+        if (result && result.specialRewards && result.specialRewards.length > 0) {
+            skinDrops++;
+        }
+        results.push(result);
+    }
+
+    console.log(`[Debug] Results: ${skinDrops}/${count} skin drops (${(skinDrops / count * 100).toFixed(1)}%)`);
+    return results;
+};
+
 console.log('[SkinManager] Skin manager class loaded');
+console.log('[Debug] Test functions available:');
+console.log('- window.testLootboxSkinDrop() - Test single lootbox opening');
+console.log('- window.testMultipleLootboxDrops(10) - Test multiple openings');

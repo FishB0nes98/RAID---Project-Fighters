@@ -123,13 +123,17 @@ class StoryManager {
             
             // Check local playerunlocked setting
             const locallyUnlocked = this.currentStory.playerunlocked === true;
+            
+            // Check if story is available for everyone
+            const availableForEveryone = this.currentStory.availableForEveryone === true;
 
             console.log(`[StoryManager] Story availability check for ${storyId}:`);
             console.log(`  - User owns: ${userOwnsStory}`);
             console.log(`  - Locally unlocked: ${locallyUnlocked}`);
+            console.log(`  - Available for everyone: ${availableForEveryone}`);
             console.log(`  - Global setting: ${isGloballyAvailable}`);
 
-            if (userOwnsStory || locallyUnlocked) {
+            if (userOwnsStory || locallyUnlocked || availableForEveryone) {
                 console.log(`[StoryManager] Story ${storyId} is available to user`);
                 return;
             }
@@ -242,6 +246,19 @@ class StoryManager {
                 if (!response.ok) throw new Error('Failed to load stories.json');
                 this.allStoriesData = await response.json();
                 console.log("[StoryManager] stories.json loaded.");
+                
+                // Also load story_2.json if it exists
+                try {
+                    console.log("[StoryManager] Loading story_2.json...");
+                    const response2 = await fetch('story_2.json');
+                    if (response2.ok) {
+                        const story2Data = await response2.json();
+                        this.allStoriesData = this.allStoriesData.concat(story2Data);
+                        console.log("[StoryManager] story_2.json loaded and merged.");
+                    }
+                } catch (error) {
+                    console.log("[StoryManager] story_2.json not found or failed to load, continuing with stories.json only:", error.message);
+                }
             }
 
             // 2. Find the specific story definition
@@ -350,7 +367,62 @@ class StoryManager {
             console.log("[StoryManager] Battle result processing finished. Processed:", battleResultProcessed);
 
             // If a battle result was processed (and it was a victory), progress/state might have changed.
-            // We might need to re-render UI elements after this point.
+            // We need to re-fetch progress to ensure UI shows the correct state
+            if (battleResultProcessed) {
+                console.log("[StoryManager] Battle result was processed, re-fetching progress to ensure UI sync...");
+                await this.fetchStoryProgress();
+                console.log("[StoryManager] Progress re-fetched after battle result processing:", JSON.parse(JSON.stringify(this.storyProgress)));
+                
+                // Force UI refresh after battle result processing
+                if (this.onStoryLoaded) {
+                    console.log("[StoryManager] Forcing UI refresh after battle result processing...");
+                    this.onStoryLoaded(this.currentStory);
+                }
+                
+                // Debug: Log current progress state after battle result processing
+                console.log(`[StoryManager] Final progress state after battle result processing:`);
+                console.log(`  - currentStageIndex: ${this.storyProgress.currentStageIndex}`);
+                console.log(`  - completedStages: ${this.storyProgress.completedStages}`);
+                console.log(`  - Total stages in story: ${this.currentStory.stages.length}`);
+                console.log(`  - Story complete: ${this.isStoryComplete()}`);
+                console.log(`  - Current active stage: ${this.getCurrentStage()?.name || 'None'}`);
+                console.log(`  - Battle result processed: ${battleResultProcessed}`);
+                
+                // Add a test function to check stage states
+                window.debugStageStates = () => {
+                    console.log('=== STAGE DEBUG INFO ===');
+                    const stages = this.getAllStages();
+                    stages.forEach((stage, index) => {
+                        console.log(`Stage ${index}: ${stage.name} - Completed: ${stage.isCompleted}, Active: ${stage.isActive}, Locked: ${stage.isLocked}`);
+                    });
+                    console.log('Current progress:', this.storyProgress);
+                    console.log('========================');
+                };
+                console.log('Debug function available: window.debugStageStates()');
+                
+                // Add function to check if there's a pending battle result
+                window.checkBattleResult = async () => {
+                    console.log('=== BATTLE RESULT CHECK ===');
+                    const battleResultRef = firebase.database().ref(`users/${this.userId}/lastBattleResult`);
+                    try {
+                        const snapshot = await battleResultRef.once('value');
+                        if (snapshot.exists()) {
+                            const result = snapshot.val();
+                            console.log('Found battle result:', result);
+                            console.log('Current progress:', this.storyProgress);
+                            console.log('Story ID match:', result.storyId === this.storyId);
+                            console.log('Stage index match:', result.stageIndex === this.storyProgress.currentStageIndex);
+                        } else {
+                            console.log('No battle result found in Firebase');
+                        }
+                    } catch (error) {
+                        console.error('Error checking battle result:', error);
+                    }
+                    console.log('=== END BATTLE RESULT CHECK ===');
+                };
+                
+                console.log('Debug function available: window.checkBattleResult()');
+            }
 
             console.log(`[StoryManager] loadStory END - Story "${this.currentStory.title}" loaded. Current Stage Index:`, this.storyProgress.currentStageIndex);
             console.log(`[StoryManager] Player team loaded:`, this.playerTeam);
@@ -358,7 +430,10 @@ class StoryManager {
             // Call event handler if defined
             if (this.onStoryLoaded) {
                 console.log("[StoryManager] Calling onStoryLoaded callback.");
-                this.onStoryLoaded(this.currentStory);
+                // Small delay to ensure all async operations are complete
+                setTimeout(() => {
+                    this.onStoryLoaded(this.currentStory);
+                }, 50);
             }
 
             return this.currentStory;
@@ -491,7 +566,7 @@ class StoryManager {
             title: this.currentStory.title,
             description: this.currentStory.description || 'No description available',
             totalStages: this.currentStory.stages.length,
-            currentStage: this.currentStageIndex,
+            currentStage: this.storyProgress.currentStageIndex,
             progress: this.getProgressPercentage()
         };
     }
@@ -505,7 +580,7 @@ class StoryManager {
             return 0;
         }
         
-        return Math.round((this.progressData.completedStages.length / this.currentStory.stages.length) * 100);
+        return Math.round((this.storyProgress.completedStages / this.currentStory.stages.length) * 100);
     }
 
     /**
@@ -624,7 +699,8 @@ class StoryManager {
             tutorialMessage: stage.tutorialMessage || null,
             index: currentStageIndex,
             // Use storyProgress to determine completion status accurately
-            isCompleted: currentStageIndex < this.storyProgress.completedStages, 
+            // A stage is completed if it's before the current stage index
+            isCompleted: false, // getCurrentStage returns the active stage, so it's never completed
             isActive: true,
             isLocked: false
         };
@@ -723,7 +799,8 @@ class StoryManager {
                  // Also restore hell effects, permanent debuffs, permanent buffs, and atlantean blessings if they exist
                  const hellEffects = savedState.hellEffects ? { ...savedState.hellEffects } : undefined;
                  const permanentDebuffs = savedState.permanentDebuffs ? [...savedState.permanentDebuffs] : undefined;
-                 const permanentBuffs = savedState.permanentBuffs ? [...savedState.permanentBuffs] : undefined;
+                 const permanentBuffs = savedState.permanentBuffs ? (Array.isArray(savedState.permanentBuffs) ? [...savedState.permanentBuffs] : { ...savedState.permanentBuffs }) : undefined;
+                 const permanentEffects = savedState.permanentEffects ? { ...savedState.permanentEffects } : undefined;
                  const atlanteanBlessings = savedState.atlanteanBlessings ? { ...savedState.atlanteanBlessings } : undefined;
                  const storyEffects = savedState.storyEffects ? { ...savedState.storyEffects } : undefined;
                  
@@ -735,12 +812,21 @@ class StoryManager {
                      hellEffects: hellEffects,
                      permanentDebuffs: permanentDebuffs,
                      permanentBuffs: permanentBuffs,
+                     permanentEffects: permanentEffects,
                      atlanteanBlessings: atlanteanBlessings,
-                     storyEffects: storyEffects
+                     storyEffects: storyEffects,
+                     // FIXED: Clear temporary buffs and debuffs when loading from Firebase
+                     buffs: [],
+                     debuffs: []
                  };
             } else {
-                 // If no saved stats for this member, keep their base stats
-                 return teamMember;
+                 // If no saved stats for this member, keep their base stats but clear temporary effects
+                 return {
+                     ...teamMember,
+                     // FIXED: Clear temporary buffs and debuffs for characters without saved states
+                     buffs: [],
+                     debuffs: []
+                 };
             }
         });
          console.log("Applied saved stats from progress to playerTeam.");
@@ -780,6 +866,12 @@ class StoryManager {
             // Strict check: The result's stage index MUST match the current progress stage index
             if (result.stageIndex !== this.storyProgress.currentStageIndex) {
                 console.warn(`[StoryManager] Battle result stage index mismatch. Result index: ${result.stageIndex}, Expected current progress index: ${this.storyProgress.currentStageIndex}. Ignoring.`);
+                console.warn(`[StoryManager] This usually means either:`);
+                console.warn(`[StoryManager] 1. The battle result is stale (from a previous session)`);
+                console.warn(`[StoryManager] 2. The progress was not saved correctly after the last battle`);
+                console.warn(`[StoryManager] 3. There's a synchronization issue between battle save and progress load`);
+                console.warn(`[StoryManager] Full battle result:`, result);
+                console.warn(`[StoryManager] Current story progress:`, this.storyProgress);
                 // If this happens often, there might be an issue in how currentStageIndex is loaded/saved elsewhere
                 // or how the stageIndex is passed to the battle.
                 return false;
@@ -800,6 +892,9 @@ class StoryManager {
                  
                  // Advance the stage index and save progress (including the updated team state)
                  await this.completeCurrentStageAfterVictory();
+                 
+                 // Ensure progress is properly synchronized
+                 console.log("[StoryManager] Victory processed. Progress after advancement:", this.storyProgress.currentStageIndex);
 
             } else {
                  console.log("[StoryManager] Processing DEFEAT from lastBattleResult.");
@@ -884,17 +979,7 @@ class StoryManager {
 
          // Update the state that gets saved in storyProgress
          this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
-             acc[member.id] = { 
-                 currentHP: member.currentHP, 
-                 currentMana: member.currentMana,
-                 // Include the full stats object to persist modifications
-                 stats: { ...member.stats },
-                 // Also preserve hell effects, permanent debuffs, atlantean blessings, and story effects
-                 hellEffects: member.hellEffects ? { ...member.hellEffects } : undefined,
-                 permanentDebuffs: member.permanentDebuffs ? [...member.permanentDebuffs] : undefined,
-                 atlanteanBlessings: member.atlanteanBlessings ? { ...member.atlanteanBlessings } : undefined,
-                 storyEffects: member.storyEffects ? { ...member.storyEffects } : undefined
-             };
+             acc[member.id] = this.getCleanCharacterState(member);
              return acc;
          }, {});
 
@@ -1070,8 +1155,10 @@ class StoryManager {
 
         // Stage index should ALREADY be correct based on fetched progress OR needs incrementing
         // Let's assume it needs incrementing here, as this is called *after* confirming victory for the *previous* index.
+        console.log(`[StoryManager] Before stage completion: currentStageIndex=${this.storyProgress.currentStageIndex}, completedStages=${this.storyProgress.completedStages}`);
         this.storyProgress.currentStageIndex++;
         this.storyProgress.completedStages = Math.max(this.storyProgress.completedStages, this.storyProgress.currentStageIndex); // Record highest reached
+        console.log(`[StoryManager] After stage completion: currentStageIndex=${this.storyProgress.currentStageIndex}, completedStages=${this.storyProgress.completedStages}`);
 
         // === Post-battle recovery: restore 10% of missing HP and Mana to every living team member ===
         if (Array.isArray(this.playerTeam) && this.playerTeam.length > 0) {
@@ -1097,11 +1184,7 @@ class StoryManager {
 
             // Update storyProgress.lastTeamState to reflect the recovery before saving
             this.storyProgress.lastTeamState = this.playerTeam.reduce((acc, member) => {
-                acc[member.id] = {
-                    currentHP: member.currentHP,
-                    currentMana: member.currentMana,
-                    stats: { ...member.stats }
-                };
+                acc[member.id] = this.getCleanCharacterState(member);
                 return acc;
             }, {});
 
@@ -1114,6 +1197,9 @@ class StoryManager {
         // Save progress (includes updated index and lastTeamState from battle result)
         await this.saveStoryProgress();
         console.log(`[StoryManager] Advanced to stage ${this.storyProgress.currentStageIndex} and saved progress.`);
+        
+        // Ensure progress was saved correctly by double-checking Firebase
+        console.log(`[StoryManager] Verifying progress save: Stage ${this.storyProgress.currentStageIndex}, Completed ${this.storyProgress.completedStages}`);
 
         const hasMoreStages = this.storyProgress.currentStageIndex < this.getTotalStages();
 
@@ -1245,7 +1331,8 @@ class StoryManager {
                     // Ensure the fully loaded object (including stats if present) is assigned
                     lastTeamState: lastTeamStateObject 
                 };
-                console.log(`Fetched progress for story ${this.storyId}:`, this.storyProgress);
+                console.log(`[StoryManager] Fetched progress for story ${this.storyId}:`, this.storyProgress);
+                console.log(`[StoryManager] Raw Firebase data:`, savedProgress);
             } else {
                 console.log(`No saved progress found for story ${this.storyId}. Initializing.`);
                 // Initialize with defaults if no progress exists
@@ -1258,6 +1345,94 @@ class StoryManager {
         }
     }
 
+    // Helper method to get clean character state for saving (without temporary effects)
+    getCleanCharacterState(character) {
+        // Helper function to clean objects of undefined values
+        const cleanObject = (obj) => {
+            if (!obj || typeof obj !== 'object') return obj;
+            const cleaned = {};
+            for (const [key, value] of Object.entries(obj)) {
+                if (value !== undefined && value !== null) {
+                    if (typeof value === 'object' && !Array.isArray(value)) {
+                        const cleanedValue = cleanObject(value);
+                        if (Object.keys(cleanedValue).length > 0) {
+                            cleaned[key] = cleanedValue;
+                        }
+                    } else {
+                        cleaned[key] = value;
+                    }
+                }
+            }
+            return cleaned;
+        };
+        
+        // Helper function to clean arrays of undefined values
+        const cleanArray = (arr) => {
+            if (!Array.isArray(arr)) return arr;
+            return arr.filter(item => item !== undefined && item !== null);
+        };
+        
+        const cleanState = {
+            currentHP: character.currentHP,
+            currentMana: character.currentMana,
+            // FIXED: Save only baseStats to prevent item bonus stacking
+            // baseStats contains the character's stats without item bonuses
+            stats: character.baseStats || character.stats
+        };
+        
+        // Only add properties that have actual values, and clean them of undefined
+        if (character.hellEffects && Object.keys(character.hellEffects).length > 0) {
+            const cleanedHellEffects = cleanObject(character.hellEffects);
+            if (Object.keys(cleanedHellEffects).length > 0) {
+                cleanState.hellEffects = cleanedHellEffects;
+            }
+        }
+        
+        if (character.permanentDebuffs && character.permanentDebuffs.length > 0) {
+            const cleanedDebuffs = cleanArray(character.permanentDebuffs);
+            if (cleanedDebuffs.length > 0) {
+                cleanState.permanentDebuffs = cleanedDebuffs;
+            }
+        }
+        
+        if (character.permanentBuffs) {
+            if (Array.isArray(character.permanentBuffs) && character.permanentBuffs.length > 0) {
+                const cleanedBuffs = cleanArray(character.permanentBuffs);
+                if (cleanedBuffs.length > 0) {
+                    cleanState.permanentBuffs = cleanedBuffs;
+                }
+            } else if (typeof character.permanentBuffs === 'object' && Object.keys(character.permanentBuffs).length > 0) {
+                const cleanedBuffs = cleanObject(character.permanentBuffs);
+                if (Object.keys(cleanedBuffs).length > 0) {
+                    cleanState.permanentBuffs = cleanedBuffs;
+                }
+            }
+        }
+        
+        if (character.permanentEffects && Object.keys(character.permanentEffects).length > 0) {
+            const cleanedEffects = cleanObject(character.permanentEffects);
+            if (Object.keys(cleanedEffects).length > 0) {
+                cleanState.permanentEffects = cleanedEffects;
+            }
+        }
+        
+        if (character.atlanteanBlessings && Object.keys(character.atlanteanBlessings).length > 0) {
+            const cleanedBlessings = cleanObject(character.atlanteanBlessings);
+            if (Object.keys(cleanedBlessings).length > 0) {
+                cleanState.atlanteanBlessings = cleanedBlessings;
+            }
+        }
+        
+        if (character.storyEffects && Object.keys(character.storyEffects).length > 0) {
+            const cleanedStoryEffects = cleanObject(character.storyEffects);
+            if (Object.keys(cleanedStoryEffects).length > 0) {
+                cleanState.storyEffects = cleanedStoryEffects;
+            }
+        }
+        
+        return cleanState;
+    }
+
     // --- Save Story Progress ---
     async saveStoryProgress() {
         if (!this.storyId || !this.userId) {
@@ -1268,14 +1443,19 @@ class StoryManager {
         // Create a snapshot of the current team state
         const teamStateToSave = {};
         const teamIds = [];
+        
+        console.log(`[StoryManager] Preparing to save progress for ${this.playerTeam.length} characters`);
+        
         this.playerTeam.forEach(character => {
-            teamIds.push(character.id);
-            teamStateToSave[character.id] = {
-                currentHP: character.currentHP,
-                currentMana: character.currentMana,
-                // NEW: Also save base stats in case they were modified
-                stats: character.stats 
-            };
+            try {
+                teamIds.push(character.id);
+                const cleanState = this.getCleanCharacterState(character);
+                teamStateToSave[character.id] = cleanState;
+                console.log(`[StoryManager] Prepared clean state for ${character.id}:`, cleanState);
+            } catch (error) {
+                console.error(`[StoryManager] Error preparing state for character ${character.id}:`, error);
+                console.error(`[StoryManager] Character data:`, character);
+            }
         });
 
         const progressToSave = {
@@ -1287,12 +1467,53 @@ class StoryManager {
         };
 
         try {
+            console.log(`[StoryManager] Attempting to save progress to Firebase:`, progressToSave);
+            
+            // Validate the data before saving
+            const validateData = (obj, path = '') => {
+                for (const [key, value] of Object.entries(obj)) {
+                    const currentPath = path ? `${path}.${key}` : key;
+                    if (value === undefined) {
+                        console.warn(`[StoryManager] Found undefined value at ${currentPath}`);
+                        return false;
+                    }
+                    if (value && typeof value === 'object' && !Array.isArray(value)) {
+                        if (!validateData(value, currentPath)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            };
+            
+            if (!validateData(progressToSave)) {
+                console.error(`[StoryManager] Data validation failed - cannot save progress with undefined values`);
+                return false;
+            }
+            
             const progressRef = firebaseDatabase.ref(`users/${this.userId}/storyProgress/${this.storyId}`);
             await progressRef.set(progressToSave);
             await firebaseDatabase.ref(`users/${this.userId}/currentTeamSelection`).set(teamIds);
+            
+            // Ensure the save operation is complete before continuing
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             console.log(`[StoryManager] Story progress saved for story ${this.storyId}`, progressToSave);
+            
+            // Debug: Verify the save was successful by reading it back
+            const verifySnapshot = await progressRef.once('value');
+            if (verifySnapshot.exists()) {
+                const savedData = verifySnapshot.val();
+                console.log(`[StoryManager] Verified Firebase save - currentStageIndex: ${savedData.currentStageIndex}, completedStages: ${savedData.completedStages}`);
+            } else {
+                console.error(`[StoryManager] Failed to verify Firebase save - no data found after save operation`);
+            }
+            
+            return true;
         } catch (error) {
             console.error(`[StoryManager] Failed to save story progress for ${this.storyId}:`, error);
+            console.error(`[StoryManager] Progress data that failed to save:`, progressToSave);
+            return false;
         }
     }
 
@@ -1322,17 +1543,20 @@ class StoryManager {
     // --- NEW: Handle Choice Stage Completion ---
     async applyChoiceEffectAndAdvance(choice, targetCharacterId) {
         if (!this.currentStory) throw new Error('No story loaded');
-        if (this.isStoryComplete()) return false; 
+        if (this.isStoryComplete()) return { hasMoreStages: false, effectMessages: [] }; 
 
         const currentStageData = this.getCurrentStage();
-        if (!currentStageData || (currentStageData.type !== 'choice' && currentStageData.type !== 'recruit')) { // Allow recruit type for UI flow
-            console.error('Attempted to apply choice/recruit effect on an invalid stage type:', currentStageData?.type);
+        if (!currentStageData || (currentStageData.type !== 'choice' && currentStageData.type !== 'recruit' && currentStageData.type !== 'character_unlock')) { // Allow recruit and character_unlock types for UI flow
+            console.error('Attempted to apply choice/recruit/character_unlock effect on an invalid stage type:', currentStageData?.type);
             // Don't throw error here, let UI handle closing etc.
-             return false; 
+             return { hasMoreStages: false, effectMessages: [] }; 
         }
 
         const effect = choice.effect;
         console.log(`Applying choice '${choice.name}' effect:`, effect);
+        
+        // Array to collect effect messages for UI display
+        const effectMessages = [];
 
         try {
             // --- Handle effects targeting the whole team (no character selection needed) ---
@@ -2034,6 +2258,128 @@ class StoryManager {
 
                         // --- END NEW ---
 
+                        case 'cursed_water_supply_effect':
+                            if (character.stats) {
+                                // Random effect: 50% chance for benefit, 50% chance for curse
+                                const isBenefit = Math.random() < 0.5;
+                                
+                                if (isBenefit) {
+                                    // Benefit: Increase HP and mana regen by 30
+                                    character.stats.hpPerTurn = (character.stats.hpPerTurn || 0) + 30;
+                                    character.stats.manaPerTurn = (character.stats.manaPerTurn || 0) + 30;
+                                    console.log(`[StoryManager] Cursed Water blessing applied to ${character.id}: +30 HP and Mana regen per turn`);
+                                    
+                                    // Track the effect
+                                    if (!character.cursedWaterEffects) character.cursedWaterEffects = {};
+                                    character.cursedWaterEffects.beneficial = true;
+                                    character.cursedWaterEffects.choiceId = choice.name;
+                                    character.cursedWaterEffects.choiceEffect = 'cursed_water_supply_effect';
+                                    character.cursedWaterEffects.effectMessage = `The cursed water blessed ${character.id} with enhanced regeneration (+30 HP and Mana regen per turn)!`;
+                                    
+                                    // Add message for UI display
+                                    effectMessages.push(`💫 ${character.name || character.id} was blessed by the cursed water! Enhanced regeneration (+30 HP and Mana regen per turn)`);
+                                } else {
+                                    // Curse: Decrease physical and magical damage by 55
+                                    character.stats.physicalDamage = Math.max(0, character.stats.physicalDamage - 55);
+                                    character.stats.magicalDamage = Math.max(0, character.stats.magicalDamage - 55);
+                                    console.log(`[StoryManager] Cursed Water curse applied to ${character.id}: -55 Physical and Magical damage`);
+                                    
+                                    // Track the effect
+                                    if (!character.cursedWaterEffects) character.cursedWaterEffects = {};
+                                    character.cursedWaterEffects.beneficial = false;
+                                    character.cursedWaterEffects.choiceId = choice.name;
+                                    character.cursedWaterEffects.choiceEffect = 'cursed_water_supply_effect';
+                                    character.cursedWaterEffects.effectMessage = `The cursed water weakened ${character.id}, reducing damage by 55!`;
+                                    
+                                    // Add message for UI display
+                                    effectMessages.push(`💀 ${character.name || character.id} was cursed by the dark water! Weakened combat abilities (-55 Physical and Magical damage)`);
+                                }
+                            } else {
+                                console.warn(`Cannot apply cursed water effect: Stats object missing for ${character.id}`);
+                                effectMessages.push(`⚠️ Cannot apply cursed water effect to ${character.name || character.id}: Stats missing`);
+                            }
+                            break;
+
+                        case 'purify_cursed_water_effect':
+                            if (character.stats) {
+                                // Cost: 50% of current mana
+                                const manaCost = Math.floor(character.currentMana * 0.5);
+                                character.currentMana = Math.max(0, character.currentMana - manaCost);
+                                
+                                // Benefit: Restore 30% of maximum HP and mana
+                                const hpRestore = Math.floor(character.stats.hp * 0.3);
+                                const manaRestore = Math.floor(character.stats.mana * 0.3);
+                                
+                                character.currentHP = Math.min(character.stats.hp, character.currentHP + hpRestore);
+                                character.currentMana = Math.min(character.stats.mana, character.currentMana + manaRestore);
+                                
+                                console.log(`[StoryManager] Purified water effect applied to ${character.id}: -${manaCost} mana, +${hpRestore} HP, +${manaRestore} mana`);
+                                
+                                // Track the effect
+                                if (!character.purifiedWaterEffects) character.purifiedWaterEffects = {};
+                                character.purifiedWaterEffects.applied = true;
+                                character.purifiedWaterEffects.manaCost = manaCost;
+                                character.purifiedWaterEffects.hpRestore = hpRestore;
+                                character.purifiedWaterEffects.manaRestore = manaRestore;
+                                character.purifiedWaterEffects.choiceId = choice.name;
+                                character.purifiedWaterEffects.choiceEffect = 'purify_cursed_water_effect';
+                                
+                                // Add message for UI display
+                                effectMessages.push(`🔮 ${character.name || character.id} purified the cursed water! Spent ${manaCost} mana but safely restored ${hpRestore} HP and ${manaRestore} mana`);
+                            } else {
+                                console.warn(`Cannot apply purified water effect: Stats object missing for ${character.id}`);
+                                effectMessages.push(`⚠️ Cannot apply purified water effect to ${character.name || character.id}: Stats missing`);
+                            }
+                            break;
+                        case 'permanent_e_cooldown_reduction':
+                            if (character.stats) {
+                                // Initialize permanent buffs if not exists
+                                if (!character.permanentBuffs) character.permanentBuffs = {};
+                                
+                                // Apply permanent E ability cooldown reduction
+                                const reductionAmount = effect.amount || 2;
+                                if (!character.permanentBuffs.eCooldownReduction) {
+                                    character.permanentBuffs.eCooldownReduction = 0;
+                                }
+                                character.permanentBuffs.eCooldownReduction += reductionAmount;
+                                
+                                console.log(`[StoryManager] Permanent E cooldown reduction applied to ${character.id}: -${reductionAmount} turns`);
+                                
+                                // Track the effect for Firebase storage
+                                if (!character.permanentEffects) character.permanentEffects = {};
+                                character.permanentEffects.eCooldownReduction = {
+                                    applied: true,
+                                    amount: character.permanentBuffs.eCooldownReduction,
+                                    source: 'carrot_buff',
+                                    choiceId: choice.name,
+                                    choiceEffect: 'permanent_e_cooldown_reduction'
+                                };
+                                
+                                // Add message for UI display
+                                effectMessages.push(`🥕 ${character.name || character.id} gained permanent E ability cooldown reduction! (-${reductionAmount} turns)`);
+                            } else {
+                                console.warn(`Cannot apply permanent E cooldown reduction: Stats object missing for ${character.id}`);
+                                effectMessages.push(`⚠️ Cannot apply carrot buff to ${character.name || character.id}: Stats missing`);
+                            }
+                            break;
+                        case 'heal_percent':
+                            if (character.stats) {
+                                const healPercent = effect.amount_percent || 85;
+                                const healAmount = Math.floor(character.stats.hp * (healPercent / 100));
+                                const actualHeal = Math.min(healAmount, character.stats.hp - character.currentHP);
+                                
+                                character.currentHP = Math.min(character.stats.hp, character.currentHP + actualHeal);
+                                
+                                console.log(`[StoryManager] Percentage heal applied to ${character.id}: +${actualHeal} HP (${healPercent}%)`);
+                                
+                                // Add message for UI display
+                                effectMessages.push(`🍎 ${character.name || character.id} ate the Big Red Apple! Restored ${actualHeal} HP (${healPercent}%)`);
+                            } else {
+                                console.warn(`Cannot apply percentage heal: Stats object missing for ${character.id}`);
+                                effectMessages.push(`⚠️ Cannot apply apple healing to ${character.name || character.id}: Stats missing`);
+                            }
+                            break;
+
                         default:
                             console.warn(`Unknown choice effect type: ${effect.type}`);
                             break;
@@ -2067,8 +2413,13 @@ class StoryManager {
                  }
                  
                  // Only include permanent buffs if they exist (Firebase doesn't allow undefined)
-                 if (member.permanentBuffs && member.permanentBuffs.length > 0) {
-                     memberState.permanentBuffs = [...member.permanentBuffs];
+                 if (member.permanentBuffs && Object.keys(member.permanentBuffs).length > 0) {
+                     memberState.permanentBuffs = { ...member.permanentBuffs };
+                 }
+                 
+                 // Only include permanent effects if they exist (Firebase doesn't allow undefined)
+                 if (member.permanentEffects && Object.keys(member.permanentEffects).length > 0) {
+                     memberState.permanentEffects = { ...member.permanentEffects };
                  }
                  
                  // Only include atlantean blessings if they exist (Firebase doesn't allow undefined)
@@ -2087,7 +2438,8 @@ class StoryManager {
                      maxHP: memberState.stats.hp,
                      hellEffects: memberState.hellEffects || 'none',
                      permanentDebuffs: memberState.permanentDebuffs ? memberState.permanentDebuffs.length : 0,
-                     permanentBuffs: memberState.permanentBuffs ? memberState.permanentBuffs.length : 0,
+                     permanentBuffs: memberState.permanentBuffs ? (Array.isArray(memberState.permanentBuffs) ? memberState.permanentBuffs.length : Object.keys(memberState.permanentBuffs).length) : 0,
+                     permanentEffects: memberState.permanentEffects || 'none',
                      atlanteanBlessings: memberState.atlanteanBlessings || 'none',
                      storyEffects: memberState.storyEffects || 'none'
                  });
@@ -2112,14 +2464,161 @@ class StoryManager {
                 this.onStageCompleted(completedStageId, [], hasMoreStages); 
             }
 
-            return hasMoreStages;
+            return { hasMoreStages, effectMessages };
 
         } catch (error) {
             console.error(`Error applying choice effect: ${error}`);
-            return false;
+            return { hasMoreStages: false, effectMessages: [`Error applying choice effect: ${error.message}`] };
         }
     }
     // --- END NEW ---
+
+    /**
+     * Handle character unlock reward selection from Expert Victory or similar stages
+     * @param {string} selectedCharacterId - The character ID selected for unlock
+     * @returns {Object} - Object containing success status and reward messages
+     */
+    async handleCharacterUnlockReward(selectedCharacterId) {
+        if (!this.currentStory) throw new Error('No story loaded');
+        if (this.isStoryComplete()) return { hasMoreStages: false, effectMessages: [] }; 
+
+        const currentStageData = this.getCurrentStage();
+        if (!currentStageData || currentStageData.type !== 'character_unlock') {
+            console.error('Attempted to handle character unlock on invalid stage type:', currentStageData?.type);
+            return { hasMoreStages: false, effectMessages: [] }; 
+        }
+
+        console.log(`[StoryManager] Processing character unlock reward for: ${selectedCharacterId}`);
+        
+        const effectMessages = [];
+
+        try {
+            // Check if this character unlock reward has already been claimed
+            const rewardKey = `expert_victory_${this.storyId}_${selectedCharacterId}`;
+            const alreadyClaimed = await this.checkExpertVictoryRewardClaimed(rewardKey);
+            
+            if (alreadyClaimed) {
+                console.log(`[StoryManager] Expert Victory reward already claimed for ${selectedCharacterId}`);
+                effectMessages.push(`You have already claimed this Expert Victory reward!`);
+                return { hasMoreStages: false, effectMessages };
+            }
+
+            // Find the selected character in the stage's unlockable characters
+            const selectedCharacter = currentStageData.unlockableCharacters?.find(char => char.characterId === selectedCharacterId);
+            if (!selectedCharacter) {
+                console.error(`[StoryManager] Character ${selectedCharacterId} not found in unlockable characters`);
+                effectMessages.push(`Selected character not available for unlock.`);
+                return { hasMoreStages: false, effectMessages };
+            }
+
+            // Grant the corresponding video skin
+            const videoSkinId = this.getVideoSkinIdForCharacter(selectedCharacterId);
+            if (videoSkinId) {
+                console.log(`[StoryManager] Granting video skin: ${videoSkinId}`);
+                
+                // Check if SkinManager is available
+                if (!window.SkinManager || !window.SkinManager.isReady()) {
+                    console.error('[StoryManager] SkinManager not ready for skin granting');
+                    effectMessages.push('Skin system not ready. Please try again.');
+                    return { hasMoreStages: false, effectMessages };
+                }
+
+                // Grant the skin
+                const skinResult = await window.SkinManager.grantSkin(videoSkinId, 'expert_victory');
+                if (skinResult.success) {
+                    console.log(`[StoryManager] Successfully granted skin: ${videoSkinId}`);
+                    effectMessages.push(`🎉 You've unlocked the ${selectedCharacter.name} video skin!`);
+                    
+                    // Mark this reward as claimed
+                    await this.markExpertVictoryRewardClaimed(rewardKey);
+                } else {
+                    console.error(`[StoryManager] Failed to grant skin: ${skinResult.error}`);
+                    if (skinResult.error === 'Skin already owned') {
+                        effectMessages.push(`You already own this skin!`);
+                    } else {
+                        effectMessages.push(`Failed to unlock skin: ${skinResult.error}`);
+                    }
+                }
+            } else {
+                console.error(`[StoryManager] No video skin found for character: ${selectedCharacterId}`);
+                effectMessages.push(`No reward skin found for ${selectedCharacter.name}.`);
+            }
+
+            // Advance to next stage
+            this.storyProgress.currentStageIndex++;
+            this.storyProgress.completedStages = Math.max(this.storyProgress.completedStages, this.storyProgress.currentStageIndex);
+
+            // Save progress
+            await this.saveStoryProgress();
+            console.log(`[StoryManager] Advanced to stage ${this.storyProgress.currentStageIndex} after character unlock reward.`);
+
+            const hasMoreStages = this.storyProgress.currentStageIndex < this.getTotalStages();
+
+            // Call event handler if defined
+            if (this.onStageCompleted) {
+                const completedStageId = this.getStageId(this.storyProgress.currentStageIndex - 1);
+                this.onStageCompleted(completedStageId, [], hasMoreStages); 
+            }
+
+            return { hasMoreStages, effectMessages };
+
+        } catch (error) {
+            console.error(`[StoryManager] Error handling character unlock reward: ${error}`);
+            return { hasMoreStages: false, effectMessages: [`Error processing reward: ${error.message}`] };
+        }
+    }
+
+    /**
+     * Get the video skin ID for a character based on Expert Victory rewards
+     * @param {string} characterId - The character ID
+     * @returns {string|null} - The video skin ID or null if not found
+     */
+    getVideoSkinIdForCharacter(characterId) {
+        const videoSkinMapping = {
+            'farmer_cham_cham': 'farmer_cham_cham_video',
+            'farmer_alice': 'farmer_alice_video',
+            'farmer_raiden': 'farmer_raiden_video',
+            'farmer_shoma': 'farmer_shoma_video',
+            'farmer_nina': 'farmer_nina_video'
+        };
+        
+        return videoSkinMapping[characterId] || null;
+    }
+
+    /**
+     * Check if an Expert Victory reward has already been claimed
+     * @param {string} rewardKey - The unique reward key
+     * @returns {boolean} - True if already claimed
+     */
+    async checkExpertVictoryRewardClaimed(rewardKey) {
+        try {
+            const database = window.database || firebase.database();
+            const rewardRef = database.ref(`users/${this.userId}/expertVictoryRewards/${rewardKey}`);
+            const snapshot = await rewardRef.once('value');
+            return snapshot.exists();
+        } catch (error) {
+            console.error('[StoryManager] Error checking Expert Victory reward status:', error);
+            return false; // Allow reward if we can't check
+        }
+    }
+
+    /**
+     * Mark an Expert Victory reward as claimed
+     * @param {string} rewardKey - The unique reward key
+     */
+    async markExpertVictoryRewardClaimed(rewardKey) {
+        try {
+            const database = window.database || firebase.database();
+            const rewardRef = database.ref(`users/${this.userId}/expertVictoryRewards/${rewardKey}`);
+            await rewardRef.set({
+                claimedAt: Date.now(),
+                storyId: this.storyId
+            });
+            console.log(`[StoryManager] Marked Expert Victory reward as claimed: ${rewardKey}`);
+        } catch (error) {
+            console.error('[StoryManager] Error marking Expert Victory reward as claimed:', error);
+        }
+    }
 
     /**
      * Helper to get base stats for a character from the registry.

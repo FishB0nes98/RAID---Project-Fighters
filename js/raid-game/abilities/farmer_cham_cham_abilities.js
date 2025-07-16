@@ -557,7 +557,7 @@ const farmerScratchAbility = new Ability(
     'farmer_scratch',              // id
     'Scratch (Farmer Version)',    // name
     'Icons/abilities/scratch_farmer.jpeg', // icon
-    40,                            // mana cost
+    30,                            // mana cost
     1,                             // cooldown
     farmerScratchEffect            // effect function
 );
@@ -819,8 +819,8 @@ const farmerBoomerangEffect = (caster, target) => {
     log(`${caster.name} throws a Boomerang (Farmer Version) at ${target.name}!`);
     // playSound('sounds/cat_boomerang.mp3', 0.7); // TODO: Add sound
 
-    // Damage Calculation (185% Physical Damage)
-    const damageMultiplier = 1.85;
+    // Damage Calculation (140% Physical Damage)
+    const damageMultiplier = 1.40;
     let physicalDamage = Math.floor((caster.stats.physicalDamage || 0) * damageMultiplier);
     
     // Check for Arcane Awakening talent (magical damage scaling)
@@ -1189,7 +1189,7 @@ const farmerBoomerangAbility = new Ability(
     farmerBoomerangEffect           // effect function
 );
 // Set base description separately
-farmerBoomerangAbility.baseDescription = 'Throws a cat-themed boomerang, dealing 185% Physical Damage twice.';
+farmerBoomerangAbility.baseDescription = 'Throws a cat-themed boomerang, dealing 140% Physical Damage twice.';
 
 // Add custom generateDescription method to handle the talent changes
 farmerBoomerangAbility.generateDescription = function() {

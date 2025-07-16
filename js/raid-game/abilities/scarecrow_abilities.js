@@ -78,13 +78,14 @@ const scarecrowFearEffect = (caster, targets, abilityData = {}) => {
             // Store the ability ID for removal
             disableDebuff.disabledAbilityId = ability.id;
 
-            // Disable the ability immediately
+            // Disable the ability immediately and set duration
             ability.isDisabled = true;
-            
-            // Set up the removal function to re-enable the ability
+            ability.disabledDuration = 2;
+
+            // Set up the removal function to re-enable the ability only if duration is up
             disableDebuff.onRemove = (character) => {
                 const disabledAbility = character.abilities.find(a => a.id === disableDebuff.disabledAbilityId);
-                if (disabledAbility && disabledAbility.isDisabled) {
+                if (disabledAbility && disabledAbility.isDisabled && (disabledAbility.disabledDuration === undefined || disabledAbility.disabledDuration <= 0)) {
                     disabledAbility.isDisabled = false;
                     log(`${character.name}'s ${disabledAbility.name} is no longer disabled by Fear.`);
                     if (uiManager) {

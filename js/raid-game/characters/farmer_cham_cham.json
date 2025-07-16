@@ -9,7 +9,7 @@
         "magicalShield": 8,
         "hp": 8400,
         "hpPerTurn": 0,
-        "mana": 2715,
+        "mana": 2585,
         "manaPerTurn": 0,
         "lifesteal": 0,
         "dodgeChance": 0,
@@ -37,4 +37,4 @@
         "description": "Every 5 turns, permanently gains 5% Lifesteal.",
         "icon": "Icons/passives/farmer_lifesteal.png"
     }
-} 
+}

@@ -19,6 +19,7 @@
     <script src="js/skins/skin-registry.js"></script>
     <link rel="preload" href="css/raid-game.css" as="style">
     <link rel="stylesheet" href="css/crow-crown.css">
+    <link rel="stylesheet" href="css/turn-indicator.css">
     
     <!-- Performance Hints -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
@@ -37,7 +38,9 @@
         html, body {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
 
         /* Essential hardware acceleration */
@@ -205,7 +208,6 @@
             transform: translate3d(0, 0, 0);
         }
     </style>
-    <script src="js/raid-game/game-manager.js"></script>
 </body>
 <body>
     <div class="game-container">
@@ -218,7 +220,9 @@
         html, body {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
 
         /* Essential hardware acceleration */
@@ -863,10 +867,18 @@
             </div>
         </div>
         
-        <!-- Volume Control -->
-        <div class="volume-control" id="volume-control">
-            <span class="volume-icon" id="volume-icon">🔊</span>
-            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70" aria-label="Volume Control">
+        <!-- Audio Controls -->
+        <div class="audio-control" id="audio-control">
+            <div class="audio-control-row">
+                <span class="audio-icon">🎵</span>
+                <label for="music-slider">Music:</label>
+                <input type="range" class="audio-slider" id="music-slider" min="0" max="100" value="30" aria-label="Music Volume Control">
+            </div>
+            <div class="audio-control-row">
+                <span class="audio-icon">🔊</span>
+                <label for="effects-slider">Effects:</label>
+                <input type="range" class="audio-slider" id="effects-slider" min="0" max="100" value="30" aria-label="Sound Effects Volume Control">
+            </div>
         </div>
 
         <!-- Quest Panel Toggle Button -->
@@ -963,6 +975,7 @@
 
         <!-- Quick Action Bar -->
         <div id="quick-action-bar" class="quick-action-bar">
+            <button id="qab-music-toggle" class="quick-action-btn" title="Toggle Music">🎵</button>
             <button id="qab-quests" class="quick-action-btn" title="Toggle Quests">🎯</button>
             <button id="qab-talents" class="quick-action-btn" title="Toggle Talents">⭐</button>
             <button id="qab-log" class="quick-action-btn" title="Toggle Battle Log">📋</button>
@@ -1061,7 +1074,6 @@
     
 
     <!-- Weekly Challenge AI -->
-    <script src="js/raid-game/weekly-challenge-ai.js"></script>
 
     <!-- Managers (Depend on Factories and Passives being registered) -->
     <script src="js/raid-game/stage-manager.js"></script>
@@ -1488,6 +1500,9 @@
             let initialY = 0;
             let xOffset = 0;
             let yOffset = 0;
+            let animationId = null;
+            let pendingUpdate = false;
+            let lastX = 0, lastY = 0;
             
             // Initialize drag variables with saved position if available
             if (savedPosition) {
@@ -1505,11 +1520,13 @@
             }
             
             function setTranslate(xPos, yPos, el) {
+                // Use transform for hardware acceleration instead of left/top
                 el.style.position = 'fixed';
-                el.style.left = xPos + 'px';
-                el.style.top = yPos + 'px';
+                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
                 el.style.right = 'auto';
                 el.style.bottom = 'auto';
+                el.style.left = 'auto';
+                el.style.top = 'auto';
             }
             
             function dragStart(e) {
@@ -1525,6 +1542,20 @@
                     isDragging = true;
                     battleLogContainer.style.cursor = 'grabbing';
                     dragHandle.style.cursor = 'grabbing';
+                    
+                    // Add dragging class for CSS optimizations
+                    battleLogContainer.classList.add('dragging');
+                    
+                    // Add performance hints for dragging
+                    battleLogContainer.style.willChange = 'transform';
+                    battleLogContainer.style.pointerEvents = 'none';
+                    
+                    // Cancel any pending animation frame
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
+                        pendingUpdate = false;
+                    }
                 }
             }
             
@@ -1534,6 +1565,20 @@
                 isDragging = false;
                 battleLogContainer.style.cursor = '';
                 dragHandle.style.cursor = 'grab';
+                
+                // Remove dragging class
+                battleLogContainer.classList.remove('dragging');
+                
+                // Remove performance hints
+                battleLogContainer.style.willChange = 'auto';
+                battleLogContainer.style.pointerEvents = 'auto';
+                
+                // Cancel any pending animation frame
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                    pendingUpdate = false;
+                }
                 
                 // Save position to localStorage
                 const position = { x: currentX, y: currentY };
@@ -1545,26 +1590,36 @@
                     e.preventDefault();
                     
                     if (e.type === "touchmove") {
-                        currentX = e.touches[0].clientX - initialX;
-                        currentY = e.touches[0].clientY - initialY;
+                        lastX = e.touches[0].clientX - initialX;
+                        lastY = e.touches[0].clientY - initialY;
                     } else {
-                        currentX = e.clientX - initialX;
-                        currentY = e.clientY - initialY;
+                        lastX = e.clientX - initialX;
+                        lastY = e.clientY - initialY;
                     }
                     
-                    // Keep the log within viewport bounds
-                    const containerRect = battleLogContainer.getBoundingClientRect();
-                    const maxX = window.innerWidth - containerRect.width;
-                    const maxY = window.innerHeight - containerRect.height;
-                    
-                    currentX = Math.max(0, Math.min(currentX, maxX));
-                    currentY = Math.max(0, Math.min(currentY, maxY));
-                    
-                    xOffset = currentX;
-                    yOffset = currentY;
-                    
-                    setTranslate(currentX, currentY, battleLogContainer);
+                    // Only update if we're not already waiting for an animation frame
+                    if (!pendingUpdate) {
+                        pendingUpdate = true;
+                        animationId = requestAnimationFrame(updatePosition);
+                    }
                 }
+            }
+            
+            function updatePosition() {
+                pendingUpdate = false;
+                
+                // Keep the log within viewport bounds
+                const containerRect = battleLogContainer.getBoundingClientRect();
+                const maxX = window.innerWidth - containerRect.width;
+                const maxY = window.innerHeight - containerRect.height;
+                
+                currentX = Math.max(0, Math.min(lastX, maxX));
+                currentY = Math.max(0, Math.min(lastY, maxY));
+                
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                setTranslate(currentX, currentY, battleLogContainer);
             }
             
             // Add event listeners for dragging
@@ -2449,6 +2504,13 @@
                                 await window.InventoryIntegrationManager.initialize();
                                 console.log('[RAID-GAME] Inventory system initialized');
                             }
+                            
+                            // Initialize skin manager
+                            if (typeof SkinManager !== 'undefined') {
+                                window.SkinManager = new SkinManager();
+                                await window.SkinManager.initialize();
+                                console.log('[RAID-GAME] Skin manager initialized');
+                            }
                         }
 
                         // Initialize Loot System
@@ -2463,9 +2525,19 @@
                             console.log('[RAID-GAME] Loot UI system initialized');
                         }
 
-                        // Initialize the talent manager if available
-                        if (window.talentManager) {
+                        // Get URL parameters first (needed for conditional initialization)
+                        const urlParams = new URLSearchParams(window.location.search);
+                        let stageId = urlParams.get('stage') || 'draft_mode_stage'; // Default to draft mode stage
+                        const storyId = urlParams.get('storyId');
+                        const stageIndex = urlParams.get('stageIndex');
+                        const isWeeklyChallenge = urlParams.get('weekly') === 'true';
+                        const skipTalentLoading = urlParams.get('skipTalentLoading') === 'true';
+
+                        // Initialize the talent manager if available and not skipping
+                        if (window.talentManager && !skipTalentLoading) {
                             await window.talentManager.initialize();
+                        } else if (skipTalentLoading) {
+                            console.log('[ADMIN] Skipping talent loading for balance testing');
                         }
 
                         // Initialize the quest manager if available
@@ -2479,21 +2551,18 @@
                         if (typeof GameManager === 'undefined') {
                              throw new Error("GameManager class not found. Check script includes.");
                         }
+                        
+                        // Initialize Stage Modifiers Registry
+                        if (typeof StageModifiersRegistry !== 'undefined') {
+                            window.stageModifiersRegistry = new StageModifiersRegistry();
+                            console.log('[RaidGame] ✓ Stage modifiers registry initialized');
+                        } else {
+                            console.warn('[RaidGame] ⚠️ StageModifiersRegistry not available - stage modifiers will not work');
+                        }
+                        
                         window.gameManager = new GameManager(); // Create instance
                         await window.gameManager.initialize(); // Initialize managers
                         
-                        // Get stageId (might be from URL for story mode, or default)
-                        const urlParams = new URLSearchParams(window.location.search);
-                        let stageId = urlParams.get('stage') || 'draft_mode_stage'; // Default to draft mode stage
-                        const storyId = urlParams.get('storyId');
-                        const stageIndex = urlParams.get('stageIndex');
-                        const isWeeklyChallenge = urlParams.get('weekly') === 'true';
-                        
-                        // Enable weekly challenge mode if detected
-                        if (isWeeklyChallenge) {
-                            window.gameManager.enableWeeklyChallengeMode();
-                            console.log('[RAID-GAME] Weekly Challenge Mode enabled for stage:', stageId);
-                        }
                         
                         // Check for data from character selector in localStorage
                         const savedGameData = localStorage.getItem('raid_game_data');
@@ -2526,9 +2595,15 @@
                         // Dispatch gameStarted event for unload protection
                         window.dispatchEvent(new CustomEvent('gameStarted'));
 
-                        // Initialize the talents panel if the talents panel manager is available
-                        if (window.talentsPanelManager) {
+                        // Initialize the talents panel if the talents panel manager is available and not skipping
+                        if (window.talentsPanelManager && !skipTalentLoading) {
                             window.talentsPanelManager.initialize();
+                        } else if (skipTalentLoading) {
+                            // Hide talents panel for admin balance testing
+                            const talentsPanel = document.getElementById('talents-panel');
+                            if (talentsPanel) {
+                                talentsPanel.style.display = 'none';
+                            }
                         }
 
                         // Hide loading screen AFTER game state is loaded and ready

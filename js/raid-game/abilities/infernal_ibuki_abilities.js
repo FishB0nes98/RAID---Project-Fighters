@@ -1077,8 +1077,8 @@ async function executeDashingStrikeChain(caster, currentTarget, hitTargets = [],
     await delay(150);
 
     // --- Chaining Logic with enhanced visuals ---
-    const chainChance = 0.45;
-    const maxChains = 2;
+    const chainChance = 0.55;
+    const maxChains = 5;
     if (Math.random() < chainChance && chainCount < maxChains) {
         // Find next target from the caster's enemies (opposite team)
         const potentialTargets = caster.isAI 

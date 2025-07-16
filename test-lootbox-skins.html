@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Lootbox Skin Drops</title>
+</head>
+<body>
+    <h1>Test Lootbox Skin Drops</h1>
+    <button id="testButton">Test Basket of Goods Opening</button>
+    <div id="results"></div>
+
+    <!-- Include Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <!-- Include your scripts -->
+    <script src="js/skins/skin-manager.js"></script>
+    <script src="js/raid-game/item-system.js"></script>
+
+    <script>
+        // Initialize Firebase (you'll need to add your config)
+        const firebaseConfig = {
+            // Add your Firebase config here
+        };
+        
+        // Mock Firebase for testing
+        window.firebase = {
+            auth: () => ({
+                currentUser: { uid: 'test-user-123' }
+            }),
+            database: () => ({
+                ref: (path) => ({
+                    once: (event) => Promise.resolve({ val: () => ({}) }),
+                    set: (data) => Promise.resolve(),
+                    update: (data) => Promise.resolve(),
+                    remove: () => Promise.resolve()
+                })
+            })
+        };
+
+        // Mock SkinRegistry
+        window.SkinRegistry = {
+            getSkin: (id) => ({ id, name: `Test Skin ${id}`, characterId: 'test_character' })
+        };
+
+        // Initialize SkinManager
+        window.SkinManager = new SkinManager();
+        window.SkinManager.initialized = true;
+        window.SkinManager.currentUserId = 'test-user-123';
+        window.SkinManager.ownedSkins = {};
+
+        // Test function
+        async function testBasketOfGoods() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing...</p>';
+
+            try {
+                // Get the basket of goods item
+                const basketItem = window.ItemRegistry.getItem('basket_of_goods');
+                if (!basketItem) {
+                    resultsDiv.innerHTML = '<p>Error: Basket of Goods item not found!</p>';
+                    return;
+                }
+
+                console.log('Testing basket of goods:', basketItem);
+
+                // Create a mock character
+                const mockCharacter = {
+                    id: 'test-character',
+                    name: 'Test Character'
+                };
+
+                // Test opening the lootbox multiple times
+                let skinDropCount = 0;
+                let totalTests = 10;
+
+                for (let i = 0; i < totalTests; i++) {
+                    const result = await basketItem.openLootbox(mockCharacter);
+                    console.log(`Test ${i + 1} result:`, result);
+                    
+                    if (result.specialRewards && result.specialRewards.length > 0) {
+                        skinDropCount++;
+                        console.log('Skin dropped!', result.specialRewards);
+                    }
+                }
+
+                resultsDiv.innerHTML = `
+                    <h3>Test Results:</h3>
+                    <p>Total tests: ${totalTests}</p>
+                    <p>Skin drops: ${skinDropCount}</p>
+                    <p>Drop rate: ${(skinDropCount / totalTests * 100).toFixed(1)}%</p>
+                    <p>Expected rate: 15%</p>
+                    <p>Check console for detailed logs</p>
+                `;
+
+            } catch (error) {
+                console.error('Test error:', error);
+                resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        // Add event listener
+        document.getElementById('testButton').addEventListener('click', testBasketOfGoods);
+
+        // Auto-run test when page loads
+        window.addEventListener('load', () => {
+            setTimeout(testBasketOfGoods, 1000);
+        });
+    </script>
+</body>
+</html>

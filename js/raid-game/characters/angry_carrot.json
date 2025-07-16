@@ -39,7 +39,7 @@
             "manaCost": 20,
             "cooldown": 5,
             "targetType": "self",
-            "description": "Increases the carrot's damage output by 10% for the next 5 turns.",
+            "description": "Increases the carrot's damage output by 500% for the next 5 turns.",
             "icon": "Icons/abilities/anger.jpeg",
             "effect": {
                 "script": "js/raid-game/abilities/angry_carrot_abilities.js",

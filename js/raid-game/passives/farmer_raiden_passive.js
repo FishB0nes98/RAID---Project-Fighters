@@ -2,7 +2,7 @@
 
 class FarmerRaidenPassive {
     constructor() {
-        this.zapDamageMultiplier = 0.6; // 60% magical damage
+        this.zapDamageMultiplier = 0.5; // 50% magical damage
         this.totalZapsDone = 0; // Track how many zaps have been triggered
         this.lastPowerGrowthTurn = 0; // Track when we last gained magical damage
         this.magicalDamageGrowthAmount = 100; // Amount to increase magical damage by
@@ -15,7 +15,7 @@ class FarmerRaidenPassive {
         this.initialMagicalShieldBonus = 0.15; // 15% magical shield at game start
         this.stormEmpowermentAmount = 300; // Magical damage bonus from Storm Empowerment talent
         this.stormEmpowermentDuration = 3; // Duration of the Storm Empowerment buff in turns
-        this.basePassiveDescription = "Using an ability zaps a random enemy target, dealing 60% magical damage.";
+        this.basePassiveDescription = "Using an ability zaps a random enemy target, dealing 50% magical damage.";
         this.passiveTalentEffects = [];
         // New talent properties
         this.disabledAbilityDuration = 0; // Will be set by the shocked debuff duration
@@ -389,19 +389,31 @@ class FarmerRaidenPassive {
         const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!characterElement) return;
         
-        // Create effect container
-        const effectContainer = document.createElement('div');
-        effectContainer.className = 'vfx-container storm-empowerment-effect';
-        characterElement.appendChild(effectContainer);
+        // Get the battle container for proper positioning
+        const container = document.querySelector('.battle-container') || document.querySelector('.game-container') || document.body;
         
-        // Create power-up effect
-        const powerUpEffect = document.createElement('div');
-        powerUpEffect.className = 'thunder-perception-effect'; // Reuse existing effect style
-        effectContainer.appendChild(powerUpEffect);
+        // Create effect container with proper positioning
+        const effectContainer = document.createElement('div');
+        effectContainer.className = 'storm-empowerment-effect';
+        
+        // Get character position relative to the container
+        const rect = characterElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const x = rect.left - containerRect.left + (rect.width / 2);
+        const y = rect.top - containerRect.top + (rect.height / 3);
+        
+        effectContainer.style.position = 'absolute';
+        effectContainer.style.left = `${x}px`;
+        effectContainer.style.top = `${y}px`;
+        effectContainer.style.transform = 'translateX(-50%)';
+        effectContainer.style.pointerEvents = 'none';
+        effectContainer.style.zIndex = '100';
+        
+        container.appendChild(effectContainer);
         
         // Add text
         const empowermentText = document.createElement('div');
-        empowermentText.className = 'thunder-perception-text'; // Reuse existing text style
+        empowermentText.className = 'storm-empowerment-text';
         empowermentText.textContent = `+${this.stormEmpowermentAmount} M.DMG`;
         effectContainer.appendChild(empowermentText);
         
@@ -699,10 +711,27 @@ class FarmerRaidenPassive {
         const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!characterElement) return;
         
-        // Create dodge effect container
+        // Get the battle container for proper positioning
+        const container = document.querySelector('.battle-container') || document.querySelector('.game-container') || document.body;
+        
+        // Create dodge effect container with proper positioning
         const dodgeEffect = document.createElement('div');
         dodgeEffect.className = 'lightning-evasion-effect';
-        characterElement.appendChild(dodgeEffect);
+        
+        // Get character position relative to the container
+        const rect = characterElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const x = rect.left - containerRect.left + (rect.width / 2);
+        const y = rect.top - containerRect.top + (rect.height / 3);
+        
+        dodgeEffect.style.position = 'absolute';
+        dodgeEffect.style.left = `${x}px`;
+        dodgeEffect.style.top = `${y}px`;
+        dodgeEffect.style.transform = 'translateX(-50%)';
+        dodgeEffect.style.pointerEvents = 'none';
+        dodgeEffect.style.zIndex = '100';
+        
+        container.appendChild(dodgeEffect);
         
         // Create dodge text
         const dodgeText = document.createElement('div');
@@ -726,22 +755,36 @@ class FarmerRaidenPassive {
         const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!characterElement) return;
         
-        // Create power growth effect container
+        // Get the battle container for proper positioning
+        const container = document.querySelector('.battle-container') || document.querySelector('.game-container') || document.body;
+        
+        // Create power growth effect container with proper positioning
         const powerEffect = document.createElement('div');
         powerEffect.className = 'raiden-power-growth-effect';
-        characterElement.appendChild(powerEffect);
+        
+        // Get character position relative to the container
+        const rect = characterElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const x = rect.left - containerRect.left + (rect.width / 2);
+        const y = rect.top - containerRect.top + (rect.height / 3);
+        
+        powerEffect.style.position = 'absolute';
+        powerEffect.style.left = `${x}px`;
+        powerEffect.style.top = `${y}px`;
+        powerEffect.style.transform = 'translateX(-50%)';
+        powerEffect.style.pointerEvents = 'none';
+        powerEffect.style.zIndex = '111';
+        
+        container.appendChild(powerEffect);
         
         // Add lightning particles
         for (let i = 0; i < 10; i++) {
             const particle = document.createElement('div');
             particle.className = 'power-growth-particle';
             particle.style.animationDelay = `${Math.random() * 0.5}s`;
-            
-            // Set random positions via CSS variables
-            const randomX = (Math.random() * 200 - 100) + 'px';
-            const randomY = (Math.random() * 200 - 100) + 'px';
-            particle.style.setProperty('--random-x', randomX);
-            particle.style.setProperty('--random-y', randomY);
+            particle.style.position = 'absolute';
+            particle.style.left = `${(Math.random() - 0.5) * 100}px`;
+            particle.style.top = `${(Math.random() - 0.5) * 50}px`;
             
             powerEffect.appendChild(particle);
         }
@@ -807,11 +850,11 @@ class FarmerRaidenPassive {
                     window.trackZapPassiveStats(caster, caster, actualHeal, 'lifesteal');
                 }
                 
-                this.showZapLifestealVFX(caster, actualHeal);
+                this.showZapLifestealVFX(caster, actualHeal.healAmount || actualHeal);
                 
                 if (window.gameManager && window.gameManager.addLogEntry) {
                     window.gameManager.addLogEntry(
-                        `${caster.name} heals for ${actualHeal} health from Zap lifesteal!`, 
+                        `${caster.name} heals for ${actualHeal.healAmount || actualHeal} health from Zap lifesteal!`, 
                         'passive'
                     );
                 }
@@ -954,10 +997,27 @@ class FarmerRaidenPassive {
         const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!characterElement) return;
         
-        // Create lightning healing effect container
+        // Get the battle container for proper positioning
+        const container = document.querySelector('.battle-container') || document.querySelector('.game-container') || document.body;
+        
+        // Create lightning healing effect container with proper positioning
         const healEffect = document.createElement('div');
         healEffect.className = 'lightning-heal-effect';
-        characterElement.appendChild(healEffect);
+        
+        // Get character position relative to the container
+        const rect = characterElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const x = rect.left - containerRect.left + (rect.width / 2);
+        const y = rect.top - containerRect.top + (rect.height / 3);
+        
+        healEffect.style.position = 'absolute';
+        healEffect.style.left = `${x}px`;
+        healEffect.style.top = `${y}px`;
+        healEffect.style.transform = 'translateX(-50%)';
+        healEffect.style.pointerEvents = 'none';
+        healEffect.style.zIndex = '100';
+        
+        container.appendChild(healEffect);
         
         // Create healing particles
         const healParticles = document.createElement('div');
@@ -1061,7 +1121,7 @@ class FarmerRaidenPassive {
         let attempts = 0;
 
         const tryInitialize = () => {
-            const characterElement = document.getElementById(`character-${character.id}`);
+            const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
             
             if (characterElement) {
                 // Success: Element exists, proceed with passive setup
@@ -1211,18 +1271,29 @@ class FarmerRaidenPassive {
                 const elementId = character.instanceId || character.id;
                 // Try multiple selectors to find the character element
                 let characterElement = document.getElementById(`character-${elementId}`);
-                
+
+                // Fallback: try .character-slot with id containing the character id or 'farmer_raiden'
                 if (!characterElement) {
-                    // Try finding any element containing the character ID
-                    const elements = document.querySelectorAll(`.character-slot`);
+                    const elements = document.querySelectorAll('.character-slot');
                     for (const el of elements) {
-                        if (el.id.includes(elementId) || el.id.includes('farmer_raiden')) {
+                        if ((el.id && el.id.includes(elementId)) || (el.id && el.id.includes('farmer_raiden'))) {
                             characterElement = el;
                             break;
                         }
                     }
                 }
-                
+
+                // Fallback: try any element with data-character-id attribute matching
+                if (!characterElement) {
+                    const elements = document.querySelectorAll('[data-character-id]');
+                    for (const el of elements) {
+                        if (el.getAttribute('data-character-id') === elementId || el.getAttribute('data-character-id') === 'farmer_raiden') {
+                            characterElement = el;
+                            break;
+                        }
+                    }
+                }
+
                 if (characterElement) {
                     const imageContainer = characterElement.querySelector('.image-container');
                     // Check if indicator already exists
@@ -1230,7 +1301,7 @@ class FarmerRaidenPassive {
                         const passiveIndicator = document.createElement('div');
                         passiveIndicator.className = 'raiden-passive-indicator';
                         passiveIndicator.dataset.characterId = elementId; // Add dataset for selection
-                        
+
                         // Add the has-talents class if any passive-affecting talents are active
                         if (character.stunningZap === true || character.lowHealthDodge === true || 
                             character.powerGrowth === true || character.critOnBuff === true || 
@@ -1238,15 +1309,15 @@ class FarmerRaidenPassive {
                             character.stormEmpowerment === true || character.zapDamageMultiplier) {
                             passiveIndicator.classList.add('has-talents');
                         }
-                        
+
                         // Set initial description data
                         const initialDescription = this.basePassiveDescription + (this.passiveTalentEffects.length > 0 ? '\n' + this.passiveTalentEffects.join('\n') : '');
                         passiveIndicator.setAttribute('data-passive-description', initialDescription);
                         passiveIndicator.setAttribute('data-tooltip-html', 'true');
-                        
+
                         imageContainer.appendChild(passiveIndicator);
                         console.log(`Passive indicator added for ${character.name} to element:`, characterElement.id);
-                        
+
                         // Attach event listeners immediately after creation
                         passiveIndicator.addEventListener('mouseenter', this.showPassiveTooltip.bind(this));
                         passiveIndicator.addEventListener('mouseleave', this.hidePassiveTooltip.bind(this));
@@ -1256,54 +1327,74 @@ class FarmerRaidenPassive {
                         console.warn(`Found character element but no image container for ${character.name}`);
                     }
                 } else {
-                    console.warn(`Could not find character element for ${character.name} (${elementId})`);
+                    console.log(`[Farmer Raiden Passive] Character element not ready yet for ${character.name} (${elementId}), will retry...`);
                 }
             } catch (error) {
                 console.error(`Error creating passive indicator for ${character.name}:`, error);
             }
         };
 
-        // Try immediately, but also set up a delayed attempt
+        // Try immediately, but also set up delayed attempts
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', tryCreate);
         } else {
             tryCreate();
-            // Try again in a moment if the UI is still being built
+            // Try again multiple times if the UI is still being built
+            setTimeout(tryCreate, 100);
             setTimeout(tryCreate, 500);
+            setTimeout(tryCreate, 1000);
         }
     }
 
     // Add the Growing Power VFX method
     showGrowingPowerVFX(character, amount) {
-        if (!character || !character.element) return;
+        const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!characterElement) return;
         
-        // Create growing power effect container
+        // Get the battle container for proper positioning
+        const container = document.querySelector('.battle-container');
+        if (!container) return;
+        
+        // Create growing power effect container with proper positioning
         const effectContainer = document.createElement('div');
         effectContainer.className = 'raiden-power-growth-effect';
-        character.element.querySelector('.image-container').appendChild(effectContainer);
+        
+        // Get character position relative to the battle container
+        const rect = characterElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const x = rect.left - containerRect.left + (rect.width / 2);
+        const y = rect.top - containerRect.top + (rect.height / 3); // Position in upper third
+        
+        effectContainer.style.position = 'absolute';
+        effectContainer.style.left = `${x}px`;
+        effectContainer.style.top = `${y}px`;
+        effectContainer.style.transform = 'translateX(-50%)';
+        effectContainer.style.pointerEvents = 'none';
+        effectContainer.style.zIndex = '111';
+        
+        container.appendChild(effectContainer);
         
         // Create power increase text
         const powerText = document.createElement('div');
         powerText.className = 'power-growth-text';
         powerText.textContent = `+${amount} M.DMG`;
         powerText.style.color = '#ffb700'; // Golden color for growing power
+        powerText.style.position = 'relative';
+        powerText.style.top = '0';
+        powerText.style.left = '0';
+        powerText.style.transform = 'none';
         effectContainer.appendChild(powerText);
         
         // Create particles
         for (let i = 0; i < 10; i++) {
             const particle = document.createElement('div');
             particle.className = 'power-growth-particle';
-            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.position = 'absolute';
+            particle.style.left = `${(Math.random() - 0.5) * 100}px`;
+            particle.style.top = `${(Math.random() - 0.5) * 50}px`;
             particle.style.animationDelay = `${Math.random() * 0.5}s`;
             effectContainer.appendChild(particle);
         }
-        
-        // Show floating text above character
-        window.gameManager.uiManager.showFloatingText(
-            character.instanceId,
-            `+${amount} M.DMG`,
-            'buff'
-        );
         
         // Remove effect after animation completes
         setTimeout(() => {

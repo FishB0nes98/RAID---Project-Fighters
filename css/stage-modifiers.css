@@ -1,3 +1,22 @@
+.crow-protection-vulnerable-static {
+    position: relative;
+    box-shadow: 0 0 18px 6px rgba(255,0,0,0.7), 0 0 32px 8px #f00a inset;
+    background: linear-gradient(120deg, rgba(255,0,0,0.10) 60%, rgba(255,0,0,0.18) 100%);
+    /* No animation, just static VFX */
+}
+
+.crow-protection-vulnerable-static::after {
+    content: '\26A0'; /* Warning sign */
+    position: absolute;
+    top: -18px;
+    right: -10px;
+    font-size: 2.2em;
+    color: #f00;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 8px #f00) drop-shadow(0 0 12px #fff2);
+    pointer-events: none;
+    /* No animation */
+}
 /* Stage Modifier VFX Styles */
 
 .stage-modifier-vfx {
@@ -854,4 +873,483 @@
     100% { 
         box-shadow: 0 0 20px rgba(160, 80, 200, 0.6); 
     }
-} 
+}
+
+/* Pumpkin Field VFX */
+.pumpkin-field-vfx {
+    background: linear-gradient(135deg, 
+        rgba(255, 140, 0, 0.08) 0%, 
+        rgba(255, 69, 0, 0.12) 30%, 
+        rgba(139, 69, 19, 0.15) 60%, 
+        rgba(255, 140, 0, 0.08) 100%);
+    animation: pumpkinFieldPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes pumpkinFieldPulse {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+        filter: brightness(1) hue-rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+        filter: brightness(1.2) hue-rotate(15deg);
+    }
+    100% {
+        opacity: 0.9;
+        transform: scale(0.98);
+        filter: brightness(1.1) hue-rotate(-10deg);
+    }
+}
+
+.pumpkin-field-particle {
+    position: absolute;
+    font-size: 20px;
+    animation: pumpkinFieldParticleFloat linear infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.9));
+}
+
+@keyframes pumpkinFieldParticleFloat {
+    0% {
+        transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+        opacity: 0.8;
+    }
+    25% {
+        transform: translateY(-15px) translateX(8px) rotate(90deg) scale(1.2);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-8px) translateX(-5px) rotate(180deg) scale(0.9);
+        opacity: 0.9;
+    }
+    75% {
+        transform: translateY(-20px) translateX(10px) rotate(270deg) scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0px) translateX(0px) rotate(360deg) scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Pumpkin debuff effect styling */
+.stage-effect.pumpkin-debuff {
+    color: #ff8c00 !important;
+    font-weight: bold;
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 8px #ff8c00;
+    animation: pumpkinDebuffText 1s ease-out;
+}
+
+@keyframes pumpkinDebuffText {
+    0% {
+        transform: scale(1);
+        text-shadow: 
+            2px 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 8px #ff8c00;
+    }
+    50% {
+        transform: scale(1.05);
+        text-shadow: 
+            2px 2px 6px rgba(0, 0, 0, 0.9),
+            0 0 15px #ff8c00,
+            0 0 25px #ff4500;
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 
+            2px 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 8px #ff8c00;
+    }
+}
+
+/* Stage modifier styling for Pumpkin Field */
+.stage-modifier[data-modifier-id="exploding_pumpkin_field"] {
+    border-left-color: rgba(255, 140, 0, 0.6);
+    background: rgba(255, 140, 0, 0.1);
+    animation: pumpkinFieldGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes pumpkinFieldGlow {
+    0% { 
+        box-shadow: 0 0 10px rgba(255, 140, 0, 0.3); 
+    }
+    100% { 
+        box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); 
+    }
+}
+
+/* Team Carrot VFX */
+.team-carrot-vfx {
+    background: linear-gradient(135deg, 
+        rgba(255, 140, 0, 0.1) 0%, 
+        rgba(255, 165, 0, 0.15) 50%, 
+        rgba(255, 140, 0, 0.1) 100%);
+    animation: teamCarrotPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes teamCarrotPulse {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+        filter: brightness(1) hue-rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+        filter: brightness(1.2) hue-rotate(10deg);
+    }
+    100% {
+        opacity: 0.9;
+        transform: scale(0.98);
+        filter: brightness(1.1) hue-rotate(-5deg);
+    }
+}
+
+.team-carrot-particle {
+    position: absolute;
+    animation: teamCarrotParticleFloat 2s ease-out forwards;
+    filter: drop-shadow(0 0 3px rgba(255, 140, 0, 0.8));
+}
+
+/* Team Carrot healing effect styling */
+.stage-effect.team-carrot {
+    color: #ff8c00 !important;
+    font-weight: bold;
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 8px #ff8c00;
+    animation: teamCarrotText 1s ease-out;
+}
+
+@keyframes teamCarrotText {
+    0% {
+        transform: scale(1);
+        text-shadow: 
+            2px 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 8px #ff8c00;
+    }
+    50% {
+        transform: scale(1.05);
+        text-shadow: 
+            2px 2px 6px rgba(0, 0, 0, 0.9),
+            0 0 15px #ff8c00,
+            0 0 25px #ff4500;
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 
+            2px 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 8px #ff8c00;
+    }
+}
+
+/* Stage modifier styling for Team Carrot */
+.stage-modifier[data-modifier-id="team_carrot"] {
+    border-left-color: rgba(255, 140, 0, 0.6);
+    background: rgba(255, 140, 0, 0.1);
+    animation: teamCarrotGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes teamCarrotGlow {
+    0% { 
+        box-shadow: 0 0 10px rgba(255, 140, 0, 0.3); 
+    }
+    100% { 
+        box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); 
+    }
+}
+
+/* Crow Protection VFX Styles */
+.crow-protection-protected {
+    position: relative;
+    box-shadow: 0 0 18px 6px rgba(0,0,0,0.7), 0 0 32px 8px #222 inset;
+    background: linear-gradient(120deg, rgba(40,40,40,0.15) 60%, rgba(0,0,0,0.25) 100%);
+    animation: crowProtectionPulse 1.5s infinite;
+}
+
+.crow-protection-protected::after {
+    content: '\1FAB6'; /* Feather emoji */
+    position: absolute;
+    top: -18px;
+    right: -10px;
+    font-size: 2.2em;
+    color: #222;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 8px #000) drop-shadow(0 0 12px #fff2);
+    pointer-events: none;
+    animation: crowFeatherFloat 2.5s infinite;
+}
+
+.crow-protection-vulnerable {
+    position: relative;
+    box-shadow: 0 0 18px 6px rgba(255,0,0,0.7), 0 0 32px 8px #f00a inset;
+    background: linear-gradient(120deg, rgba(255,0,0,0.10) 60%, rgba(255,0,0,0.18) 100%);
+    animation: crowVulnerablePulse 1s infinite;
+}
+
+.crow-protection-vulnerable::after {
+    content: '\26A0'; /* Warning sign */
+    position: absolute;
+    top: -18px;
+    right: -10px;
+    font-size: 2.2em;
+    color: #f00;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 8px #f00) drop-shadow(0 0 12px #fff2);
+    pointer-events: none;
+    animation: crowVulnerableWarning 1.2s infinite;
+}
+
+@keyframes crowFeatherFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.7;
+    }
+    25% {
+        transform: translateY(-8px) rotate(90deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-4px) rotate(180deg);
+        opacity: 0.8;
+    }
+    75% {
+        transform: translateY(-12px) rotate(270deg);
+        opacity: 1;
+    }
+}
+
+@keyframes crowProtectionPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes crowVulnerableWarning {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+@keyframes crowVulnerablePulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+    }
+}
+
+@keyframes crowProtectedGlow {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.9);
+    }
+}
+
+@keyframes crowVulnerableGlow {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+        background: rgba(255, 0, 0, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.9);
+        background: rgba(255, 0, 0, 0.9);
+    }
+}
+
+@keyframes crowFlyAcross {
+    0% {
+        left: -50px;
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-5deg);
+    }
+    50% {
+        transform: rotate(5deg);
+    }
+    75% {
+        transform: rotate(-3deg);
+    }
+    100% {
+        left: calc(100% + 50px);
+        transform: rotate(0deg);
+    }
+}
+
+/* Crow Protection battlefield effect */
+.crow-protection-battlefield-vfx {
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(20, 20, 20, 0.1) 50%,
+        rgba(0, 0, 0, 0.05) 100%
+    );
+    animation: crowBattlefieldPulse 4s ease-in-out infinite;
+}
+
+@keyframes crowBattlefieldPulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Stage modifier styling for Crow Protection */
+.stage-modifier[data-modifier-id="crow_protection"] {
+    border-left-color: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.1);
+    animation: crowProtectionModifierGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes crowProtectionModifierGlow {
+    0% { 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); 
+    }
+    100% { 
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); 
+    }
+}
+
+/* Crow Protection Swap VFX */
+@keyframes crowSwapFlash {
+    0% {
+        opacity: 0;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, transparent 70%);
+    }
+    20% {
+        opacity: 1;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 0%, transparent 70%);
+    }
+    80% {
+        opacity: 1;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+    }
+    100% {
+        opacity: 0;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, transparent 70%);
+    }
+}
+
+@keyframes crowSwapSwirl {
+    0% {
+        transform: scale(0.5) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2) rotate(90deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1) rotate(180deg);
+        opacity: 0.8;
+    }
+    80% {
+        transform: scale(0.8) rotate(270deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(0.3) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.crow-swap-highlight {
+    animation: crowSwapHighlight 2s ease-out forwards;
+    position: relative;
+    z-index: 100;
+}
+
+@keyframes crowSwapHighlight {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+        transform: scale(1);
+    }
+    25% {
+        box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.8);
+        transform: scale(1.05);
+    }
+    50% {
+        box-shadow: 0 0 30px 8px rgba(255, 0, 0, 0.6);
+        transform: scale(1.02);
+    }
+    75% {
+        box-shadow: 0 0 15px 3px rgba(255, 0, 0, 0.4);
+        transform: scale(1.01);
+    }
+}
+
+/* Enhanced vulnerable warning for swaps */
+.crow-protection-vulnerable .crow-vulnerable-warning {
+    animation: crowVulnerableWarningSwap 2s ease-in-out infinite;
+}
+
+@keyframes crowVulnerableWarningSwap {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.8;
+        filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.8));
+    }
+    25% {
+        transform: scale(1.3) rotate(5deg);
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(255, 0, 0, 1));
+    }
+    50% {
+        transform: scale(1.1) rotate(-3deg);
+        opacity: 0.9;
+        filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.9));
+    }
+    75% {
+        transform: scale(1.2) rotate(3deg);
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(255, 0, 0, 1));
+    }
+}
+
+/* Responsive adjustments for Crow Protection */
+@media (max-width: 768px) {
+    .crow-dodge-indicator {
+        font-size: 10px !important;
+        padding: 1px 6px !important;
+        bottom: -20px !important;
+    }
+    
+    .crow-vulnerable-warning {
+        font-size: 16px !important;
+        top: 2px !important;
+        right: 2px !important;
+    }
+    
+    .battlefield-crow {
+        font-size: 14px !important;
+    }
+    
+    .swap-crow {
+        font-size: 12px !important;
+    }
+}

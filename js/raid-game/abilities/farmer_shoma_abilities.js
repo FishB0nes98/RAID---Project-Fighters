@@ -533,11 +533,10 @@ const homeRunSmashEffect = (caster, target, ability, actualManaCost, options = {
     // --- End Target Impact VFX ---
 
     // Check if Quick Smash talent is active by seeing if cooldown is 1
-    // If the cooldown is 1, we assume the talent is active and skip applying stun
     const hasQuickSmashTalent = ability.cooldown === 1;
     
-    // Apply stun effect with 35% chance only if Quick Smash talent is not active
-    if (!hasQuickSmashTalent && Math.random() < 0.35) {
+    // Apply stun effect with 35% chance
+    if (Math.random() < 0.35) {
         const stunDebuff = new Effect(
             'farmer_shoma_stun_debuff',
             'Stunned',
@@ -559,7 +558,8 @@ const homeRunSmashEffect = (caster, target, ability, actualManaCost, options = {
             const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
             if (charElement) {
                 charElement.classList.remove('stunned');
-                const stunEffects = charElement.querySelectorAll('.stun-effect-container');
+                // Remove stun VFX container
+                const stunEffects = charElement.querySelectorAll('.stun-vfx-container');
                 stunEffects.forEach(el => el.remove());
             }
         };
@@ -568,24 +568,6 @@ const homeRunSmashEffect = (caster, target, ability, actualManaCost, options = {
         target.addDebuff(stunDebuff.clone()); // Clone before adding
         log(`${target.name} is stunned for 2 turns!`);
 
-        // Add stun VFX
-        if (targetElement) {
-            targetElement.classList.add('stunned'); // Apply grayscale
-
-            // Create container for stun VFX
-            const stunVfxContainer = document.createElement('div');
-            stunVfxContainer.className = 'vfx-container stun-effect-container';
-            targetElement.appendChild(stunVfxContainer);
-
-            // Create stun stars effect inside container
-            const stunEffect = document.createElement('div');
-            stunEffect.className = 'stun-effect'; // From farmer_alice_abilities.css
-            stunVfxContainer.appendChild(stunEffect);
-
-            // Note: The removal is handled by stunDebuff.remove
-        }
-    } else if (hasQuickSmashTalent) {
-        console.log(`[HomeRunSmash] Quick Smash talent is active, skipping stun effect`);
     }
 
     // Update UI
@@ -600,7 +582,7 @@ const homeRunSmashAbility = new Ability(
     'Home Run Smash',
     'Icons/abilities/homerun_smash.jpeg',
     35, // Mana cost
-    1,  // Cooldown reduced from 2 to 1 turn
+    1,  // Cooldown in turns
     homeRunSmashEffect
 )
 .setTargetType('enemy');
@@ -619,11 +601,12 @@ homeRunSmashAbility.generateDescription = function() {
         description += ` <span class="talent-effect damage">plus ${this.scalingPercent * 100}% of Physical Damage</span>`;
     }
     
-    // Only show stun chance if Quick Smash talent is not active (cooldown > 1)
-    if (this.cooldown > 1) {
-        description += ` and has ${this.stunChance * 100}% chance to stun the target for 2 turns.`;
-    } else {
-        description += `. <span class="talent-effect damage">No longer stuns, but cooldown reduced to 1 turn.</span>`;
+    // Check if Quick Smash talent is active by checking talentModifiers.cooldown
+    const hasQuickSmashTalentActive = this.talentModifiers && this.talentModifiers.cooldown === 1;
+
+    description += ` and has ${this.stunChance * 100}% chance to stun the target for 2 turns.`;
+    if (hasQuickSmashTalentActive) {
+        description += ` <span class="talent-effect damage">Cooldown reduced to 1 turn.</span>`;
     }
     
     this.description = description;
@@ -1456,7 +1439,6 @@ const farmersCatchEffect = (caster, target, ability) => {
 
             const buffIndicator = document.createElement('div');
             buffIndicator.className = 'dodge-buff-indicator'; // CSS for styling and animation
-            buffIndicator.innerHTML = '💨';
             indicatorContainer.appendChild(buffIndicator);
 
             // Create initial buff application VFX (glow and particles)
@@ -1818,7 +1800,6 @@ const cottageRunEffect = (caster, target) => {
 
             const buffIndicator = document.createElement('div');
             buffIndicator.className = 'perfect-dodge-indicator'; // CSS for styling and animation
-            buffIndicator.innerHTML = '🏠';
             indicatorContainer.appendChild(buffIndicator);
 
             // Create initial buff application VFX
@@ -2348,17 +2329,6 @@ document.addEventListener('DOMContentLoaded', () => {
             filter: grayscale(50%);
         }
         
-        .stun-effect {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            background-image: radial-gradient(circle, transparent 30%, yellow 30%, yellow 40%, transparent 40%);
-            animation: spin 2s linear infinite;
-            z-index: 5;
-        }
         
         @keyframes spin {
             0% { transform: translateX(-50%) rotate(0deg); }

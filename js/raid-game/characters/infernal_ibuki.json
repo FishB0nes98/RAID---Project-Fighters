@@ -64,7 +64,7 @@
             "manaCost": 85,
             "cooldown": 6,
             "targetType": "enemy",
-            "description": "Deals <span class='damage-text'>180%</span> Physical Damage. <span class='utility-text'>45%</span> chance to dash to another enemy and repeat (max 2 chains).",
+            "description": "Deals <span class='damage-text'>180%</span> Physical Damage. <span class='utility-text'>55%</span> chance to dash to another enemy and repeat (max 5 chains).",
             "icon": "Icons/abilities/dashing_strike.png",
             "sound": "sounds/dash.mp3",
             "effects": {
@@ -72,8 +72,8 @@
                     "physicalDamagePercent": 1.8
                 },
                 "chaining": {
-                    "chance": 0.45,
-                    "maxChains": 2
+                    "chance": 0.55,
+                    "maxChains": 5
                 }
             }
         },

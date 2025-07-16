@@ -249,6 +249,14 @@ class StageManager {
                      console.log(`[StageManager] Calling initialize() for ${character.name}'s passive: ${character.passiveHandler.name || character.passive.id}`);
                      try {
                          character.passiveHandler.initialize(character); 
+                         // Add delayed retry for UI-dependent passives
+                         setTimeout(() => {
+                             try {
+                                 character.passiveHandler.initialize(character);
+                             } catch (err) {
+                                 console.log(`[StageManager] Delayed passive initialization failed for ${character.name}:`, err);
+                             }
+                         }, 1500);
                      } catch (err) {
                           console.error(`[StageManager] Error initializing passive for ${character.name}:`, err);
                      }
@@ -294,6 +302,10 @@ class StageManager {
     loadStageModifiers() {
         this.stageModifiers = [];
         
+        console.log(`[StageManager] Loading stage modifiers for stage:`, this.currentStage?.name);
+        console.log(`[StageManager] Stage modifiers property:`, this.currentStage?.modifiers);
+        console.log(`[StageManager] Stage stageEffects property:`, this.currentStage?.stageEffects);
+        
         // Load from either 'modifiers' or 'stageEffects' (supporting both formats)
         const effects = this.currentStage?.modifiers || this.currentStage?.stageEffects || [];
         
@@ -310,9 +322,10 @@ class StageManager {
                 log(`${modifier.name}: ${modifier.description}`, 'stage-info');
             });
             
-            console.log(`Loaded ${this.stageModifiers.length} stage modifiers from ${this.currentStage?.modifiers ? 'modifiers' : 'stageEffects'} property`);
+            console.log(`[StageManager] Loaded ${this.stageModifiers.length} stage modifiers from ${this.currentStage?.modifiers ? 'modifiers' : 'stageEffects'} property`);
+            console.log(`[StageManager] Stage modifiers:`, this.stageModifiers);
         } else {
-            console.log('No stage modifiers found');
+            console.log('[StageManager] No stage modifiers found');
         }
     }
     
@@ -726,12 +739,15 @@ class StageManager {
                     console.log(`[StageManager] Loading player character ${charId} with talents:`, selectedTalentIds);
                     character = await CharacterFactory.createCharacter(charData, selectedTalentIds);
                     // Ensure talents are applied during Draft Mode so they affect stats and appear in the Talents panel
-                    if (selectedTalentIds.length > 0 && window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function') {
+                    const skipTalentLoading = new URLSearchParams(window.location.search).get('skipTalentLoading') === 'true';
+                    if (selectedTalentIds.length > 0 && window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function' && !skipTalentLoading) {
                         try {
                             await window.talentManager.applyTalentsToCharacter(character, selectedTalentIds);
                         } catch (talentError) {
                             console.error(`[StageManager] Error applying talents to ${character.name} in Draft Mode:`, talentError);
                         }
+                    } else if (skipTalentLoading) {
+                        console.log(`[ADMIN] Skipping talent application for ${character.name} due to skipTalentLoading`);
                     }
                 }
                 
@@ -829,6 +845,18 @@ class StageManager {
                 const response = await fetch('stories.json');
                 if (!response.ok) throw new Error('Failed to load stories.json');
                 this.allStoriesData = await response.json();
+                
+                // Also load story_2.json if it exists
+                try {
+                    const response2 = await fetch('story_2.json');
+                    if (response2.ok) {
+                        const story2Data = await response2.json();
+                        this.allStoriesData = this.allStoriesData.concat(story2Data);
+                        console.log("[StageManager] story_2.json loaded and merged.");
+                    }
+                } catch (error) {
+                    console.log("[StageManager] story_2.json not found or failed to load, continuing with stories.json only:", error.message);
+                }
             } catch (error) {
                 console.error("Failed to load stories.json:", error);
                 return null;
@@ -1061,7 +1089,8 @@ class StageManager {
 
                 // Apply talents if TalentManager is available and talents are selected
                 // SAFETY CHECK: Only apply talents to player characters (not AI)
-                if (window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function' && character.isAI === false) {
+                const skipTalentLoading = new URLSearchParams(window.location.search).get('skipTalentLoading') === 'true';
+                if (window.talentManager && typeof window.talentManager.applyTalentsToCharacter === 'function' && character.isAI === false && !skipTalentLoading) {
                     const selectedTalents = await window.talentManager.getSelectedTalents(charId, userId);
                     // Check if selectedTalents is not null and is an array with length > 0
                     if (selectedTalents && Array.isArray(selectedTalents) && selectedTalents.length > 0) {
@@ -1086,6 +1115,8 @@ class StageManager {
                     } else {
                         console.log(`[StageManager] No talents selected or found for ${character.name}. Selected talents:`, selectedTalents);
                     }
+                } else if (skipTalentLoading) {
+                    console.log(`[ADMIN] Skipping talent application for ${character.name} due to skipTalentLoading`);
                 } else {
                     console.warn('[StageManager] TalentManager or applyTalentsToCharacter method not available. Skipping talent application for', character.name);
                 }
@@ -1570,6 +1601,12 @@ class StageManager {
                     });
                 }
                 
+                // --- NEW: Apply permanent effects from story choices ---
+                if (savedState && savedState.permanentEffects) {
+                    character.permanentEffects = { ...savedState.permanentEffects };
+                    console.log(`[StageManager] Restored permanent effects for ${character.name}:`, character.permanentEffects);
+                }
+                
                 // --- NEW: Apply atlantean blessings from saved state ---
                             if (savedState && savedState.atlanteanBlessings) {
                 character.atlanteanBlessings = { ...savedState.atlanteanBlessings };
@@ -1629,6 +1666,8 @@ class StageManager {
             maxHp: character.stats.maxHp,
             currentHp: character.stats.currentHp,
             speed: character.stats.speed,
+            physicalDamage: character.stats.physicalDamage,
+            magicalDamage: character.stats.magicalDamage,
             abilities: character.abilities ? character.abilities.map(a => ({ 
                 name: a.name, 
                 damage: a.damage, 
@@ -1717,10 +1756,234 @@ class StageManager {
             this.stageModificationMessages.push(message);
         }
         
+        // Apply direct physical damage modification
+        if (modifications.physicalDamage) {
+            const originalDamage = character.stats.physicalDamage || 0;
+            character.stats.physicalDamage = modifications.physicalDamage;
+            // Update baseStats so recalculation preserves the modification
+            character.baseStats.physicalDamage = modifications.physicalDamage;
+            // Store the modification for future reference
+            character.stageModifications.physicalDamage = modifications.physicalDamage;
+            
+            console.log(`[StageManager] Applied physical damage modification: ${originalDamage} -> ${character.stats.physicalDamage}`);
+            
+            // Display modification message
+            const message = `⚔️ ${character.name}'s physical attacks now deal ${modifications.physicalDamage} damage!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct magical damage modification
+        if (modifications.magicalDamage) {
+            const originalDamage = character.stats.magicalDamage || 0;
+            character.stats.magicalDamage = modifications.magicalDamage;
+            // Update baseStats so recalculation preserves the modification
+            character.baseStats.magicalDamage = modifications.magicalDamage;
+            // Store the modification for future reference
+            character.stageModifications.magicalDamage = modifications.magicalDamage;
+            
+            console.log(`[StageManager] Applied magical damage modification: ${originalDamage} -> ${character.stats.magicalDamage}`);
+            
+            // Display modification message
+            const message = `✨ ${character.name}'s magical attacks now deal ${modifications.magicalDamage} damage!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply damage multiplier to base stats (physicalDamage and magicalDamage)
+        if (modifications.damageMultiplier && (character.stats.physicalDamage || character.stats.magicalDamage)) {
+            if (character.stats.physicalDamage) {
+                const originalPhysicalDamage = character.stats.physicalDamage;
+                character.stats.physicalDamage = Math.floor(character.stats.physicalDamage * modifications.damageMultiplier);
+                character.baseStats.physicalDamage = character.stats.physicalDamage;
+                console.log(`[StageManager] Applied damage multiplier to base physical damage: ${originalPhysicalDamage} -> ${character.stats.physicalDamage}`);
+            }
+            
+            if (character.stats.magicalDamage) {
+                const originalMagicalDamage = character.stats.magicalDamage;
+                character.stats.magicalDamage = Math.floor(character.stats.magicalDamage * modifications.damageMultiplier);
+                character.baseStats.magicalDamage = character.stats.magicalDamage;
+                console.log(`[StageManager] Applied damage multiplier to base magical damage: ${originalMagicalDamage} -> ${character.stats.magicalDamage}`);
+            }
+        }
+        
+        // Apply direct HP modification
+        if (modifications.hp) {
+            const originalMaxHp = character.stats.maxHp;
+            character.stats.maxHp = modifications.hp;
+            character.stats.currentHp = modifications.hp; // Set current HP to new max
+            // Update baseStats so recalculation preserves the modification
+            character.baseStats.maxHp = modifications.hp;
+            // Store the modification for future reference
+            character.stageModifications.hp = modifications.hp;
+            
+            console.log(`[StageManager] Applied HP modification: ${originalMaxHp} -> ${character.stats.maxHp}`);
+            
+            // Display modification message
+            const message = `💪 ${character.name} now has ${modifications.hp} HP!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct HP regeneration modification
+        if (modifications.hpPerTurn) {
+            const originalRegen = character.stats.hpPerTurn || 0;
+            character.stats.hpPerTurn = modifications.hpPerTurn;
+            // Update baseStats so recalculation preserves the modification
+            if (!character.baseStats.hpPerTurn) character.baseStats.hpPerTurn = 0;
+            character.baseStats.hpPerTurn = modifications.hpPerTurn;
+            // Store the modification for future reference
+            character.stageModifications.hpPerTurn = modifications.hpPerTurn;
+            
+            console.log(`[StageManager] Applied HP regeneration modification: ${originalRegen} -> ${character.stats.hpPerTurn}`);
+            
+            // Display modification message
+            const message = `💚 ${character.name} gains ${modifications.hpPerTurn} HP regeneration per turn!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct dodge chance modification
+        if (modifications.dodgeChance) {
+            const originalDodge = character.stats.dodgeChance || 0;
+            character.stats.dodgeChance = modifications.dodgeChance;
+            // Update baseStats so recalculation preserves the modification
+            if (!character.baseStats.dodgeChance) character.baseStats.dodgeChance = 0;
+            character.baseStats.dodgeChance = modifications.dodgeChance;
+            // Store the modification for future reference
+            character.stageModifications.dodgeChance = modifications.dodgeChance;
+            
+            console.log(`[StageManager] Applied dodge chance modification: ${originalDodge} -> ${character.stats.dodgeChance}`);
+            
+            // Display modification message
+            const dodgePercent = Math.round(modifications.dodgeChance * 100);
+            const message = `⚡ ${character.name} gains ${dodgePercent}% dodge chance!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct lifesteal modification
+        if (modifications.lifesteal) {
+            const originalLifesteal = character.stats.lifesteal || 0;
+            character.stats.lifesteal = modifications.lifesteal;
+            // Update baseStats so recalculation preserves the modification
+            if (!character.baseStats.lifesteal) character.baseStats.lifesteal = 0;
+            character.baseStats.lifesteal = modifications.lifesteal;
+            // Store the modification for future reference
+            character.stageModifications.lifesteal = modifications.lifesteal;
+            
+            console.log(`[StageManager] Applied lifesteal modification: ${originalLifesteal} -> ${character.stats.lifesteal}`);
+            
+            // Display modification message
+            const lifestealPercent = Math.round(modifications.lifesteal * 100);
+            const message = `🩸 ${character.name} gains ${lifestealPercent}% lifesteal!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct armor modification
+        if (modifications.armor) {
+            const originalArmor = character.stats.armor || 0;
+            character.stats.armor = modifications.armor;
+            if (!character.baseStats.armor) character.baseStats.armor = 0;
+            character.baseStats.armor = modifications.armor;
+            character.stageModifications.armor = modifications.armor;
+            
+            console.log(`[StageManager] Applied armor modification: ${originalArmor} -> ${character.stats.armor}`);
+            
+            const message = `🛡️ ${character.name} now has ${modifications.armor} armor!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct magicalShield modification
+        if (modifications.magicalShield) {
+            const originalShield = character.stats.magicalShield || 0;
+            character.stats.magicalShield = modifications.magicalShield;
+            if (!character.baseStats.magicalShield) character.baseStats.magicalShield = 0;
+            character.baseStats.magicalShield = modifications.magicalShield;
+            character.stageModifications.magicalShield = modifications.magicalShield;
+            
+            console.log(`[StageManager] Applied magical shield modification: ${originalShield} -> ${character.stats.magicalShield}`);
+            
+            const message = `🔮 ${character.name} now has ${modifications.magicalShield} magical shield!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct mana modification
+        if (modifications.mana) {
+            const originalMana = character.stats.mana || 0;
+            character.stats.mana = modifications.mana;
+            character.stats.currentMana = modifications.mana;
+            if (!character.baseStats.mana) character.baseStats.mana = 0;
+            character.baseStats.mana = modifications.mana;
+            character.stageModifications.mana = modifications.mana;
+            
+            console.log(`[StageManager] Applied mana modification: ${originalMana} -> ${character.stats.mana}`);
+            
+            const message = `💙 ${character.name} now has ${modifications.mana} mana!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct manaPerTurn modification
+        if (modifications.manaPerTurn) {
+            const originalManaRegen = character.stats.manaPerTurn || 0;
+            character.stats.manaPerTurn = modifications.manaPerTurn;
+            if (!character.baseStats.manaPerTurn) character.baseStats.manaPerTurn = 0;
+            character.baseStats.manaPerTurn = modifications.manaPerTurn;
+            character.stageModifications.manaPerTurn = modifications.manaPerTurn;
+            
+            console.log(`[StageManager] Applied mana regeneration modification: ${originalManaRegen} -> ${character.stats.manaPerTurn}`);
+            
+            const message = `💎 ${character.name} gains ${modifications.manaPerTurn} mana regeneration per turn!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct critChance modification
+        if (modifications.critChance) {
+            const originalCrit = character.stats.critChance || 0;
+            character.stats.critChance = modifications.critChance;
+            if (!character.baseStats.critChance) character.baseStats.critChance = 0;
+            character.baseStats.critChance = modifications.critChance;
+            character.stageModifications.critChance = modifications.critChance;
+            
+            console.log(`[StageManager] Applied crit chance modification: ${originalCrit} -> ${character.stats.critChance}`);
+            
+            const critPercent = Math.round(modifications.critChance * 100);
+            const message = `⚡ ${character.name} gains ${critPercent}% crit chance!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct critDamage modification
+        if (modifications.critDamage) {
+            const originalCritDamage = character.stats.critDamage || 0;
+            character.stats.critDamage = modifications.critDamage;
+            if (!character.baseStats.critDamage) character.baseStats.critDamage = 0;
+            character.baseStats.critDamage = modifications.critDamage;
+            character.stageModifications.critDamage = modifications.critDamage;
+            
+            console.log(`[StageManager] Applied crit damage modification: ${originalCritDamage} -> ${character.stats.critDamage}`);
+            
+            const critDamagePercent = Math.round(modifications.critDamage * 100);
+            const message = `💥 ${character.name} gains ${critDamagePercent}% crit damage!`;
+            this.stageModificationMessages.push(message);
+        }
+        
+        // Apply direct healingPower modification
+        if (modifications.healingPower) {
+            const originalHealing = character.stats.healingPower || 0;
+            character.stats.healingPower = modifications.healingPower;
+            if (!character.baseStats.healingPower) character.baseStats.healingPower = 0;
+            character.baseStats.healingPower = modifications.healingPower;
+            character.stageModifications.healingPower = modifications.healingPower;
+            
+            console.log(`[StageManager] Applied healing power modification: ${originalHealing} -> ${character.stats.healingPower}`);
+            
+            const healingPercent = Math.round(modifications.healingPower * 100);
+            const message = `💚 ${character.name} gains ${healingPercent}% healing power!`;
+            this.stageModificationMessages.push(message);
+        }
+        
         console.log(`[StageManager] Character stats after modifications:`, {
             maxHp: character.stats.maxHp,
             currentHp: character.stats.currentHp,
             speed: character.stats.speed,
+            hpRegen: character.stats.hpRegen,
+            dodgeChance: character.stats.dodgeChance,
+            lifesteal: character.stats.lifesteal,
             stageModifications: character.stageModifications,
             baseStats: character.baseStats
         });
@@ -1756,6 +2019,98 @@ class StageManager {
             const originalSpeed = charData.stats.speed;
             charData.stats.speed = Math.floor(originalSpeed * modifications.speedMultiplier);
             console.log(`[StageManager] Applied speed multiplier ${modifications.speedMultiplier}: ${originalSpeed} -> ${charData.stats.speed}`);
+        }
+        
+        // Apply direct HP modification
+        if (modifications.hp) {
+            const originalHp = charData.stats.hp || charData.stats.maxHp;
+            charData.stats.hp = modifications.hp;
+            charData.stats.maxHp = modifications.hp;
+            console.log(`[StageManager] Applied HP modification: ${originalHp} -> ${charData.stats.hp}`);
+        }
+        
+        // Apply direct physicalDamage modification
+        if (modifications.physicalDamage) {
+            const originalDamage = charData.stats.physicalDamage;
+            charData.stats.physicalDamage = modifications.physicalDamage;
+            console.log(`[StageManager] Applied physical damage modification: ${originalDamage} -> ${charData.stats.physicalDamage}`);
+        }
+        
+        // Apply direct magicalDamage modification
+        if (modifications.magicalDamage) {
+            const originalDamage = charData.stats.magicalDamage;
+            charData.stats.magicalDamage = modifications.magicalDamage;
+            console.log(`[StageManager] Applied magical damage modification: ${originalDamage} -> ${charData.stats.magicalDamage}`);
+        }
+        
+        // Apply direct lifesteal modification
+        if (modifications.lifesteal) {
+            const originalLifesteal = charData.stats.lifesteal || 0;
+            charData.stats.lifesteal = modifications.lifesteal;
+            console.log(`[StageManager] Applied lifesteal modification: ${originalLifesteal} -> ${charData.stats.lifesteal}`);
+        }
+        
+        // Apply direct armor modification
+        if (modifications.armor) {
+            const originalArmor = charData.stats.armor || 0;
+            charData.stats.armor = modifications.armor;
+            console.log(`[StageManager] Applied armor modification: ${originalArmor} -> ${charData.stats.armor}`);
+        }
+        
+        // Apply direct magicalShield modification
+        if (modifications.magicalShield) {
+            const originalShield = charData.stats.magicalShield || 0;
+            charData.stats.magicalShield = modifications.magicalShield;
+            console.log(`[StageManager] Applied magical shield modification: ${originalShield} -> ${charData.stats.magicalShield}`);
+        }
+        
+        // Apply direct mana modification
+        if (modifications.mana) {
+            const originalMana = charData.stats.mana || 0;
+            charData.stats.mana = modifications.mana;
+            console.log(`[StageManager] Applied mana modification: ${originalMana} -> ${charData.stats.mana}`);
+        }
+        
+        // Apply direct manaPerTurn modification
+        if (modifications.manaPerTurn) {
+            const originalManaRegen = charData.stats.manaPerTurn || 0;
+            charData.stats.manaPerTurn = modifications.manaPerTurn;
+            console.log(`[StageManager] Applied mana regeneration modification: ${originalManaRegen} -> ${charData.stats.manaPerTurn}`);
+        }
+        
+        // Apply direct hpPerTurn modification
+        if (modifications.hpPerTurn) {
+            const originalHpRegen = charData.stats.hpPerTurn || 0;
+            charData.stats.hpPerTurn = modifications.hpPerTurn;
+            console.log(`[StageManager] Applied HP regeneration modification: ${originalHpRegen} -> ${charData.stats.hpPerTurn}`);
+        }
+        
+        // Apply direct dodgeChance modification
+        if (modifications.dodgeChance) {
+            const originalDodge = charData.stats.dodgeChance || 0;
+            charData.stats.dodgeChance = modifications.dodgeChance;
+            console.log(`[StageManager] Applied dodge chance modification: ${originalDodge} -> ${charData.stats.dodgeChance}`);
+        }
+        
+        // Apply direct critChance modification
+        if (modifications.critChance) {
+            const originalCrit = charData.stats.critChance || 0;
+            charData.stats.critChance = modifications.critChance;
+            console.log(`[StageManager] Applied crit chance modification: ${originalCrit} -> ${charData.stats.critChance}`);
+        }
+        
+        // Apply direct critDamage modification
+        if (modifications.critDamage) {
+            const originalCritDamage = charData.stats.critDamage || 0;
+            charData.stats.critDamage = modifications.critDamage;
+            console.log(`[StageManager] Applied crit damage modification: ${originalCritDamage} -> ${charData.stats.critDamage}`);
+        }
+        
+        // Apply direct healingPower modification
+        if (modifications.healingPower) {
+            const originalHealing = charData.stats.healingPower || 0;
+            charData.stats.healingPower = modifications.healingPower;
+            console.log(`[StageManager] Applied healing power modification: ${originalHealing} -> ${charData.stats.healingPower}`);
         }
         
         // Apply stat modifications (original format)
@@ -1892,6 +2247,18 @@ class StageManager {
                 const response = await fetch('stories.json');
                 if (!response.ok) throw new Error('Failed to load stories.json');
                 this.allStoriesData = await response.json();
+                
+                // Also load story_2.json if it exists
+                try {
+                    const response2 = await fetch('story_2.json');
+                    if (response2.ok) {
+                        const story2Data = await response2.json();
+                        this.allStoriesData = this.allStoriesData.concat(story2Data);
+                        console.log("[StageManager] story_2.json loaded and merged in loadStoryStage.");
+                    }
+                } catch (error) {
+                    console.log("[StageManager] story_2.json not found or failed to load in loadStoryStage, continuing with stories.json only:", error.message);
+                }
             } catch (error) {
                 console.error("Failed to load stories.json:", error);
                 throw new Error("Could not load stories data");
@@ -1950,6 +2317,18 @@ class StageManager {
                  const response = await fetch('stories.json');
                  if (!response.ok) throw new Error('Failed to load stories.json');
                  this.allStoriesData = await response.json();
+                 
+                 // Also load story_2.json if it exists
+                 try {
+                     const response2 = await fetch('story_2.json');
+                     if (response2.ok) {
+                         const story2Data = await response2.json();
+                         this.allStoriesData = this.allStoriesData.concat(story2Data);
+                         console.log("[StageManager] story_2.json loaded and merged in getStageInfoFromRegistry.");
+                     }
+                 } catch (error) {
+                     console.log("[StageManager] story_2.json not found or failed to load in getStageInfoFromRegistry, continuing with stories.json only:", error.message);
+                 }
              } catch (error) {
                   console.error("Failed to load stories.json needed for getStageInfoFromRegistry:", error);
                   return null;

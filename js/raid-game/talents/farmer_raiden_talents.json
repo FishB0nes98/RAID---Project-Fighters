@@ -111,11 +111,9 @@
                 "value": true
             },
             "parents": [
-                "talent_raiden_7",
                 "talent_raiden_4"
             ],
             "children": [
-                "talent_raiden_4",
                 "talent_raiden_14"
             ],
             "position": {
@@ -154,8 +152,7 @@
                 "value": true
             },
             "parents": [
-                "talent_raiden_2",
-                "talent_raiden_5"
+                "talent_raiden_2"
             ],
             "children": [
                 "talent_raiden_5"
@@ -195,8 +192,7 @@
                 "value": true
             },
             "parents": [
-                "talent_raiden_4",
-                "talent_raiden_24"
+                "talent_raiden_4"
             ],
             "children": [
                 "talent_raiden_10",
@@ -520,11 +516,9 @@
                 "value": true
             },
             "parents": [
-                "talent_raiden_23",
-                "talent_raiden_9"
+                "talent_raiden_23"
             ],
             "children": [
-                "talent_raiden_9",
                 "talent_raiden_26"
             ],
             "position": {

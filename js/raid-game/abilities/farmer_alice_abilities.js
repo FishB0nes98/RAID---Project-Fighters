@@ -1185,8 +1185,8 @@ const pounceAbilityEffect = (caster, target) => {
     const ability = caster.abilities.find(a => a.id === 'pounce');
     
     // Calculate base damage (using the ability's amount property instead of hardcoded value)
-    // FIX: Check if amount exists and is a valid number, fallback to 0.5 if not
-    const damageMultiplier = ability && ability.amount !== undefined && !isNaN(ability.amount) ? ability.amount : 0.5;
+    // FIX: Check if amount exists and is a valid number, fallback to 1.0 if not
+    const damageMultiplier = ability && ability.amount !== undefined && !isNaN(ability.amount) ? ability.amount : 1.0;
     
     // FIX: In Farmer Alice's JSON, HP is defined as "hp", but is available as "maxHp" in stats
     // Properly access the stats
@@ -1390,8 +1390,8 @@ const thickFurAbilityEffect = (caster, target, options = {}) => {
     const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
 
     // Set the flat boost amount
-    const armorBoost = 20;
-    const magicShieldBoost = 20;
+    const armorBoost = 22;
+    const magicShieldBoost = 32;
     
     // --- Check for the Restorative Fur talent (healing) ---
     const ability = caster.abilities.find(a => a.id === 'thick_fur');
@@ -1606,98 +1606,57 @@ const bunnyBounceAbilityEffect = (caster, target) => {
     // Get current magic shield value
     const currentMagicShield = caster.stats.magicalShield;
     
-    // Check if target is ally or enemy
-    if (target.isAI === caster.isAI) {
-        // Target is an ally
-        
-        // Apply redirection buff instead of shield
-        const redirectBuff = new Effect(
-            'bunny_bounce_redirect_buff',
-            'Bunny Bounce',
-            'Icons/abilities/bunny_bounce.webp',
-            5, // Duration: 5 turns
-            null,
-            false
-        ).setDescription(`All damage received is redirected to ${caster.name}.`);
+    // Target is an ally
+    
+    // Apply redirection buff instead of shield
+    const redirectBuff = new Effect(
+        'bunny_bounce_redirect_buff',
+        'Bunny Bounce',
+        'Icons/abilities/bunny_bounce.webp',
+        5, // Duration: 5 turns
+        null,
+        false
+    ).setDescription(`All damage received is redirected to ${caster.name}.`);
 
-        // When buff is applied, flag the target for redirection
-        target.bunnyBounceRedirectToAliceId = caster.instanceId || caster.id;
+    // When buff is applied, flag the target for redirection
+    target.bunnyBounceRedirectToAliceId = caster.instanceId || caster.id;
 
-        // Clean up on removal
-        redirectBuff.remove = function(character) {
-            if (character.bunnyBounceRedirectToAliceId) delete character.bunnyBounceRedirectToAliceId;
-            addLogEntry(`${character.name}'s Bunny Bounce protection has faded.`);
-        };
+    // Clean up on removal
+    redirectBuff.remove = function(character) {
+        if (character.bunnyBounceRedirectToAliceId) delete character.bunnyBounceRedirectToAliceId;
+        addLogEntry(`${character.name}'s Bunny Bounce protection has faded.`);
+    };
 
-        // Add buff to target
-        target.addBuff(redirectBuff.clone());
+    // Add buff to target
+    target.addBuff(redirectBuff.clone());
 
-        // Ally VFX showing link
-        const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
-        const casterElement2 = document.getElementById(`character-${caster.instanceId || caster.id}`);
-        if (targetElement && casterElement2) {
-            const beam = document.createElement('div');
-            beam.className = 'bunny-bounce-redirect-beam';
-            document.body.appendChild(beam);
+    // Ally VFX showing link
+    const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
+    const casterElement2 = document.getElementById(`character-${caster.instanceId || caster.id}`);
+    if (targetElement && casterElement2) {
+        const beam = document.createElement('div');
+        beam.className = 'bunny-bounce-redirect-beam';
+        document.body.appendChild(beam);
 
-            const startRect = targetElement.getBoundingClientRect();
-            const endRect = casterElement2.getBoundingClientRect();
-            const sx = startRect.left + startRect.width/2;
-            const sy = startRect.top + startRect.height/2;
-            const ex = endRect.left + endRect.width/2;
-            const ey = endRect.top + endRect.height/2;
-            const dist = Math.hypot(ex - sx, ey - sy);
-            const angle = Math.atan2(ey - sy, ex - sx) * 180/Math.PI;
-            beam.style.left = sx + 'px';
-            beam.style.top = sy + 'px';
-            beam.style.width = dist + 'px';
-            beam.style.transform = `rotate(${angle}deg)`;
-            beam.style.transformOrigin = '0 50%';
+        const startRect = targetElement.getBoundingClientRect();
+        const endRect = casterElement2.getBoundingClientRect();
+        const sx = startRect.left + startRect.width/2;
+        const sy = startRect.top + startRect.height/2;
+        const ex = endRect.left + endRect.width/2;
+        const ey = endRect.top + endRect.height/2;
+        const dist = Math.hypot(ex - sx, ey - sy);
+        const angle = Math.atan2(ey - sy, ex - sx) * 180/Math.PI;
+        beam.style.left = sx + 'px';
+        beam.style.top = sy + 'px';
+        beam.style.width = dist + 'px';
+        beam.style.transform = `rotate(${angle}deg)`;
+        beam.style.transformOrigin = '0 50%';
 
-            playSound('sounds/shield_gain_ally.mp3', 0.6);
-            setTimeout(()=> beam.remove(), 1200);
-        }
-
-        log(`${caster.name} protects ${target.name} with Bunny Bounce! All incoming damage will be redirected to ${caster.name}.`);
-    } else {
-        // Target is an enemy
-        
-        // Calculate damage (600% of magic shield)
-        const damage = Math.floor(currentMagicShield * 6);
-        
-        // --- Enemy Target VFX ---
-        const targetElement = document.getElementById(`character-${target.instanceId || target.id}`);
-    if (targetElement) {
-        const vfxContainer = document.createElement('div');
-        vfxContainer.className = 'vfx-container bunny-bounce-enemy-vfx';
-        targetElement.appendChild(vfxContainer);
-
-            targetElement.classList.add('bunny-bounce-impact');
-
-            const impactVfx = document.createElement('div');
-            impactVfx.className = 'bunny-bounce-impact-vfx';
-            vfxContainer.appendChild(impactVfx);
-
-            playSound('sounds/bunny_bounce_impact.mp3', 0.8); // Example sound
-
-            setTimeout(() => {
-                targetElement.classList.remove('bunny-bounce-impact');
-                vfxContainer.remove();
-            }, 800);
-        }
-        // --- End Enemy Target VFX ---
-
-        // Set damage source property correctly on target for critical hit calculation
-        // Apply damage - 600% of Alice's magic shield as physical damage
-        const result = target.applyDamage(damage, 'physical', caster, { abilityId: 'bunny_bounce' });
-        
-        let message = `${caster.name} used Bunny Bounce on ${target.name} for ${result.damage} physical damage`;
-        if (result.isCritical) {
-            message += " (Critical Hit!)";
-        }
-        
-        addLogEntry(message);
+        playSound('sounds/shield_gain_ally.mp3', 0.6);
+        setTimeout(()=> beam.remove(), 1200);
     }
+
+    log(`${caster.name} protects ${target.name} with Bunny Bounce! All incoming damage will be redirected to ${caster.name}.`);
 
     // Update UI
     updateCharacterUI(caster);
@@ -1791,16 +1750,16 @@ const carrotPowerUpAbilityEffect = (caster, target) => {
         let healAmount;
         
         if (useMaxHpInstead) {
-            // Power Carrots talent: Use 27% of max HP
-            healAmount = Math.floor(currentTarget.stats.maxHp * 0.27);
+            // Power Carrots talent: Use 31% of max HP
+            healAmount = Math.floor(currentTarget.stats.maxHp * 0.31);
             if (currentTarget === target) { // Only log once for the main target
                 log(`${caster.name}'s Power Carrots talent enhances the healing!`, 'talent-effect');
             }
         } else {
-            // Default behavior: 27% of missing health
+            // Default behavior: 31% of missing health
             const missingHealth = currentTarget.stats.maxHp - currentTarget.stats.currentHp;
             // Calculate healing, with a minimum amount based on max HP (2% of max HP) even if at full health
-            healAmount = Math.max(Math.floor(missingHealth * 0.27), Math.floor(currentTarget.stats.maxHp * 0.02));
+            healAmount = Math.max(Math.floor(missingHealth * 0.31), Math.floor(currentTarget.stats.maxHp * 0.02));
         }
         
         // Apply healing with statistics tracking
@@ -1885,15 +1844,15 @@ const pounceAbility = new Ability(
     pounceAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-pounceAbility.baseDescription = 'Deals 50% AD damage and has a 47% chance to stun the target for 2 turns.';
+pounceAbility.baseDescription = 'Deals 100% AD damage and has a 40% chance to stun the target for 2 turns.';
 // Set default amount property to prevent NaN issues
-pounceAbility.amount = 0.5;
+pounceAbility.amount = 1.0;
 // Add debuffEffect property for stun functionality
 pounceAbility.debuffEffect = {
     debuffId: "stun",
     name: "Stunned",
     duration: 2,
-    chance: 0.47,
+    chance: 0.4,
     effects: { cantAct: true }
 };
 pounceAbility.generateDescription = function() {
@@ -1942,7 +1901,7 @@ const thickFurAbility = new Ability(
     thickFurAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-thickFurAbility.baseDescription = 'Increases Armor and Magic Shield by 20 for 10 turns.';
+thickFurAbility.baseDescription = 'Increases Armor by 22 and Magic Shield by 32 for 10 turns.';
 thickFurAbility.generateDescription = function() {
     let generatedDesc = Ability.prototype.generateDescription.call(this);
     console.log(`[Alice] Generating description for thick_fur. Base: "${generatedDesc}"`);
@@ -1978,7 +1937,7 @@ const bunnyBounceAbility = new Ability(
     bunnyBounceAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-bunnyBounceAbility.baseDescription = 'If used on an ally: Redirect every damage from that target to yourself. If used on an enemy: Deals 600% of Magic Shield as physical damage.';
+bunnyBounceAbility.baseDescription = 'Redirects all damage the ally would receive to Farmer Alice for 5 turns.';
 bunnyBounceAbility.generateDescription = function() {
     // Bunny Bounce currently has no talents modifying its description, so just use the base.
     let generatedDesc = Ability.prototype.generateDescription.call(this);
@@ -1986,7 +1945,7 @@ bunnyBounceAbility.generateDescription = function() {
     console.log(`[Alice] Final bunny_bounce description: "${this.description}"`);
 };
 bunnyBounceAbility.generateDescription(); // Generate initial description
-bunnyBounceAbility.setTargetType('any_except_self'); // Custom target type to allow targeting allies and enemies but not self
+bunnyBounceAbility.setTargetType('ally'); // Can target self or allies
 
 // Create the Carrot Power Up ability
 const carrotPowerUpAbility = new Ability(
@@ -1998,7 +1957,7 @@ const carrotPowerUpAbility = new Ability(
     carrotPowerUpAbilityEffect
 );
 // --- CORRECTED: Set baseDescription and assign generateDescription --- 
-carrotPowerUpAbility.baseDescription = 'Heals the target for 27% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.';
+carrotPowerUpAbility.baseDescription = 'Heals the target for 31% of missing health (minimum 2% of max HP) and reduces target\'s active cooldowns by 5 turns. Cooldown reduces by 1 turn when Alice takes damage.';
 carrotPowerUpAbility.generateDescription = function() {
     let generatedDesc = Ability.prototype.generateDescription.call(this);
     console.log(`[Alice] Generating description for carrot_power_up. Base: "${generatedDesc}"`);
@@ -2192,7 +2151,7 @@ function updateAliceAbilityDescriptions(character) {
         // Make sure we have the amount property correctly set
         if (pounceAbility.amount === undefined || isNaN(pounceAbility.amount)) {
             console.log(`[Alice] Fixing invalid pounce.amount: ${pounceAbility.amount}`);
-            pounceAbility.amount = 0.5; // Default to 50% AD
+            pounceAbility.amount = 1; // Default to 50% AD
         }
         
         // Calculate the actual damage percentage for display

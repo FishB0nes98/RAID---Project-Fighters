@@ -137,5 +137,173 @@
                 "chance": 1.0
             }
         ]
+    },
+    {
+        "id": "admin_balance_testing",
+        "name": "🔧 Admin Balance Testing",
+        "description": "A testing environment for balance changes. Admin only - skips talent loading for faster testing.",
+        "difficulty": 1,
+        "playerunlocked": false,
+        "adminOnly": true,
+        "skipTalentLoading": true,
+        "requirements": {
+            "tags": [],
+            "teamSize": { "min": 1, "max": 4 }
+        },
+        "type": "battle",
+        "enemies": [
+            {
+                "characterId": "target_dummy",
+                "modifications": {
+                    "hpMultiplier": 10.0,
+                    "armor": 0,
+                    "magicalShield": 0
+                }
+            },
+                        {
+                "characterId": "target_dummy",
+                "modifications": {
+                    "hpMultiplier": 10.0,
+                    "armor": 0,
+                    "magicalShield": 0
+                }
+            },
+                        {
+                "characterId": "target_dummy",
+                "modifications": {
+                    "hpMultiplier": 10.0,
+                    "armor": 0,
+                    "magicalShield": 0
+                }
+            },
+                        {
+                "characterId": "target_dummy",
+                "modifications": {
+                    "hpMultiplier": 10.0,
+                    "armor": 0,
+                    "magicalShield": 0
+                }
+            }
+        ],
+        "backgroundImage": "images/stages/training_ground.png",
+        "backgroundMusic": "sounds/music/training_theme.mp3",
+        "rewards": [
+            {
+                "type": "gold",
+                "value": 0,
+                "chance": 1.0
+            },
+            {
+                "type": "experience",
+                "value": 0,
+                "chance": 1.0
+            }
+        ]
+    },
+    {
+        "id": "twisted_apple_orchard",
+        "name": "🍎💀 Twisted Apple Orchard",
+        "description": "A cursed orchard where fallen enemies rise again! The twisted apple trees revive all dead enemies every 6th turn with 50% HP. Defeat them quickly or face an endless battle!",
+        "difficulty": 4,
+        "playerunlocked": true,
+        "requirements": {
+            "tags": [],
+            "teamSize": { "min": 1, "max": 3 }
+        },
+        "type": "stage",
+        "enemies": [
+            {
+                "id": "orchard_guardian_1",
+                "name": "Corrupted Dryad",
+                "image": "images/characters/dryad.png",
+                "stats": {
+                    "maxHp": 180,
+                    "currentHp": 180,
+                    "physicalDamage": 35,
+                    "magicalDamage": 25,
+                    "armor": 12,
+                    "magicalShield": 8,
+                    "speed": 14,
+                    "critChance": 0.15,
+                    "dodgeChance": 0.1
+                },
+                "abilities": []
+            },
+            {
+                "id": "orchard_guardian_2", 
+                "name": "Twisted Treant",
+                "image": "images/characters/treant.png",
+                "stats": {
+                    "maxHp": 250,
+                    "currentHp": 250,
+                    "physicalDamage": 45,
+                    "magicalDamage": 15,
+                    "armor": 20,
+                    "magicalShield": 5,
+                    "speed": 8,
+                    "critChance": 0.1,
+                    "dodgeChance": 0.05
+                },
+                "abilities": []
+            },
+            {
+                "id": "orchard_guardian_3",
+                "name": "Apple Wraith",
+                "image": "images/characters/wraith.png", 
+                "stats": {
+                    "maxHp": 120,
+                    "currentHp": 120,
+                    "physicalDamage": 25,
+                    "magicalDamage": 40,
+                    "armor": 5,
+                    "magicalShield": 15,
+                    "speed": 18,
+                    "critChance": 0.2,
+                    "dodgeChance": 0.15
+                },
+                "abilities": []
+            }
+        ],
+        "modifiers": [
+            {
+                "id": "twisted_apple_orchard",
+                "name": "Twisted Apple Orchard",
+                "description": "The cursed apple trees revive fallen enemies every 6th turn with 50% HP! A dark magic counter shows when the next revival will occur.",
+                "icon": "🍎💀"
+            }
+        ],
+        "backgroundImage": "images/stages/under_the_apple_tree.png",
+        "backgroundMusic": "sounds/music/dark_forest_theme.mp3",
+        "objectives": [
+            {
+                "type": "defeat_all_enemies",
+                "description": "Defeat all enemies in the twisted orchard",
+                "required": true
+            },
+            {
+                "type": "survive_turns",
+                "description": "Survive for 15 turns to prove your endurance",
+                "value": 15,
+                "optional": true
+            }
+        ],
+        "rewards": [
+            {
+                "type": "gold",
+                "value": 600,
+                "chance": 1.0
+            },
+            {
+                "type": "experience",
+                "value": 400,
+                "chance": 1.0
+            },
+            {
+                "type": "item",
+                "value": "cursed_apple",
+                "chance": 0.3,
+                "description": "A cursed apple that grants dark power"
+            }
+        ]
     }
 ] 

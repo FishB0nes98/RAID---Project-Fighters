@@ -25,17 +25,16 @@ class AngryBullPassive {
         const flatArmorIncrease = Math.max(1, Math.floor(baseArmor * this.armorIncreasePercent)); // Ensure at least 1 armor is gained
         console.log(`[Passive Debug - ${this.constructor.name}] Calculated flat armor increase: ${flatArmorIncrease}`);
 
-        // Increase current armor stat (permanently for the battle)
-        // This modifies the character.stats object directly
-        character.stats.armor = (character.stats.armor || 0) + flatArmorIncrease;
+        // Increase base armor stat (permanently for the battle)
+        // This modifies the character.baseStats object so recalculateStats() preserves the change
+        character.baseStats.armor = (character.baseStats.armor || 0) + flatArmorIncrease;
 
         // Update tracking stat (track the total flat amount gained)
         this.totalArmorGained = (this.totalArmorGained || 0) + flatArmorIncrease;
         // Attach this tracking stat to the character for UI display/tooltip
         character.armorFromPassive = this.totalArmorGained;
 
-        // Recalculate stats isn't strictly necessary for just adding flat armor,
-        // but call it for consistency if other passives interact
+        // Recalculate stats to apply the base stat change to current stats
         character.recalculateStats();
 
         log(`${character.name}'s passive activates! Permanently gained +${flatArmorIncrease} Armor from taking damage. Current Armor: ${character.stats.armor}`, 'passive');

@@ -1024,6 +1024,16 @@ const siegfriedSwordBlessingEffect = (caster, target) => {
         
         // Track utility usage
         trackSiegfriedAbilityUsage(caster, 'schoolboy_siegfried_e', 'utility');
+
+        // Check for Swift Protection talent
+        if (ability && ability.doesNotEndTurn) {
+            if (window.gameManager && typeof window.gameManager.preventTurnEnd === 'function') {
+                window.gameManager.preventTurnEnd(caster);
+                if (window.gameManager.addLogEntry) {
+                    window.gameManager.addLogEntry(` ${caster.name} can act again!`, 'talent-effect utility');
+                }
+            }
+        }
         
         // Show VFX
         showSwordBlessingVFX(caster);
@@ -1144,6 +1154,8 @@ const siegfriedE = new Ability(
     siegfriedSwordBlessingEffect
 ).setDescription('Siegfried blesses his sword, applying two separate buffs: Blessed Lifesteal (15% Lifesteal) and Blessed Damage (200 Physical Damage) for 6 turns each.')
  .setTargetType('self'); // Target is self
+
+siegfriedE.doesNotEndTurn = true; // This ability does not end the turn
 
 // --- Ability Factory Integration ---
 if (typeof AbilityFactory !== 'undefined' && typeof AbilityFactory.registerAbilities === 'function') {
@@ -1287,46 +1299,13 @@ const schoolboySiegfriedJudgementEffect = (caster, target) => {
             setTimeout(() => healVfx.remove(), 1200);
         }
 
-        // Find a random living ally (player character, not the caster)
-        let randomAlly = null;
-        if (gameManager && gameManager.gameState && gameManager.gameState.playerCharacters) {
-            const potentialAllies = gameManager.gameState.playerCharacters.filter(ally =>
-                ally.id !== caster.id && !ally.isDead()
-            );
-
-            if (potentialAllies.length > 0) {
-                const randomIndex = Math.floor(Math.random() * potentialAllies.length);
-                randomAlly = potentialAllies[randomIndex];
-            }
-        }
-
         // Heal random ally if found
         let allyHealResult = null;
-        if (randomAlly) {
-            allyHealResult = randomAlly.heal(healAmount, caster, { abilityId: 'schoolboy_siegfried_r_ally_heal' });
-            // --- NEW: Use ally instanceId if available ---
-            const allyName = randomAlly.name || (randomAlly.instanceId || randomAlly.id);
-            log(`${allyName} is healed by Judgement for ${allyHealResult.healAmount} HP.`);
-            // Add ally heal VFX
-            const allyElementId = randomAlly.instanceId || randomAlly.id;
-            const allyElement = document.getElementById(`character-${allyElementId}`);
-            // --- END NEW ---
-            if (allyElement) {
-                const healVfx = document.createElement('div');
-                healVfx.className = 'heal-vfx judgement-heal-vfx'; // Use same style
-                healVfx.textContent = `+${allyHealResult.healAmount}`;
-                allyElement.appendChild(healVfx);
-                setTimeout(() => healVfx.remove(), 1200);
-                updateCharacterUI(randomAlly); // Update ally UI
-            }
-        } else {
-            log("No other living allies found to receive Judgement's heal.");
-        }
-
+        
         // Track comprehensive statistics for Judgement ability
         if (window.trackJudgementStats) {
-            const allyHealAmount = randomAlly && allyHealResult ? allyHealResult.healAmount : 0;
-            window.trackJudgementStats(caster, target, result, casterHealResult.healAmount, allyHealAmount, randomAlly);
+            const allyHealAmount = 0;
+            window.trackJudgementStats(caster, target, result, casterHealResult.healAmount, allyHealAmount, null);
         }
     }
 
@@ -1350,7 +1329,7 @@ const schoolboySiegfriedR = new Ability(
     100, // Mana cost
     15,  // Cooldown
     schoolboySiegfriedJudgementEffect
-).setDescription('Deals 285% AD physical damage. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).') // Updated description
+).setDescription('Deals 285% AD physical damage. If damage is dealt, Siegfried is healed for the damage amount (scales with Healing Power).') // Updated description
  .setTargetType('enemy'); // Target is enemy
 
 // --- Ability Factory Integration ---
@@ -1636,7 +1615,7 @@ const updateSiegfriedAbilityDescriptions = (character) => {
             // NEW TALENT: Swift Protection (doesNotEndTurn)
             const hasSwiftProtection = (character.hasTalent && character.hasTalent('swift_protection')) || ability.doesNotEndTurn === true;
             if (hasSwiftProtection) {
-                description += ' <span class="talent-effect utility">⚡ Swift Protection: Does not end your turn</span>';
+                description += ' <span class="talent-effect utility">Does not end your turn</span>';
                 hasModifications = true;
             }
             
@@ -1684,7 +1663,7 @@ const updateSiegfriedAbilityDescriptions = (character) => {
             // NEW TALENT: Swift Protection
             const hasSwiftProtection = (character.hasTalent && character.hasTalent('swift_protection')) || ability.doesNotEndTurn === true;
             if (hasSwiftProtection) {
-                description += ' <span class="talent-effect utility">⚡ Swift Protection: Does not end your turn</span>';
+                description += ' <span class="talent-effect utility">Does not end your turn</span>';
                 hasModifications = true;
             }
             updatedDescription = description;
@@ -1694,13 +1673,13 @@ const updateSiegfriedAbilityDescriptions = (character) => {
         if (ability.id === 'schoolboy_siegfried_r') {
             // Base damage scaling with potential Divine Judgment enhancement
             let damagePercent = '285%';
-            let baseDescription = `Deals ${highlight(damagePercent, '#FFD700')} AD physical damage. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).`;
+            let baseDescription = `Deals ${highlight(damagePercent, '#FFD700')} AD physical damage. If damage is dealt, Siegfried is healed for the damage amount (scales with Healing Power).`;
             
             // Check for Divine Judgment talent (75% additional damage scaling)
             if (character.hasTalent && character.hasTalent('judgment_enhancement')) {
                 const bonusPercent = ability.damage_scaling_bonus ? Math.round(ability.damage_scaling_bonus * 100) : 75;
                 const totalPercent = 285 + bonusPercent;
-                baseDescription = `Deals ${highlight(totalPercent + '%', '#FFD700')} AD physical damage. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).`;
+                baseDescription = `Deals ${highlight(totalPercent + '%', '#FFD700')} AD physical damage. If damage is dealt, Siegfried is healed for the damage amount (scales with Healing Power).`;
                 baseDescription += ` <span class="talent-effect damage">⚡ Divine Judgment: +${highlight(bonusPercent + '%', '#FFD700')} additional damage scaling</span>`;
                 hasModifications = true;
             }

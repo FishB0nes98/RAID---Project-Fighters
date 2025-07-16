@@ -46,7 +46,7 @@ class Item {
      * @param {Character} character - The character opening the lootbox
      * @returns {Object} Result object with success status, message, and generated items
      */
-    openLootbox(character) {
+    async openLootbox(character) {
         if (!this.isLootbox || !this.lootTable) {
             return { success: false, message: 'Item is not a lootbox or has no loot table' };
         }
@@ -889,15 +889,211 @@ class ItemRegistry {
         const basketofGoods = new Item(
             'basket_of_goods',
             'Basket of Goods',
-            'A basket filled with various farm items.',
+            'A basket filled with various farm items. May contain rare video skins!',
             'items/basket_of_goods.png',
             'rare',
             {},
             'lootbox'
         );
+        
+        // Override openLootbox method for Basket of Goods to include skin drops
+        basketofGoods.openLootbox = async function(character) {
+            if (!this.isLootbox || !this.lootTable) {
+                return { success: false, message: 'Item is not a lootbox or has no loot table' };
+            }
+
+            const results = [];
+            
+            // First, check for skin drop (3% chance - balanced for gameplay)
+            const skinDropChance = Math.random();
+            console.log('[BasketOfGoods] Skin drop roll:', skinDropChance);
+            
+            if (skinDropChance < 0.03) { // 3% chance
+                console.log('[BasketOfGoods] Skin drop triggered!');
+                // Get available skins that the user doesn't own
+                const availableSkins = this.getAvailableVideoSkins();
+                console.log('[BasketOfGoods] Available skins:', availableSkins);
+                
+                if (availableSkins.length > 0) {
+                    const randomSkin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
+                    console.log('[BasketOfGoods] Selected skin:', randomSkin);
+                    
+                    results.push({
+                        type: 'skin',
+                        skinId: randomSkin.id,
+                        skinName: randomSkin.name,
+                        characterId: randomSkin.characterId
+                    });
+                    
+                    // Grant the skin to the user (await the async operation)
+                    const grantResult = await this.grantSkinToUser(randomSkin.id);
+                    console.log('[BasketOfGoods] Skin grant result:', grantResult);
+                } else {
+                    console.log('[BasketOfGoods] No available skins to grant');
+                }
+            } else {
+                console.log('[BasketOfGoods] No skin drop this time');
+            }
+            
+            // Then generate normal items
+            const generatedItems = [];
+            const totalWeight = this.lootTable.reduce((sum, entry) => sum + entry.weight, 0);
+            
+            const roll = Math.random() * totalWeight;
+            let currentWeight = 0;
+            
+            for (const lootEntry of this.lootTable) {
+                currentWeight += lootEntry.weight;
+                if (roll <= currentWeight) {
+                    const quantity = lootEntry.quantity || 1;
+                    generatedItems.push({
+                        itemId: lootEntry.itemId,
+                        quantity: quantity
+                    });
+                    break;
+                }
+            }
+
+            return {
+                success: true,
+                message: `Opened ${this.name}`,
+                items: generatedItems,
+                specialRewards: results // Include skin drops as special rewards
+            };
+        };
+        
+        // Method to get available video skins that user doesn't own
+        basketofGoods.getAvailableVideoSkins = function() {
+            const videoSkins = [
+                { id: 'farmer_shoma_video', name: 'Farmer Shoma Video', characterId: 'farmer_shoma' },
+                { id: 'farmer_raiden_video', name: 'Farmer Raiden Video', characterId: 'farmer_raiden' },
+                { id: 'farmer_nina_video', name: 'Farmer Nina Video', characterId: 'farmer_nina' },
+                { id: 'farmer_alice_video', name: 'Farmer Alice Video', characterId: 'farmer_alice' },
+                { id: 'farmer_cham_cham_video', name: 'Farmer Cham Cham Video', characterId: 'farmer_cham_cham' }
+            ];
+            
+            console.log('[BasketOfGoods] All video skins:', videoSkins);
+            console.log('[BasketOfGoods] SkinManager available:', !!window.SkinManager);
+            console.log('[BasketOfGoods] SkinManager initialized:', window.SkinManager?.initialized);
+            console.log('[BasketOfGoods] SkinManager currentUserId:', window.SkinManager?.currentUserId);
+            
+            // Filter out skins the user already owns (now that SkinManager is working)
+            if (window.SkinManager && window.SkinManager.initialized && window.SkinManager.currentUserId) {
+                const availableSkins = videoSkins.filter(skin => {
+                    const owns = window.SkinManager.ownsSkin(skin.id);
+                    console.log(`[BasketOfGoods] User owns ${skin.id}:`, owns);
+                    return !owns;
+                });
+                console.log('[BasketOfGoods] Available skins after filtering:', availableSkins);
+                
+                if (availableSkins.length === 0) {
+                    console.log('[BasketOfGoods] User owns all video skins! No skins to grant.');
+                }
+                
+                return availableSkins;
+            }
+            
+            // If SkinManager not available, return all (fallback)
+            console.log('[BasketOfGoods] SkinManager not ready, returning all skins as fallback');
+            return videoSkins;
+        };
+        
+        // Method to grant skin to user
+        basketofGoods.grantSkinToUser = async function(skinId) {
+            try {
+                console.log('[BasketOfGoods] Attempting to grant skin:', skinId);
+                
+                // Check if SkinManager is available
+                if (!window.SkinManager) {
+                    console.error('[BasketOfGoods] SkinManager not available');
+                    return false;
+                }
+
+                // Try to initialize SkinManager if not already initialized
+                if (!window.SkinManager.initialized) {
+                    console.log('[BasketOfGoods] SkinManager not initialized, attempting to initialize...');
+                    try {
+                        const initResult = await window.SkinManager.initialize();
+                        if (!initResult) {
+                            console.warn('[BasketOfGoods] SkinManager initialization failed, using fallback method');
+                            return await this.grantSkinFallback(skinId);
+                        }
+                    } catch (initError) {
+                        console.warn('[BasketOfGoods] SkinManager initialization error, using fallback:', initError);
+                        return await this.grantSkinFallback(skinId);
+                    }
+                }
+
+                // Wait for SkinManager to be ready (shorter timeout)
+                const isReady = await window.SkinManager.waitForReady(3000);
+                if (!isReady) {
+                    console.warn('[BasketOfGoods] SkinManager not ready after waiting, using fallback method');
+                    return await this.grantSkinFallback(skinId);
+                }
+
+                // Use the optimized grantSkin method
+                const result = await window.SkinManager.grantSkin(skinId, 'basket_of_goods');
+                
+                if (result.success) {
+                    console.log(`[BasketOfGoods] Successfully granted skin ${skinId}`);
+                    return true;
+                } else {
+                    console.error(`[BasketOfGoods] Failed to grant skin ${skinId}:`, result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('[BasketOfGoods] Error granting skin:', error);
+                return await this.grantSkinFallback(skinId);
+            }
+        };
+
+        // Fallback method to grant skin directly to Firebase
+        basketofGoods.grantSkinFallback = async function(skinId) {
+            try {
+                console.log('[BasketOfGoods] Using fallback method to grant skin:', skinId);
+                
+                // Get current user from Firebase auth
+                const currentUser = window.auth?.currentUser || firebase?.auth()?.currentUser;
+                if (!currentUser) {
+                    console.error('[BasketOfGoods] No authenticated user found for fallback method');
+                    return false;
+                }
+
+                const userId = currentUser.uid;
+                const database = window.database || firebase.database();
+                
+                if (!database) {
+                    console.error('[BasketOfGoods] Firebase database not available');
+                    return false;
+                }
+
+                // Add skin directly to Firebase
+                await database.ref(`users/${userId}/RAIDSkin/${skinId}`).set({
+                    grantedAt: Date.now(),
+                    source: 'basket_of_goods',
+                    price: 0
+                });
+
+                // Update local SkinManager data if available
+                if (window.SkinManager && window.SkinManager.ownedSkins) {
+                    window.SkinManager.ownedSkins[skinId] = {
+                        grantedAt: Date.now(),
+                        source: 'basket_of_goods',
+                        price: 0
+                    };
+                }
+
+                console.log(`[BasketOfGoods] Successfully granted skin ${skinId} using fallback method`);
+                return true;
+            } catch (error) {
+                console.error('[BasketOfGoods] Fallback method error:', error);
+                return false;
+            }
+        };
+        
         this.registerItem(basketofGoods);
 
-        // Set the loot table for Atlantean Treasure Chest
+        // Set the loot table for Basket of Goods
         basketofGoods.setLootTable([
             { itemId: 'cow_bell', weight: 3, quantity: 1 },
             { itemId: 'iron_nail', weight: 6, quantity: 1 },
@@ -964,6 +1160,200 @@ class ItemRegistry {
             { itemId: 'kotal_kahns_atlantean_dagger', weight: 1, quantity: 1 },
             { itemId: 'seaborn_crown', weight: 1, quantity: 1 }
         ]);
+
+        // Override openLootbox method for Atlantean Treasure Chest to include skin drops
+        atlanteanTreasureChest.openLootbox = async function(character) {
+            if (!this.isLootbox || !this.lootTable) {
+                return { success: false, message: 'Item is not a lootbox or has no loot table' };
+            }
+
+            const results = [];
+            
+            // First, check for skin drop (3% chance - same as Basket of Goods)
+            const skinDropChance = Math.random();
+            console.log('[AtlanteanTreasureChest] Skin drop roll:', skinDropChance);
+            
+            if (skinDropChance < 0.03) { // 3% chance
+                console.log('[AtlanteanTreasureChest] Skin drop triggered!');
+                // Get available skins that the user doesn't own
+                const availableSkins = this.getAvailableVideoSkins();
+                console.log('[AtlanteanTreasureChest] Available skins:', availableSkins);
+                
+                if (availableSkins.length > 0) {
+                    const randomSkin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
+                    console.log('[AtlanteanTreasureChest] Selected skin:', randomSkin);
+                    
+                    results.push({
+                        type: 'skin',
+                        skinId: randomSkin.id,
+                        skinName: randomSkin.name,
+                        characterId: randomSkin.characterId
+                    });
+                    
+                    // Grant the skin to the user (await the async operation)
+                    const grantResult = await this.grantSkinToUser(randomSkin.id);
+                    console.log('[AtlanteanTreasureChest] Skin grant result:', grantResult);
+                } else {
+                    console.log('[AtlanteanTreasureChest] No available skins to grant');
+                }
+            } else {
+                console.log('[AtlanteanTreasureChest] No skin drop this time');
+            }
+            
+            // Then generate normal items
+            const generatedItems = [];
+            const totalWeight = this.lootTable.reduce((sum, entry) => sum + entry.weight, 0);
+            
+            const roll = Math.random() * totalWeight;
+            let currentWeight = 0;
+            
+            for (const lootEntry of this.lootTable) {
+                currentWeight += lootEntry.weight;
+                if (roll <= currentWeight) {
+                    const quantity = lootEntry.quantity || 1;
+                    generatedItems.push({
+                        itemId: lootEntry.itemId,
+                        quantity: quantity
+                    });
+                    break;
+                }
+            }
+
+            return {
+                success: true,
+                message: `Opened ${this.name}`,
+                items: generatedItems,
+                specialRewards: results // Include skin drops as special rewards
+            };
+        };
+        
+        // Method to get available Atlantean video skins that user doesn't own
+        atlanteanTreasureChest.getAvailableVideoSkins = function() {
+            const videoSkins = [
+                { id: 'atlantean_kagome_video', name: 'Atlantean Kagome Video', characterId: 'atlantean_kagome' },
+                { id: 'atlantean_kotal_kahn_video', name: 'Atlantean Kotal Kahn Video', characterId: 'atlantean_kotal_kahn' },
+                { id: 'atlantean_sub_zero_video', name: 'Atlantean Sub Zero Video', characterId: 'atlantean_sub_zero_playable' },
+                { id: 'atlantean_christie_video', name: 'Atlantean Christie Video', characterId: 'atlantean_christie' }
+            ];
+            
+            console.log('[AtlanteanTreasureChest] All video skins:', videoSkins);
+            console.log('[AtlanteanTreasureChest] SkinManager available:', !!window.SkinManager);
+            console.log('[AtlanteanTreasureChest] SkinManager initialized:', window.SkinManager?.initialized);
+            console.log('[AtlanteanTreasureChest] SkinManager currentUserId:', window.SkinManager?.currentUserId);
+            
+            // Filter out skins the user already owns
+            if (window.SkinManager && window.SkinManager.initialized && window.SkinManager.currentUserId) {
+                const availableSkins = videoSkins.filter(skin => {
+                    const owns = window.SkinManager.ownsSkin(skin.id);
+                    console.log(`[AtlanteanTreasureChest] User owns ${skin.id}:`, owns);
+                    return !owns;
+                });
+                console.log('[AtlanteanTreasureChest] Available skins after filtering:', availableSkins);
+                
+                if (availableSkins.length === 0) {
+                    console.log('[AtlanteanTreasureChest] User owns all Atlantean video skins! No skins to grant.');
+                }
+                
+                return availableSkins;
+            }
+            
+            // If SkinManager not available, return all (fallback)
+            console.log('[AtlanteanTreasureChest] SkinManager not ready, returning all skins as fallback');
+            return videoSkins;
+        };
+        
+        // Method to grant skin to user (same as Basket of Goods)
+        atlanteanTreasureChest.grantSkinToUser = async function(skinId) {
+            try {
+                console.log('[AtlanteanTreasureChest] Attempting to grant skin:', skinId);
+                
+                // Check if SkinManager is available
+                if (!window.SkinManager) {
+                    console.error('[AtlanteanTreasureChest] SkinManager not available');
+                    return false;
+                }
+
+                // Try to initialize SkinManager if not already initialized
+                if (!window.SkinManager.initialized) {
+                    console.log('[AtlanteanTreasureChest] SkinManager not initialized, attempting to initialize...');
+                    try {
+                        const initResult = await window.SkinManager.initialize();
+                        if (!initResult) {
+                            console.warn('[AtlanteanTreasureChest] SkinManager initialization failed, using fallback method');
+                            return await this.grantSkinFallback(skinId);
+                        }
+                    } catch (initError) {
+                        console.warn('[AtlanteanTreasureChest] SkinManager initialization error, using fallback:', initError);
+                        return await this.grantSkinFallback(skinId);
+                    }
+                }
+
+                // Wait for SkinManager to be ready (shorter timeout)
+                const isReady = await window.SkinManager.waitForReady(3000);
+                if (!isReady) {
+                    console.warn('[AtlanteanTreasureChest] SkinManager not ready after waiting, using fallback method');
+                    return await this.grantSkinFallback(skinId);
+                }
+
+                // Use the optimized grantSkin method
+                const result = await window.SkinManager.grantSkin(skinId, 'atlantean_treasure_chest');
+                
+                if (result.success) {
+                    console.log(`[AtlanteanTreasureChest] Successfully granted skin ${skinId}`);
+                    return true;
+                } else {
+                    console.error(`[AtlanteanTreasureChest] Failed to grant skin ${skinId}:`, result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('[AtlanteanTreasureChest] Error granting skin:', error);
+                return await this.grantSkinFallback(skinId);
+            }
+        };
+
+        // Fallback method to grant skin directly to Firebase
+        atlanteanTreasureChest.grantSkinFallback = async function(skinId) {
+            try {
+                console.log('[AtlanteanTreasureChest] Using fallback method to grant skin:', skinId);
+                
+                // Get current user from Firebase auth
+                const currentUser = window.auth?.currentUser || firebase?.auth()?.currentUser;
+                if (!currentUser) {
+                    console.error('[AtlanteanTreasureChest] No authenticated user found for fallback method');
+                    return false;
+                }
+
+                const userId = currentUser.uid;
+                const database = window.database || firebase.database();
+                
+                if (!database) {
+                    console.error('[AtlanteanTreasureChest] Firebase database not available');
+                    return false;
+                }
+
+                // Add skin directly to Firebase
+                await database.ref(`users/${userId}/RAIDSkin/${skinId}`).set({
+                    grantedAt: Date.now(),
+                    source: 'atlantean_treasure_chest',
+                    price: 0
+                });
+
+                // Update local SkinManager data if available
+                if (window.SkinManager && window.SkinManager.ownedSkins) {
+                    window.SkinManager.ownedSkins[skinId] = {
+                        grantedAt: Date.now(),
+                        source: 'atlantean_treasure_chest',
+                        price: 0
+                    };
+                }
+
+                console.log(`[AtlanteanTreasureChest] Successfully granted skin ${skinId} using fallback method`);
+                return true;
+            } catch (error) {
+                console.error('[AtlanteanTreasureChest] Fallback method error:', error);
+                return false;
+            }
+        };
 
         this.registerItem(atlanteanTreasureChest);
 

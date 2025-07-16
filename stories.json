@@ -6,7 +6,10 @@
     "playerunlocked": true,
     "requirements": {
       "tags": [],
-      "teamSize": { "min": 1, "max": 1 }
+      "teamSize": {
+        "min": 1,
+        "max": 1
+      }
     },
     "stages": [
       {
@@ -41,11 +44,18 @@
         "difficulty": 2,
         "type": "battle",
         "enemies": [
-          { "characterId": "little_devil" },
-          { "characterId": "little_devil_female" }
+          {
+            "characterId": "little_devil"
+          },
+          {
+            "characterId": "little_devil_female"
+          }
         ],
         "isTutorial": true,
-        "tutorialHighlights": ["hp-bar", "mana-bar"],
+        "tutorialHighlights": [
+          "hp-bar",
+          "mana-bar"
+        ],
         "tutorialMessage": "Your HP and mana from the previous stage are preserved! Manage your resources wisely across multiple battles.",
         "loot": {
           "items": [
@@ -75,12 +85,18 @@
           {
             "name": "Accept the Potions",
             "description": "Gratefully accept both potions. Restores 75% of missing health and mana to the selected character.",
-            "effect": { "type": "heal_and_mana_restore_missing_percent", "target": "selected", "amount_percent": 75 }
+            "effect": {
+              "type": "heal_and_mana_restore_missing_percent",
+              "target": "selected",
+              "amount_percent": 75
+            }
           },
           {
-            "name": "Politely Decline", 
+            "name": "Politely Decline",
             "description": "Thank the old man but decline his generous offer. You prefer to rely on your own strength.",
-            "effect": { "type": "none" }
+            "effect": {
+              "type": "none"
+            }
           }
         ]
       },
@@ -91,7 +107,11 @@
         "isEncounter": true,
         "recruitTag": "tutorial_allies",
         "recruitCount": 3,
-        "specificCharacters": ["farmer_shoma", "farmer_cham_cham", "renée"]
+        "specificCharacters": [
+          "farmer_shoma",
+          "farmer_cham_cham",
+          "renée"
+        ]
       },
       {
         "name": "Farm Disturbance",
@@ -99,13 +119,13 @@
         "difficulty": 3,
         "type": "battle",
         "enemies": [
-          { 
+          {
             "characterId": "farmer_nina",
             "modifications": {
               "hpMultiplier": 0.7
             }
           },
-          { 
+          {
             "characterId": "farmer_raiden",
             "modifications": {
               "hpMultiplier": 0.7
@@ -123,7 +143,7 @@
             }
           }
         ],
-                "loot": {
+        "loot": {
           "guaranteedItems": 1,
           "items": [
             {
@@ -133,7 +153,7 @@
               "quantityMax": 1
             },
             {
-              "itemId": "thunder_gloves", 
+              "itemId": "thunder_gloves",
               "dropChance": 0.5,
               "quantityMin": 1,
               "quantityMax": 1
@@ -141,7 +161,10 @@
           ]
         },
         "isTutorial": true,
-        "tutorialHighlights": ["stage-modifiers-indicator", "character-hp"],
+        "tutorialHighlights": [
+          "stage-modifiers-indicator",
+          "character-hp"
+        ],
         "tutorialMessage": "Stage modifiers can affect the entire battle! The Healing Farm Wind will restore 1% of each character's maximum HP at the start of every turn. Check the stage modifier indicator at the top of the screen.",
         "backgroundImage": "images/stages/farm_field.webp",
         "backgroundMusic": "sounds/music/farmland_ambient.mp3"
@@ -159,7 +182,7 @@
           },
           {
             "characterId": "farmer_raiden",
-            "name": "Farmer Raiden", 
+            "name": "Farmer Raiden",
             "description": "A lightning-fast farmer with electrical attacks and evasive techniques.",
             "image": "Icons/characters/Farmer Raiden.png"
           }
@@ -172,18 +195,30 @@
     "id": "a_date_in_the_forest",
     "title": "A Date in the Forest",
     "description": "A romantic adventure in the mystical forest where love and magic intertwine.",
-    "playerunlocked": true,
+    "playerunlocked": false,
     "isEvent": true,
     "eventType": "temporary",
-    "availableForEveryone": true,
+    "availableForEveryone": false,
     "requirements": {
       "tags": [],
-      "teamSize": { "min": 2, "max": 2 },
-      "allowedCharacters": ["schoolboy_shoma", "schoolgirl_julia"]
+      "teamSize": {
+        "min": 2,
+        "max": 2
+      },
+      "allowedCharacters": [
+        "schoolboy_shoma",
+        "schoolgirl_julia"
+      ]
     },
     "forcedSkins": [
-      { "characterId": "schoolboy_shoma", "skinId": "schoolboy_shoma_forest" },
-      { "characterId": "schoolgirl_julia", "skinId": "schoolgirl_julia_forest" }
+      {
+        "characterId": "schoolboy_shoma",
+        "skinId": "schoolboy_shoma_forest"
+      },
+      {
+        "characterId": "schoolgirl_julia",
+        "skinId": "schoolgirl_julia_forest"
+      }
     ],
     "stages": [
       {
@@ -215,9 +250,15 @@
         "difficulty": 3,
         "type": "battle",
         "enemies": [
-          { "characterId": "talking_necromatic_tree" },
-          { "characterId": "necromatic_corrupted_bear" },
-          { "characterId": "talking_necromatic_tree" }
+          {
+            "characterId": "talking_necromatic_tree"
+          },
+          {
+            "characterId": "necromatic_corrupted_bear"
+          },
+          {
+            "characterId": "talking_necromatic_tree"
+          }
         ],
         "modifiers": [
           {
@@ -275,10 +316,18 @@
         "difficulty": 2,
         "type": "battle",
         "enemies": [
-          { "characterId": "rose_spider" },
-          { "characterId": "venomous_spider" },
-          { "characterId": "black_spider" },
-          { "characterId": "bloodsucker_spider" }
+          {
+            "characterId": "rose_spider"
+          },
+          {
+            "characterId": "venomous_spider"
+          },
+          {
+            "characterId": "black_spider"
+          },
+          {
+            "characterId": "bloodsucker_spider"
+          }
         ],
         "backgroundImage": "images/stages/spiderweb.png",
         "backgroundMusic": "sounds/music/spiderweb_ambient.mp3",
@@ -298,8 +347,13 @@
     "description": "Survive the chaos of a school day gone wrong!",
     "playerunlocked": false,
     "requirements": {
-      "tags": ["Student"],
-      "teamSize": { "min": 2, "max": 2 }
+      "tags": [
+        "Student"
+      ],
+      "teamSize": {
+        "min": 2,
+        "max": 2
+      }
     },
     "stages": [
       {
@@ -308,7 +362,9 @@
         "difficulty": 3,
         "type": "battle",
         "enemies": [
-          { "characterId": "infernal_astaroth" }
+          {
+            "characterId": "infernal_astaroth"
+          }
         ],
         "modifiers": [
           {
@@ -334,17 +390,31 @@
           {
             "name": "First Aid Kit",
             "description": "Heal a chosen character to full HP.",
-            "effect": { "type": "heal", "target": "selected", "amount": "full" }
+            "effect": {
+              "type": "heal",
+              "target": "selected",
+              "amount": "full"
+            }
           },
           {
             "name": "Red Adrenaline",
             "description": "Inject a chosen character with adrenaline, boosting their physical damage by 20%.",
-            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": "physicalDamage", "amount": 20 }
+            "effect": {
+              "type": "stat_boost_percent",
+              "target": "selected",
+              "stat": "physicalDamage",
+              "amount": 20
+            }
           },
           {
             "name": "Student's Book",
             "description": "Apply learned knowledge to a chosen character, increasing all stats.",
-            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": "all", "amount": 5 }
+            "effect": {
+              "type": "stat_boost_percent",
+              "target": "selected",
+              "stat": "all",
+              "amount": 5
+            }
           }
         ]
       },
@@ -355,11 +425,21 @@
         "type": "battle",
         "backgroundImage": "images/stages/school_yard.png",
         "enemies": [
-          { "characterId": "blazing_elemental" },
-          { "characterId": "blazing_elemental" },
-          { "characterId": "blazing_elemental" },
-          { "characterId": "blazing_elemental" },
-          { "characterId": "blazing_elemental" }
+          {
+            "characterId": "blazing_elemental"
+          },
+          {
+            "characterId": "blazing_elemental"
+          },
+          {
+            "characterId": "blazing_elemental"
+          },
+          {
+            "characterId": "blazing_elemental"
+          },
+          {
+            "characterId": "blazing_elemental"
+          }
         ],
         "modifiers": [
           {
@@ -388,7 +468,9 @@
         "difficulty": 6,
         "type": "battle",
         "enemies": [
-          { "characterId": "infernal_scorpion" }
+          {
+            "characterId": "infernal_scorpion"
+          }
         ],
         "modifiers": [
           {
@@ -414,19 +496,30 @@
             "name": "Mysterious Font",
             "description": "Revive a fallen ally, restoring them to 50% HP.",
             "target": "selected_dead",
-            "effect": { "type": "revive", "target": "selected", "amount_percent": 50 }
+            "effect": {
+              "type": "revive",
+              "target": "selected",
+              "amount_percent": 50
+            }
           },
           {
             "name": "First Aid Kit",
             "description": "Heal a chosen character to full HP.",
             "target": "selected_living",
-            "effect": { "type": "heal", "target": "selected", "amount": "full" }
+            "effect": {
+              "type": "heal",
+              "target": "selected",
+              "amount": "full"
+            }
           },
           {
             "name": "Risky Medicine",
             "description": "A potent concoction. 50% chance to double the character's Max HP (and fully heal), 50% chance to defeat them instantly.",
             "target": "selected_living",
-            "effect": { "type": "risky_medicine", "target": "selected" }
+            "effect": {
+              "type": "risky_medicine",
+              "target": "selected"
+            }
           }
         ]
       },
@@ -443,7 +536,9 @@
         "difficulty": 8,
         "type": "battle",
         "enemies": [
-          { "characterId": "infernal_birdie" }
+          {
+            "characterId": "infernal_birdie"
+          }
         ],
         "modifiers": [
           {
@@ -474,8 +569,12 @@
         "difficulty": 9,
         "type": "battle",
         "enemies": [
-          { "characterId": "infernal_ibuki" },
-          { "characterId": "infernal_raiden" }
+          {
+            "characterId": "infernal_ibuki"
+          },
+          {
+            "characterId": "infernal_raiden"
+          }
         ],
         "modifiers": [
           {
@@ -516,17 +615,53 @@
     "description": "Something is wrong in the peaceful farmland...",
     "playerunlocked": false,
     "requirements": {
-      "tags": ["Farmer"],
-      "teamSize": { "min": 1, "max": 1 }
+      "tags": [
+        "Farmer"
+      ],
+      "teamSize": {
+        "min": 1,
+        "max": 1
+      }
     },
     "stages": [
       {
         "name": "An Angry Carrot",
         "description": "A strangely aggressive carrot blocks the path into the farmland.",
         "difficulty": 1,
+        "type": "battle",
         "enemies": [
-            { "characterId": "angry_carrot" }
+          {
+            "characterId": "angry_carrot"
+          }
         ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "carrot_cannon",
+              "dropChance": 0.05,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "carrot",
+              "dropChance": 0.75,
+              "quantityMin": 3,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.25,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.85,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
         "backgroundImage": "images/stages/Stage_1_BG.jpeg",
         "backgroundMusic": "sounds/music/farmland_ambient.mp3"
       },
@@ -543,10 +678,74 @@
         "difficulty": 2,
         "type": "battle",
         "enemies": [
-          { "characterId": "angry_pig" },
-          { "characterId": "angry_chicken" },
-          { "characterId": "angry_bull" }
+          {
+            "characterId": "angry_pig"
+          },
+          {
+            "characterId": "angry_chicken"
+          },
+          {
+            "characterId": "angry_bull"
+          }
         ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.85,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "pitchfork",
+              "dropChance": 0.24,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "carrot",
+              "dropChance": 0.42,
+              "quantityMin": 2,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.24,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "iron_nail",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 7
+            },
+            {
+              "itemId": "wooden_plank",
+              "dropChance": 0.35,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "pork",
+              "dropChance": 0.60,
+              "quantityMin": 2,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "red_linen",
+              "dropChance": 0.60,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "double_kitchen_knife",
+              "dropChance": 0.10,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
         "backgroundImage": "images/stages/farmstage2.jpeg",
         "backgroundMusic": "sounds/music/ranch_battle.mp3"
       },
@@ -558,17 +757,34 @@
           {
             "name": "Fresh Apple",
             "description": "Restores 50% Max HP to the entire team.",
-            "effect": { "type": "heal_percent", "target": "all", "amount_percent": 50 }
+            "effect": {
+              "type": "heal_percent",
+              "target": "all",
+              "amount_percent": 50
+            }
           },
           {
             "name": "Juicy Pear",
             "description": "Increase a selected character's Magic Damage by 30%.",
-            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": "magicalDamage", "amount": 30 }
+            "effect": {
+              "type": "stat_boost_percent",
+              "target": "selected",
+              "stat": "magicalDamage",
+              "amount": 30
+            }
           },
           {
             "name": "Ripe Watermelon",
             "description": "Increase a selected character's Armor and Magical Resistance by 7%.",
-            "effect": { "type": "stat_boost_percent", "target": "selected", "stat": ["armor", "magicalShield"], "amount": 7 }
+            "effect": {
+              "type": "stat_boost_percent",
+              "target": "selected",
+              "stat": [
+                "armor",
+                "magicalShield"
+              ],
+              "amount": 7
+            }
           }
         ]
       },
@@ -580,7 +796,11 @@
           {
             "name": "Drink from the Well",
             "description": "Restores the entire team's Mana to full.",
-            "effect": { "type": "mana_restore", "target": "all", "amount": "full" }
+            "effect": {
+              "type": "mana_restore",
+              "target": "all",
+              "amount": "full"
+            }
           }
         ]
       },
@@ -590,14 +810,89 @@
         "difficulty": 3,
         "type": "battle",
         "enemies": [
-            { "characterId": "monster_apple" },
-            { "characterId": "healthy_apple" },
-            { "characterId": "angry_apple" },
-            { "characterId": "leafy_apple" },
-            { "characterId": "rotten_apple" }
+          {
+            "characterId": "monster_apple"
+          },
+          {
+            "characterId": "healthy_apple"
+          },
+          {
+            "characterId": "angry_apple"
+          },
+          {
+            "characterId": "leafy_apple"
+          },
+          {
+            "characterId": "rotten_apple"
+          }
         ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "healthy_apple",
+              "dropChance": 0.80,
+              "quantityMin": 1,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "yellow_apple",
+              "dropChance": 0.80,
+              "quantityMin": 1,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "green_apple",
+              "dropChance": 0.80,
+              "quantityMin": 1,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.85,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
         "backgroundImage": "images/stages/under_the_apple_tree.webp",
         "backgroundMusic": "sounds/music/apple_battle.mp3"
+      },
+      {
+        "name": "Orchard Supplies",
+        "description": "After the intense battle with the twisted apple creatures, you discover a hidden cache of supplies left behind by previous travelers. The supplies offer different forms of aid for your journey ahead.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "First Aid Kits",
+            "description": "Heal all allies to 100% HP. These medical supplies will restore your entire team to perfect health.",
+            "effect": {
+              "type": "heal",
+              "target": "all",
+              "amount": "full"
+            }
+          },
+          {
+            "name": "Revival Herb",
+            "description": "Revive a fallen ally with 50% HP. This rare herb can bring back a defeated companion.",
+            "effect": {
+              "type": "revive",
+              "target": "selected_dead",
+              "amount_percent": 50
+            }
+          },
+          {
+            "name": "Water Bottle",
+            "description": "Restores 2000 HP and 2000 Mana to a character. A refreshing drink that restores both health and magical energy.",
+            "effect": {
+              "type": "heal_and_mana_restore",
+              "target": "selected",
+              "amount": {
+                "hp": 2000,
+                "mana": 2000
+              }
+            }
+          }
+        ]
       },
       {
         "name": "Digged up treasure",
@@ -607,17 +902,29 @@
           {
             "name": "First Aid Kit",
             "description": "Heal a chosen character to full HP.",
-            "effect": { "type": "heal", "target": "selected", "amount": "full" }
+            "effect": {
+              "type": "heal",
+              "target": "selected",
+              "amount": "full"
+            }
           },
           {
             "name": "A Rare Bone",
             "description": "Increases a selected character's dodge chance by 15%.",
-            "effect": { "type": "stat_boost", "target": "selected", "stat": "dodgeChance", "amount": 0.15 }
+            "effect": {
+              "type": "stat_boost",
+              "target": "selected",
+              "stat": "dodgeChance",
+              "amount": 0.15
+            }
           },
           {
             "name": "Pocket of Weed",
             "description": "Double your Magical and Physical Damage of a selected character but set armor and magic shield to 0.",
-            "effect": { "type": "pocket_of_weed_effect", "target": "selected" }
+            "effect": {
+              "type": "pocket_of_weed_effect",
+              "target": "selected"
+            }
           }
         ]
       },
@@ -627,9 +934,89 @@
         "difficulty": 4,
         "type": "battle",
         "enemies": [
-          { "characterId": "crazy_farmer" },
-          { "characterId": "hound" }
+          {
+            "characterId": "crazy_farmer"
+          },
+          {
+            "characterId": "hound"
+          }
         ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "corn",
+              "dropChance": 0.50,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "alcohol",
+              "dropChance": 0.80,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "pitchfork",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "cow_bell",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "fertilizer_sprayer",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "wooden_plank",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "goat_milk_crafting",
+              "dropChance": 0.50,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "goat_milk_consumable",
+              "dropChance": 0.50,
+              "quantityMin": 2,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "milking_bucket",
+              "dropChance": 0.70,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "dog_collar",
+              "dropChance": 0.10,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.85,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
         "backgroundImage": "images/stages/the_barn.webp",
         "backgroundMusic": "sounds/music/barn_battle.mp3"
       },
@@ -648,17 +1035,37 @@
           {
             "name": "Water Bottle",
             "description": "Restores 2000 HP and 2000 Mana to a character.",
-            "effect": { "type": "heal_and_mana_restore", "target": "selected", "amount": { "hp": 2000, "mana": 2000 } }
+            "effect": {
+              "type": "heal_and_mana_restore",
+              "target": "selected",
+              "amount": {
+                "hp": 2000,
+                "mana": 2000
+              }
+            }
           },
           {
             "name": "Corn",
             "description": "+80 HP regeneration to a character.",
-            "effect": { "type": "stat_boost", "target": "selected", "stat": "hpRegen", "amount": 80 }
+            "effect": {
+              "type": "stat_boost",
+              "target": "selected",
+              "stat": "hpRegen",
+              "amount": 80
+            }
           },
           {
             "name": "Magical Ring",
             "description": "Restores mana to full and grants the selected character +100 Magical Damage.",
-            "effect": { "type": "mana_restore_and_stat_boost", "target": "selected", "amount": { "mana": "full", "stat": "magicalDamage", "value": 100 } }
+            "effect": {
+              "type": "mana_restore_and_stat_boost",
+              "target": "selected",
+              "amount": {
+                "mana": "full",
+                "stat": "magicalDamage",
+                "value": 100
+              }
+            }
           }
         ]
       },
@@ -668,12 +1075,62 @@
         "difficulty": 5,
         "type": "battle",
         "enemies": [
-          { "characterId": "crow" },
-          { "characterId": "crow" },
-          { "characterId": "scarecrow" },
-          { "characterId": "crow" },
-          { "characterId": "crow" }
+          {
+            "characterId": "crow"
+          },
+          {
+            "characterId": "crow"
+          },
+          {
+            "characterId": "scarecrow"
+          },
+          {
+            "characterId": "crow"
+          },
+          {
+            "characterId": "crow"
+          }
         ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "crow_feather",
+              "dropChance": 0.80,
+              "quantityMin": 1,
+              "quantityMax": 20
+            },
+            {
+              "itemId": "exploding_pumpkin",
+              "dropChance": 0.50,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "beehive_bomb",
+              "dropChance": 0.50,
+              "quantityMin": 2,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "corn_spear",
+              "dropChance": 0.15,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "corn",
+              "dropChance": 0.50,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.85,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
         "backgroundImage": "images/stages/crowfield.webp",
         "backgroundMusic": "sounds/music/crowfield.mp3"
       },
@@ -685,7 +1142,11 @@
           {
             "name": "Drink from the Well",
             "description": "Restores the entire team's Mana to full.",
-            "effect": { "type": "mana_restore", "target": "all", "amount": "full" }
+            "effect": {
+              "type": "mana_restore",
+              "target": "all",
+              "amount": "full"
+            }
           }
         ]
       },
@@ -702,11 +1163,21 @@
         "difficulty": 7,
         "type": "battle",
         "enemies": [
-          { "characterId": "angry_bull" },
-          { "characterId": "crow" },
-          { "characterId": "farmer_fang" },
-          { "characterId": "angry_carrot" },
-          { "characterId": "hound" }
+          {
+            "characterId": "angry_bull"
+          },
+          {
+            "characterId": "crow"
+          },
+          {
+            "characterId": "farmer_fang"
+          },
+          {
+            "characterId": "angry_carrot"
+          },
+          {
+            "characterId": "hound"
+          }
         ],
         "modifiers": [
           {
@@ -723,7 +1194,80 @@
         ],
         "objectives": {
           "winConditions": [
-            { "type": "enemyDefeated", "targetId": "farmer_fang" }
+            {
+              "type": "enemyDefeated",
+              "targetId": "farmer_fang"
+            }
+          ]
+        },
+        "loot": {
+          "items": [
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 1.0,
+              "quantityMin": 2,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "pitchfork",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "carrot_cannon",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "fertilizer_sprayer",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "cow_bell",
+              "dropChance": 0.15,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "corn_spear",
+              "dropChance": 0.15,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "dog_collar",
+              "dropChance": 0.05,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "beehive_bomb",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "exploding_pumpkin",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "red_linen",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 2
+            }
           ]
         },
         "backgroundImage": "images/stages/farm_clearing.png",
@@ -742,7 +1286,7 @@
           },
           {
             "characterId": "farmer_raiden",
-            "name": "Farmer Raiden", 
+            "name": "Farmer Raiden",
             "description": "A lightning-fast farmer with electrical attacks and evasive techniques.",
             "image": "Icons/characters/Farmer Raiden.png"
           },
@@ -764,7 +1308,10 @@
     "playerunlocked": true,
     "requirements": {
       "tags": [],
-      "teamSize": { "min": 2, "max": 2 }
+      "teamSize": {
+        "min": 2,
+        "max": 2
+      }
     },
     "stages": [
       {
@@ -775,26 +1322,26 @@
           {
             "name": "Lava Sample",
             "description": "Infuse a character with molten lava essence, setting their magical damage to exactly 200.",
-            "effect": { 
-              "type": "set_magical_damage", 
-              "target": "selected", 
-              "amount": 200 
+            "effect": {
+              "type": "set_magical_damage",
+              "target": "selected",
+              "amount": 200
             }
           },
           {
             "name": "Demon Claws",
             "description": "Graft demonic claws onto a character, increasing their physical damage by 80 but making them unable to dodge.",
-            "effect": { 
-              "type": "demon_claws_effect", 
-              "target": "selected" 
+            "effect": {
+              "type": "demon_claws_effect",
+              "target": "selected"
             }
           },
           {
             "name": "Hellish Pact",
             "description": "Form a dark pact that increases a character's HP by 2000 but curses them to take 75 damage each turn.",
-            "effect": { 
-              "type": "hellish_pact_effect", 
-              "target": "selected" 
+            "effect": {
+              "type": "hellish_pact_effect",
+              "target": "selected"
             }
           }
         ]
@@ -805,8 +1352,12 @@
         "difficulty": 4,
         "type": "battle",
         "enemies": [
-          { "characterId": "scamp" },
-          { "characterId": "morissa" }
+          {
+            "characterId": "scamp"
+          },
+          {
+            "characterId": "morissa"
+          }
         ],
         "backgroundImage": "images/stages/hell_stage1.png",
         "backgroundMusic": "sounds/music/hell_entrance_theme.mp3"
@@ -819,48 +1370,54 @@
         "description_detail": "Select one character from 3 randomly chosen champions from your collection to add to your team. This ally will join you for the remainder of your journey through hell."
       },
       {
-      "name": "Hellish Sacrifices",
-      "description": "Deeper in hell, a malevolent entity offers you three dark choices. Each sacrifice grants power, but at a terrible cost to your team. The decision you make here will affect all your companions.",
-      "type": "choice",
-      "choices": [
-        {
-          "name": "Sacrifice for Mana",
-          "description": "ALL your characters lose 15% of their current HP to restore mana to full. The price of power is blood.",
-          "effect": { 
-            "type": "sacrifice_hp_for_mana", 
-            "target": "all",
-            "hp_percent": 15
+        "name": "Hellish Sacrifices",
+        "description": "Deeper in hell, a malevolent entity offers you three dark choices. Each sacrifice grants power, but at a terrible cost to your team. The decision you make here will affect all your companions.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Sacrifice for Mana",
+            "description": "ALL your characters lose 15% of their current HP to restore mana to full. The price of power is blood.",
+            "effect": {
+              "type": "sacrifice_hp_for_mana",
+              "target": "all",
+              "hp_percent": 15
+            }
+          },
+          {
+            "name": "Sacrifice for Power",
+            "description": "Your armor and magical shield is decremented by 5 (all characters) to increase your Magical Damage and Physical Damage by 100.",
+            "effect": {
+              "type": "sacrifice_defense_for_power",
+              "target": "all",
+              "defense_reduction": 5,
+              "damage_boost": 100
+            }
+          },
+          {
+            "name": "Sacrifice for Life",
+            "description": "Sacrifice a selected character to restore your remaining characters to full HP and Full mana. The ultimate price for the ultimate reward.",
+            "effect": {
+              "type": "sacrifice_character_for_restoration",
+              "target": "selected"
+            }
           }
-        },
-        {
-          "name": "Sacrifice for Power",
-          "description": "Your armor and magical shield is decremented by 5 (all characters) to increase your Magical Damage and Physical Damage by 100.",
-          "effect": { 
-            "type": "sacrifice_defense_for_power", 
-            "target": "all",
-            "defense_reduction": 5,
-            "damage_boost": 100
-          }
-        },
-        {
-          "name": "Sacrifice for Life",
-          "description": "Sacrifice a selected character to restore your remaining characters to full HP and Full mana. The ultimate price for the ultimate reward.",
-          "effect": { 
-            "type": "sacrifice_character_for_restoration", 
-            "target": "selected"
-          }
-        }
-      ]
-    },
+        ]
+      },
       {
         "name": "Smith Cave",
         "description": "Deep in the volcanic chambers of hell, you discover the forge of the Smith Lord. The air crackles with demonic magic as enchanted weapons amplify the strength of all who dwell here. A lava chimp screeches from the shadows while the vile Vulgrim lurks nearby, all under the watchful eye of the Smith Lord himself.",
         "difficulty": 4,
         "type": "battle",
         "enemies": [
-          { "characterId": "lava_chimp" },
-          { "characterId": "smith_lord" },
-          { "characterId": "vulgrim" }
+          {
+            "characterId": "lava_chimp"
+          },
+          {
+            "characterId": "smith_lord"
+          },
+          {
+            "characterId": "vulgrim"
+          }
         ],
         "modifiers": [
           {
@@ -890,8 +1447,8 @@
           {
             "name": "Molten Hammer",
             "description": "A massive hammer forged from the core of a hellish volcano. Its weight and power will significantly increase the physical damage of the chosen character by 200.",
-            "effect": { 
-              "type": "molten_hammer_effect", 
+            "effect": {
+              "type": "molten_hammer_effect",
               "target": "selected",
               "image": "Icons/rewards/Molten_Hammer.png"
             }
@@ -899,8 +1456,8 @@
           {
             "name": "Molten Scythe",
             "description": "A cursed scythe that feeds on hellish energy, growing stronger with each battle. It will increase all stats of the chosen character by 1% every turn, creating an ever-growing power.",
-            "effect": { 
-              "type": "molten_scythe_effect", 
+            "effect": {
+              "type": "molten_scythe_effect",
               "target": "selected",
               "image": "Icons/rewards/Molten_Scythe.png"
             }
@@ -908,8 +1465,8 @@
           {
             "name": "Molten Spear",
             "description": "A swift spear infused with the agility of hellish winds. It will enhance the chosen character's dodging abilities, increasing their dodge chance by 18%.",
-            "effect": { 
-              "type": "molten_spear_effect", 
+            "effect": {
+              "type": "molten_spear_effect",
               "target": "selected",
               "image": "Icons/rewards/Molten_Spear.png"
             }
@@ -922,8 +1479,12 @@
         "difficulty": 5,
         "type": "battle",
         "enemies": [
-          { "characterId": "hotshot_diablo" },
-          { "characterId": "hotshot_diabla" }
+          {
+            "characterId": "hotshot_diablo"
+          },
+          {
+            "characterId": "hotshot_diabla"
+          }
         ],
         "modifiers": [
           {
@@ -955,10 +1516,18 @@
         "difficulty": 6,
         "type": "battle",
         "enemies": [
-          { "characterId": "cursed_lion" },
-          { "characterId": "hellboar" },
-          { "characterId": "hell_fly" },
-          { "characterId": "lava_worm" }
+          {
+            "characterId": "cursed_lion"
+          },
+          {
+            "characterId": "hellboar"
+          },
+          {
+            "characterId": "hell_fly"
+          },
+          {
+            "characterId": "lava_worm"
+          }
         ],
         "modifiers": [
           {
@@ -979,29 +1548,32 @@
           {
             "name": "Pool of Infernal Mana",
             "description": "A bubbling pool of blue hellfire that completely restores a character's magical energy to its maximum capacity.",
-            "effect": { 
-              "type": "mana_restore", 
-              "target": "selected", 
-              "amount": "full" 
+            "effect": {
+              "type": "mana_restore",
+              "target": "selected",
+              "amount": "full"
             }
           },
           {
             "name": "Pool of Vitality",
             "description": "A crimson pool that pulses with life force, fully healing a character's wounds and restoring them to perfect health.",
-            "effect": { 
-              "type": "heal", 
-              "target": "selected", 
-              "amount": "full" 
+            "effect": {
+              "type": "heal",
+              "target": "selected",
+              "amount": "full"
             }
           },
           {
             "name": "Pool of Demonic Protection",
             "description": "A shimmering pool of molten metal that permanently enhances a character's defensive capabilities, increasing their armor and magical resistance by 8%.",
-            "effect": { 
-              "type": "stat_boost_percent", 
-              "target": "selected", 
-              "stat": ["armor", "magicalShield"], 
-              "amount": 8 
+            "effect": {
+              "type": "stat_boost_percent",
+              "target": "selected",
+              "stat": [
+                "armor",
+                "magicalShield"
+              ],
+              "amount": 8
             }
           }
         ]
@@ -1014,7 +1586,11 @@
           {
             "name": "Take One Last Drink",
             "description": "Restore 25% of maximum mana to all characters in your team.",
-            "effect": { "type": "mana_restore_percent", "target": "all", "amount_percent": 25 }
+            "effect": {
+              "type": "mana_restore_percent",
+              "target": "all",
+              "amount_percent": 25
+            }
           }
         ]
       },
@@ -1024,8 +1600,12 @@
         "difficulty": 6,
         "type": "battle",
         "enemies": [
-          { "characterId": "gargolyan" },
-          { "characterId": "hellhorn" }
+          {
+            "characterId": "gargolyan"
+          },
+          {
+            "characterId": "hellhorn"
+          }
         ],
         "modifiers": [
           {
@@ -1034,11 +1614,12 @@
             "description": "The castle guardians inspire fierce combat! When a character dodges, they gain +30% dodge chance for 3 turns. When someone deals damage, they gain +100 magical damage and +80 physical damage for 3 turns (stacking).",
             "icon": "🛡️"
           }
-          
         ],
         "objectives": {
           "winConditions": [
-            { "type": "allEnemiesDefeated" }
+            {
+              "type": "allEnemiesDefeated"
+            }
           ]
         },
         "backgroundImage": "images/stages/hell_castle_entrace.png",
@@ -1052,16 +1633,16 @@
           {
             "name": "Summon Hellish Ally",
             "description": "Channel the chaotic energies of hell to randomly summon a powerful ally from your collection to join your final assault.",
-            "effect": { 
-              "type": "summon_random_ally", 
+            "effect": {
+              "type": "summon_random_ally",
               "target": "team"
             }
           },
           {
             "name": "Infernal Restoration",
             "description": "Draw upon the castle's ancient power to completely restore all your team members to full health and mana, preparing them for the trials ahead.",
-            "effect": { 
-              "type": "heal_and_mana_restore_all_full", 
+            "effect": {
+              "type": "heal_and_mana_restore_all_full",
               "target": "all"
             }
           }
@@ -1073,9 +1654,15 @@
         "difficulty": 7,
         "type": "battle",
         "enemies": [
-          { "characterId": "kroudin" },
-          { "characterId": "grok_hell_lord" },
-          { "characterId": "skress" }
+          {
+            "characterId": "kroudin"
+          },
+          {
+            "characterId": "grok_hell_lord"
+          },
+          {
+            "characterId": "skress"
+          }
         ],
         "modifiers": [
           {
@@ -1093,13 +1680,14 @@
         ],
         "objectives": {
           "winConditions": [
-            { "type": "allEnemiesDefeated" }
+            {
+              "type": "allEnemiesDefeated"
+            }
           ]
         },
         "backgroundImage": "images/stages/hell_castle_throne.png",
         "backgroundMusic": "sounds/music/hell_lord_theme.mp3"
       }
-      
     ]
   },
   {
@@ -1108,10 +1696,20 @@
     "description": "The ancient underwater kingdom of Atlantis is under attack by dark forces. Only champions with Atlantean heritage can venture into the depths to save the realm.",
     "playerunlocked": false,
     "requirements": {
-      "tags": ["Atlantean"],
-      "teamSize": { "min": 1, "max": 1 }
+      "tags": [
+        "Atlantean"
+      ],
+      "teamSize": {
+        "min": 1,
+        "max": 1
+      },
+      "allowedCharacters": [
+        "atlantean_kagome"
+      ]
     },
-    "forcedInitialCharacters": ["atlantean_kagome"],
+    "forcedInitialCharacters": [
+      "atlantean_kagome"
+    ],
     "stages": [
       {
         "name": "The Deep Waters",
@@ -1119,10 +1717,18 @@
         "difficulty": 5,
         "type": "battle",
         "enemies": [
-          { "characterId": "shadowfin" },
-          { "characterId": "piranha" },
-          { "characterId": "piranha" },
-          { "characterId": "piranha" }
+          {
+            "characterId": "shadowfin"
+          },
+          {
+            "characterId": "piranha"
+          },
+          {
+            "characterId": "piranha"
+          },
+          {
+            "characterId": "piranha"
+          }
         ],
         "modifiers": [
           {
@@ -1134,494 +1740,541 @@
         ],
         "objectives": {
           "winConditions": [
-            { "type": "enemyDefeated", "targetId": "shadowfin" }
+            {
+              "type": "enemyDefeated",
+              "targetId": "shadowfin"
+            }
           ]
         },
-              "backgroundImage": "images/stages/stage1_background.jpeg",
-      "backgroundMusic": "sounds/music/atlantis_depths.mp3",
-      "loot": {
-        "items": [
+        "backgroundImage": "images/stages/stage1_background.jpeg",
+        "backgroundMusic": "sounds/music/atlantis_depths.mp3",
+        "loot": {
+          "items": [
+            {
+              "itemId": "piranha_scales",
+              "dropChance": 0.4,
+              "quantityMin": 1,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "piranha_tooth",
+              "dropChance": 0.7,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "murky_water_vial",
+              "dropChance": 0.8,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "void_essence",
+              "dropChance": 0.02,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "shadow_essence",
+              "dropChance": 0.3,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "atlantean_treasure_chest",
+              "dropChance": 0.855,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        }
+      },
+      {
+        "name": "Atlantean Blessings",
+        "description": "Having defeated the dark forces in the deep waters, the ancient spirits of Atlantis appear before you, offering their blessings to aid in your quest to save the realm. Each blessing will enhance your entire team's capabilities for the remainder of your journey.",
+        "type": "choice",
+        "choices": [
           {
-            "itemId": "piranha_scales",
-            "dropChance": 0.4,
-            "quantityMin": 1,
-            "quantityMax": 5
+            "name": "Blessing of the Depths",
+            "description": "The spirits grant your team the blessing of the ocean's vitality. All team members gain 10% Lifesteal, allowing them to recover health with every attack.",
+            "effect": {
+              "type": "atlantean_lifesteal_blessing",
+              "target": "all"
+            }
           },
           {
-            "itemId": "piranha_tooth",
-            "dropChance": 0.7,
-            "quantityMin": 1,
-            "quantityMax": 2
+            "name": "Blessing of the Tides",
+            "description": "The flowing tides reduce the strain of using abilities. All team members' abilities cost 50% less mana to cast.",
+            "effect": {
+              "type": "atlantean_mana_efficiency",
+              "target": "all"
+            }
           },
           {
-            "itemId": "murky_water_vial",
-            "dropChance": 0.8,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "void_essence",
-            "dropChance": 0.02,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "shadow_essence",
-            "dropChance": 0.3,
-            "quantityMin": 1,
-            "quantityMax": 2
-          },
-          {
-            "itemId": "atlantean_treasure_chest",
-            "dropChance": 0.855,
-            "quantityMin": 1,
-            "quantityMax": 1
+            "name": "Blessing of the Currents",
+            "description": "The swift currents of Atlantis enhance your reflexes. All team members' Q abilities have their cooldown reduced by 1 turn.",
+            "effect": {
+              "type": "atlantean_swiftness",
+              "target": "all"
+            }
           }
         ]
-      }
-    },
-    {
-      "name": "Atlantean Blessings",
-      "description": "Having defeated the dark forces in the deep waters, the ancient spirits of Atlantis appear before you, offering their blessings to aid in your quest to save the realm. Each blessing will enhance your entire team's capabilities for the remainder of your journey.",
-      "type": "choice",
-      "choices": [
-        {
-          "name": "Blessing of the Depths",
-          "description": "The spirits grant your team the blessing of the ocean's vitality. All team members gain 10% Lifesteal, allowing them to recover health with every attack.",
-          "effect": { "type": "atlantean_lifesteal_blessing", "target": "all" }
-        },
-        {
-          "name": "Blessing of the Tides",
-          "description": "The flowing tides reduce the strain of using abilities. All team members' abilities cost 50% less mana to cast.",
-          "effect": { "type": "atlantean_mana_efficiency", "target": "all" }
-        },
-        {
-          "name": "Blessing of the Currents",
-          "description": "The swift currents of Atlantis enhance your reflexes. All team members' Q abilities have their cooldown reduced by 1 turn.",
-          "effect": { "type": "atlantean_swiftness", "target": "all" }
-        }
-      ]
-    },
-    {
-      "name": "Frozen Underground Ruins",
-      "description": "Following ancient maps discovered in the depths, you venture into the frozen underground ruins that were once part of ancient Atlantis before the great ice age. These crystalline caverns hold the remnants of a lost civilization, guarded by frozen soldiers who still patrol the halls and the legendary ice master Sub Zero. The bitter cold preserves their forms, but their duty remains eternal.",
-      "difficulty": 6,
-      "type": "battle",
-      "enemies": [
-        { "characterId": "frozen_soldier" },
-        { "characterId": "frozen_soldier" },
-        { "characterId": "atlantean_sub_zero" },
-        { "characterId": "frozen_soldier" },
-        { "characterId": "frozen_soldier" }
-      ],
-
-      "modifiers": [
-        {
-          "id": "atlantean_ambush_defense",
-          "name": "Atlantean Ambush Defense",
-          "description": "Ancient Atlantean wards protect their champions from ambushers, granting them +25 Armor and +25 Magical Shield.",
-          "icon": "🛡️"
-        },
-                  {
+      },
+      {
+        "name": "Frozen Underground Ruins",
+        "description": "Following ancient maps discovered in the depths, you venture into the frozen underground ruins that were once part of ancient Atlantis before the great ice age. These crystalline caverns hold the remnants of a lost civilization, guarded by frozen soldiers who still patrol the halls and the legendary ice master Sub Zero. The bitter cold preserves their forms, but their duty remains eternal.",
+        "difficulty": 6,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "frozen_soldier"
+          },
+          {
+            "characterId": "frozen_soldier"
+          },
+          {
+            "characterId": "atlantean_sub_zero"
+          },
+          {
+            "characterId": "frozen_soldier"
+          },
+          {
+            "characterId": "frozen_soldier"
+          }
+        ],
+        "modifiers": [
+          {
+            "id": "atlantean_ambush_defense",
+            "name": "Atlantean Ambush Defense",
+            "description": "Ancient Atlantean wards protect their champions from ambushers, granting them +25 Armor and +25 Magical Shield.",
+            "icon": "🛡️"
+          },
+          {
             "id": "aquatic_home_protector",
             "name": "Aquatic Home Protector",
             "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
             "icon": "🌊"
           }
-      ],
-
-      "objectives": {
-        "winConditions": [
-          { "type": "allEnemiesDefeated" }
-        ]
+        ],
+        "objectives": {
+          "winConditions": [
+            {
+              "type": "allEnemiesDefeated"
+            }
+          ]
+        },
+        "loot": {
+          "items": [
+            {
+              "itemId": "atlantean_treasure_chest",
+              "dropChance": 0.855,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "ice_flask",
+              "dropChance": 0.25,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "ice_shard",
+              "dropChance": 0.77,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "ice_dagger",
+              "dropChance": 0.12,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "atlantis_teardrop",
+              "dropChance": 0.39,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/stage2_ice.png",
+        "backgroundMusic": "sounds/music/frozen_depths.mp3"
       },
-      "loot": {
-        "items": [
+      {
+        "name": "Alliance with Sub Zero",
+        "description": "Impressed by your valor, Atlantean Sub Zero pledges his icy might to your cause.",
+        "type": "recruit",
+        "recruitCount": 1,
+        "specificCharacters": [
+          "atlantean_sub_zero_playable"
+        ],
+        "choices": []
+      },
+      {
+        "name": "Ambush of the Shadow Assassins",
+        "description": "While traversing a narrow Atlantean trench, your champions are ambushed by a deadly cadre of assassins lurking in the shadows of the deep.",
+        "difficulty": 6,
+        "type": "battle",
+        "enemies": [
           {
-            "itemId": "atlantean_treasure_chest",
-            "dropChance": 0.855,
-            "quantityMin": 1,
-            "quantityMax": 1
+            "characterId": "shadow_assassin"
           },
           {
-            "itemId": "ice_flask",
-            "dropChance": 0.25,
-            "quantityMin": 1,
-            "quantityMax": 3
+            "characterId": "shadow_assassin_female"
           },
           {
-            "itemId": "ice_shard",
-            "dropChance": 0.77,
-            "quantityMin": 2,
-            "quantityMax": 5
+            "characterId": "reptilian_assassin"
           },
           {
-            "itemId": "ice_dagger",
-            "dropChance": 0.12,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "atlantis_teardrop",
-            "dropChance": 0.39,
-            "quantityMin": 1,
-            "quantityMax": 1
+            "characterId": "octopus_assassin"
           }
-        ]
-      },
-      "backgroundImage": "images/stages/stage2_ice.png",
-      "backgroundMusic": "sounds/music/frozen_depths.mp3"
-    },
-    {
-      "name": "Alliance with Sub Zero",
-      "description": "Impressed by your valor, Atlantean Sub Zero pledges his icy might to your cause.",
-      "type": "recruit",
-      "recruitCount": 1,
-      "specificCharacters": ["atlantean_sub_zero_playable"],
-      "choices": []
-    },
-    {
-      "name": "Ambush of the Shadow Assassins",
-      "description": "While traversing a narrow Atlantean trench, your champions are ambushed by a deadly cadre of assassins lurking in the shadows of the deep.",
-      "difficulty": 6,
-      "type": "battle",
-      "enemies": [
-        { "characterId": "shadow_assassin" },
-        { "characterId": "shadow_assassin_female" },
-        { "characterId": "reptilian_assassin" },
-        { "characterId": "octopus_assassin" }
-      ],
-      "modifiers": [
-        {
-          "id": "aquatic_home_protector",
-          "name": "Aquatic Home Protector",
-          "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
-          "icon": "🌊"
-        },
-        {
-          "id": "freezing_waters",
-          "name": "Freezing Waters",
-          "description": "All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 40% chance for their abilities to succeed.",
-          "icon": "❄️"
-        },
-                {
-          "id": "atlantean_ambush_defense",
-          "name": "Atlantean Ambush Defense",
-          "description": "Ancient Atlantean wards protect their champions from ambushers, granting them +25 Armor and +25 Magical Shield.",
-          "icon": "🛡️"
-        }
-      ],
-      "objectives": {
-        "winConditions": [
-          { "type": "allEnemiesDefeated" }
-        ]
-      },
-            "loot": {
-        "items": [
+        ],
+        "modifiers": [
           {
-            "itemId": "atlantean_treasure_chest",
-            "dropChance": 0.855,
-            "quantityMin": 1,
-            "quantityMax": 1
+            "id": "aquatic_home_protector",
+            "name": "Aquatic Home Protector",
+            "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
+            "icon": "🌊"
           },
           {
-            "itemId": "shadow_dagger",
-            "dropChance": 0.08,
-            "quantityMin": 1,
-            "quantityMax": 1
+            "id": "freezing_waters",
+            "name": "Freezing Waters",
+            "description": "All player abilities that target enemies have a 38% chance to freeze the target for 2 turns. Frozen enemies have only 40% chance for their abilities to succeed.",
+            "icon": "❄️"
           },
           {
-            "itemId": "ice_dagger",
-            "dropChance": 0.12,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "tridents_vow",
-            "dropChance": 0.05,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "deep_sea_essence",
-            "dropChance": 0.20,
-            "quantityMin": 1,
-            "quantityMax": 3
-          },
-          {
-            "itemId": "kotal_kahns_atlantean_dagger",
-            "dropChance": 0.008,
-            "quantityMin": 1,
-            "quantityMax": 1
+            "id": "atlantean_ambush_defense",
+            "name": "Atlantean Ambush Defense",
+            "description": "Ancient Atlantean wards protect their champions from ambushers, granting them +25 Armor and +25 Magical Shield.",
+            "icon": "🛡️"
           }
-        ]
-      },
-      "backgroundImage": "images/stages/stage3.png",
-      "backgroundMusic": "sounds/music/assassin_attack.mp3"
-    },
-    {
-      "name": "Returning Home",
-      "description": "After the fierce battle with the shadow assassins, you find sanctuary in a peaceful Atlantean healing chamber. The ancient waters restore your strength completely, and you are joined by Atlantean Christie, a skilled assassin who has been protecting the sacred waters. With your team fully healed and reinforced, you are ready to face the ultimate threat lurking in the deepest depths.",
-      "type": "healing_and_recruit",
-      "isEncounter": true,
-      "healingEffect": {
-        "type": "heal_and_mana_restore_all_full",
-        "target": "all"
-      },
-      "recruitEffect": {
-        "type": "add_specific_ally",
-        "characterId": "atlantean_christie"
-      },
-      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
-      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
-    },
-    {
-      "name": "Dark Underwater Cave",
-      "description": "Deep beneath the ocean floor lies a massive underwater cavern shrouded in darkness. Ancient corruption has awakened the Dark Leviathan, a colossal sea beast that guards the deepest secrets of Atlantis. With your team fully restored and reinforced with Atlantean Christie's skills, you venture into the abyss to face this ultimate threat to your homeland.",
-      "difficulty": 8,
-      "type": "battle",
-      "enemies": [
-        { "characterId": "dark_leviathan" }
-      ],
-      "modifiers": [
-        {
-          "id": "aquatic_home_protector",
-          "name": "Aquatic Home Protector",
-          "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
-          "icon": "🌊"
+        ],
+        "objectives": {
+          "winConditions": [
+            {
+              "type": "allEnemiesDefeated"
+            }
+          ]
         },
-        {
-          "id": "atlantean_purification",
-          "name": "Atlantean Purification",
-          "description": "The pure waters of Atlantis instantly cleanse all debuffs from characters at the start of each turn.",
-          "icon": "💧✨"
+        "loot": {
+          "items": [
+            {
+              "itemId": "atlantean_treasure_chest",
+              "dropChance": 0.855,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "shadow_dagger",
+              "dropChance": 0.08,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "ice_dagger",
+              "dropChance": 0.12,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "tridents_vow",
+              "dropChance": 0.05,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "deep_sea_essence",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "kotal_kahns_atlantean_dagger",
+              "dropChance": 0.008,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
         },
-        {
-          "id": "tidal_wave_chaos",
-          "name": "Tidal Wave Chaos",
-          "description": "Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.",
-          "icon": "🌊💥"
-        }
-      ],
-      "objectives": {
-        "winConditions": [
-          { "type": "enemyDefeated", "targetId": "dark_leviathan" }
-        ]
+        "backgroundImage": "images/stages/stage3.png",
+        "backgroundMusic": "sounds/music/assassin_attack.mp3"
       },
-      "loot": {
-        "items": [
+      {
+        "name": "Returning Home",
+        "description": "After the fierce battle with the shadow assassins, you find sanctuary in a peaceful Atlantean healing chamber. The ancient waters restore your strength completely, and you are joined by Atlantean Christie, a skilled assassin who has been protecting the sacred waters. With your team fully healed and reinforced, you are ready to face the ultimate threat lurking in the deepest depths.",
+        "type": "healing_and_recruit",
+        "isEncounter": true,
+        "healingEffect": {
+          "type": "heal_and_mana_restore_all_full",
+          "target": "all"
+        },
+        "recruitEffect": {
+          "type": "add_specific_ally",
+          "characterId": "atlantean_christie"
+        },
+        "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+        "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
+      },
+      {
+        "name": "Dark Underwater Cave",
+        "description": "Deep beneath the ocean floor lies a massive underwater cavern shrouded in darkness. Ancient corruption has awakened the Dark Leviathan, a colossal sea beast that guards the deepest secrets of Atlantis. With your team fully restored and reinforced with Atlantean Christie's skills, you venture into the abyss to face this ultimate threat to your homeland.",
+        "difficulty": 8,
+        "type": "battle",
+        "enemies": [
           {
-            "itemId": "abyssal_echo",
-            "dropChance": 0.40,
-            "quantityMin": 1,
-            "quantityMax": 2
-          },
-          {
-            "itemId": "abyssal_anchor",
-            "dropChance": 0.25,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "cursed_water_vial",
-            "dropChance": 0.20,
-            "quantityMin": 2,
-            "quantityMax": 2
-          },
-          {
-            "itemId": "pearl_of_the_depths",
-            "dropChance": 0.035,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "tidal_charm",
-            "dropChance": 0.50,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "leviathans_fang",
-            "dropChance": 0.01,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "atlantean_treasure_chest",
-            "dropChance": 0.855,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "leviathan_scale",
-            "dropChance": 1.0,
-            "quantityMin": 1,
-            "quantityMax": 2
-          },
-          {
-            "itemId": "mermaid_essence",
-            "dropChance": 0.20,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "cursed_shell",
-            "dropChance": 0.20,
-            "quantityMin": 1,
-            "quantityMax": 2
+            "characterId": "dark_leviathan"
           }
-        ]
+        ],
+        "modifiers": [
+          {
+            "id": "aquatic_home_protector",
+            "name": "Aquatic Home Protector",
+            "description": "The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.",
+            "icon": "🌊"
+          },
+          {
+            "id": "atlantean_purification",
+            "name": "Atlantean Purification",
+            "description": "The pure waters of Atlantis instantly cleanse all debuffs from characters at the start of each turn.",
+            "icon": "💧✨"
+          },
+          {
+            "id": "tidal_wave_chaos",
+            "name": "Tidal Wave Chaos",
+            "description": "Every 6th turn, a massive tidal wave crashes across the battlefield! Each character has a 50% chance to either take 1000 damage or heal 1000 HP.",
+            "icon": "🌊💥"
+          }
+        ],
+        "objectives": {
+          "winConditions": [
+            {
+              "type": "enemyDefeated",
+              "targetId": "dark_leviathan"
+            }
+          ]
+        },
+        "loot": {
+          "items": [
+            {
+              "itemId": "abyssal_echo",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "abyssal_anchor",
+              "dropChance": 0.25,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "cursed_water_vial",
+              "dropChance": 0.20,
+              "quantityMin": 2,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "pearl_of_the_depths",
+              "dropChance": 0.035,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "tidal_charm",
+              "dropChance": 0.50,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "leviathans_fang",
+              "dropChance": 0.01,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "atlantean_treasure_chest",
+              "dropChance": 0.855,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "leviathan_scale",
+              "dropChance": 1.0,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "mermaid_essence",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "cursed_shell",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 2
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/stage4.png",
+        "backgroundMusic": "sounds/music/dark_depths.mp3"
       },
-      "backgroundImage": "images/stages/stage4.png",
-      "backgroundMusic": "sounds/music/dark_depths.mp3"
-    },
-    {
-      "name": "Atlantean Recovery Chamber",
-      "description": "After defeating the Dark Leviathan, you discover an ancient Atlantean recovery chamber filled with mystical artifacts and healing pools. The chamber offers three powerful boons to aid your team. Choose wisely, as each option will provide different advantages for your future endeavors.",
-      "type": "choice",
-      "isEncounter": true,
-      "choices": [
-        {
-          "name": "Pool of Infinite Mana",
-          "description": "Immerse your entire team in the mystical mana pool, completely restoring all team members' magical energy to full capacity.",
-          "effect": { 
-            "type": "mana_restore", 
-            "target": "all", 
-            "amount": "full" 
+      {
+        "name": "Atlantean Recovery Chamber",
+        "description": "After defeating the Dark Leviathan, you discover an ancient Atlantean recovery chamber filled with mystical artifacts and healing pools. The chamber offers three powerful boons to aid your team. Choose wisely, as each option will provide different advantages for your future endeavors.",
+        "type": "choice",
+        "isEncounter": true,
+        "choices": [
+          {
+            "name": "Pool of Infinite Mana",
+            "description": "Immerse your entire team in the mystical mana pool, completely restoring all team members' magical energy to full capacity.",
+            "effect": {
+              "type": "mana_restore",
+              "target": "all",
+              "amount": "full"
+            }
+          },
+          {
+            "name": "Crystal of Magical Enhancement",
+            "description": "Choose one team member to receive the blessing of an ancient Atlantean crystal, permanently increasing their magical damage by 200.",
+            "effect": {
+              "type": "stat_boost",
+              "target": "selected",
+              "stat": "magicalDamage",
+              "amount": 200
+            }
+          },
+          {
+            "name": "Blessing of Enduring Magic",
+            "description": "The ancient spirits grant your entire team enhanced magical resilience. All buffs will now last 1 additional turn, making your magical enhancements more persistent.",
+            "effect": {
+              "type": "extend_buff_duration",
+              "target": "all",
+              "amount": 1
+            }
           }
-        },
-        {
-          "name": "Crystal of Magical Enhancement",
-          "description": "Choose one team member to receive the blessing of an ancient Atlantean crystal, permanently increasing their magical damage by 200.",
-          "effect": { 
-            "type": "stat_boost", 
-            "target": "selected", 
-            "stat": "magicalDamage", 
-            "amount": 200 
-          }
-        },
-        {
-          "name": "Blessing of Enduring Magic",
-          "description": "The ancient spirits grant your entire team enhanced magical resilience. All buffs will now last 1 additional turn, making your magical enhancements more persistent.",
-          "effect": { 
-            "type": "extend_buff_duration", 
-            "target": "all", 
-            "amount": 1 
-          }
-        }
-      ],
-      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
-      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
-    },
-    {
-      "name": "The Ruler's Return",
-      "description": "As you prepare for the final confrontation, a powerful presence emerges from the deepest sanctum of the ancient palace. Atlantean Kotal Kahn, the rightful ruler of Atlantis, steps forward from his meditative state where he has been channeling the ocean's power to resist the corruption. Having witnessed your heroic deeds throughout Atlantis, he pledges his strength to join your cause in the ultimate battle to save his realm from eternal darkness.",
-      "type": "recruit",
-      "isEncounter": true,
-      "recruitCount": 1,
-      "specificCharacters": ["atlantean_kotal_kahn"],
-      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
-      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
-    },
-    {
-      "name": "Ancient Atlantean Throne Room",
-      "description": "Your journey reaches its climax in the ancient throne room of Atlantis, where the ocean's greatest powers once ruled. Here, the corrupted remnants of Atlantean Zasalamel and Atlantean Shinnok await - two powerful beings who have fallen to the darkness of the abyss. These ancient lords of Atlantis have been twisted by dark magic and now seek to drag the entire realm into eternal shadow. This is your final stand to save Atlantis from complete destruction.",
-      "difficulty": 10,
-      "type": "battle",
-      "enemies": [
-        { "characterId": "atlantean_zasalamel" },
-        { "characterId": "atlantean_shinnok" }
-      ],
-      "modifiers": [
-        {
-          "id": "dark_current",
-          "name": "Dark Current",
-          "description": "The dark waters drain the strength from all abilities. Using an ability costs an additional 20 mana.",
-          "icon": "🌊⚡"
-        }
-      ],
-      "objectives": {
-        "winConditions": [
-          { "type": "allEnemiesDefeated" }
-        ]
+        ],
+        "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+        "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
       },
-      "loot": {
-        "items": [
-          {
-            "itemId": "shinnoks_dark_magic_bubble",
-            "dropChance": 0.20,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "zasalamel_scythe",
-            "dropChance": 0.20,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "deep_sea_essence",
-            "dropChance": 0.50,
-            "quantityMin": 2,
-            "quantityMax": 4
-          },
-          {
-            "itemId": "seaborn_crown",
-            "dropChance": 0.00008,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "atlantean_treasure_chest",
-            "dropChance": 0.855,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "atlantean_crown",
-            "dropChance": 0.20,
-            "quantityMin": 1,
-            "quantityMax": 1
-          },
-          {
-            "itemId": "atlantean_trident_of_time",
-            "dropChance": 0.000005,
-            "quantityMin": 1,
-            "quantityMax": 1
-          }
-        ]
+      {
+        "name": "The Ruler's Return",
+        "description": "As you prepare for the final confrontation, a powerful presence emerges from the deepest sanctum of the ancient palace. Atlantean Kotal Kahn, the rightful ruler of Atlantis, steps forward from his meditative state where he has been channeling the ocean's power to resist the corruption. Having witnessed your heroic deeds throughout Atlantis, he pledges his strength to join your cause in the ultimate battle to save his realm from eternal darkness.",
+        "type": "recruit",
+        "isEncounter": true,
+        "recruitCount": 1,
+        "specificCharacters": [
+          "atlantean_kotal_kahn"
+        ],
+        "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+        "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
       },
-      "backgroundImage": "images/stages/stage6.png",
-      "backgroundMusic": "sounds/music/final_boss_atlantis.mp3"
-    },
-    {
-      "name": "Legacy of Atlantis",
-      "description": "With Atlantis saved at last, its greatest champions stand before you. Choose one of them to accompany you on future adventures!",
-      "type": "character_unlock",
-      "firstTimeCompletionReward": true,
-      "unlockableCharacters": [
-        {
-          "characterId": "atlantean_kotal_kahn",
-          "name": "Atlantean Kotal Kahn",
-          "description": "The indomitable ruler of Atlantis, mastering solar energy and oceanic might.",
-          "image": "Icons/characters/Atlantean Kotal Kahn.png"
+      {
+        "name": "Ancient Atlantean Throne Room",
+        "description": "Your journey reaches its climax in the ancient throne room of Atlantis, where the ocean's greatest powers once ruled. Here, the corrupted remnants of Atlantean Zasalamel and Atlantean Shinnok await - two powerful beings who have fallen to the darkness of the abyss. These ancient lords of Atlantis have been twisted by dark magic and now seek to drag the entire realm into eternal shadow. This is your final stand to save Atlantis from complete destruction.",
+        "difficulty": 10,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "atlantean_zasalamel"
+          },
+          {
+            "characterId": "atlantean_shinnok"
+          }
+        ],
+        "modifiers": [
+          {
+            "id": "dark_current",
+            "name": "Dark Current",
+            "description": "The dark waters drain the strength from all abilities. Using an ability costs an additional 20 mana.",
+            "icon": "🌊⚡"
+          }
+        ],
+        "objectives": {
+          "winConditions": [
+            {
+              "type": "allEnemiesDefeated"
+            }
+          ]
         },
-        {
-          "characterId": "atlantean_sub_zero_playable",
-          "name": "Atlantean Sub Zero",
-          "description": "A legendary cryomancer who channels the frigid depths to freeze his foes.",
-          "image": "Icons/characters/Atlantean Sub Zero.png"
+        "loot": {
+          "items": [
+            {
+              "itemId": "shinnoks_dark_magic_bubble",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "zasalamel_scythe",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "deep_sea_essence",
+              "dropChance": 0.50,
+              "quantityMin": 2,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "seaborn_crown",
+              "dropChance": 0.00008,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "atlantean_treasure_chest",
+              "dropChance": 0.855,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "atlantean_crown",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "atlantean_trident_of_time",
+              "dropChance": 0.000005,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
         },
-        {
-          "characterId": "atlantean_christie",
-          "name": "Atlantean Christie",
-          "description": "A nimble guardian assassin, dancing through water with deadly grace.",
-          "image": "Icons/characters/Atlantean Christie.png"
-        }
-      ],
-      "backgroundImage": "images/stages/atlantean_healing_chamber.png",
-      "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
-    }
-  ]
-}
+        "backgroundImage": "images/stages/stage6.png",
+        "backgroundMusic": "sounds/music/final_boss_atlantis.mp3"
+      },
+      {
+        "name": "Legacy of Atlantis",
+        "description": "With Atlantis saved at last, its greatest champions stand before you. Choose one of them to accompany you on future adventures!",
+        "type": "character_unlock",
+        "firstTimeCompletionReward": true,
+        "unlockableCharacters": [
+          {
+            "characterId": "atlantean_kotal_kahn",
+            "name": "Atlantean Kotal Kahn",
+            "description": "The indomitable ruler of Atlantis, mastering solar energy and oceanic might.",
+            "image": "Icons/characters/Atlantean Kotal Kahn.png"
+          },
+          {
+            "characterId": "atlantean_sub_zero_playable",
+            "name": "Atlantean Sub Zero",
+            "description": "A legendary cryomancer who channels the frigid depths to freeze his foes.",
+            "image": "Icons/characters/Atlantean Sub Zero.png"
+          },
+          {
+            "characterId": "atlantean_christie",
+            "name": "Atlantean Christie",
+            "description": "A nimble guardian assassin, dancing through water with deadly grace.",
+            "image": "Icons/characters/Atlantean Christie.png"
+          }
+        ],
+        "backgroundImage": "images/stages/atlantean_healing_chamber.png",
+        "backgroundMusic": "sounds/music/peaceful_atlantis.mp3"
+      }
+    ]
+  }
 ]

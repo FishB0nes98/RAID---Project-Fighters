@@ -41,6 +41,11 @@ class StoryUI {
         this.characterSelectionList = null;
         this.choiceModalDescription = null;
         
+        // Talent Modal elements
+        this.talentModal = null;
+        this.talentModalTitle = null;
+        this.talentIframe = null;
+        
         // Other screens
         this.victoryScreenElement = null;
         this.gameOverScreenElement = null;
@@ -113,6 +118,11 @@ class StoryUI {
         this.characterSelectionModal = document.getElementById('character-selection-modal');
         this.characterSelectionList = document.getElementById('character-selection-list');
         this.choiceModalDescription = document.getElementById('choice-modal-description');
+        
+        // Talent Modal elements
+        this.talentModal = document.getElementById('talent-modal');
+        this.talentModalTitle = document.getElementById('talent-modal-title');
+        this.talentIframe = document.getElementById('talent-iframe');
         this.victoryScreenElement = document.getElementById('victory-screen');
         this.gameOverScreenElement = document.getElementById('game-over-screen');
         this.storyCompleteScreenElement = document.getElementById('story-complete-screen');
@@ -432,7 +442,17 @@ class StoryUI {
                 this.openCharacterInventory(character.id);
             });
             
+            const talentBtn = document.createElement('button');
+            talentBtn.className = 'character-talent-btn';
+            talentBtn.textContent = '⭐';
+            talentBtn.title = 'Manage Talents';
+            talentBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openTalentModal(character.id);
+            });
+            
             actionsDiv.appendChild(inventoryBtn);
+            actionsDiv.appendChild(talentBtn);
             
             // Assemble the component
             infoDiv.appendChild(nameSpan);
@@ -655,6 +675,97 @@ class StoryUI {
             });
             
             // Ensure the map container is large enough
+            this.mapStagesElement.style.width = `${width}px`;
+            this.mapStagesElement.style.height = `${height}px`;
+        } else if (storyTitle === "Expert: Corruption at the Farmland" && mapContainerWidth > 0 && mapContainerHeight > 0) {
+            console.log("[StoryUI] Applying SPECIFIC expert layout for 'Expert: Corruption at the Farmland'");
+            
+            // Create an expert-level layout with more dramatic positioning and darker theme
+            // This will create a more challenging visual path that reflects the expert difficulty
+            
+            // Map dimensions - larger for expert content
+            const width = Math.max(mapContainerWidth, 3000);
+            const height = Math.max(mapContainerHeight, 2400);
+            
+            // Define specific positions for each stage in the Expert Corruption story
+            // Organized to show the escalating difficulty and corruption spread
+            const expertLayout = {
+                // Tier 1: Initial Corruption Outbreak
+                "Mutated Carrot Legion": { x: 0.15, y: 0.08 },           // Start: Farmland entrance
+                
+                // Tier 2: First Choice - Abandoned Areas
+                "Abandoned Cottage": { x: 0.45, y: 0.15 },               // Empty cottage
+                
+                // Tier 3: Escalating Corruption
+                "Corrupted Animal Stampede": { x: 0.75, y: 0.22 },       // Ranch animals attack
+                
+                // Tier 4: Mystical Elements
+                "Mystical Well": { x: 0.60, y: 0.35 },                   // Restorative well
+                
+                // Tier 5: Corruption Spreads to Water
+                "Corrupted Well": { x: 0.25, y: 0.42 },                  // Dark water choice
+                
+                // Tier 6: Major Battle - Orchard
+                "Twisted Apple Orchard": { x: 0.80, y: 0.50 },           // Massive apple battle
+                
+                // Tier 7: Post-Battle Recovery
+                "Orchard Supplies": { x: 0.65, y: 0.58 },                // Supply choice
+                
+                // Tier 8: Water Corruption Intensifies
+                "Cursed Water Supply": { x: 0.35, y: 0.65 },             // Cursed water choice
+                
+                // Tier 9: Major Boss Battle - Barn
+                "The Smelly Barn": { x: 0.15, y: 0.72 },                 // Crazy Farmer + Hound
+                
+                // Tier 10: Hidden Survivors Found
+                "Hidden Survivors": { x: 0.50, y: 0.78 },                // Survivor recruitment
+                
+                // Tier 11: Found in Cornfield
+                "Found in the Cornfield": { x: 0.75, y: 0.82 },          // Supply cache choice
+                
+                // Tier 12: Crow King Domain
+                "The Crow King's Domain": { x: 0.25, y: 0.88 },          // Crow army battle
+
+                // Tier 13: Restorative Well (NEW, replaces Poisoned Well)
+                "Restorative Well": { x: 0.60, y: 0.92 },                // Restores all to full mana
+
+                // Tier 14: Last Farmer Ally (NEW, replaces No Allies Left)
+                "Last Farmer Ally": { x: 0.45, y: 0.96 },                // Farmer recruit before final battle
+
+                // Tier 15: Final Boss
+                "The Corrupted Master's Lair": { x: 0.30, y: 1.02 },     // Farmer FANG battle
+
+                // Tier 16: Victory Reward
+                "Expert Victory": { x: 0.50, y: 1.10 }                   // Character unlock reward
+            };
+            
+            stages.forEach((stage, index) => {
+                let position = expertLayout[stage.name];
+                
+                if (position) {
+                    // Calculate absolute pixel values from percentages
+                    const x = position.x * width;
+                    const y = position.y * height;
+                    
+                    // Add slight variation for expert difficulty visual
+                    const expertJitter = 25;
+                    const jitterX = (Math.random() - 0.5) * expertJitter;
+                    const jitterY = (Math.random() - 0.5) * expertJitter;
+                    
+                    positions.push({ 
+                        x: x + jitterX, 
+                        y: y + jitterY 
+                    });
+                } else {
+                    // Fallback for any unexpected stages
+                    console.warn(`[StoryUI] No specific position defined for expert stage: ${stage.name}. Using fallback.`);
+                    const fallbackX = minPadding + (width / 4) * (index % 4);
+                    const fallbackY = minPadding + Math.floor(index / 4) * (stageHeight + 180);
+                    positions.push({ x: fallbackX, y: fallbackY });
+                }
+            });
+            
+            // Ensure the map container is large enough for expert content
             this.mapStagesElement.style.width = `${width}px`;
             this.mapStagesElement.style.height = `${height}px`;
         } else if (storyTitle === "To The Hell We Go" && mapContainerWidth > 0 && mapContainerHeight > 0) {
@@ -1257,9 +1368,25 @@ class StoryUI {
                         iconPrefix = '⚡';
                         break;
                     // --- END NEW ---
+                    // --- NEW: Cursed Water Supply effect icons ---
+                    case 'cursed_water_supply_effect':
+                        iconPrefix = '💀';
+                        break;
+                    case 'purify_cursed_water_effect':
+                        iconPrefix = '✨';
+                        break;
+                    // --- END NEW ---
                     case 'mana_restore_percent':
                         iconPrefix = '💙';
                         break;
+                    // --- NEW: Cornfield effect icons ---
+                    case 'permanent_e_cooldown_reduction':
+                        iconPrefix = '🥕';
+                        break;
+                    case 'heal_percent':
+                        iconPrefix = '🍎';
+                        break;
+                    // --- END NEW ---
                 }
             }
             choiceName.innerHTML = `${iconPrefix} ${choice.name}`;
@@ -1296,9 +1423,17 @@ class StoryUI {
             // If target is 'all' or 'team', apply effect directly without modal
             try {
                 this.showLoadingOverlay(`Applying effect: ${choice.name}...`);
-                const hasMore = await this.storyManager.applyChoiceEffectAndAdvance(choice, null); // Pass null for targetCharacterId
+                const result = await this.storyManager.applyChoiceEffectAndAdvance(choice, null); // Pass null for targetCharacterId
                 this.hideLoadingOverlay();
-                if (hasMore) {
+                
+                // Show effect messages if any
+                if (result.effectMessages && result.effectMessages.length > 0) {
+                    for (const message of result.effectMessages) {
+                        this.showPopupMessage(message, 'info', 4000);
+                    }
+                }
+                
+                if (result.hasMoreStages) {
                     this.closeStageDetails();
                     this.renderPlayerTeam(); // Update team display
                     this.updateStageNodes(); // Update map node statuses
@@ -1320,9 +1455,17 @@ class StoryUI {
             // Handle 'none' effect type - advance without applying any effect
             try {
                 this.showLoadingOverlay(`Processing choice: ${choice.name}...`);
-                const hasMore = await this.storyManager.applyChoiceEffectAndAdvance(choice, null);
+                const result = await this.storyManager.applyChoiceEffectAndAdvance(choice, null);
                 this.hideLoadingOverlay();
-                if (hasMore) {
+                
+                // Show effect messages if any
+                if (result.effectMessages && result.effectMessages.length > 0) {
+                    for (const message of result.effectMessages) {
+                        this.showPopupMessage(message, 'info', 4000);
+                    }
+                }
+                
+                if (result.hasMoreStages) {
                     this.closeStageDetails();
                     this.renderPlayerTeam(); // Update team display
                     this.updateStageNodes(); // Update map node statuses
@@ -1534,6 +1677,26 @@ class StoryUI {
                         effectInfo.classList.add('effect-positive');
                         break;
                     // --- END NEW ---
+                    // --- NEW: Cursed Water Supply effect previews ---
+                    case 'cursed_water_supply_effect':
+                        effectText = 'Random: +15 HP/Mana Regen OR -55 Damage';
+                        effectInfo.classList.add('effect-random');
+                        break;
+                    case 'purify_cursed_water_effect':
+                        effectText = 'Cost: 50% Mana. Gain: 30% HP/Mana';
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    // --- END NEW ---
+                    // --- NEW: Cornfield effect previews ---
+                    case 'permanent_e_cooldown_reduction':
+                        effectText = `E Ability -${choice.effect.amount} Turn Cooldown (Permanent)`;
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    case 'heal_percent':
+                        effectText = `+${choice.effect.amount_percent}% HP`;
+                        effectInfo.classList.add('effect-positive');
+                        break;
+                    // --- END NEW ---
                 }
                 effectInfo.textContent = effectText;
             }
@@ -1581,14 +1744,21 @@ class StoryUI {
             // TODO: Add loading indicator?
             
             // Call StoryManager to apply the effect and advance
-            const hasMoreStages = await this.storyManager.applyChoiceEffectAndAdvance(this.selectedChoice, characterId);
+            const result = await this.storyManager.applyChoiceEffectAndAdvance(this.selectedChoice, characterId);
             
             // Close modal and details panel regardless of outcome for now
             this.closeCharacterSelectionModal();
             this.closeStageDetails();
 
+            // Show effect messages if any
+            if (result.effectMessages && result.effectMessages.length > 0) {
+                for (const message of result.effectMessages) {
+                    this.showPopupMessage(message, 'info', 4000);
+                }
+            }
+
             // UI updates (map, progress) should be handled by the onStageCompleted event listener already set up.
-            if (hasMoreStages === false) {
+            if (result.hasMoreStages === false) {
                 // If that was the last stage after the choice, maybe show story complete screen?
                 // The onStageCompleted handler should already manage this.
                 console.log("Choice applied, story might be complete.");
@@ -1864,13 +2034,60 @@ class StoryUI {
                 modificationsElement.className = 'battle-enemy-modifications';
                 
                 const modsList = [];
+                // Handle multipliers
                 if (enemy.modifications.hpMultiplier && enemy.modifications.hpMultiplier !== 1) {
                     modsList.push(`${Math.round(enemy.modifications.hpMultiplier * 100)}% HP`);
                 }
-                if (enemy.modifications.damageMultiplier && enemy.modifications.damageMultiplier !== 1) {
-                    modsList.push(`${Math.round(enemy.modifications.damageMultiplier * 100)}% Damage`);
+                if (enemy.modifications.physicalDamageMultiplier && enemy.modifications.physicalDamageMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.physicalDamageMultiplier * 100)}% Physical Damage`);
                 }
-                
+                if (enemy.modifications.magicalDamageMultiplier && enemy.modifications.magicalDamageMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.magicalDamageMultiplier * 100)}% Magical Damage`);
+                }
+                if (enemy.modifications.armorMultiplier && enemy.modifications.armorMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.armorMultiplier * 100)}% Armor`);
+                }
+                if (enemy.modifications.magicalShieldMultiplier && enemy.modifications.magicalShieldMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.magicalShieldMultiplier * 100)}% Magical Shield`);
+                }
+                if (enemy.modifications.speedMultiplier && enemy.modifications.speedMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.speedMultiplier * 100)}% Speed`);
+                }
+                if (enemy.modifications.critChanceMultiplier && enemy.modifications.critChanceMultiplier !== 1) {
+                    modsList.push(`${Math.round(enemy.modifications.critChanceMultiplier * 100)}% Critical Chance`);
+                }
+                // Handle direct stat modifications
+                if (enemy.modifications.physicalDamage && enemy.modifications.physicalDamage !== 0) {
+                    modsList.push(`${enemy.modifications.physicalDamage > 0 ? '+' : ''}${enemy.modifications.physicalDamage} Physical Damage`);
+                }
+                if (enemy.modifications.magicalDamage && enemy.modifications.magicalDamage !== 0) {
+                    modsList.push(`${enemy.modifications.magicalDamage > 0 ? '+' : ''}${enemy.modifications.magicalDamage} Magical Damage`);
+                }
+                if (enemy.modifications.armor && enemy.modifications.armor !== 0) {
+                    modsList.push(`${enemy.modifications.armor > 0 ? '+' : ''}${enemy.modifications.armor} Armor`);
+                }
+                if (enemy.modifications.magicalShield && enemy.modifications.magicalShield !== 0) {
+                    modsList.push(`${enemy.modifications.magicalShield > 0 ? '+' : ''}${enemy.modifications.magicalShield} Magical Shield`);
+                }
+                if (enemy.modifications.speed && enemy.modifications.speed !== 0) {
+                    modsList.push(`${enemy.modifications.speed > 0 ? '+' : ''}${enemy.modifications.speed} Speed`);
+                }
+                if (enemy.modifications.critChance && enemy.modifications.critChance !== 0) {
+                    modsList.push(`${enemy.modifications.critChance > 0 ? '+' : ''}${Math.round(enemy.modifications.critChance * 100)}% Critical Chance`);
+                }
+                if (enemy.modifications.hpRegen && enemy.modifications.hpRegen !== 0) {
+                    modsList.push(`${enemy.modifications.hpRegen > 0 ? '+' : ''}${enemy.modifications.hpRegen} HP Regen`);
+                }
+                if (enemy.modifications.dodgeChance && enemy.modifications.dodgeChance !== 0) {
+                    modsList.push(`${enemy.modifications.dodgeChance > 0 ? '+' : ''}${Math.round(enemy.modifications.dodgeChance * 100)}% Dodge Chance`);
+                }
+                if (enemy.modifications.lifesteal && enemy.modifications.lifesteal !== 0) {
+                    modsList.push(`${enemy.modifications.lifesteal > 0 ? '+' : ''}${Math.round(enemy.modifications.lifesteal * 100)}% Lifesteal`);
+                }
+
+                console.log(`[StoryUI] Enemy ${enemy.characterId} modifications:`, enemy.modifications);
+                console.log(`[StoryUI] modsList for ${enemy.characterId}:`, modsList);
+
                 if (modsList.length > 0) {
                     modificationsElement.textContent = modsList.join(', ');
                     enemyElement.appendChild(modificationsElement);
@@ -4274,6 +4491,8 @@ class StoryUI {
                 titleElement.textContent = '🎓 Choose Your Tutorial Reward! 🎓';
             } else if (stage.firstTimeCompletionReward) {
                 titleElement.textContent = '🎉 Choose Your Story Completion Reward! 🎉';
+            } else if (stage.name === 'Expert Victory') {
+                titleElement.textContent = '🏆 Expert Victory Reward! 🏆';
             } else {
                 titleElement.textContent = '⭐ Character Unlock ⭐';
             }
@@ -4283,6 +4502,8 @@ class StoryUI {
                 descElement.textContent = 'Congratulations on completing the tutorial! Choose one character to unlock permanently:';
             } else if (stage.firstTimeCompletionReward) {
                 descElement.textContent = 'You have successfully completed this story for the first time! Choose one character to unlock as your reward:';
+            } else if (stage.name === 'Expert Victory') {
+                descElement.textContent = 'Against all odds, you have conquered the expert challenge! Choose one legendary video skin as your reward:';
             } else {
                 descElement.textContent = 'Choose one character to unlock:';
             }
@@ -4300,7 +4521,8 @@ class StoryUI {
                 const characterCard = this.createCharacterUnlockCard(
                     character, 
                     stage.tutorialReward || false, 
-                    stage.firstTimeCompletionReward || false
+                    stage.firstTimeCompletionReward || false,
+                    stage.name === 'Expert Victory'
                 );
                 characterGrid.appendChild(characterCard);
             });
@@ -4325,16 +4547,19 @@ class StoryUI {
      * @param {Object} character - The character unlock data.
      * @param {boolean} isTutorialReward - Whether this is a tutorial reward.
      * @param {boolean} isFirstTimeCompletionReward - Whether this is a first-time completion reward.
+     * @param {boolean} isExpertVictoryReward - Whether this is an Expert Victory reward.
      * @returns {HTMLElement} The created card element.
      */
-    createCharacterUnlockCard(character, isTutorialReward = false, isFirstTimeCompletionReward = false) {
+    createCharacterUnlockCard(character, isTutorialReward = false, isFirstTimeCompletionReward = false, isExpertVictoryReward = false) {
         const card = document.createElement('div');
         card.className = 'character-select-card unlock-card';
         card.dataset.characterId = character.characterId;
 
-        // Add special styling for tutorial rewards
+        // Add special styling for different reward types
         if (isTutorialReward) {
             card.classList.add('tutorial-reward');
+        } else if (isExpertVictoryReward) {
+            card.classList.add('expert-victory-reward');
         }
 
         // Image container for better layout with tall images
@@ -4372,13 +4597,23 @@ class StoryUI {
 
         // Description
         const descElement = document.createElement('p');
-        descElement.textContent = character.description;
+        if (isExpertVictoryReward) {
+            descElement.textContent = `${character.description} Unlocks the legendary video skin for this character!`;
+        } else {
+            descElement.textContent = character.description;
+        }
         infoContainer.appendChild(descElement);
 
         // Unlock button
         const unlockButton = document.createElement('button');
         unlockButton.className = 'character-unlock-button';
-        unlockButton.textContent = isFirstTimeCompletionReward ? '🎉 Claim Reward' : '🔓 Unlock Character';
+        if (isExpertVictoryReward) {
+            unlockButton.textContent = '🏆 Claim Video Skin';
+        } else if (isFirstTimeCompletionReward) {
+            unlockButton.textContent = '🎉 Claim Reward';
+        } else {
+            unlockButton.textContent = '🔓 Unlock Character';
+        }
         unlockButton.addEventListener('click', (e) => {
             e.stopPropagation();
             this.handleCharacterUnlock(character.characterId, isTutorialReward, isFirstTimeCompletionReward);
@@ -4415,17 +4650,52 @@ class StoryUI {
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
+
+        // Check if this is an Expert Victory reward stage
+        const currentStage = this.storyManager.getCurrentStage();
+        const isExpertVictoryReward = currentStage?.name === 'Expert Victory';
+        
+        const confirmMessage = isExpertVictoryReward 
+            ? `Are you sure you want to claim the ${characterDisplayName} video skin reward? This choice cannot be changed.`
+            : `Are you sure you want to unlock ${characterDisplayName}? This choice cannot be changed.`;
             
-        if (!confirm(`Are you sure you want to unlock ${characterDisplayName}? This choice cannot be changed.`)) {
+        if (!confirm(confirmMessage)) {
             // Re-enable buttons and release guard if user cancels
             if (allButtons) allButtons.forEach(btn => btn.disabled = false);
             this.characterUnlockInProgress = false;
             return;
         }
 
-        this.showLoadingOverlay('Unlocking character...');
+        const loadingMessage = isExpertVictoryReward ? 'Claiming Expert Victory reward...' : 'Unlocking character...';
+        this.showLoadingOverlay(loadingMessage);
 
         try {
+            // Handle Expert Victory rewards differently
+            if (isExpertVictoryReward) {
+                console.log(`[StoryUI] Processing Expert Victory reward for: ${characterId}`);
+                const result = await this.storyManager.handleCharacterUnlockReward(characterId);
+                
+                // Show effect messages if any
+                if (result.effectMessages && result.effectMessages.length > 0) {
+                    for (const message of result.effectMessages) {
+                        this.showPopupMessage(message, 'success', 4000);
+                    }
+                }
+                
+                // Close details and handle stage completion
+                this.closeStageDetails();
+                if (result.hasMoreStages) {
+                    this.renderPlayerTeam(); // Update UI
+                    this.updateStageNodes(); // Update map
+                    this.updateProgressIndicator(); // Update progress bar
+                } else {
+                    this.showStoryCompleteScreen();
+                }
+                
+                return; // Exit early for Expert Victory rewards
+            }
+
+            // Regular character unlock logic follows for non-Expert Victory rewards
             const user = firebase.auth().currentUser;
             if (!user) {
                 throw new Error('User not authenticated');
@@ -4907,6 +5177,71 @@ class StoryUI {
         } catch (error) {
             console.error('[StoryUI] Error opening crafting modal:', error);
             this.showPopupMessage(`❌ Failed to open crafting interface: ${error.message}`, 'error', 4000);
+        }
+    }
+
+    /**
+     * Open talent modal for character talent management
+     * @param {string} characterId - The character ID
+     */
+    openTalentModal(characterId) {
+        console.log(`[StoryUI] Opening talent modal for character: ${characterId}`);
+        
+        try {
+            // Get character info for modal title
+            const character = this.storyManager.playerTeam.find(c => c.id === characterId);
+            const characterName = character ? character.name : 'Unknown Character';
+            
+            // Check if modal elements are available
+            if (!this.talentModal || !this.talentModalTitle || !this.talentIframe) {
+                console.error('[StoryUI] Talent modal elements not found');
+                this.showPopupMessage('❌ Talent modal not available. Please refresh the page.', 'error', 3000);
+                return;
+            }
+            
+            // Set modal title
+            this.talentModalTitle.textContent = `${characterName} - Talents`;
+            
+            // Set iframe source to talents page with character parameter
+            this.talentIframe.src = `talents.html?character=${encodeURIComponent(characterId)}`;
+            
+            // Show modal
+            this.talentModal.classList.remove('hidden');
+            this.talentModal.classList.add('visible');
+            
+            console.log(`[StoryUI] Talent modal opened for character: ${characterId}`);
+            
+        } catch (error) {
+            console.error('[StoryUI] Error opening talent modal:', error);
+            this.showPopupMessage(`❌ Failed to open talent interface: ${error.message}`, 'error', 4000);
+        }
+    }
+    
+    /**
+     * Close talent modal
+     */
+    closeTalentModal() {
+        console.log('[StoryUI] Closing talent modal');
+        
+        try {
+            if (!this.talentModal) {
+                console.error('[StoryUI] Talent modal not found');
+                return;
+            }
+            
+            // Hide modal
+            this.talentModal.classList.remove('visible');
+            this.talentModal.classList.add('hidden');
+            
+            // Clear iframe source to stop any ongoing processes
+            if (this.talentIframe) {
+                this.talentIframe.src = '';
+            }
+            
+            console.log('[StoryUI] Talent modal closed');
+            
+        } catch (error) {
+            console.error('[StoryUI] Error closing talent modal:', error);
         }
     }
 

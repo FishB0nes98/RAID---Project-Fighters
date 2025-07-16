@@ -113,12 +113,22 @@ const angerEffect = (caster, target) => {
     // Store the base damage value at the time of application for removal
     damageBuff.originalBaseDamage = caster.baseStats.physicalDamage;
 
-    // Define a custom remove function to revert the damage increase
+    // Define a custom remove function to revert the damage increase and clean up VFX
     damageBuff.remove = (character) => {
         // Recalculate stats after removing the buff's direct modifier effect.
         // The Character.recalculateStats() handles applying other buffs/debuffs correctly.
         console.log(`Anger buff expiring, removing stat modifier for ${character.name}.`);
         // No direct stat manipulation needed here, recalculateStats handles it.
+        
+        // Clean up the visual effect
+        const charElementId = character.instanceId || character.id;
+        const charElement = document.getElementById(`character-${charElementId}`);
+        if (charElement) {
+            const vfxElement = charElement.querySelector('.anger-active-vfx');
+            if (vfxElement) {
+                vfxElement.remove();
+            }
+        }
     };
 
 

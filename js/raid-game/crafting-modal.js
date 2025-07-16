@@ -247,8 +247,8 @@ class CraftingModal {
         // Get a character reference for opening (use current user's first character or create temp)
         const character = this.getCurrentCharacter();
         
-        // Open the lootbox
-        const result = item.openLootbox(character);
+        // Open the lootbox (await if it's async)
+        const result = await item.openLootbox(character);
         
         if (result.success) {
             console.log('[CraftingModal] Lootbox opened successfully:', result);
@@ -259,8 +259,16 @@ class CraftingModal {
             // Add items to global inventory and save to Firebase
             await this.addItemsToGlobalInventory(result.items);
             
-            // Show results
-            this.showLootboxResults(result.items, item);
+            // Check for special rewards (skin drops)
+            if (result.specialRewards && result.specialRewards.length > 0) {
+                // Show special skin drop effect first
+                await this.showSkinDropEffect(result.specialRewards);
+                // Then show normal results
+                this.showLootboxResults(result.items, item, result.specialRewards);
+            } else {
+                // Show normal results
+                this.showLootboxResults(result.items, item);
+            }
         } else {
             console.error('[CraftingModal] Failed to open lootbox:', result.message);
             this.closeLootboxAnimation();
@@ -287,9 +295,155 @@ class CraftingModal {
     }
 
     /**
+     * Show special skin drop effect
+     */
+    async showSkinDropEffect(specialRewards) {
+        const skin = specialRewards.find(reward => reward.type === 'skin');
+        if (!skin) return;
+        
+        // Create skin drop effect overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'skin-drop-overlay';
+        overlay.innerHTML = `
+            <div class="skin-drop-content">
+                <div class="skin-drop-sparkles">✨🎬✨</div>
+                <div class="skin-drop-title">RARE SKIN DROPPED!</div>
+                <div class="skin-drop-name">${skin.skinName}</div>
+                <div class="skin-drop-subtitle">Video skin unlocked for ${skin.characterId.replace('_', ' ')}</div>
+                <div class="skin-drop-continue">Click to continue...</div>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(overlay);
+        
+        // Add styles if not already present
+        if (!document.querySelector('#skin-drop-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'skin-drop-styles';
+            styles.textContent = `
+                .skin-drop-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,140,0,0.8) 50%, rgba(0,0,0,0.9) 100%);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                    animation: skinDropFadeIn 0.5s ease-out;
+                }
+                
+                .skin-drop-content {
+                    text-align: center;
+                    animation: skinDropBounce 1s ease-out;
+                }
+                
+                .skin-drop-sparkles {
+                    font-size: 48px;
+                    margin-bottom: 20px;
+                    animation: skinDropSparkle 2s infinite;
+                }
+                
+                .skin-drop-title {
+                    font-size: 36px;
+                    font-weight: bold;
+                    color: #FFD700;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                    margin-bottom: 15px;
+                    letter-spacing: 2px;
+                }
+                
+                .skin-drop-name {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #FFF;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+                    margin-bottom: 10px;
+                }
+                
+                .skin-drop-subtitle {
+                    font-size: 18px;
+                    color: #FFF;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+                    margin-bottom: 30px;
+                    text-transform: capitalize;
+                }
+                
+                .skin-drop-continue {
+                    font-size: 16px;
+                    color: #FFD700;
+                    opacity: 0.8;
+                    animation: skinDropPulse 2s infinite;
+                }
+                
+                @keyframes skinDropFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                @keyframes skinDropBounce {
+                    0% { transform: scale(0.3) translateY(-100px); opacity: 0; }
+                    50% { transform: scale(1.1) translateY(0); opacity: 1; }
+                    100% { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                
+                @keyframes skinDropSparkle {
+                    0%, 100% { transform: rotate(0deg) scale(1); }
+                    25% { transform: rotate(5deg) scale(1.1); }
+                    50% { transform: rotate(-5deg) scale(1.2); }
+                    75% { transform: rotate(5deg) scale(1.1); }
+                }
+                
+                @keyframes skinDropPulse {
+                    0%, 100% { opacity: 0.6; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.05); }
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+        
+        // Return promise that resolves when user clicks or after timeout
+        return new Promise((resolve) => {
+            let resolved = false;
+            
+            const resolveOnce = () => {
+                if (resolved) return;
+                resolved = true;
+                
+                overlay.style.animation = 'skinDropFadeIn 0.3s ease-in reverse';
+                setTimeout(() => {
+                    overlay.remove();
+                    resolve();
+                }, 300);
+            };
+            
+            // Click to continue
+            overlay.addEventListener('click', resolveOnce);
+            
+            // Auto-continue after 5 seconds if user doesn't click
+            setTimeout(() => {
+                console.log('[CraftingModal] Auto-continuing skin drop effect after timeout');
+                resolveOnce();
+            }, 5000);
+            
+            // Also add keyboard support (Enter or Space)
+            const keyHandler = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    document.removeEventListener('keydown', keyHandler);
+                    resolveOnce();
+                }
+            };
+            document.addEventListener('keydown', keyHandler);
+        });
+    }
+
+    /**
      * Show lootbox opening results
      */
-    showLootboxResults(items, lootboxItem) {
+    showLootboxResults(items, lootboxItem, specialRewards = []) {
         const resultsContainer = document.getElementById('lootbox-results');
         const openingText = document.getElementById('lootbox-opening-text');
 
@@ -302,8 +456,24 @@ class CraftingModal {
         const existingRewards = resultsContainer.querySelectorAll('.lootbox-reward');
         existingRewards.forEach(reward => reward.remove());
 
-        // Add each reward
-        items.forEach((itemReward, index) => {
+        let rewardIndex = 0;
+
+        // Add special rewards first (like skin drops)
+        specialRewards.forEach((specialReward) => {
+            if (specialReward.type === 'skin') {
+                const skinRewardElement = this.createSkinRewardElement(specialReward);
+                
+                // Add with delay for dramatic effect
+                setTimeout(() => {
+                    resultsContainer.insertBefore(skinRewardElement, resultsContainer.lastElementChild);
+                }, rewardIndex * 300);
+                
+                rewardIndex++;
+            }
+        });
+
+        // Add each regular item reward
+        items.forEach((itemReward) => {
             const rewardItem = window.ItemRegistry?.getItem(itemReward.itemId);
             if (rewardItem) {
                 const rewardElement = this.createRewardElement(rewardItem, itemReward.quantity);
@@ -311,7 +481,9 @@ class CraftingModal {
                 // Add with delay for dramatic effect
                 setTimeout(() => {
                     resultsContainer.insertBefore(rewardElement, resultsContainer.lastElementChild);
-                }, index * 300);
+                }, rewardIndex * 300);
+                
+                rewardIndex++;
             }
         });
 
@@ -333,6 +505,30 @@ class CraftingModal {
             <div class="lootbox-reward-info">
                 <div class="lootbox-reward-name">${item.name}</div>
                 <div class="lootbox-reward-quantity">Quantity: ${quantity}</div>
+            </div>
+        `;
+        
+        return rewardDiv;
+    }
+
+    /**
+     * Create a skin reward element for display
+     */
+    createSkinRewardElement(skinReward) {
+        const rewardDiv = document.createElement('div');
+        rewardDiv.className = 'lootbox-reward rarity-legendary skin-reward';
+        
+        // Get skin from registry for display info
+        const skin = window.SkinRegistry?.getSkin(skinReward.skinId);
+        const displayName = skin ? skin.name : skinReward.skinName;
+        const characterName = skinReward.characterId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        
+        rewardDiv.innerHTML = `
+            <div class="skin-reward-icon">🎬</div>
+            <div class="lootbox-reward-info">
+                <div class="lootbox-reward-name">${displayName}</div>
+                <div class="lootbox-reward-quantity">Video Skin - ${characterName}</div>
+                <div class="skin-reward-badge">✨ RARE SKIN UNLOCKED ✨</div>
             </div>
         `;
         

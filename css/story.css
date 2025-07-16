@@ -549,6 +549,7 @@ body::before {
 .character-actions {
     display: flex;
     justify-content: flex-end;
+    gap: 6px;
     margin-top: auto;
 }
 
@@ -585,6 +586,42 @@ body::before {
     transform: translateY(0) scale(1.02);
     box-shadow: 
         0 3px 12px rgba(155, 89, 182, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+
+.character-talent-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+    box-shadow: 
+        0 3px 12px rgba(245, 158, 11, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.character-talent-btn:hover {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    transform: translateY(-1px) scale(1.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 6px 18px rgba(245, 158, 11, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.character-talent-btn:active {
+    transform: translateY(0) scale(1.02);
+    box-shadow: 
+        0 3px 12px rgba(245, 158, 11, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
@@ -1723,6 +1760,15 @@ body::before {
 .choice-item.effect-heal_and_mana_restore_all_full { border-left: 3px solid #4caf50; } /* Green for restoration */
 .choice-item.effect-heal_and_mana_restore_all_full:hover { box-shadow: 0 12px 20px rgba(76, 175, 80, 0.2); }
 .choice-item.effect-heal_and_mana_restore_all_full::before { background: linear-gradient(90deg, #4caf50, var(--primary)); }
+
+/* Cursed Water Supply Effects */
+.choice-item.effect-cursed_water_supply_effect { border-left: 3px solid #6a1b9a; } /* Purple for random/cursed effect */
+.choice-item.effect-cursed_water_supply_effect:hover { box-shadow: 0 12px 20px rgba(106, 27, 154, 0.2); }
+.choice-item.effect-cursed_water_supply_effect::before { background: linear-gradient(90deg, #6a1b9a, var(--primary)); }
+
+.choice-item.effect-purify_cursed_water_effect { border-left: 3px solid #0097a7; } /* Teal for purification */
+.choice-item.effect-purify_cursed_water_effect:hover { box-shadow: 0 12px 20px rgba(0, 151, 167, 0.2); }
+.choice-item.effect-purify_cursed_water_effect::before { background: linear-gradient(90deg, #0097a7, var(--primary)); }
 
 /* Styles for Character Selection Modal Cards */
 .character-select-card .stat-bar {
@@ -3565,4 +3611,120 @@ body::before {
 
 .skip-button:hover {
     background-color: var(--secondary-dark);
+}
+
+/* Talent Modal Styles */
+.talent-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.talent-modal.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.talent-modal-content {
+    background: var(--bg-card);
+    border-radius: var(--border-radius-large);
+    border: 2px solid var(--border-medium);
+    width: 90%;
+    height: 90%;
+    max-width: 1200px;
+    max-height: 800px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-hard);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.talent-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-medium);
+    border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+}
+
+.talent-modal-header h2 {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 1.5rem;
+}
+
+.talent-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-medium);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.talent-close-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+.talent-modal-body {
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+}
+
+.talent-modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive adjustments for talent modal */
+@media (max-width: 768px) {
+    .talent-modal-content {
+        width: 95%;
+        height: 95%;
+        max-width: none;
+        max-height: none;
+    }
+    
+    .talent-modal-header {
+        padding: 15px;
+    }
+    
+    .talent-modal-header h2 {
+        font-size: 1.2rem;
+    }
 }

@@ -62,10 +62,8 @@ function trackElectricShockStats(caster, target, damageResult, isHit, isForked =
     try {
         if (window.trackRaidenAbilityUsage) {
             if (isHit) {
-                const damageAmount = typeof damageResult === 'object' && damageResult.damage !== undefined 
-                    ? damageResult.damage 
-                    : (typeof damageResult === 'number' ? damageResult : 0);
-                const isCritical = typeof damageResult === 'object' ? damageResult.isCritical : false;
+                const damageAmount = damageResult ? damageResult.damage : 0;
+                const isCritical = damageResult ? damageResult.isCritical : false;
                 
                 const abilityId = isForked ? 'electric_shock_forked' : 'electric_shock';
                 window.trackRaidenAbilityUsage(caster, abilityId, 'damage', damageAmount, isCritical);
@@ -425,7 +423,7 @@ const lightningOrbAbility = new Ability(
     'farmer_raiden_lightning_orb',
     'Lightning Orb',
     'Icons/abilities/lightning_orb.webp',
-    25, // Mana cost
+    35, // Mana cost
     1,  // Cooldown
     lightningOrbEffect // The function implementing the logic
 );
@@ -737,7 +735,7 @@ const electricShockEffect = (caster, target, ability) => {
                     
                     // Track miss statistics
                     if (window.trackElectricShockStats) {
-                        window.trackElectricShockStats(caster, enemy, null, false, castNumber > 1, false);
+                        window.trackElectricShockStats(caster, enemy, { damage: 0, isCritical: false }, false, castNumber > 1, false);
                     }
                     
                     // Show miss VFX for electric shock
@@ -774,7 +772,7 @@ const electricShockEffect = (caster, target, ability) => {
                         const debuffEffect = new Effect(
                             `electric_shock_debuff_${enemy.instanceId || enemy.id}_${Date.now()}`, // Unique ID
                             'Shocked',
-                            'Icons/abilities/electric_shock.webp',
+                            'Icons/debuffs/stun.png',
                             debuffDuration, // Use the dynamic duration
                             (target) => {
                                 // This function is called each turn
@@ -802,82 +800,59 @@ const electricShockEffect = (caster, target, ability) => {
                                 const randomIndex = Math.floor(Math.random() * availableAbilities.length);
                                 const abilityToDisable = availableAbilities[randomIndex];
                                 
-                                // Store the original ability state
-                                const originalIsDisabled = abilityToDisable.isDisabled;
+                                log(`${caster.name}'s Disabling Shock prevents ${enemy.name} from using ${abilityToDisable.name}!`, 'system-update');
                                 
-                                // Add onApply to set the ability as disabled
-                                const originalOnApply = debuffEffect.onApply || (() => {});
-                                debuffEffect.onApply = (target) => {
-                                    // Call the original onApply first
-                                    originalOnApply(target);
-                                    
-                                    // Disable the ability
-                                    abilityToDisable.isDisabled = true;
-                                    
-                                    // Log the effect
-                                    log(`${caster.name}'s Disabling Shock prevents ${target.name} from using ${abilityToDisable.name}!`, 'system-update');
-                                    
-                                    // Add visual effects to show disabled ability
-                                    if (enemyElement) {
-                                        const abilitiesDiv = enemyElement.querySelector('.abilities');
-                                        if (abilitiesDiv) {
-                                            const abilityElements = abilitiesDiv.querySelectorAll('.ability');
-                                            abilityElements.forEach((abilityEl, i) => {
-                                                if (i === enemy.abilities.indexOf(abilityToDisable)) {
-                                                    abilityEl.classList.add('disabled');
-                                                    
-                                                    // Add a special icon to show it's disabled by shock
-                                                    const disabledIcon = document.createElement('div');
-                                                    disabledIcon.className = 'shocked-disabled-ability-icon';
-                                                    abilityEl.appendChild(disabledIcon);
-                                                }
-                                            });
-                                        }
-                                    }
-                                    
-                                    // Update UI
-                                    if (window.gameManager && window.gameManager.uiManager) {
-                                        window.gameManager.uiManager.updateCharacterUI(target);
-                                    }
-                                };
+                                // Create a separate disable debuff (like Elphelt does)
+                                const disableDebuff = new Effect(
+                                    `raiden_disabling_shock_${Date.now()}`,
+                                    'Ability Disabled (Disabling Shock)',
+                                    'Icons/abilities/electric_shock.webp',
+                                    debuffDuration, // Duration: same as shocked debuff
+                                    null,
+                                    true // isDebuff = true
+                                ).setDescription(`${abilityToDisable.name} is disabled for ${debuffDuration} turns.`);
                                 
-                                // Add onRemove to restore the ability
-                                const originalOnRemove = debuffEffect.remove || (() => {});
-                                debuffEffect.remove = function(character) {
-                                    // Call the original remove first
-                                    if (typeof originalOnRemove === 'function') {
-                                        originalOnRemove(character);
-                                    }
-                                    
-                                    // Re-enable the ability if it exists
-                                    const abilityIndex = character.abilities.indexOf(abilityToDisable);
-                                    if (abilityIndex !== -1) {
-                                        character.abilities[abilityIndex].isDisabled = originalIsDisabled;
-                                        
-                                        // Log the ability being restored
-                                        log(`${character.name}'s ${abilityToDisable.name} ability is no longer disabled.`, 'system-update');
-                                        
-                                        // Remove visual effects
-                                        if (enemyElement) {
-                                            const abilitiesDiv = enemyElement.querySelector('.abilities');
-                                            if (abilitiesDiv) {
-                                                const abilityElements = abilitiesDiv.querySelectorAll('.ability');
-                                                abilityElements.forEach((abilityEl, i) => {
-                                                    if (i === abilityIndex) {
-                                                        abilityEl.classList.remove('disabled');
-                                                        const disabledIcon = abilityEl.querySelector('.shocked-disabled-ability-icon');
-                                                        if (disabledIcon) disabledIcon.remove();
-                                                    }
-                                                });
+                                // Store which ability was disabled for cleanup
+                                disableDebuff.disabledAbilityId = abilityToDisable.id;
+                                
+                                // Apply the disable effect 
+                                abilityToDisable.isDisabled = true;
+                                abilityToDisable.disabledDuration = debuffDuration;
+                                
+                                // Define the remove function for the debuff
+                                disableDebuff.remove = (character) => {
+                                    const originallyDisabledAbility = character.abilities.find(a => a.id === disableDebuff.disabledAbilityId);
+                                    if (originallyDisabledAbility) {
+                                        if (originallyDisabledAbility.isDisabled && originallyDisabledAbility.disabledDuration <= 0) {
+                                            originallyDisabledAbility.isDisabled = false;
+                                            log(`${character.name}'s ${originallyDisabledAbility.name} is no longer disabled by Disabling Shock.`);
+                                            if (window.gameManager && window.gameManager.uiManager) {
+                                                window.gameManager.uiManager.updateCharacterUI(character);
                                             }
                                         }
-                                        
-                                        // Update UI
-                                        if (window.gameManager && window.gameManager.uiManager) {
-                                            window.gameManager.uiManager.updateCharacterUI(character);
-                                        }
                                     }
                                 };
+                                
+                                // Apply the disable debuff to the target
+                                enemy.addDebuff(disableDebuff);
+                                
+                                // Add visual effects to show disabled ability
+                                if (enemyElement) {
+                                    const abilitiesDiv = enemyElement.querySelector('.abilities');
+                                    if (abilitiesDiv) {
+                                        const abilityElements = abilitiesDiv.querySelectorAll('.ability');
+                                        abilityElements.forEach((abilityEl, i) => {
+                                            if (i === enemy.abilities.indexOf(abilityToDisable)) {
+                                                abilityEl.classList.add('disabled');
+                                                
+                                                // Add a special icon to show it's disabled by shock
+                                                const disabledIcon = document.createElement('div');
+                                                disabledIcon.className = 'shocked-disabled-ability-icon';
+                                                abilityEl.appendChild(disabledIcon);
+                                            }
+                                        });
+                                    }
+                                }
                                 
                                 // Update description to include ability disabling
                                 debuffEffect.setDescription(`Reduces Magical Shield by 15% and disables ${abilityToDisable.name} for ${debuffDuration} turns.`);
@@ -888,12 +863,12 @@ const electricShockEffect = (caster, target, ability) => {
                             debuffEffect.setDescription(`Reduces Magical Shield by 15% for ${debuffDuration} turns.`);
                         }
                         
-                        // Add visual effects for the debuff
-                        const originalOnApply = debuffEffect.onApply || (() => {});
+                        // Extend the existing onApply function to add visual effects
+                        const currentOnApply = debuffEffect.onApply || (() => {});
                         debuffEffect.onApply = (target) => {
-                            // Call any existing onApply function
-                            if (typeof originalOnApply === 'function') {
-                                originalOnApply(target);
+                            // Call any existing onApply function first (including disabling shock logic)
+                            if (typeof currentOnApply === 'function') {
+                                currentOnApply(target);
                             }
                             
                             log(`${target.name} is shocked, reducing their Magical Shield by 15% for ${debuffDuration} turns!`, 'system');
@@ -1638,4 +1613,4 @@ function applyPermanentThunderShield(character) {
             });
         }, 200);
     }
-} 
+}

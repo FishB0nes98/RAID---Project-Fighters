@@ -122,6 +122,51 @@
     <script src="js/raid-game/character-xp-manager.js"></script>
     <script src="js/raid-game/controller-manager.js"></script>
     <script src="js/raid-game/talents.js"></script>
+    
+    <!-- Script to handle iframe detection and back button behavior -->
+    <script>
+        // Detect if we're running in an iframe
+        const isInIframe = window.self !== window.top;
+        
+        // Store iframe mode globally so talents.js can check it
+        window.isInIframe = isInIframe;
+        
+        // Function to close the talent modal when in iframe
+        function closeParentModal() {
+            if (isInIframe) {
+                // Try to call the parent's close function
+                try {
+                    window.parent.closeTalentModal();
+                } catch (error) {
+                    console.error('Could not close parent modal:', error);
+                    // Fallback: try to communicate with parent
+                    window.parent.postMessage({action: 'closeTalentModal'}, '*');
+                }
+            }
+        }
+        
+        // Update button text when in iframe mode
+        window.addEventListener('load', function() {
+            if (isInIframe) {
+                setTimeout(function() {
+                    const backButton = document.getElementById('back-button');
+                    if (backButton) {
+                        // Update button text to reflect new behavior
+                        backButton.innerHTML = '<i class="fas fa-times"></i> Close';
+                        backButton.title = 'Close Talent Window';
+                        console.log('[Talents] Back button text updated for iframe mode');
+                    }
+                }, 100);
+            }
+        });
+        
+        // Handle escape key to close modal when in iframe
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isInIframe) {
+                closeParentModal();
+            }
+        });
+    </script>
     <script>
     // Diagnostic script to help identify loading issues
     document.addEventListener('DOMContentLoaded', function() {

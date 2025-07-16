@@ -1,0 +1,144 @@
+/* Enhanced Turn Indicator Styles */
+#battle-phase.player-turn {
+    background: linear-gradient(45deg, #00796B, #4CAF50);
+    color: white;
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+    border: 2px solid #4CAF50;
+    padding: 4px 8px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#battle-phase.ai-turn {
+    background: linear-gradient(45deg, #D32F2F, #F44336);
+    color: white;
+    box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3);
+    border: 2px solid #F44336;
+    padding: 4px 8px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Turn change animation */
+#battle-phase.turn-change {
+    animation: turnChangeAnimation 0.8s ease-out;
+}
+
+@keyframes turnChangeAnimation {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+    75% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Pulse animation for current turn */
+#battle-phase.player-turn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: playerTurnPulse 2s infinite;
+    pointer-events: none;
+}
+
+#battle-phase.ai-turn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle, rgba(244, 67, 54, 0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: aiTurnPulse 2s infinite;
+    pointer-events: none;
+}
+
+@keyframes playerTurnPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+@keyframes aiTurnPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+/* Smooth Battle Log Dragging Performance Optimizations */
+.battle-log-container {
+    /* Hardware acceleration for smooth dragging */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    will-change: transform;
+    
+    /* Disable text selection during dragging */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.battle-log-container.dragging {
+    /* Additional optimizations during drag */
+    will-change: transform;
+    pointer-events: none;
+    transition: none;
+    
+    /* Optimize rendering during drag */
+    contain: layout style paint;
+    isolation: isolate;
+}
+
+.battle-log-drag-handle {
+    /* Ensure drag handle has proper cursor feedback */
+    cursor: grab;
+    touch-action: none;
+}
+
+.battle-log-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Performance optimization for drag content */
+.battle-log-content {
+    /* Disable expensive effects during drag */
+    will-change: auto;
+    contain: layout style paint;
+}

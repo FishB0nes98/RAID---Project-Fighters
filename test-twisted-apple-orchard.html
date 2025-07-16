@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twisted Apple Orchard Test</title>
+    <link rel="stylesheet" href="css/raid-game.css">
+    <link rel="stylesheet" href="css/crow-crown.css">
+    <link rel="stylesheet" href="css/turn-indicator.css">
+</head>
+<body>
+    <div class="game-container" id="game-container">
+        <div class="stage-background" id="stage-background"></div>
+        
+        <div class="battle-interface">
+            <div class="characters-section">
+                <div class="player-characters">
+                    <h3>Player Characters</h3>
+                    <div class="characters-container" id="player-characters-container"></div>
+                </div>
+                
+                <div class="ai-characters">
+                    <h3>AI Characters</h3>
+                    <div class="characters-container" id="ai-characters-container"></div>
+                </div>
+            </div>
+            
+            <div class="battle-controls">
+                <div class="turn-info">
+                    <div class="turn-counter">Turn: <span id="turn-counter">1</span></div>
+                    <div class="phase-indicator">Phase: <span id="phase-indicator">Player</span></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="end-turn-btn" class="end-turn-button">End Turn</button>
+                    <button id="test-apple-revival" class="test-button">Test Apple Revival (Turn 10)</button>
+                    <button id="kill-enemy" class="test-button">Kill First Enemy</button>
+                </div>
+            </div>
+            
+            <div class="battle-log-container">
+                <div class="battle-log" id="battle-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load all necessary scripts -->
+    <script src="js/skins/skin-registry.js"></script>
+    <script src="js/skins/skin-manager.js"></script>
+    <script src="js/raid-game/character.js"></script>
+    <script src="js/raid-game/stage-modifiers.js"></script>
+    <script src="js/raid-game/stage-manager.js"></script>
+    <script src="js/raid-game/game-manager.js"></script>
+
+    <script>
+        // Initialize the test
+        let gameManager;
+        let stageManager;
+        let stageModifiersRegistry;
+
+        async function initializeTest() {
+            try {
+                console.log('Initializing Twisted Apple Orchard test...');
+                
+                // Create instances
+                stageModifiersRegistry = new StageModifiersRegistry();
+                stageManager = new StageManager();
+                gameManager = new GameManager();
+                
+                // Make them globally available
+                window.stageModifiersRegistry = stageModifiersRegistry;
+                window.gameManager = gameManager;
+                
+                // Create a test stage with the Twisted Apple Orchard modifier
+                const testStage = {
+                    id: 'twisted_apple_test',
+                    name: 'Twisted Apple Orchard Test',
+                    description: 'Test stage for the Twisted Apple Orchard modifier',
+                    backgroundImage: 'images/backgrounds/forest.jpg',
+                    enemies: [
+                        {
+                            id: 'test_enemy_1',
+                            name: 'Test Goblin',
+                            image: 'images/characters/goblin.png',
+                            stats: {
+                                maxHp: 100,
+                                currentHp: 100,
+                                physicalDamage: 20,
+                                armor: 5,
+                                speed: 10
+                            },
+                            abilities: []
+                        },
+                        {
+                            id: 'test_enemy_2',
+                            name: 'Test Orc',
+                            image: 'images/characters/orc.png',
+                            stats: {
+                                maxHp: 150,
+                                currentHp: 150,
+                                physicalDamage: 30,
+                                armor: 10,
+                                speed: 8
+                            },
+                            abilities: []
+                        }
+                    ],
+                    modifiers: [
+                        {
+                            id: 'twisted_apple_orchard',
+                            name: 'Twisted Apple Orchard',
+                            description: 'The cursed apple trees revive fallen enemies every 10th turn with 50% HP!'
+                        }
+                    ]
+                };
+                
+                // Set up the stage
+                stageManager.currentStage = testStage;
+                stageManager.loadStageModifiers();
+                
+                // Initialize game state
+                stageManager.resetGameState();
+                
+                // Create test player characters
+                const playerChar = new Character('test_player', 'Test Hero', 'images/characters/hero.png', {
+                    maxHp: 200,
+                    currentHp: 200,
+                    physicalDamage: 50,
+                    armor: 15,
+                    speed: 12
+                });
+                playerChar.abilities = [];
+                
+                stageManager.gameState.playerCharacters = [playerChar];
+                
+                // Create AI characters
+                stageManager.gameState.aiCharacters = testStage.enemies.map(enemyData => {
+                    const enemy = new Character(
+                        enemyData.id,
+                        enemyData.name,
+                        enemyData.image,
+                        enemyData.stats
+                    );
+                    enemy.isAI = true;
+                    enemy.abilities = enemyData.abilities || [];
+                    return enemy;
+                });
+                
+                // Set up game manager
+                gameManager.gameState = stageManager.gameState;
+                gameManager.stageManager = stageManager;
+                
+                // Initialize stage modifiers
+                if (stageModifiersRegistry && stageManager.stageModifiers.length > 0) {
+                    console.log('Processing stage start modifiers...');
+                    stageModifiersRegistry.processModifiers(gameManager, stageManager, 'stageStart');
+                }
+                
+                // Render the UI
+                if (gameManager.uiManager) {
+                    gameManager.uiManager.renderCharacters(
+                        stageManager.gameState.playerCharacters,
+                        stageManager.gameState.aiCharacters
+                    );
+                }
+                
+                console.log('Test initialized successfully!');
+                addLogEntry('🍎💀 Twisted Apple Orchard test initialized! Kill enemies and wait 10 turns to see revival!', 'system');
+                
+            } catch (error) {
+                console.error('Error initializing test:', error);
+                addLogEntry('❌ Error initializing test: ' + error.message, 'error');
+            }
+        }
+
+        // Helper function to add log entries
+        function addLogEntry(message, type = 'info') {
+            const battleLog = document.getElementById('battle-log');
+            if (battleLog) {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+                logEntry.innerHTML = message;
+                battleLog.appendChild(logEntry);
+                battleLog.scrollTop = battleLog.scrollHeight;
+            }
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Test functions
+        function testAppleRevival() {
+            if (!stageModifiersRegistry || !gameManager || !stageManager) {
+                addLogEntry('❌ Test not initialized!', 'error');
+                return;
+            }
+            
+            // Find the apple orchard modifier
+            const modifier = stageManager.stageModifiers.find(mod => mod.id === 'twisted_apple_orchard');
+            if (!modifier) {
+                addLogEntry('❌ Apple orchard modifier not found!', 'error');
+                return;
+            }
+            
+            // Set turn counter to 10 to trigger revival
+            modifier.turnCounter = 10;
+            addLogEntry('🍎 Forcing turn counter to 10 to test revival...', 'system');
+            
+            // Process turn start to trigger revival
+            stageModifiersRegistry.processModifiers(gameManager, stageManager, 'turnStart');
+        }
+
+        function killFirstEnemy() {
+            if (!gameManager || !gameManager.gameState || !gameManager.gameState.aiCharacters.length) {
+                addLogEntry('❌ No enemies to kill!', 'error');
+                return;
+            }
+            
+            const enemy = gameManager.gameState.aiCharacters[0];
+            if (enemy.isDead()) {
+                addLogEntry('❌ First enemy is already dead!', 'error');
+                return;
+            }
+            
+            // Kill the enemy
+            enemy.stats.currentHp = 0;
+            addLogEntry(`💀 ${enemy.name} has been killed for testing!`, 'death');
+            
+            // Handle death
+            if (gameManager.handleCharacterDeath) {
+                gameManager.handleCharacterDeath(enemy);
+            }
+            
+            // Update UI
+            if (gameManager.uiManager) {
+                gameManager.uiManager.updateCharacterUI(enemy);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTest();
+            
+            // Add event listeners for test buttons
+            document.getElementById('test-apple-revival').addEventListener('click', testAppleRevival);
+            document.getElementById('kill-enemy').addEventListener('click', killFirstEnemy);
+            
+            // End turn button
+            document.getElementById('end-turn-btn').addEventListener('click', () => {
+                if (gameManager && stageManager) {
+                    // Increment turn
+                    stageManager.gameState.turn = (stageManager.gameState.turn || 1) + 1;
+                    document.getElementById('turn-counter').textContent = stageManager.gameState.turn;
+                    
+                    // Process turn start modifiers
+                    if (stageModifiersRegistry && stageManager.stageModifiers.length > 0) {
+                        stageModifiersRegistry.processModifiers(gameManager, stageManager, 'turnStart');
+                    }
+                    
+                    addLogEntry(`Turn ${stageManager.gameState.turn} started!`, 'system');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-button:hover {
+            background: #45a049;
+        }
+        
+        .log-entry.system {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        
+        .log-entry.error {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        .log-entry.death {
+            color: #ff6666;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .battle-interface {
+            padding: 20px;
+        }
+        
+        .characters-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .player-characters, .ai-characters {
+            flex: 1;
+            border: 2px solid #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .battle-log-container {
+            height: 200px;
+            overflow-y: auto;
+            border: 2px solid #333;
+            padding: 10px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .turn-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+</body>
+</html>

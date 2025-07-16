@@ -2,15 +2,224 @@ class StageModifiersRegistry {
     constructor() {
         this.modifiers = new Map();
         this.initializeDefaultModifiers();
+        this.registerTeamCarrotModifier();
+        this.registerAlcoholicAirModifier();
     }
 
     initializeDefaultModifiers() {
+        // Corrupted Power Surge Modifier (All AI deal 300% damage)
+        this.registerModifier({
+            id: 'ai_double_damage',
+            name: 'Corrupted Power Surge (Triple Damage)',
+            description: 'All AI characters deal 300% damage.',
+            icon: '💀⚡',
+            vfx: {
+                type: 'double_damage',
+                particles: true,
+                animation: 'power_surge'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                console.log('[ai_double_damage] onStageStart called');
+                // Apply 3x damage multiplier to all AI (enemy) characters
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                aiChars.forEach(ai => {
+                    if (!ai || typeof ai !== 'object') {
+                        console.warn('[ai_double_damage] Skipping invalid AI:', ai);
+                        return;
+                    }
+                    const name = ai.name || ai.characterId || '(unknown)';
+                    
+                    // Store original damage multiplier if not already stored
+                    if (typeof ai._originalDamageMultiplier === 'undefined') {
+                        ai._originalDamageMultiplier = ai.stats.damageMultiplier || 1;
+                    }
+                    
+                    // Apply 3x damage multiplier
+                    ai.stats.damageMultiplier = ai._originalDamageMultiplier * 3;
+                    
+                    console.log(`[ai_double_damage] Set ${name} damageMultiplier=${ai.stats.damageMultiplier} (was ${ai._originalDamageMultiplier})`);
+                    
+                    // Ensure stage modifiers object exists
+                    if (!ai.stageModifiers) {
+                        ai.stageModifiers = {};
+                    }
+                    ai.stageModifiers.aiTripleDamage = true;
+                });
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Restore original damage multiplier
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                aiChars.forEach(ai => {
+                    if (typeof ai._originalDamageMultiplier !== 'undefined') {
+                        ai.stats.damageMultiplier = ai._originalDamageMultiplier;
+                        delete ai._originalDamageMultiplier;
+                    }
+                    if (ai.stageModifiers && ai.stageModifiers.aiTripleDamage) {
+                        delete ai.stageModifiers.aiTripleDamage;
+                    }
+                });
+            }
+        });
+
+        // Corrupted Evasion Modifier (Fang 100% dodge until last)
+        this.registerModifier({
+            id: 'fang_invincible_until_last',
+            name: 'Corrupted Evasion',
+            description: 'Farmer Fang has 100% dodge chance until all other enemies are defeated.',
+            icon: '🦊💨',
+            onStageStart: (gameManager, stageManager, modifier) => {
+                console.log('[fang_invincible_until_last] onStageStart called');
+                // Set Fang's dodge to 100% if not last enemy (after all AI are loaded)
+                const setFangDodge = () => {
+                    console.log(`[FANG DEBUG] === setFangDodge() called ===`);
+                    const aiChars = gameManager.gameState.aiCharacters || [];
+                    console.log(`[FANG DEBUG] Total AI characters: ${aiChars.length}`);
+                    aiChars.forEach((ai, index) => {
+                        console.log(`[FANG DEBUG] AI ${index}: ${ai.name} (ID: ${ai.id}, isDead: ${ai.isDead()})`);
+                    });
+                    
+                    const aiAlive = aiChars.filter(ai => !ai.isDead());
+                    console.log(`[FANG DEBUG] Alive AI characters: ${aiAlive.length}`);
+                    
+                    const fang = aiChars.find(ai => ai.id === 'farmer_fang' || ai.characterId === 'farmer_fang');
+                    console.log(`[FANG DEBUG] Fang found: ${!!fang}`);
+                    
+                    if (fang) {
+                        console.log(`[FANG DEBUG] Fang current stats: dodgeChance=${fang.stats.dodgeChance}, originalDodgeChance=${fang.originalDodgeChance}`);
+                        
+                        // Store original dodge chance using the preservation system
+                        if (typeof fang.originalDodgeChance === 'undefined') {
+                            fang.originalDodgeChance = fang.stats.dodgeChance;
+                            console.log(`[FANG DEBUG] Stored original dodge with preservation system: ${fang.originalDodgeChance}`);
+                        } else {
+                            console.log(`[FANG DEBUG] Original dodge already stored: ${fang.originalDodgeChance}`);
+                        }
+                        
+                        // Count alive allies (enemies excluding Fang himself)
+                        const fangAllies = aiAlive.filter(ai => ai !== fang);
+                        console.log(`[FANG DEBUG] Fang allies count: ${fangAllies.length}`);
+                        fangAllies.forEach((ally, index) => {
+                            console.log(`[FANG DEBUG] Ally ${index}: ${ally.name} (ID: ${ally.id})`);
+                        });
+                        
+                        const newDodgeChance = (fangAllies.length > 0) ? 1.0 : (fang.originalDodgeChance || 0);
+                        console.log(`[FANG DEBUG] Logic: fangAllies.length (${fangAllies.length}) > 0 = ${fangAllies.length > 0}`);
+                        console.log(`[FANG DEBUG] Will set dodge to: ${newDodgeChance}`);
+                        
+                        // Use the preservation system - set the dodge directly
+                        fang.stats.dodgeChance = newDodgeChance;
+                        console.log(`[FANG DEBUG] Fang dodge set to: ${fang.stats.dodgeChance}`);
+                        
+                        // Now recalculateStats will preserve this value due to originalDodgeChance being set
+                        console.log(`[FANG DEBUG] Calling recalculateStats with preservation system...`);
+                        if (typeof fang.recalculateStats === 'function') {
+                            fang.recalculateStats('fang_dodge_update');
+                            console.log(`[FANG DEBUG] After recalculateStats: dodgeChance=${fang.stats.dodgeChance}`);
+                        } else {
+                            console.log(`[FANG DEBUG] recalculateStats not available`);
+                        }
+                        
+                        // Update UI to reflect the change
+                        console.log(`[FANG DEBUG] Updating UI...`);
+                        if (gameManager.uiManager) {
+                            gameManager.uiManager.updateCharacterUI(fang);
+                            console.log(`[FANG DEBUG] UI updated`);
+                        } else {
+                            console.log(`[FANG DEBUG] UI manager not available`);
+                        }
+                        
+                        console.log(`[FANG DEBUG] Final dodge chance: ${fang.stats.dodgeChance}`);
+                    }
+                };
+                setFangDodge();
+                setTimeout(setFangDodge, 50);
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                // If Fang is alive and not the only enemy, keep dodge at 100%
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                const aiAlive = aiChars.filter(ai => !ai.isDead());
+                const fang = aiAlive.find(ai => ai.id === 'farmer_fang' || ai.characterId === 'farmer_fang');
+                if (fang) {
+                    const fangAllies = aiAlive.filter(ai => ai !== fang);
+                    if (fangAllies.length === 0) {
+                        // All Fang's allies are dead, restore original dodge
+                        fang.stats.dodgeChance = fang.originalDodgeChance || 0;
+                        console.log(`[fang_invincible_until_last] All Fang's allies are dead! Dodge reduced to ${fang.stats.dodgeChance}`);
+                    } else {
+                        fang.stats.dodgeChance = 1.0;
+                        console.log(`[fang_invincible_until_last] Fang has ${fangAllies.length} allies! Dodge set to 100%`);
+                    }
+                    
+                    // Force stat recalculation to ensure the dodge change takes effect
+                    if (typeof fang.recalculateStats === 'function') {
+                        fang.recalculateStats('fang_turn_dodge_update');
+                    }
+                    
+                    // Update UI to reflect the change
+                    if (gameManager.uiManager) {
+                        gameManager.uiManager.updateCharacterUI(fang);
+                    }
+                }
+            },
+            onCharacterDeath: (gameManager, stageManager, modifier, diedCharacter) => {
+                // Update Fang's dodge immediately when any character dies
+                if (diedCharacter && diedCharacter.isAI) {
+                    console.log(`[fang_invincible_until_last] Character ${diedCharacter.name} died, checking Fang's dodge status`);
+                    const aiChars = gameManager.gameState.aiCharacters || [];
+                    const aiAlive = aiChars.filter(ai => !ai.isDead());
+                    const fang = aiAlive.find(ai => ai.id === 'farmer_fang' || ai.characterId === 'farmer_fang');
+                    
+                    if (fang) {
+                        const fangAllies = aiAlive.filter(ai => ai !== fang);
+                        if (fangAllies.length === 0) {
+                            // All Fang's allies are dead, remove dodge bonus
+                            fang.stats.dodgeChance = fang._originalDodge || 0;
+                            console.log(`[fang_invincible_until_last] ${diedCharacter.name} died! All Fang's allies are dead, dodge reduced to ${fang.stats.dodgeChance}`);
+                        } else {
+                            // Fang still has allies, keep dodge at 100%
+                            fang.stats.dodgeChance = 1.0;
+                            console.log(`[fang_invincible_until_last] ${diedCharacter.name} died! Fang still has ${fangAllies.length} allies, keeping 100% dodge`);
+                        }
+                        
+                        // Temporarily disable the patch to avoid conflicts
+                        const tempPatch = fang._invinciblePatch;
+                        fang._invinciblePatch = false;
+                        
+                        // Force stat recalculation to ensure the dodge change takes effect
+                        if (typeof fang.recalculateStats === 'function') {
+                            fang.recalculateStats('fang_death_dodge_update');
+                        }
+                        
+                        // Re-enable the patch
+                        fang._invinciblePatch = tempPatch;
+                        
+                        // Update UI to reflect the change
+                        if (gameManager.uiManager) {
+                            gameManager.uiManager.updateCharacterUI(fang);
+                        }
+                    }
+                }
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Restore Fang's dodge and unpatch recalculateStats
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                const fang = aiChars.find(ai => ai.id === 'farmer_fang' || ai.characterId === 'farmer_fang');
+                if (fang && fang._originalDodge !== undefined) {
+                    fang.stats.dodgeChance = fang._originalDodge;
+                }
+                if (fang && fang._invinciblePatch && fang.recalculateStats && fang.recalculateStats.name !== 'recalculateStats') {
+                    delete fang.recalculateStats;
+                    fang.recalculateStats = Object.getPrototypeOf(fang).recalculateStats;
+                    delete fang._invinciblePatch;
+                }
+            }
+        });
         // Burning Ground Modifier
         this.registerModifier({
             id: 'burning_ground',
             name: 'Burning Ground',
             description: 'The ground is ablaze with hellish flames! Player characters take fire damage at the start of each turn.',
-            icon: '🔥',
+            icon: 'burning_flames',
             vfx: {
                 type: 'burning_ground',
                 particles: true,
@@ -19,34 +228,125 @@ class StageModifiersRegistry {
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const damageAmount = modifier.effect?.value || 150;
                 const damageType = modifier.effect?.damageType || 'fire';
-                
+
                 // Only target player characters for burning ground
                 const targets = gameManager.gameState.playerCharacters;
 
                 if (targets.length > 0) {
                     gameManager.addLogEntry(
-                        `🔥 The burning ground erupts with flames!`, 
+                        `🔥 The burning ground erupts with flames!`,
                         'stage-effect dramatic'
                     );
                 }
 
                 targets.forEach(character => {
                     if (!character.isDead()) {
-                        character.applyDamage(damageAmount, damageType, null, { 
+                        character.applyDamage(damageAmount, damageType, null, {
                             isStageEffect: true,
-                            stageModifierName: modifier.name 
+                            stageModifierName: modifier.name
                         });
-                        
+
                         gameManager.addLogEntry(
-                            `${character.name} is scorched by the infernal flames for ${damageAmount} damage!`, 
+                            `${character.name} is scorched by the infernal flames for ${damageAmount} damage!`,
                             'stage-effect damage'
                         );
 
                         // Create dramatic screen shake effect
                         this.createScreenShakeEffect();
-                        
+
                         // Create fire eruption VFX on the character
                         this.createFireEruptionVFX(character);
+                    }
+                });
+            }
+        });
+
+        // Crow Protection Modifier
+        this.registerModifier({
+            id: 'crow_protection',
+            name: 'Crow Protection',
+            description: 'Every AI character except 1 has 100% dodge chance, that one has 0. Clear visual representation is shown.',
+            icon: '🪶',
+            vfx: {
+                type: 'crow_protection',
+                particles: true,
+                animation: 'crow_protection_vfx'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                // Get all AI characters
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                if (aiChars.length === 0) return;
+                // Only consider living AI characters for vulnerability
+                const livingAI = aiChars.filter(char => !char.isDead());
+                if (livingAI.length === 0) return;
+                // Randomly pick one living AI to be vulnerable
+                const vulnerableChar = livingAI[Math.floor(Math.random() * livingAI.length)];
+                aiChars.forEach((char) => {
+                    if (char.isDead()) {
+                        char.stats.dodgeChance = 1; // Dead characters should not be vulnerable
+                    } else if (char === vulnerableChar) {
+                        char.stats.dodgeChance = 0;
+                    } else {
+                        char.stats.dodgeChance = 1;
+                    }
+                    // Update DOM visual
+                    const el = document.getElementById(`character-${char.instanceId || char.id}`);
+                    if (el) {
+                        el.classList.remove('crow-protection-protected', 'crow-protection-vulnerable', 'crow-protection-vulnerable-static');
+                        if (!char.isDead() && char === vulnerableChar) {
+                            el.classList.add('crow-protection-vulnerable-static'); // No pulse/animation, just static VFX
+                        } else if (!char.isDead()) {
+                            el.classList.add('crow-protection-protected');
+                        }
+                    }
+                });
+                // Store for later reference (for turn-based swaps if needed)
+                modifier._crowVulnerableInstanceId = vulnerableChar.instanceId || vulnerableChar.id;
+            },
+            // Optional: On each turn, rotate vulnerability
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                if (aiChars.length === 0) return;
+                // Only consider living AI characters for vulnerability
+                const livingAI = aiChars.filter(char => !char.isDead());
+                if (livingAI.length === 0) return;
+                // Pick a new vulnerable one (different from last turn)
+                let newVulnerableChar;
+                if (livingAI.length === 1) {
+                    newVulnerableChar = livingAI[0];
+                } else {
+                    // Avoid picking the same as last turn
+                    let candidates = livingAI.filter(char => (char.instanceId || char.id) !== modifier._crowVulnerableInstanceId);
+                    if (candidates.length === 0) candidates = livingAI;
+                    newVulnerableChar = candidates[Math.floor(Math.random() * candidates.length)];
+                }
+                aiChars.forEach((char) => {
+                    if (char.isDead()) {
+                        char.stats.dodgeChance = 1;
+                    } else if (char === newVulnerableChar) {
+                        char.stats.dodgeChance = 0;
+                    } else {
+                        char.stats.dodgeChance = 1;
+                    }
+                    const el = document.getElementById(`character-${char.instanceId || char.id}`);
+                    if (el) {
+                        el.classList.remove('crow-protection-protected', 'crow-protection-vulnerable', 'crow-protection-vulnerable-static');
+                        if (!char.isDead() && char === newVulnerableChar) {
+                            el.classList.add('crow-protection-vulnerable-static');
+                        } else if (!char.isDead()) {
+                            el.classList.add('crow-protection-protected');
+                        }
+                    }
+                });
+                modifier._crowVulnerableInstanceId = newVulnerableChar.instanceId || newVulnerableChar.id;
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Clean up classes
+                const aiChars = gameManager.gameState.aiCharacters || [];
+                aiChars.forEach(char => {
+                    const el = document.getElementById(`character-${char.instanceId || char.id}`);
+                    if (el) {
+                        el.classList.remove('crow-protection-protected', 'crow-protection-vulnerable', 'crow-protection-vulnerable-static');
                     }
                 });
             }
@@ -66,7 +366,7 @@ class StageModifiersRegistry {
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const healPercent = modifier.effect?.value || 0.01; // 1% by default
                 const target = modifier.effect?.target || 'all';
-                
+
                 let targets = [];
                 if (target === 'all') {
                     targets = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
@@ -80,12 +380,12 @@ class StageModifiersRegistry {
                     if (!character.isDead()) {
                         const healAmount = Math.floor(character.stats.maxHp * healPercent);
                         if (healAmount > 0) {
-                            character.heal(healAmount, null, { 
+                            character.heal(healAmount, null, {
                                 isStageEffect: true,
-                                stageModifierName: modifier.name 
+                                stageModifierName: modifier.name
                             });
                             gameManager.addLogEntry(
-                                `${character.name} heals ${healAmount} HP from ${modifier.name}.`, 
+                                `${character.name} heals ${healAmount} HP from ${modifier.name}.`,
                                 'stage-effect heal'
                             );
                         }
@@ -99,7 +399,7 @@ class StageModifiersRegistry {
             id: 'healing_farm_wind',
             name: 'Healing Farm Wind',
             description: 'A gentle breeze carries healing energy across the battlefield.',
-            icon: '🌾',
+            icon: 'healing_breeze',
             vfx: {
                 type: 'healing_wind', // Reuse the same VFX as healing_wind
                 particles: true,
@@ -108,7 +408,7 @@ class StageModifiersRegistry {
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const healPercent = modifier.effect?.value || 0.01; // 1% by default
                 const target = modifier.effect?.target || 'all';
-                
+
                 let targets = [];
                 if (target === 'all') {
                     targets = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
@@ -121,12 +421,12 @@ class StageModifiersRegistry {
                     if (!character.isDead()) {
                         const healAmount = Math.floor(character.stats.maxHp * healPercent);
                         if (healAmount > 0) {
-                            character.heal(healAmount, null, { 
+                            character.heal(healAmount, null, {
                                 isStageEffect: true,
-                                stageModifierName: modifier.name 
+                                stageModifierName: modifier.name
                             });
                             gameManager.addLogEntry(
-                                `${character.name} heals ${healAmount} HP from ${modifier.name}.`, 
+                                `${character.name} heals ${healAmount} HP from ${modifier.name}.`,
                                 'stage-effect heal'
                             );
                         }
@@ -148,15 +448,15 @@ class StageModifiersRegistry {
             },
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const healAmount = modifier.effect?.value || 100;
-                
+
                 gameManager.gameState.playerCharacters.forEach(character => {
                     if (!character.isDead()) {
-                        character.heal(healAmount, null, { 
+                        character.heal(healAmount, null, {
                             isStageEffect: true,
-                            stageModifierName: modifier.name 
+                            stageModifierName: modifier.name
                         });
                         gameManager.addLogEntry(
-                            `${character.name} heals ${healAmount} HP from the rain.`, 
+                            `${character.name} heals ${healAmount} HP from the rain.`,
                             'stage-effect heal'
                         );
                     }
@@ -177,15 +477,15 @@ class StageModifiersRegistry {
             },
             onStageStart: (gameManager, stageManager, modifier) => {
                 const speedReduction = modifier.effect?.value || 0.25;
-                
+
                 [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters].forEach(character => {
                     character.stats.speed *= (1 - speedReduction);
                     character.stageModifiers = character.stageModifiers || {};
                     character.stageModifiers.speedReduction = speedReduction;
                 });
-                
+
                 gameManager.addLogEntry(
-                    `All characters are slowed by the frozen ground.`, 
+                    `All characters are slowed by the frozen ground.`,
                     'stage-effect'
                 );
             }
@@ -204,15 +504,15 @@ class StageModifiersRegistry {
             },
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const poisonDamage = modifier.effect?.value || 75;
-                
+
                 [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters].forEach(character => {
                     if (!character.isDead()) {
-                        character.applyDamage(poisonDamage, 'poison', null, { 
+                        character.applyDamage(poisonDamage, 'poison', null, {
                             isStageEffect: true,
-                            stageModifierName: modifier.name 
+                            stageModifierName: modifier.name
                         });
                         gameManager.addLogEntry(
-                            `${character.name} takes ${poisonDamage} poison damage from ${modifier.name}.`, 
+                            `${character.name} takes ${poisonDamage} poison damage from ${modifier.name}.`,
                             'stage-effect damage'
                         );
                     }
@@ -235,12 +535,12 @@ class StageModifiersRegistry {
                 const allCharacters = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
                 let totalDebuffsRemoved = 0;
                 const affectedCharacters = [];
-                
+
                 allCharacters.forEach(character => {
                     if (!character.isDead() && character.debuffs.length > 0) {
                         const debuffCount = character.debuffs.length;
                         const debuffNames = character.debuffs.map(d => d.name || d.id).join(', ');
-                        
+
                         // Remove all debuffs
                         character.debuffs.forEach(debuff => {
                             if (debuff.remove && typeof debuff.remove === 'function') {
@@ -248,33 +548,33 @@ class StageModifiersRegistry {
                             }
                         });
                         character.debuffs = [];
-                        
+
                         totalDebuffsRemoved += debuffCount;
                         affectedCharacters.push({ character, debuffCount, debuffNames });
-                        
+
                         // Create purification VFX
                         this.createAtlanteanPurificationVFX(character);
-                        
+
                         // Update UI
                         if (gameManager.uiManager) {
                             gameManager.uiManager.updateCharacterUI(character);
                         }
                     }
                 });
-                
+
                 if (totalDebuffsRemoved > 0) {
                     gameManager.addLogEntry(
-                        `💧✨ The pure waters of Atlantis cleanse all debuffs from the battlefield!`, 
+                        `💧✨ The pure waters of Atlantis cleanse all debuffs from the battlefield!`,
                         'stage-effect positive'
                     );
-                    
+
                     affectedCharacters.forEach(({ character, debuffCount, debuffNames }) => {
                         gameManager.addLogEntry(
-                            `${character.name} is purified of ${debuffCount} debuff${debuffCount > 1 ? 's' : ''}: ${debuffNames}`, 
+                            `${character.name} is purified of ${debuffCount} debuff${debuffCount > 1 ? 's' : ''}: ${debuffNames}`,
                             'stage-effect heal'
                         );
                     });
-                    
+
                     // Create screen-wide purification effect
                     this.createAtlanteanPurificationScreenVFX();
                 }
@@ -295,60 +595,60 @@ class StageModifiersRegistry {
             turnCounter: 0,
             onTurnStart: (gameManager, stageManager, modifier) => {
                 modifier.turnCounter = (modifier.turnCounter || 0) + 1;
-                
+
                 if (modifier.turnCounter % 6 === 0) {
                     const allCharacters = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
                     const livingCharacters = allCharacters.filter(char => !char.isDead());
-                    
+
                     if (livingCharacters.length === 0) return;
-                    
+
                     gameManager.addLogEntry(
-                        `🌊💥 A massive tidal wave rises from the depths and crashes across the battlefield!`, 
+                        `🌊💥 A massive tidal wave rises from the depths and crashes across the battlefield!`,
                         'stage-effect dramatic'
                     );
-                    
+
                     // Create massive wave VFX
                     this.createTidalWaveChaosBattlefieldVFX();
-                    
+
                     // Clear all debuff VFX from the battlefield (wave washes them away)
                     this.clearAllDebuffVFX();
-                    
+
                     // Add log entry about VFX being washed away
                     setTimeout(() => {
                         gameManager.addLogEntry(
-                            `🌊 The powerful wave washes away all lingering effects from the battlefield!`, 
+                            `🌊 The powerful wave washes away all lingering effects from the battlefield!`,
                             'stage-effect positive'
                         );
                     }, 800);
-                    
+
                     // Process each character with a delay for dramatic effect
                     livingCharacters.forEach((character, index) => {
                         setTimeout(() => {
                             const isHeal = Math.random() < 0.5; // 50% chance
                             const amount = 1000;
-                            
+
                             if (isHeal) {
-                                character.heal(amount, null, { 
+                                character.heal(amount, null, {
                                     isStageEffect: true,
-                                    stageModifierName: modifier.name 
+                                    stageModifierName: modifier.name
                                 });
                                 gameManager.addLogEntry(
-                                    `🌊 The healing tide restores ${amount} HP to ${character.name}!`, 
+                                    `🌊 The healing tide restores ${amount} HP to ${character.name}!`,
                                     'stage-effect heal'
                                 );
                                 this.createTidalWaveHealVFX(character);
                             } else {
-                                character.applyDamage(amount, 'water', null, { 
+                                character.applyDamage(amount, 'water', null, {
                                     isStageEffect: true,
-                                    stageModifierName: modifier.name 
+                                    stageModifierName: modifier.name
                                 });
                                 gameManager.addLogEntry(
-                                    `💥 The crushing wave deals ${amount} damage to ${character.name}!`, 
+                                    `💥 The crushing wave deals ${amount} damage to ${character.name}!`,
                                     'stage-effect damage'
                                 );
                                 this.createTidalWaveDamageVFX(character);
                             }
-                            
+
                             // Update UI
                             if (gameManager.uiManager) {
                                 gameManager.uiManager.updateCharacterUI(character);
@@ -381,11 +681,11 @@ class StageModifiersRegistry {
                     character.stageModifiers = character.stageModifiers || {};
                     character.stageModifiers.originalPhysicalDamage = character.stats.physicalDamage;
                     character.stageModifiers.originalMagicalDamage = character.stats.magicalDamage;
-                    
+
                     // Double the damage
                     character.stats.physicalDamage *= 2;
                     character.stats.magicalDamage *= 2;
-                    
+
                     // Also update base stats to ensure persistence
                     if (character.baseStats) {
                         character.baseStats.physicalDamage = character.baseStats.physicalDamage || character.stats.physicalDamage / 2;
@@ -393,16 +693,16 @@ class StageModifiersRegistry {
                         character.baseStats.physicalDamage *= 2;
                         character.baseStats.magicalDamage *= 2;
                     }
-                    
+
                     // Create power surge VFX
                     this.createDoubleDamageVFX(character);
                 });
 
                 gameManager.addLogEntry(
-                    `⚔️💥 Raw power surges through the battlefield! All damage is doubled!`, 
+                    `⚔️💥 Raw power surges through the battlefield! All damage is doubled!`,
                     'stage-effect dramatic'
                 );
-                
+
                 // Create screen-wide VFX
                 this.createDoubleDamageScreenVFX();
             },
@@ -421,13 +721,13 @@ class StageModifiersRegistry {
                         if (character.stageModifiers.originalMagicalDamage !== undefined) {
                             character.stats.magicalDamage = character.stageModifiers.originalMagicalDamage;
                         }
-                        
+
                         // Also restore base stats
                         if (character.baseStats) {
                             character.baseStats.physicalDamage = character.stageModifiers.originalPhysicalDamage;
                             character.baseStats.magicalDamage = character.stageModifiers.originalMagicalDamage;
                         }
-                        
+
                         // Clean up stored values
                         delete character.stageModifiers.originalPhysicalDamage;
                         delete character.stageModifiers.originalMagicalDamage;
@@ -450,7 +750,7 @@ class StageModifiersRegistry {
             onTurnStart: (gameManager, stageManager, modifier) => {
                 // Debug logging for turn counter
                 console.log(`[CleansingWinds] Turn check: gameManager.turnCounter=${gameManager.turnCounter}, gameManager.gameState.turn=${gameManager.gameState.turn}`);
-                
+
                 // Use gameState.turn instead of turnCounter, and check if it's every 3rd turn (3, 6, 9, 12, etc.)
                 const currentTurn = gameManager.gameState.turn || gameManager.turnCounter || 1;
                 if (currentTurn % 3 === 0) {
@@ -461,7 +761,7 @@ class StageModifiersRegistry {
 
                     // Log the cleansing event
                     gameManager.addLogEntry(
-                        `🌪️✨ Cleansing winds sweep across the battlefield on turn ${currentTurn}, purging all magical effects!`, 
+                        `🌪️✨ Cleansing winds sweep across the battlefield on turn ${currentTurn}, purging all magical effects!`,
                         'stage-effect dramatic'
                     );
 
@@ -470,18 +770,18 @@ class StageModifiersRegistry {
                         if (!character.isDead()) {
                             const buffCount = character.buffs.length;
                             const debuffCount = character.debuffs.length;
-                            
+
                             // Clear all buffs and debuffs
                             character.buffs = [];
                             character.debuffs = [];
-                            
+
                             // Update character stats after clearing effects
                             character.recalculateStats('cleansing_winds');
-                            
+
                             // Log individual cleansing effects
                             if (buffCount > 0 || debuffCount > 0) {
                                 gameManager.addLogEntry(
-                                    `${character.name} has ${buffCount} buffs and ${debuffCount} debuffs cleansed!`, 
+                                    `${character.name} has ${buffCount} buffs and ${debuffCount} debuffs cleansed!`,
                                     'stage-effect'
                                 );
                             }
@@ -519,9 +819,9 @@ class StageModifiersRegistry {
                     character.stageModifiers = character.stageModifiers || {};
                     character.stageModifiers.healingDisabled = true;
                 });
-                
+
                 gameManager.addLogEntry(
-                    `🚫💚 A dark curse descends upon the battlefield! All healing is now impossible...`, 
+                    `🚫💚 A dark curse descends upon the battlefield! All healing is now impossible...`,
                     'stage-effect dramatic'
                 );
 
@@ -540,9 +840,9 @@ class StageModifiersRegistry {
                         delete character.stageModifiers.healingDisabled;
                     }
                 });
-                
+
                 gameManager.addLogEntry(
-                    `💚 The healing curse lifts... healing is restored!`, 
+                    `💚 The healing curse lifts... healing is restored!`,
                     'stage-effect'
                 );
 
@@ -565,7 +865,7 @@ class StageModifiersRegistry {
             onStageStart: (gameManager, stageManager, modifier) => {
                 const speedReduction = 0.25; // 25% speed reduction
                 const magicalShieldBonus = 0.15; // 15% magical shield bonus
-                
+
                 const allCharacters = [
                     ...gameManager.gameState.playerCharacters,
                     ...gameManager.gameState.aiCharacters
@@ -576,23 +876,23 @@ class StageModifiersRegistry {
                     character.stageModifiers = character.stageModifiers || {};
                     character.stageModifiers.originalSpeed = character.stats.speed;
                     character.stageModifiers.originalMagicalShield = character.stats.magicalShield;
-                    
+
                     // Apply speed reduction
                     character.stats.speed = Math.floor(character.stats.speed * (1 - speedReduction));
-                    
+
                     // Apply magical shield bonus
                     const shieldBonus = Math.floor(character.stats.magicalShield * magicalShieldBonus);
                     character.stats.magicalShield = character.stats.magicalShield + shieldBonus;
-                    
+
                     // Also update baseStats to preserve through recalculation
                     if (character.baseStats) {
                         character.baseStats.speed = character.stats.speed;
                         character.baseStats.magicalShield = character.stats.magicalShield;
                     }
                 });
-                
+
                 gameManager.addLogEntry(
-                    `❄️ The ancient ice magic preserves all combatants! Speed reduced, magical resistance increased.`, 
+                    `❄️ The ancient ice magic preserves all combatants! Speed reduced, magical resistance increased.`,
                     'stage-effect dramatic'
                 );
 
@@ -615,7 +915,7 @@ class StageModifiersRegistry {
                             }
                             delete character.stageModifiers.originalSpeed;
                         }
-                        
+
                         if (character.stageModifiers.originalMagicalShield !== undefined) {
                             character.stats.magicalShield = character.stageModifiers.originalMagicalShield;
                             if (character.baseStats) {
@@ -625,9 +925,9 @@ class StageModifiersRegistry {
                         }
                     }
                 });
-                
+
                 gameManager.addLogEntry(
-                    `❄️ The icy preservation fades as the battle ends.`, 
+                    `❄️ The icy preservation fades as the battle ends.`,
                     'stage-effect'
                 );
 
@@ -636,12 +936,67 @@ class StageModifiersRegistry {
             }
         });
 
+        // Twisted Apple Orchard Modifier
+        this.registerModifier({
+            id: 'twisted_apple_orchard',
+            name: 'Twisted Apple Orchard',
+            description: 'The cursed apple trees revive fallen enemies every 6th turn with 50% HP! A dark magic counter shows when the next revival will occur.',
+            icon: '🍎💀',
+            vfx: {
+                type: 'twisted_apple_orchard',
+                particles: true,
+                animation: 'dark_apple_glow'
+            },
+            turnCounter: 0,
+            deadAICharacters: [], // Track dead AI characters for revival
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                modifier.turnCounter = (modifier.turnCounter || 0) + 1;
+
+                // Update visual counter
+                this.updateAppleRevivalCounter(modifier.turnCounter);
+
+                // Check for revival every 6th turn
+                if (modifier.turnCounter % 6 === 0) {
+                    this.performAppleRevival(gameManager, stageManager, modifier);
+                }
+
+                // Track newly dead AI characters
+                this.trackDeadAICharacters(gameManager, modifier);
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                // Initialize the revival counter UI
+                this.createAppleRevivalCounterUI();
+
+                // Initialize tracking arrays
+                modifier.deadAICharacters = [];
+                modifier.turnCounter = 0;
+
+                gameManager.addLogEntry(
+                    `🍎💀 The twisted apple orchard awakens! Dead enemies will be revived every 6 turns with 50% HP...`,
+                    'stage-effect dramatic'
+                );
+
+                // Create visual effects
+                this.createTwistedAppleOrchardVFX();
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Clean up UI elements
+                this.removeAppleRevivalCounterUI();
+                this.clearTwistedAppleOrchardVFX();
+
+                gameManager.addLogEntry(
+                    `🍎 The twisted apple orchard falls silent...`,
+                    'stage-effect'
+                );
+            }
+        });
+
         // Small Space Modifier
         this.registerModifier({
             id: 'small_space',
             name: 'Small Space',
             description: 'The confined space makes dodging impossible! All characters have their dodge chance reduced to 0.',
-            icon: '🚪',
+            icon: 'cramped_space',
             onStageStart: (gameManager, stageManager, modifier) => {
                 // Apply small space effect immediately when stage loads
                 this.applySmallSpaceEffect(gameManager, modifier, true);
@@ -663,9 +1018,9 @@ class StageModifiersRegistry {
                         delete character.originalDodgeChance;
                     }
                 });
-                
+
                 gameManager.addLogEntry(
-                    `Characters regain their ability to dodge outside the confined space.`, 
+                    `Characters regain their ability to dodge outside the confined space.`,
                     'stage-effect'
                 );
             }
@@ -676,48 +1031,48 @@ class StageModifiersRegistry {
             id: 'carried_medicines',
             name: 'Carried medicines',
             description: 'Medical supplies scattered around provide periodic mana recovery. Every fifth turn, restores 10% of maximum mana for player characters.',
-            icon: '💊',
+            icon: 'medical_supplies',
             onTurnStart: (gameManager, stageManager, modifier) => {
                 // Initialize internal turn counter if it doesn't exist
                 if (!modifier._internalTurnCounter) {
                     modifier._internalTurnCounter = 0;
                 }
-                
+
                 // Increment our internal turn counter
                 modifier._internalTurnCounter++;
-                
+
                 // Get game turn for comparison
                 let currentTurn = gameManager.gameState?.currentTurn || gameManager.gameState?.turn || modifier._internalTurnCounter;
-                
+
                 // Debug logging
                 console.log(`[Carried Medicines] Game turn: ${currentTurn}, Internal turn: ${modifier._internalTurnCounter}`);
-                
+
                 // Only trigger on multiples of 5 using our internal counter (5, 10, 15, 20...)
                 if (modifier._internalTurnCounter % 5 === 0) {
                     const manaRestorePercent = 0.10; // Always 10% of max mana
-                    
+
                     gameManager.addLogEntry(
-                        `💊 The scattered medicines provide their healing energy!`, 
+                        `💊 The scattered medicines provide their healing energy!`,
                         'stage-effect medicines'
                     );
-                    
+
                     gameManager.gameState.playerCharacters.forEach(character => {
                         if (!character.isDead()) {
                             const manaRestoreAmount = Math.floor(character.stats.maxMana * manaRestorePercent);
-                            
+
                             if (manaRestoreAmount > 0) {
                                 const oldMana = character.stats.currentMana;
                                 character.stats.currentMana = Math.min(character.stats.maxMana, character.stats.currentMana + manaRestoreAmount);
                                 const actualManaRestored = character.stats.currentMana - oldMana;
-                                
+
                                 gameManager.addLogEntry(
-                                    `${character.name} recovers ${actualManaRestored} mana from the medical supplies.`, 
+                                    `${character.name} recovers ${actualManaRestored} mana from the medical supplies.`,
                                     'stage-effect mana-restore'
                                 );
-                                
+
                                 // Create medicine VFX on the character
                                 this.createMedicineVFX(character, actualManaRestored);
-                                
+
                                 // Update character UI
                                 if (typeof updateCharacterUI === 'function') {
                                     updateCharacterUI(character);
@@ -754,9 +1109,9 @@ class StageModifiersRegistry {
                     character.stageModifiers = character.stageModifiers || {};
                     character.stageModifiers.healingFire = true;
                 });
-                
+
                 gameManager.addLogEntry(
-                    `🔥💚 The infernal flames corrupt all healing energy! Healing will now burn...`, 
+                    `🔥💚 The infernal flames corrupt all healing energy! Healing will now burn...`,
                     'stage-effect dramatic'
                 );
             },
@@ -772,9 +1127,9 @@ class StageModifiersRegistry {
                         delete character.stageModifiers.healingFire;
                     }
                 });
-                
+
                 gameManager.addLogEntry(
-                    `💚 The healing corruption fades away...`, 
+                    `💚 The healing corruption fades away...`,
                     'stage-effect'
                 );
             }
@@ -790,16 +1145,16 @@ class StageModifiersRegistry {
                 // Initialize tracking for enchanted weapon bonuses
                 gameManager.enchantedWeaponBonuses = 0;
                 gameManager.addLogEntry(
-                    `⚔️ The forge's magic begins to empower enemy weapons...`, 
+                    `⚔️ The forge's magic begins to empower enemy weapons...`,
                     'stage-effect dramatic'
                 );
-                
+
                 // Create initial VFX to show the forge is active
                 this.createEnchantedWeaponVFX(modifier);
             },
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const currentTurn = gameManager.gameState.currentTurn || gameManager.gameState.turn;
-                
+
                 // Check if this is a 5th turn milestone
                 if (currentTurn % 5 === 0 && currentTurn > 0) {
                     this.applyEnchantedWeaponEffect(gameManager, currentTurn);
@@ -811,7 +1166,7 @@ class StageModifiersRegistry {
                     gameManager.gameState.aiCharacters.forEach(character => {
                         // Remove the enchanted weapon buff
                         character.removeBuff('enchanted_weapon_buff');
-                        
+
                         // Update UI to reflect buff removal
                         if (gameManager.uiManager) {
                             gameManager.uiManager.updateCharacterUI(character);
@@ -820,7 +1175,7 @@ class StageModifiersRegistry {
                 }
                 delete gameManager.enchantedWeaponBonuses;
                 gameManager.addLogEntry(
-                    `⚔️ The forge's enchantment fades as the battle ends.`, 
+                    `⚔️ The forge's enchantment fades as the battle ends.`,
                     'stage-effect'
                 );
             }
@@ -831,7 +1186,7 @@ class StageModifiersRegistry {
             id: 'desert_heat',
             name: 'Desert Heat',
             description: 'The scorching desert heat heightens reflexes and vitality! All characters have their critical strike chance set to 50%, HP regeneration set to 50, and mana regeneration set to 50.',
-            icon: '🌵',
+            icon: 'desert_cactus',
             vfx: {
                 type: 'desert_heat',
                 particles: true,
@@ -862,14 +1217,14 @@ class StageModifiersRegistry {
                         delete character.originalCritChance;
                         console.log(`[DesertHeat] Restored ${character.name}'s crit chance to ${character.stats.critChance}`);
                     }
-                    
+
                     // Restore original HP regeneration
                     if (character.originalHpPerTurn !== undefined) {
                         character.stats.hpPerTurn = character.originalHpPerTurn;
                         delete character.originalHpPerTurn;
                         console.log(`[DesertHeat] Restored ${character.name}'s HP regen to ${character.stats.hpPerTurn}`);
                     }
-                    
+
                     // Restore original mana regeneration
                     if (character.originalManaPerTurn !== undefined) {
                         character.stats.manaPerTurn = character.originalManaPerTurn;
@@ -879,7 +1234,7 @@ class StageModifiersRegistry {
                 });
 
                 gameManager.addLogEntry(
-                    `🌵 The desert heat fades, returning everyone's reflexes and vitality to normal.`, 
+                    `🌵 The desert heat fades, returning everyone's reflexes and vitality to normal.`,
                     'stage-effect'
                 );
 
@@ -891,7 +1246,7 @@ class StageModifiersRegistry {
                 });
             }
         });
-        
+
         console.log(`[StageModifiers] Registered desert_heat modifier successfully`);
 
         // ==== PACK HEALING MODIFIER ====
@@ -899,44 +1254,44 @@ class StageModifiersRegistry {
             id: 'pack_healing',
             name: 'Pack Healing',
             description: 'When an enemy dies, all remaining enemies heal to full HP. The bond between these beasts runs deep.',
-            icon: '🩺',
+            icon: 'healing_bond',
             vfx: {
                 type: 'pack_healing'
             },
             onCharacterDeath: (gameManager, stageManager, modifier, diedCharacter) => {
                 console.log(`[PackHealing] Character ${diedCharacter?.name} died, checking if we should trigger pack healing`);
-                
+
                 if (!diedCharacter || !diedCharacter.isAI) {
                     console.log(`[PackHealing] Died character was not an enemy, no pack healing triggered`);
                     return;
                 }
-                
+
                 // Get all living enemy allies of the died character
-                const livingEnemies = gameManager.gameState.aiCharacters.filter(char => 
+                const livingEnemies = gameManager.gameState.aiCharacters.filter(char =>
                     !char.isDead() && char.instanceId !== diedCharacter.instanceId
                 );
-                
+
                 console.log(`[PackHealing] Found ${livingEnemies.length} living enemies to heal`);
-                
+
                 if (livingEnemies.length === 0) {
                     console.log(`[PackHealing] No living enemies to heal`);
                     return;
                 }
-                
+
                 // Heal all living enemies to full HP
                 let healedCharacters = [];
                 livingEnemies.forEach(character => {
                     // Try different HP property locations
                     const currentHp = character.stats.currentHp || character.hp || character.stats.hp || 0;
                     const maxHp = character.stats.maxHp || character.maxHp || 0;
-                    
+
                     console.log(`[PackHealing] Checking ${character.name}: Current HP ${currentHp}/${maxHp}`);
                     console.log(`[PackHealing] HP properties check: stats.currentHp=${character.stats.currentHp}, hp=${character.hp}, stats.hp=${character.stats.hp}, maxHp=${character.stats.maxHp}`);
-                    
+
                     if (currentHp < maxHp) {
                         const healAmount = maxHp - currentHp;
                         const oldHp = currentHp;
-                        
+
                         // Set HP in all possible locations to ensure it works
                         if (character.stats.currentHp !== undefined) {
                             character.stats.currentHp = maxHp;
@@ -947,42 +1302,42 @@ class StageModifiersRegistry {
                         if (character.stats.hp !== undefined) {
                             character.stats.hp = maxHp;
                         }
-                        
+
                         console.log(`[PackHealing] Healed ${character.name} from ${oldHp} to ${maxHp} (${healAmount} HP)`);
-                        
+
                         // Show healing VFX using the global registry
                         if (window.stageModifiersRegistry) {
                             window.stageModifiersRegistry.createPackHealingVFX(character, healAmount);
                         }
-                        
+
                         // Update UI
                         if (gameManager.uiManager) {
                             gameManager.uiManager.updateCharacterUI(character);
                             gameManager.uiManager.triggerHPAnimation(character, 'heal', healAmount);
                         }
-                        
+
                         healedCharacters.push(character.name);
                     } else {
                         console.log(`[PackHealing] ${character.name} already at full health, skipping`);
                     }
                 });
-                
+
                 console.log(`[PackHealing] Healed characters: ${healedCharacters.join(', ')}`);
-                
+
                 if (healedCharacters.length > 0) {
                     gameManager.addLogEntry(
-                        `🩺 The death of ${diedCharacter.name} strengthens the pack! ${healedCharacters.join(', ')} heal${healedCharacters.length === 1 ? 's' : ''} to full HP!`, 
+                        `🩺 The death of ${diedCharacter.name} strengthens the pack! ${healedCharacters.join(', ')} heal${healedCharacters.length === 1 ? 's' : ''} to full HP!`,
                         'stage-effect dramatic'
                     );
                 } else {
                     gameManager.addLogEntry(
-                        `🩺 The pack mourns ${diedCharacter.name}, but all allies were already at full health.`, 
+                        `🩺 The pack mourns ${diedCharacter.name}, but all allies were already at full health.`,
                         'stage-effect'
                     );
                 }
             }
         });
-        
+
         console.log(`[StageModifiers] Registered pack_healing modifier successfully`);
 
         // Aggressive Protection Modifier
@@ -998,7 +1353,7 @@ class StageModifiersRegistry {
             },
             onStageStart: (gameManager, stageManager, modifier) => {
                 console.log(`[AggressiveProtection] Setting up event listeners for stage modifier`);
-                
+
                 // Store event listeners for cleanup
                 if (!gameManager._aggressiveProtectionListeners) {
                     gameManager._aggressiveProtectionListeners = {};
@@ -1008,9 +1363,9 @@ class StageModifiersRegistry {
                 gameManager._aggressiveProtectionListeners.onDodge = (event) => {
                     console.log(`[AggressiveProtection] DODGE EVENT TRIGGERED:`, event.detail);
                     const { character, attacker } = event.detail;
-                    
+
                     console.log(`[AggressiveProtection] ${character.name} dodged an attack, applying dodge bonus buff`);
-                    
+
                     // Check if character already has the dodge buff
                     let existingDodgeBuff = character.buffs.find(buff => buff.id === 'aggressive_protection_dodge_bonus');
                     if (character._aggressiveProtectionDodgeBuffAddedThisTurn) {
@@ -1028,7 +1383,7 @@ class StageModifiersRegistry {
                         console.log(`[AggressiveProtection] Refreshed Battle Instincts duration for ${character.name} and reset modifier flags`);
                         character.recalculateStats('aggressive_protection_dodge_refresh');
                         gameManager.addLogEntry(
-                            `⚡ ${character.name}'s Battle Instincts refreshed!`, 
+                            `⚡ ${character.name}'s Battle Instincts refreshed!`,
                             'stage-effect buff'
                         );
                         this.createAggressiveProtectionDodgeVFX(character);
@@ -1047,7 +1402,7 @@ class StageModifiersRegistry {
                         false
                     );
                     dodgeBuff.description = '+30% dodge chance from aggressive protection';
-                    
+
                     // Use statModifiers - this is the correct format the game expects
                     dodgeBuff.statModifiers = [
                         {
@@ -1057,24 +1412,24 @@ class StageModifiersRegistry {
                             _isApplied: false // Track if this modifier has been applied
                         }
                     ];
-                    
+
                     // Add special flag for recalculate stats debugging
                     dodgeBuff._isAggressiveProtectionBuff = true;
-                    
+
                     // Debug logging for dodge buff
                     console.log(`[AggressiveProtection] DEBUG: Creating Battle Instincts buff with statModifiers:`, dodgeBuff.statModifiers);
                     console.log(`[AggressiveProtection] DEBUG: ${character.name} dodge chance BEFORE buff: ${character.stats.dodgeChance}`);
-                    
+
                     character.addBuff(dodgeBuff);
                     character._aggressiveProtectionDodgeBuffAddedThisTurn = true;
-                    
+
                     // Debug logging AFTER buff is applied (addBuff already calls recalculateStats)
                     setTimeout(() => {
                         console.log(`[AggressiveProtection] DEBUG: ${character.name} dodge chance AFTER NEW buff: ${character.stats.dodgeChance}`);
                     }, 50);
-                    
+
                     gameManager.addLogEntry(
-                        `⚡ ${character.name} gains Battle Instincts, increasing dodge chance by 30% for 3 turns!`, 
+                        `⚡ ${character.name} gains Battle Instincts, increasing dodge chance by 30% for 3 turns!`,
                         'stage-effect buff'
                     );
 
@@ -1086,18 +1441,18 @@ class StageModifiersRegistry {
                 gameManager._aggressiveProtectionListeners.onDamage = (event) => {
                     console.log(`[AggressiveProtection] DAMAGE EVENT TRIGGERED:`, event.detail);
                     const { character, target, damage, damageType, isCritical } = event.detail;
-                    
+
                     console.log(`[AggressiveProtection] Event detail breakdown:`, {
                         caster: character?.name || 'undefined',
-                        target: target?.name || 'undefined', 
+                        target: target?.name || 'undefined',
                         damage: damage,
                         type: damageType,
                         isCritical: isCritical
                     });
-                    
+
                     if (character && damage > 0) {
                         console.log(`[AggressiveProtection] ${character.name} dealt ${damage} damage, applying damage bonus buff`);
-                        
+
                         // Check if character already has the damage buff
                         let existingBuff = character.buffs.find(buff => buff.id === 'aggressive_protection_damage_bonus');
                         if (character._aggressiveProtectionDamageBuffAddedThisTurn) {
@@ -1115,7 +1470,7 @@ class StageModifiersRegistry {
                             console.log(`[AggressiveProtection] Refreshed Combat Fury duration for ${character.name} and reset modifier flags`);
                             character.recalculateStats('aggressive_protection_refresh');
                             gameManager.addLogEntry(
-                                `🔥 ${character.name}'s Combat Fury refreshed!`, 
+                                `🔥 ${character.name}'s Combat Fury refreshed!`,
                                 'stage-effect buff'
                             );
                             this.createAggressiveProtectionDamageVFX(character);
@@ -1134,7 +1489,7 @@ class StageModifiersRegistry {
                             false
                         );
                         damageBuff.description = '+100 magical damage and +80 physical damage from aggressive protection';
-                        
+
                         // Use statModifiers - this is the correct format the game expects
                         damageBuff.statModifiers = [
                             {
@@ -1144,29 +1499,29 @@ class StageModifiersRegistry {
                                 _isApplied: false // Track if this modifier has been applied
                             },
                             {
-                                stat: 'physicalDamage', 
+                                stat: 'physicalDamage',
                                 value: 80, // Flat +80 physical damage
                                 operation: 'add',
                                 _isApplied: false // Track if this modifier has been applied
                             }
                         ];
-                        
+
                         // Add debug logging specific to aggressive protection
                         console.log(`[AggressiveProtection] DEBUG: Creating Combat Fury buff with statModifiers:`, damageBuff.statModifiers);
                         console.log(`[AggressiveProtection] DEBUG: ${character.name} stats BEFORE buff - Physical: ${character.stats.physicalDamage}, Magical: ${character.stats.magicalDamage}`);
-                        
+
                         // Add special flag for recalculate stats debugging
                         damageBuff._isAggressiveProtectionBuff = true;
-                        
+
                         console.log(`[AggressiveProtection] Creating new damage buff for ${character.name}`);
                         character.addBuff(damageBuff);
                         character._aggressiveProtectionDamageBuffAddedThisTurn = true;
-                        
+
                         gameManager.addLogEntry(
-                            `🔥 ${character.name} gains Combat Fury, increasing damage output for 3 turns!`, 
+                            `🔥 ${character.name} gains Combat Fury, increasing damage output for 3 turns!`,
                             'stage-effect buff'
                         );
-                        
+
                         // Debug logging AFTER buff is applied (addBuff already calls recalculateStats)
                         setTimeout(() => {
                             console.log(`[AggressiveProtection] DEBUG: ${character.name} stats AFTER NEW buff - Physical: ${character.stats.physicalDamage}, Magical: ${character.stats.magicalDamage}`);
@@ -1182,15 +1537,15 @@ class StageModifiersRegistry {
                 // Add event listeners
                 document.addEventListener('character:dodged', gameManager._aggressiveProtectionListeners.onDodge);
                 document.addEventListener('character:damage-dealt', gameManager._aggressiveProtectionListeners.onDamage);
-                
+
                 gameManager.addLogEntry(
-                    `🛡️ Aggressive Protection is active! Dodging grants dodge bonuses, dealing damage grants damage bonuses!`, 
+                    `🛡️ Aggressive Protection is active! Dodging grants dodge bonuses, dealing damage grants damage bonuses!`,
                     'stage-effect dramatic'
                 );
             },
             onStageEnd: (gameManager, stageManager, modifier) => {
                 console.log(`[AggressiveProtection] Cleaning up event listeners`);
-                
+
                 // Remove event listeners
                 if (gameManager._aggressiveProtectionListeners) {
                     if (gameManager._aggressiveProtectionListeners.onDodge) {
@@ -1201,13 +1556,13 @@ class StageModifiersRegistry {
                     }
                     delete gameManager._aggressiveProtectionListeners;
                 }
-                
+
                 // Remove all related buffs from characters
                 const allCharacters = [
                     ...(gameManager.gameState?.playerCharacters || []),
                     ...(gameManager.gameState?.aiCharacters || [])
                 ];
-                
+
                 allCharacters.forEach(character => {
                     character.removeBuff('aggressive_protection_dodge_bonus');
                     character.removeBuff('aggressive_protection_damage_bonus');
@@ -1222,7 +1577,7 @@ class StageModifiersRegistry {
                 });
             }
         });
-        
+
         console.log(`[StageModifiers] Registered aggressive_protection modifier successfully`);
 
         // ==== ESSENCE TRANSFER MODIFIER ====
@@ -1230,7 +1585,7 @@ class StageModifiersRegistry {
             id: 'essence_transfer',
             name: 'Essence Transfer',
             description: 'When a character dies, their remaining power is transferred to a random survivor, adding each of their stats to the recipient. The transfer is additive and can stack indefinitely.',
-            icon: '💀',
+            icon: 'soul_transfer',
             onCharacterDeath: (gameManager, stageManager, modifier, diedCharacter) => {
                 console.log(`[EssenceTransfer] Character ${diedCharacter?.name} has died – initiating essence transfer.`);
 
@@ -1303,7 +1658,7 @@ class StageModifiersRegistry {
             id: 'healing_mana_flow',
             name: 'Healing Mana Flow',
             description: 'Healing energy is supercharged: whenever a character is healed, they also restore 20% of the heal amount as mana.',
-            icon: '💧',
+            icon: 'mana_droplet',
             onStageStart: (gameManager, stageManager, modifier) => {
                 // Flag all characters so Character.heal knows to grant mana
                 const allChars = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
@@ -1330,7 +1685,7 @@ class StageModifiersRegistry {
             id: 'aquatic_home_protector',
             name: 'Aquatic Home Protector',
             description: 'The protective waters of the Atlantean realm heal player characters by 245 HP at the start of each turn.',
-            icon: '🌊',
+            icon: 'aquatic_waves',
             vfx: {
                 type: 'aquatic_home_protector',
                 particles: true,
@@ -1338,27 +1693,27 @@ class StageModifiersRegistry {
             },
             onTurnStart: (gameManager, stageManager, modifier) => {
                 const healAmount = modifier.effect?.value || 245;
-                
+
                 // Only heal player characters
                 const targets = gameManager.gameState.playerCharacters;
 
                 if (targets.length > 0) {
                     gameManager.addLogEntry(
-                        `🌊 The protective waters of Atlantis surge with healing energy!`, 
+                        `🌊 The protective waters of Atlantis surge with healing energy!`,
                         'stage-effect dramatic'
                     );
                 }
 
                 targets.forEach(character => {
                     if (!character.isDead()) {
-                        character.heal(healAmount, null, { 
+                        character.heal(healAmount, null, {
                             isStageEffect: true,
                             stageModifierName: modifier.name,
                             abilityId: 'aquatic_home_protector_healing'
                         });
-                        
+
                         gameManager.addLogEntry(
-                            `${character.name} is healed by the protective waters for ${healAmount} HP!`, 
+                            `${character.name} is healed by the protective waters for ${healAmount} HP!`,
                             'stage-effect heal'
                         );
 
@@ -1457,7 +1812,7 @@ class StageModifiersRegistry {
             },
             onStageStart: (gameManager, stageManager, modifier) => {
                 console.log(`[FreezingWaters] Setting up ability usage event listeners`);
-                
+
                 // Store event listeners for cleanup
                 if (!gameManager._freezingWatersListeners) {
                     gameManager._freezingWatersListeners = {};
@@ -1467,17 +1822,17 @@ class StageModifiersRegistry {
                 gameManager._freezingWatersListeners.onAbilityUsed = (event) => {
                     console.log(`[FreezingWaters] ABILITY USED EVENT TRIGGERED:`, event.detail);
                     const { caster, target, ability } = event.detail;
-                    
+
                     // Only apply to player characters using abilities that target enemies
                     if (caster && target && ability && !caster.isAI && target.isAI) {
                         // Check if ability targets enemies
-                        const targetsEnemies = ability.targetType === 'enemy' || 
-                                             ability.targetType === 'aoe_enemy' ||
-                                             (ability.targetType === 'any' && target.isAI);
-                        
+                        const targetsEnemies = ability.targetType === 'enemy' ||
+                            ability.targetType === 'aoe_enemy' ||
+                            (ability.targetType === 'any' && target.isAI);
+
                         if (targetsEnemies) {
                             console.log(`[FreezingWaters] ${caster.name} used ${ability.name} on enemy ${target.name}, rolling for freeze...`);
-                            
+
                             // 38% chance to freeze
                             if (Math.random() < 0.38) {
                                 const freezeDebuff = {
@@ -1489,24 +1844,24 @@ class StageModifiersRegistry {
                                     isDebuff: true,
                                     source: 'Freezing Waters',
                                     description: 'Frozen by the icy waters! Abilities have only 42% chance to succeed.',
-                                    effect: function(character) {
+                                    effect: function (character) {
                                         // Freeze effect is handled in the ability usage logic
                                     },
-                                    onRemove: function(character) {
+                                    onRemove: function (character) {
                                         // Remove freeze VFX when debuff expires
                                         if (window.stageModifiersRegistry) {
                                             window.stageModifiersRegistry.removeFreezingWatersVFX(character);
                                         }
                                     }
                                 };
-                                
+
                                 target.addDebuff(freezeDebuff);
-                                
+
                                 // Show freeze VFX
                                 this.showFreezingWatersApplicationVFX(target);
-                                
+
                                 gameManager.addLogEntry(
-                                    `❄️ ${target.name} is frozen by the icy waters for 2 turns!`, 
+                                    `❄️ ${target.name} is frozen by the icy waters for 2 turns!`,
                                     'stage-effect debuff'
                                 );
                             }
@@ -1516,15 +1871,15 @@ class StageModifiersRegistry {
 
                 // Add event listener
                 document.addEventListener('AbilityUsed', gameManager._freezingWatersListeners.onAbilityUsed);
-                
+
                 gameManager.addLogEntry(
-                    `❄️ The waters around you turn ice-cold! Player abilities now have a chance to freeze enemies!`, 
+                    `❄️ The waters around you turn ice-cold! Player abilities now have a chance to freeze enemies!`,
                     'stage-effect dramatic'
                 );
             },
             onStageEnd: (gameManager, stageManager, modifier) => {
                 console.log(`[FreezingWaters] Cleaning up event listeners`);
-                
+
                 // Remove event listeners
                 if (gameManager._freezingWatersListeners) {
                     if (gameManager._freezingWatersListeners.onAbilityUsed) {
@@ -1532,7 +1887,7 @@ class StageModifiersRegistry {
                     }
                     delete gameManager._freezingWatersListeners;
                 }
-                
+
                 // Clear any remaining freeze VFX
                 this.clearFreezingWatersVFX();
             }
@@ -1577,7 +1932,7 @@ class StageModifiersRegistry {
                             }
                             delete character.stageModifiers.originalMaxHp;
                         }
-                        
+
                         // Restore original mana values
                         if (character.stageModifiers.originalMaxMana !== undefined) {
                             character.stats.mana = character.stageModifiers.originalMaxMana;
@@ -1589,7 +1944,7 @@ class StageModifiersRegistry {
                             }
                             delete character.stageModifiers.originalMaxMana;
                         }
-                        
+
                         // Restore original HP regen
                         if (character.stageModifiers.originalHpPerTurn !== undefined) {
                             character.stats.hpPerTurn = character.stageModifiers.originalHpPerTurn;
@@ -1598,7 +1953,7 @@ class StageModifiersRegistry {
                             }
                             delete character.stageModifiers.originalHpPerTurn;
                         }
-                        
+
                         // Restore original mana regen
                         if (character.stageModifiers.originalManaPerTurn !== undefined) {
                             character.stats.manaPerTurn = character.stageModifiers.originalManaPerTurn;
@@ -1609,9 +1964,9 @@ class StageModifiersRegistry {
                         }
                     }
                 });
-                
+
                 gameManager.addLogEntry('⚔️✨ The draft mode enhancements fade as the battle ends.', 'stage-effect');
-                
+
                 // Clear VFX
                 this.clearDraftModeVFX();
             }
@@ -1633,34 +1988,34 @@ class StageModifiersRegistry {
             onAbilityUse: (gameManager, stageManager, modifier, character, ability) => {
                 // Apply additional mana cost to any character using an ability
                 const additionalManaCost = 20;
-                
+
                 // Check if character has enough current mana to pay the additional cost
                 if (character.stats.currentMana >= additionalManaCost) {
                     character.stats.currentMana -= additionalManaCost;
-                    
+
                     // Create dark energy drain VFX
                     this.createDarkCurrentDrainVFX(character, additionalManaCost);
-                    
+
                     gameManager.addLogEntry(
-                        `🌊⚡ The Dark Current drains ${additionalManaCost} additional mana from ${character.name}!`, 
+                        `🌊⚡ The Dark Current drains ${additionalManaCost} additional mana from ${character.name}!`,
                         'stage-effect damage'
                     );
                 } else {
                     // If not enough mana, take what's available
                     const drainedMana = character.stats.currentMana;
                     character.stats.currentMana = 0;
-                    
+
                     if (drainedMana > 0) {
                         // Create dark energy drain VFX
                         this.createDarkCurrentDrainVFX(character, drainedMana);
-                        
+
                         gameManager.addLogEntry(
-                            `🌊⚡ The Dark Current drains ${drainedMana} mana from ${character.name}, leaving them completely drained!`, 
+                            `🌊⚡ The Dark Current drains ${drainedMana} mana from ${character.name}, leaving them completely drained!`,
                             'stage-effect damage'
                         );
                     }
                 }
-                
+
                 // Force UI update to show mana change
                 if (gameManager.uiManager) {
                     gameManager.uiManager.updateCharacterUI(character);
@@ -1675,7 +2030,7 @@ class StageModifiersRegistry {
             id: 'power_of_love',
             name: 'Power of Love',
             description: 'When there are only two player characters, their stats are combined, amplifying their strength through their bond.',
-            icon: '💖',
+            icon: 'bonded_hearts',
             vfx: {
                 type: 'power_of_love',
                 particles: true,
@@ -1734,7 +2089,7 @@ class StageModifiersRegistry {
                         if (char.baseStats) {
                             Object.assign(char.baseStats, combinedStats);
                         }
-                        
+
                         char.stageModifiers.powerOfLoveApplied = true;
 
                         if (gameManager.uiManager) {
@@ -1790,7 +2145,7 @@ class StageModifiersRegistry {
                 playerCharacters.forEach(character => {
                     if (!character.isDead() && character.abilities.length > 0) {
                         // Filter out abilities that are already disabled or passives
-                        const usableAbilities = character.abilities.filter(ability => 
+                        const usableAbilities = character.abilities.filter(ability =>
                             !ability.isDisabled && !ability.isPassive && ability.id !== 'basic_attack'
                         );
 
@@ -1801,7 +2156,7 @@ class StageModifiersRegistry {
                             if (abilityToDisable) {
                                 abilityToDisable.isDisabled = true;
                                 abilityToDisable.isWebbed = true; // Mark as webbed for permanent disable
-                                
+
                                 gameManager.addLogEntry(
                                     `🕸️ ${character.name}'s ${abilityToDisable.name} is now webbed and disabled!`,
                                     'stage-effect debuff'
@@ -1821,7 +2176,77 @@ class StageModifiersRegistry {
             }
         });
         console.log('[StageModifiers] Registered webbed modifier successfully');
+
+        // Register the exploding pumpkin modifier
+        this.registerExplodingPumpkinModifier();
+
+        // Register Crow Protection modifier
+        // this.registerCrowProtectionModifier();
+
+        // Register Triple HP modifier
+        this.registerModifier({
+            id: 'triple_hp',
+            name: 'Triple HP',
+            description: 'All characters have triple HP! Battles last longer but hits feel more impactful.',
+            icon: 'triple_hearts',
+            vfx: {
+                type: 'triple_hp',
+                particles: true,
+                animation: 'hp_boost_aura',
+                description: 'A golden aura surrounds all characters, with floating heart symbols and energy particles that pulse with vitality. Triple HP values glow with golden numbers.'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                console.log('[TripleHP] Applying Triple HP modifier to all characters');
+
+                // Apply to all characters
+                const allCharacters = [
+                    ...gameManager.gameState.playerCharacters,
+                    ...gameManager.gameState.aiCharacters
+                ];
+
+                allCharacters.forEach(character => {
+                    if (character && !character.isDead()) {
+                        // Triple max HP
+                        const originalMaxHp = character.stats.maxHp || character.stats.hp;
+                        const newMaxHp = Math.floor(originalMaxHp * 3);
+
+                        // Triple current HP
+                        const originalCurrentHp = character.stats.currentHp || character.stats.hp;
+                        const newCurrentHp = Math.floor(originalCurrentHp * 3);
+
+                        // Apply the changes
+                        character.stats.maxHp = newMaxHp;
+                        character.stats.currentHp = newCurrentHp;
+
+                        // Store original values for potential restoration
+                        character.originalMaxHp = originalMaxHp;
+                        character.originalCurrentHp = originalCurrentHp;
+
+                        console.log(`[TripleHP] ${character.name}: HP ${originalCurrentHp}/${originalMaxHp} -> ${newCurrentHp}/${newMaxHp}`);
+                    }
+                });
+
+                // Add log entry
+                gameManager.addLogEntry(
+                    '💖 Triple HP activated! All characters now have triple their original HP!',
+                    'stage-effect dramatic'
+                );
+
+                // Update UI for all characters
+                if (gameManager.uiManager) {
+                    allCharacters.forEach(character => {
+                        gameManager.uiManager.updateCharacterUI(character);
+                    });
+                }
+            }
+        });
+
+        // Register AI-specific modifiers for story modes
+        this.registerAIStunningAttackModifier();
+        this.registerAICleansingWindsModifier();
     }
+
+    // Removed duplicate and buggy registerCrowProtectionModifier
 
     createPowerOfLoveVFX(character) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
@@ -1829,7 +2254,7 @@ class StageModifiersRegistry {
 
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'power-of-love-vfx';
-        
+
         for (let i = 0; i < 15; i++) {
             const heart = document.createElement('div');
             heart.className = 'heart-particle';
@@ -1876,7 +2301,7 @@ class StageModifiersRegistry {
                 z-index: 10;
                 overflow: hidden;
             `;
-            
+
             const webIcon = document.createElement('div');
             webIcon.textContent = '🕸️';
             webIcon.style.cssText = `
@@ -1906,7 +2331,7 @@ class StageModifiersRegistry {
                 }
                 webOverlay.appendChild(webLine);
             }
-            
+
             abilityElement.appendChild(webOverlay);
 
             // Add CSS animations to the head if not already present
@@ -1935,7 +2360,7 @@ class StageModifiersRegistry {
     // Helper method to apply draft mode effect to all characters
     applyDraftModeEffect(gameManager, modifier, isStageStart) {
         console.log(`[DraftMode] applyDraftModeEffect called - isStageStart: ${isStageStart}`);
-        
+
         // Add a delay to ensure characters are fully loaded
         const applyEffect = () => {
             const allCharacters = [
@@ -1944,15 +2369,15 @@ class StageModifiersRegistry {
             ];
 
             console.log(`[DraftMode] Found ${allCharacters.length} characters to process for Draft Mode`);
-            
+
             if (allCharacters.length === 0) {
                 console.warn(`[DraftMode] No characters found! Retrying in 500ms...`);
                 setTimeout(applyEffect, 500);
                 return;
             }
-            
+
             let affectedCharacters = [];
-            
+
             allCharacters.forEach(character => {
                 if (!character.isDead()) {
                     // Store original values if not already stored
@@ -1961,35 +2386,35 @@ class StageModifiersRegistry {
                         character.stageModifiers.originalMaxHp = character.stats.maxHp || character.stats.hp;
                         console.log(`[DraftMode] Stored original max HP for ${character.name}: ${character.stageModifiers.originalMaxHp}`);
                     }
-                    
+
                     if (character.stageModifiers?.originalMaxMana === undefined) {
                         character.stageModifiers = character.stageModifiers || {};
                         character.stageModifiers.originalMaxMana = character.stats.maxMana || character.stats.mana;
                         console.log(`[DraftMode] Stored original max mana for ${character.name}: ${character.stageModifiers.originalMaxMana}`);
                     }
-                    
+
                     if (character.stageModifiers?.originalHpPerTurn === undefined) {
                         character.stageModifiers = character.stageModifiers || {};
                         character.stageModifiers.originalHpPerTurn = character.stats.hpPerTurn || 0;
                         console.log(`[DraftMode] Stored original HP regen for ${character.name}: ${character.stageModifiers.originalHpPerTurn}`);
                     }
-                    
+
                     if (character.stageModifiers?.originalManaPerTurn === undefined) {
                         character.stageModifiers = character.stageModifiers || {};
                         character.stageModifiers.originalManaPerTurn = character.stats.manaPerTurn || 0;
                         console.log(`[DraftMode] Stored original mana regen for ${character.name}: ${character.stageModifiers.originalManaPerTurn}`);
                     }
-                    
+
                     // Apply 40% HP and mana increase
                     const originalMaxHp = character.stageModifiers.originalMaxHp;
                     const originalMaxMana = character.stageModifiers.originalMaxMana;
-                    
+
                     const newMaxHp = Math.floor(originalMaxHp * 1.4);
                     const newMaxMana = Math.floor(originalMaxMana * 1.4);
-                    
+
                     console.log(`[DraftMode] Increasing ${character.name}'s HP from ${originalMaxHp} to ${newMaxHp} (40% increase)`);
                     console.log(`[DraftMode] Increasing ${character.name}'s mana from ${originalMaxMana} to ${newMaxMana} (40% increase)`);
-                    
+
                     // Update max HP/Mana stats without forcibly healing the character.
                     character.stats.hp = newMaxHp;
                     character.stats.maxHp = newMaxHp;
@@ -2014,7 +2439,7 @@ class StageModifiersRegistry {
                     } else if (character.stats.currentMana > newMaxMana) {
                         character.stats.currentMana = newMaxMana;
                     }
-                    
+
                     // Update base stats to preserve through recalculation
                     if (character.baseStats) {
                         character.baseStats.hp = newMaxHp;
@@ -2022,30 +2447,30 @@ class StageModifiersRegistry {
                         character.baseStats.mana = newMaxMana;
                         character.baseStats.maxMana = newMaxMana;
                     }
-                    
+
                     // Apply regeneration bonuses
                     const targetHpRegen = character.stageModifiers.originalHpPerTurn + 30;
                     const targetManaRegen = character.stageModifiers.originalManaPerTurn + 25;
-                    
+
                     console.log(`[DraftMode] Setting ${character.name}'s HP regen from ${character.stats.hpPerTurn} to ${targetHpRegen} (+30)`);
                     console.log(`[DraftMode] Setting ${character.name}'s mana regen from ${character.stats.manaPerTurn} to ${targetManaRegen} (+25)`);
-                    
+
                     character.stats.hpPerTurn = targetHpRegen;
                     character.stats.manaPerTurn = targetManaRegen;
-                    
+
                     // Update base stats for regeneration
                     if (character.baseStats) {
                         character.baseStats.hpPerTurn = targetHpRegen;
                         character.baseStats.manaPerTurn = targetManaRegen;
                     }
-                    
+
                     affectedCharacters.push(character.name);
-                    
+
                     // Force recalculate stats to ensure the changes are properly applied
                     if (character.recalculateStats) {
                         character.recalculateStats('draft_mode_modifier');
                     }
-                    
+
                     // Force UI update
                     if (window.gameManager && window.gameManager.uiManager) {
                         window.gameManager.uiManager.updateCharacterUI(character);
@@ -2058,22 +2483,22 @@ class StageModifiersRegistry {
             // Add log entry
             if (isStageStart && affectedCharacters.length > 0) {
                 gameManager.addLogEntry(
-                    `⚔️✨ Draft Mode enhances all combatants! Everyone gains 40% more HP and mana, plus 30 HP regen and 25 mana regen per turn.`, 
+                    `⚔️✨ Draft Mode enhances all combatants! Everyone gains 40% more HP and mana, plus 30 HP regen and 25 mana regen per turn.`,
                     'stage-effect dramatic'
                 );
             } else if (!isStageStart && affectedCharacters.length > 0) {
                 gameManager.addLogEntry(
-                    `⚔️✨ Draft Mode enhancements continue to empower all fighters.`, 
+                    `⚔️✨ Draft Mode enhancements continue to empower all fighters.`,
                     'stage-effect'
                 );
             }
-            
+
             // Create VFX if it's the stage start
             if (isStageStart) {
                 this.createDraftModeVFX(modifier);
             }
         };
-        
+
         // Apply immediately if characters exist, otherwise wait for them
         if (isStageStart) {
             setTimeout(() => applyEffect.call(this), 100); // Small delay for stage start
@@ -2096,11 +2521,11 @@ class StageModifiersRegistry {
 
     processModifiers(gameManager, stageManager, phase = 'turnStart', options = {}) {
         const activeModifiers = stageManager.getStageModifiers() || [];
-        
+
         console.log(`[StageModifiers] Processing ${activeModifiers.length} modifiers for phase: ${phase}`);
         console.log(`[StageModifiers] Available registered modifiers:`, Array.from(this.modifiers.keys()));
         console.log(`[StageModifiers] Stage modifiers to process:`, activeModifiers.map(m => ({ id: m.id, name: m.name })));
-        
+
         // Special debug for aggressive protection
         if (phase === 'stageStart') {
             const aggressiveProtectionModifier = activeModifiers.find(m => m.id === 'aggressive_protection');
@@ -2108,14 +2533,14 @@ class StageModifiersRegistry {
                 console.log(`[StageModifiers] FOUND AGGRESSIVE PROTECTION MODIFIER for stage start!`, aggressiveProtectionModifier);
             }
         }
-        
+
         activeModifiers.forEach(modifier => {
             const registeredModifier = this.getModifier(modifier.id);
-            
+
             if (registeredModifier) {
                 try {
                     console.log(`[StageModifiers] Executing ${registeredModifier.name} (${modifier.id}) for ${phase}`);
-                    
+
                     if (phase === 'turnStart' && registeredModifier.onTurnStart) {
                         registeredModifier.onTurnStart(gameManager, stageManager, modifier);
                     } else if (phase === 'stageStart' && registeredModifier.onStageStart) {
@@ -2130,6 +2555,10 @@ class StageModifiersRegistry {
                         registeredModifier.onCharacterDeath(gameManager, stageManager, modifier, options?.character);
                     } else if (phase === 'abilityUse' && registeredModifier.onAbilityUse) {
                         registeredModifier.onAbilityUse(gameManager, stageManager, modifier, options?.character, options?.ability);
+                    } else if (phase === 'activate' && registeredModifier.onActivate) {
+                        registeredModifier.onActivate(gameManager, stageManager, modifier);
+                    } else if (phase === 'deactivate' && registeredModifier.onDeactivate) {
+                        registeredModifier.onDeactivate(gameManager, stageManager, modifier);
                     } else {
                         console.log(`[StageModifiers] No ${phase} handler for ${modifier.id}`);
                     }
@@ -2144,10 +2573,10 @@ class StageModifiersRegistry {
 
     initializeVFX(stageManager) {
         const activeModifiers = stageManager.getStageModifiers() || [];
-        
+
         activeModifiers.forEach(modifier => {
             const registeredModifier = this.getModifier(modifier.id);
-            
+
             if (registeredModifier && registeredModifier.vfx) {
                 this.createVFX(registeredModifier.vfx, modifier);
             }
@@ -2217,12 +2646,12 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx burning-ground-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create heat wave overlay
         const heatWave = document.createElement('div');
         heatWave.className = 'heat-wave-overlay';
         vfxContainer.appendChild(heatWave);
-        
+
         // Create fire sparks/embers
         for (let i = 0; i < 80; i++) {
             const ember = document.createElement('div');
@@ -2235,114 +2664,67 @@ class StageModifiersRegistry {
 
         // Add to stage background
         const stageBackground = document.getElementById('stage-background');
-        if (stageBackground) {
-            stageBackground.appendChild(vfxContainer);
+        switch (vfxConfig.type) {
+            case 'burning_ground':
+                return this.createBurningGroundVFX(modifier);
+            case 'healing_wind':
+                return this.createHealingWindVFX(modifier);
+            case 'heavy_rain':
+                return this.createHeavyRainVFX(modifier);
+            case 'frozen_ground':
+                return this.createFrozenGroundVFX(modifier);
+            case 'toxic_miasma':
+                return this.createToxicMiasmaVFX(modifier);
+            case 'atlantean_purification':
+                return this.createAtlanteanPurificationVFX();
+            case 'tidal_wave_chaos':
+                return this.createTidalWaveChaosBattlefieldVFX();
+            case 'double_damage':
+                return this.createDoubleDamageVFX();
+            case 'cleansing_winds':
+                return this.createCleansingWindsScreenVFX();
+            case 'healing_disabled':
+                return this.createHealingDisabledVFX();
+            case 'icy_preservation':
+                return this.createIcyPreservationVFX();
+            case 'twisted_apple_orchard':
+                return this.createTwistedAppleOrchardVFX();
+            case 'small_space':
+                // No VFX for small space
+                return;
+            case 'carried_medicines':
+                return this.createCarriedMedicinesVFX();
+            case 'smoke_cloud':
+                return this.createSmokeCloudVFX();
+            case 'healing_fire':
+                return this.createHealingFireVFX();
+            case 'enchanted_weapon':
+                return this.createEnchantedWeaponVFX();
+            case 'desert_heat':
+                return this.createDesertHeatVFX();
+            case 'pack_healing':
+                return this.createPackHealingEnvironmentVFX();
+            case 'aggressive_protection':
+                return this.createAggressiveProtectionVFX();
+            case 'draft_mode':
+                return this.createDraftModeVFX();
+            case 'freezing_waters':
+                return this.createFreezingWatersVFX();
+            case 'dark_current':
+                return this.createDarkCurrentVFX();
+            case 'exploding_pumpkin_field':
+                return this.createPumpkinFieldVFX();
+            case 'ai_stunning_attack':
+                // No VFX for this modifier
+                return;
+            case 'ai_double_damage':
+            case 'fang_invincible':
+                // No VFX implemented for these, but suppress error
+                return;
+            default:
+                console.warn(`[StageModifiers] Unknown VFX type: ${vfxConfig.type}`);
+                return;
         }
-
-        console.log(`[StageModifiers] Created simplified burning ground VFX with heat wave and embers for ${modifier.name}`);
-    }
-
-    createDesertHeatVFX(modifier) {
-        const vfxContainer = document.createElement('div');
-        vfxContainer.className = 'stage-modifier-vfx desert-heat-vfx';
-        vfxContainer.setAttribute('data-modifier', modifier.id);
-        
-        // Create heat shimmer overlay
-        const heatShimmer = document.createElement('div');
-        heatShimmer.className = 'heat-shimmer-overlay';
-        heatShimmer.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                45deg,
-                rgba(255, 140, 0, 0.1) 0%,
-                rgba(255, 69, 0, 0.15) 25%,
-                rgba(255, 215, 0, 0.1) 50%,
-                rgba(255, 140, 0, 0.15) 75%,
-                rgba(255, 69, 0, 0.1) 100%
-            );
-            animation: desertHeatShimmer 4s ease-in-out infinite alternate;
-            pointer-events: none;
-            z-index: 2;
-        `;
-        vfxContainer.appendChild(heatShimmer);
-        
-        // Create sand particles
-        for (let i = 0; i < 30; i++) {
-            const sandParticle = document.createElement('div');
-            sandParticle.className = 'sand-particle';
-            sandParticle.style.cssText = `
-                position: absolute;
-                width: ${2 + Math.random() * 4}px;
-                height: ${2 + Math.random() * 4}px;
-                background: rgba(222, 184, 135, ${0.6 + Math.random() * 0.4});
-                border-radius: 50%;
-                left: ${Math.random() * 100}%;
-                top: ${Math.random() * 100}%;
-                animation: sandDrift ${3 + Math.random() * 4}s linear infinite;
-                animation-delay: ${Math.random() * 3}s;
-                filter: blur(0.5px);
-                z-index: 3;
-            `;
-            vfxContainer.appendChild(sandParticle);
-        }
-        
-        // Create heat waves
-        for (let i = 0; i < 8; i++) {
-            const heatWave = document.createElement('div');
-            heatWave.className = 'desert-heat-wave';
-            heatWave.style.cssText = `
-                position: absolute;
-                width: 100%;
-                height: ${20 + Math.random() * 30}px;
-                background: linear-gradient(
-                    90deg,
-                    transparent 0%,
-                    rgba(255, 140, 0, 0.2) 20%,
-                    rgba(255, 69, 0, 0.3) 50%,
-                    rgba(255, 140, 0, 0.2) 80%,
-                    transparent 100%
-                );
-                left: 0;
-                top: ${Math.random() * 100}%;
-                animation: heatWaveFlow ${2 + Math.random() * 2}s ease-in-out infinite;
-                animation-delay: ${Math.random() * 2}s;
-                filter: blur(1px);
-                opacity: ${0.4 + Math.random() * 0.3};
-                z-index: 1;
-            `;
-            vfxContainer.appendChild(heatWave);
-        }
-        
-        // Create floating cactus emojis for desert theme
-        for (let i = 0; i < 5; i++) {
-            const cactus = document.createElement('div');
-            cactus.className = 'desert-cactus';
-            cactus.textContent = '🌵';
-            cactus.style.cssText = `
-                position: absolute;
-                font-size: ${12 + Math.random() * 8}px;
-                left: ${Math.random() * 100}%;
-                top: ${Math.random() * 100}%;
-                animation: floatingCactus ${6 + Math.random() * 4}s ease-in-out infinite;
-                animation-delay: ${Math.random() * 3}s;
-                opacity: ${0.3 + Math.random() * 0.4};
-                z-index: 4;
-                pointer-events: none;
-            `;
-            vfxContainer.appendChild(cactus);
-        }
-
-        // Add to stage background
-        const stageBackground = document.getElementById('stage-background');
-        if (stageBackground) {
-            stageBackground.appendChild(vfxContainer);
-        }
-
-        console.log(`[StageModifiers] Created desert heat VFX with heat shimmer and sand particles for ${modifier.name}`);
     }
 
     createScreenShakeEffect() {
@@ -2361,7 +2743,7 @@ class StageModifiersRegistry {
 
         const eruption = document.createElement('div');
         eruption.className = 'fire-eruption-vfx';
-        
+
         // Create multiple fire bursts
         for (let i = 0; i < 12; i++) {
             const burst = document.createElement('div');
@@ -2372,7 +2754,7 @@ class StageModifiersRegistry {
         }
 
         charElement.appendChild(eruption);
-        
+
         // Remove after animation
         setTimeout(() => {
             if (eruption.parentNode) {
@@ -2386,7 +2768,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx healing-wind-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create wind particle effect
         for (let i = 0; i < 20; i++) {
             const particle = document.createElement('div');
@@ -2408,7 +2790,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx rain-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create rain drops
         for (let i = 0; i < 100; i++) {
             const drop = document.createElement('div');
@@ -2430,7 +2812,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx frozen-ground-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create ice crystal effect
         for (let i = 0; i < 15; i++) {
             const crystal = document.createElement('div');
@@ -2452,7 +2834,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx toxic-miasma-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create gas swirl effect
         for (let i = 0; i < 25; i++) {
             const gas = document.createElement('div');
@@ -2475,7 +2857,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx carried-medicines-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create floating medicine bottles and pills
         for (let i = 0; i < 15; i++) {
             const medicine = document.createElement('div');
@@ -2484,11 +2866,11 @@ class StageModifiersRegistry {
             medicine.style.top = Math.random() * 100 + '%';
             medicine.style.animationDelay = Math.random() * 4 + 's';
             medicine.style.animationDuration = (4 + Math.random() * 2) + 's';
-            
+
             // Add medicine icons randomly
             const icons = ['💊', '🧪', '💉', '🩹'];
             medicine.textContent = icons[Math.floor(Math.random() * icons.length)];
-            
+
             vfxContainer.appendChild(medicine);
         }
 
@@ -2501,16 +2883,16 @@ class StageModifiersRegistry {
     // Helper method to apply small space effect to all characters
     applySmallSpaceEffect(gameManager, modifier, isStageStart) {
         console.log(`[StageModifiers] applySmallSpaceEffect called - isStageStart: ${isStageStart}`);
-        
+
         const allCharacters = [
             ...gameManager.gameState.playerCharacters,
             ...gameManager.gameState.aiCharacters
         ];
 
         console.log(`[StageModifiers] Found ${allCharacters.length} characters to process for Small Space`);
-        
+
         let affectedCharacters = [];
-        
+
         allCharacters.forEach(character => {
             if (!character.isDead()) {
                 // Store original dodge chance if not already stored
@@ -2518,7 +2900,7 @@ class StageModifiersRegistry {
                     character.originalDodgeChance = character.stats.dodgeChance || 0;
                     console.log(`[StageModifiers] Stored original dodge chance for ${character.name}: ${character.originalDodgeChance}`);
                 }
-                
+
                 // Set dodge chance to 0
                 if (character.stats.dodgeChance > 0) {
                     console.log(`[StageModifiers] Setting ${character.name}'s dodge chance from ${character.stats.dodgeChance} to 0`);
@@ -2535,16 +2917,16 @@ class StageModifiersRegistry {
         // Add log entry
         if (isStageStart && affectedCharacters.length > 0) {
             gameManager.addLogEntry(
-                `🚪 The cramped bathroom space prevents all dodging! All characters lose their ability to dodge.`, 
+                `🚪 The cramped bathroom space prevents all dodging! All characters lose their ability to dodge.`,
                 'stage-effect'
             );
         } else if (!isStageStart && affectedCharacters.length > 0) {
             gameManager.addLogEntry(
-                `🚪 The tight space continues to prevent dodging.`, 
+                `🚪 The tight space continues to prevent dodging.`,
                 'stage-effect'
             );
         }
-        
+
         // Update character UIs to reflect the stat change
         allCharacters.forEach(character => {
             if (window.gameManager && window.gameManager.uiManager) {
@@ -2560,17 +2942,17 @@ class StageModifiersRegistry {
         // Create mana restoration VFX on the character
         const medicineVfx = document.createElement('div');
         medicineVfx.className = 'medicine-restore-vfx';
-        
+
         // Create mana restoration text
         const manaText = document.createElement('div');
         manaText.className = 'mana-restore-text';
         manaText.textContent = `+${manaRestored} MP`;
         manaText.style.color = '#4169E1'; // Royal blue for mana
-        
+
         // Create floating medicine particles
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'medicine-particles';
-        
+
         for (let i = 0; i < 8; i++) {
             const particle = document.createElement('div');
             particle.className = 'medicine-particle';
@@ -2580,11 +2962,11 @@ class StageModifiersRegistry {
             particle.style.animationDelay = (Math.random() * 0.5) + 's';
             particlesContainer.appendChild(particle);
         }
-        
+
         medicineVfx.appendChild(manaText);
         medicineVfx.appendChild(particlesContainer);
         charElement.appendChild(medicineVfx);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (medicineVfx.parentNode) {
@@ -2598,7 +2980,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx smoke-cloud-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create DRAMATIC screen-covering smoke overlay with pulsing effect
         const smokeOverlay = document.createElement('div');
         smokeOverlay.className = 'heavy-smoke-overlay';
@@ -2618,7 +3000,7 @@ class StageModifiersRegistry {
             filter: blur(1px);
         `;
         vfxContainer.appendChild(smokeOverlay);
-        
+
         // Create MASSIVE billowing smoke clouds
         for (let i = 0; i < 25; i++) {
             const bigSmoke = document.createElement('div');
@@ -2683,7 +3065,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(particle);
         }
-        
+
         // Add LIGHTNING FLASHES through the smoke for extra drama
         for (let i = 0; i < 3; i++) {
             const lightning = document.createElement('div');
@@ -2771,7 +3153,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx healing-fire-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create corrupted healing overlay with pulsing effect
         const healingFireOverlay = document.createElement('div');
         healingFireOverlay.className = 'healing-fire-overlay';
@@ -2791,7 +3173,7 @@ class StageModifiersRegistry {
             filter: blur(2px);
         `;
         vfxContainer.appendChild(healingFireOverlay);
-        
+
         // Create corrupted healing flames
         for (let i = 0; i < 20; i++) {
             const flame = document.createElement('div');
@@ -2823,8 +3205,8 @@ class StageModifiersRegistry {
                 position: absolute;
                 width: ${size}px;
                 height: ${size}px;
-                background: ${isHealing ? 
-                    `rgba(100, 255, 150, ${0.6 + Math.random() * 0.4})` : 
+                background: ${isHealing ?
+                    `rgba(100, 255, 150, ${0.6 + Math.random() * 0.4})` :
                     `rgba(255, 100, 50, ${0.6 + Math.random() * 0.4})`};
                 border-radius: 50%;
                 left: ${Math.random() * 100}%;
@@ -2835,7 +3217,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(particle);
         }
-        
+
         // Add CSS animations for healing fire
         if (!document.getElementById('healing-fire-styles')) {
             const styleSheet = document.createElement('style');
@@ -2917,7 +3299,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 50;
         `;
-        
+
         // Create damage text with healing fire theme
         const damageText = document.createElement('div');
         damageText.className = 'healing-fire-damage-text';
@@ -2937,7 +3319,7 @@ class StageModifiersRegistry {
             animation: healingFireDamageText 2.5s ease-out;
             z-index: 51;
         `;
-        
+
         // Create corrupted healing burst around character
         const healingBurst = document.createElement('div');
         healingBurst.className = 'healing-fire-burst';
@@ -2953,7 +3335,7 @@ class StageModifiersRegistry {
             animation: healingFireBurst 1.8s ease-out;
             z-index: 49;
         `;
-        
+
         // Create swirling corruption particles
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'healing-fire-particles';
@@ -2965,7 +3347,7 @@ class StageModifiersRegistry {
             height: 100%;
             z-index: 48;
         `;
-        
+
         for (let i = 0; i < 15; i++) {
             const particle = document.createElement('div');
             particle.className = 'healing-fire-corruption-particle';
@@ -2976,8 +3358,8 @@ class StageModifiersRegistry {
                 position: absolute;
                 width: ${size}px;
                 height: ${size}px;
-                background: ${isHealing ? 
-                    `radial-gradient(circle, rgba(100, 255, 150, 0.9) 0%, rgba(150, 255, 100, 0.6) 50%, transparent 100%)` : 
+                background: ${isHealing ?
+                    `radial-gradient(circle, rgba(100, 255, 150, 0.9) 0%, rgba(150, 255, 100, 0.6) 50%, transparent 100%)` :
                     `radial-gradient(circle, rgba(255, 100, 50, 0.9) 0%, rgba(255, 150, 100, 0.6) 50%, transparent 100%)`};
                 border-radius: 50%;
                 top: 50%;
@@ -2991,7 +3373,7 @@ class StageModifiersRegistry {
             particle.style.setProperty('--distance', `${60 + Math.random() * 40}px`);
             particlesContainer.appendChild(particle);
         }
-        
+
         // Add CSS animations for healing fire damage VFX
         if (!document.getElementById('healing-fire-damage-styles')) {
             const styleSheet = document.createElement('style');
@@ -3052,19 +3434,19 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         healingFireVfx.appendChild(damageText);
         healingFireVfx.appendChild(healingBurst);
         healingFireVfx.appendChild(particlesContainer);
         charElement.appendChild(healingFireVfx);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (healingFireVfx.parentNode) {
                 healingFireVfx.remove();
             }
         }, 3000);
-        
+
         console.log(`[StageModifiers] Created healing fire damage VFX for ${character.name} with ${damageAmount} damage`);
     }
 
@@ -3084,7 +3466,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 100;
         `;
-        
+
         // Create dramatic screen flash effect
         const flashOverlay = document.createElement('div');
         flashOverlay.className = 'smoke-miss-flash';
@@ -3100,7 +3482,7 @@ class StageModifiersRegistry {
             z-index: 1000;
         `;
         document.body.appendChild(flashOverlay);
-        
+
         // Create large miss text with dramatic styling
         const missText = document.createElement('div');
         missText.className = 'dramatic-miss-text';
@@ -3120,7 +3502,7 @@ class StageModifiersRegistry {
             animation: dramaticMissText 2s ease-out;
             z-index: 101;
         `;
-        
+
         // Create intense smoke burst
         const smokeBurst = document.createElement('div');
         smokeBurst.className = 'smoke-burst-container';
@@ -3133,7 +3515,7 @@ class StageModifiersRegistry {
             height: 200px;
             z-index: 99;
         `;
-        
+
         // Create multiple layers of smoke burst
         for (let layer = 0; layer < 3; layer++) {
             const smokeBurstLayer = document.createElement('div');
@@ -3154,7 +3536,7 @@ class StageModifiersRegistry {
             `;
             smokeBurst.appendChild(smokeBurstLayer);
         }
-        
+
         // Create swirling smoke particles
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'dramatic-smoke-particles';
@@ -3166,7 +3548,7 @@ class StageModifiersRegistry {
             height: 100%;
             z-index: 98;
         `;
-        
+
         for (let i = 0; i < 25; i++) {
             const particle = document.createElement('div');
             particle.className = 'dramatic-smoke-particle';
@@ -3190,7 +3572,7 @@ class StageModifiersRegistry {
             particle.style.setProperty('--distance', `${80 + Math.random() * 60}px`);
             particlesContainer.appendChild(particle);
         }
-        
+
         // Add enhanced CSS animations for miss VFX
         if (!document.getElementById('smoke-miss-styles')) {
             const styleSheet = document.createElement('style');
@@ -3257,16 +3639,16 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         smokeVfx.appendChild(missText);
         smokeVfx.appendChild(smokeBurst);
         smokeVfx.appendChild(particlesContainer);
         charElement.appendChild(smokeVfx);
-        
+
         // Screen shake effect
         const battleContainer = document.querySelector('.battle-container') || document.body;
         battleContainer.style.animation = 'smokeScreenShake 0.6s ease-out';
-        
+
         // Add screen shake animation if not exists
         if (!document.getElementById('smoke-screen-shake-styles')) {
             const shakeSheet = document.createElement('style');
@@ -3287,7 +3669,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(shakeSheet);
         }
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (smokeVfx.parentNode) {
@@ -3298,7 +3680,7 @@ class StageModifiersRegistry {
             }
             battleContainer.style.animation = '';
         }, 3000);
-        
+
         console.log(`[StageModifiers] Created dramatic smoke miss VFX for ${character.name}`);
     }
 
@@ -3307,26 +3689,26 @@ class StageModifiersRegistry {
         gameManager.enchantedWeaponBonuses++;
         const bonusAmount = 0.15; // 15% bonus per milestone
         const totalBonusPercent = gameManager.enchantedWeaponBonuses * bonusAmount * 100;
-        
+
         gameManager.addLogEntry(
-            `⚔️ Turn ${currentTurn}: The forge's magic surges! Enemy weapons gain another +15% physical damage!`, 
+            `⚔️ Turn ${currentTurn}: The forge's magic surges! Enemy weapons gain another +15% physical damage!`,
             'stage-effect dramatic'
         );
-        
+
         gameManager.addLogEntry(
-            `🔥 Enemy weapons now deal +${totalBonusPercent}% physical damage!`, 
+            `🔥 Enemy weapons now deal +${totalBonusPercent}% physical damage!`,
             'stage-effect warning'
         );
-        
+
         // Apply the bonus to all AI characters using proper buff effects
         gameManager.gameState.aiCharacters.forEach(character => {
             if (!character.isDead()) {
                 // Remove existing enchanted weapon buff if it exists
                 character.removeBuff('enchanted_weapon_buff');
-                
+
                 // Calculate total damage bonus (cumulative)
                 const totalDamageMultiplier = 1 + (gameManager.enchantedWeaponBonuses * bonusAmount);
-                
+
                 // Create new enchanted weapon buff with cumulative bonus
                 const enchantmentBuff = new Effect(
                     'enchanted_weapon_buff',
@@ -3336,40 +3718,40 @@ class StageModifiersRegistry {
                     null,
                     false // Not a debuff
                 );
-                
+
                 enchantmentBuff.setDescription(`Weapon enhanced by forge magic. +${totalBonusPercent}% physical damage.`);
-                
+
                 // Use stat modifiers to properly apply the bonus
                 enchantmentBuff.statModifiers = [
-                    { 
-                        stat: 'physicalDamage', 
-                        value: totalDamageMultiplier, 
-                        operation: 'multiply' 
+                    {
+                        stat: 'physicalDamage',
+                        value: totalDamageMultiplier,
+                        operation: 'multiply'
                     }
                 ];
-                
+
                 // Add custom properties for tracking
                 enchantmentBuff.enchantmentLevel = gameManager.enchantedWeaponBonuses;
                 enchantmentBuff.totalBonusPercent = totalBonusPercent;
-                
+
                 // Apply the buff
                 character.addBuff(enchantmentBuff);
-                
+
                 // Create enchantment VFX on the character
                 this.createEnchantedWeaponBuffVFX(character, totalBonusPercent);
-                
+
                 gameManager.addLogEntry(
-                    `${character.name}'s weapon glows with infernal power! (+${totalBonusPercent}% physical damage)`, 
+                    `${character.name}'s weapon glows with infernal power! (+${totalBonusPercent}% physical damage)`,
                     'stage-effect enemy-buff'
                 );
-                
+
                 // Force UI update to reflect the new buff
                 if (gameManager.uiManager) {
                     gameManager.uiManager.updateCharacterUI(character);
                 }
             }
         });
-        
+
         // Create screen-wide enchantment VFX
         this.createEnchantmentSurgeVFX(currentTurn, totalBonusPercent);
     }
@@ -3378,7 +3760,7 @@ class StageModifiersRegistry {
         // Create ambient forge glow VFX in the background
         const stageBackground = document.getElementById('stage-background');
         if (!stageBackground) return;
-        
+
         const forgeGlow = document.createElement('div');
         forgeGlow.className = 'enchanted-weapon-forge-glow stage-modifier-vfx';
         forgeGlow.style.cssText = `
@@ -3392,7 +3774,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 1;
         `;
-        
+
         // Add forge glow animation
         if (!document.getElementById('enchanted-weapon-styles')) {
             const styleSheet = document.createElement('style');
@@ -3446,7 +3828,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         stageBackground.appendChild(forgeGlow);
         console.log('[StageModifiers] Created enchanted weapon forge glow VFX');
     }
@@ -3454,7 +3836,7 @@ class StageModifiersRegistry {
     createEnchantedWeaponBuffVFX(character, totalBonusPercent) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!charElement) return;
-        
+
         // Create weapon glow effect
         const weaponGlow = document.createElement('div');
         weaponGlow.className = 'enchanted-weapon-character-buff';
@@ -3471,7 +3853,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 95;
         `;
-        
+
         // Create enchantment sparks
         const sparksContainer = document.createElement('div');
         sparksContainer.className = 'enchantment-sparks';
@@ -3484,7 +3866,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 96;
         `;
-        
+
         for (let i = 0; i < 8; i++) {
             const spark = document.createElement('div');
             const angle = (i / 8) * 360;
@@ -3503,7 +3885,7 @@ class StageModifiersRegistry {
             spark.style.setProperty('--angle', `${angle}deg`);
             sparksContainer.appendChild(spark);
         }
-        
+
         // Create floating damage bonus text
         const bonusText = document.createElement('div');
         bonusText.className = 'enchantment-bonus-text';
@@ -3523,7 +3905,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 97;
         `;
-        
+
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'enchanted-weapon-vfx-container';
         vfxContainer.style.cssText = `
@@ -3534,26 +3916,26 @@ class StageModifiersRegistry {
             height: 100%;
             pointer-events: none;
         `;
-        
+
         vfxContainer.appendChild(weaponGlow);
         vfxContainer.appendChild(sparksContainer);
         vfxContainer.appendChild(bonusText);
         charElement.appendChild(vfxContainer);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (vfxContainer.parentNode) {
                 vfxContainer.remove();
             }
         }, 2500);
-        
+
         console.log(`[StageModifiers] Created enchanted weapon buff VFX for ${character.name} (+${totalBonusPercent}% damage)`);
     }
 
     createEnchantmentSurgeVFX(currentTurn, totalBonusPercent) {
         // Create screen-wide surge effect
         const battleContainer = document.querySelector('.battle-container') || document.body;
-        
+
         const surgeOverlay = document.createElement('div');
         surgeOverlay.className = 'enchantment-surge-overlay';
         surgeOverlay.style.cssText = `
@@ -3567,7 +3949,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 150;
         `;
-        
+
         // Create large surge text
         const surgeText = document.createElement('div');
         surgeText.className = 'enchantment-surge-text';
@@ -3588,7 +3970,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 151;
         `;
-        
+
         // Add surge animation
         if (!document.getElementById('enchantment-surge-styles')) {
             const styleSheet = document.createElement('style');
@@ -3619,10 +4001,10 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         battleContainer.appendChild(surgeOverlay);
         battleContainer.appendChild(surgeText);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (surgeOverlay.parentNode) {
@@ -3632,7 +4014,7 @@ class StageModifiersRegistry {
                 surgeText.remove();
             }
         }, 3500);
-        
+
         console.log(`[StageModifiers] Created enchantment surge VFX for turn ${currentTurn}`);
     }
 
@@ -3640,7 +4022,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx pack-healing-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create healing aura overlay
         const healingAura = document.createElement('div');
         healingAura.className = 'pack-healing-aura';
@@ -3662,7 +4044,7 @@ class StageModifiersRegistry {
             z-index: 2;
         `;
         vfxContainer.appendChild(healingAura);
-        
+
         // Create floating healing orbs
         for (let i = 0; i < 15; i++) {
             const healingOrb = document.createElement('div');
@@ -3682,7 +4064,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(healingOrb);
         }
-        
+
         // Create healing energy particles
         for (let i = 0; i < 8; i++) {
             const energyParticle = document.createElement('div');
@@ -3705,7 +4087,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(energyParticle);
         }
-        
+
         // Create healing wave particles
         for (let i = 0; i < 12; i++) {
             const waveParticle = document.createElement('div');
@@ -3727,7 +4109,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(waveParticle);
         }
-        
+
         // Add CSS animations if not already present
         if (!document.getElementById('pack-healing-animations')) {
             const styleSheet = document.createElement('style');
@@ -3797,7 +4179,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         // Add to stage background
         const stageBackground = document.getElementById('stage-background');
         if (stageBackground) {
@@ -3810,7 +4192,7 @@ class StageModifiersRegistry {
     createPackHealingVFX(character, healAmount) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!charElement) return;
-        
+
         // Create healing burst effect
         const healingBurst = document.createElement('div');
         healingBurst.className = 'pack-healing-burst';
@@ -3827,7 +4209,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 95;
         `;
-        
+
         // Create healing particles
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'pack-healing-particles';
@@ -3840,7 +4222,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 96;
         `;
-        
+
         for (let i = 0; i < 12; i++) {
             const particle = document.createElement('div');
             const angle = (i / 12) * 360;
@@ -3859,7 +4241,7 @@ class StageModifiersRegistry {
             particle.style.setProperty('--angle', `${angle}deg`);
             particlesContainer.appendChild(particle);
         }
-        
+
         // Create floating heal amount text
         const healText = document.createElement('div');
         healText.className = 'pack-healing-text';
@@ -3879,7 +4261,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 97;
         `;
-        
+
         // Create pack bond energy ring
         const bondRing = document.createElement('div');
         bondRing.className = 'pack-bond-ring';
@@ -3900,7 +4282,7 @@ class StageModifiersRegistry {
                 0 0 8px rgba(100, 255, 150, 0.6),
                 inset 0 0 8px rgba(100, 255, 150, 0.4);
         `;
-        
+
         // Add animations if not already present
         if (!document.getElementById('pack-healing-character-animations')) {
             const styleSheet = document.createElement('style');
@@ -3945,7 +4327,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'pack-healing-character-vfx';
         vfxContainer.style.cssText = `
@@ -3956,20 +4338,20 @@ class StageModifiersRegistry {
             height: 100%;
             pointer-events: none;
         `;
-        
+
         vfxContainer.appendChild(healingBurst);
         vfxContainer.appendChild(particlesContainer);
         vfxContainer.appendChild(healText);
         vfxContainer.appendChild(bondRing);
         charElement.appendChild(vfxContainer);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (vfxContainer.parentNode) {
                 vfxContainer.remove();
             }
         }, 2000);
-        
+
         console.log(`[StageModifiers] Created pack healing VFX for ${character.name} (+${healAmount} HP)`);
     }
 
@@ -3979,7 +4361,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx healing-disabled-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create dark curse overlay
         const darkCurse = document.createElement('div');
         darkCurse.className = 'dark-curse-overlay';
@@ -4000,7 +4382,7 @@ class StageModifiersRegistry {
             z-index: 1;
         `;
         vfxContainer.appendChild(darkCurse);
-        
+
         // Create floating dark particles
         for (let i = 0; i < 25; i++) {
             const particle = document.createElement('div');
@@ -4021,7 +4403,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(particle);
         }
-        
+
         // Add CSS animations for healing disabled
         if (!document.getElementById('healing-disabled-styles')) {
             const styleSheet = document.createElement('style');
@@ -4041,7 +4423,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         // Add to stage background
         const stageBackground = document.getElementById('stage-background');
         if (stageBackground) {
@@ -4066,7 +4448,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx aggressive-protection-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create protective aura overlay
         const protectiveAura = document.createElement('div');
         protectiveAura.className = 'protective-aura-overlay';
@@ -4088,7 +4470,7 @@ class StageModifiersRegistry {
             z-index: 2;
         `;
         vfxContainer.appendChild(protectiveAura);
-        
+
         // Create floating shield particles
         for (let i = 0; i < 15; i++) {
             const shieldParticle = document.createElement('div');
@@ -4109,7 +4491,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(shieldParticle);
         }
-        
+
         // Create energy rings
         for (let i = 0; i < 4; i++) {
             const energyRing = document.createElement('div');
@@ -4130,7 +4512,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(energyRing);
         }
-        
+
         // Create aggressive symbols floating around
         const symbols = ['⚔️', '🛡️', '⚡', '💥'];
         for (let i = 0; i < 8; i++) {
@@ -4198,7 +4580,7 @@ class StageModifiersRegistry {
     createAggressiveProtectionDodgeVFX(character) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!charElement) return;
-        
+
         // Create dodge enhancement effect
         const dodgeVFX = document.createElement('div');
         dodgeVFX.className = 'aggressive-protection-dodge-vfx';
@@ -4211,7 +4593,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 90;
         `;
-        
+
         // Create speed lines effect
         for (let i = 0; i < 8; i++) {
             const speedLine = document.createElement('div');
@@ -4228,7 +4610,7 @@ class StageModifiersRegistry {
             `;
             dodgeVFX.appendChild(speedLine);
         }
-        
+
         // Create instinct glow
         const instinctGlow = document.createElement('div');
         instinctGlow.style.cssText = `
@@ -4243,7 +4625,7 @@ class StageModifiersRegistry {
             border-radius: 50%;
         `;
         dodgeVFX.appendChild(instinctGlow);
-        
+
         // Create floating text
         const floatingText = document.createElement('div');
         floatingText.textContent = '+30% Dodge';
@@ -4260,7 +4642,7 @@ class StageModifiersRegistry {
             pointer-events: none;
         `;
         dodgeVFX.appendChild(floatingText);
-        
+
         // Add animations if not present
         if (!document.getElementById('aggressive-protection-dodge-animations')) {
             const styleSheet = document.createElement('style');
@@ -4280,23 +4662,23 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         charElement.appendChild(dodgeVFX);
-        
+
         // Remove after animation
         setTimeout(() => {
             if (dodgeVFX.parentNode) {
                 dodgeVFX.remove();
             }
         }, 1500);
-        
+
         console.log(`[AggressiveProtection] Created dodge bonus VFX for ${character.name}`);
     }
 
     createAggressiveProtectionDamageVFX(character) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!charElement) return;
-        
+
         // Create damage enhancement effect
         const damageVFX = document.createElement('div');
         damageVFX.className = 'aggressive-protection-damage-vfx';
@@ -4309,7 +4691,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 90;
         `;
-        
+
         // Create combat aura
         const combatAura = document.createElement('div');
         combatAura.style.cssText = `
@@ -4324,7 +4706,7 @@ class StageModifiersRegistry {
             border-radius: 50%;
         `;
         damageVFX.appendChild(combatAura);
-        
+
         // Create power sparks
         for (let i = 0; i < 12; i++) {
             const spark = document.createElement('div');
@@ -4342,7 +4724,7 @@ class StageModifiersRegistry {
             `;
             damageVFX.appendChild(spark);
         }
-        
+
         // Create floating damage text
         const damageText = document.createElement('div');
         damageText.textContent = '+Damage';
@@ -4359,7 +4741,7 @@ class StageModifiersRegistry {
             pointer-events: none;
         `;
         damageVFX.appendChild(damageText);
-        
+
         // Add animations if not present
         if (!document.getElementById('aggressive-protection-damage-animations')) {
             const styleSheet = document.createElement('style');
@@ -4393,16 +4775,16 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         charElement.appendChild(damageVFX);
-        
+
         // Remove after animation
         setTimeout(() => {
             if (damageVFX.parentNode) {
                 damageVFX.remove();
             }
         }, 1500);
-        
+
         console.log(`[AggressiveProtection] Created damage bonus VFX for ${character.name}`);
     }
 
@@ -4410,7 +4792,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx aquatic-home-protector-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create aquatic healing overlay with flowing water effect
         const aquaticOverlay = document.createElement('div');
         aquaticOverlay.className = 'aquatic-healing-overlay';
@@ -4430,7 +4812,7 @@ class StageModifiersRegistry {
             filter: blur(1px);
         `;
         vfxContainer.appendChild(aquaticOverlay);
-        
+
         // Create floating water bubbles
         for (let i = 0; i < 25; i++) {
             const bubble = document.createElement('div');
@@ -4452,7 +4834,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(bubble);
         }
-        
+
         // Create healing water streams
         for (let i = 0; i < 15; i++) {
             const stream = document.createElement('div');
@@ -4474,7 +4856,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(stream);
         }
-        
+
         // Create floating water droplets
         for (let i = 0; i < 20; i++) {
             const droplet = document.createElement('div');
@@ -4496,7 +4878,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(droplet);
         }
-        
+
         // Add CSS animations for aquatic home protector
         if (!document.getElementById('aquatic-home-protector-styles')) {
             const styleSheet = document.createElement('style');
@@ -4577,7 +4959,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         // Add to stage background
         const stageBackground = document.getElementById('stage-background');
         if (stageBackground) {
@@ -4590,7 +4972,7 @@ class StageModifiersRegistry {
     createAquaticHealingVFX(character, healAmount) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!charElement) return;
-        
+
         // Create aquatic healing burst effect
         const aquaticVfx = document.createElement('div');
         aquaticVfx.className = 'aquatic-healing-character-vfx';
@@ -4603,7 +4985,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 95;
         `;
-        
+
         // Create healing water burst
         const waterBurst = document.createElement('div');
         waterBurst.className = 'aquatic-healing-burst';
@@ -4619,7 +5001,7 @@ class StageModifiersRegistry {
             animation: aquaticHealingBurst 1.8s ease-out;
             z-index: 94;
         `;
-        
+
         // Create floating heal amount text
         const healText = document.createElement('div');
         healText.className = 'aquatic-healing-text';
@@ -4640,7 +5022,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 96;
         `;
-        
+
         // Create water healing particles
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'aquatic-healing-particles';
@@ -4653,7 +5035,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 95;
         `;
-        
+
         for (let i = 0; i < 15; i++) {
             const particle = document.createElement('div');
             particle.className = 'aquatic-healing-particle';
@@ -4677,7 +5059,7 @@ class StageModifiersRegistry {
             particle.style.setProperty('--distance', `${50 + Math.random() * 30}px`);
             particlesContainer.appendChild(particle);
         }
-        
+
         // Create protective water ring
         const protectiveRing = document.createElement('div');
         protectiveRing.className = 'aquatic-protective-ring';
@@ -4698,7 +5080,7 @@ class StageModifiersRegistry {
                 0 0 12px rgba(100, 200, 255, 0.6),
                 inset 0 0 12px rgba(100, 200, 255, 0.4);
         `;
-        
+
         // Add character-specific animations if not already present
         if (!document.getElementById('aquatic-healing-character-animations')) {
             const styleSheet = document.createElement('style');
@@ -4766,27 +5148,27 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         aquaticVfx.appendChild(waterBurst);
         aquaticVfx.appendChild(healText);
         aquaticVfx.appendChild(particlesContainer);
         aquaticVfx.appendChild(protectiveRing);
         charElement.appendChild(aquaticVfx);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (aquaticVfx.parentNode) {
                 aquaticVfx.remove();
             }
         }, 2500);
-        
+
         console.log(`[StageModifiers] Created aquatic healing VFX for ${character.name} (+${healAmount} HP)`);
     }
 
     createAquaticLifestealVFX(character, healAmount) {
         const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
         if (!charElement) return;
-        
+
         // Create aquatic lifesteal effect with a different style than regular healing
         const lifestealVfx = document.createElement('div');
         lifestealVfx.className = 'aquatic-lifesteal-character-vfx';
@@ -4799,7 +5181,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 92;
         `;
-        
+
         // Create lifesteal water swirl
         const waterSwirl = document.createElement('div');
         waterSwirl.className = 'aquatic-lifesteal-swirl';
@@ -4815,7 +5197,7 @@ class StageModifiersRegistry {
             animation: aquaticLifestealSwirl 1.5s ease-out;
             z-index: 91;
         `;
-        
+
         // Create floating lifesteal text with different color
         const lifestealText = document.createElement('div');
         lifestealText.className = 'aquatic-lifesteal-text';
@@ -4836,7 +5218,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 93;
         `;
-        
+
         // Create lifesteal energy streams
         const streamsContainer = document.createElement('div');
         streamsContainer.className = 'aquatic-lifesteal-streams';
@@ -4849,7 +5231,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 90;
         `;
-        
+
         for (let i = 0; i < 8; i++) {
             const stream = document.createElement('div');
             stream.className = 'aquatic-lifesteal-stream';
@@ -4869,7 +5251,7 @@ class StageModifiersRegistry {
             `;
             streamsContainer.appendChild(stream);
         }
-        
+
         // Create combat energy indicator
         const combatIndicator = document.createElement('div');
         combatIndicator.className = 'aquatic-combat-indicator';
@@ -4885,7 +5267,7 @@ class StageModifiersRegistry {
             z-index: 94;
             filter: drop-shadow(0 0 6px rgba(0, 255, 128, 0.8));
         `;
-        
+
         // Add lifesteal-specific animations if not already present
         if (!document.getElementById('aquatic-lifesteal-animations')) {
             const styleSheet = document.createElement('style');
@@ -4953,26 +5335,26 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         lifestealVfx.appendChild(waterSwirl);
         lifestealVfx.appendChild(lifestealText);
         lifestealVfx.appendChild(streamsContainer);
         lifestealVfx.appendChild(combatIndicator);
         charElement.appendChild(lifestealVfx);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (lifestealVfx.parentNode) {
                 lifestealVfx.remove();
             }
         }, 2000);
-        
+
         console.log(`[StageModifiers] Created aquatic lifesteal VFX for ${character.name} (+${healAmount} HP from damage)`);
     }
 
     createIcyPreservationVFX(modifier) {
         const gameContainer = document.querySelector('.game-container') || document.body;
-        
+
         // Create ice preservation overlay
         const icyOverlay = document.createElement('div');
         icyOverlay.id = 'icy-preservation-vfx';
@@ -4995,7 +5377,7 @@ class StageModifiersRegistry {
             );
             animation: icyPreservationPulse 4s ease-in-out infinite;
         `;
-        
+
         // Create ice crystals container
         const crystalsContainer = document.createElement('div');
         crystalsContainer.className = 'icy-crystals-container';
@@ -5008,7 +5390,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 11;
         `;
-        
+
         // Create multiple ice crystals
         for (let i = 0; i < 15; i++) {
             const crystal = document.createElement('div');
@@ -5018,7 +5400,7 @@ class StageModifiersRegistry {
             const randomY = Math.random() * 100;
             const randomDelay = Math.random() * 3;
             const randomDuration = 6 + Math.random() * 4;
-            
+
             crystal.style.cssText = `
                 position: absolute;
                 left: ${randomX}%;
@@ -5032,7 +5414,7 @@ class StageModifiersRegistry {
             `;
             crystalsContainer.appendChild(crystal);
         }
-        
+
         // Create frost border effect
         const frostBorder = document.createElement('div');
         frostBorder.className = 'frost-border';
@@ -5050,7 +5432,7 @@ class StageModifiersRegistry {
             z-index: 13;
             animation: frostBorderGlow 3s ease-in-out infinite alternate;
         `;
-        
+
         // Add ice preservation animations if not already present
         if (!document.getElementById('icy-preservation-animations')) {
             const styleSheet = document.createElement('style');
@@ -5101,11 +5483,11 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         icyOverlay.appendChild(crystalsContainer);
         icyOverlay.appendChild(frostBorder);
         gameContainer.appendChild(icyOverlay);
-        
+
         console.log('[StageModifiers] Created Icy Preservation environment VFX');
     }
 
@@ -5120,7 +5502,7 @@ class StageModifiersRegistry {
     createCleansingWindsVFX(character) {
         const characterElement = document.querySelector(`[data-character-id="${character.id}"]`);
         if (!characterElement) return;
-        
+
         // Create cleansing winds VFX container
         const cleansingVfx = document.createElement('div');
         cleansingVfx.className = 'cleansing-winds-vfx';
@@ -5135,7 +5517,7 @@ class StageModifiersRegistry {
             border-radius: 10px;
             overflow: hidden;
         `;
-        
+
         // Create swirling wind effect
         const windSwirl = document.createElement('div');
         windSwirl.className = 'wind-swirl';
@@ -5158,7 +5540,7 @@ class StageModifiersRegistry {
             animation: windSwirlRotate 1.5s ease-out;
             filter: blur(2px) drop-shadow(0 0 10px rgba(135, 206, 250, 0.6));
         `;
-        
+
         // Create cleansing particles
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'cleansing-particles';
@@ -5170,7 +5552,7 @@ class StageModifiersRegistry {
             height: 100%;
             pointer-events: none;
         `;
-        
+
         // Create multiple cleansing particles
         for (let i = 0; i < 8; i++) {
             const particle = document.createElement('div');
@@ -5178,7 +5560,7 @@ class StageModifiersRegistry {
             particle.textContent = '✨';
             const angle = (i / 8) * 360;
             const delay = i * 0.1;
-            
+
             particle.style.cssText = `
                 position: absolute;
                 top: 50%;
@@ -5192,7 +5574,7 @@ class StageModifiersRegistry {
             `;
             particlesContainer.appendChild(particle);
         }
-        
+
         // Create cleansing text
         const cleansingText = document.createElement('div');
         cleansingText.className = 'cleansing-text';
@@ -5209,7 +5591,7 @@ class StageModifiersRegistry {
             animation: cleansingTextFloat 1.5s ease-out;
             z-index: 101;
         `;
-        
+
         // Add animations if not already present
         if (!document.getElementById('cleansing-winds-animations')) {
             const styleSheet = document.createElement('style');
@@ -5262,19 +5644,19 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         cleansingVfx.appendChild(windSwirl);
         cleansingVfx.appendChild(particlesContainer);
         cleansingVfx.appendChild(cleansingText);
         characterElement.appendChild(cleansingVfx);
-        
+
         // Remove VFX after animation
         setTimeout(() => {
             if (cleansingVfx.parentNode) {
                 cleansingVfx.remove();
             }
         }, 2000);
-        
+
         console.log(`[StageModifiers] Created cleansing winds VFX for ${character.name}`);
     }
 
@@ -5293,14 +5675,14 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 1000;
         `;
-        
+
         document.body.appendChild(screenVFX);
-        
+
         // Remove after animation
         setTimeout(() => {
             screenVFX.remove();
         }, 3000);
-        
+
         console.log('[StageModifiers] Created cleansing winds screen VFX');
     }
 
@@ -5506,7 +5888,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx draft-mode-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create enhancement aura overlay
         const enhancementAura = document.createElement('div');
         enhancementAura.className = 'draft-enhancement-aura';
@@ -5528,7 +5910,7 @@ class StageModifiersRegistry {
             z-index: 2;
         `;
         vfxContainer.appendChild(enhancementAura);
-        
+
         // Create floating enhancement particles
         for (let i = 0; i < 25; i++) {
             const particle = document.createElement('div');
@@ -5549,7 +5931,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(particle);
         }
-        
+
         // Create power surge lines
         for (let i = 0; i < 8; i++) {
             const surgeLine = document.createElement('div');
@@ -5594,7 +5976,7 @@ class StageModifiersRegistry {
     // Helper method to apply desert heat effect to all characters
     applyDesertHeatEffect(gameManager, modifier, isStageStart) {
         console.log(`[DesertHeat] applyDesertHeatEffect called - isStageStart: ${isStageStart}`);
-        
+
         // Add a delay to ensure characters are fully loaded
         const applyEffect = () => {
             const allCharacters = [
@@ -5603,15 +5985,15 @@ class StageModifiersRegistry {
             ];
 
             console.log(`[DesertHeat] Found ${allCharacters.length} characters to process for Desert Heat`);
-            
+
             if (allCharacters.length === 0) {
                 console.warn(`[DesertHeat] No characters found! Retrying in 500ms...`);
                 setTimeout(applyEffect, 500);
                 return;
             }
-            
+
             let affectedCharacters = [];
-            
+
             allCharacters.forEach(character => {
                 if (!character.isDead()) {
                     // Store original values if not already stored
@@ -5619,39 +6001,39 @@ class StageModifiersRegistry {
                         character.originalCritChance = character.stats.critChance || 0;
                         console.log(`[DesertHeat] Stored original crit chance for ${character.name}: ${character.originalCritChance}`);
                     }
-                    
+
                     if (character.originalHpPerTurn === undefined) {
                         character.originalHpPerTurn = character.stats.hpPerTurn || 0;
                         console.log(`[DesertHeat] Stored original HP regen for ${character.name}: ${character.originalHpPerTurn}`);
                     }
-                    
+
                     if (character.originalManaPerTurn === undefined) {
                         character.originalManaPerTurn = character.stats.manaPerTurn || 0;
                         console.log(`[DesertHeat] Stored original mana regen for ${character.name}: ${character.originalManaPerTurn}`);
                     }
-                    
+
                     // Set crit chance to 50%
                     const targetCritChance = 0.5;
                     console.log(`[DesertHeat] Setting ${character.name}'s crit chance from ${character.stats.critChance} to ${targetCritChance}`);
                     character.stats.critChance = targetCritChance;
-                    
+
                     // Set HP regeneration to 50
                     const targetHpRegen = 50;
                     console.log(`[DesertHeat] Setting ${character.name}'s HP regen from ${character.stats.hpPerTurn} to ${targetHpRegen}`);
                     character.stats.hpPerTurn = targetHpRegen;
-                    
+
                     // Set mana regeneration to 50
                     const targetManaRegen = 50;
                     console.log(`[DesertHeat] Setting ${character.name}'s mana regen from ${character.stats.manaPerTurn} to ${targetManaRegen}`);
                     character.stats.manaPerTurn = targetManaRegen;
-                    
+
                     affectedCharacters.push(character.name);
-                    
+
                     // Force recalculate stats to ensure the change is properly applied
                     if (character.recalculateStats) {
                         character.recalculateStats('desert_heat_modifier');
                     }
-                    
+
                     // Force UI update
                     if (window.gameManager && window.gameManager.uiManager) {
                         window.gameManager.uiManager.updateCharacterUI(character);
@@ -5664,17 +6046,17 @@ class StageModifiersRegistry {
             // Add log entry
             if (isStageStart && affectedCharacters.length > 0) {
                 gameManager.addLogEntry(
-                    `🌵 The desert heat intensifies everyone's focus! All characters gain 50% critical strike chance, 50 HP regen, and 50 mana regen.`, 
+                    `🌵 The desert heat intensifies everyone's focus! All characters gain 50% critical strike chance, 50 HP regen, and 50 mana regen.`,
                     'stage-effect dramatic'
                 );
             } else if (!isStageStart && affectedCharacters.length > 0) {
                 gameManager.addLogEntry(
-                    `🌵 The desert heat continues to sharpen everyone's reflexes and vitality.`, 
+                    `🌵 The desert heat continues to sharpen everyone's reflexes and vitality.`,
                     'stage-effect'
                 );
             }
         };
-        
+
         // Apply immediately if characters exist, otherwise wait for them
         if (isStageStart) {
             setTimeout(applyEffect, 100); // Small delay for stage start
@@ -5687,7 +6069,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx freezing-waters-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create ice crystal overlay
         const iceCrystalOverlay = document.createElement('div');
         iceCrystalOverlay.className = 'ice-crystal-overlay';
@@ -5709,7 +6091,7 @@ class StageModifiersRegistry {
             z-index: 2;
         `;
         vfxContainer.appendChild(iceCrystalOverlay);
-        
+
         // Create floating ice crystals
         for (let i = 0; i < 30; i++) {
             const crystal = document.createElement('div');
@@ -5730,7 +6112,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(crystal);
         }
-        
+
         // Create frost waves
         for (let i = 0; i < 12; i++) {
             const frostWave = document.createElement('div');
@@ -5769,7 +6151,7 @@ class StageModifiersRegistry {
     showFreezingWatersApplicationVFX(character) {
         const characterElement = this.getCharacterElement(character);
         if (!characterElement) return;
-        
+
         // Add freeze overlay if not already present
         let freezeOverlay = characterElement.querySelector('.freeze-overlay');
         if (!freezeOverlay) {
@@ -5790,7 +6172,7 @@ class StageModifiersRegistry {
             `;
             characterElement.appendChild(freezeOverlay);
         }
-        
+
         // Create ice crystal burst
         for (let i = 0; i < 12; i++) {
             const crystal = document.createElement('div');
@@ -5810,17 +6192,17 @@ class StageModifiersRegistry {
                 pointer-events: none;
                 z-index: 11;
             `;
-            
+
             const angle = (i / 12) * 360;
             const distance = 30 + Math.random() * 20;
             crystal.style.setProperty('--angle', angle + 'deg');
             crystal.style.setProperty('--distance', distance + 'px');
-            
+
             characterElement.appendChild(crystal);
-            
+
             setTimeout(() => crystal.remove(), 1500);
         }
-        
+
         // Show freeze indicator on character
         this.showFreezingWatersIndicator(character);
     }
@@ -5828,7 +6210,7 @@ class StageModifiersRegistry {
     showFreezingWatersIndicator(character) {
         const characterElement = this.getCharacterElement(character);
         if (!characterElement) return;
-        
+
         let freezeIndicator = characterElement.querySelector('.freeze-indicator');
         if (!freezeIndicator) {
             freezeIndicator = document.createElement('div');
@@ -5859,7 +6241,7 @@ class StageModifiersRegistry {
             overlay.style.opacity = '0';
             setTimeout(() => overlay.remove(), 1000);
         });
-        
+
         // Fade indicators
         const indicators = characterElement.querySelectorAll('.freeze-indicator');
         indicators.forEach(indicator => {
@@ -5872,24 +6254,24 @@ class StageModifiersRegistry {
     clearFreezingWatersVFX() {
         const existingVFX = document.querySelectorAll('.freezing-waters-vfx');
         existingVFX.forEach(vfx => vfx.remove());
-        
+
         // Also clear any character freeze overlays
         const freezeOverlays = document.querySelectorAll('.freezing-waters-freeze');
         freezeOverlays.forEach(overlay => overlay.remove());
-        
+
         const freezeIndicators = document.querySelectorAll('.freezing-waters-indicator');
         freezeIndicators.forEach(indicator => indicator.remove());
-        
+
         console.log('[StageModifiers] Cleared freezing waters VFX');
     }
 
     createTidalWaveChaosBattlefieldVFX() {
         // Clear any existing tidal wave VFX
         this.clearTidalWaveVFX();
-        
+
         const battleContainer = document.querySelector('.battle-container');
         if (!battleContainer) return;
-        
+
         // Create main wave container
         const waveContainer = document.createElement('div');
         waveContainer.className = 'tidal-wave-chaos-container';
@@ -5903,7 +6285,7 @@ class StageModifiersRegistry {
             z-index: 1000;
             overflow: hidden;
         `;
-        
+
         // Create massive wave that sweeps across the screen
         const massiveWave = document.createElement('div');
         massiveWave.className = 'tidal-massive-wave';
@@ -5930,7 +6312,7 @@ class StageModifiersRegistry {
                 inset 0 20px 40px rgba(255, 255, 255, 0.2);
         `;
         waveContainer.appendChild(massiveWave);
-        
+
         // Create wave particles and foam
         for (let i = 0; i < 30; i++) {
             const particle = document.createElement('div');
@@ -5949,7 +6331,7 @@ class StageModifiersRegistry {
             `;
             waveContainer.appendChild(particle);
         }
-        
+
         // Create foam spray effects
         for (let i = 0; i < 20; i++) {
             const foam = document.createElement('div');
@@ -5967,7 +6349,7 @@ class StageModifiersRegistry {
             `;
             waveContainer.appendChild(foam);
         }
-        
+
         // Create water droplets
         for (let i = 0; i < 50; i++) {
             const droplet = document.createElement('div');
@@ -5986,28 +6368,28 @@ class StageModifiersRegistry {
             `;
             waveContainer.appendChild(droplet);
         }
-        
+
         // Add to battle container
         battleContainer.appendChild(waveContainer);
-        
+
         // Create screen shake effect
         battleContainer.classList.add('tidal-wave-shake');
         setTimeout(() => {
             battleContainer.classList.remove('tidal-wave-shake');
         }, 2000);
-        
+
         // Remove wave after animation
         setTimeout(() => {
             waveContainer.remove();
         }, 5000);
-        
+
         console.log('[StageModifiers] Created massive tidal wave battlefield VFX');
     }
-    
+
     createTidalWaveHealVFX(character) {
         const characterElement = this.getCharacterElement(character);
         if (!characterElement) return;
-        
+
         // Create healing water aura
         const healingAura = document.createElement('div');
         healingAura.className = 'tidal-healing-aura';
@@ -6025,7 +6407,7 @@ class StageModifiersRegistry {
             z-index: 10;
         `;
         characterElement.appendChild(healingAura);
-        
+
         // Create healing sparkles
         for (let i = 0; i < 12; i++) {
             const sparkle = document.createElement('div');
@@ -6045,15 +6427,15 @@ class StageModifiersRegistry {
                 pointer-events: none;
                 z-index: 11;
             `;
-            
+
             const angle = (i / 12) * 360;
             const distance = 40 + Math.random() * 20;
             sparkle.style.setProperty('--angle', angle + 'deg');
             sparkle.style.setProperty('--distance', distance + 'px');
-            
+
             characterElement.appendChild(sparkle);
         }
-        
+
         // Create floating heal text
         const healText = document.createElement('div');
         healText.className = 'tidal-heal-text';
@@ -6072,7 +6454,7 @@ class StageModifiersRegistry {
             z-index: 12;
         `;
         characterElement.appendChild(healText);
-        
+
         // Cleanup
         setTimeout(() => {
             healingAura.remove();
@@ -6081,11 +6463,11 @@ class StageModifiersRegistry {
             sparkles.forEach(s => s.remove());
         }, 2500);
     }
-    
+
     createTidalWaveDamageVFX(character) {
         const characterElement = this.getCharacterElement(character);
         if (!characterElement) return;
-        
+
         // Create damage splash effect
         const damageEffect = document.createElement('div');
         damageEffect.className = 'tidal-damage-effect';
@@ -6103,7 +6485,7 @@ class StageModifiersRegistry {
             z-index: 10;
         `;
         characterElement.appendChild(damageEffect);
-        
+
         // Create water impact particles
         for (let i = 0; i < 16; i++) {
             const particle = document.createElement('div');
@@ -6123,15 +6505,15 @@ class StageModifiersRegistry {
                 pointer-events: none;
                 z-index: 11;
             `;
-            
+
             const angle = (i / 16) * 360;
             const distance = 30 + Math.random() * 30;
             particle.style.setProperty('--angle', angle + 'deg');
             particle.style.setProperty('--distance', distance + 'px');
-            
+
             characterElement.appendChild(particle);
         }
-        
+
         // Create damage text
         const damageText = document.createElement('div');
         damageText.className = 'tidal-damage-text';
@@ -6150,7 +6532,7 @@ class StageModifiersRegistry {
             z-index: 12;
         `;
         characterElement.appendChild(damageText);
-        
+
         // Cleanup
         setTimeout(() => {
             damageEffect.remove();
@@ -6159,54 +6541,54 @@ class StageModifiersRegistry {
             particles.forEach(p => p.remove());
         }, 2000);
     }
-    
+
     clearTidalWaveVFX() {
         const existingVFX = document.querySelectorAll('.tidal-wave-chaos-container');
         existingVFX.forEach(vfx => vfx.remove());
-        
+
         const healingEffects = document.querySelectorAll('.tidal-healing-aura, .tidal-heal-text, .tidal-healing-sparkle');
         healingEffects.forEach(effect => effect.remove());
-        
+
         const damageEffects = document.querySelectorAll('.tidal-damage-effect, .tidal-damage-text, .tidal-damage-particle');
         damageEffects.forEach(effect => effect.remove());
-        
+
         console.log('[StageModifiers] Cleared tidal wave VFX');
     }
-    
+
     clearAllDebuffVFX() {
         // Clear common debuff VFX elements
         const debuffVFXSelectors = [
             // Stun effects
             '.stun-effect-container', '.stun-effect', '.stun-stars', '.stun-circle', '.stunned',
             '.samba-stun-swirl', '.samba-stun-particle', '.samba-dizzy-indicator',
-            
+
             // Freeze effects
             '.freeze-overlay', '.freeze-indicator', '.freezing-waters-freeze', '.freezing-waters-indicator',
             '.freeze-crystal-burst', '.frost-shard',
-            
+
             // Charm effects
             '.aquatic-charm-indicator', '.charm-effect',
-            
+
             // Poison/Toxic effects
             '.poison-effect', '.toxic-effect', '.poison-indicator',
-            
+
             // Burn effects
             '.burn-effect', '.burning-indicator', '.fire-effect',
-            
+
             // General debuff VFX
             '.debuff-vfx', '.debuff-overlay', '.debuff-indicator', '.debuff-effect',
             '.status-effect-overlay', '.debuff-particles',
-            
+
             // Ability-specific debuff VFX
             '.flower-bomb-vfx', '.ability-disabled-vfx',
-            
+
             // Shadow/Dark effects
             '.shadow-effect', '.dark-effect', '.corruption-effect',
-            
+
             // Miscellaneous debuff effects
             '.weakness-effect', '.slow-effect', '.blind-effect', '.silence-effect'
         ];
-        
+
         let removedCount = 0;
         debuffVFXSelectors.forEach(selector => {
             const elements = document.querySelectorAll(selector);
@@ -6215,23 +6597,23 @@ class StageModifiersRegistry {
                 element.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
                 element.style.opacity = '0';
                 element.style.transform = 'scale(0.8)';
-                
+
                 setTimeout(() => {
                     if (element.parentNode) {
                         element.remove();
                     }
                 }, 500);
-                
+
                 removedCount++;
             });
         });
-        
+
         // Also remove stunned class from character elements
         const stunnedCharacters = document.querySelectorAll('.character-slot.stunned');
         stunnedCharacters.forEach(char => {
             char.classList.remove('stunned');
         });
-        
+
         // Clear any character-specific debuff overlays
         const characterSlots = document.querySelectorAll('.character-slot');
         characterSlots.forEach(slot => {
@@ -6241,7 +6623,7 @@ class StageModifiersRegistry {
                 slot.classList.remove(debuffClass);
             });
         });
-        
+
         if (removedCount > 0) {
             console.log(`[StageModifiers] Tidal wave cleared ${removedCount} debuff VFX elements from the battlefield`);
         }
@@ -6254,14 +6636,14 @@ class StageModifiersRegistry {
             `character-${character.id}`,
             character.instanceId || character.id
         ];
-        
+
         for (const id of possibleIds) {
             const element = document.getElementById(id);
             if (element) {
                 return element;
             }
         }
-        
+
         // Fallback: search by character name or other attributes
         const allCharacterElements = document.querySelectorAll('.character-slot');
         for (const element of allCharacterElements) {
@@ -6270,7 +6652,7 @@ class StageModifiersRegistry {
                 return element;
             }
         }
-        
+
         console.warn(`[StageModifiers] Could not find character element for ${character.name} (${character.id})`);
         return null;
     }
@@ -6279,7 +6661,7 @@ class StageModifiersRegistry {
         const vfxContainer = document.createElement('div');
         vfxContainer.className = 'stage-modifier-vfx dark-current-vfx';
         vfxContainer.setAttribute('data-modifier', modifier.id);
-        
+
         // Create dark water overlay with swirling energy
         const darkOverlay = document.createElement('div');
         darkOverlay.className = 'dark-current-overlay';
@@ -6298,7 +6680,7 @@ class StageModifiersRegistry {
             z-index: 2;
         `;
         vfxContainer.appendChild(darkOverlay);
-        
+
         // Create dark energy particles floating around
         for (let i = 0; i < 35; i++) {
             const energyParticle = document.createElement('div');
@@ -6320,7 +6702,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(energyParticle);
         }
-        
+
         // Create dark current streams
         for (let i = 0; i < 20; i++) {
             const stream = document.createElement('div');
@@ -6342,7 +6724,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(stream);
         }
-        
+
         // Create lightning-like energy bolts
         for (let i = 0; i < 15; i++) {
             const bolt = document.createElement('div');
@@ -6364,7 +6746,7 @@ class StageModifiersRegistry {
             `;
             vfxContainer.appendChild(bolt);
         }
-        
+
         // Add CSS animations for dark current
         if (!document.getElementById('dark-current-styles')) {
             const styleSheet = document.createElement('style');
@@ -6446,7 +6828,7 @@ class StageModifiersRegistry {
             `;
             document.head.appendChild(styleSheet);
         }
-        
+
         // Add to stage background
         const stageBackground = document.getElementById('stage-background');
         if (stageBackground) {
@@ -6519,12 +6901,12 @@ class StageModifiersRegistry {
                 pointer-events: none;
                 z-index: 99;
             `;
-            
+
             const angle = (i / 12) * 360;
             const distance = 40 + Math.random() * 30;
             particle.style.setProperty('--angle', angle + 'deg');
             particle.style.setProperty('--distance', distance + 'px');
-            
+
             characterElement.appendChild(particle);
         }
 
@@ -6612,7 +6994,7 @@ class StageModifiersRegistry {
             pointer-events: none;
             z-index: 100;
         `;
-        
+
         // Create power particles
         for (let i = 0; i < 6; i++) {
             const particle = document.createElement('div');
@@ -6625,7 +7007,7 @@ class StageModifiersRegistry {
                 animation: doubleDamageParticle 3s ease-out;
                 animation-delay: ${i * 0.2}s;
             `;
-            
+
             const angle = (i / 6) * 360;
             particle.style.setProperty('--angle', angle + 'deg');
             vfxContainer.appendChild(particle);
@@ -6666,7 +7048,7 @@ class StageModifiersRegistry {
             animation: doubleDamageText 3s ease-out;
         `;
         vfxContainer.appendChild(multiplierText);
-        
+
         characterElement.appendChild(vfxContainer);
 
         // Add CSS animations if not already added
@@ -6870,7 +7252,1799 @@ class StageModifiersRegistry {
             }
         }, 4000);
     }
+
+    // Exploding Pumpkin Field Modifier
+    registerExplodingPumpkinModifier() {
+        this.registerModifier({
+            id: 'exploding_pumpkin_field',
+            name: 'Exploding Pumpkin Field',
+            description: 'Starting at turn 2, every 6th turn all living characters gain an exploding pumpkin debuff!',
+            icon: 'pumpkin_field',
+            vfx: {
+                type: 'pumpkin_field',
+                particles: true,
+                animation: 'floating_pumpkins',
+                description: 'Orange pumpkins with glowing jack-o-lantern faces float ominously across the battlefield, leaving trails of sparkling orange particles. When they explode, they create bright orange bursts with radiating shock waves.'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                const currentTurn = gameManager.gameState.turn;
+
+                console.log(`[PumpkinField] Turn ${currentTurn} - Checking for pumpkin debuff application`);
+
+                // Check if it's turn 2 or every 6th turn after turn 2
+                if (currentTurn === 2 || (currentTurn > 2 && (currentTurn - 2) % 6 === 0)) {
+                    console.log(`[PumpkinField] Turn ${currentTurn} - Applying pumpkin debuffs!`);
+                    const allCharacters = [
+                        ...gameManager.gameState.playerCharacters,
+                        ...gameManager.gameState.aiCharacters
+                    ];
+
+                    const livingCharacters = allCharacters.filter(char => !char.isDead());
+
+                    console.log(`[PumpkinField] Found ${livingCharacters.length} living characters:`, livingCharacters.map(c => c.name));
+
+                    if (livingCharacters.length > 0) {
+                        gameManager.addLogEntry(
+                            `🎃 The pumpkin field erupts! All living characters are cursed with exploding pumpkins!`,
+                            'stage-effect dramatic'
+                        );
+
+                        // Apply exploding pumpkin debuff to all living characters
+                        livingCharacters.forEach(character => {
+                            const debuff = new Effect(
+                                `exploding_pumpkin_field_${Date.now()}_${character.id}`,
+                                'Exploding Pumpkin',
+                                'items/exploding_pumpkin.png',
+                                5,
+                                null,
+                                true
+                            ).setDescription('A ticking time bomb! Will explode for 8500 damage when the timer runs out.');
+
+                            debuff.onRemove = function (char) {
+                                if (char.isDead()) return;
+                                gameManager.addLogEntry(
+                                    `🎃 The Exploding Pumpkin on ${char.name} detonates!`,
+                                    'debuff-effect'
+                                );
+                                const damage = 8500;
+                                char.applyDamage(damage, 'magical', null, {
+                                    abilityId: 'exploding_pumpkin_field',
+                                    isStageEffect: true,
+                                    stageModifierName: modifier.name
+                                });
+                            };
+
+                            character.addDebuff(debuff);
+                            console.log(`[PumpkinField] Applied pumpkin debuff to ${character.name}`, debuff);
+
+                            gameManager.addLogEntry(
+                                `🎃 ${character.name} is cursed with an exploding pumpkin!`,
+                                'stage-effect damage'
+                            );
+
+                            // Update UI
+                            if (typeof updateCharacterUI === 'function') {
+                                updateCharacterUI(character);
+                            }
+                        });
+
+                        // Create pumpkin field VFX
+                        this.createPumpkinFieldVFX();
+                    }
+                }
+            }
+        });
+    }
+
+    createPumpkinFieldVFX() {
+        const vfxContainer = document.createElement('div');
+        vfxContainer.className = 'pumpkin-field-vfx';
+        vfxContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        `;
+
+        // Create floating pumpkins
+        for (let i = 0; i < 8; i++) {
+            const pumpkin = document.createElement('div');
+            pumpkin.innerHTML = '🎃';
+            pumpkin.style.cssText = `
+                position: absolute;
+                font-size: 24px;
+                left: ${10 + (i * 10)}%;
+                top: ${20 + Math.random() * 60}%;
+                animation: pumpkinFieldFloat 3s ease-out;
+                animation-delay: ${i * 0.3}s;
+                filter: drop-shadow(0 0 5px rgba(255, 140, 0, 0.8));
+            `;
+            vfxContainer.appendChild(pumpkin);
+        }
+
+        // Add CSS animations for pumpkin field
+        if (!document.getElementById('pumpkin-field-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'pumpkin-field-styles';
+            styleSheet.textContent = `
+                @keyframes pumpkinFieldFloat {
+                    0% {
+                        transform: scale(0.3) rotate(0deg) translateY(50px);
+                        opacity: 0;
+                    }
+                    20% {
+                        transform: scale(1.2) rotate(90deg) translateY(0px);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1) rotate(180deg) translateY(-20px);
+                        opacity: 1;
+                    }
+                    80% {
+                        transform: scale(1.1) rotate(270deg) translateY(-10px);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: scale(0.5) rotate(360deg) translateY(-50px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+
+        document.body.appendChild(vfxContainer);
+
+        // Remove after animation
+        setTimeout(() => {
+            if (vfxContainer.parentNode) {
+                vfxContainer.parentNode.removeChild(vfxContainer);
+            }
+        }, 4000);
+    }
+
+    // AI Damage Stun Chance Modifier
+    registerStunningAttack() {
+        this.registerModifier({
+            id: 'ai_damage_stun_chance',
+            name: 'Stunning Attacks',
+            description: 'AI character attacks have a chance to stun their targets.',
+            icon: '💫',
+            vfx: {
+                type: 'stunning_attacks',
+                particles: true,
+                animation: 'stun_sparkles'
+            },
+            onActivate: (gameManager, stageManager, modifier) => {
+                console.log('[StageModifiers] Activating ai_damage_stun_chance modifier');
+
+                // Store reference to stage modifiers registry for VFX creation
+                const modifiersRegistry = window.stageModifiersRegistry;
+
+                // Create event listener for AI damage dealing
+                if (!gameManager._aiStunListeners) {
+                    gameManager._aiStunListeners = {};
+                }
+
+                gameManager._aiStunListeners.onDamage = (event) => {
+                    const { character, target, damage } = event.detail;
+
+                    // Only process if damage was dealt by AI character to player character
+                    if (!character || !target || damage <= 0) return;
+
+                    const isAIAttacker = gameManager.gameState.aiCharacters.includes(character);
+                    const isPlayerTarget = gameManager.gameState.playerCharacters.includes(target);
+
+                    if (!isAIAttacker || !isPlayerTarget || target.isDead()) return;
+
+                    // Check for stun chance
+                    const stunChance = modifier.effect?.stunChance || 0.12;
+                    const stunDuration = modifier.effect?.stunDuration || 1;
+
+                    if (Math.random() < stunChance) {
+                        // Apply stun debuff
+                        const stunDebuff = {
+                            id: 'ai_damage_stun',
+                            name: 'Stunned',
+                            icon: '💫',
+                            duration: stunDuration,
+                            isDebuff: true,
+                            source: 'Stunning Stampede',
+                            description: `Stunned for ${stunDuration} turn${stunDuration > 1 ? 's' : ''}. Cannot act.`,
+
+                            onApply: function (debuffHolder) {
+                                console.log(`[StageModifiers] ${debuffHolder.name} is stunned by ${character.name}!`);
+                            },
+
+                            onTurnStart: function (debuffHolder) {
+                                // Prevent character from acting
+                                debuffHolder._isStunned = true;
+                                return true; // Skip turn
+                            },
+
+                            onRemove: function (debuffHolder) {
+                                debuffHolder._isStunned = false;
+                                console.log(`[StageModifiers] ${debuffHolder.name} recovers from stun.`);
+                            }
+                        };
+
+                        target.addDebuff(stunDebuff);
+
+                        gameManager.addLogEntry(
+                            `💫 ${target.name} is stunned by ${character.name}'s overwhelming attack!`,
+                            'stage-effect debuff'
+                        );
+
+                        // Create stun VFX using the registry reference
+                        if (modifiersRegistry && typeof modifiersRegistry.createStunVFX === 'function') {
+                            modifiersRegistry.createStunVFX(target);
+                        }
+                    }
+                };
+
+                // Add event listener
+                document.addEventListener('character:damage-dealt', gameManager._aiStunListeners.onDamage);
+
+                gameManager.addLogEntry(
+                    `💫 The battlefield crackles with stunning energy! AI attacks may stun their targets!`,
+                    'stage-effect dramatic'
+                );
+            },
+
+            onDeactivate: (gameManager, stageManager, modifier) => {
+                // Remove event listener
+                if (gameManager._aiStunListeners && gameManager._aiStunListeners.onDamage) {
+                    document.removeEventListener('character:damage-dealt', gameManager._aiStunListeners.onDamage);
+                    delete gameManager._aiStunListeners;
+                }
+
+                // Remove all stun debuffs from this source
+                const allCharacters = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
+                allCharacters.forEach(character => {
+                    character.removeDebuff('ai_damage_stun');
+                    character._isStunned = false;
+                });
+
+                console.log('[StageModifiers] Deactivated ai_damage_stun_chance modifier');
+            }
+        });
+
+        console.log('[StageModifiers] Registered ai_damage_stun_chance modifier successfully');
+
+        // AI Cleansing Winds Modifier - removes debuffs from AI characters every turn
+        this.registerModifier({
+            id: 'ai_cleansing_winds',
+            name: 'AI Cleansing Winds',
+            description: 'Mystical winds protect AI characters, removing all debuffs from them at the start of each turn.',
+            icon: '🌪️',
+            vfx: {
+                type: 'ai_cleansing_winds',
+                particles: true,
+                animation: 'protective_winds'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                // Only target AI characters
+                const aiCharacters = gameManager.gameState.aiCharacters || [];
+
+                if (aiCharacters.length > 0) {
+                    gameManager.addLogEntry(
+                        `🌪️ Protective winds cleanse the enemies, removing their debuffs!`,
+                        'stage-effect dramatic'
+                    );
+
+                    aiCharacters.forEach(character => {
+                        if (!character.isDead()) {
+                            const debuffCount = character.debuffs ? character.debuffs.length : 0;
+
+                            if (debuffCount > 0) {
+                                // Clear all debuffs
+                                character.debuffs = [];
+
+                                // Update character stats after clearing debuffs
+                                character.recalculateStats('ai_cleansing_winds');
+
+                                // Log individual cleansing effects
+                                gameManager.addLogEntry(
+                                    `${character.name} has ${debuffCount} debuff${debuffCount > 1 ? 's' : ''} cleansed!`,
+                                    'stage-effect'
+                                );
+
+                                // Create VFX for the cleansing effect
+                                if (window.stageModifiersRegistry && typeof window.stageModifiersRegistry.createCleansingWindsVFX === 'function') {
+                                    window.stageModifiersRegistry.createCleansingWindsVFX(character);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+    }
+    // AI Damage Stun Chance Modifier
+    registerStunningAttack() {
+        this.registerModifier({
+            id: 'ai_damage_stun_chance',
+            name: 'Stunning Attacks',
+            description: 'AI character attacks have a chance to stun their targets.',
+            icon: '💫',
+            vfx: {
+                type: 'stunning_attacks',
+                particles: true,
+                animation: 'stun_sparkles'
+            },
+            onActivate: (gameManager, stageManager, modifier) => {
+                console.log('[StageModifiers] Activating ai_damage_stun_chance modifier');
+
+                // Store reference to stage modifiers registry for VFX creation
+                const modifiersRegistry = window.stageModifiersRegistry;
+
+                // Create event listener for AI damage dealing
+                if (!gameManager._aiStunListeners) {
+                    gameManager._aiStunListeners = {};
+                }
+
+                gameManager._aiStunListeners.onDamage = (event) => {
+                    const { character, target, damage } = event.detail;
+
+                    // Only process if damage was dealt by AI character to player character
+                    if (!character || !target || damage <= 0) return;
+
+                    const isAIAttacker = gameManager.gameState.aiCharacters.includes(character);
+                    const isPlayerTarget = gameManager.gameState.playerCharacters.includes(target);
+
+                    if (!isAIAttacker || !isPlayerTarget || target.isDead()) return;
+
+                    // Check for stun chance
+                    const stunChance = modifier.effect?.stunChance || 0.12;
+                    const stunDuration = modifier.effect?.stunDuration || 1;
+
+                    if (Math.random() < stunChance) {
+                        // Apply stun debuff
+                        const stunDebuff = {
+                            id: 'ai_damage_stun',
+                            name: 'Stunned',
+                            icon: '💫',
+                            duration: stunDuration,
+                            isDebuff: true,
+                            source: 'Stunning Stampede',
+                            description: `Stunned for ${stunDuration} turn${stunDuration > 1 ? 's' : ''}. Cannot act.`,
+
+                            onApply: function (debuffHolder) {
+                                console.log(`[StageModifiers] ${debuffHolder.name} is stunned by ${character.name}!`);
+                            },
+
+                            onTurnStart: function (debuffHolder) {
+                                // Prevent character from acting
+                                debuffHolder._isStunned = true;
+                                return true; // Skip turn
+                            },
+
+                            onRemove: function (debuffHolder) {
+                                debuffHolder._isStunned = false;
+                                console.log(`[StageModifiers] ${debuffHolder.name} recovers from stun.`);
+                            }
+                        };
+
+                        target.addDebuff(stunDebuff.clone()); // Clone before adding
+
+                        gameManager.addLogEntry(
+                            `💫 ${target.name} is stunned by ${character.name}'s overwhelming attack!`,
+                            'stage-effect debuff'
+                        );
+
+                        // Create stun VFX using the registry reference
+                        if (modifiersRegistry && typeof modifiersRegistry.createStunVFX === 'function') {
+                            modifiersRegistry.createStunVFX(target);
+                        }
+                    }
+                };
+
+                // Add event listener
+                document.addEventListener('character:damage-dealt', gameManager._aiStunListeners.onDamage);
+
+                gameManager.addLogEntry(
+                    `💫 The battlefield crackles with stunning energy! AI attacks may stun their targets!`,
+                    'stage-effect dramatic'
+                );
+            },
+
+            onDeactivate: (gameManager, stageManager, modifier) => {
+                // Remove event listener
+                if (gameManager._aiStunListeners && gameManager._aiStunListeners.onDamage) {
+                    document.removeEventListener('character:damage-dealt', gameManager._aiStunListeners.onDamage);
+                    delete gameManager._aiStunListeners;
+                }
+
+                // Remove all stun debuffs from this source
+                const allCharacters = [...gameManager.gameState.playerCharacters, ...gameManager.gameState.aiCharacters];
+                allCharacters.forEach(character => {
+                    character.removeDebuff('ai_damage_stun');
+                    character._isStunned = false;
+                });
+
+                console.log('[StageModifiers] Deactivated ai_damage_stun_chance modifier');
+            }
+        });
+
+        console.log('[StageModifiers] Registered ai_damage_stun_chance modifier successfully');
+
+        // AI Cleansing Winds Modifier - removes debuffs from AI characters every turn
+        this.registerModifier({
+            id: 'ai_cleansing_winds',
+            name: 'AI Cleansing Winds',
+            description: 'Mystical winds protect AI characters, removing all debuffs from them at the start of each turn.',
+            icon: '🌪️',
+            vfx: {
+                type: 'ai_cleansing_winds',
+                particles: true,
+                animation: 'protective_winds'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                // Only target AI characters
+                const aiCharacters = gameManager.gameState.aiCharacters || [];
+
+                if (aiCharacters.length > 0) {
+                    gameManager.addLogEntry(
+                        `🌪️ Protective winds cleanse the enemies, removing their debuffs!`,
+                        'stage-effect dramatic'
+                    );
+
+                    aiCharacters.forEach(character => {
+                        if (!character.isDead()) {
+                            const debuffCount = character.debuffs ? character.debuffs.length : 0;
+
+                            if (debuffCount > 0) {
+                                // Clear all debuffs
+                                character.debuffs = [];
+
+                                // Update character stats after clearing debuffs
+                                character.recalculateStats('ai_cleansing_winds');
+
+                                // Log individual cleansing effects
+                                gameManager.addLogEntry(
+                                    `${character.name} has ${debuffCount} debuff${debuffCount > 1 ? 's' : ''} cleansed!`,
+                                    'stage-effect'
+                                );
+
+                                // Create VFX for the cleansing effect
+                                if (window.stageModifiersRegistry && typeof window.stageModifiersRegistry.createCleansingWindsVFX === 'function') {
+                                    window.stageModifiersRegistry.createCleansingWindsVFX(character);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        console.log('[StageModifiers] Registered ai_cleansing_winds modifier successfully');
+    }
+
+    createStunVFX(character) {
+        const charElement = this.getCharacterElement(character);
+        if (!charElement) return;
+
+        // Create stun effect container
+        const stunVFX = document.createElement('div');
+        stunVFX.className = 'stun-vfx';
+        stunVFX.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        `;
+
+        // Create spinning stars around character
+        for (let i = 0; i < 6; i++) {
+            const star = document.createElement('div');
+            star.textContent = '⭐';
+            star.style.cssText = `
+                position: absolute;
+                font-size: 16px;
+                color: #ffd700;
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+                animation: stunStarSpin 2s linear infinite;
+                animation-delay: ${i * 0.2}s;
+                transform-origin: 50px 50px;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%) rotate(${i * 60}deg) translateY(-40px);
+            `;
+            stunVFX.appendChild(star);
+        }
+
+        // Create central impact effect
+        const impact = document.createElement('div');
+        impact.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: stunImpactPulse 0.5s ease-out;
+        `;
+        stunVFX.appendChild(impact);
+
+        // Add stun text
+        const stunText = document.createElement('div');
+        stunText.textContent = 'STUNNED!';
+        stunText.style.cssText = `
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+            animation: stunTextFloat 2s ease-out;
+            pointer-events: none;
+        `;
+        stunVFX.appendChild(stunText);
+
+        // Add CSS animations if not present
+        if (!document.getElementById('stun-vfx-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'stun-vfx-styles';
+            styleSheet.textContent = `
+                @keyframes stunStarSpin {
+                    0% { transform: translate(-50%, -50%) rotate(0deg) translateY(-40px); }
+                    100% { transform: translate(-50%, -50%) rotate(360deg) translateY(-40px); }
+                }
+                
+                @keyframes stunImpactPulse {
+                    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+                    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                }
+                
+                @keyframes stunTextFloat {
+                    0% { transform: translateX(-50%) translateY(0px); opacity: 0; }
+                    20% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+                    80% { transform: translateX(-50%) translateY(-20px); opacity: 1; }
+                    100% { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+
+        charElement.appendChild(stunVFX);
+
+        // Remove after animation
+        setTimeout(() => {
+            if (stunVFX.parentNode) {
+                stunVFX.remove();
+            }
+        }, 2000);
+
+        console.log(`[StageModifiers] Created stun VFX for ${character.name}`);
+    }
+
+    // Placeholder method for team carrot modifier registration
+    // This method was called in constructor but not implemented
+    registerTeamCarrotModifier() {
+        // TODO: Implement team carrot modifier if needed
+        console.log('[StageModifiers] registerTeamCarrotModifier called - no implementation yet');
+    }
+
+    // Register AI Stunning Attack modifier for story mode
+    registerAIStunningAttackModifier() {
+        this.registerModifier({
+            id: 'ai_damage_stun_chance',
+            name: 'Stunning Attacks',
+            description: 'AI character attacks have a chance to stun their targets.',
+            icon: '💫',
+            vfx: {
+                type: 'stunning_attacks',
+                particles: true,
+                animation: 'stun_sparkles'
+            },
+            onActivate: (gameManager, stageManager, modifier) => {
+                console.log('[StageModifiers] Activating ai_damage_stun_chance modifier');
+
+                // Store reference to stage modifiers registry for VFX creation
+                const modifiersRegistry = window.stageModifiersRegistry;
+
+                // Create event listener for AI damage dealing
+                if (!gameManager._aiStunListeners) {
+                    gameManager._aiStunListeners = {};
+                }
+
+                gameManager._aiStunListeners.onDamage = (event) => {
+                    const { character, target, damage, damageType } = event.detail;
+
+                    // Only apply to AI characters attacking player characters
+                    if (!character.isAI || target.isAI) return;
+
+                    // Check stun chance from modifier effect or default to 12%
+                    const stunChance = modifier.effect?.stunChance || 0.12;
+                    const stunDuration = modifier.effect?.stunDuration || 1;
+
+                    if (Math.random() < stunChance) {
+                        // Create stun debuff using same definition as Farmer Shoma's Q
+                        const stunDebuff = new Effect(
+                            'ai_damage_stun',
+                            'Stunned',
+                            'Icons/debuffs/stun.png',
+                            stunDuration, // Duration from modifier effect
+                            null,
+                            true // Is a debuff
+                        );
+
+                        // Set stun effect properties
+                        stunDebuff.effects = {
+                            cantAct: true
+                        };
+
+                        stunDebuff.setDescription('Cannot perform any actions.');
+
+                        // Add a custom remove method to clean up the stun VFX when the debuff expires
+                        stunDebuff.remove = function (debuffCharacter) {
+                            const charElement = document.getElementById(`character-${debuffCharacter.instanceId || debuffCharacter.id}`);
+                            if (charElement) {
+                                charElement.classList.remove('stunned');
+                                // Remove stun VFX container
+                                const stunEffects = charElement.querySelectorAll('.stun-vfx-container');
+                                stunEffects.forEach(el => el.remove());
+                            }
+                        };
+
+                        target.addDebuff(stunDebuff.clone()); // Clone before adding
+
+                        gameManager.addLogEntry(
+                            `💫 ${target.name} is stunned by ${character.name}'s overwhelming attack!`,
+                            'stage-effect debuff'
+                        );
+
+                        // Create stun VFX using the registry reference
+                        if (modifiersRegistry && typeof modifiersRegistry.createStunVFX === 'function') {
+                            modifiersRegistry.createStunVFX(target);
+                        }
+                    }
+                };
+
+                // Add event listener
+                document.addEventListener('character:damage-dealt', gameManager._aiStunListeners.onDamage);
+
+                gameManager.addLogEntry(
+                    `💫 The battlefield crackles with stunning energy! AI attacks may stun their targets!`,
+                    'stage-effect dramatic'
+                );
+            },
+
+            onDeactivate: (gameManager, stageManager, modifier) => {
+                // Remove event listener
+                if (gameManager._aiStunListeners && gameManager._aiStunListeners.onDamage) {
+                    document.removeEventListener('character:damage-dealt', gameManager._aiStunListeners.onDamage);
+                    delete gameManager._aiStunListeners;
+                }
+
+                // Remove all stun debuffs
+                const allCharacters = [...(gameManager.gameState.playerCharacters || []), ...(gameManager.gameState.aiCharacters || [])];
+                allCharacters.forEach(character => {
+                    character.removeDebuff('ai_damage_stun');
+                    character._isStunned = false;
+                });
+
+                console.log('[StageModifiers] Deactivated ai_damage_stun_chance modifier');
+            }
+        });
+
+        console.log('[StageModifiers] Registered ai_damage_stun_chance modifier successfully');
+    }
+
+    // Register AI Cleansing Winds modifier for story mode
+    registerAICleansingWindsModifier() {
+        this.registerModifier({
+            id: 'ai_cleansing_winds',
+            name: 'AI Cleansing Winds',
+            description: 'Mystical winds protect AI characters, removing all debuffs from them at the start of each AI turn.',
+            icon: '🌪️',
+            vfx: {
+                type: 'ai_cleansing_winds',
+                particles: true,
+                animation: 'protective_winds'
+            },
+            onTurnStart: (gameManager, stageManager, modifier) => {
+                // Only trigger at AI turn start, not player turn start
+                if (gameManager.gameState.phase !== 'ai') {
+                    return;
+                }
+
+                // Only target AI characters
+                const aiCharacters = gameManager.gameState.aiCharacters || [];
+
+                if (aiCharacters.length > 0) {
+                    gameManager.addLogEntry(
+                        `🌪️ Protective winds cleanse the enemies, removing their debuffs!`,
+                        'stage-effect dramatic'
+                    );
+
+                    aiCharacters.forEach(character => {
+                        const debuffCount = character.debuffs ? character.debuffs.length : 0;
+
+                        if (debuffCount > 0) {
+                            // Properly remove each debuff using the character's removeDebuff method
+                            // This ensures onRemove handlers are called and abilities are re-enabled
+                            const debuffIds = character.debuffs.map(debuff => debuff.id);
+                            debuffIds.forEach(debuffId => {
+                                character.removeDebuff(debuffId);
+                            });
+
+                            // Force re-enable any disabled abilities (Protective Winds should cleanse all debuff effects)
+                            character.abilities.forEach(ability => {
+                                if (ability.isDisabled) {
+                                    ability.isDisabled = false;
+                                    ability.disabledDuration = 0;
+                                    console.log(`[Protective Winds] Re-enabled ${character.name}'s ${ability.name}`);
+                                }
+                            });
+
+                            // Remove any visual disable effects from ability UI
+                            const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+                            if (characterElement) {
+                                const abilityElements = characterElement.querySelectorAll('.ability.disabled');
+                                abilityElements.forEach(abilityEl => {
+                                    abilityEl.classList.remove('disabled');
+                                    // Remove any disable icons
+                                    const disableIcons = abilityEl.querySelectorAll('.shocked-disabled-ability-icon, .disabled-ability-icon');
+                                    disableIcons.forEach(icon => icon.remove());
+                                });
+                            }
+
+                            // Update the character UI to reflect ability re-enabling
+                            if (gameManager.uiManager && typeof gameManager.uiManager.updateCharacterUI === 'function') {
+                                gameManager.uiManager.updateCharacterUI(character);
+                            }
+
+                            // Log individual cleansing effects
+                            gameManager.addLogEntry(
+                                `${character.name} has ${debuffCount} debuff${debuffCount > 1 ? 's' : ''} cleansed!`,
+                                'stage-effect'
+                            );
+
+                            // Create VFX for the cleansing effect
+                            if (window.stageModifiersRegistry && typeof window.stageModifiersRegistry.createCleansingWindsVFX === 'function') {
+                                window.stageModifiersRegistry.createCleansingWindsVFX(character);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        console.log('[StageModifiers] Registered ai_cleansing_winds modifier successfully');
+    }
+
+    // Helper methods for Twisted Apple Orchard modifier
+    trackDeadAICharacters(gameManager, modifier) {
+        if (!gameManager.gameState || !gameManager.gameState.aiCharacters) return;
+
+        // First, remove any tracked characters that are currently alive (they were revived)
+        modifier.deadAICharacters = modifier.deadAICharacters.filter(deadChar => {
+            const liveChar = gameManager.gameState.aiCharacters.find(aiChar => 
+                (aiChar.instanceId || aiChar.id) === (deadChar.instanceId || deadChar.id) && !aiChar.isDead()
+            );
+            if (liveChar) {
+                console.log(`[TwistedAppleOrchard] Removing ${deadChar.name} from dead list - character is alive`);
+                return false; // Remove from dead list
+            }
+            return true; // Keep in dead list
+        });
+
+        // Find newly dead AI characters that aren't already tracked
+        gameManager.gameState.aiCharacters.forEach(aiChar => {
+            if (aiChar.isDead() && !modifier.deadAICharacters.find(dead => 
+                (dead.instanceId || dead.id) === (aiChar.instanceId || aiChar.id)
+            )) {
+                // Store the character data for revival
+                const deadCharData = {
+                    id: aiChar.id,
+                    instanceId: aiChar.instanceId,
+                    name: aiChar.name,
+                    image: aiChar.image,
+                    baseStats: { ...aiChar.baseStats },
+                    abilities: [...aiChar.abilities],
+                    passive: aiChar.passive,
+                    isAI: true,
+                    turnDied: modifier.turnCounter
+                };
+
+                modifier.deadAICharacters.push(deadCharData);
+                console.log(`[TwistedAppleOrchard] Tracked dead AI character: ${aiChar.name} (died on turn ${modifier.turnCounter})`);
+            }
+        });
+    }
+
+    performAppleRevival(gameManager, stageManager, modifier) {
+        if (!modifier.deadAICharacters || modifier.deadAICharacters.length === 0) {
+            gameManager.addLogEntry(
+                `🍎 The apple trees glow with dark energy, but there are no fallen enemies to revive...`,
+                'stage-effect'
+            );
+            return;
+        }
+
+        gameManager.addLogEntry(
+            `🍎💀 The twisted apple trees pulse with dark magic! The fallen rise again!`,
+            'stage-effect dramatic'
+        );
+
+        // Revive all dead AI characters
+        const revivedCharacters = [];
+        modifier.deadAICharacters.forEach(deadCharData => {
+            // First, try to find the existing dead character in the game state
+            let existingChar = gameManager.gameState.aiCharacters.find(char => 
+                (char.instanceId || char.id) === (deadCharData.instanceId || deadCharData.id)
+            );
+
+            if (existingChar && existingChar.isDead()) {
+                // Manual revival with proper integration
+                existingChar.stats.currentHp = Math.floor(existingChar.stats.maxHp * 0.5);
+                
+                // Clear any death-related effects and states
+                existingChar.buffs = existingChar.buffs.filter(buff => buff.id !== 'death');
+                existingChar.debuffs = existingChar.debuffs.filter(debuff => debuff.id !== 'death');
+                
+                // Reset any death flags or states that might exist
+                if (existingChar.isDead) {
+                    delete existingChar.isDead;
+                }
+                if (existingChar.defeated) {
+                    existingChar.defeated = false;
+                }
+                if (existingChar.dead) {
+                    existingChar.dead = false;
+                }
+                
+                // Ensure character is marked as alive and targetable
+                existingChar.alive = true;
+                existingChar.targetable = true;
+                
+                // Force recalculation of stats to ensure everything is properly updated
+                if (typeof existingChar.recalculateStats === 'function') {
+                    existingChar.recalculateStats('revival');
+                }
+                
+                // Immediately update the character's UI element to remove dead state
+                const charElement = document.getElementById(`character-${existingChar.instanceId || existingChar.id}`);
+                if (charElement) {
+                    charElement.classList.remove('character-dead', 'death-animation', 'defeated', 'disabled');
+                    charElement.style.opacity = '1';
+                    charElement.style.filter = 'none';
+                    charElement.style.pointerEvents = 'auto';
+                    charElement.removeAttribute('data-defeated');
+                    charElement.removeAttribute('data-dead');
+                    charElement.setAttribute('data-alive', 'true');
+                }
+                
+                revivedCharacters.push(existingChar);
+                
+                gameManager.addLogEntry(
+                    `🍎 ${existingChar.name} rises from the grave with ${existingChar.stats.currentHp} HP!`,
+                    'stage-effect heal'
+                );
+                
+                // Create revival VFX
+                this.createAppleRevivalVFX(existingChar);
+            } else {
+                // If character not found or not dead, create a new instance (fallback)
+                const revivedChar = new Character(
+                    deadCharData.id,
+                    deadCharData.name,
+                    deadCharData.image,
+                    deadCharData.baseStats
+                );
+
+                // Restore abilities and passive
+                revivedChar.abilities = [...deadCharData.abilities];
+                revivedChar.passive = deadCharData.passive;
+                revivedChar.isAI = true;
+                revivedChar.instanceId = deadCharData.instanceId;
+
+                // Set HP to 50% of max HP
+                revivedChar.stats.currentHp = Math.floor(revivedChar.stats.maxHp * 0.5);
+                
+                // Ensure the character is properly initialized for targeting
+                revivedChar.buffs = [];
+                revivedChar.debuffs = [];
+                
+                // Initialize passive handler if needed
+                if (revivedChar.passive && window.PassiveFactory) {
+                    const PassiveHandlerClass = window.PassiveFactory.getPassiveHandlerClass(revivedChar.passive.id);
+                    if (PassiveHandlerClass) {
+                        try {
+                            revivedChar.passiveHandler = new PassiveHandlerClass(revivedChar);
+                            if (typeof revivedChar.passiveHandler.initialize === 'function') {
+                                revivedChar.passiveHandler.initialize(revivedChar);
+                            }
+                        } catch (error) {
+                            console.error(`Error initializing passive for revived ${revivedChar.name}:`, error);
+                        }
+                    }
+                }
+
+                // Add back to the game state
+                gameManager.gameState.aiCharacters.push(revivedChar);
+                revivedCharacters.push(revivedChar);
+
+                gameManager.addLogEntry(
+                    `🍎 ${revivedChar.name} rises from the grave with ${revivedChar.stats.currentHp} HP!`,
+                    'stage-effect heal'
+                );
+
+                // Create revival VFX
+                this.createAppleRevivalVFX(revivedChar);
+            }
+        });
+
+        // Clear the dead characters list since they've all been revived
+        modifier.deadAICharacters = [];
+
+        // Update the UI to show the revived characters
+        if (gameManager.uiManager) {
+            // Force a complete re-render of all characters to ensure revived ones are properly displayed
+            gameManager.uiManager.renderCharacters(gameManager.gameState.playerCharacters, gameManager.gameState.aiCharacters);
+            
+            // Use a small delay to ensure the UI has time to update before we modify elements
+            setTimeout(() => {
+                revivedCharacters.forEach(char => {
+                    // Remove any dead-related classes from the character element
+                    const charElement = document.getElementById(`character-${char.instanceId || char.id}`);
+                    if (charElement) {
+                        charElement.classList.remove('character-dead', 'death-animation');
+                        charElement.style.opacity = '1';
+                        charElement.style.filter = 'none';
+                        charElement.style.pointerEvents = 'auto';
+                        
+                        // Remove any data attributes that might mark it as defeated
+                        charElement.removeAttribute('data-defeated');
+                        charElement.removeAttribute('data-dead');
+                        
+                        // Force the element to be interactive
+                        charElement.style.cursor = 'pointer';
+                        
+                        // Clear any disabled states
+                        charElement.classList.remove('disabled', 'defeated');
+                        
+                        // Ensure the character is properly marked as alive
+                        charElement.setAttribute('data-alive', 'true');
+                    }
+                    
+                    // Update the character's UI state
+                    gameManager.uiManager.updateCharacterUI(char);
+                    
+                    // Force a recalculation of character stats to ensure they're properly initialized
+                    if (typeof char.recalculateStats === 'function') {
+                        char.recalculateStats('revival');
+                    }
+                });
+                
+                // Force update of targeting system
+                if (gameManager.updateTargetingSystem) {
+                    gameManager.updateTargetingSystem();
+                }
+                
+                // Refresh ability targeting if in targeting mode
+                if (gameManager.targetingMode) {
+                    gameManager.refreshTargeting();
+                }
+                
+                // Clear any cached targeting data
+                if (gameManager.clearTargetingCache) {
+                    gameManager.clearTargetingCache();
+                }
+            }, 100); // Small delay to ensure UI updates are complete
+        }
+
+        // Create screen-wide revival effect
+        this.createAppleRevivalScreenVFX();
+    }
+
+    createAppleRevivalCounterUI() {
+        // Remove existing counter if present
+        this.removeAppleRevivalCounterUI();
+
+        const counterElement = document.createElement('div');
+        counterElement.id = 'apple-revival-counter';
+        counterElement.className = 'apple-revival-counter';
+        counterElement.innerHTML = `
+            <div class="counter-icon">🍎💀</div>
+            <div class="counter-text">
+                <div class="counter-title">Apple Revival</div>
+                <div class="counter-value">Next in: <span id="apple-counter-turns">6</span> turns</div>
+            </div>
+        `;
+
+        // Add CSS styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .apple-revival-counter {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, rgba(139, 69, 19, 0.9), rgba(160, 82, 45, 0.9));
+                border: 2px solid #8B4513;
+                border-radius: 10px;
+                padding: 10px 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(5px);
+                animation: appleGlow 2s ease-in-out infinite alternate;
+            }
+            
+            .counter-icon {
+                font-size: 24px;
+                animation: appleFloat 3s ease-in-out infinite;
+            }
+            
+            .counter-text {
+                color: #FFE4B5;
+                font-family: 'Arial', sans-serif;
+            }
+            
+            .counter-title {
+                font-size: 12px;
+                font-weight: bold;
+                margin-bottom: 2px;
+            }
+            
+            .counter-value {
+                font-size: 14px;
+            }
+            
+            @keyframes appleGlow {
+                0% { box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3); }
+                100% { box-shadow: 0 4px 20px rgba(220, 20, 60, 0.5); }
+            }
+            
+            @keyframes appleFloat {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-3px); }
+            }
+        `;
+
+        document.head.appendChild(style);
+        document.body.appendChild(counterElement);
+    }
+
+    updateAppleRevivalCounter(currentTurn) {
+        const counterElement = document.getElementById('apple-counter-turns');
+        if (counterElement) {
+            const turnsUntilRevival = 6 - (currentTurn % 6);
+            counterElement.textContent = turnsUntilRevival === 6 ? 6 : turnsUntilRevival;
+
+            // Add urgency styling when close to revival
+            const parentCounter = document.getElementById('apple-revival-counter');
+            if (parentCounter) {
+                if (turnsUntilRevival <= 3) {
+                    parentCounter.style.animation = 'appleGlow 0.5s ease-in-out infinite alternate';
+                } else {
+                    parentCounter.style.animation = 'appleGlow 2s ease-in-out infinite alternate';
+                }
+            }
+        }
+    }
+
+    removeAppleRevivalCounterUI() {
+        const counterElement = document.getElementById('apple-revival-counter');
+        if (counterElement) {
+            counterElement.remove();
+        }
+    }
+
+    createTwistedAppleOrchardVFX() {
+        // Create ambient apple orchard effects
+        const vfxContainer = document.createElement('div');
+        vfxContainer.id = 'twisted-apple-orchard-vfx';
+        vfxContainer.className = 'twisted-apple-orchard-vfx';
+        vfxContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        `;
+
+        // VFX container created but no floating apples added
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.id = 'twisted-apple-orchard-styles';
+        style.textContent = `
+            @keyframes floatingApple {
+                0%, 100% { 
+                    transform: translateY(0px) rotate(0deg);
+                    opacity: 0.7;
+                }
+                25% { 
+                    transform: translateY(-20px) rotate(90deg);
+                    opacity: 0.9;
+                }
+                50% { 
+                    transform: translateY(-10px) rotate(180deg);
+                    opacity: 0.5;
+                }
+                75% { 
+                    transform: translateY(-30px) rotate(270deg);
+                    opacity: 0.8;
+                }
+            }
+        `;
+
+        document.head.appendChild(style);
+
+        const battlefield = document.querySelector('#game-container') || document.body;
+        battlefield.appendChild(vfxContainer);
+    }
+
+    createAppleRevivalVFX(character) {
+        // Create revival effect for individual character
+        const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (charElement) {
+            // Remove death classes
+            charElement.classList.remove('death-animation', 'character-dead');
+
+            // Add revival effect
+            charElement.classList.add('apple-revival-effect');
+
+            // Create apple burst effect
+            const burstContainer = document.createElement('div');
+            burstContainer.className = 'apple-revival-burst';
+            burstContainer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 100;
+            `;
+
+            for (let i = 0; i < 8; i++) {
+                const apple = document.createElement('div');
+                apple.textContent = '🍎';
+                apple.style.cssText = `
+                    position: absolute;
+                    font-size: 16px;
+                    animation: appleBurst 1s ease-out forwards;
+                    animation-delay: ${i * 0.1}s;
+                    transform: rotate(${i * 45}deg) translateX(0px);
+                `;
+                burstContainer.appendChild(apple);
+            }
+
+            charElement.appendChild(burstContainer);
+
+            // Clean up after animation
+            setTimeout(() => {
+                charElement.classList.remove('apple-revival-effect');
+                if (burstContainer.parentNode) {
+                    burstContainer.remove();
+                }
+            }, 2000);
+        }
+    }
+
+    createAppleRevivalScreenVFX() {
+        // Create screen-wide revival effect
+        const screenEffect = document.createElement('div');
+        screenEffect.className = 'apple-revival-screen-effect';
+        screenEffect.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(139, 69, 19, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 999;
+            animation: appleRevivalPulse 2s ease-out forwards;
+        `;
+
+        document.body.appendChild(screenEffect);
+
+        setTimeout(() => {
+            if (screenEffect.parentNode) {
+                screenEffect.remove();
+            }
+        }, 2000);
+
+        // Add CSS for revival effects
+        if (!document.getElementById('apple-revival-effect-styles')) {
+            const style = document.createElement('style');
+            style.id = 'apple-revival-effect-styles';
+            style.textContent = `
+                .apple-revival-effect {
+                    animation: appleRevivalGlow 2s ease-out;
+                    filter: brightness(1.5) saturate(1.2);
+                }
+                
+                @keyframes appleBurst {
+                    0% {
+                        transform: rotate(var(--rotation, 0deg)) translateX(0px);
+                        opacity: 1;
+                        scale: 1;
+                    }
+                    100% {
+                        transform: rotate(var(--rotation, 0deg)) translateX(50px);
+                        opacity: 0;
+                        scale: 0.5;
+                    }
+                }
+                
+                @keyframes appleRevivalGlow {
+                    0% { 
+                        filter: brightness(1) saturate(1);
+                        transform: scale(1);
+                    }
+                    50% { 
+                        filter: brightness(2) saturate(2);
+                        transform: scale(1.1);
+                    }
+                    100% { 
+                        filter: brightness(1.2) saturate(1.1);
+                        transform: scale(1);
+                    }
+                }
+                
+                @keyframes appleRevivalPulse {
+                    0% { opacity: 0; }
+                    50% { opacity: 0.8; }
+                    100% { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    clearTwistedAppleOrchardVFX() {
+        const vfxContainer = document.getElementById('twisted-apple-orchard-vfx');
+        if (vfxContainer) {
+            vfxContainer.remove();
+        }
+
+        const styles = document.getElementById('twisted-apple-orchard-styles');
+        if (styles) {
+            styles.remove();
+        }
+
+        const revivalStyles = document.getElementById('apple-revival-effect-styles');
+        if (revivalStyles) {
+            revivalStyles.remove();
+        }
+    }
+
+    // Alcoholic Air Modifier - permanently reduces armor and magical resistance to 0 for player characters
+    registerAlcoholicAirModifier() {
+        this.registerModifier({
+            id: 'alcoholic_air',
+            name: 'Alcoholic Air',
+            description: 'The barn air is thick with alcohol vapors! All player characters\' armor and magical resistance is permanently reduced to 0 for this battle.',
+            icon: '🍺',
+            vfx: {
+                color: '#8B4513',
+                particle: 'vapor_cloud',
+                animation: 'swirling_vapor'
+            },
+            onStageStart: (gameManager, stageManager, modifier) => {
+                console.log('[StageModifiers] Alcoholic Air effect starting - applying permanent armor/resistance reduction');
+                
+                // Create full stage-wide alcoholic air atmosphere
+                this.createFullStageAlcoholicAir(gameManager, stageManager, modifier);
+                
+                // Apply permanent debuff to all player characters
+                const playerCharacters = gameManager.gameState.playerCharacters || [];
+                
+                playerCharacters.forEach(character => {
+                    // Create a permanent non-removable debuff similar to the drunk effect
+                    const alcoholicAirDebuff = new Effect(
+                        'alcoholic_air_debuff',
+                        'Alcoholic Air',
+                        'Icons/abilities/drink_alcohol.webp',
+                        999, // Very long duration (essentially permanent)
+                        null,
+                        true // isDebuff
+                    ).setDescription('Armor and Magical Resistance reduced to 0 by alcoholic vapors.');
+
+                    // Make it non-removable by setting a special flag
+                    alcoholicAirDebuff.isNonRemovable = true;
+
+                    // Custom onApply method to set stats immediately
+                    alcoholicAirDebuff.onApply = function(character) {
+                        // Store original BASE values before modifying STATS
+                        this.originalBaseArmor = character.baseStats.armor;
+                        this.originalBaseMagicalShield = character.baseStats.magicalShield;
+                        
+                        // Set BASE stats to 0 permanently - recalculateStats will use these
+                        character.baseStats.armor = 0;
+                        character.baseStats.magicalShield = 0;
+                        
+                        gameManager.addLogEntry(
+                            `${character.name} is affected by alcoholic vapors! Armor and Magical Resistance reduced to 0.`,
+                            'stage-effect debuff'
+                        );
+                    };
+                    
+                    // Custom remove method - should not be called during battle, but included for completeness
+                    alcoholicAirDebuff.remove = function(character) {
+                        // Only restore if not non-removable (for safety)
+                        if (!this.isNonRemovable) {
+                            if (this.originalBaseArmor !== undefined) {
+                                character.baseStats.armor = this.originalBaseArmor;
+                            }
+                            
+                            if (this.originalBaseMagicalShield !== undefined) {
+                                character.baseStats.magicalShield = this.originalBaseMagicalShield;
+                            }
+                            
+                            gameManager.addLogEntry(
+                                `${character.name} is no longer affected by alcoholic vapors. Armor and Magical Resistance restored.`,
+                                'stage-effect'
+                            );
+                        }
+                    };
+                    
+                    // Add the debuff to the character
+                    character.addDebuff(alcoholicAirDebuff);
+                    
+                    // Create individual character VFX
+                    this.createAlcoholicAirVFX(character);
+                });
+
+                // Log the modifier activation
+                gameManager.addLogEntry(
+                    '🍺 The barn air is thick with alcohol vapors! All player characters\' defenses are compromised.',
+                    'stage-effect dramatic'
+                );
+            },
+            onStageEnd: (gameManager, stageManager, modifier) => {
+                // Clean up stage-wide effects when battle ends
+                this.clearFullStageAlcoholicAir();
+            }
+        });
+
+        console.log('[StageModifiers] Registered alcoholic_air_effect modifier successfully');
+    }
+
+    // Create full stage-wide alcoholic air atmosphere
+    createFullStageAlcoholicAir(gameManager, stageManager, modifier) {
+        console.log('[StageModifiers] Creating full stage alcoholic air atmosphere');
+        
+        // Create the main stage overlay container
+        const stageOverlay = document.createElement('div');
+        stageOverlay.id = 'alcoholic-air-stage-overlay';
+        stageOverlay.className = 'alcoholic-air-stage-overlay';
+        
+        // Create multiple layers for the effect
+        stageOverlay.innerHTML = `
+            <div class="alcoholic-air-background"></div>
+            <div class="vapor-particles-layer"></div>
+            <div class="floating-vapor-clouds"></div>
+            <div class="alcohol-haze-overlay"></div>
+            <div class="stage-warning-banner">
+                <div class="warning-icon">🍺</div>
+                <div class="warning-text">ALCOHOLIC AIR - DEFENSES COMPROMISED</div>
+                <div class="warning-icon">🍺</div>
+            </div>
+        `;
+        
+        // Find the game container and add the overlay
+        const gameContainer = document.querySelector('.game-container') || document.querySelector('.battle-container') || document.body;
+        gameContainer.appendChild(stageOverlay);
+        
+        // Create vapor particles dynamically
+        this.createVaporParticles(stageOverlay);
+        
+        // Add comprehensive CSS styles
+        this.addAlcoholicAirStyles();
+        
+        // Start periodic vapor effects
+        this.startPeriodicVaporEffects();
+        
+        // Play atmospheric sound if available
+        if (gameManager && typeof gameManager.playSound === 'function') {
+            gameManager.playSound('sounds/alcoholic_air_ambience.mp3', { loop: true, volume: 0.3 });
+        }
+        
+        console.log('[StageModifiers] Full stage alcoholic air atmosphere created');
+    }
+    
+    // Create animated vapor particles
+    createVaporParticles(container) {
+        const particlesLayer = container.querySelector('.vapor-particles-layer');
+        
+        // Create 20 vapor particles
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'vapor-particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+            particlesLayer.appendChild(particle);
+        }
+        
+        // Create floating vapor clouds
+        const cloudsLayer = container.querySelector('.floating-vapor-clouds');
+        for (let i = 0; i < 8; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'floating-vapor-cloud';
+            cloud.style.left = Math.random() * 100 + '%';
+            cloud.style.top = Math.random() * 100 + '%';
+            cloud.style.animationDelay = Math.random() * 15 + 's';
+            cloud.style.animationDuration = (12 + Math.random() * 6) + 's';
+            cloudsLayer.appendChild(cloud);
+        }
+    }
+    
+    // Add comprehensive CSS styles for the stage effect
+    addAlcoholicAirStyles() {
+        const styleId = 'alcoholic-air-stage-styles';
+        if (document.getElementById(styleId)) return; // Already added
+        
+        const styles = document.createElement('style');
+        styles.id = styleId;
+        styles.textContent = `
+            .alcoholic-air-stage-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                pointer-events: none;
+                z-index: 100;
+                overflow: hidden;
+            }
+            
+            .alcoholic-air-background {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(
+                    circle at 50% 50%,
+                    rgba(139,69,19,0.15) 0%,
+                    rgba(160,82,45,0.08) 30%,
+                    rgba(139,69,19,0.05) 60%,
+                    transparent 100%
+                );
+                animation: alcohol-atmosphere-pulse 8s infinite ease-in-out;
+            }
+            
+            @keyframes alcohol-atmosphere-pulse {
+                0%, 100% { opacity: 0.6; transform: scale(1); }
+                50% { opacity: 0.9; transform: scale(1.05); }
+            }
+            
+            .vapor-particles-layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .vapor-particle {
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background: radial-gradient(circle, rgba(139,69,19,0.8) 0%, transparent 100%);
+                border-radius: 50%;
+                animation: vapor-particle-float 10s infinite linear;
+            }
+            
+            @keyframes vapor-particle-float {
+                0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+                10% { opacity: 0.6; }
+                90% { opacity: 0.6; }
+                100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+            }
+            
+            .floating-vapor-clouds {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .floating-vapor-cloud {
+                position: absolute;
+                width: 120px;
+                height: 80px;
+                background: radial-gradient(
+                    ellipse at center,
+                    rgba(139,69,19,0.4) 0%,
+                    rgba(139,69,19,0.2) 50%,
+                    transparent 100%
+                );
+                border-radius: 50%;
+                animation: vapor-cloud-drift 15s infinite linear;
+            }
+            
+            @keyframes vapor-cloud-drift {
+                0% { transform: translateX(-150px) translateY(0px) rotate(0deg); opacity: 0; }
+                20% { opacity: 0.7; }
+                80% { opacity: 0.7; }
+                100% { transform: translateX(calc(100vw + 150px)) translateY(-20px) rotate(10deg); opacity: 0; }
+            }
+            
+            .alcohol-haze-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    45deg,
+                    transparent 0%,
+                    rgba(139,69,19,0.1) 25%,
+                    transparent 50%,
+                    rgba(160,82,45,0.08) 75%,
+                    transparent 100%
+                );
+                animation: alcohol-haze-shift 12s infinite ease-in-out;
+            }
+            
+            @keyframes alcohol-haze-shift {
+                0%, 100% { transform: translateX(0px) translateY(0px); opacity: 0.5; }
+                25% { transform: translateX(20px) translateY(-10px); opacity: 0.8; }
+                50% { transform: translateX(-10px) translateY(15px); opacity: 0.6; }
+                75% { transform: translateX(15px) translateY(5px); opacity: 0.9; }
+            }
+            
+            .stage-warning-banner {
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                background: linear-gradient(135deg, rgba(139,69,19,0.95) 0%, rgba(160,82,45,0.95) 100%);
+                color: #fff;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-weight: bold;
+                font-size: 14px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+                border: 2px solid #8B4513;
+                box-shadow: 0 4px 15px rgba(139,69,19,0.6);
+                animation: warning-banner-pulse 3s infinite ease-in-out;
+                z-index: 1000;
+            }
+            
+            @keyframes warning-banner-pulse {
+                0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+                50% { transform: translateX(-50%) scale(1.05); opacity: 1; }
+            }
+            
+            .warning-icon {
+                font-size: 18px;
+                animation: warning-icon-bounce 2s infinite ease-in-out;
+            }
+            
+            @keyframes warning-icon-bounce {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+            }
+            
+            .warning-text {
+                font-family: 'Exo 2', monospace, sans-serif;
+                letter-spacing: 1px;
+            }
+            
+            /* Character-specific VFX */
+            .alcoholic-air-vfx {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 10;
+            }
+            
+            .vapor-cloud {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 80px;
+                height: 80px;
+                background: radial-gradient(circle, rgba(139,69,19,0.6) 0%, rgba(139,69,19,0.3) 50%, transparent 100%);
+                border-radius: 50%;
+                animation: swirling-vapor 3s infinite ease-in-out;
+            }
+            
+            @keyframes swirling-vapor {
+                0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 0.6; }
+                50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); opacity: 0.8; }
+            }
+            
+            .stat-reduction-indicator {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(139,69,19,0.9);
+                color: white;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: bold;
+                border: 1px solid #8B4513;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    // Start periodic vapor effects
+    startPeriodicVaporEffects() {
+        // Create periodic vapor bursts
+        this.vaporBurstInterval = setInterval(() => {
+            this.createVaporBurst();
+        }, 8000);
+        
+        // Create periodic atmospheric pulses
+        this.atmosphericPulseInterval = setInterval(() => {
+            this.createAtmosphericPulse();
+        }, 12000);
+    }
+    
+    // Create a vapor burst effect
+    createVaporBurst() {
+        const overlay = document.getElementById('alcoholic-air-stage-overlay');
+        if (!overlay) return;
+        
+        const burst = document.createElement('div');
+        burst.className = 'vapor-burst';
+        burst.style.cssText = `
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(139,69,19,0.8) 0%, rgba(139,69,19,0.3) 50%, transparent 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: vapor-burst-expand 4s ease-out forwards;
+            z-index: 50;
+        `;
+        
+        overlay.appendChild(burst);
+        
+        // Add burst animation
+        const burstStyle = document.createElement('style');
+        burstStyle.textContent = `
+            @keyframes vapor-burst-expand {
+                0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+                20% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+                100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(burstStyle);
+        
+        // Remove burst after animation
+        setTimeout(() => {
+            burst.remove();
+            burstStyle.remove();
+        }, 4000);
+    }
+    
+    // Create atmospheric pulse effect
+    createAtmosphericPulse() {
+        const overlay = document.getElementById('alcoholic-air-stage-overlay');
+        if (!overlay) return;
+        
+        const pulse = document.createElement('div');
+        pulse.className = 'atmospheric-pulse';
+        pulse.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(139,69,19,0.3) 0%, transparent 60%);
+            animation: atmospheric-pulse-effect 6s ease-in-out forwards;
+            z-index: 1;
+        `;
+        
+        overlay.appendChild(pulse);
+        
+        // Add pulse animation
+        const pulseStyle = document.createElement('style');
+        pulseStyle.textContent = `
+            @keyframes atmospheric-pulse-effect {
+                0% { opacity: 0; transform: scale(0.8); }
+                50% { opacity: 1; transform: scale(1.1); }
+                100% { opacity: 0; transform: scale(1.3); }
+            }
+        `;
+        document.head.appendChild(pulseStyle);
+        
+        // Remove pulse after animation
+        setTimeout(() => {
+            pulse.remove();
+            pulseStyle.remove();
+        }, 6000);
+    }
+    
+    // Clear full stage alcoholic air effects
+    clearFullStageAlcoholicAir() {
+        console.log('[StageModifiers] Clearing full stage alcoholic air effects');
+        
+        // Remove stage overlay
+        const overlay = document.getElementById('alcoholic-air-stage-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        
+        // Remove styles
+        const styles = document.getElementById('alcoholic-air-stage-styles');
+        if (styles) {
+            styles.remove();
+        }
+        
+        // Clear intervals
+        if (this.vaporBurstInterval) {
+            clearInterval(this.vaporBurstInterval);
+            this.vaporBurstInterval = null;
+        }
+        
+        if (this.atmosphericPulseInterval) {
+            clearInterval(this.atmosphericPulseInterval);
+            this.atmosphericPulseInterval = null;
+        }
+        
+        // Stop ambient sound if playing
+        if (window.gameManager && typeof window.gameManager.stopSound === 'function') {
+            window.gameManager.stopSound('sounds/alcoholic_air_ambience.mp3');
+        }
+        
+        console.log('[StageModifiers] Full stage alcoholic air effects cleared');
+    }
+
+    // Create VFX for individual characters
+    createAlcoholicAirVFX(character) {
+        const characterElement = document.getElementById(`character-${character.instanceId || character.id}`);
+        if (!characterElement) return;
+
+        // Create the alcoholic air VFX container
+        const alcoholicAirVfx = document.createElement('div');
+        alcoholicAirVfx.className = 'alcoholic-air-vfx';
+        alcoholicAirVfx.innerHTML = `
+            <div class="vapor-cloud"></div>
+            <div class="stat-reduction-indicator">ARMOR & RESISTANCE: 0</div>
+        `;
+        characterElement.appendChild(alcoholicAirVfx);
+
+        // Remove VFX after a delay (but keep the debuff effect)
+        setTimeout(() => {
+            alcoholicAirVfx.remove();
+        }, 5000);
+    }
 }
 
-// Create global instance
-window.stageModifiersRegistry = new StageModifiersRegistry();
+// Ensure the registry is globally accessible for the game
+if (typeof window !== 'undefined') {
+    window.stageModifiersRegistry = new StageModifiersRegistry();
+}

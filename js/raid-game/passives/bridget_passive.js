@@ -263,7 +263,7 @@ class BridgetPassiveHandler {
             if (target && !target.isDead()) {
                 console.log(`[BridgetPassiveHandler applyPassiveHealing] Applying heal to ${target.name}`);
                 // Pass caster (Bridget) to the heal method for correct healing power application and critical heal check
-                const healResult = target.heal(healAmount, this.character, { allowOverheal: true }); // allowOverheal for passive
+                const healResult = target.heal(healAmount, this.character);
                 const actualHealAmount = healResult.healAmount;
 
                 if (actualHealAmount > 0) {
@@ -2670,4 +2670,4 @@ window.fixBridgetLowTidePower = function() {
         console.log("[DEBUG FIX] Mana not below 50%, no action taken");
         return false;
     }
-}; 
+};

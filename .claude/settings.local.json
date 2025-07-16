@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(tail:*)"
+    ],
+    "deny": []
+  }
+}

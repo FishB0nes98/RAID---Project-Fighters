@@ -853,7 +853,22 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.saveButton.addEventListener('click', handleSaveTalents);
         elements.resetButton.addEventListener('click', handleResetTalents);
         elements.backButton.addEventListener('click', () => {
-            // Navigate back to character selector, potentially passing charId
+            // Check if we're in iframe mode (from story interface)
+            if (window.isInIframe) {
+                // Close the modal instead of navigating
+                try {
+                    if (typeof window.parent.closeTalentModal === 'function') {
+                        window.parent.closeTalentModal();
+                    } else {
+                        window.parent.postMessage({action: 'closeTalentModal'}, '*');
+                    }
+                } catch (error) {
+                    console.error('Could not close parent modal:', error);
+                }
+                return;
+            }
+            
+            // Normal navigation for standalone mode
             window.location.href = `character-selector.html`;
             // --- Controller: Cleanup on navigate away ---
             stopControllerUpdates();

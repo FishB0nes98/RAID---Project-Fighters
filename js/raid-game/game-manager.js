@@ -4,7 +4,6 @@ class GameManager {
         this.stageManager = new StageManager();
         this.uiManager = new UIManager(this);
         this.aiManager = new AIManager(this); // Initialize AI Manager
-        this.weeklyChallengeAI = null; // Will be initialized when weekly challenge mode is enabled
         this.characterFactory = CharacterFactory; // Use the global instance
         this.gameState = {}; // Initial empty game state
         this.actedCharacters = []; // Track characters who have acted this turn
@@ -37,26 +36,17 @@ class GameManager {
                 const volumeSettings = JSON.parse(savedVolume);
                 this.bgmVolume = volumeSettings.bgm || 0.3;
                 this.sfxVolume = volumeSettings.sfx || 0.3;
+                this.musicEnabled = volumeSettings.musicEnabled !== false; // Default to true if not set
             } catch (e) {
                 console.error('Error loading volume settings:', e);
             }
+        } else {
+            this.musicEnabled = true; // Default to music enabled
         }
         
         // Initialize preventTurnEnd flag
         this.preventTurnEndFlag = false;
         
-        // Add weekly challenge mode toggle for debugging
-        window.toggleWeeklyChallengeMode = () => {
-            if (this.isWeeklyChallengeMode) {
-                this.disableWeeklyChallengeMode();
-                console.log('Weekly Challenge Mode DISABLED');
-                return false;
-            } else {
-                this.enableWeeklyChallengeMode();
-                console.log('Weekly Challenge Mode ENABLED - Healing Forbidden Challenge active!');
-                return true;
-            }
-        };
 
         // Add a special window function to force ability reuse for debugging
         window.forceAyaneAbilityReuse = () => {
@@ -100,7 +90,6 @@ class GameManager {
         
         this.controllerManager = null; // Add a reference to the controller manager
         this.tutorialManager = null; // Tutorial manager for guided experiences
-        this.isWeeklyChallengeMode = false; // Flag to track if weekly challenge mode is active
         
         this.playerProgressData = null; // Store player progress data
         this.questManager = null; // Will be initialized when available
@@ -596,28 +585,6 @@ class GameManager {
         console.log(`[Debug] Enemy low HP cheat activated! ${enemiesAffected} enemies affected.`);
     }
 
-    /**
-     * Enable Weekly Challenge Mode with intelligent AI
-     */
-    enableWeeklyChallengeMode() {
-        this.isWeeklyChallengeMode = true;
-        if (typeof WeeklyChallengeAI !== 'undefined') {
-            this.weeklyChallengeAI = new WeeklyChallengeAI(this);
-            this.weeklyChallengeAI.initialize();
-            console.log('[GameManager] Weekly Challenge Mode enabled with intelligent AI');
-        } else {
-            console.error('[GameManager] WeeklyChallengeAI class not found. Make sure weekly-challenge-ai.js is loaded.');
-        }
-    }
-
-    /**
-     * Disable Weekly Challenge Mode
-     */
-    disableWeeklyChallengeMode() {
-        this.isWeeklyChallengeMode = false;
-        this.weeklyChallengeAI = null;
-        console.log('[GameManager] Weekly Challenge Mode disabled');
-    }
 
     // --- NEW METHOD: Change the current game phase ---
     changePhase(newPhase) {
@@ -994,6 +961,9 @@ class GameManager {
         // Initialize stage modifier VFX
         if (window.stageModifiersRegistry) {
             window.stageModifiersRegistry.initializeVFX(this.stageManager);
+            // Activate stage modifiers first
+            console.log('[GameManager] Activating stage modifiers...');
+            window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'activate');
             // Process stage start modifiers (like Small Space)
             console.log('[GameManager] Processing stage start modifiers...');
             window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'stageStart');
@@ -1196,6 +1166,9 @@ class GameManager {
         // Initialize stage modifier VFX
         if (window.stageModifiersRegistry) {
             window.stageModifiersRegistry.initializeVFX(this.stageManager);
+            // Activate stage modifiers first
+            console.log('[GameManager] Activating stage modifiers...');
+            window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'activate');
             // Process stage start modifiers (like Small Space)
             console.log('[GameManager] Processing stage start modifiers...');
             window.stageModifiersRegistry.processModifiers(this, this.stageManager, 'stageStart');
@@ -1587,53 +1560,96 @@ class GameManager {
         }
     }
     
-    // Initialize volume control
+    // Initialize audio controls
     initializeVolumeControl() {
-        const volumeSlider = document.getElementById('volume-slider');
-        const volumeIcon = document.getElementById('volume-icon');
+        const musicSlider = document.getElementById('music-slider');
+        const effectsSlider = document.getElementById('effects-slider');
+        const musicToggle = document.getElementById('qab-music-toggle');
         
-        if (!volumeSlider || !volumeIcon) return;
+        if (!musicSlider || !effectsSlider) return;
         
-        // Set initial slider value from stored volume
-        volumeSlider.value = Math.round(this.bgmVolume * 100);
+        // Set initial slider values from stored volumes
+        musicSlider.value = Math.round(this.bgmVolume * 100);
+        effectsSlider.value = Math.round(this.sfxVolume * 100);
         
-        // Update volume when slider changes
-        volumeSlider.addEventListener('input', () => {
-            const volume = volumeSlider.value / 100;
-            this.setVolume(volume);
+        // Initialize music toggle state
+        this.musicEnabled = this.bgmVolume > 0;
+        this.updateMusicToggleButton();
+        
+        // Update music volume when slider changes
+        musicSlider.addEventListener('input', () => {
+            const volume = musicSlider.value / 100;
+            this.bgmVolume = volume;
             
-            // Update icon based on volume level
-            if (volume === 0) {
-                volumeIcon.textContent = '🔇';
-            } else if (volume < 0.5) {
-                volumeIcon.textContent = '🔉';
-            } else {
-                volumeIcon.textContent = '🔊';
+            // If volume is set above 0, enable music
+            if (volume > 0) {
+                this.musicEnabled = true;
+                this.updateMusicToggleButton();
+            }
+            
+            // Update current playing music
+            if (this.bgmPlayer && this.musicEnabled) {
+                this.bgmPlayer.volume = volume;
             }
             
             // Save volume settings to localStorage
             this.saveVolumeSettings();
         });
         
-        // Toggle mute when clicking the icon
-        volumeIcon.addEventListener('click', () => {
-            if (this.bgmVolume > 0) {
-                // Store current volume for unmuting
-                this.previousVolume = this.bgmVolume;
-                this.setVolume(0);
-                volumeSlider.value = 0;
-                volumeIcon.textContent = '🔇';
-            } else {
-                // Restore previous volume or default to 0.7
-                const newVolume = this.previousVolume || 0.7;
-                this.setVolume(newVolume);
-                volumeSlider.value = Math.round(newVolume * 100);
-                volumeIcon.textContent = newVolume < 0.5 ? '🔉' : '🔊';
-            }
+        // Update effects volume when slider changes
+        effectsSlider.addEventListener('input', () => {
+            const volume = effectsSlider.value / 100;
+            this.sfxVolume = volume;
             
             // Save volume settings to localStorage
             this.saveVolumeSettings();
         });
+        
+        // Music toggle button in quick action bar
+        if (musicToggle) {
+            musicToggle.addEventListener('click', () => {
+                this.toggleMusic();
+            });
+        }
+    }
+    
+    // Toggle music on/off
+    toggleMusic() {
+        this.musicEnabled = !this.musicEnabled;
+        
+        if (this.musicEnabled) {
+            // Resume music if it was paused
+            if (this.bgmPlayer) {
+                this.bgmPlayer.volume = this.bgmVolume;
+                if (this.bgmPlayer.paused) {
+                    this.bgmPlayer.play().catch(e => console.log('Could not resume music:', e));
+                }
+            }
+        } else {
+            // Pause music
+            if (this.bgmPlayer && !this.bgmPlayer.paused) {
+                this.bgmPlayer.pause();
+            }
+        }
+        
+        this.updateMusicToggleButton();
+        this.saveVolumeSettings();
+    }
+    
+    // Update the music toggle button appearance
+    updateMusicToggleButton() {
+        const musicToggle = document.getElementById('qab-music-toggle');
+        if (musicToggle) {
+            if (this.musicEnabled) {
+                musicToggle.textContent = '🎵';
+                musicToggle.title = 'Turn Off Music';
+                musicToggle.style.opacity = '1';
+            } else {
+                musicToggle.textContent = '🔇';
+                musicToggle.title = 'Turn On Music';
+                musicToggle.style.opacity = '0.6';
+            }
+        }
     }
     
     // Set volume for all audio
@@ -1652,7 +1668,8 @@ class GameManager {
     saveVolumeSettings() {
         const volumeSettings = {
             bgm: this.bgmVolume,
-            sfx: this.sfxVolume
+            sfx: this.sfxVolume,
+            musicEnabled: this.musicEnabled
         };
         localStorage.setItem('gameVolume', JSON.stringify(volumeSettings));
     }
@@ -1806,6 +1823,32 @@ class GameManager {
         // --- END Apply story context ---
 
         this.gameState = this.stageManager.gameState; // Get the loaded game state
+        
+        // --- NEW: Initialize permanent effects for all characters ---
+        console.log('[GameManager] Initializing permanent effects for all characters...');
+        if (this.gameState.playerCharacters) {
+            this.gameState.playerCharacters.forEach(character => {
+                if (character.permanentEffects) {
+                    console.log(`[GameManager] ${character.name} has permanent effects:`, character.permanentEffects);
+                    
+                    // Ensure permanent effects are properly applied to character abilities
+                    if (character.permanentEffects.eCooldownReduction && character.permanentEffects.eCooldownReduction.applied) {
+                        console.log(`[GameManager] ${character.name} has E cooldown reduction: ${character.permanentEffects.eCooldownReduction.amount}`);
+                        
+                        // Ensure permanentBuffs object exists and has the cooldown reduction
+                        if (!character.permanentBuffs) character.permanentBuffs = {};
+                        if (!character.permanentBuffs.eCooldownReduction) {
+                            character.permanentBuffs.eCooldownReduction = character.permanentEffects.eCooldownReduction.amount;
+                            console.log(`[GameManager] Applied E cooldown reduction to ${character.name}'s permanentBuffs`);
+                        }
+                    }
+                }
+                if (character.permanentBuffs) {
+                    console.log(`[GameManager] ${character.name} has permanent buffs:`, character.permanentBuffs);
+                }
+            });
+        }
+        // --- END NEW ---
  
         // --- Initialize UI --- 
         // ... (Rest of startGame)
@@ -3485,6 +3528,48 @@ class GameManager {
            }
        }
 
+       // Generate and play turn change sound effect
+       playTurnChangeSound(phase) {
+           try {
+               if (this.audioContext.state === 'suspended') {
+                   this.audioContext.resume();
+               }
+               
+               // Create a simple turn notification sound using Web Audio API
+               const oscillator = this.audioContext.createOscillator();
+               const gainNode = this.audioContext.createGain();
+               
+               // Different tones for player vs AI turns
+               if (phase === 'player') {
+                   // Player turn: Rising tone (C to E)
+                   oscillator.frequency.setValueAtTime(261.63, this.audioContext.currentTime); // C4
+                   oscillator.frequency.exponentialRampToValueAtTime(329.63, this.audioContext.currentTime + 0.15); // E4
+               } else {
+                   // AI turn: Descending tone (E to C)
+                   oscillator.frequency.setValueAtTime(329.63, this.audioContext.currentTime); // E4
+                   oscillator.frequency.exponentialRampToValueAtTime(261.63, this.audioContext.currentTime + 0.15); // C4
+               }
+               
+               oscillator.type = 'sine';
+               
+               // Volume envelope
+               gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+               gainNode.gain.linearRampToValueAtTime(this.sfxVolume * 0.3, this.audioContext.currentTime + 0.05);
+               gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.25);
+               
+               // Connect nodes
+               oscillator.connect(gainNode);
+               gainNode.connect(this.audioContext.destination);
+               
+               // Play the sound
+               oscillator.start(this.audioContext.currentTime);
+               oscillator.stop(this.audioContext.currentTime + 0.25);
+               
+           } catch (error) {
+               console.warn('Could not play turn change sound:', error);
+           }
+       }
+
        // --- NEW: Helper function to save battle result to Firebase --- 
        async saveBattleResultToFirebase(isVictory) {
             // --- DEBUG LOGGING ---
@@ -4921,6 +5006,54 @@ class GameManager {
        }
 
        /**
+        * Handle character revival (for stage modifiers like Twisted Apple Orchard)
+        * @param {Character} character - The character to revive
+        * @param {number} hpPercent - Percentage of max HP to revive with (0.0 to 1.0)
+        */
+       handleCharacterRevival(character, hpPercent = 0.5) {
+           const log = this.addLogEntry.bind(this);
+           
+           // Ensure character is actually dead before reviving
+           if (!character.isDead()) {
+               console.warn(`[handleCharacterRevival] Character ${character.name} is not dead, cannot revive`);
+               return false;
+           }
+           
+           // Set HP to the specified percentage
+           character.stats.currentHp = Math.floor(character.stats.maxHp * hpPercent);
+           
+           // Clear any death-related debuffs or effects
+           character.debuffs = character.debuffs.filter(debuff => 
+               debuff.id !== 'death' && debuff.id !== 'defeated'
+           );
+           
+           // Update UI to reflect revival
+           const charElement = document.getElementById(`character-${character.instanceId || character.id}`);
+           if (charElement) {
+               charElement.classList.remove('death-animation', 'character-dead');
+           }
+           
+           // Update character UI
+           if (this.uiManager) {
+               this.uiManager.updateCharacterUI(character);
+           }
+           
+           log(`${character.name} has been revived with ${character.stats.currentHp} HP!`, 'heal');
+           
+           // Dispatch revival event
+           const revivalEvent = new CustomEvent('CharacterRevived', {
+               detail: { 
+                   character: character,
+                   hpPercent: hpPercent
+               }
+           });
+           document.dispatchEvent(revivalEvent);
+           
+           console.log(`[handleCharacterRevival] Successfully revived ${character.name} with ${character.stats.currentHp}/${character.stats.maxHp} HP`);
+           return true;
+       }
+
+       /**
         * Gets the opposing team relative to the given character.
         * @param {Character} character - The character to find opponents for.
         * @returns {Character[]} - Array of opponent characters.
@@ -5390,6 +5523,15 @@ class AIManager {
                this.gameManager.gameState.phase = 'ai';
                this.gameManager.uiManager.updatePhase('ai');
 
+               // --- Process stage modifiers for AI turn start ---
+               if (window.stageModifiersRegistry) {
+                   try {
+                       window.stageModifiersRegistry.processModifiers(this.gameManager, this.gameManager.stageManager, 'turnStart');
+                   } catch (error) {
+                       console.error('[GameManager] Error processing AI turn start stage modifiers:', error);
+                   }
+               }
+
                // --- Process AI character effects and cooldowns at start of AI turn ---
                this.gameManager.gameState.aiCharacters.forEach(aiChar => {
                    if (aiChar && !aiChar.isDead()) {
@@ -5495,11 +5637,6 @@ class AIManager {
 
        // Plan an action for an AI character (but don't execute it yet)
        async planAIAction(aiChar) {
-           // Check if Weekly Challenge AI should be used
-           if (this.gameManager.isWeeklyChallengeMode && this.gameManager.weeklyChallengeAI) {
-               console.log(`[AI Planner] Using Weekly Challenge AI for ${aiChar.name}`);
-               return await this.gameManager.weeklyChallengeAI.planWeeklyChallengeAction(aiChar);
-           }
 
            // SPECIAL AI BEHAVIOR FOR INFERNAL RAIDEN
            console.log(`[AI Planner Debug] Character ID: "${aiChar.id}", Name: "${aiChar.name}"`);
@@ -6910,12 +7047,6 @@ class AIManager {
                 this.showCharacterStatsMenu(character, e.clientX, e.clientY);
             });
             
-            // Also add it to the media element for backward compatibility
-            mediaElement.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                this.showCharacterStatsMenu(character, e.clientX, e.clientY);
-            });
-            
             // Buff container
             const buffsDiv = document.createElement('div');
             buffsDiv.className = 'status-effects buffs';
@@ -7959,7 +8090,26 @@ class AIManager {
             // Only update if phase is provided
             if (phase) {
                 const phaseText = phase === 'player' ? "Player's Turn" : "AI's Turn";
-                document.getElementById('battle-phase').textContent = phaseText;
+                const phaseElement = document.getElementById('battle-phase');
+                
+                if (phaseElement) {
+                    phaseElement.textContent = phaseText;
+                    
+                    // Add visual feedback for turn changes
+                    phaseElement.classList.remove('player-turn', 'ai-turn', 'turn-change');
+                    phaseElement.classList.add(phase === 'player' ? 'player-turn' : 'ai-turn');
+                    
+                    // Add turn change animation
+                    phaseElement.classList.add('turn-change');
+                    setTimeout(() => {
+                        phaseElement.classList.remove('turn-change');
+                    }, 800);
+                }
+                
+                // Play turn change sound effect via GameManager
+                if (this.gameManager && this.gameManager.playTurnChangeSound) {
+                    this.gameManager.playTurnChangeSound(phase);
+                }
             }
             
             // Update End Turn button state

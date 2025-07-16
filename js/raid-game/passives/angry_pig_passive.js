@@ -12,6 +12,12 @@ class AngryPigPassive {
         const playSound = window.gameManager ? window.gameManager.playSound.bind(window.gameManager) : () => {};
         console.log(`[Passive Debug - ${this.constructor.name}] onDamageTaken triggered for ${character.name}. DamageInfo:`, damageInfo);
 
+        // Don't heal if character would die (HP <= 0 after damage)
+        if (character.stats.currentHp <= 0) {
+            console.log(`[Passive Debug - ${character.name}] Character HP is ${character.stats.currentHp}, passive healing disabled to allow death.`);
+            return;
+        }
+
         // Calculate heal amount from the actual damage taken
         const damageAmount = damageInfo.damage;
         const healAmount = Math.floor(damageAmount * this.healPercent);

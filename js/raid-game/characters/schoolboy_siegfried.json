@@ -68,9 +68,9 @@
             "type": "damage",
             "damageType": "physical",
             "manaCost": 100,
-            "cooldown": 15,
+            "cooldown": 11,
             "targetType": "enemy",
-            "description": "Deals 350% AD physical damage, ignoring armor. If damage is dealt, Siegfried and a random ally are healed for the damage amount (scales with Healing Power).",
+            "description": "Deals 350% AD physical damage, ignoring armor. If damage is dealt, Siegfried is healed for the damage amount (scales with Healing Power).",
             "icon": "Icons/abilities/judgement.png"
         }
     ],
@@ -80,4 +80,4 @@
         "description": "Gain 125 Physical Damage for each active buff.",
         "icon": "Icons/passives/schoolboy_siegfried_passive.jfif"
     }
-} 
+}

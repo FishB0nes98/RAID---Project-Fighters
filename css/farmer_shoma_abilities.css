@@ -478,15 +478,7 @@
     100% { opacity: 0; transform: scale(1.5); }
 }
 
-.dodge-buff-indicator {
-    position: absolute;
-    top: -15px;
-    right: 25px;
-    font-size: 20px;
-    animation: dodgeFloat 3s infinite ease-in-out;
-    filter: drop-shadow(0 0 5px rgba(135, 206, 250, 0.8));
-    z-index: 5;
-}
+
 
 @keyframes dodgeFloat {
     0% { transform: translateY(0) rotate(0deg); }
@@ -564,7 +556,7 @@
 }
 
 /* Mana Restoration VFX for Cottage Run */
-.cottage-run-mana-vfx {
+.-run-mana-vfx {
     position: absolute;
     width: 120%;
     height: 120%;

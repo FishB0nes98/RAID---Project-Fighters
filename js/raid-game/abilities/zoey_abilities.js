@@ -199,9 +199,9 @@ function updateHeartPounceDescription(ability, character = null) {
     
     // Damage scaling based on Enhanced Heart Pounce talent
     if (character && character.enableEnhancedHeartPounce) {
-        description += '855 + (100% Magical damage + 50% Physical damage) to the target';
+        description += '500 + (100% Magical damage + 50% Physical damage) to the target';
     } else {
-        description += '855 + (50% Magical damage) to the target';
+        description += '500 + (50% Magical damage) to the target';
     }
     
     // Add Feline Combo description if character has it
@@ -395,7 +395,7 @@ function executeHeartPounce(caster, target, abilityInstance) {
             try {
                 if (isSuccessful) {
                     // Successful pounce - deal damage
-                    let baseDamage = 855;
+                    let baseDamage = 500;
                     let magicalScaling = 0.5; // Base 50% magical damage (reduced from 125%)
                     let physicalScaling = 0; // Base 0% physical damage
                     
@@ -441,9 +441,9 @@ function executeHeartPounce(caster, target, abilityInstance) {
                         : (typeof damageResult === 'number' ? damageResult : modifiedDamage);
                     
                     // Track statistics for successful Heart Pounce
-                    if (window.trackHeartPounceStats) {
+                    /*if (window.trackHeartPounceStats) {
                         window.trackHeartPounceStats(caster, target, damageResult, true, caster.enableEnhancedHeartPounce, false);
-                    }
+                    }*/
                     
                     // Add log entry for successful hit
                     if (caster.enableEnhancedHeartPounce) {
@@ -459,7 +459,8 @@ function executeHeartPounce(caster, target, abilityInstance) {
                             target: target,
                             damage: damageAmount,
                             type: 'magical',
-                            source: "Heart Pounce"
+                            source: "Heart Pounce",
+                            abilityId: 'zoey_w'
                         }
                     });
                     
@@ -474,9 +475,9 @@ function executeHeartPounce(caster, target, abilityInstance) {
                             abilityInstance.currentCooldown = 0;
                             
                             // Track Feline Combo activation
-                            if (window.trackHeartPounceStats) {
+                            /*if (window.trackHeartPounceStats) {
                                 window.trackHeartPounceStats(caster, target, damageResult, true, caster.enableEnhancedHeartPounce, true);
-                            }
+                            }*/
                             
                             // Prevent turn from ending
                             if (window.gameManager && typeof window.gameManager.preventTurnEnd === 'function') {
@@ -862,9 +863,9 @@ function executeSparkleburst(caster, targets, abilityInstance) {
                         gameManager.addLogEntry(`${caster.name}'s sparkles hit ${target.name} for ${damageAmount} damage!`, 'zoey player-turn');
                         
                         // Track statistics for successful hit
-                        if (window.trackSparkleburstStats) {
+                        /*if (window.trackSparkleburstStats) {
                             window.trackSparkleburstStats(caster, target, damageResult, true, caster.enableImprovedSparkleburst, false);
-                        }
+                        }*/
                         
                         // Show impact VFX
                         showSparkleImpactVFX(target);
@@ -876,7 +877,8 @@ function executeSparkleburst(caster, targets, abilityInstance) {
                                 target: target,
                                 damage: damageAmount,
                                 type: 'magical',
-                                source: "Sparkle Burst"
+                                source: "Sparkle Burst",
+                                abilityId: 'zoey_e'
                             }
                         });
                         
@@ -888,9 +890,9 @@ function executeSparkleburst(caster, targets, abilityInstance) {
                             const pounceChance = 0.1; // 10% chance
                             if (Math.random() < pounceChance) {
                                 // Track Sparkle Pounce activation
-                                if (window.trackSparkleburstStats) {
+                                /*if (window.trackSparkleburstStats) {
                                     window.trackSparkleburstStats(caster, target, damageResult, true, caster.enableImprovedSparkleburst, true);
-                                }
+                                }*/
                                 
                                 // Automatically cast Heart Pounce
                                 setTimeout(() => {
@@ -1183,9 +1185,9 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                         gameManager.addLogEntry(`${caster.name}'s Bell Mastery devastates ${targetName} for ${damageAmount} magical damage!`, 'zoey player-turn');
                         
                         // Track Bell Mastery statistics
-                        if (window.trackStrawberryBellStats) {
+                        /*if (window.trackStrawberryBellStats) {
                             window.trackStrawberryBellStats(caster, currentTarget, damageResult, true, abilityInstance.isRecast || false);
-                        }
+                        }*/
                         
                         // Create damage taken event to notify passive
                         const damageTakenEvent = new CustomEvent('damage:taken', {
@@ -1194,7 +1196,8 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                                 target: currentTarget,
                                 damage: damageAmount,
                                 type: 'magical',
-                                source: "Strawberry Bell Burst (Bell Mastery)"
+                                source: "Strawberry Bell Burst (Bell Mastery)",
+                                abilityId: 'zoey_q'
                             }
                         });
                         
@@ -1270,9 +1273,9 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                     gameManager.addLogEntry(`${caster.name}'s Strawberry Bell Burst hits ${target.name} for ${damageAmount} magical damage!`, 'zoey player-turn');
                     
                     // Track single-target Bell Burst statistics
-                    if (window.trackStrawberryBellStats) {
+                    /*if (window.trackStrawberryBellStats) {
                         window.trackStrawberryBellStats(caster, target, damageResult, false, abilityInstance.isRecast || false);
-                    }
+                    }*/
                     
                     // Create explicit ability used event to notify passive
                     const abilityUsedEvent = new CustomEvent('ability:used', {
@@ -1294,7 +1297,8 @@ function executeStrawberryBellBurst(caster, target, abilityInstance) {
                             target: target,
                             damage: damageAmount,
                             type: 'magical',
-                            source: "Strawberry Bell Burst"
+                            source: "Strawberry Bell Burst",
+                            abilityId: 'zoey_q'
                         }
                     });
                     
@@ -2240,7 +2244,8 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
                         target: target,
                         damage: damageAmount,
                         type: 'magical',
-                        source: abilityInstance
+                        source: abilityInstance,
+                        abilityId: 'zoey_r'
                     }
                 });
                 
@@ -2256,9 +2261,9 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
                 }
                 
                 // Track successful Light Arc hit
-                if (window.trackGlowingLightArcStats) {
+                /*if (window.trackGlowingLightArcStats) {
                     window.trackGlowingLightArcStats(caster, target, damageResult, true, abilityDisabled, caster.enableEnhancedLightArc);
-                }
+                }*/
                 
                 // Show impact VFX on the target
                 showGlowingLightArcImpactVFX(target);
@@ -2293,9 +2298,9 @@ function executeGlowingLightArc(caster, targets, abilityInstance) {
                 gameManager.addLogEntry(`${target.name} is not hit by Glowing Light Arc.`);
                 
                 // Track miss statistics
-                if (window.trackGlowingLightArcStats) {
+                /*if (window.trackGlowingLightArcStats) {
                     window.trackGlowingLightArcStats(caster, target, null, false, false, caster.enableEnhancedLightArc);
-                }
+                }*/
                 
                 // Use the showFloatingText method if it exists
                 if (gameManager.showFloatingText && target.id) {

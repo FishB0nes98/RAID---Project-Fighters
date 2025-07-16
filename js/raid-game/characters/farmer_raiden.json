@@ -4,7 +4,7 @@
     "image": "Loading Screen/Farmer Raiden.png",
     "stats": {
         "physicalDamage": 56,
-        "magicalDamage": 240,
+        "magicalDamage": 185,
         "armor": 10,
         "magicalShield": 15,
         "hp": 7490,
@@ -22,7 +22,7 @@
             "id": "farmer_raiden_lightning_orb",
             "name": "Lightning Orb",
             "type": "custom",
-            "manaCost": 25,
+            "manaCost": 35,
             "cooldown": 1,
             "targetType": "enemy",
             "description": "Deals 455 + 100% Magical damage to the target.",
@@ -62,7 +62,7 @@
     "passive": {
         "id": "farmer_raiden_zap",
         "name": "Zap",
-        "description": "Using an ability zaps a random enemy target, dealing 60% magical damage.",
+        "description": "Using an ability zaps a random enemy target, dealing 50% magical damage.",
         "icon": "Icons/passives/lightning_zap.png"
     }
 } 

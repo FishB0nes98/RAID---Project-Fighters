@@ -40,7 +40,7 @@
         {
             "id": "bridget_w",
             "name": "Bubble Beam Barrage",
-            "description": "Shoots between 3-7 bubble beams onto random enemies each dealing 125% Magical Damage. Cooldown: 5 turns. The passive healing effect from Aqua Life Essence applies to the total damage dealt.",
+            "description": "Shoots between 3-7 bubble beams onto random enemies each dealing 85% Magical Damage. Cooldown: 5 turns. The passive healing effect from Aqua Life Essence applies to the total damage dealt.",
             "baseDescription": "Shoots between 3-7 bubble beams onto random enemies each dealing {damageScaling}% Magical Damage. Cooldown: {cooldown} turns.",
             "icon": "Icons/abilities/bubble_beam.png",
             "manaCost": 90,
@@ -48,7 +48,7 @@
             "targetType": "all_enemies",
             "type": "custom",
             "functionName": "bridgetBubbleBeamBarrageEffect",
-            "damageScaling": 1.25
+            "damageScaling": 0.85
         },
         {
             "id": "bridget_e",

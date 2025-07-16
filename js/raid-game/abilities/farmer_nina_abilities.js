@@ -285,9 +285,15 @@ const FarmerNinaAbilities = {
 
         stealthBuff.setDescription('Untargetable by enemies for 2 turns. Regenerates 350 HP per turn.');
         stealthBuff.effects = {
-            isUntargetableByEnemies: true,
-            hpPerTurn: 350
+            isUntargetableByEnemies: true
         };
+        
+        // Add healing as a stat modifier
+        stealthBuff.statModifiers = [{
+            stat: 'hpPerTurn',
+            value: 350,
+            operation: 'add'
+        }];
 
         // Set stealth properties
         stealthBuff.onApply = (character) => {
@@ -298,6 +304,15 @@ const FarmerNinaAbilities = {
         stealthBuff.onRemove = (character) => {
             delete character._hidingActive;
             this.endStealthVisuals(character);
+        };
+
+        // Add turn-based healing effect
+        stealthBuff.onTurnStart = (character) => {
+            if (character._hidingActive) {
+                const healAmount = 350;
+                character.heal(healAmount);
+                this.addLogEntry(`${character.name} regenerates ${healAmount} HP while hidden`, 'heal');
+            }
         };
 
         caster.addBuff(stealthBuff);

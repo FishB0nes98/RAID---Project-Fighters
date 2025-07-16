@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Selector</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Nunito:wght@400;600;700&display=swap">
-    <!-- New: Reuse raid-game styles for unified quest panel -->
+    <title>Champion Selector - Gaming Lobby</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Game Systems Styles -->
     <link rel="stylesheet" href="css/raid-game.css">
-    <!-- Inventory System Styles -->
     <link rel="stylesheet" href="css/inventory-system.css">
-    <!-- Crafting System Styles -->
     <link rel="stylesheet" href="css/crafting-modal.css">
     <!-- Selector-specific overrides -->
     <style id="selector-overrides">
-      /* Restore scrolling and normal body dimensions */
       body { height: auto !important; overflow-y: auto !important; }
-      /* Quest panel scrolling */
       .quests-panel { max-height: 85vh; overflow-y: auto; }
-      /* Hide completed quests */
       .quests-panel .quest-item.completed { display: none; }
     </style>
-    <style>
+<style>
         :root {
             /* Main color scheme */
             --primary: #5463ff;
@@ -3072,6 +3070,315 @@
         .quests-panel { max-height: 85vh; overflow-y: auto; }
         /* Hide completed quests as an extra safeguard */
         .quests-panel .quest-item.completed { display: none; }
+
+        /* Patch Notes Modal Styles */
+        .patch-notes-modal .modal-content {
+            max-width: 900px;
+            width: 95%;
+            max-height: 95vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(102, 126, 234, 0.1);
+        }
+
+        .patch-notes-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--neutral-400);
+            transition: all 0.3s ease;
+            z-index: 10;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .patch-notes-close:hover {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border-color: rgba(255, 107, 107, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .patch-notes-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .patch-notes-header h2 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .patch-version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .patch-notes-body {
+            padding: 0 10px;
+        }
+
+        .patch-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .patch-section-header h3 {
+            font-size: 1.8rem;
+            color: var(--neutral-100);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .patch-rationale {
+            background: rgba(255, 189, 0, 0.1);
+            border-left: 4px solid var(--legendary);
+            padding: 15px 20px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: var(--neutral-200);
+        }
+
+        .patch-subsection {
+            margin-bottom: 25px;
+        }
+
+        .patch-subsection h4 {
+            font-size: 1.4rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .stat-changes {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-change {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-name {
+            font-weight: 600;
+            color: var(--neutral-200);
+            font-size: 1.1rem;
+        }
+
+        .stat-values {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .old-value {
+            color: #ff6b6b;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .arrow {
+            color: var(--neutral-400);
+            font-weight: bold;
+        }
+
+        .new-value {
+            color: #4ecdc4;
+            font-weight: 700;
+        }
+
+        .change-percent {
+            color: var(--easy);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .ability-change {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .ability-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ability-icon {
+            font-size: 1.3rem;
+        }
+
+        .ability-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--neutral-100);
+        }
+
+        .ability-changes {
+            margin-left: 35px;
+        }
+
+        .ability-stat {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-label {
+            color: var(--neutral-300);
+            min-width: 80px;
+        }
+
+        .stat-change-inline {
+            color: var(--neutral-200);
+        }
+
+        .ability-impact {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: rgba(116, 75, 162, 0.1);
+            border-left: 3px solid var(--secondary);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            color: var(--neutral-300);
+            font-size: 0.95rem;
+        }
+
+        .impact-summary {
+            display: grid;
+            gap: 10px;
+        }
+
+        .impact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--primary);
+        }
+
+        .impact-phase {
+            font-weight: 600;
+            color: var(--primary-light);
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .impact-desc {
+            color: var(--neutral-300);
+            line-height: 1.4;
+        }
+
+        .patch-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .patch-item-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--neutral-100);
+            margin-bottom: 10px;
+        }
+
+        .patch-item-description {
+            color: var(--neutral-300);
+            line-height: 1.5;
+        }
+
+        /* Character Balance Section Styles */
+        .character-balance-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .character-header h4 {
+            font-size: 1.3rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.15);
+            padding-bottom: 8px;
+        }
+
+        .ability-changes-compact {
+            margin-top: 15px;
+        }
+
+        .ability-change-compact {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+            border-left: 3px solid var(--secondary);
+        }
+
+        .ability-change-compact .ability-name {
+            font-weight: 600;
+            color: var(--neutral-100);
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .ability-change-compact .changes {
+            color: var(--neutral-300);
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -3110,7 +3417,7 @@
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                     </svg>
                     What's New
-                    <span class="version-badge">v0.3</span>
+                    <span class="version-badge">v0.5</span>
                 </button>
             </div>
         </header>
@@ -3240,6 +3547,9 @@
     
     <!-- New Quest UI Manager -->
     <script src="js/raid-game/quest-ui-manager.js"></script>
+
+        <!-- Skin Manager (Needed for lootbox skin drops) -->
+    <script src="js/skins/skin-manager.js"></script>
     
     <!-- Inventory System -->
     <script src="js/raid-game/item-system.js"></script>
@@ -4108,6 +4418,16 @@ addShadowDaggerToGlobalInventory()
                             } else {
                                 console.warn('[ADMIN] Could not find test dummy stage definition.');
                             }
+                            
+                            // Also add admin-only stages to ownedStages
+                            console.log('[ADMIN] Adding admin-only stages to owned stages');
+                            const adminStages = allStages.filter(stage => stage.adminOnly === true);
+                            adminStages.forEach(stage => {
+                                if (!ownedStages.includes(stage.id)) {
+                                    ownedStages.push(stage.id);
+                                    console.log(`[ADMIN] Added admin stage ${stage.id} to ownedStages`);
+                                }
+                            });
                             // Extra: log allStages and ownedStages after admin logic
                             setTimeout(() => {
                                 try {
@@ -4143,6 +4463,19 @@ addShadowDaggerToGlobalInventory()
                 ]);
 
                 allStories = storiesData;
+                
+                // Also load story_2.json if it exists
+                try {
+                    const story2Response = await fetch('story_2.json');
+                    if (story2Response.ok) {
+                        const story2Data = await story2Response.json();
+                        allStories = allStories.concat(story2Data);
+                        console.log('story_2.json loaded and merged with stories');
+                    }
+                } catch (error) {
+                    console.log('story_2.json not found or failed to load, continuing with stories.json only:', error.message);
+                }
+                
                 stageRegistry = stageRegistryData;
                 
                 // Extract standalone stages (non-story stages) and filter out hidden ones
@@ -4173,32 +4506,42 @@ addShadowDaggerToGlobalInventory()
                     }
                 });
 
-                // Initialize weekly challenges – Cleansing Winds Challenge
+                // Initialize weekly challenges – Pumpkin Field Challenge
                 allWeeklyChallenges = [
                     {
-                        id: 'cleansing_winds_challenge',
-                        name: 'Cleansing Winds Challenge',
-                        description: 'Face five formidable opponents in a mystical battlefield where cleansing winds sweep away all magical effects every 3rd turn! Defeat Bridget, Farmer Raiden, Infernal Ibuki, Atlantean Kagome, and Zoey with a team of 5 heroes.',
-                        name: 'Double Damage Challenge',
-                        description: 'Face five powerful opponents in an arena where raw power surges through the battlefield! All damage is doubled for everyone. Zoey, Schoolgirl Julia, Schoolgirl Elphelt, Renée, and Infernal Ibuki await your challenge. Choose your 5 strongest fighters wisely!',
-                        difficulty: 8,
+                        id: 'weekly_challenge_pumpkin_field',
+                        name: 'Weekly Challenge: Pumpkin Field',
+                        description: 'Face the farm school gang in a cursed pumpkin field! Starting at turn 2, every 6th turn all living characters gain exploding pumpkin debuffs. With triple HP, battles last longer but hits feel more impactful!',
+                        difficulty: 6,
                         teamSize: 5,
-                        enemies: ['bridget', 'farmer_raiden', 'infernal_ibuki', 'atlantean_kagome', 'zoey'],
-                        enemies: ['zoey', 'schoolgirl_julia', 'schoolgirl_elphelt', 'renée', 'infernal_ibuki'],
-                        modifiers: [{
-                            id: 'cleansing_winds',
-                            name: 'Cleansing Winds',
-                            description: 'Every 3rd turn, mystical winds cleanse all buffs and debuffs from all characters!',
-                            id: 'double_damage',
-                            name: 'Double Damage',
-                            description: 'All damage dealt by all characters is doubled.'
-                        }],
+                        enemies: ['farmer_shoma', 'farmer_cham_cham', 'schoolgirl_ayane', 'bridget', 'schoolgirl_julia'],
+                        backgroundImage: 'images/stages/farmstage2.jpeg',
+                        backgroundMusic: 'sounds/Stage_1_Audio.mp3',
+                        modifiers: [
+                            {
+                                id: 'exploding_pumpkin_field',
+                                name: 'Exploding Pumpkin Field',
+                                description: 'Starting at turn 2, every 6th turn all living characters gain an exploding pumpkin debuff that detonates for 8500 damage after 5 turns!'
+                            },
+                            {
+                                id: 'triple_hp',
+                                name: 'Triple HP',
+                                description: 'All characters have triple HP! Battles last longer but hits feel more impactful.'
+                            }
+                        ],
                         rewards: [
                             {
                                 type: 'random_character',
                                 value: 'tier_2',
                                 name: 'Random Character',
                                 icon: '❓'
+                            },
+                            {
+                                type: 'item',
+                                itemId: 'exploding_pumpkin',
+                                quantity: 5,
+                                name: 'Exploding Pumpkin x5',
+                                icon: '🎃'
                             }
                         ],
                         timeRemaining: 'Resets in 6 days, 8 hours',
@@ -5183,12 +5526,23 @@ addShadowDaggerToGlobalInventory()
                 });
                 
                 sortedStages.forEach(stage => {
+                    // Check if stage is admin-only
+                    const isAdminOnlyStage = stage.adminOnly === true;
+                    if (isAdminOnlyStage && !isAdminUser) {
+                        return; // Skip admin-only stages for non-admin users
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'stage-card';
                     card.dataset.stageId = stage.id;
                     
-                    // Check if stage is owned
-                    const isOwned = ownedStages.includes(stage.id);
+                    // Check if stage is admin-only
+                    if (isAdminOnlyStage) {
+                        card.classList.add('admin-stage');
+                    }
+                    
+                    // Check if stage is owned - admin stages are available for admins
+                    const isOwned = isAdminOnlyStage ? true : ownedStages.includes(stage.id);
                     if (!isOwned) {
                         card.classList.add('locked');
                     }
@@ -5212,6 +5566,7 @@ addShadowDaggerToGlobalInventory()
                                 <span>Difficulty: ${stage.difficulty}</span>
                             </div>
                             ${!isOwned ? '<div class="stage-lock-overlay">🔒</div>' : ''}
+                            ${isAdminOnlyStage ? '<div class="admin-badge">ADMIN</div>' : ''}
                         </div>
                         <div class="stage-info">
                             <div class="stage-name">${isOwned ? stage.name : '🔒 ' + stage.name}</div>
@@ -5263,7 +5618,10 @@ addShadowDaggerToGlobalInventory()
                 
                 // Create modifiers HTML
                 const modifiersHTML = challenge.modifiers.map(modifier => 
-                    `<div class="weekly-modifier-item">${modifier.description}</div>`
+                    `<div class="weekly-modifier-item">
+                        <span class="modifier-icon">${modifier.id === 'exploding_pumpkin_field' ? '🎃' : modifier.id === 'triple_hp' ? '💖' : '⚡'}</span>
+                        ${modifier.description}
+                    </div>`
                 ).join('');
                 
                 // Create rewards HTML
@@ -5366,8 +5724,9 @@ addShadowDaggerToGlobalInventory()
                 const newlySelectedStage = allStages.find(s => s.id === stageId);
                 if (!newlySelectedStage) return;
                 
-                // Check if stage is owned
-                const isOwned = ownedStages.includes(stageId);
+                // Check if stage is owned (admin stages are always owned by admins)
+                const isAdminStage = newlySelectedStage.adminOnly === true;
+                const isOwned = isAdminStage && isAdminUser ? true : ownedStages.includes(stageId);
                 if (!isOwned) {
                     showTooltip('You do not own this stage.');
                     return;
@@ -5707,7 +6066,8 @@ addShadowDaggerToGlobalInventory()
                         localStorage.setItem('selectedStage', JSON.stringify(selectedStage));
                         
                         // Navigate to battle page
-                        window.location.href = `raid-game.html?stage=${selectedStage.id}`;
+                        const skipTalentLoading = selectedStage.skipTalentLoading ? '&skipTalentLoading=true' : '';
+                        window.location.href = `raid-game.html?stage=${selectedStage.id}${skipTalentLoading}`;
                         
                     } catch (error) {
                         console.error("Error saving selection to Firebase:", error);
@@ -5744,8 +6104,8 @@ addShadowDaggerToGlobalInventory()
                             description: selectedWeeklyChallenge.description,
                             difficulty: selectedWeeklyChallenge.difficulty,
                             type: 'weekly_challenge',
-                            backgroundImage: "images/stages/burning_school_gym.jpg", // generic backdrop (override in JSON if needed)
-                            backgroundMusic: "sounds/battle-epic.mp3",
+                            backgroundImage: selectedWeeklyChallenge.backgroundImage || "images/stages/burning_school_gym.jpg",
+                            backgroundMusic: selectedWeeklyChallenge.backgroundMusic || "sounds/battle-epic.mp3",
                             enemies: (selectedWeeklyChallenge.enemies || []).map(enemyId => ({ characterId: enemyId })),
                             modifiers: selectedWeeklyChallenge.modifiers || [],
                             rewards: selectedWeeklyChallenge.rewards || [],
@@ -8405,35 +8765,299 @@ Example: addZasalamelScytheToGlobalInventory() - Add Zasalamel Scythe to invento
     <script>
         // Changelog Modal Functions
         function showChangelog() {
-            const modal = document.getElementById('changelog-modal');
-            modal.classList.add('show');
+            const modal = document.getElementById('patchNotesModal');
+            modal.classList.add('active');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         }
 
         function hideChangelog() {
-            const modal = document.getElementById('changelog-modal');
-            modal.classList.remove('show');
+            const modal = document.getElementById('patchNotesModal');
+            modal.classList.remove('active');
             document.body.style.overflow = ''; // Restore scrolling
         }
 
 
         // Close modals when clicking outside
-        document.getElementById('changelog-modal').addEventListener('click', function(e) {
+        document.getElementById('patchNotesModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideChangelog();
             }
+        });
+
+        // Close patch notes modal when clicking the close button
+        document.querySelector('.patch-notes-close').addEventListener('click', function() {
+            hideChangelog();
         });
 
 
         // Close modals with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (document.getElementById('changelog-modal').classList.contains('show')) {
+                if (document.getElementById('patchNotesModal').classList.contains('active')) {
                     hideChangelog();
                 }
             }
         });
     </script>
+
+    <!-- Patch Notes Modal -->
+    <div id="patchNotesModal" class="modal patch-notes-modal">
+        <div class="modal-content patch-notes-content">
+            <span class="close patch-notes-close">&times;</span>
+            <div class="patch-notes-header">
+                <h2>🔥 Patch Notes - Version 0.5</h2>
+                <div class="patch-version-badge">Latest Release</div>
+            </div>
+            
+            <div class="patch-notes-body">
+                <!-- Stealthed Characters Update -->
+                <div class="patch-section">
+                    <div class="patch-section-header">
+                        <h3>⚔️ Combat System Update</h3>
+                    </div>
+                    <div class="patch-item">
+                        <div class="patch-item-title">Stealth Mechanics Adjustment</div>
+                        <div class="patch-item-description">
+                            Stealthed characters can now be targeted by allies, improving tactical coordination and support abilities.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character Balance Changes -->
+                <div class="patch-section">
+                    <div class="patch-section-header">
+                        <h3>⚖️ Character Balance Updates</h3>
+                        <div class="patch-rationale">
+                            <strong>Developer Note:</strong> This patch includes comprehensive balance adjustments across multiple characters to improve gameplay diversity and address power level concerns.
+                        </div>
+                    </div>
+
+                    <!-- Farmer Alice -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🐰 Farmer Alice - Enhanced Tank</h4>
+                        </div>
+                        
+                        <div class="stat-changes">
+                            <div class="stat-change">
+                                <div class="stat-name">Armor (Base)</div>
+                                <div class="stat-values">
+                                    <span class="old-value">12</span>
+                                    <span class="arrow">→</span>
+                                    <span class="new-value">22</span>
+                                    <span class="change-percent">(+83%)</span>
+                                </div>
+                            </div>
+                            <div class="stat-change">
+                                <div class="stat-name">Magic Shield (Base)</div>
+                                <div class="stat-values">
+                                    <span class="old-value">20</span>
+                                    <span class="arrow">→</span>
+                                    <span class="new-value">35</span>
+                                    <span class="change-percent">(+75%)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🐾 Pounce (Q):</span>
+                                <span class="changes">Cooldown: 2 → 1 turn | Stun Chance: 47% → 40% | Damage Scaling: 50% → 100%</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🛡️ Thick Fur (W):</span>
+                                <span class="changes">Cooldown: 18 → 14 turns | Magic Resistance: 20 → 32 | Armor: 20 → 22</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🐇 Bunny Bounce (E):</span>
+                                <span class="changes">Base Damage: 120 → 275 | Can no longer target enemies (ally-only)</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🥕 Carrot Power Up (R):</span>
+                                <span class="changes">Healing: 27% → 31% of missing health | Mana Cost: 155 → 90</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Raiden -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>⚡ Farmer Raiden - Power Adjustment</h4>
+                        </div>
+                        
+                        <div class="stat-changes">
+                            <div class="stat-change">
+                                <div class="stat-name">Magical Damage</div>
+                                <div class="stat-values">
+                                    <span class="old-value">240</span>
+                                    <span class="arrow">→</span>
+                                    <span class="new-value">185</span>
+                                    <span class="change-percent">(-23%)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">⚡ Lightning Orb (Q):</span>
+                                <span class="changes">Mana Cost: 25 → 35</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🔥 Zap Passive:</span>
+                                <span class="changes">Scaling: 60% → 50% Magical Damage</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bridget -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🌊 Bridget - Ability Rebalance</h4>
+                        </div>
+                        
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🌊 Ribbon Wave Rush (Q):</span>
+                                <span class="changes">Cooldown: 2 → 1 turn | Base Damage: 365 → 185</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">💧 Bubble Beam Barrage (W):</span>
+                                <span class="changes">Scaling: 125% → 85% Magical Damage</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Atlantean Kagome -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🌊 Atlantean Kagome - Damage Boost</h4>
+                        </div>
+                        
+                        <div class="stat-changes">
+                            <div class="stat-change">
+                                <div class="stat-name">Base Magical Damage</div>
+                                <div class="stat-values">
+                                    <span class="old-value">220</span>
+                                    <span class="arrow">→</span>
+                                    <span class="new-value">255</span>
+                                    <span class="change-percent">(+16%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zoey -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🌟 Zoey - Partial Revert</h4>
+                        </div>
+                        
+                        <div class="stat-changes">
+                            <div class="stat-change">
+                                <div class="stat-name">Base Magical Damage</div>
+                                <div class="stat-values">
+                                    <span class="old-value">162</span>
+                                    <span class="arrow">→</span>
+                                    <span class="new-value">225</span>
+                                    <span class="change-percent">(+39%)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">💖 Heart Pounce (W):</span>
+                                <span class="changes">Base Damage: 855 → 500</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">✨ Sparkle Bell Mark (Passive):</span>
+                                <span class="changes">Damage Bonus: 125% → 175%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Infernal Ibuki -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🥷 Infernal Ibuki - Mobility Enhancement</h4>
+                        </div>
+                        
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🗡️ Swift Strike (E):</span>
+                                <span class="changes">Dash Chance: 45% → 55% | Max Chain: Unlimited → 5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schoolboy Siegfried -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🛡️ Schoolboy Siegfried - Utility Adjustments</h4>
+                        </div>
+                        
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">⚔️ Judgement (R):</span>
+                                <span class="changes">Cooldown: 15 → 11 turns | No longer heals allies (self-only)</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🗡️ Sword Blessing (E):</span>
+                                <span class="changes">No longer calls "acted" status</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🦁 Lion Protection (W):</span>
+                                <span class="changes">Fixed VFX not clearing after buff expires</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Cham Cham -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>🪃 Farmer Cham Cham - Resource Adjustments</h4>
+                        </div>
+                        
+                        <div class="stat-changes">
+                            <div class="stat-change">
+                                <div class="stat-name">Base Mana</div>
+                                <div class="stat-values">
+                                    <span class="old-value">2715</span>
+                                    <span class="arrow">→</span>
+                                    <span class="new-value">2585</span>
+                                    <span class="change-percent">(-5%)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🐾 Scratch (Q):</span>
+                                <span class="changes">Mana Cost: 40 → 30</span>
+                            </div>
+                            <div class="ability-change-compact">
+                                <span class="ability-name">🪃 Boomerang (E):</span>
+                                <span class="changes">Scaling: 185% → 140% Physical Damage</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Shoma -->
+                    <div class="character-balance-section">
+                        <div class="character-header">
+                            <h4>⚾ Farmer Shoma - Bug Fix</h4>
+                        </div>
+                        
+                        <div class="ability-changes-compact">
+                            <div class="ability-change-compact">
+                                <span class="ability-name">⚾ Home Run Smash (Q):</span>
+                                <span class="changes">Fixed bug - Now correctly applies 35% stun chance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
-</html> 
 </html>

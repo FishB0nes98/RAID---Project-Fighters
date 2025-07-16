@@ -381,16 +381,27 @@ class AtlanteanChristieAbilities {
         const maxChainTargets = Math.min(4, enemies.length);
         const chainTargets = Math.floor(Math.random() * maxChainTargets) + 1;
         
-        // Shuffle and select targets
-        const shuffledEnemies = [...enemies].sort(() => 0.5 - Math.random());
+        // Shuffle and select targets using Fisher-Yates shuffle for better randomness
+        const shuffledEnemies = [...enemies];
+        for (let i = shuffledEnemies.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledEnemies[i], shuffledEnemies[j]] = [shuffledEnemies[j], shuffledEnemies[i]];
+        }
         const selectedTargets = shuffledEnemies.slice(0, chainTargets);
 
-        window.gameManager.addLogEntry(`${caster.name}'s Kick strike ${strikeNumber} chains to ${chainTargets} additional enemies!`, 'player-turn');
+        console.log(`[Atlantean Christie] Chain hit: targeting ${chainTargets} enemies from ${enemies.length} available`);
+        window.gameManager.addLogEntry(`${caster.name}'s Kick strike ${strikeNumber} chains to ${chainTargets} additional ${chainTargets === 1 ? 'enemy' : 'enemies'}!`, 'player-turn');
 
         // Apply chain damage (60% physical damage)
         selectedTargets.forEach((target, index) => {
             setTimeout(() => {
+                if (target.isDead()) {
+                    console.log(`[Atlantean Christie] Chain target ${target.name} is already dead, skipping`);
+                    return;
+                }
+                
                 const chainDamage = Math.round(caster.stats.physicalDamage * 0.60);
+                console.log(`[Atlantean Christie] Chain hit: ${chainDamage} damage to ${target.name}`);
                 
                 AtlanteanChristieAbilities.showChainKickVFX(caster, target);
                 

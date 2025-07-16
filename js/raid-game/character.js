@@ -325,14 +325,14 @@ class Character {
                     this.baseStats[statName] = newMulValue;
                     console.log(`[Character ${this.name}] Applied multiply operation: ${statName} = ${this.baseStats[statName] || 1.0} * ${value} = ${newMulValue}`);
                 } else {
-                    console.warn(`[Character ${this.name}] Talent operation 'multiply' for stat ${statName} should typically be handled via percentage buffs/debuffs or direct base stat setting.`);
-                    // If truly needed, modify base stat directly:
+                    // Handle multiplication for other stats (less common)
                     const newMulValue = (this.baseStats[statName] || 0) * value;
                     if (isNaN(newMulValue) || !isFinite(newMulValue)) {
                         console.error(`[Character ${this.name}] MULTIPLY operation resulted in NaN for ${statName}, skipping`);
                         return;
                     }
                     this.baseStats[statName] = newMulValue;
+                    console.log(`[Character ${this.name}] Applied multiply operation: ${statName} = ${this.baseStats[statName] || 0} * ${value} = ${newMulValue}`);
                 }
                 break;
             case 'set':
@@ -1355,6 +1355,20 @@ class Character {
                 }
                 // --- END NEW ---
                 
+                // --- NEW: Check for permanent E ability cooldown reduction ---
+                if (index === 2 && !this.isAI) { // E ability (index 2)
+                    if (this.permanentBuffs && this.permanentBuffs.eCooldownReduction) {
+                        const originalCooldown = finalCooldown;
+                        finalCooldown = Math.max(0, finalCooldown - this.permanentBuffs.eCooldownReduction);
+                        console.log(`[Permanent E CDR] ${this.name}'s E ability cooldown reduced from ${originalCooldown} to ${finalCooldown} (reduction: ${this.permanentBuffs.eCooldownReduction})`);
+                    } else if (this.permanentEffects && this.permanentEffects.eCooldownReduction && this.permanentEffects.eCooldownReduction.applied) {
+                        const originalCooldown = finalCooldown;
+                        finalCooldown = Math.max(0, finalCooldown - this.permanentEffects.eCooldownReduction.amount);
+                        console.log(`[Permanent E CDR] ${this.name}'s E ability cooldown reduced from ${originalCooldown} to ${finalCooldown} (reduction: ${this.permanentEffects.eCooldownReduction.amount})`);
+                    }
+                }
+                // --- END NEW ---
+                
                 ability.currentCooldown = finalCooldown;
             }
             // If resetCooldown was true, currentCooldown remains 0 (handled in Ability.use)
@@ -1786,17 +1800,32 @@ class Character {
         if (type === 'physical') {
             // <<< Check actualBypassArmor >>>
             if (!actualBypassArmor) {
-                // Apply armor as direct percentage reduction (capped at 80%)
-                const damageReduction = Math.min(0.8, this.stats.armor / 100);
                 const damageBeforeArmor = damageAfterMods;
-                damageAfterMods = Math.max(1, Math.floor(damageAfterMods * (1 - damageReduction)));
                 
-                // Debug log for armor calculation
-                console.log(`[Armor Debug] ${this.name}: ${damageBeforeArmor} physical damage, ${this.stats.armor} armor (${(damageReduction * 100).toFixed(1)}% reduction) -> ${damageAfterMods} damage`);
-                
-                // Add battle log entry if significant reduction
-                if (damageReduction > 0.05 && window.gameManager) { // Only log if 5%+ reduction
-                    window.gameManager.addLogEntry(`${this.name}'s armor reduces physical damage by ${(damageReduction * 100).toFixed(0)}% (${damageBeforeArmor} → ${damageAfterMods})`, 'armor-reduction');
+                if (this.stats.armor >= 0) {
+                    // Positive armor: Apply as percentage reduction (capped at 80%)
+                    const damageReduction = Math.min(0.8, this.stats.armor / 100);
+                    damageAfterMods = Math.max(1, Math.floor(damageAfterMods * (1 - damageReduction)));
+                    
+                    // Debug log for armor reduction
+                    console.log(`[Armor Debug] ${this.name}: ${damageBeforeArmor} physical damage, ${this.stats.armor} armor (${(damageReduction * 100).toFixed(1)}% reduction) -> ${damageAfterMods} damage`);
+                    
+                    // Add battle log entry if significant reduction
+                    if (damageReduction > 0.05 && window.gameManager) { // Only log if 5%+ reduction
+                        window.gameManager.addLogEntry(`${this.name}'s armor reduces physical damage by ${(damageReduction * 100).toFixed(0)}% (${damageBeforeArmor} → ${damageAfterMods})`, 'armor-reduction');
+                    }
+                } else {
+                    // Negative armor: Apply as additional damage percentage
+                    const damageIncrease = Math.abs(this.stats.armor) / 100;
+                    damageAfterMods = Math.floor(damageAfterMods * (1 + damageIncrease));
+                    
+                    // Debug log for armor penalty
+                    console.log(`[Armor Debug] ${this.name}: ${damageBeforeArmor} physical damage, ${this.stats.armor} armor (${(damageIncrease * 100).toFixed(1)}% additional damage) -> ${damageAfterMods} damage`);
+                    
+                    // Add battle log entry for armor penalty
+                    if (damageIncrease > 0.05 && window.gameManager) { // Only log if 5%+ increase
+                        window.gameManager.addLogEntry(`${this.name}'s broken armor increases physical damage by ${(damageIncrease * 100).toFixed(0)}% (${damageBeforeArmor} → ${damageAfterMods})`, 'armor-penalty');
+                    }
                 }
             } else {
                  const log = window.gameManager ? window.gameManager.addLogEntry.bind(window.gameManager) : console.log;
@@ -1807,17 +1836,32 @@ class Character {
             // If bypassMagicalShield is true, skip the reduction logic entirely.
             // The damageAfterMods value will remain unchanged from before this check.
             if (!bypassMagicalShield) { 
-                // Apply magical shield as direct percentage reduction (capped at 80%)
-                const damageReduction = Math.min(0.8, this.stats.magicalShield / 100);
                 const damageBeforeShield = damageAfterMods;
-                damageAfterMods = Math.max(1, Math.floor(damageAfterMods * (1 - damageReduction)));
                 
-                // Debug log for magical shield calculation
-                console.log(`[Magical Shield Debug] ${this.name}: ${damageBeforeShield} magical damage, ${this.stats.magicalShield} magical shield (${(damageReduction * 100).toFixed(1)}% reduction) -> ${damageAfterMods} damage`);
-                
-                // Add battle log entry if significant reduction
-                if (damageReduction > 0.05 && window.gameManager) { // Only log if 5%+ reduction
-                    window.gameManager.addLogEntry(`${this.name}'s magical shield reduces magical damage by ${(damageReduction * 100).toFixed(0)}% (${damageBeforeShield} → ${damageAfterMods})`, 'shield-reduction');
+                if (this.stats.magicalShield >= 0) {
+                    // Positive magical shield: Apply as percentage reduction (capped at 80%)
+                    const damageReduction = Math.min(0.8, this.stats.magicalShield / 100);
+                    damageAfterMods = Math.max(1, Math.floor(damageAfterMods * (1 - damageReduction)));
+                    
+                    // Debug log for magical shield reduction
+                    console.log(`[Magical Shield Debug] ${this.name}: ${damageBeforeShield} magical damage, ${this.stats.magicalShield} magical shield (${(damageReduction * 100).toFixed(1)}% reduction) -> ${damageAfterMods} damage`);
+                    
+                    // Add battle log entry if significant reduction
+                    if (damageReduction > 0.05 && window.gameManager) { // Only log if 5%+ reduction
+                        window.gameManager.addLogEntry(`${this.name}'s magical shield reduces magical damage by ${(damageReduction * 100).toFixed(0)}% (${damageBeforeShield} → ${damageAfterMods})`, 'shield-reduction');
+                    }
+                } else {
+                    // Negative magical shield: Apply as additional damage percentage
+                    const damageIncrease = Math.abs(this.stats.magicalShield) / 100;
+                    damageAfterMods = Math.floor(damageAfterMods * (1 + damageIncrease));
+                    
+                    // Debug log for magical shield penalty
+                    console.log(`[Magical Shield Debug] ${this.name}: ${damageBeforeShield} magical damage, ${this.stats.magicalShield} magical shield (${(damageIncrease * 100).toFixed(1)}% additional damage) -> ${damageAfterMods} damage`);
+                    
+                    // Add battle log entry for magical shield penalty
+                    if (damageIncrease > 0.05 && window.gameManager) { // Only log if 5%+ increase
+                        window.gameManager.addLogEntry(`${this.name}'s broken magical shield increases magical damage by ${(damageIncrease * 100).toFixed(0)}% (${damageBeforeShield} → ${damageAfterMods})`, 'shield-penalty');
+                    }
                 }
             } else {
                 // Log that shield was bypassed (no damage modification needed here)
@@ -5674,6 +5718,16 @@ const CharacterFactory = {
         // --- ADD FARMER FANG PASSIVE --- 
         else if (passiveId === 'fang_full_heal_ally' && typeof FarmerFangPassive !== 'undefined') {
             return FarmerFangPassive;
+        }
+        // --- ADD ANGRY ANIMALS PASSIVES ---
+        else if (passiveId === 'angry_pig_damage_heal' && typeof AngryPigPassive !== 'undefined') {
+            return AngryPigPassive;
+        }
+        else if (passiveId === 'angry_chicken_dodge_gain' && typeof AngryChickenPassive !== 'undefined') {
+            return AngryChickenPassive;
+        }
+        else if (passiveId === 'angry_bull_armor_gain' && typeof AngryBullPassive !== 'undefined') {
+            return AngryBullPassive;
         }
         // --- END FARMER FANG PASSIVE ---
         // --- ADD SCAMP PASSIVE ---

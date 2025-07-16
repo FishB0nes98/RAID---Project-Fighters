@@ -331,7 +331,7 @@ let bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
     
     // Calculate damage per hit
     // Use baseDamage from the abilityInstance passed to the effect function
-    const baseDamage = abilityInstance.baseDamage || 365; // Default if not found or undefined
+    const baseDamage = abilityInstance.baseDamage || 185; // Default if not found or undefined
     const magicalDamage = caster.stats.magicalDamage || 0;
     const damagePerHit = baseDamage + Math.floor(magicalDamage * 1.0);
     
@@ -356,9 +356,9 @@ let bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
             const damageResult = target.applyDamage(damage, 'magical', caster, { abilityId: 'bridget_q' });
             
             // Track damage statistics
-            if (window.trackRibbonWaveRushStats) {
+            /*if (window.trackRibbonWaveRushStats) {
                 window.trackRibbonWaveRushStats(caster, target, damageResult);
-            }
+            }*/
             
             // Show water impact VFX
             showWaterImpactVFX(target, isCritical, caster);
@@ -1024,8 +1024,7 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
     
     // Ensure the ability has the damageScaling property
     if (bubbleBeamAbility && bubbleBeamAbility.damageScaling === undefined) {
-        bubbleBeamAbility.damageScaling = 1.25; // Set default 125% scaling
-        console.log(`[Bubble Beam] Set default damageScaling to 1.25`);
+        bubbleBeamAbility.damageScaling = 0.85; // Set default 85% scaling
     }
     
     // Update the description based on current ability state
@@ -1158,10 +1157,10 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
                 console.log(`[Bubble Healing - Ally Heal Result] Target: ${currentTarget.name}, Healed for: ${healResult.healAmount}, Crit: ${healResult.isCritical}, Caster HealingPower for context: ${caster.stats.healingPower}`);
                 
                 // Track healing statistics
-                if (window.trackBubbleBeamStats) {
+                /*if (window.trackBubbleBeamStats) {
                     const beamType = caster.enhancedBubbleBarrage ? 'enhanced' : 'standard';
                     window.trackBubbleBeamStats(caster, currentTarget, healResult, true, beamType);
-                }
+                }*/
                 
                 // Create a healing projectile VFX for allies
                 createBubbleBeamProjectile(caster, currentTarget, beamIndex, healResult.isCritical, true /* isHealingBeam */);
@@ -1170,7 +1169,7 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
             }
         } else {
             // ---- DAMAGE ENEMY ----
-            let damage = Math.floor(caster.stats.magicalDamage * (bubbleBeamAbility ? bubbleBeamAbility.damageScaling : 1.25));
+            let damage = Math.floor(caster.stats.magicalDamage * (bubbleBeamAbility ? bubbleBeamAbility.damageScaling : 0.85));
             let isCritical = Math.random() < (caster.stats.critChance || 0);
     
             if (isCritical) {
@@ -1188,10 +1187,10 @@ const bridgetBubbleBeamBarrageEffect = (caster, targets, abilityInstance) => {
                     totalDamage += damageResult.damage; // Accumulate damage for passive
                     
                     // Track damage statistics
-                    if (window.trackBubbleBeamStats) {
+                    /*if (window.trackBubbleBeamStats) {
                         const beamType = caster.enhancedBubbleBarrage ? 'enhanced' : 'standard';
                         window.trackBubbleBeamStats(caster, currentTarget, damageResult, false, beamType);
-                    }
+                    }*/
     
                     // Check for death & passive after damage is applied
                     if (currentTarget.isDead()) {
@@ -1466,9 +1465,9 @@ const bridgetArcaneBubbleShieldEffect = (caster) => {
             log(`A magic bubble from ${character.name}'s Bubble Arsenal heals ${target.name} for ${healResult.healAmount} HP!`);
             
             // Track healing statistics
-            if (window.trackBubbleArsenalStats) {
+            /*if (window.trackBubbleArsenalStats) {
                 window.trackBubbleArsenalStats(character, target, healResult, true);
-            }
+            }*/
             
             // Show heal VFX on target
             showBubbleHealVFX(target, healResult.healAmount);
@@ -1501,9 +1500,9 @@ const bridgetArcaneBubbleShieldEffect = (caster) => {
             const damageResult = target.applyDamage(damage, 'magical', character, { abilityId: 'bridget_e_arsenal_damage' });
             
             // Track damage statistics
-            if (window.trackBubbleArsenalStats) {
+            /*if (window.trackBubbleArsenalStats) {
                 window.trackBubbleArsenalStats(character, target, damageResult, false);
-            }
+            }*/
             
             // Trigger passive healing from the damage dealt
             if (character.passiveHandler && character.passiveHandler.applyPassiveHealing) {
@@ -2014,9 +2013,9 @@ const bridgetWaveCrushEffect = (caster) => {
                 totalDamageDealt += damageResult.damage;
 
                 // Track damage statistics
-                if (window.trackWaveCrushStats) {
+                /*if (window.trackWaveCrushStats) {
                     window.trackWaveCrushStats(caster, enemy, damageResult, false);
-                }
+                }*/
 
                 showWaveCrushImpactVFX(enemy, damageResult.isCritical); // Pass critical status
                 log(`${enemy.name} takes ${damageResult.damage} magical damage from Wave Crush${damageResult.isCritical ? ' (Critical Hit!)' : ''}.`);
@@ -2055,9 +2054,9 @@ const bridgetWaveCrushEffect = (caster) => {
                 const healResult = ally.heal(healAmount, caster, { abilityId: 'bridget_r_heal' }); // Bridget is the source of healing
 
                 // Track healing statistics
-                if (window.trackWaveCrushStats) {
+                /*if (window.trackWaveCrushStats) {
                     window.trackWaveCrushStats(caster, ally, healResult, true);
-                }
+                }*/
 
                 showWaveCrushHealVFX(ally, healResult.isCritical); // Pass critical status
                 log(`${ally.name} is healed for ${healResult.healAmount} HP by the Wave Crush${healResult.isCritical ? ' (Critical Heal!)' : ''}.`);
@@ -2312,7 +2311,7 @@ function updateBubbleBeamDescription(ability) {
         
         // Ensure damageScaling property exists
         if (ability.damageScaling === undefined) {
-            ability.damageScaling = 1.25; // Set default 125% scaling
+            ability.damageScaling = 0.85; // Set default 85% scaling
         }
         
         // Use isEnhanced flag if it exists, otherwise false
@@ -2331,7 +2330,7 @@ function updateBubbleBeamDescription(ability) {
     
     // --- Get current talent-modified properties ---
     // Read directly from the ability instance for properties modified by talents
-    const damageScaling = ability.damageScaling !== undefined ? ability.damageScaling : 1.25; // Default 125%
+    const damageScaling = ability.damageScaling !== undefined ? ability.damageScaling : 0.85; // Default 85%
     const cooldown = ability.cooldown !== undefined ? ability.cooldown : 5; // Default 5 turns
     
     // Read from the character instance for properties modified by talents
@@ -2719,14 +2718,14 @@ if (window.AbilityFactory) {
         'Ribbon Wave Rush',
         'Icons/abilities/water_cascade.webp',
         30, // mana cost
-        2,  // cooldown
+        1,  // cooldown
         bridgetRibbonWaveRushEffect
     );
     
     // Set the target type to 'all_enemies' which is more reliable than 'aoe_enemy'
     ribbonWaveRushAbility.setTargetType('all_enemies');
     ribbonWaveRushAbility.setDescription('Summons a waterfall that hits two random enemies for {baseDamage} + 85% Magical damage.');
-    ribbonWaveRushAbility.baseDamage = 365;
+    ribbonWaveRushAbility.baseDamage = 185;
     
     // Add generateDescription method to update description based on talents
     ribbonWaveRushAbility.generateDescription = function() {
@@ -2743,7 +2742,7 @@ if (window.AbilityFactory) {
         let description = `Summons a waterfall that hits ${targetDescription} for`;
         
         // Check if baseDamage was modified by Surging Tides talent
-        const baseDamage = this.baseDamage || 365;
+        const baseDamage = this.baseDamage || 185;
         description += ` ${baseDamage} + 85% Magical damage.`;
         
         // Add talent effects
@@ -2787,7 +2786,7 @@ if (window.AbilityFactory) {
 
     // Explicitly set damageScaling with a default value
     Object.defineProperty(bubbleBeamBarrageAbility, 'damageScaling', {
-        value: 1.25,
+        value: 0.85,
         writable: true,
         enumerable: true,
         configurable: true
@@ -4699,4 +4698,3 @@ bridgetRibbonWaveRushEffect = (caster, targets, abilityInstance) => {
 
 // Note: Removed problematic const reassignments that were causing JavaScript errors
 // The battle log should now work properly without these function overrides
-

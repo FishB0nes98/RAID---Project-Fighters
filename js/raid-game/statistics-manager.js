@@ -562,4 +562,4 @@ class StatisticsManager {
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = StatisticsManager;
-} 
+}

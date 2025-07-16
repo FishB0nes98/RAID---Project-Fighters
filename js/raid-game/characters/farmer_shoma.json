@@ -24,7 +24,7 @@
             "type": "damage",
             "damageType": "physical",
             "manaCost": 35,
-            "cooldown": 1,
+            "cooldown": 2,
             "targetType": "enemy",
             "description": "Deals 315 damage and has 35% chance to stun the target for 2 turns.",
             "icon": "Icons/abilities/homerun_smash.jpeg"
@@ -32,13 +32,13 @@
         {
             "id": "farmer_shoma_w",
             "name": "Apple Throw",
-            "type": "heal_or_damage",
-            "damageType": "physical",
+            "type": "custom",
             "manaCost": 60,
             "cooldown": 3,
             "targetType": "any",
             "description": "If targets ally: Heals 750 health. If targets enemy: Deals 400 damage and reduces their damage by 20% for 4 turns. Both effects can crit.",
-            "icon": "Icons/abilities/apple_throw.jpeg"
+            "icon": "Icons/abilities/apple_throw.jpeg",
+            "functionName": "farmerShomaAppleThrowEffect"
         },
         {
             "id": "farmer_shoma_e",
@@ -54,13 +54,13 @@
         {
             "id": "farmer_shoma_r",
             "name": "Cottage Run",
-            "type": "heal_and_buff",
-            "damageType": "physical",
+            "type": "custom",
             "manaCost": 150,
             "cooldown": 22,
             "targetType": "self",
             "description": "Heals 35% of missing health to himself and gains 100% dodge chance for 3 turns.",
-            "icon": "Icons/abilities/cottage_run.jpeg"
+            "icon": "Icons/abilities/cottage_run.jpeg",
+            "functionName": "farmerShomaCottageRunEffect"
         }
     ],
     "passive": {
@@ -69,4 +69,4 @@
         "description": "You start with 50% crit chance, increased to 70% after turn 20.",
         "icon": "Icons/passive_farmer_shoma.png"
     }
-} 
+}

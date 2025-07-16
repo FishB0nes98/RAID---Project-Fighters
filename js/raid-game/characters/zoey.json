@@ -8,7 +8,7 @@
         "hp": 6800,
         "mana": 2890,
         "physicalDamage": 100,
-        "magicalDamage": 162,
+        "magicalDamage": 225,
         "armor": 8,
         "magicalShield": 13,
         "critChance": 0.0,
@@ -22,7 +22,7 @@
     "passive": {
         "id": "zoey_passive",
         "name": "Sparkle Bell Mark",
-        "description": "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 125% damage to marked enemies. The mark disappears when the enemy takes damage.",
+        "description": "When Zoey deals damage to an enemy with damage spells, she places a sparkle bell mark on them for 2 turns. Zoey deals 175% damage to marked enemies. The mark disappears when the enemy takes damage.",
         "icon": "Icons/abilities/sparkle_bell_mark.png"
     },
     "abilities": [
@@ -40,7 +40,7 @@
         {
             "id": "zoey_w",
             "name": "Heart Pounce",
-            "description": "Zoey jumps onto an enemy, dealing 855 + (50% Magical damage) to the target.",
+            "description": "Zoey jumps onto an enemy, dealing 500 + (50% Magical damage) to the target.",
             "icon": "Icons/abilities/heart_pounce.png",
             "manaCost": 55,
             "cooldown": 5,
@@ -71,4 +71,4 @@
             "functionName": "zoeyGlowingLightArcEffect"
         }
     ]
-} 
+}

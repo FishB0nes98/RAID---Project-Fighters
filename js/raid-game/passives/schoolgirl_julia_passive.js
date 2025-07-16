@@ -459,8 +459,8 @@ class SchoolgirlJuliaPassiveHandler {
             }
 
             // Check if character died
-            if (newHp <= 0) {
-                this.die();
+            if (newHp <= 0 && window.gameManager) {
+                window.gameManager.handleCharacterDeath(this);
             }
 
             // Update UI

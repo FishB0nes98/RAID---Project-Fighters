@@ -1,0 +1,812 @@
+[
+  {
+    "id": "expert_corruption_at_the_farmland",
+    "title": "Expert: Corruption at the Farmland",
+    "description": "The corruption has returned to the farmland, stronger and more dangerous than ever before. Only the most skilled farmers can hope to survive.",
+    "playerunlocked": true,
+    "availableForEveryone": true,
+    "requirements": {
+      "tags": [
+        "Farmer"
+      ],
+      "teamSize": {
+        "min": 2,
+        "max": 2
+      }
+    },
+    "stages": [
+      {
+        "name": "Mutated Carrot Legion",
+        "description": "Multiple angry carrots have formed a dangerous pack at the farmland entrance. Their corruption has made them significantly more aggressive.",
+        "difficulty": 3,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "angry_carrot",
+            "modifications": {
+              "physicalDamage": 500
+            }
+          },
+          {
+            "characterId": "angry_carrot",
+            "modifications": {
+              "physicalDamage": 500
+            }
+          },
+          {
+            "characterId": "angry_carrot",
+            "modifications": {
+              "physicalDamage": 500
+            }
+          },
+          {
+            "characterId": "angry_carrot",
+            "modifications": {
+              "physicalDamage": 500
+            }
+          },
+          {
+            "characterId": "angry_carrot",
+            "modifications": {
+              "physicalDamage": 500
+            }
+          }
+        ],
+        "modifiers": [],
+        "loot": {
+          "items": [
+            {
+              "itemId": "carrot_cannon",
+              "dropChance": 0.15,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "carrot",
+              "dropChance": 0.85,
+              "quantityMin": 5,
+              "quantityMax": 8
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.45,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.95,
+              "quantityMin": 1,
+              "quantityMax": 2
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/Stage_1_BG.jpeg",
+        "backgroundMusic": "sounds/music/farmland_ambient.mp3"
+      },
+      {
+        "name": "Abandoned Cottage",
+        "description": "The cottage stands empty, its former inhabitants having fled the intensified corruption. You find some supplies but no allies.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Search for Supplies",
+            "description": "Find emergency rations that restore 30% of your maximum HP and mana.",
+            "effect": {
+              "type": "heal_and_mana_restore_missing_percent",
+              "target": "selected",
+              "amount_percent": 30
+            }
+          },
+          {
+            "name": "Fortify Position",
+            "description": "Barricade yourself in, increasing your armor by 15 for the remainder of the journey.",
+            "effect": {
+              "type": "stat_boost",
+              "target": "selected",
+              "stat": "armor",
+              "amount": 15
+            }
+          }
+        ]
+      },
+      {
+        "name": "Corrupted Animal Stampede",
+        "description": "The ranch animals have become more vicious and coordinated. They attack in a frenzied stampede!",
+        "difficulty": 5,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "angry_pig",
+            "modifications": {
+              "hpPerTurn": 225
+            }
+          },
+          {
+            "characterId": "angry_chicken",
+            "modifications": {
+              "dodgeChance": 0.30
+            }
+          },
+          {
+            "characterId": "angry_bull",
+            "modifications": {
+              "lifesteal": 1.0
+            }
+          }
+        ],
+        "modifiers": [
+          {
+            "id": "ai_damage_stun_chance",
+            "name": "Stunning Stampede",
+            "description": "The ferocity of the stampede is overwhelming! Any AI character damage has a 12% chance to stun the target for 1 turn.",
+            "icon": "💫",
+            "effect": {
+              "stunChance": 0.12,
+              "stunDuration": 1,
+              "target": "player"
+            }
+          },
+          {
+            "id": "ai_cleansing_winds",
+            "name": "Protective Winds",
+            "description": "Mystical winds protect the animals, cleansing them of debuffs each turn.",
+            "icon": "🌪️"
+          }
+        ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.95,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "pitchfork",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "carrot",
+              "dropChance": 0.60,
+              "quantityMin": 3,
+              "quantityMax": 6
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "iron_nail",
+              "dropChance": 0.50,
+              "quantityMin": 3,
+              "quantityMax": 10
+            },
+            {
+              "itemId": "wooden_plank",
+              "dropChance": 0.50,
+              "quantityMin": 3,
+              "quantityMax": 8
+            },
+            {
+              "itemId": "pork",
+              "dropChance": 0.75,
+              "quantityMin": 3,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "red_linen",
+              "dropChance": 0.75,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "double_kitchen_knife",
+              "dropChance": 0.25,
+              "quantityMin": 1,
+              "quantityMax": 1
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/farmstage2.jpeg",
+        "backgroundMusic": "sounds/music/ranch_battle.mp3"
+      },
+      {
+        "name": "Mystical Well",
+        "description": "A mystical well glows with restorative energy. Its waters can restore your strength and magical power.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Drink from the Well",
+            "description": "Restores mana to full and heals 50% of missing HP.",
+            "effect": {
+              "type": "heal_and_mana_restore_missing_percent",
+              "target": "selected",
+              "amount_percent": 50
+            }
+          },
+          {
+            "name": "Skip the Well",
+            "description": "Continue without drinking, avoiding any potential risks.",
+            "effect": {
+              "type": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Corrupted Well",
+        "description": "The well water has turned dark and murky. It may still restore mana, but at what cost?",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Drink the Dark Water",
+            "description": "Restores full mana but reduces maximum HP by 200 for the remainder of the journey.",
+            "effect": {
+              "type": "corrupted_well_effect",
+              "target": "selected"
+            }
+          },
+          {
+            "name": "Purify the Water",
+            "description": "Spend 50% of current mana to purify the water, then restore 50% of maximum mana safely.",
+            "effect": {
+              "type": "purify_well_effect",
+              "target": "selected"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Twisted Apple Orchard",
+        "description": "The apple tree has grown massive and twisted. Corrupted apples rain down like projectiles while the tree itself attacks!",
+        "difficulty": 6,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "monster_apple"
+          },
+          {
+            "characterId": "monster_apple"
+          },
+          {
+            "characterId": "angry_apple"
+          },
+          {
+            "characterId": "rotten_apple"
+          },
+          {
+            "characterId": "rotten_apple"
+          }
+        ],
+        "modifiers": [
+          {
+            "id": "twisted_apple_orchard",
+            "name": "Twisted Apple Orchard",
+            "description": "The cursed apple trees revive fallen enemies every 6th turn with 50% HP! A dark magic counter shows when the next revival will occur.",
+            "icon": "🍎💀"
+          },
+          {
+            "id": "ai_cleansing_winds",
+            "name": "Protective Winds",
+            "description": "Mystical winds protect the animals, cleansing them of debuffs each turn.",
+            "icon": "🌪️"
+          }
+        ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "healthy_apple",
+              "dropChance": 0.90,
+              "quantityMin": 3,
+              "quantityMax": 6
+            },
+            {
+              "itemId": "yellow_apple",
+              "dropChance": 0.90,
+              "quantityMin": 3,
+              "quantityMax": 6
+            },
+            {
+              "itemId": "green_apple",
+              "dropChance": 0.90,
+              "quantityMin": 3,
+              "quantityMax": 6
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.95,
+              "quantityMin": 1,
+              "quantityMax": 2
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/under_the_apple_tree.webp",
+        "backgroundMusic": "sounds/music/apple_battle.mp3"
+      },
+      {
+        "name": "Orchard Supplies",
+        "description": "After the intense battle with the twisted apple creatures, you discover a hidden cache of supplies left behind by previous travelers. The supplies offer different forms of aid for your journey ahead.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "First Aid Kits",
+            "description": "Heal all allies to 100% HP. These medical supplies will restore your entire team to perfect health.",
+            "effect": { "type": "heal", "target": "all", "amount": "full" }
+          },
+          {
+            "name": "Revival Herb",
+            "description": "Revive a fallen ally with 50% HP. This rare herb can bring back a defeated companion.",
+            "target": "selected_dead",
+            "effect": { "type": "revive", "target": "selected", "amount_percent": 50 }
+          },
+          {
+            "name": "Water Bottle",
+            "description": "Restores 2000 HP and 2000 Mana to a character. A refreshing drink that restores both health and magical energy.",
+            "effect": { "type": "heal_and_mana_restore", "target": "selected", "amount": { "hp": 2000, "mana": 2000 } }
+          }
+        ]
+      },
+      {
+        "name": "Cursed Water Supply",
+        "description": "The water supply has been tainted by dark magic. Its corrupted waters offer power but at a dangerous cost.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Drink the Cursed Water",
+            "description": "It either increases your HP and mana regen by 30 OR decreases your physical and magical damage by 55. The curse decides randomly.",
+            "effect": {
+              "type": "cursed_water_supply_effect",
+              "target": "selected"
+            }
+          },
+          {
+            "name": "Purify the Water",
+            "description": "Spend 50% of current mana to cleanse the water, then safely restore 30% of maximum HP and mana.",
+            "effect": {
+              "type": "purify_cursed_water_effect",
+              "target": "selected"
+            }
+          },
+          {
+            "name": "Avoid the Water",
+            "description": "Skip this encounter entirely and continue on your journey.",
+            "effect": {
+              "type": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Smelly Barn",
+        "description": "The barn has become a hive of corruption. The Crazy Farmer has been joined by additional twisted creatures!",
+        "difficulty": 7,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "crazy_farmer",
+            "modifications": {
+              "physicalDamage": 615,
+              "critChance": 0.65,
+              "hp": 17000
+            }
+          },
+          {
+            "characterId": "hound",
+            "modifications": {
+              "lifesteal": 2.0,
+              "hp": 20000
+            }
+          }
+        ],
+        "modifiers": [
+          {
+            "id": "alcoholic_air",
+            "name": "Alcoholic Air",
+            "description": "The barn air is thick with alcohol vapors! All player characters' armor and magical resistance is permanently reduced to 0 for this battle.",
+            "icon": "🍺"
+          }
+        ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "corn",
+              "dropChance": 0.70,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "alcohol",
+              "dropChance": 0.90,
+              "quantityMin": 2,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "pitchfork",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "cow_bell",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "fertilizer_sprayer",
+              "dropChance": 0.60,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.40,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "wooden_plank",
+              "dropChance": 0.60,
+              "quantityMin": 3,
+              "quantityMax": 8
+            },
+            {
+              "itemId": "goat_milk_crafting",
+              "dropChance": 0.70,
+              "quantityMin": 2,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "goat_milk_consumable",
+              "dropChance": 0.70,
+              "quantityMin": 3,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "milking_bucket",
+              "dropChance": 0.85,
+              "quantityMin": 1,
+              "quantityMax": 2
+            },
+            {
+              "itemId": "dog_collar",
+              "dropChance": 0.20,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.95,
+              "quantityMin": 1,
+              "quantityMax": 2
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/the_barn.webp",
+        "backgroundMusic": "sounds/music/barn_battle.mp3"
+      },
+      {
+        "name": "Hidden Survivors",
+        "description": "Despite the devastation, you discover a hidden cellar beneath the barn. Inside, you find three brave farmers who have been hiding from the corruption. They've survived this long and could be valuable allies in your fight against the darkness.",
+        "type": "recruit",
+        "recruitTag": "Farmer",
+        "recruitCount": 3
+      },
+      {
+        "name": "Found in the Cornfield",
+        "description": "While navigating through the cornfield, you discover a hidden cache of supplies left behind by previous travelers. Each item offers different benefits for your journey.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Carrot",
+            "description": "Places a permanent buff that reduces your E ability cooldown by 2 turns. This buff persists across all battles and cannot be removed.",
+            "effect": {
+              "type": "permanent_e_cooldown_reduction",
+              "target": "selected",
+              "amount": 2
+            }
+          },
+          {
+            "name": "Corn",
+            "description": "The selected character gains 8% dodge chance permanently.",
+            "effect": {
+              "type": "stat_boost_percent",
+              "target": "selected",
+              "stat": "dodgeChance",
+              "amount": 8
+            }
+          },
+          {
+            "name": "Big Red Apple",
+            "description": "Restore 85% of your HP to the selected character.",
+            "effect": {
+              "type": "heal_percent",
+              "target": "selected",
+              "amount_percent": 85
+            }
+          }
+        ]
+      },
+      {
+        "name": "The Crow King's Domain",
+        "description": "The crowfield has been taken over by a massive Crow King! Dark magic swirls as an army of corrupted crows serves their master.",
+        "difficulty": 8,
+        "type": "battle",
+        "enemies": [
+          {
+            "characterId": "crow",
+            "modifications": {
+              "hp": 5555,
+              "lifesteal": 0.3
+            }
+          },
+          {
+            "characterId": "crow",
+            "modifications": {
+              "hp": 5555,
+              "lifesteal": 0.3
+            }
+          },
+          {
+            "characterId": "scarecrow",
+            "modifications": {
+              "hp": 10500
+            }
+          },
+          {
+            "characterId": "crow",
+            "modifications": {
+              "hp": 5555,
+              "lifesteal": 0.3
+            }
+          },
+          {
+            "characterId": "crow",
+            "modifications": {
+              "hp": 5555,
+              "lifesteal": 0.3
+            }
+          }
+        ],
+        "modifiers": [
+                    {
+            "id": "crow_protection",
+            "name": "Crow Protection",
+            "description": "Every AI character except 1 has 100% dodge chance, that one has 0. This is clearly shown over their character slot.",
+            "icon": "🪶"
+          }
+        ],
+        "loot": {
+          "items": [
+            {
+              "itemId": "crow_feather",
+              "dropChance": 0.95,
+              "quantityMin": 5,
+              "quantityMax": 25
+            },
+            {
+              "itemId": "exploding_pumpkin",
+              "dropChance": 0.75,
+              "quantityMin": 2,
+              "quantityMax": 4
+            },
+            {
+              "itemId": "beehive_bomb",
+              "dropChance": 0.75,
+              "quantityMin": 3,
+              "quantityMax": 6
+            },
+            {
+              "itemId": "corn_spear",
+              "dropChance": 0.30,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "corn",
+              "dropChance": 0.70,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 0.95,
+              "quantityMin": 1,
+              "quantityMax": 2
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/crowfield.webp",
+        "backgroundMusic": "sounds/music/crowfield.mp3"
+      },
+      {
+        "name": "Restorative Well",
+        "description": "A clear, magical well offers a chance to restore your magical energy. Its waters shimmer with power.",
+        "type": "choice",
+        "choices": [
+          {
+            "name": "Drink from the Well",
+            "description": "Restores all allies to full mana.",
+            "effect": {
+              "type": "mana_restore",
+              "target": "all",
+              "amount": "full"
+            }
+          },
+          {
+            "name": "Skip the Well",
+            "description": "Continue on your journey without drinking.",
+            "effect": {
+              "type": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Last Farmer Ally",
+        "description": "You find one last brave farmer willing to join your cause before the final battle. Choose wisely.",
+        "type": "recruit",
+        "recruitTag": "Farmer",
+        "recruitCount": 1
+      },
+      {
+        "name": "The Corrupted Master's Lair",
+        "description": "Farmer FANG has been consumed by corruption and transformed into something far more dangerous. The very ground writhes with dark energy, and twisted minions emerge from the shadows to serve their master!",
+        "difficulty": 10,
+        "type": "battle",
+        "enemies": [
+          { 
+            "characterId": "angry_bull",
+            "modifications": {
+              "hp": 12500
+            }
+          },
+          { 
+            "characterId": "crow",
+            "modifications": {
+              "hp": 6666
+            }
+          },
+          { "characterId": "farmer_fang" },
+          { 
+            "characterId": "angry_carrot",
+            "modifications": {
+              "hp": 10000
+            }
+          },
+          { 
+            "characterId": "hound",
+            "modifications": {
+              "hp": 9898
+            }
+          }
+        ],
+        "modifiers": [
+          { "id": "its_raining_man", "name": "It's raining man!", "description": "Heavy rain falls from the burning sky! All player characters heal HP each turn.", "icon": "🌧️" },
+          { "id": "ai_double_damage", "name": "Corrupted Power Surge (Triple Damage)", "description": "All AI characters deal 300% damage.", "icon": "💀⚡" },
+          { "id": "fang_invincible_until_last", "name": "Corrupted Evasion", "description": "Farmer Fang has 100% dodge chance until all other enemies are defeated.", "icon": "💨" }
+        ],
+        "objectives": {
+          "winConditions": [
+            { "type": "enemyDefeated", "targetId": "farmer_fang" }
+          ]
+        },
+        "loot": {
+          "items": [
+            {
+              "itemId": "basket_of_goods",
+              "dropChance": 1.0,
+              "quantityMin": 3,
+              "quantityMax": 3
+            },
+            {
+              "itemId": "pitchfork",
+              "dropChance": 0.60,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "carrot_cannon",
+              "dropChance": 0.60,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "rake",
+              "dropChance": 0.60,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "fertilizer_sprayer",
+              "dropChance": 0.60,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "cow_bell",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "corn_spear",
+              "dropChance": 0.35,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "dog_collar",
+              "dropChance": 0.15,
+              "quantityMin": 1,
+              "quantityMax": 1
+            },
+            {
+              "itemId": "beehive_bomb",
+              "dropChance": 0.60,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "exploding_pumpkin",
+              "dropChance": 0.60,
+              "quantityMin": 2,
+              "quantityMax": 5
+            },
+            {
+              "itemId": "red_linen",
+              "dropChance": 0.60,
+              "quantityMin": 2,
+              "quantityMax": 4
+            }
+          ]
+        },
+        "backgroundImage": "images/stages/farm_clearing.png",
+        "backgroundMusic": "sounds/music/final_farm_battle.mp3"
+      },
+      {
+        "name": "Expert Victory",
+        "description": "Against all odds, you have single-handedly defeated the corruption in its most powerful form. The farmland is saved, but the victory came at great cost. As a reward for your exceptional skill, you may choose one of these legendary farmer champions who have been inspired by your heroic deed.",
+        "type": "character_unlock",
+        "unlockableCharacters": [
+          {
+            "characterId": "farmer_nina",
+            "name": "Expert Farmer Nina",
+            "description": "A master farmer who has learned advanced rifle techniques and evasion through harsh trials.",
+            "image": "Icons/characters/Farmer Nina.png"
+          },
+          {
+            "characterId": "farmer_raiden",
+            "name": "Expert Farmer Raiden",
+            "description": "A lightning-fast farmer whose electrical powers have been enhanced by surviving the corruption.",
+            "image": "Icons/characters/Farmer Raiden.png"
+          },
+          {
+            "characterId": "farmer_shoma",
+            "name": "Expert Farmer Shoma",
+            "description": "A legendary farm-raised warrior whose skills have been honed to perfection through adversity.",
+            "image": "Icons/characters/Farmer Shoma.png"
+          },
+          {
+            "characterId": "farmer_alice",
+            "name": "Expert Farmer Alice",
+            "description": "A seasoned farmer whose combat skills have been refined through countless battles against corruption.",
+            "image": "Icons/characters/Farmer Alice.png"
+          },
+          {
+            "characterId": "farmer_cham_cham",
+            "name": "Expert Farmer Cham Cham",
+            "description": "A wild boomerang fighter whose farming prowess has grown legendary through expert trials.",
+            "image": "Icons/characters/Farmer Cham Cham.png"
+          }
+        ],
+        "firstTimeCompletionReward": true
+      }
+    ]
+  }
+]
